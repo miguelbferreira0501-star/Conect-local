@@ -1,0 +1,20 @@
+/* Paleta da marca. Altere aqui para trocar a identidade visual. Valores em RGB. */
+:root {
+  --brand-50: 238 244 252;
+  --brand-100: 217 230 247;
+  --brand-200: 179 204 238;
+  --brand-500: 46 104 184;
+  --brand-600: 26 78 155;
+  --brand-700: 18 60 122; /* #123C7A — azul profundo */
+  --brand-800: 14 47 96;
+  --brand-900: 11 36 73;
+  --accent-50: 232 247 244;
+  --accent-100: 204 238 231;
+  --accent-600: 14 159 138; /* #0E9F8A — turquesa */
+  --accent-700: 11 122 106;
+  --ink: 30 37 48; /* grafite */
+  --muted: 84 95 110; /* cinza com contraste AA */
+  --line: 227 232 239;
+  --surface: 246 248 251;
+  --star: 245 166 35; /* dourado */
+}

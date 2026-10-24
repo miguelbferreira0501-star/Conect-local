@@ -1,1 +1,112 @@
-# Conect-local
+# Conecta Local
+
+Plataforma brasileira para **encontrar, comparar, confiar e contratar** empresas e profissionais locais.
+Esta versão entrega o **aplicativo do cliente** (web mobile-first, instalável como PWA), com API própria e
+banco PostgreSQL protegido por políticas de segurança. “Conecta Local” é um nome provisório: veja
+[Trocar a marca](#trocar-a-marca).
+
+> **Modo demonstração:** o seed cria 84 empresas e ~3.900 avaliações **fictícias**, todas marcadas como
+> “Exemplo” na interface. Contatos de empresas de exemplo ficam desativados. Conta de teste:
+> `demo@conectalocal.app` / `Demo1234`.
+
+## O que o app faz
+
+| Área | Funcionalidades |
+| --- | --- |
+| **Início** | Cidade selecionada, busca com sugestões, 12 categorias, seções “Bem avaliadas”, “A mais bem avaliada de cada categoria”, “Com avaliações recentes”, “Novas na plataforma” e “Serviços procurados” (só aparece com volume real de pedidos). |
+| **Localização** | Estado → cidade com os **5.571 municípios do IBGE** (busca por nome, sem acentos). Localização do aparelho opcional, com explicação antes do pedido de permissão; coordenadas nunca são salvas. Cidade sem empresas sugere cidades próximas. |
+| **Busca** | Nome, profissional, categoria, palavras-chave (“eletricista”, “banho e tosa”), serviços e bairro. Filtros combináveis (categoria, nota mínima, nº de avaliações, preço, tipo de atendimento, agenda on-line, bairro), 5 ordenações, “Por que aparece aqui?” em cada resultado. Filtros ficam na URL. |
+| **Empresa** | Capa, nota, selos com critérios, abas (Visão geral, Serviços, Avaliações, Fotos, Contato — abas vazias não aparecem), horários com aviso quando desatualizados, área atendida, mapa (OpenStreetMap), preços ou “Solicitar orçamento”. |
+| **Contratar** | Agendamento com horários livres reais (fuso da cidade, sem conflitos), pedido de orçamento, contato por WhatsApp/telefone/site (o app diz que **abre** outro app — não afirma que a mensagem foi enviada). |
+| **Atividades** | Agendamentos e orçamentos com status, cancelar, “O serviço foi realizado”, “Contratei”, avaliar. |
+| **Avaliações** | Só após contratação confirmada; nota + comentário + aspectos opcionais; editar por 30 dias; excluir; denunciar. |
+| **Perfil** | Conta, dados, minhas avaliações, privacidade (lembrar cidade, **excluir conta** — LGPD), “Como funciona”, termos. |
+
+Navegação sem cadastro: a pessoa explora tudo e só precisa de conta para favoritar, agendar, pedir orçamento e avaliar.
+
+## Decisão técnica
+
+O ambiente estava vazio. Escolhi **aplicação web mobile-first instalável (PWA)**: funciona em qualquer
+Android/iPhone sem loja de apps, roda bem em aparelhos de entrada e continua disponível na web. Um app
+Android nativo pode ser gerado depois (Capacitor/TWA) reaproveitando o mesmo front-end e a mesma API.
+
+| Camada | Tecnologia |
+| --- | --- |
+| Front-end | React 18 + TypeScript + Vite + Tailwind CSS + React Router + TanStack Query + ícones Lucide + vite-plugin-pwa |
+| API | Node 20+ com Hono, validação com Zod, sessões em cookie httpOnly |
+| Banco | PostgreSQL 16 com **Row Level Security** e funções `SECURITY DEFINER` mínimas |
+| Compartilhado | `packages/shared`: tipos, validações, ranking, selos, formatação — usados pelo app, pela API e pelo futuro painel empresarial |
+
+Supabase não foi usado porque não havia credenciais; o esquema e as políticas RLS são PostgreSQL padrão e
+podem ser migrados para Supabase (veja [docs/SEGURANCA.md](docs/SEGURANCA.md)).
+
+## Estrutura
+
+```
+packages/shared/   regras de negócio e contratos (ranking, selos, validação, formatação, categorias)
+server/            API: routes/ (HTTP) → services/ (regras) → repositories/ (SQL)
+  src/db/          migrações SQL, importação do IBGE, seed de demonstração
+  data/            municípios e estados (IBGE, via github.com/kelvins/municipios-brasileiros)
+  test/            testes de API e de segurança (RLS) contra banco real
+web/               app do cliente (PWA)
+  src/components/  sistema de design (ui/) e componentes do produto
+  src/pages/       telas
+  src/lib/         cliente da API, autenticação, localização, hooks de dados
+e2e/               teste ponta a ponta no navegador (Playwright)
+docs/              arquitetura, ranking, avaliações, segurança
+```
+
+## Como rodar localmente
+
+Requisitos: Node 20+ e PostgreSQL 14+.
+
+```bash
+npm install
+cp .env.example .env
+npm run db:setup     # cria os papéis conecta (dono) e conecta_app (aplicação) e os bancos
+npm run db:reset     # migrações + 5.571 municípios + dados de demonstração
+npm run dev          # API em :3001 e app em http://localhost:5173
+```
+
+`db:setup` usa `sudo -u postgres psql`; para outro acesso, defina `PSQL="psql -U postgres -h localhost"`.
+
+## Testes
+
+```bash
+npm test             # 22 testes de regras (ranking, selos, validação) + 19 testes de API/segurança
+npm run test:e2e     # navegador: localização, busca, filtros, empresa, login, favorito, agendamento,
+                     # avaliação, orçamento, cidade sem empresas e layout desktop
+```
+
+Os testes de API usam o banco `conecta_test` (recriado a cada execução). O teste e2e usa a conta de demonstração
+e espera o servidor rodando (`npm run build && npm start`); rode `npm run db:reset` antes de repeti-lo.
+Para salvar capturas de tela: `SHOTS=1 npm run test:e2e`.
+
+## Publicar
+
+1. Banco PostgreSQL gerenciado (Supabase, Neon, RDS…). Crie os papéis como em `scripts/setup-local-db.sh`
+   (senhas fortes!) e rode `npm run db:migrate` e `npm run db:locations` com as variáveis de produção.
+2. `npm run build` gera `web/dist` (PWA) e `server/dist` (API). Um único processo `npm start` serve os dois.
+3. Variáveis em produção: `NODE_ENV=production`, `DEMO_MODE=false`, `COOKIE_SECURE=true`,
+   `APP_ORIGINS=https://seu-dominio`, `DATABASE_URL` (papel da aplicação) e `DATABASE_OWNER_URL` (só migrações).
+4. Sirva atrás de HTTPS (obrigatório para PWA e geolocalização).
+
+Com `DEMO_MODE=false` o seed não roda e o banner de demonstração some; as empresas virão do futuro painel empresarial.
+
+## Trocar a marca
+
+- Nome, slogan e e-mail: `packages/shared/src/brand.ts`
+- Cores: `web/src/styles/theme.css` (e `themeColor` em `brand.ts`)
+- Ícone: `web/public/icon.svg` → gere os PNGs com `node scripts/make-icons.mjs`
+
+## Próximos passos
+
+- **Painel empresarial** — o banco já tem `business_members`, políticas RLS de edição para membros,
+  `review_replies`, áreas de atendimento e contadores de resposta (selo “Responde às solicitações”).
+- Envio real de pedidos às empresas (e-mail/WhatsApp Business API) e notificações ao cliente.
+- Recuperação de senha por e-mail (precisa de um provedor de e-mail).
+- Upload de fotos (Supabase Storage/S3) e processo de verificação de empresas.
+- Painel de moderação de denúncias.
+- Ranking pré-calculado em coluna/visão materializada quando houver milhares de empresas por cidade.
+
+Detalhes: [arquitetura](docs/ARQUITETURA.md) · [ranking e selos](docs/RANKING.md) · [avaliações](docs/AVALIACOES.md) · [segurança e privacidade](docs/SEGURANCA.md)

@@ -1,0 +1,31 @@
+@import './theme.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body { @apply bg-surface text-ink antialiased; font-size: 16px; }
+  :focus-visible { @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-white; }
+  h1, h2, h3 { @apply text-ink; letter-spacing: -0.01em; }
+}
+
+@layer components {
+  .container-app { @apply mx-auto w-full max-w-content px-4 md:px-8; }
+  .card { @apply rounded-2xl border border-line bg-white shadow-card; }
+  .label { @apply mb-1.5 block text-sm font-medium text-ink; }
+  .field {
+    @apply block w-full rounded-xl border border-line bg-white px-3.5 py-3 text-base text-ink placeholder:text-muted/80
+      transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:bg-surface;
+  }
+  .field-error { @apply border-danger-700 focus:border-danger-700 focus:ring-danger-700/20; }
+  .section-title { @apply text-lg font-semibold md:text-xl; }
+  .scroll-row { @apply -mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0; scrollbar-width: none; }
+  .scroll-row::-webkit-scrollbar { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
