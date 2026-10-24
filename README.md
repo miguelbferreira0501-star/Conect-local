@@ -82,6 +82,17 @@ Os testes de API usam o banco `conecta_test` (recriado a cada execução). O tes
 e espera o servidor rodando (`npm run build && npm start`); rode `npm run db:reset` antes de repeti-lo.
 Para salvar capturas de tela: `SHOTS=1 npm run test:e2e`.
 
+## Prévia sem servidor
+
+Uma versão que roda inteira no navegador, com os dados de demonstração embutidos, para visualizar o app sem
+publicar nada. Usa as mesmas regras (`packages/shared`) que a API; contas, favoritos, pedidos e avaliações
+criados nela ficam só no navegador de quem a abre. Não é segura nem substitui o servidor.
+
+```bash
+npm run db:reset && npm run preview:data   # atualiza web/src/preview/data.json a partir do banco
+npm run preview:build                      # gera web/dist-preview (sem service worker, navegação em memória)
+```
+
 ## Publicar (Neon + Render, planos gratuitos)
 
 1. **Banco:** crie um projeto em [neon.tech](https://neon.tech) e copie a *connection string*

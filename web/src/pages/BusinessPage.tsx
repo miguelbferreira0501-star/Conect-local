@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft, CalendarCheck, Clock, ExternalLink, Flag, Globe, Instagram, Mail, MapPin, MessageCircle, Phone, ShieldCheck, Share2, Star, Store, Truck, Wifi,
 } from 'lucide-react';
@@ -39,6 +39,7 @@ function hasContact(b: BusinessDetailDTO) {
 export function BusinessPage() {
   const { slug } = useParams();
   const nav = useNavigate();
+  const loc = useLocation();
   const [sp, setSp] = useSearchParams();
   const { data: b, isLoading, error, refetch } = useBusiness(slug);
   const toast = useToast();
@@ -71,7 +72,7 @@ export function BusinessPage() {
         <BusinessCover name={b.name} coverUrl={b.coverUrl} icon={b.category.icon} className="h-36 md:h-52" />
         <div className="absolute inset-x-0 top-0">
           <div className="container-app flex items-center justify-between py-3">
-            <button aria-label="Voltar" onClick={() => (window.history.length > 1 ? nav(-1) : nav('/'))} className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/95 shadow-card hover:bg-white">
+            <button aria-label="Voltar" onClick={() => (loc.key !== 'default' ? nav(-1) : nav('/'))} className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/95 shadow-card hover:bg-white">
               <ArrowLeft className="h-5 w-5" />
             </button>
             <div className="flex gap-2">

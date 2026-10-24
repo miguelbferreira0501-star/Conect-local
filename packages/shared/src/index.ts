@@ -8,3 +8,7 @@ export * from './hours';
 export * from './geo';
 export * from './schemas';
 export * from './types';
+export * from './time';
+export * from './scoring';
+export * from './booking';
+export * from './activities';

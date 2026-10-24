@@ -1,37 +1,12 @@
-import { REVIEW_RULES, type ActivityDTO, type BookingRequestInput, type QuoteRequestInput } from '@conecta/shared';
+import { ACTIVITY_LIMITS, localDateOf, toActivityDTO, type BookingRequestInput, type QuoteRequestInput } from '@conecta/shared';
+
+export { ACTIVITY_LIMITS, toActivityDTO };
 import { withUser, type Db } from '../db/pool';
 import { AppError, notFound } from '../lib/errors';
-import { activitiesRepo, type ActivityRow } from '../repositories/activities';
+import { activitiesRepo } from '../repositories/activities';
 import { businessesRepo } from '../repositories/businesses';
 import { reviewsRepo } from '../repositories/reviews';
 import { availability } from './business';
-
-export const ACTIVITY_LIMITS = { maxActiveFutureBookings: 10, maxQuotesPerDay: 15, reviewWindowDays: 180 };
-
-export function toActivityDTO(a: ActivityRow, lastReviewByBusiness: Map<string, Date>, now = new Date()): ActivityDTO {
-  const startsAt = a.starts_at ? new Date(a.starts_at) : null;
-  const done = (a.type === 'booking' && a.status === 'completed') || (a.type === 'quote' && a.status === 'hired');
-  const closedAt = a.closed_at ? new Date(a.closed_at) : startsAt;
-  const withinWindow = !closedAt || now.getTime() - closedAt.getTime() <= ACTIVITY_LIMITS.reviewWindowDays * 86_400_000;
-  const last = lastReviewByBusiness.get(a.business_id);
-  const cooldownOk = !last || now.getTime() - last.getTime() >= REVIEW_RULES.minDaysBetweenReviewsSameBusiness * 86_400_000;
-  const active = a.status === 'requested' || a.status === 'confirmed';
-  return {
-    id: a.id,
-    type: a.type,
-    status: a.status as ActivityDTO['status'],
-    business: { id: a.business_id, slug: a.business_slug, name: a.business_name, logoUrl: a.logo_url, categoryName: a.category_name },
-    serviceName: a.service_name,
-    startsAt: startsAt?.toISOString() ?? null,
-    preferredDate: a.preferred_date,
-    description: a.description,
-    createdAt: new Date(a.created_at).toISOString(),
-    canReview: done && !a.review_id && withinWindow && cooldownOk,
-    reviewId: a.review_id,
-    canMarkDone: a.type === 'booking' ? active && !!startsAt && startsAt <= now : a.status === 'sent' || a.status === 'answered',
-    canCancel: a.type === 'booking' ? active && !!startsAt && startsAt > now : a.status === 'sent' || a.status === 'answered',
-  };
-}
 
 async function lastReviewMap(db: Db) {
   const mine = (await reviewsRepo.mine(db)) as Array<{ business: { id: string }; createdAt: Date }>;
@@ -61,7 +36,7 @@ export async function createBooking(userId: string, input: BookingRequestInput) 
     const biz = await businessesRepo.basicById(input.businessId, db);
     if (!biz) throw notFound('Empresa não encontrada.');
     const startsAt = new Date(input.startsAt);
-    const localDate = new Intl.DateTimeFormat('en-CA', { timeZone: biz.timezone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(startsAt);
+    const localDate = localDateOf(startsAt, biz.timezone);
     const avail = await availability(db, input.businessId, input.serviceId, localDate);
     if (!avail.slots.some((s) => new Date(s.startsAt).getTime() === startsAt.getTime())) {
       throw new AppError(409, 'slot_unavailable', 'Este horário não está mais disponível. Escolha outro.');

@@ -16,7 +16,9 @@
     "start": "npm run start -w server",
     "typecheck": "npm run typecheck -w packages/shared && npm run typecheck -w server && npm run typecheck -w web",
     "test": "npm run test -w packages/shared && npm run test -w server",
-    "test:e2e": "node e2e/smoke.mjs"
+    "test:e2e": "node e2e/smoke.mjs",
+    "preview:data": "npm run preview:data -w server",
+    "preview:build": "cd web && VITE_PREVIEW=1 vite build"
   },
   "devDependencies": {
     "concurrently": "^9.1.0",

@@ -1,61 +1,7 @@
-import type { ServiceMode } from '@conecta/shared';
-import { query, type Db } from '../db/pool';
+import type { BusinessRow, ServiceMode } from '@conecta/shared';
 
-export interface BusinessRow {
-  id: string;
-  slug: string;
-  name: string;
-  professional_name: string | null;
-  short_description: string | null;
-  description: string | null;
-  logo_url: string | null;
-  cover_url: string | null;
-  street: string | null;
-  neighborhood: string | null;
-  postal_code: string | null;
-  city_ibge: number;
-  lat: number | null;
-  lon: number | null;
-  address_public: boolean;
-  phone: string | null;
-  whatsapp: string | null;
-  website: string | null;
-  instagram: string | null;
-  facebook: string | null;
-  email: string | null;
-  price_level: number | null;
-  mode_in_person: boolean;
-  mode_at_customer: boolean;
-  mode_online: boolean;
-  accepts_booking: boolean;
-  accepts_quote: boolean;
-  opening_hours: Record<string, Array<[string, string]>> | null;
-  hours_updated_at: Date | null;
-  verified_at: Date | null;
-  requests_received: number;
-  requests_answered: number;
-  is_demo: boolean;
-  created_at: Date;
-  cat_slug: string;
-  cat_name: string;
-  cat_short: string;
-  cat_icon: string;
-  cat_keywords: string[];
-  city_name: string;
-  city_uf: string;
-  timezone: string;
-  review_count: number;
-  average: number | null;
-  stddev: number | null;
-  first_review_at: Date | null;
-  last_review_at: Date | null;
-  location_match: 'establishmentInCity' | 'servesCity' | 'onlineOnly';
-  service_names: string[] | null;
-  services_count: number;
-  services_with_price: number;
-  has_bookable: boolean;
-  photos_count: number;
-}
+export type { BusinessRow };
+import { query, type Db } from '../db/pool';
 
 export interface CandidateFilters {
   city: number;

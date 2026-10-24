@@ -1,7 +1,7 @@
-import { hoursAreFresh, toMinutes, type BusinessDetailDTO, type ReviewDTO } from '@conecta/shared';
+import { BOOKING_RULES, computeSlots, hoursAreFresh, type BusinessDetailDTO, type ReviewDTO } from '@conecta/shared';
 import { withUser, type Db } from '../db/pool';
 import { AppError, notFound } from '../lib/errors';
-import { weekdayOf, zonedToUtc } from '../lib/time';
+import { zonedToUtc } from '../lib/time';
 import { businessesRepo } from '../repositories/businesses';
 import { favoritesRepo } from '../repositories/favorites';
 import { reviewsRepo } from '../repositories/reviews';
@@ -78,11 +78,7 @@ export async function businessReviews(
   });
 }
 
-export const BOOKING_RULES = {
-  slotStepMinutes: 30,
-  minLeadMinutes: 60,
-  maxDaysAhead: 60,
-};
+export { BOOKING_RULES };
 
 /** Horários livres de um serviço numa data (no fuso da cidade da empresa). */
 export async function availability(db: Db, businessId: string, serviceId: string, date: string, now = new Date()) {
@@ -92,21 +88,7 @@ export async function availability(db: Db, businessId: string, serviceId: string
   const svc = await businessesRepo.service(businessId, serviceId, db);
   if (!svc || !svc.bookable || !svc.duration_minutes) throw new AppError(422, 'service_not_bookable', 'Este serviço não pode ser agendado pela plataforma.');
   const dayStart = zonedToUtc(date, 0, biz.timezone);
-  if (dayStart.getTime() > now.getTime() + BOOKING_RULES.maxDaysAhead * 86_400_000) {
-    return { date, timezone: biz.timezone, durationMinutes: svc.duration_minutes, slots: [] as Array<{ startsAt: string; label: string }> };
-  }
-  const ranges = biz.opening_hours?.[String(weekdayOf(date))] ?? [];
   const busy = await businessesRepo.busyRanges(businessId, dayStart, new Date(dayStart.getTime() + 86_400_000), db);
-  const slots: Array<{ startsAt: string; label: string }> = [];
-  const minStart = now.getTime() + BOOKING_RULES.minLeadMinutes * 60_000;
-  for (const [open, close] of ranges) {
-    for (let m = toMinutes(open); m + svc.duration_minutes <= toMinutes(close); m += BOOKING_RULES.slotStepMinutes) {
-      const start = zonedToUtc(date, m, biz.timezone);
-      const end = new Date(start.getTime() + svc.duration_minutes * 60_000);
-      if (start.getTime() < minStart) continue;
-      if (busy.some((b) => start < new Date(b.ends_at) && end > new Date(b.starts_at))) continue;
-      slots.push({ startsAt: start.toISOString(), label: `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}` });
-    }
-  }
+  const slots = computeSlots({ date, timezone: biz.timezone, durationMinutes: svc.duration_minutes, openingHours: biz.opening_hours, busy, now });
   return { date, timezone: biz.timezone, durationMinutes: svc.duration_minutes, slots };
 }

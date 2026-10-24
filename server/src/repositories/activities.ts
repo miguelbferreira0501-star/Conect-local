@@ -1,24 +1,7 @@
+import type { ActivityRow } from '@conecta/shared';
 import { query, type Db } from '../db/pool';
 
-export interface ActivityRow {
-  id: string;
-  type: 'booking' | 'quote';
-  status: string;
-  business_id: string;
-  business_slug: string;
-  business_name: string;
-  logo_url: string | null;
-  category_name: string;
-  is_demo: boolean;
-  service_name: string | null;
-  service_id: string | null;
-  starts_at: Date | null;
-  preferred_date: string | null;
-  description: string | null;
-  created_at: Date;
-  closed_at: Date | null;
-  review_id: string | null;
-}
+export type { ActivityRow };
 
 /** Todas as consultas dependem da política RLS: só retornam dados do próprio usuário. */
 export const activitiesRepo = {

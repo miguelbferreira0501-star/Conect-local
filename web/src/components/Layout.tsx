@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CalendarClock, Heart, House, Search, User, X } from 'lucide-react';
 import { BRAND } from '@conecta/shared';
 import { useConfig } from '@/lib/queries';
@@ -17,21 +17,29 @@ const NAV = [
 export function Logo({ className = '' }: { className?: string }) {
   return (
     <span className={`inline-flex items-center gap-2 font-bold text-brand-700 ${className}`}>
-      <img src="/icon.svg" alt="" width={30} height={30} className="h-[30px] w-[30px]" />
+      <svg viewBox="0 0 64 64" width={30} height={30} aria-hidden="true" className="h-[30px] w-[30px]">
+        <rect width="64" height="64" rx="14" fill="rgb(var(--brand-700))" />
+        <path d="M32 12c-8.3 0-15 6.5-15 14.6C17 37.5 32 52 32 52s15-14.5 15-25.4C47 18.5 40.3 12 32 12z" fill="#fff" />
+        <path d="m25.5 31.5 4.5 4.5 9-9.5" fill="none" stroke="rgb(var(--accent-600))" strokeWidth="4.2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
       <span className="text-[19px] tracking-tight">{BRAND.name}</span>
     </span>
   );
 }
 
 function DemoBanner() {
-  const config = useConfig();
+  const config = useConfig() as { data?: { demoMode: boolean; preview?: boolean } };
   const [hidden, setHidden] = useState(() => storage.get('cl_demo_banner_hidden', false));
   if (!config.data?.demoMode || hidden) return null;
   return (
     <div className="border-b border-warning-700/20 bg-warning-50 text-warning-700">
       <div className="container-app flex items-center gap-3 py-2 text-sm">
         <p className="flex-1">
-          <strong>Modo demonstração:</strong> as empresas e avaliações marcadas como “Exemplo” são fictícias.
+          {config.data.preview ? (
+            <><strong>Prévia:</strong> empresas e avaliações são fictícias, e o que você criar fica salvo só neste navegador.</>
+          ) : (
+            <><strong>Modo demonstração:</strong> as empresas e avaliações marcadas como “Exemplo” são fictícias.</>
+          )}
         </p>
         <button aria-label="Fechar aviso de demonstração" className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-warning-700/10"
           onClick={() => { setHidden(true); storage.set('cl_demo_banner_hidden', true); }}>
@@ -97,11 +105,12 @@ export function AppLayout() {
 /** Cabeçalho das telas internas, com botão voltar. */
 export function PageHeader({ title, back = true, actions, subtitle }: { title: string; back?: boolean | string; actions?: ReactNode; subtitle?: ReactNode }) {
   const nav = useNavigate();
+  const loc = useLocation();
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-white/95 backdrop-blur">
       <div className="container-app flex min-h-[60px] items-center gap-2 py-2">
         {back && (
-          <button aria-label="Voltar" onClick={() => (typeof back === 'string' ? nav(back) : window.history.length > 1 ? nav(-1) : nav('/'))}
+          <button aria-label="Voltar" onClick={() => (typeof back === 'string' ? nav(back) : loc.key !== 'default' ? nav(-1) : nav('/'))}
             className="-ml-2 inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-surface">
             <ArrowLeft className="h-5 w-5" />
           </button>

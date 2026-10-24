@@ -7,7 +7,22 @@ export class ApiError extends Error {
   }
 }
 
+/** Na prévia sem servidor (VITE_PREVIEW=1), as chamadas são respondidas no próprio navegador. */
+const IS_PREVIEW = import.meta.env.VITE_PREVIEW === '1';
+
+async function previewRequest<T>(method: string, path: string, body?: unknown): Promise<T> {
+  const { handle, MockError } = await import('../preview/mockServer');
+  await new Promise((r) => setTimeout(r, 120)); // simula a latência de rede
+  try {
+    return (await handle(method, path, body === undefined ? undefined : JSON.parse(JSON.stringify(body)))) as T;
+  } catch (e) {
+    if (e instanceof MockError) throw new ApiError(e.status, e.code, e.message, e.fields);
+    throw e;
+  }
+}
+
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  if (IS_PREVIEW) return previewRequest<T>(method, path, body);
   let res: Response;
   try {
     res = await fetch(`/api${path}`, {

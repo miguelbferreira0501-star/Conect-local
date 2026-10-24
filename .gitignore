@@ -5,3 +5,4 @@ dist
 e2e/screenshots
 coverage
 e2e/falha*.png
+web/dist-preview
