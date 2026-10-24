@@ -10,6 +10,7 @@
     "migrate": "tsx --env-file-if-exists=../.env src/db/cli.ts migrate",
     "locations": "tsx --env-file-if-exists=../.env src/db/cli.ts locations",
     "seed": "tsx --env-file-if-exists=../.env src/db/cli.ts seed",
+    "deploy": "tsx --env-file-if-exists=../.env src/db/cli.ts deploy",
     "reset": "tsx --env-file-if-exists=../.env src/db/cli.ts reset",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json"

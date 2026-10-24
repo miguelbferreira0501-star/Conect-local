@@ -82,16 +82,21 @@ Os testes de API usam o banco `conecta_test` (recriado a cada execução). O tes
 e espera o servidor rodando (`npm run build && npm start`); rode `npm run db:reset` antes de repeti-lo.
 Para salvar capturas de tela: `SHOTS=1 npm run test:e2e`.
 
-## Publicar
+## Publicar (Neon + Render, planos gratuitos)
 
-1. Banco PostgreSQL gerenciado (Supabase, Neon, RDS…). Crie os papéis como em `scripts/setup-local-db.sh`
-   (senhas fortes!) e rode `npm run db:migrate` e `npm run db:locations` com as variáveis de produção.
-2. `npm run build` gera `web/dist` (PWA) e `server/dist` (API). Um único processo `npm start` serve os dois.
-3. Variáveis em produção: `NODE_ENV=production`, `DEMO_MODE=false`, `COOKIE_SECURE=true`,
-   `APP_ORIGINS=https://seu-dominio`, `DATABASE_URL` (papel da aplicação) e `DATABASE_OWNER_URL` (só migrações).
-4. Sirva atrás de HTTPS (obrigatório para PWA e geolocalização).
+1. **Banco:** crie um projeto em [neon.tech](https://neon.tech) e copie a *connection string*
+   (`postgresql://...neon.tech/neondb?sslmode=require`).
+2. **App:** no [Render](https://render.com), escolha **New → Blueprint**, selecione este repositório e cole a
+   connection string em `DATABASE_OWNER_URL`. O arquivo `render.yaml` cuida do resto.
+3. Na primeira inicialização, `npm run db:deploy` cria o papel do app no banco (`conecta_app`, com a senha gerada
+   em `DB_APP_PASSWORD`), aplica as migrações, importa os municípios e, com `DEMO_MODE=true`, os dados de exemplo.
+   Ele é idempotente: roda a cada inicialização sem apagar nada.
 
-Com `DEMO_MODE=false` o seed não roda e o banner de demonstração some; as empresas virão do futuro painel empresarial.
+Outros provedores: qualquer Node 22 + PostgreSQL. Comando de build `npm ci --include=dev && npm run build`,
+início `npm run db:deploy && npm start`. Variáveis: `NODE_ENV=production`, `COOKIE_SECURE=true`,
+`DATABASE_OWNER_URL` (dono, precisa de CREATEROLE), `DB_APP_PASSWORD` (12+ caracteres) ou `DATABASE_URL` pronta
+do papel da aplicação, e `DEMO_MODE=false` quando houver empresas reais. HTTPS é obrigatório (PWA e geolocalização).
+No plano gratuito do Render o app "dorme" após 15 min sem acesso; o primeiro acesso depois disso leva ~1 minuto.
 
 ## Trocar a marca
 

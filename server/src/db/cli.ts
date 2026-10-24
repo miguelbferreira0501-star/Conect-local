@@ -34,23 +34,51 @@ export async function reset(client: pg.Client) {
   await client.query(`GRANT USAGE ON SCHEMA public TO ${env.DB_APP_ROLE}`);
 }
 
+/** Cria (ou atualiza a senha do) papel da aplicação. O dono precisa do privilégio CREATEROLE (Neon e Supabase têm). */
+export async function ensureAppRole(client: pg.Client) {
+  if (!env.DB_APP_PASSWORD) return;
+  const role = env.DB_APP_ROLE;
+  const exists = (await client.query('SELECT 1 FROM pg_roles WHERE rolname = $1', [role])).rowCount;
+  const pwd = (await client.query('SELECT quote_literal($1) AS q', [env.DB_APP_PASSWORD])).rows[0].q;
+  // Na criação definimos os atributos; depois, só sincronizamos a senha (donos com CREATEROLE não alteram atributos).
+  if (exists) await client.query(`ALTER ROLE ${role} WITH PASSWORD ${pwd}`);
+  else await client.query(`CREATE ROLE ${role} WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS PASSWORD ${pwd}`);
+  const db = (await client.query('SELECT current_database() AS d')).rows[0].d;
+  await client.query(`GRANT CONNECT ON DATABASE "${db}" TO ${role}`);
+  console.log(`✔ papel da aplicação "${role}" pronto`);
+}
+
+/** Preparação idempotente para produção: papel, migrações, municípios e (no modo demonstração) dados de exemplo. */
+export async function deploy(client: pg.Client) {
+  await ensureAppRole(client);
+  await migrate(client);
+  const cities = (await client.query('SELECT count(*)::int AS n FROM cities')).rows[0].n;
+  if (cities < 5000) await loadLocations(client);
+  if (env.DEMO_MODE) {
+    const n = (await client.query('SELECT count(*)::int AS n FROM businesses')).rows[0].n;
+    if (n === 0) await seedDemo(client);
+  }
+}
+
 async function main() {
   const cmd = process.argv[2];
   const client = new pg.Client({ connectionString: env.DATABASE_OWNER_URL });
   await client.connect();
   try {
     if (cmd === 'migrate') await migrate(client);
+    else if (cmd === 'deploy') await deploy(client);
     else if (cmd === 'locations') await loadLocations(client);
     else if (cmd === 'seed') {
       if (!env.DEMO_MODE) throw new Error('O seed de demonstração só pode rodar com DEMO_MODE=true.');
       await seedDemo(client);
     } else if (cmd === 'reset') {
+      if (env.NODE_ENV === 'production') throw new Error('reset apaga o banco e não pode rodar em produção.');
       await reset(client);
       await migrate(client);
       await loadLocations(client);
       if (env.DEMO_MODE) await seedDemo(client);
     } else {
-      console.log('Uso: cli.ts migrate | locations | seed | reset');
+      console.log('Uso: cli.ts migrate | deploy | locations | seed | reset');
     }
   } finally {
     await client.end();

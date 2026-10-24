@@ -1,0 +1,24 @@
+# Publicação no Render (https://render.com) via "Blueprint".
+# Você só precisa informar DATABASE_OWNER_URL (endereço do banco, por exemplo do Neon).
+services:
+  - type: web
+    name: conecta-local
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build
+    # Na inicialização: cria o papel do banco, aplica migrações, importa municípios e dados de exemplo (se vazio).
+    startCommand: npm run db:deploy && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: DEMO_MODE
+        value: "true"
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: DB_APP_PASSWORD
+        generateValue: true
+      - key: DATABASE_OWNER_URL
+        sync: false

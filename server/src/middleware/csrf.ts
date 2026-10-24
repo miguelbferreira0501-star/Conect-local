@@ -17,8 +17,11 @@ export const csrfMiddleware = createMiddleware(async (c, next) => {
   }
   const origin = c.req.header('origin');
   if (origin && !allowed.has(origin)) {
-    const self = new URL(c.req.url).origin;
-    if (origin !== self) throw new AppError(403, 'csrf', 'Origem da requisição não permitida.');
+    // Mesmo site: o host do Origin é o host da requisição (funciona atrás de proxy HTTPS, como no Render).
+    let originHost = '';
+    try { originHost = new URL(origin).host; } catch { /* Origin inválido */ }
+    const host = c.req.header('x-forwarded-host') ?? c.req.header('host') ?? new URL(c.req.url).host;
+    if (originHost !== host) throw new AppError(403, 'csrf', 'Origem da requisição não permitida.');
   }
   await next();
 });
