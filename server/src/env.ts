@@ -24,7 +24,9 @@ const envSchema = z.object({
   SESSION_DAYS: z.coerce.number().int().min(1).max(365).default(30),
 });
 
-const parsed = envSchema.parse(process.env);
+// Variáveis vazias (ex.: deixadas em branco no painel da hospedagem) contam como não definidas.
+const rawEnv = Object.fromEntries(Object.entries(process.env).filter(([, v]) => v !== undefined && v.trim() !== ''));
+const parsed = envSchema.parse(rawEnv);
 
 function appDatabaseUrl(): string {
   if (parsed.DATABASE_URL) return parsed.DATABASE_URL;
