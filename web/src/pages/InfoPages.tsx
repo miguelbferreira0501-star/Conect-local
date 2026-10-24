@@ -82,8 +82,36 @@ export function TermsPage() {
           <p><strong>Finalidade:</strong> criar sua conta, enviar seus pedidos às empresas escolhidas e exibir suas avaliações.</p>
           <p><strong>Compartilhamento:</strong> seus dados de contato só são enviados à empresa com a qual você fizer um pedido. Não vendemos dados pessoais.</p>
           <p><strong>Localização:</strong> a localização do aparelho só é usada com sua permissão, enquanto o app está aberto, e não é armazenada.</p>
-          <p><strong>Seus direitos:</strong> você pode acessar, corrigir e excluir seus dados a qualquer momento em Perfil → Privacidade e dados.</p>
+          <p><strong>Seus direitos:</strong> você pode acessar, corrigir e excluir seus dados a qualquer momento em Perfil → Privacidade e dados. Veja também <a href="/excluir-conta" className="font-semibold text-brand-700 underline">como excluir sua conta</a>.</p>
           <p><strong>Contato:</strong> {BRAND.supportEmail}</p>
+        </Section>
+      </div>
+    </div>
+  );
+}
+
+/** Página pública exigida pela Google Play: explica como excluir a conta e os dados. */
+export function DeleteAccountInfoPage() {
+  return (
+    <div>
+      <PageHeader title="Excluir conta e dados" />
+      <div className="container-app max-w-3xl space-y-4 py-5">
+        <Section title={`Como excluir sua conta do ${BRAND.name}`}>
+          <ol className="list-decimal space-y-1 pl-5">
+            <li>Abra o app ou o site e entre na sua conta.</li>
+            <li>Toque em <strong>Perfil</strong> → <strong>Privacidade e dados</strong>.</li>
+            <li>Toque em <strong>Excluir minha conta</strong> e confirme com sua senha.</li>
+          </ol>
+          <ButtonLink to="/perfil/privacidade" className="mt-2">Ir para Privacidade e dados</ButtonLink>
+          <p>Sem acesso à conta? Envie um e-mail para <strong>{BRAND.supportEmail}</strong> a partir do endereço cadastrado, com o assunto “Excluir conta”. Respondemos em até 15 dias.</p>
+        </Section>
+        <Section title="O que é apagado">
+          <ul className="list-disc space-y-1 pl-5">
+            <li>Nome, e-mail, telefone, senha e cidade salva.</li>
+            <li>Favoritos, agendamentos, pedidos de orçamento e avaliações feitas por você.</li>
+            <li>Sessões abertas em todos os aparelhos.</li>
+          </ul>
+          <p>A exclusão é imediata e definitiva. Cópias de segurança do banco são sobrescritas em até 30 dias.</p>
         </Section>
       </div>
     </div>

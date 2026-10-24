@@ -125,4 +125,6 @@ No plano gratuito do Render o app "dorme" após 15 min sem acesso; o primeiro ac
 - Painel de moderação de denúncias.
 - Ranking pré-calculado em coluna/visão materializada quando houver milhares de empresas por cidade.
 
+Lançamento na Google Play: [store/PLAY-STORE.md](store/PLAY-STORE.md)
+
 Detalhes: [arquitetura](docs/ARQUITETURA.md) · [ranking e selos](docs/RANKING.md) · [avaliações](docs/AVALIACOES.md) · [segurança e privacidade](docs/SEGURANCA.md)

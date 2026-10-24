@@ -24,20 +24,25 @@ export default defineConfig({
     react(),
     !PREVIEW && VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['icon.svg', 'apple-touch-icon.png', 'icon-maskable-512.png'],
       manifest: {
         name: BRAND.name,
         short_name: BRAND.shortName,
         description: BRAND.description,
+        id: '/',
         lang: 'pt-BR',
+        dir: 'ltr',
         start_url: '/',
+        scope: '/',
+        orientation: 'portrait',
+        categories: ['business', 'lifestyle', 'shopping'],
         display: 'standalone',
         background_color: '#F6F8FB',
         theme_color: BRAND.themeColor,
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {

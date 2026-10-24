@@ -18,6 +18,9 @@ const envSchema = z.object({
   APP_ORIGINS: z.string().default('http://localhost:5173,http://localhost:3001'),
   /** Pasta com o front-end compilado (servido em produção pelo mesmo processo). */
   WEB_DIST: z.string().default('../web/dist'),
+  /** App Android (Play Store): nome do pacote e impressões SHA-256 do certificado (separadas por vírgula). */
+  ANDROID_PACKAGE_NAME: z.string().regex(/^[a-zA-Z][\w.]*$/).optional(),
+  ANDROID_CERT_SHA256: z.string().optional(),
   SESSION_DAYS: z.coerce.number().int().min(1).max(365).default(30),
 });
 

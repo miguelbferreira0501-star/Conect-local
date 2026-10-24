@@ -31,6 +31,19 @@ export function createApp() {
     }),
   );
 
+  // Digital Asset Links: prova ao Android que o app da Play Store e este site são do mesmo dono
+  // (permite abrir o site em tela cheia, sem barra de navegador, dentro do app).
+  app.get('/.well-known/assetlinks.json', (c) => {
+    const fingerprints = (env.ANDROID_CERT_SHA256 ?? '').split(',').map((f) => f.trim().toUpperCase()).filter(Boolean);
+    if (!env.ANDROID_PACKAGE_NAME || fingerprints.length === 0) return c.json([]);
+    return c.json([
+      {
+        relation: ['delegate_permission/common.handle_all_urls'],
+        target: { namespace: 'android_app', package_name: env.ANDROID_PACKAGE_NAME, sha256_cert_fingerprints: fingerprints },
+      },
+    ]);
+  });
+
   const api = new Hono<AppEnv>();
   api.use('*', sessionMiddleware, csrfMiddleware);
   api.route('/', publicRoutes);

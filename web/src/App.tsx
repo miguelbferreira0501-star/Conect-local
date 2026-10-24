@@ -22,6 +22,7 @@ const PrivacyPage = lazy(() => import('./pages/ProfilePages').then((m) => ({ def
 const ForBusinessPage = lazy(() => import('./pages/ProfilePages').then((m) => ({ default: m.ForBusinessPage })));
 const HowItWorksPage = lazy(() => import('./pages/InfoPages').then((m) => ({ default: m.HowItWorksPage })));
 const TermsPage = lazy(() => import('./pages/InfoPages').then((m) => ({ default: m.TermsPage })));
+const DeleteAccountInfoPage = lazy(() => import('./pages/InfoPages').then((m) => ({ default: m.DeleteAccountInfoPage })));
 const NotFoundPage = lazy(() => import('./pages/InfoPages').then((m) => ({ default: m.NotFoundPage })));
 
 export function App() {
@@ -48,6 +49,7 @@ export function App() {
           <Route path="para-empresas" element={<ForBusinessPage />} />
           <Route path="como-funciona" element={<HowItWorksPage />} />
           <Route path="termos" element={<TermsPage />} />
+          <Route path="excluir-conta" element={<DeleteAccountInfoPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
