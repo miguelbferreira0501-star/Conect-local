@@ -7,7 +7,7 @@ import {
   BADGES, describeDayHours, formatDuration, formatPhoneBR, formatRating, formatServicePrice, isOpenAt, PRICE_LEVEL_LABELS, REPORT_REASONS, REVIEW_ASPECT_LABELS,
   relativeTime, reviewCountLabel, WEEKDAY_NAMES, type BusinessDetailDTO, type ReviewAspect, type ServiceMode,
 } from '@conecta/shared';
-import { BRAND } from '@conecta/shared';
+import { BRAND, isReservationCategory } from '@conecta/shared';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useBusiness, useReviews } from '@/lib/queries';
@@ -31,6 +31,13 @@ const MODE_TEXT: Record<ServiceMode, string> = {
   online: 'Atende on-line',
 };
 
+/** Preço exibido; na reserva de mesa sem valor definido não mostramos "orçamento". */
+export function priceLabel(s: BusinessDetailDTO['services'][number], reservation: boolean) {
+  if (s.priceType === 'fixed' && s.priceMinCents === 0) return 'Gratuito';
+  if (reservation && s.bookable && s.priceType === 'quote') return '';
+  return formatServicePrice(s);
+}
+
 function hasContact(b: BusinessDetailDTO) {
   const c = b.contact;
   return !!(c.whatsapp || c.phone || c.website || c.instagram || c.facebook || c.email);
@@ -49,7 +56,7 @@ export function BusinessPage() {
 
   const tabs: Array<{ id: TabId; label: string }> = [
     { id: 'visao-geral', label: 'Visão geral' },
-    ...(b.services.length ? [{ id: 'servicos' as const, label: 'Serviços' }] : []),
+    ...(b.services.length ? [{ id: 'servicos' as const, label: isReservationCategory(b.category.slug) ? 'Cardápio' : 'Serviços' }] : []),
     { id: 'avaliacoes', label: `Avaliações${b.rating.count ? ` (${b.rating.count})` : ''}` },
     ...(b.photos.length ? [{ id: 'fotos' as const, label: 'Fotos' }] : []),
     ...(hasContact(b) ? [{ id: 'contato' as const, label: 'Contato' }] : []),
@@ -149,17 +156,20 @@ export function BusinessPage() {
 
 function PrimaryActions({ b, primary, onContact, compact }: { b: BusinessDetailDTO; primary: string; onContact: () => void; compact?: boolean }) {
   const contact = hasContact(b);
+  const reservation = isReservationCategory(b.category.slug);
   return (
     <>
       {b.acceptsBooking && (
-        <ButtonLink to={`/empresa/${b.slug}/agendar`} icon={<CalendarCheck className="h-5 w-5" />} className={compact ? 'flex-1 whitespace-nowrap' : ''}>{compact ? 'Agendar' : 'Agendar horário'}</ButtonLink>
+        <ButtonLink to={`/empresa/${b.slug}/agendar`} icon={<CalendarCheck className="h-5 w-5" />} className={compact ? 'flex-1 whitespace-nowrap' : ''}>
+          {isReservationCategory(b.category.slug) ? (compact ? 'Reservar' : 'Reservar mesa') : compact ? 'Agendar' : 'Agendar horário'}
+        </ButtonLink>
       )}
-      {b.acceptsQuote && (
+      {b.acceptsQuote && !reservation && (
         <ButtonLink to={`/empresa/${b.slug}/orcamento`} variant={primary === 'quote' ? 'primary' : 'secondary'} className={compact ? 'flex-1 whitespace-nowrap' : ''}>
           {compact && b.acceptsBooking ? 'Orçamento' : 'Solicitar orçamento'}
         </ButtonLink>
       )}
-      {contact && !(compact && b.acceptsBooking && b.acceptsQuote) && (
+      {contact && !(compact && b.acceptsBooking && b.acceptsQuote && !reservation) && (
         <Button variant="secondary" onClick={onContact} icon={<MessageCircle className="h-5 w-5" />} className={compact ? 'flex-1' : ''}>Contato</Button>
       )}
     </>
@@ -196,14 +206,14 @@ function Overview({ b, onTab }: { b: BusinessDetailDTO; onTab: (t: TabId) => voi
         {b.services.length > 0 && (
           <section className="card p-5">
             <div className="mb-2 flex items-center justify-between">
-              <h2 className="font-semibold">Principais serviços</h2>
+              <h2 className="font-semibold">{isReservationCategory(b.category.slug) ? 'Destaques do cardápio' : 'Principais serviços'}</h2>
               <button className="min-h-[44px] text-sm font-semibold text-brand-700 hover:underline" onClick={() => onTab('servicos')}>Ver todos</button>
             </div>
             <ul className="divide-y divide-line">
               {b.services.slice(0, 3).map((s) => (
                 <li key={s.id} className="flex items-center justify-between gap-3 py-2.5">
                   <span>{s.name}</span>
-                  <span className="shrink-0 text-sm font-medium text-ink">{formatServicePrice(s)}</span>
+                  <span className="shrink-0 text-sm font-medium text-ink">{priceLabel(s, isReservationCategory(b.category.slug))}</span>
                 </li>
               ))}
             </ul>
@@ -285,11 +295,11 @@ function Services({ b }: { b: BusinessDetailDTO }) {
               </p>
               {s.notes && <p className="mt-1 text-sm text-ink/80">{s.notes}</p>}
             </div>
-            <p className="text-right font-semibold">{s.priceType === 'fixed' && s.priceMinCents === 0 ? 'Gratuito' : formatServicePrice(s)}</p>
+            <p className="text-right font-semibold">{priceLabel(s, isReservationCategory(b.category.slug))}</p>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            {s.bookable && b.acceptsBooking && <ButtonLink size="sm" to={`/empresa/${b.slug}/agendar?servico=${s.id}`}>Agendar</ButtonLink>}
-            {b.acceptsQuote && <ButtonLink size="sm" variant="secondary" to={`/empresa/${b.slug}/orcamento?servico=${s.id}`}>{s.priceType === 'quote' ? 'Solicitar orçamento' : 'Tirar dúvidas / orçamento'}</ButtonLink>}
+            {s.bookable && b.acceptsBooking && <ButtonLink size="sm" to={`/empresa/${b.slug}/agendar?servico=${s.id}`}>{isReservationCategory(b.category.slug) ? 'Reservar' : 'Agendar'}</ButtonLink>}
+            {b.acceptsQuote && !isReservationCategory(b.category.slug) && <ButtonLink size="sm" variant="secondary" to={`/empresa/${b.slug}/orcamento?servico=${s.id}`}>{s.priceType === 'quote' ? 'Solicitar orçamento' : 'Tirar dúvidas / orçamento'}</ButtonLink>}
           </div>
         </li>
       ))}

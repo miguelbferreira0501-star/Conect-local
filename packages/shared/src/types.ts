@@ -149,6 +149,7 @@ export interface ActivityDTO {
   bookingMode?: 'slot' | 'period' | 'day';
   period?: string | null;
   staffName?: string | null;
+  partySize?: number | null;
 }
 
 export interface UserDTO {

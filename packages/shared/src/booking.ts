@@ -63,6 +63,8 @@ export const PERIODS: Record<Period, { label: string; start: string; end: string
  * `staffLabel` é como o app chama quem atende: "Profissional", "Quadra", "Espaço"...
  */
 export const BOOKING_PROFILES: Record<string, { mode: BookingMode; staffLabel: string; staffLabelPlural: string; staffKind: 'person' | 'resource' }> = {
+  // Restaurante: reserva de mesa em horário marcado; cada mesa/ambiente é uma agenda.
+  restaurantes: { mode: 'slot', staffLabel: 'Mesa', staffLabelPlural: 'Mesas e ambientes', staffKind: 'resource' },
   'estetica-e-beleza': { mode: 'slot', staffLabel: 'Profissional', staffLabelPlural: 'Profissionais', staffKind: 'person' },
   automotivo: { mode: 'slot', staffLabel: 'Mecânico', staffLabelPlural: 'Mecânicos', staffKind: 'person' },
   pet: { mode: 'slot', staffLabel: 'Profissional', staffLabelPlural: 'Profissionais', staffKind: 'person' },
@@ -173,3 +175,7 @@ export function computeAvailability(i: AvailabilityInput): AvailabilityResult {
   }
   return { mode: i.mode, slots: [...merged.values()].sort((a, b) => a.startsAt.localeCompare(b.startsAt)) };
 }
+
+/** Categorias em que o agendamento é uma reserva com número de pessoas (e serviços formam o cardápio). */
+export const RESERVATION_CATEGORIES = new Set(['restaurantes']);
+export const isReservationCategory = (slug: string) => RESERVATION_CATEGORIES.has(slug);

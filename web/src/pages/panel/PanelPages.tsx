@@ -5,7 +5,7 @@ import {
   CalendarCheck, CheckCircle2, Circle, Clock, FileText, ImagePlus, MessageCircle, Phone, Plus, Star, Store, Trash2,
 } from 'lucide-react';
 import {
-  BOOKING_MODE_LABELS, bookingProfile, describeDayHours, formatDuration, PERIODS, type BookingMode, type Period, formatPhoneBR, formatRating, formatServicePrice, relativeTime, serviceInputSchema, WEEKDAY_NAMES,
+  BOOKING_MODE_LABELS, bookingProfile, describeDayHours, isReservationCategory, formatDuration, PERIODS, type BookingMode, type Period, formatPhoneBR, formatRating, formatServicePrice, relativeTime, serviceInputSchema, WEEKDAY_NAMES,
   type PanelBusinessDTO, type PanelRequestDTO, type ServiceInput,
 } from '@conecta/shared';
 import { api, ApiError } from '@/lib/api';
@@ -197,7 +197,8 @@ function RequestCard({ r, businessId }: { r: PanelRequestDTO; businessId: string
               : new Date(r.startsAt).toLocaleString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })}
         </p>
       )}
-      {r.staffName && <p className="text-sm">Com: <strong>{r.staffName}</strong></p>}
+      {r.partySize && <p className="text-sm"><strong>{r.partySize} {r.partySize === 1 ? 'pessoa' : 'pessoas'}</strong></p>}
+      {r.staffName && <p className="text-sm">{r.partySize ? 'Mesa/ambiente' : 'Com'}: <strong>{r.staffName}</strong></p>}
       {r.preferredDate && <p className="text-sm">Data desejada: {new Date(r.preferredDate + 'T12:00:00').toLocaleDateString('pt-BR')}</p>}
       {r.description && <p className="mt-1 whitespace-pre-line text-sm">{r.description}</p>}
       {r.neighborhood && <p className="text-sm text-muted">Bairro: {r.neighborhood}</p>}
@@ -282,7 +283,11 @@ export function PanelServicesPage() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted">{b.services.length} serviço(s). Preços ajudam o cliente a decidir.</p>
+        <p className="text-sm text-muted">
+          {isReservationCategory(b.profile.categorySlug)
+            ? 'Cadastre os pratos do cardápio com preço e um serviço “Reserva de mesa” agendável (duração média da refeição).'
+            : `${b.services.length} serviço(s). Preços ajudam o cliente a decidir.`}
+        </p>
         <Button size="sm" icon={<Plus className="h-4 w-4" />} onClick={() => { setErrors({}); setEditing({ id: null, f: { ...EMPTY_SERVICE, bookingMode: bookingProfile(b.profile.categorySlug).mode } }); }}>Adicionar serviço</Button>
       </div>
       {b.services.length === 0 && <EmptyState icon={<FileText className="h-8 w-8" />} title="Nenhum serviço cadastrado">Cadastre o que você oferece, com preço e duração quando possível.</EmptyState>}

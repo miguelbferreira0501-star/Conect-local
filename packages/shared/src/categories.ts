@@ -17,6 +17,14 @@ export interface CategoryDefinition {
 
 export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
   {
+    slug: 'restaurantes',
+    name: 'Restaurantes e onde comer',
+    shortName: 'Restaurantes',
+    icon: 'UtensilsCrossed',
+    description: 'Restaurantes, pizzarias, lanchonetes, cafés, bares e comida típica da região.',
+    keywords: ['restaurante', 'onde comer', 'comida', 'almoço', 'jantar', 'pizzaria', 'pizza', 'churrascaria', 'churrasco', 'rodízio', 'comida japonesa', 'japonês', 'sushi', 'hamburgueria', 'hambúrguer', 'lanchonete', 'lanche', 'café', 'cafeteria', 'padaria', 'confeitaria', 'bar', 'boteco', 'frutos do mar', 'peixe', 'comida típica', 'comida caseira', 'self-service', 'buffet por quilo', 'marmita', 'vegetariano', 'vegano', 'massas', 'italiana', 'árabe', 'mexicana', 'açaí', 'sorveteria', 'doceria', 'delivery'],
+  },
+  {
     slug: 'estetica-e-beleza',
     name: 'Estética e beleza',
     shortName: 'Estética',

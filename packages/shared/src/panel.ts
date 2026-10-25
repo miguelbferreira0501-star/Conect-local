@@ -153,6 +153,7 @@ export interface PanelRequestDTO {
   bookingMode: 'slot' | 'period' | 'day' | null;
   period: string | null;
   staffName: string | null;
+  partySize: number | null;
   customer: { name: string; email: string | null; phone: string | null } | null;
 }
 
@@ -196,6 +197,7 @@ export interface PanelAgendaItemDTO {
   serviceName: string;
   staffId: string | null;
   staffName: string | null;
+  partySize: number | null;
   customerName: string | null;
   customerPhone: string | null;
 }

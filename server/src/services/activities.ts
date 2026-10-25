@@ -52,6 +52,7 @@ export async function createBooking(userId: string, input: BookingRequestInput) 
       staffId,
       mode: avail.mode,
       period: avail.mode === 'period' ? slot.label : null,
+      partySize: input.partySize ?? null,
     });
     return { id: created.id, status: 'requested' as const, isDemoBusiness: biz.is_demo };
   });

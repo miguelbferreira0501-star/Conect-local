@@ -11,13 +11,13 @@ export const activitiesRepo = {
          SELECT bk.id, 'booking' AS type, bk.status, b.id AS business_id, b.slug AS business_slug, b.name AS business_name,
            b.logo_url, c.name AS category_name, b.is_demo, s.name AS service_name, s.id AS service_id, bk.starts_at,
            NULL::text AS preferred_date, bk.notes AS description, bk.created_at, bk.completed_at AS closed_at, r.id AS review_id, bk.business_note AS business_message,
-           bk.booking_mode, bk.period, st.name AS staff_name
+           bk.booking_mode, bk.period, st.name AS staff_name, bk.party_size
          FROM bookings bk JOIN businesses b ON b.id = bk.business_id JOIN categories c ON c.id = b.category_id
          JOIN services s ON s.id = bk.service_id LEFT JOIN reviews r ON r.booking_id = bk.id
          LEFT JOIN business_staff st ON st.id = bk.staff_id
          UNION ALL
          SELECT q.id, 'quote', q.status, b.id, b.slug, b.name, b.logo_url, c.name, b.is_demo, s.name, s.id, NULL,
-           q.preferred_date::text, q.description, q.created_at, q.hired_at, r.id, q.business_response, NULL, NULL, NULL
+           q.preferred_date::text, q.description, q.created_at, q.hired_at, r.id, q.business_response, NULL, NULL, NULL, NULL
          FROM quote_requests q JOIN businesses b ON b.id = q.business_id JOIN categories c ON c.id = b.category_id
          LEFT JOIN services s ON s.id = q.service_id LEFT JOIN reviews r ON r.quote_id = q.id
        ) a ORDER BY coalesce(a.starts_at, a.created_at) DESC`,
@@ -33,11 +33,11 @@ export const activitiesRepo = {
     (await query<{ id: string; status: string; business_id: string; service_id: string | null; hired_at: Date | null }>(
       `SELECT id, status, business_id, service_id, hired_at FROM quote_requests WHERE id = $1`, [id], db))[0] ?? null,
 
-  createBooking: async (db: Db, b: { businessId: string; serviceId: string; startsAt: Date; endsAt: Date; notes?: string; phone?: string; staffId: string | null; mode: string; period: string | null }) =>
+  createBooking: async (db: Db, b: { businessId: string; serviceId: string; startsAt: Date; endsAt: Date; notes?: string; phone?: string; staffId: string | null; mode: string; period: string | null; partySize: number | null }) =>
     (await query<{ id: string }>(
-      `INSERT INTO bookings (user_id, business_id, service_id, starts_at, ends_at, notes, contact_phone, staff_id, booking_mode, period)
-       VALUES (app.current_user_id(), $1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
-      [b.businessId, b.serviceId, b.startsAt, b.endsAt, b.notes || null, b.phone || null, b.staffId, b.mode, b.period], db))[0],
+      `INSERT INTO bookings (user_id, business_id, service_id, starts_at, ends_at, notes, contact_phone, staff_id, booking_mode, period, party_size)
+       VALUES (app.current_user_id(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
+      [b.businessId, b.serviceId, b.startsAt, b.endsAt, b.notes || null, b.phone || null, b.staffId, b.mode, b.period, b.partySize], db))[0],
 
   setBookingStatus: (db: Db, id: string, status: 'cancelled' | 'completed') =>
     query(

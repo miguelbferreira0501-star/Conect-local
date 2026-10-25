@@ -80,3 +80,36 @@ describe('agendas com profissionais', () => {
     expect(again.slots.some((s: { startsAt: string }) => s.startsAt === chosen.startsAt)).toBe(false);
   });
 });
+
+describe('restaurantes', () => {
+  it('busca por tipo de comida, seção "Onde comer" e reserva com número de pessoas', async () => {
+    resetRateLimits();
+    const pizza = (await call('GET', '/search?city=4209102&q=pizzaria')).body;
+    expect(pizza.total).toBeGreaterThan(0);
+    expect(pizza.items.every((b: { category: { slug: string } }) => b.category.slug === 'restaurantes')).toBe(true);
+    const japa = (await call('GET', '/search?city=4209102&q=comida japonesa')).body;
+    expect(japa.items[0].category.slug).toBe('restaurantes');
+
+    const home = (await call('GET', '/discover?city=4209102')).body;
+    expect(home.sections[0].id).toBe('restaurants');
+    expect(home.sections[0].title).toBe('Onde comer em Joinville');
+    const cats = (await call('GET', '/categories')).body;
+    expect(cats[0].slug).toBe('restaurantes');
+
+    const owner = await newUser();
+    const { body: biz } = await call('POST', '/panel/businesses', { ...base, name: 'Restaurante Teste', categorySlug: 'restaurantes', modeAtCustomer: false }, owner.cookie);
+    await call('PUT', `/panel/businesses/${biz.id}/hours`, allDays, owner.cookie);
+    const { body: svc } = await call('POST', `/panel/businesses/${biz.id}/services`, { name: 'Reserva de mesa', priceType: 'quote', durationMinutes: 120, bookable: true }, owner.cookie);
+    await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'Varanda', kind: 'resource' }, owner.cookie);
+    const detail = (await call('GET', `/businesses/${biz.slug}`)).body;
+    expect(detail.staffLabel).toBe('Mesa');
+    const slot = (await call('GET', `/businesses/${biz.id}/availability?serviceId=${svc.id}&date=${day(2)}`)).body.slots[0];
+    const c = await newUser();
+    expect((await call('POST', '/bookings', { businessId: biz.id, serviceId: svc.id, startsAt: slot.startsAt, partySize: 60 }, c.cookie)).status).toBe(422);
+    expect((await call('POST', '/bookings', { businessId: biz.id, serviceId: svc.id, startsAt: slot.startsAt, partySize: 4 }, c.cookie)).status).toBe(201);
+    expect((await call('GET', '/me/activities', undefined, c.cookie)).body[0].partySize).toBe(4);
+    const reqs = (await call('GET', `/panel/businesses/${biz.id}/requests`, undefined, owner.cookie)).body;
+    expect(reqs[0].partySize).toBe(4);
+    expect(reqs[0].staffName).toBe('Varanda');
+  });
+});

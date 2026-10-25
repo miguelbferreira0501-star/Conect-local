@@ -29,6 +29,7 @@ const HOURS: Record<CategoryTemplate['hours'], OpeningHours> = {
   extended: { '1': [['09:00', '19:00']], '2': [['09:00', '19:00']], '3': [['09:00', '19:00']], '4': [['09:00', '19:00']], '5': [['09:00', '19:00']], '6': [['09:00', '17:00']] },
   evening: { '0': [['09:00', '22:00']], '1': [['14:00', '23:00']], '2': [['14:00', '23:00']], '3': [['14:00', '23:00']], '4': [['14:00', '23:00']], '5': [['14:00', '23:00']], '6': [['09:00', '22:00']] },
   weekend: { '2': [['09:00', '18:00']], '3': [['09:00', '18:00']], '4': [['09:00', '18:00']], '5': [['09:00', '18:00']], '6': [['09:00', '16:00']] },
+  restaurant: { '0': [['11:30', '16:00']], '2': [['11:30', '15:00'], ['18:30', '23:30']], '3': [['11:30', '15:00'], ['18:30', '23:30']], '4': [['11:30', '15:00'], ['18:30', '23:30']], '5': [['11:30', '15:00'], ['18:30', '23:59']], '6': [['11:30', '16:00'], ['18:30', '23:59']] },
   appointment: { '1': [['09:00', '18:00']], '2': [['09:00', '18:00']], '3': [['09:00', '18:00']], '4': [['09:00', '18:00']], '5': [['09:00', '18:00']] },
 };
 
@@ -52,6 +53,19 @@ async function insertMany(client: pg.Client, table: string, columns: string[], r
   }
 }
 
+/** Categorias são dado do produto (não de demonstração): gravadas/atualizadas a cada inicialização. */
+export async function syncCategories(client: pg.Client) {
+  for (const [i, c] of CATEGORY_DEFINITIONS.entries()) {
+    await client.query(
+      `INSERT INTO categories (slug, name, short_name, icon, description, keywords, sort_order)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
+       ON CONFLICT (slug) DO UPDATE SET name=EXCLUDED.name, short_name=EXCLUDED.short_name, icon=EXCLUDED.icon,
+         description=EXCLUDED.description, keywords=EXCLUDED.keywords, sort_order=EXCLUDED.sort_order`,
+      [c.slug, c.name, c.shortName, c.icon, c.description, c.keywords, i],
+    );
+  }
+}
+
 export async function seedDemo(client: pg.Client, opts: { now?: Date; quiet?: boolean } = {}) {
   const now = opts.now ?? new Date();
   const rnd = mulberry32(20261024);
@@ -67,16 +81,7 @@ export async function seedDemo(client: pg.Client, opts: { now?: Date; quiet?: bo
 
   await client.query('BEGIN');
   try {
-    // Categorias (dado de produto, não de demonstração)
-    for (const [i, c] of CATEGORY_DEFINITIONS.entries()) {
-      await client.query(
-        `INSERT INTO categories (slug, name, short_name, icon, description, keywords, sort_order)
-         VALUES ($1,$2,$3,$4,$5,$6,$7)
-         ON CONFLICT (slug) DO UPDATE SET name=EXCLUDED.name, short_name=EXCLUDED.short_name, icon=EXCLUDED.icon,
-           description=EXCLUDED.description, keywords=EXCLUDED.keywords, sort_order=EXCLUDED.sort_order`,
-        [c.slug, c.name, c.shortName, c.icon, c.description, c.keywords, i],
-      );
-    }
+    await syncCategories(client);
     const catRows = (await client.query('SELECT id, slug FROM categories')).rows as Array<{ id: number; slug: string }>;
     const catId = new Map(catRows.map((r) => [r.slug, r.id]));
 
@@ -140,6 +145,9 @@ export async function seedDemo(client: pg.Client, opts: { now?: Date; quiet?: bo
         ]);
         // Serviços: 4 a 6 do modelo
         const pool = [...tpl.services].sort(() => rnd() - 0.5).slice(0, int(4, Math.min(6, tpl.services.length)));
+        // Restaurantes de exemplo sempre aceitam reserva de mesa.
+        const reservation = tpl.services.find((x) => x.name === 'Reserva de mesa');
+        if (reservation && !pool.includes(reservation)) pool.unshift(reservation);
         const svcs: Array<{ id: string; bookable: boolean; duration: number | null }> = [];
         pool.forEach((s, order) => {
           const sid = randomUUID();

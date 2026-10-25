@@ -22,7 +22,7 @@ export interface CategoryTemplate {
   descriptions: string[];
   modes: { in_person: boolean; at_customer: boolean; online: boolean };
   booking: boolean;
-  hours: 'commercial' | 'extended' | 'evening' | 'weekend' | 'appointment';
+  hours: 'commercial' | 'extended' | 'evening' | 'weekend' | 'appointment' | 'restaurant';
   priceLevels: number[];
   aspects: string[];
   phrases: { good: string[]; mid: string[]; bad: string[] };
@@ -61,6 +61,33 @@ const GENERIC = {
 const h = (n: number, extra: Partial<ServiceTemplate> = {}) => ({ duration: n, bookable: true, ...extra });
 
 export const CATEGORY_TEMPLATES: Record<string, CategoryTemplate> = {
+  restaurantes: {
+    names: [['Cantina Nonna Lúcia'], ['Sushi Kaigan'], ['Churrascaria Fogo de Chão Gaúcho'], ['Bistrô da Praça'], ['Boteco do Zé'], ['Peixaria Maré Alta'], ['Café & Pão Caseiro']],
+    services: [
+      { name: 'Reserva de mesa', description: 'Reserve sua mesa e chegue sem fila.', priceType: 'quote', duration: 120, bookable: true },
+      { name: 'Prato executivo (almoço)', priceType: 'fixed', min: 42 },
+      { name: 'Rodízio completo', priceType: 'fixed', min: 119 },
+      { name: 'Combinado de sushi (30 peças)', priceType: 'fixed', min: 98 },
+      { name: 'Pizza grande', priceType: 'from', min: 69 },
+      { name: 'Moqueca para dois', priceType: 'fixed', min: 158 },
+      { name: 'Café da manhã completo', priceType: 'fixed', min: 39 },
+      { name: 'Sobremesa da casa', priceType: 'fixed', min: 24 },
+    ],
+    descriptions: [
+      'Cozinha feita na hora com ingredientes frescos da região. Ambiente acolhedor para almoço com a família ou jantar com os amigos.',
+      'Um dos endereços preferidos de quem mora e de quem visita a cidade. Atendimento atencioso, porções generosas e opções vegetarianas.',
+    ],
+    modes: { in_person: true, at_customer: false, online: false },
+    booking: true,
+    hours: 'restaurant',
+    priceLevels: [1, 2, 2, 3, 4],
+    aspects: ['atendimento', 'qualidade', 'preco', 'pontualidade'],
+    phrases: {
+      good: ['Comida deliciosa e bem servida, voltaria com certeza.', 'Atendimento rápido e simpático, ambiente muito agradável.', 'Estava de passagem pela cidade e foi a melhor refeição da viagem.', 'Prato chegou quentinho e o tempero é caseiro de verdade.'],
+      mid: ['Comida boa, mas demorou bastante para chegar.', 'Gostei, mas o preço está um pouco alto para a porção.'],
+      bad: ['Esperamos mais de uma hora e a comida veio fria.', 'Reservei e mesmo assim não tinha mesa quando cheguei.'],
+    },
+  },
   'estetica-e-beleza': {
     names: [['Espaço Bem Cuidar'], ['Clínica Pele Leve'], ['Studio Lumina Estética'], ['Ateliê das Unhas'], ['Renova Estética Avançada'], ['Studio Camila Rocha', 'Camila Rocha'], ['Bella Forma Clínica']],
     services: [

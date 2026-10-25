@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { CalendarCheck, CalendarX2, CheckCircle2, Clock, UserRound } from 'lucide-react';
-import { formatDuration, formatServicePrice, PERIODS, type BusinessDetailDTO, type Period } from '@conecta/shared';
+import { formatDuration, formatServicePrice, isReservationCategory, PERIODS, type BusinessDetailDTO, type Period } from '@conecta/shared';
 import { api, ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useAvailability, useBusiness } from '@/lib/queries';
@@ -32,7 +32,7 @@ export function BookingPage() {
   if (error || !b) return <ErrorState error={error} />;
   return (
     <div>
-      <PageHeader title="Agendar horário" subtitle={b.name} />
+      <PageHeader title={isReservationCategory(b.category.slug) ? 'Reservar mesa' : 'Agendar horário'} subtitle={b.name} />
       <div className="container-app max-w-2xl py-5">
         <RequireAuth title="Entre para agendar" reason="Assim você acompanha o pedido em Atividades e pode avaliar a empresa depois do atendimento.">
           <BookingForm b={b} />
@@ -64,7 +64,9 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
   // Na diária, buscamos a lista de dias a partir de hoje.
   const avail = useAvailability(b.id, serviceId || undefined, mode === 'day' ? dates[0].iso : date, staffId);
   const chosen = avail.data?.slots.find((x) => x.startsAt === slot);
-  const step = (n: number) => (staffForService.length > 0 ? n + 1 : n);
+  const reservation = isReservationCategory(b.category.slug);
+  const [people, setPeople] = useState(2);
+  const step = (n: number) => (staffForService.length > 0 ? n + 1 : n) + (reservation ? 1 : 0);
   const label = b.staffLabel;
 
   if (!b.acceptsBooking || bookable.length === 0) {
@@ -80,7 +82,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
     return (
       <div className="card p-6 text-center">
         <CheckCircle2 className="mx-auto h-14 w-14 text-accent-600" aria-hidden="true" />
-        <h2 className="mt-3 text-xl font-semibold">Pedido de agendamento registrado</h2>
+        <h2 className="mt-3 text-xl font-semibold">{reservation ? 'Pedido de reserva registrado' : 'Pedido de agendamento registrado'}</h2>
         <p className="mt-2 text-muted"><strong className="text-ink">{service?.name}</strong> com {b.name}<br />{done.label}</p>
         <Alert tone="info" title="Aguardando confirmação da empresa">
           {mode === 'period' ? 'A empresa vai combinar com você o horário exato dentro do turno escolhido.' : 'O horário fica reservado para você enquanto a empresa confirma.'} Acompanhe o status em Atividades.
@@ -106,10 +108,10 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
     setSubmitting(true);
     setErr(null);
     try {
-      await api.post('/bookings', { businessId: b.id, serviceId, startsAt: chosen.startsAt, staffId, notes: notes || undefined, contactPhone: phone || undefined });
+      await api.post('/bookings', { businessId: b.id, serviceId, startsAt: chosen.startsAt, staffId, notes: notes || undefined, contactPhone: phone || undefined, partySize: reservation ? people : undefined });
       qc.invalidateQueries({ queryKey: ['activities'] });
       qc.invalidateQueries({ queryKey: ['availability'] });
-      setDone({ startsAt: chosen.startsAt, label: describe(chosen) + (staffId ? ` · com ${b.staff.find((s) => s.id === staffId)?.name}` : '') });
+      setDone({ startsAt: chosen.startsAt, label: describe(chosen) + (reservation ? ` · ${people} ${people === 1 ? 'pessoa' : 'pessoas'}` : '') + (staffId ? ` · ${reservation ? '' : 'com '}${b.staff.find((s) => s.id === staffId)?.name}` : '') });
       window.scrollTo({ top: 0 });
     } catch (e) {
       setErr(e as ApiError);
@@ -123,8 +125,20 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
 
   return (
     <div className="space-y-6">
+      {reservation && (
+        <section>
+          <h2 className="mb-2 font-semibold">1. Quantas pessoas?</h2>
+          <div className="flex items-center gap-3">
+            <button type="button" aria-label="Menos uma pessoa" disabled={people <= 1} onClick={() => setPeople(people - 1)} className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-line bg-white text-xl font-semibold disabled:opacity-40">−</button>
+            <span className="min-w-[90px] text-center text-lg font-semibold" aria-live="polite">{people} {people === 1 ? 'pessoa' : 'pessoas'}</span>
+            <button type="button" aria-label="Mais uma pessoa" disabled={people >= 50} onClick={() => setPeople(people + 1)} className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-line bg-white text-xl font-semibold disabled:opacity-40">+</button>
+          </div>
+          {people > 12 && <p className="mt-2 text-sm text-muted">Para grupos grandes, o restaurante pode pedir para confirmar por telefone.</p>}
+        </section>
+      )}
+
       <section>
-        <h2 className="mb-2 font-semibold">1. Escolha o serviço</h2>
+        <h2 className="mb-2 font-semibold">{reservation ? '2. Escolha a reserva' : '1. Escolha o serviço'}</h2>
         <div className="space-y-2" role="radiogroup" aria-label="Serviço">
           {bookable.map((s) => (
             <label key={s.id} className={`card flex cursor-pointer items-center gap-3 p-4 transition ${serviceId === s.id ? 'border-brand-700 ring-2 ring-brand-500/20' : 'hover:border-brand-200'}`}>
@@ -133,7 +147,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
                 <span className="block font-medium">{s.name}</span>
                 <span className="text-sm text-muted">{s.bookingMode === 'day' ? 'Diária' : s.bookingMode === 'period' ? 'Você escolhe o turno' : s.durationMinutes ? formatDuration(s.durationMinutes) : ''}</span>
               </span>
-              <span className="text-sm font-semibold">{formatServicePrice(s)}</span>
+              <span className="text-sm font-semibold">{reservation && s.priceType === 'quote' ? '' : formatServicePrice(s)}</span>
             </label>
           ))}
         </div>
@@ -141,7 +155,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
 
       {serviceId && staffForService.length > 0 && (
         <section>
-          <h2 className="mb-2 font-semibold">2. Escolha {label.toLowerCase().startsWith('quadra') || label.toLowerCase().startsWith('equipe') ? 'a' : 'o'} {label.toLowerCase()}</h2>
+          <h2 className="mb-2 font-semibold">{reservation ? '3' : '2'}. Escolha {/^(quadra|equipe|mesa)/.test(label.toLowerCase()) ? 'a' : 'o'} {label.toLowerCase()}</h2>
           <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={label}>
             <ChipToggle selected={staffId === null} onClick={() => { setStaffId(null); setSlot(''); }}>Sem preferência</ChipToggle>
             {staffForService.map((st) => (
@@ -236,7 +250,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
       <div className="sticky bottom-[64px] z-10 -mx-4 border-t border-line bg-white/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0">
         {chosen && <p className="mb-2 text-center text-sm font-medium">{describe(chosen)}</p>}
         <Button block size="lg" disabled={!chosen} loading={submitting} onClick={submit} icon={<CalendarCheck className="h-5 w-5" />}>
-          {chosen ? 'Solicitar agendamento' : mode === 'day' ? 'Escolha uma data' : mode === 'period' ? 'Escolha um turno' : 'Escolha um horário'}
+          {chosen ? (reservation ? 'Solicitar reserva' : 'Solicitar agendamento') : mode === 'day' ? 'Escolha uma data' : mode === 'period' ? 'Escolha um turno' : 'Escolha um horário'}
         </Button>
         <p className="mt-2 text-center text-xs text-muted">Você pode cancelar pelo app até o horário marcado.</p>
       </div>

@@ -122,7 +122,7 @@ function ActivityCard({ a }: { a: ActivityDTO }) {
           </div>
           <h3 className="mt-1 font-semibold"><Link to={`/empresa/${a.business.slug}`} className="hover:underline">{a.business.name}</Link></h3>
           <p className="text-sm text-muted">{a.serviceName ?? a.business.categoryName}</p>
-          <p className="mt-0.5 text-sm">{when}{a.staffName ? ` · com ${a.staffName}` : ''}</p>
+          <p className="mt-0.5 text-sm">{when}{a.partySize ? ` · ${a.partySize} ${a.partySize === 1 ? 'pessoa' : 'pessoas'}` : ''}{a.staffName ? ` · ${a.partySize ? '' : 'com '}${a.staffName}` : ''}</p>
           {a.type === 'quote' && a.status === 'sent' && <p className="mt-1 text-xs text-muted">A empresa responde pelo contato que você informou.</p>}
           {a.businessMessage && (
             <div className="mt-2 rounded-xl bg-surface p-3 text-sm">

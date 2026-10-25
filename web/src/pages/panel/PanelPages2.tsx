@@ -186,7 +186,7 @@ export function PanelAgendaPage() {
                 <li key={i.id} className="flex flex-wrap items-center gap-3 py-2.5">
                   <span className="w-20 font-semibold tabular-nums">{when(i)}</span>
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium">{i.serviceName}{i.staffName ? <span className="font-normal text-muted"> · {i.staffName}</span> : null}</p>
+                    <p className="font-medium">{i.serviceName}{i.partySize ? <span className="font-normal"> · {i.partySize} pessoas</span> : null}{i.staffName ? <span className="font-normal text-muted"> · {i.staffName}</span> : null}</p>
                     <p className="text-sm text-muted">{i.customerName ?? 'Cliente'}{i.customerPhone ? ` · ${i.customerPhone}` : ''}</p>
                   </div>
                   {i.status === 'requested' ? <Tag tone="warning">Aguardando você</Tag> : i.status === 'confirmed' ? <Tag tone="brand">Confirmado</Tag> : <Tag tone="accent">Realizado</Tag>}

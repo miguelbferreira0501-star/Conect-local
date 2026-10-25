@@ -101,6 +101,8 @@ export const bookingRequestSchema = z.object({
   serviceId: uuid,
   /** Profissional/recurso escolhido; ausente = sem preferência */
   staffId: uuid.nullable().optional(),
+  /** Reserva de restaurante: quantas pessoas */
+  partySize: z.coerce.number().int().min(1, 'Informe quantas pessoas.').max(50, 'Para grupos com mais de 50 pessoas, peça um orçamento.').optional(),
   startsAt: z.string().datetime({ offset: true, message: 'Horário inválido.' }),
   notes: z.string().trim().max(500, 'Use no máximo 500 caracteres.').optional(),
   contactPhone: phoneSchema.optional(),

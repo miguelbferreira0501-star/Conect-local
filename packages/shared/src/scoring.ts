@@ -216,6 +216,13 @@ export function buildDiscoverSections(scored: Scored[], cityName: string, nowDat
     .filter((s) => s.row.review_count >= 5)
     .sort((a, b) => b.ranking.bayesianRating - a.ranking.bayesianRating || tie(a, b))
     .slice(0, 8);
+  // Quem chega numa cidade nova quer saber onde comer: restaurantes primeiro, por nota ajustada.
+  const food = [...scored]
+    .filter((s) => s.row.cat_slug === 'restaurantes')
+    .sort((a, b) => b.ranking.bayesianRating - a.ranking.bayesianRating || tie(a, b))
+    .slice(0, 8);
+  if (food.length) sections.push({ id: 'restaurants', title: `Onde comer em ${city.name}`, subtitle: 'Restaurantes mais bem avaliados por quem foi', items: food.map((s) => toCard(s)) });
+
   if (topRated.length) sections.push({ id: 'top-rated', title: `Bem avaliadas em ${city.name}`, subtitle: 'Nota ajustada pela quantidade de avaliações', items: topRated.map((s) => toCard(s)) });
 
   const byCategory = new Map<string, Scored>();

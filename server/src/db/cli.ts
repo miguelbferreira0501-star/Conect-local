@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 import { env } from '../env';
 import { loadLocations } from './locations';
-import { seedDemo } from './seed';
+import { seedDemo, syncCategories } from './seed';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const migrationsDir = existsSync(join(here, 'migrations')) ? join(here, 'migrations') : join(here, '../migrations');
@@ -54,6 +54,7 @@ export async function deploy(client: pg.Client) {
   await migrate(client);
   const cities = (await client.query('SELECT count(*)::int AS n FROM cities')).rows[0].n;
   if (cities < 5000) await loadLocations(client);
+  await syncCategories(client);
   if (env.DEMO_MODE) {
     const n = (await client.query('SELECT count(*)::int AS n FROM businesses WHERE is_demo')).rows[0].n;
     if (n === 0) await seedDemo(client);
@@ -86,6 +87,7 @@ async function main() {
       await reset(client);
       await migrate(client);
       await loadLocations(client);
+      await syncCategories(client);
       if (env.DEMO_MODE) await seedDemo(client);
     } else {
       console.log('Uso: cli.ts migrate | deploy | locations | seed | reset');

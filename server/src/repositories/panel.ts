@@ -110,13 +110,13 @@ export const panelRepo = {
          SELECT bk.id, 'booking' AS type, bk.status, s.name AS service_name, bk.starts_at, NULL::text AS preferred_date, bk.notes AS description,
            NULL::text AS contact_preference, NULL::text AS neighborhood, bk.created_at, bk.business_note AS business_response,
            bk.contact_phone, cu.name AS customer_name, cu.email AS customer_email, cu.phone AS customer_phone,
-           bk.booking_mode, bk.period, st.name AS staff_name
+           bk.booking_mode, bk.period, st.name AS staff_name, bk.party_size
          FROM bookings bk JOIN services s ON s.id = bk.service_id LEFT JOIN business_staff st ON st.id = bk.staff_id
          LEFT JOIN LATERAL app.business_customer(bk.business_id, bk.user_id) cu ON true
          WHERE bk.business_id = $1
          UNION ALL
          SELECT q.id, 'quote', q.status, s.name, NULL, q.preferred_date::text, q.description, q.contact_preference, q.neighborhood, q.created_at,
-           q.business_response, q.contact_phone, cu.name, cu.email, cu.phone, NULL, NULL, NULL
+           q.business_response, q.contact_phone, cu.name, cu.email, cu.phone, NULL, NULL, NULL, NULL
          FROM quote_requests q LEFT JOIN services s ON s.id = q.service_id
          LEFT JOIN LATERAL app.business_customer(q.business_id, q.user_id) cu ON true
          WHERE q.business_id = $1
@@ -176,7 +176,7 @@ export const panelRepo = {
 
   agenda: (db: Db, businessId: string, from: Date, to: Date) =>
     query(
-      `SELECT bk.id, bk.status, bk.starts_at, bk.ends_at, bk.booking_mode, bk.period, s.name AS service_name, bk.staff_id, st.name AS staff_name,
+      `SELECT bk.id, bk.status, bk.starts_at, bk.ends_at, bk.booking_mode, bk.period, s.name AS service_name, bk.staff_id, st.name AS staff_name, bk.party_size,
          cu.name AS customer_name, coalesce(bk.contact_phone, cu.phone) AS customer_phone
        FROM bookings bk JOIN services s ON s.id = bk.service_id LEFT JOIN business_staff st ON st.id = bk.staff_id
        LEFT JOIN LATERAL app.business_customer(bk.business_id, bk.user_id) cu ON true

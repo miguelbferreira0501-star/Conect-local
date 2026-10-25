@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { ChevronDown, ChevronRight, MapPin, MapPinOff, ShieldCheck, User } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronDown, ChevronRight, LayoutGrid, MapPin, MapPinOff, ShieldCheck, User } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useUserLocation } from '@/lib/location';
 import { fetchCity, useCategories, useDiscover, useSearch } from '@/lib/queries';
@@ -10,12 +11,14 @@ import { SearchBox } from '@/components/SearchBox';
 import { Button } from '@/components/ui/Button';
 import { CardSkeleton, EmptyState, ErrorState, Skeleton } from '@/components/ui/Feedback';
 import { useFirstRunLocation } from '@/hooks/useFirstRunLocation';
+import { Sheet } from '@/components/ui/Sheet';
 
 export function HomePage() {
   const { city, openPicker } = useUserLocation();
   const { user } = useAuth();
   const categories = useCategories();
   const discover = useDiscover(city?.ibge);
+  const [allOpen, setAllOpen] = useState(false);
   useFirstRunLocation();
 
   return (
@@ -61,7 +64,7 @@ export function HomePage() {
             <ErrorState error={categories.error} onRetry={() => categories.refetch()} />
           ) : (
             <ul className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-6">
-              {categories.data?.map((c) => (
+              {(categories.data!.length > 12 ? categories.data!.slice(0, 11) : categories.data!).map((c) => (
                 <li key={c.slug}>
                   <Link to={`/categoria/${c.slug}`} className="flex h-full min-h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border border-line bg-white p-2.5 text-center transition hover:border-brand-200 hover:bg-brand-50" title={c.name}>
                     <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><CategoryIcon icon={c.icon} /></span>
@@ -69,15 +72,60 @@ export function HomePage() {
                   </Link>
                 </li>
               ))}
+              {categories.data!.length > 12 && (
+                <li>
+                  <button onClick={() => setAllOpen(true)} className="flex h-full min-h-[92px] w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-brand-200 bg-white p-2.5 text-center transition hover:bg-brand-50">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-surface text-brand-700"><LayoutGrid className="h-6 w-6" aria-hidden="true" /></span>
+                    <span className="text-[13px] font-medium leading-tight">Ver todas</span>
+                  </button>
+                </li>
+              )}
             </ul>
           )}
         </section>
+
+        <Sheet open={allOpen} onClose={() => setAllOpen(false)} title="Todas as categorias">
+          <ul className="divide-y divide-line">
+            {categories.data?.map((c) => (
+              <li key={c.slug}>
+                <Link to={`/categoria/${c.slug}`} className="flex min-h-[56px] items-center gap-3 py-2 hover:text-brand-700">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><CategoryIcon icon={c.icon} className="h-5 w-5" /></span>
+                  <span><span className="block font-medium">{c.name}</span><span className="text-sm text-muted">{c.description}</span></span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Sheet>
 
         {city && discover.isLoading && (
           <div className="grid gap-3 md:grid-cols-3">{[0, 1, 2].map((i) => <CardSkeleton key={i} />)}</div>
         )}
         {city && discover.isError && <ErrorState error={discover.error} onRetry={() => discover.refetch()} />}
         {city && discover.data && discover.data.totalBusinesses === 0 && <NoBusinessesHere />}
+
+        {discover.data?.sections.map((s) => (
+          <section key={s.id} aria-labelledby={`sec-${s.id}`}>
+            <div className="mb-3 flex items-end justify-between gap-3">
+              <div>
+                <h2 id={`sec-${s.id}`} className="section-title">{s.title}</h2>
+                {s.subtitle && <p className="text-sm text-muted">{s.subtitle}</p>}
+              </div>
+              {s.id === 'restaurants' && (
+                <Link to="/categoria/restaurantes?ordem=rating" className="inline-flex min-h-[44px] shrink-0 items-center text-sm font-semibold text-brand-700 hover:underline">
+                  Ver todos <ChevronRight className="h-4 w-4" />
+                </Link>
+              )}
+              {s.id === 'top-rated' && (
+                <Link to="/buscar?ordem=rating" className="inline-flex min-h-[44px] shrink-0 items-center text-sm font-semibold text-brand-700 hover:underline">
+                  Ver todas <ChevronRight className="h-4 w-4" />
+                </Link>
+              )}
+            </div>
+            <div className="scroll-row md:grid md:grid-cols-3 md:overflow-visible xl:grid-cols-4">
+              {s.items.slice(0, 8).map((b) => <BusinessCard key={b.id} b={b} layout="compact" />)}
+            </div>
+          </section>
+        ))}
 
         {discover.data?.popularServices && discover.data.popularServices.length > 0 && (
           <section aria-labelledby="pop-title">
@@ -94,25 +142,6 @@ export function HomePage() {
             </ul>
           </section>
         )}
-
-        {discover.data?.sections.map((s) => (
-          <section key={s.id} aria-labelledby={`sec-${s.id}`}>
-            <div className="mb-3 flex items-end justify-between gap-3">
-              <div>
-                <h2 id={`sec-${s.id}`} className="section-title">{s.title}</h2>
-                {s.subtitle && <p className="text-sm text-muted">{s.subtitle}</p>}
-              </div>
-              {s.id === 'top-rated' && (
-                <Link to="/buscar?ordem=rating" className="inline-flex min-h-[44px] shrink-0 items-center text-sm font-semibold text-brand-700 hover:underline">
-                  Ver todas <ChevronRight className="h-4 w-4" />
-                </Link>
-              )}
-            </div>
-            <div className="scroll-row md:grid md:grid-cols-3 md:overflow-visible xl:grid-cols-4">
-              {s.items.slice(0, 8).map((b) => <BusinessCard key={b.id} b={b} layout="compact" />)}
-            </div>
-          </section>
-        ))}
 
         <section className="card flex flex-col gap-3 p-5 md:flex-row md:items-center">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-700"><ShieldCheck className="h-6 w-6" /></span>
