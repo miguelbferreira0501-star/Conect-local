@@ -74,6 +74,12 @@ async function request<T>(method: string, path: string, body?: unknown, retried 
     const msg = data.errors?.[0]?.description;
     // 401 = chave de outro ambiente (ex.: "A chave de API informada não pertence a este ambiente"). Nada foi criado: tenta no outro.
     if (res.status === 401 && !retried && switchEnvironment()) return request<T>(method, path, body, true);
+    if (res.status === 401) {
+      console.error('Asaas 401', path, msg, '| ambiente:', resolved?.name, '| começo da chave:', (env.ASAAS_API_KEY ?? '').trim().slice(0, 11));
+      throw new AppError(503, 'billing_unavailable', retried
+        ? 'A chave do Asaas foi recusada em produção e em testes. Gere uma chave nova no Asaas (Integrações → Chave de API) e cole de novo em ASAAS_API_KEY, sem espaços.'
+        : `A chave do Asaas foi recusada (${resolved?.name ?? 'ambiente desconhecido'}): ${msg ?? 'sem detalhes'}`);
+    }
     console.error('Asaas', res.status, path, msg);
     throw new AppError(res.status >= 500 ? 503 : 422, 'billing_error', msg ? `Meio de pagamento: ${msg}` : 'O meio de pagamento recusou o pedido.');
   }
