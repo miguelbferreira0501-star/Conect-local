@@ -83,3 +83,38 @@ export function formatPhoneBR(digits: string): string {
   if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
   return digits;
 }
+
+/** Preço de referência de um serviço (para comparar com a cidade). Orçamento não entra. */
+export function serviceReferenceCents(s: { priceType: PriceType; priceMinCents: number | null; priceMaxCents: number | null }): number | null {
+  if (s.priceType === 'quote' || s.priceMinCents == null) return null;
+  if (s.priceType === 'range' && s.priceMaxCents != null) return Math.round((s.priceMinCents + s.priceMaxCents) / 2);
+  return s.priceMinCents;
+}
+
+/** Mediana de preço do mesmo serviço na cidade (só com 3+ empresas, para não expor concorrente). */
+export interface CityPriceRef {
+  medianCents: number;
+  businesses: number;
+}
+
+export const CITY_PRICE_MIN_BUSINESSES = 3;
+
+export type PriceComparison = { tone: 'below' | 'average' | 'above'; label: string };
+
+export function comparePriceWithCity(
+  s: { priceType: PriceType; priceMinCents: number | null; priceMaxCents: number | null },
+  ref: CityPriceRef | null | undefined,
+): PriceComparison | null {
+  const own = serviceReferenceCents(s);
+  if (own == null || !ref || ref.businesses < CITY_PRICE_MIN_BUSINESSES || ref.medianCents <= 0) return null;
+  const ratio = own / ref.medianCents;
+  if (ratio <= 0.9) return { tone: 'below', label: 'Abaixo da média da cidade' };
+  if (ratio >= 1.15) return { tone: 'above', label: 'Acima da média da cidade' };
+  return { tone: 'average', label: 'Na média da cidade' };
+}
+
+export function median(values: number[]): number {
+  const v = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(v.length / 2);
+  return v.length % 2 ? v[mid] : Math.round((v[mid - 1] + v[mid]) / 2);
+}

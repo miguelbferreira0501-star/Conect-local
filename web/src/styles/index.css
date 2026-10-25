@@ -29,3 +29,12 @@
 }
 
 .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+
+/* Cartaz do painel ("Divulgar"): imprime só o cartaz, grande e centralizado. */
+@media print {
+  body * { visibility: hidden; }
+  #print-poster, #print-poster * { visibility: visible; }
+  #print-poster { position: absolute; inset: 0; margin: 0 auto; max-width: none; border: 0; box-shadow: none; padding-top: 3rem; }
+  #print-poster h2 { font-size: 2.5rem; }
+  #print-poster [role='img'] { width: 22rem; }
+}

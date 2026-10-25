@@ -4,7 +4,7 @@ import {
   ArrowLeft, CalendarCheck, Clock, ExternalLink, Flag, Globe, Instagram, Mail, MapPin, MessageCircle, Phone, ShieldCheck, Share2, Star, Store, Truck, Wifi,
 } from 'lucide-react';
 import {
-  BADGES, describeDayHours, formatDuration, formatPhoneBR, formatRating, formatServicePrice, isOpenAt, PRICE_LEVEL_LABELS, REPORT_REASONS, REVIEW_ASPECT_LABELS,
+  BADGES, comparePriceWithCity, formatCents, describeDayHours, formatDuration, formatPhoneBR, formatRating, formatServicePrice, isOpenAt, PRICE_LEVEL_LABELS, REPORT_REASONS, REVIEW_ASPECT_LABELS,
   relativeTime, reviewCountLabel, WEEKDAY_NAMES, type BusinessDetailDTO, type ReviewAspect, type ServiceMode,
 } from '@conecta/shared';
 import { BRAND, isReservationCategory } from '@conecta/shared';
@@ -36,6 +36,20 @@ export function priceLabel(s: BusinessDetailDTO['services'][number], reservation
   if (s.priceType === 'fixed' && s.priceMinCents === 0) return 'Gratuito';
   if (reservation && s.bookable && s.priceType === 'quote') return '';
   return formatServicePrice(s);
+}
+
+const PRICE_TONE = { below: 'bg-accent-50 text-accent-700', average: 'bg-surface text-muted', above: 'bg-warning-50 text-warning-700' } as const;
+
+/** "Preço justo": compara com a mediana do mesmo serviço na cidade (3+ empresas). */
+function CityPriceTag({ s }: { s: BusinessDetailDTO['services'][number] }) {
+  const cmp = comparePriceWithCity(s, s.cityPrice);
+  if (!cmp || !s.cityPrice) return null;
+  return (
+    <p className="mt-1 flex flex-col items-end gap-0.5">
+      <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${PRICE_TONE[cmp.tone]}`}>{cmp.label}</span>
+      <span className="text-xs text-muted">Média: {formatCents(s.cityPrice.medianCents)} ({s.cityPrice.businesses} empresas)</span>
+    </p>
+  );
 }
 
 function hasContact(b: BusinessDetailDTO) {
@@ -295,7 +309,10 @@ function Services({ b }: { b: BusinessDetailDTO }) {
               </p>
               {s.notes && <p className="mt-1 text-sm text-ink/80">{s.notes}</p>}
             </div>
-            <p className="text-right font-semibold">{priceLabel(s, isReservationCategory(b.category.slug))}</p>
+            <div className="text-right">
+              <p className="font-semibold">{priceLabel(s, isReservationCategory(b.category.slug))}</p>
+              <CityPriceTag s={s} />
+            </div>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             {s.bookable && b.acceptsBooking && <ButtonLink size="sm" to={`/empresa/${b.slug}/agendar?servico=${s.id}`}>{isReservationCategory(b.category.slug) ? 'Reservar' : 'Agendar'}</ButtonLink>}

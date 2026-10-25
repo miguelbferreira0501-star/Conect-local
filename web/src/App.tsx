@@ -24,6 +24,7 @@ const PanelStaffPage = lazy(() => panel2().then((m) => ({ default: m.PanelStaffP
 const PanelAgendaPage = lazy(() => panel2().then((m) => ({ default: m.PanelAgendaPage })));
 const PanelAssistantPage = lazy(() => panel2().then((m) => ({ default: m.PanelAssistantPage })));
 const PanelPlanPage = lazy(() => panel2().then((m) => ({ default: m.PanelPlanPage })));
+const PanelPromotePage = lazy(() => import('./pages/panel/PanelPromote').then((m) => ({ default: m.PanelPromotePage })));
 const AdminPage = lazy(() => import('./pages/panel/AdminPage').then((m) => ({ default: m.AdminPage })));
 
 // Telas menos acessadas são carregadas sob demanda (bom para celulares de entrada).
@@ -64,6 +65,7 @@ export function App() {
             <Route path="equipe" element={<PanelStaffPage />} />
             <Route path="agenda" element={<PanelAgendaPage />} />
             <Route path="assistente" element={<PanelAssistantPage />} />
+            <Route path="divulgar" element={<PanelPromotePage />} />
             <Route path="plano" element={<PanelPlanPage />} />
           </Route>
         </Route>

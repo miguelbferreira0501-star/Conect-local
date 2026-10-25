@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Bot, CalendarClock, CalendarDays, Clock, Crown, ExternalLink, Image, LayoutDashboard, ListChecks, Star, Store, Users } from 'lucide-react';
+import { ArrowLeft, Bot, CalendarClock, CalendarDays, Clock, Crown, ExternalLink, Image, LayoutDashboard, ListChecks, QrCode, Star, Store, Users } from 'lucide-react';
 import { useMyBusinesses, usePanelBusiness, usePanelRequests } from '@/lib/panelQueries';
 import { Logo } from '@/components/Layout';
 import { RequireAuth } from '@/components/RequireAuth';
@@ -31,6 +31,7 @@ const TABS = [
   { to: 'pedidos', label: 'Pedidos', Icon: CalendarClock },
   { to: 'agenda', label: 'Agenda', Icon: CalendarDays },
   { to: 'assistente', label: 'Assistente IA', Icon: Bot },
+  { to: 'divulgar', label: 'Divulgar', Icon: QrCode },
   { to: 'perfil', label: 'Perfil', Icon: Store },
   { to: 'servicos', label: 'Serviços', Icon: ListChecks },
   { to: 'equipe', label: 'Equipe', Icon: Users },

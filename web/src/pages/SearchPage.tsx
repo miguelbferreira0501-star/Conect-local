@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/Button';
 import { CardSkeleton, EmptyState, ErrorState } from '@/components/ui/Feedback';
 import { Checkbox, ChipToggle, TextField } from '@/components/ui/Form';
 import { Sheet } from '@/components/ui/Sheet';
+import { InviteBusiness } from '@/components/InviteBusiness';
 
 /** Filtros ficam na URL: a busca pode ser compartilhada e o botão voltar funciona. */
 function useFilters() {
@@ -163,6 +164,7 @@ export function SearchPage() {
                 <Button variant="secondary" loading={query.isFetchingNextPage} onClick={() => query.fetchNextPage()}>Mostrar mais resultados</Button>
               </div>
             )}
+            {first && !query.hasNextPage && <div className="mt-6"><InviteBusiness cityName={city.name} compact /></div>}
           </>
         )}
       </div>

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bot, CalendarDays, Check, Copy, Crown, Lightbulb, ListPlus, MessageSquareText, PenLine, Plus, Send, Trash2, UserRound, Users } from 'lucide-react';
+import { Bot, CalendarDays, Check, Copy, Crown, Lightbulb, ListPlus, MessageCircle, MessageSquareText, PenLine, Plus, Send, Trash2, UserRound, Users } from 'lucide-react';
 import {
-  bookingProfile, checkoutSchema, formatCents, PERIODS, PLANS, WEEKDAY_NAMES, type AiTask, type BillingStatusDTO, type CheckoutResultDTO, type PanelAgendaItemDTO, type PanelBusinessDTO, type PanelStaffDTO, type Period, type PlanId,
+  bookingProfile, checkoutSchema, reminderMessage, reviewRequestMessage, whatsappLink, formatCents, PERIODS, PLANS, WEEKDAY_NAMES, type AiTask, type BillingStatusDTO, type CheckoutResultDTO, type PanelAgendaItemDTO, type PanelBusinessDTO, type PanelStaffDTO, type Period, type PlanId,
 } from '@conecta/shared';
 import { api, ApiError } from '@/lib/api';
 import { streamAssistant } from '@/lib/ai';
@@ -192,6 +192,7 @@ export function PanelAgendaPage() {
                     <p className="text-sm text-muted">{i.customerName ?? 'Cliente'}{i.customerPhone ? ` · ${i.customerPhone}` : ''}</p>
                   </div>
                   {i.status === 'requested' ? <Tag tone="warning">Aguardando você</Tag> : i.status === 'confirmed' ? <Tag tone="brand">Confirmado</Tag> : <Tag tone="accent">Realizado</Tag>}
+                  <AgendaWhatsApp item={i} biz={b} />
                 </li>
               ))}
             </ul>
@@ -199,6 +200,22 @@ export function PanelAgendaPage() {
         ))
       )}
     </div>
+  );
+}
+
+/** Lembrete (antes) ou pedido de avaliação (depois), com mensagem pronta no WhatsApp da empresa. */
+function AgendaWhatsApp({ item: i, biz }: { item: PanelAgendaItemDTO; biz: PanelBusinessDTO }) {
+  const upcoming = new Date(i.endsAt).getTime() > Date.now();
+  if (i.status === 'requested' && !upcoming) return null;
+  const text = upcoming
+    ? reminderMessage({ businessName: biz.name, customerName: i.customerName, serviceName: i.serviceName, startsAt: i.startsAt, mode: i.mode, period: i.period, partySize: i.partySize })
+    : reviewRequestMessage(biz.name, i.customerName, `${window.location.origin}/empresa/${biz.slug}`);
+  const href = whatsappLink(i.customerPhone, text);
+  if (!href) return null;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-line bg-white px-3 text-sm font-semibold text-brand-700 hover:bg-surface">
+      <MessageCircle className="h-4 w-4" aria-hidden="true" />{upcoming ? 'Enviar lembrete' : 'Pedir avaliação'}
+    </a>
   );
 }
 

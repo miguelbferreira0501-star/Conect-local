@@ -21,6 +21,8 @@ export async function businessDetail(slug: string, userId: string | null): Promi
     const aspects = await businessesRepo.aspectAverages(row.id, db);
     const isFavorite = userId ? await favoritesRepo.isFavorite(db, row.id) : false;
     const staff = await businessesRepo.staff(row.id, db);
+    const priceRefs = await businessesRepo.cityPriceRefs(row.city_ibge, row.cat_slug, services.map((s) => s.name as string), db);
+    const refByName = new Map(priceRefs.map((p) => [p.name, { medianCents: p.median, businesses: p.n }]));
     const card = toCard(scored);
     return {
       ...card,
@@ -45,7 +47,7 @@ export async function businessDetail(slug: string, userId: string | null): Promi
         facebook: row.facebook,
         email: row.email,
       },
-      services: services as BusinessDetailDTO['services'],
+      services: services.map((s) => ({ ...s, cityPrice: refByName.get(s.name as string) ?? null })) as BusinessDetailDTO['services'],
       photos: photos as BusinessDetailDTO['photos'],
       ratingDistribution: distribution,
       aspectAverages: aspects,

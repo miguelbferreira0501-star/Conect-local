@@ -1,7 +1,7 @@
 /** Contratos de dados da API (compartilhados entre servidor, app e futuro painel empresarial). */
 import type { BadgeId } from './badges';
 import type { OpeningHours } from './hours';
-import type { PriceType } from './format';
+import type { CityPriceRef, PriceType } from './format';
 import type { ReviewAspect, ServiceMode } from './schemas';
 
 export interface StateDTO { uf: string; name: string; region: string }
@@ -72,6 +72,8 @@ export interface ServiceDTO {
   bookable: boolean;
   bookingMode: 'slot' | 'period' | 'day';
   notes: string | null;
+  /** Mediana do mesmo serviço na cidade (3+ empresas), para o cliente saber se o preço é justo. */
+  cityPrice?: CityPriceRef | null;
 }
 
 export interface PublicStaffDTO {

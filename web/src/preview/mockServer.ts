@@ -6,7 +6,7 @@
  */
 import {
   ACTIVITY_LIMITS, BRAND, RANKING_PARAMS, REVIEW_RULES, bookingProfile, bookingRequestSchema, buildDiscoverSections, computeAvailability,
-  haversineKm, hoursAreFresh, localDateOf, loginSchema, normalize, profileUpdateSchema, publicAuthorName, quoteRequestSchema, registerSchema,
+  CITY_PRICE_MIN_BUSINESSES, median, serviceReferenceCents, haversineKm, hoursAreFresh, localDateOf, loginSchema, normalize, profileUpdateSchema, publicAuthorName, quoteRequestSchema, registerSchema,
   reviewInputSchema, reviewReportSchema, reviewUpdateSchema, scoreRows, searchQuerySchema, sortScored, toActivityDTO, toCard,
   type ActivityRow, type BusinessRow, type CityDTO, type SuggestionDTO,
 } from '@conecta/shared';
@@ -133,6 +133,20 @@ function rowFor(b: Json, cityIbge: number): BusinessRow {
     service_names: svcs.map((s) => s.name), services_count: svcs.length,
     services_with_price: svcs.filter((s) => s.price_type !== 'quote').length, has_bookable: svcs.some((s) => s.bookable), photos_count: 0,
   } as BusinessRow;
+}
+
+function cityPriceFor(b: Json, name: string) {
+  const key = normalize(name);
+  const perBiz = new Map<string, number>();
+  for (const o of businesses) {
+    if (o.city_ibge !== b.city_ibge || o.category_id !== b.category_id) continue;
+    for (const s of servicesByBiz.get(o.id) ?? []) {
+      if (normalize(s.name) !== key) continue;
+      const ref = serviceReferenceCents({ priceType: s.price_type, priceMinCents: s.price_min_cents, priceMaxCents: s.price_max_cents });
+      if (ref != null && !perBiz.has(o.id)) perBiz.set(o.id, ref);
+    }
+  }
+  return perBiz.size >= CITY_PRICE_MIN_BUSINESSES ? { medianCents: median([...perBiz.values()]), businesses: perBiz.size } : null;
 }
 
 function globalMean() {
@@ -309,7 +323,7 @@ export async function handle(method: string, fullPath: string, body: Json): Prom
         contact: { phone: b.phone, whatsapp: b.whatsapp, website: b.website, instagram: b.instagram, facebook: b.facebook, email: b.email },
         services: (servicesByBiz.get(b.id) ?? []).map((s) => ({
           id: s.id, name: s.name, description: s.description, priceType: s.price_type, priceMinCents: s.price_min_cents, priceMaxCents: s.price_max_cents,
-          durationMinutes: s.duration_minutes, bookable: s.bookable, bookingMode: 'slot', notes: s.notes,
+          durationMinutes: s.duration_minutes, bookable: s.bookable, bookingMode: 'slot', notes: s.notes, cityPrice: cityPriceFor(b, s.name),
         })),
         photos: [],
         staff: [],

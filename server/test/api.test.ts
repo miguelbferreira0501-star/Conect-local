@@ -52,6 +52,17 @@ describe('localidades e busca', () => {
     for (const b of r.body.items) expect(['servesCity', 'establishmentInCity']).toContain(b.locationMatch);
   });
 
+  it('preço justo: compara com a mediana do mesmo serviço na cidade (3+ empresas)', async () => {
+    const biz = (await call('GET', '/businesses/espaco-bem-cuidar-joinville')).body;
+    const withRef = biz.services.filter((s: { cityPrice: unknown }) => s.cityPrice);
+    expect(withRef.length).toBeGreaterThan(0);
+    for (const s of withRef) {
+      expect(s.cityPrice.businesses).toBeGreaterThanOrEqual(3);
+      expect(s.cityPrice.medianCents).toBeGreaterThan(0);
+    }
+    for (const s of biz.services.filter((x: { priceType: string }) => x.priceType === 'quote')) expect(s.cityPrice).toBeNull();
+  });
+
   it('valida parâmetros inválidos', async () => {
     expect((await call('GET', '/search?city=123')).status).toBe(422);
   });

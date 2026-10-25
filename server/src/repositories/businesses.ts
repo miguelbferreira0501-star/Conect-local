@@ -89,6 +89,22 @@ export const businessesRepo = {
     return rows[0] ?? null;
   },
 
+  /** Mediana de preço, na cidade e categoria, dos serviços com estes nomes (só com 3+ empresas). */
+  cityPriceRefs: (cityIbge: number, catSlug: string, names: string[], db?: Db) =>
+    query<{ name: string; median: number; n: number }>(
+      `SELECT x.name,
+         round(percentile_cont(0.5) WITHIN GROUP (ORDER BY CASE WHEN s.price_type = 'range' AND s.price_max_cents IS NOT NULL
+           THEN (s.price_min_cents + s.price_max_cents) / 2.0 ELSE s.price_min_cents END))::int AS median,
+         count(DISTINCT s.business_id)::int AS n
+       FROM unnest($3::text[]) AS x(name)
+       JOIN services s ON app.norm(s.name) = app.norm(x.name) AND s.active AND s.price_type <> 'quote' AND s.price_min_cents IS NOT NULL
+       JOIN businesses b ON b.id = s.business_id AND b.status = 'active' AND b.city_ibge = $1
+       JOIN categories c ON c.id = b.category_id AND c.slug = $2
+       GROUP BY x.name HAVING count(DISTINCT s.business_id) >= 3`,
+      [cityIbge, catSlug, names],
+      db,
+    ),
+
   services: (businessId: string, db?: Db) =>
     query(
       `SELECT id, name, description, price_type AS "priceType", price_min_cents AS "priceMinCents",
