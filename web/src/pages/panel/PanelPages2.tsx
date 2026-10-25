@@ -57,8 +57,10 @@ export function PanelStaffPage() {
       <div className="card p-5">
         <h2 className="font-semibold">{profile.staffLabelPlural} e agendas</h2>
         <p className="mt-1 text-sm text-muted">
-          Cada {profile.staffLabel.toLowerCase()} tem a própria agenda: dois clientes podem marcar o mesmo horário com pessoas (ou {profile.staffKind === 'resource' ? 'quadras/salas' : 'recursos'}) diferentes.
-          O cliente pode escolher ou marcar “sem preferência”. Sem ninguém cadastrado, a empresa tem uma agenda única.
+          {profile.staffLabel === 'Mesa'
+            ? <>Cadastre suas mesas ou ambientes (ex.: “Mesa 4 lugares”, “Varanda”). Cada um tem a própria agenda: várias reservas no mesmo horário, uma por mesa. O cliente pode escolher ou marcar “sem preferência”. Sem nada cadastrado, o restaurante aceita uma reserva por horário.</>
+            : <>Cada {profile.staffLabel.toLowerCase()} tem a própria agenda: dois clientes podem marcar o mesmo horário com pessoas (ou {profile.staffKind === 'resource' ? 'quadras/salas' : 'recursos'}) diferentes.
+          O cliente pode escolher ou marcar “sem preferência”. Sem ninguém cadastrado, a empresa tem uma agenda única.</>}
         </p>
         <p className="mt-2 text-sm">Seu plano ({plan.name}) permite <strong>{plan.maxStaff}</strong> {plan.maxStaff === 1 ? 'agenda' : 'agendas'}. <Link to="../plano" className="font-semibold text-brand-700 hover:underline">Ver planos</Link></p>
       </div>
