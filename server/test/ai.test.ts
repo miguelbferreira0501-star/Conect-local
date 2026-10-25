@@ -15,6 +15,11 @@ beforeAll(async () => {
     req.on('data', (c) => (raw += c));
     req.on('end', () => {
       lastBody = JSON.parse(raw);
+      if (!lastBody.stream) {
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ id: 'msg_t', type: 'message', role: 'assistant', model: lastBody.model, content: [{ type: 'text', text: 'ok' }], stop_reason: 'end_turn', stop_sequence: null, usage: { input_tokens: 10, output_tokens: 2 } }));
+        return;
+      }
       res.writeHead(200, { 'content-type': 'text/event-stream' });
       const send = (event: string, data: object) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
       send('message_start', { type: 'message_start', message: { id: 'msg_1', type: 'message', role: 'assistant', model: lastBody.model, content: [], stop_reason: null, stop_sequence: null, usage: { input_tokens: 812, output_tokens: 1 } } });
@@ -105,5 +110,21 @@ describe('assistente de IA', () => {
     const second = await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'Bia', kind: 'person' }, owner.cookie);
     expect(second.status).toBe(402);
     expect(second.body.error.message).toMatch(/plano Grátis/);
+  });
+});
+
+describe('diagnóstico da IA (admin)', () => {
+  it('só administrador vê; o teste faz um pedido mínimo e confirma que funciona', async () => {
+    const admin = await newUser('Admin IA');
+    expect((await call('GET', '/admin/ai-status', undefined, admin.cookie)).status).toBe(403);
+    const db = new pg.Client({ connectionString: process.env.DATABASE_OWNER_URL });
+    await db.connect();
+    await db.query(`UPDATE users SET role = 'admin' WHERE id = $1`, [admin.id]);
+    await db.end();
+    expect((await call('GET', '/admin/ai-status', undefined, admin.cookie)).body.status).toBe('unknown');
+    const r = (await call('GET', '/admin/ai-status?test=1', undefined, admin.cookie)).body;
+    expect(r.status).toBe('ok');
+    expect(lastBody.max_tokens).toBe(256);
+    expect(lastBody.fallbacks).toBe('default');
   });
 });

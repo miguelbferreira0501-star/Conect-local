@@ -1,4 +1,4 @@
-import { BOOKING_RULES, bookingProfile, computeAvailability, hoursAreFresh, type BusinessDetailDTO, type ReviewDTO } from '@conecta/shared';
+import { BOOKING_RULES, bookingProfile, computeAvailability, effectivePlan, hoursAreFresh, staffWithinPlan, type PlanId, type BusinessDetailDTO, type ReviewDTO } from '@conecta/shared';
 import { withUser, type Db } from '../db/pool';
 import { AppError, notFound } from '../lib/errors';
 import { zonedToUtc } from '../lib/time';
@@ -20,7 +20,8 @@ export async function businessDetail(slug: string, userId: string | null): Promi
     const distribution = await businessesRepo.ratingDistribution(row.id, db);
     const aspects = await businessesRepo.aspectAverages(row.id, db);
     const isFavorite = userId ? await favoritesRepo.isFavorite(db, row.id) : false;
-    const staff = await businessesRepo.staff(row.id, db);
+    const r = row as typeof row & { plan: PlanId; plan_until: Date | null };
+    const staff = staffWithinPlan(await businessesRepo.staff(row.id, db), effectivePlan(r.plan, r.plan_until));
     const priceRefs = await businessesRepo.cityPriceRefs(row.city_ibge, row.cat_slug, services.map((s) => s.name as string), db);
     const refByName = new Map(priceRefs.map((p) => [p.name, { medianCents: p.median, businesses: p.n }]));
     const card = toCard(scored);
@@ -97,7 +98,8 @@ export async function availability(db: Db, businessId: string, serviceId: string
   if (!svc || !svc.bookable || (svc.booking_mode === 'slot' && !svc.duration_minutes)) {
     throw new AppError(422, 'service_not_bookable', 'Este serviço não pode ser agendado pela plataforma.');
   }
-  const allStaff = await businessesRepo.staff(businessId, db);
+  // Só as agendas cobertas pelo plano atual aceitam reservas (plano vencido = agendas extras pausadas).
+  const allStaff = staffWithinPlan(await businessesRepo.staff(businessId, db), effectivePlan(biz.plan, biz.plan_until));
   let staff = allStaff.filter((s) => s.serviceIds.length === 0 || s.serviceIds.includes(serviceId));
   if (staffId) {
     staff = staff.filter((s) => s.id === staffId);

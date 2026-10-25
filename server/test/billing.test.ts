@@ -8,6 +8,7 @@ setupDatabase();
 
 /** Simulador da API v3 da Asaas. */
 const state = { requests: [] as Array<{ method: string; path: string; body: any; key?: string }>, paymentStatus: 'PENDING', canceled: [] as string[], webhooks: [] as any[], webhookUpdates: 0 };
+const subValues = new Map<string, number>();
 let server: Server;
 beforeAll(async () => {
   server = createServer((req, res) => {
@@ -24,13 +25,13 @@ beforeAll(async () => {
         if (req.method === 'POST') { state.webhooks.push({ id: 'wh_1', url: body.url, enabled: true, body }); return json(200, { id: 'wh_1' }); }
         if (req.method === 'PUT') { state.webhookUpdates++; return json(200, { id: 'wh_1' }); }
       }
-      if (req.method === 'POST' && path === '/subscriptions') return json(200, { id: `sub_${state.requests.length}` });
+      if (req.method === 'POST' && path === '/subscriptions') { const id = `sub_${state.requests.length}`; subValues.set(id, body.value); return json(200, { id }); }
       let m = /^\/subscriptions\/([^/]+)\/payments$/.exec(path);
-      if (m) return json(200, { data: [{ id: `pay_${m[1]}`, status: 'PENDING', value: body?.value ?? 49.9, dueDate: '2026-10-25', invoiceUrl: `https://sandbox.asaas.com/i/${m[1]}`, subscription: m[1] }] });
+      if (m) return json(200, { data: [{ id: `pay_${m[1]}`, status: 'PENDING', value: subValues.get(m[1]) ?? 49.9, dueDate: '2026-10-25', invoiceUrl: `https://sandbox.asaas.com/i/${m[1]}`, subscription: m[1] }] });
       m = /^\/payments\/([^/]+)\/pixQrCode$/.exec(path);
       if (m) return json(200, { encodedImage: 'iVBORw0KGgo=', payload: '00020126PIXCOPIAECOLA', expirationDate: '2026-10-26 23:59:59' });
       m = /^\/payments\/([^/]+)$/.exec(path);
-      if (m) return json(200, { id: m[1], status: state.paymentStatus, value: 49.9, dueDate: '2026-10-25', invoiceUrl: null, subscription: m[1].replace('pay_', '') });
+      if (m) return json(200, { id: m[1], status: state.paymentStatus, value: subValues.get(m[1].replace('pay_', '')) ?? 49.9, dueDate: '2026-10-25', invoiceUrl: null, subscription: m[1].replace('pay_', '') });
       m = /^\/subscriptions\/([^/]+)$/.exec(path);
       if (req.method === 'DELETE' && m) { state.canceled.push(m[1]); return json(200, { deleted: true }); }
       json(404, { errors: [{ description: 'não encontrado' }] });
@@ -112,6 +113,36 @@ describe('assinatura paga', () => {
     expect(st.subscription.status).toBe('canceled');
     expect(st.effectivePlan).toBe('pro');
     await db.end();
+  });
+
+  it('valor menor que o plano não libera; plano vencido pausa as agendas extras', async () => {
+    resetRateLimits();
+    const owner = await newUser('Dono Esperto');
+    const { body: biz } = await call('POST', '/panel/businesses', { ...profile, name: 'Ateliê Pausa' }, owner.cookie);
+    const co = await call('POST', `/panel/businesses/${biz.id}/billing/checkout`, { plan: 'pro', method: 'PIX', cpfCnpj: '529.982.247-25', holderName: 'Dono Esperto' }, owner.cookie);
+    expect(co.status).toBe(201);
+    const pay = { id: co.body.paymentId, status: 'RECEIVED', value: 1, dueDate: '2026-10-25', invoiceUrl: null, subscription: co.body.subscriptionId };
+    expect((await (await webhook({ id: 'evt_under', event: 'PAYMENT_RECEIVED', payment: pay })).json()).result).toBe('underpaid');
+    expect((await call('GET', `/panel/businesses/${biz.id}/billing`, undefined, owner.cookie)).body.effectivePlan).toBe('free');
+    expect((await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'A', kind: 'person' }, owner.cookie)).status).toBe(201);
+    expect((await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'B', kind: 'person' }, owner.cookie)).status).toBe(402);
+
+    expect((await (await webhook({ id: 'evt_full', event: 'PAYMENT_RECEIVED', payment: { ...pay, value: 49.9 } })).json()).result).toBe('activated');
+    expect((await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'B', kind: 'person' }, owner.cookie)).status).toBe(201);
+    let pub = (await call('GET', `/businesses/${biz.slug}`)).body;
+    expect(pub.staff.map((x: { name: string }) => x.name)).toEqual(['A', 'B']);
+
+    // Venceu sem pagar: volta ao Grátis e só a primeira agenda continua aceitando clientes
+    const db = new pg.Client({ connectionString: process.env.DATABASE_OWNER_URL });
+    await db.connect();
+    await db.query(`UPDATE businesses SET plan_until = now() - interval '1 day' WHERE id = $1`, [biz.id]);
+    await db.end();
+    pub = (await call('GET', `/businesses/${biz.slug}`)).body;
+    expect(pub.staff.map((x: { name: string }) => x.name)).toEqual(['A']);
+    const panel = (await call('GET', `/panel/businesses/${biz.id}`, undefined, owner.cookie)).body;
+    expect(panel.plan.effective).toBe('free');
+    expect(panel.staff.map((x: { name: string; paused: boolean }) => [x.name, x.paused])).toEqual([['A', false], ['B', true]]);
+    expect((await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'C', kind: 'person' }, owner.cookie)).status).toBe(402);
   });
 
   it('sem aviso da Asaas, a tela de status confere o pagamento direto', async () => {

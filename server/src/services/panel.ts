@@ -113,7 +113,7 @@ export const panel = {
           priceMin: s.price_min_cents == null ? null : s.price_min_cents / 100, priceMax: s.price_max_cents == null ? null : s.price_max_cents / 100,
           durationMinutes: s.duration_minutes, bookable: s.bookable, bookingMode: s.booking_mode, notes: s.notes,
         })),
-        staff: staff as PanelStaffDTO[],
+        staff: staff.map((s, i) => ({ ...s, paused: i >= PLANS[effectivePlan(b.plan as PlanId, b.plan_until)].maxStaff })) as PanelStaffDTO[],
         plan: { id: b.plan, effective: effectivePlan(b.plan, b.plan_until), until: b.plan_until ? new Date(b.plan_until).toISOString() : null, aiUsedThisMonth: aiUsed },
         stats: { ...stats, requestsReceived: b.requests_received, requestsAnswered: b.requests_answered },
       };

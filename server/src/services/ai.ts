@@ -14,6 +14,56 @@ import { panelRepo } from '../repositories/panel';
 const client = env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: env.ANTHROPIC_API_KEY }) : null;
 export const aiEnabled = () => client !== null;
 
+/** Último erro da API (só para o administrador ver em /admin; nunca mostrado às empresas). */
+type AiError = { at: string; status: number | null; message: string };
+let lastError: AiError | null = null;
+function rememberError(err: unknown) {
+  if (err instanceof Anthropic.APIError) lastError = { at: new Date().toISOString(), status: err.status ?? null, message: err.message };
+}
+
+export interface AiDiagnostics {
+  configured: boolean;
+  model: string;
+  status: 'ok' | 'not_configured' | 'invalid_key' | 'no_credits' | 'model_unavailable' | 'error' | 'unknown';
+  message: string;
+  lastError: AiError | null;
+}
+
+/** Diagnóstico para /admin. Com `test`, faz um pedido mínimo de verdade (custa uma fração de centavo). */
+export async function aiDiagnostics(test: boolean): Promise<AiDiagnostics> {
+  const base = { configured: !!client, model: env.AI_MODEL, lastError };
+  if (!client) {
+    return { ...base, status: 'not_configured', message: 'Falta a chave ANTHROPIC_API_KEY no Render (Environment). Crie a chave em console.anthropic.com → API Keys.' };
+  }
+  if (!test) return { ...base, status: 'unknown', message: 'Chave configurada. Toque em "Testar assistente" para conferir se está tudo certo.' };
+  try {
+    await client.beta.messages.create({
+      model: env.AI_MODEL,
+      max_tokens: 256,
+      output_config: { effort: 'low' },
+      messages: [{ role: 'user', content: 'Responda só com a palavra: ok' }],
+      ...(supportsFallback ? { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' as const } : {}),
+    });
+    return { ...base, status: 'ok', lastError, message: `Assistente funcionando (modelo ${env.AI_MODEL}).` };
+  } catch (err) {
+    rememberError(err);
+    const out = { ...base, lastError };
+    if (err instanceof Anthropic.AuthenticationError || err instanceof Anthropic.PermissionDeniedError) {
+      return { ...out, status: 'invalid_key', message: 'A chave ANTHROPIC_API_KEY é inválida ou foi desativada. Gere uma nova em console.anthropic.com → API Keys e cole no Render.' };
+    }
+    if (err instanceof Anthropic.NotFoundError) {
+      return { ...out, status: 'model_unavailable', message: `O modelo "${env.AI_MODEL}" não está disponível para esta conta. Confira a variável AI_MODEL no Render (use claude-opus-5-5 ou claude-haiku-5-5).` };
+    }
+    if (err instanceof Anthropic.BadRequestError && /credit|billing|balance/i.test(err.message)) {
+      return { ...out, status: 'no_credits', message: 'A conta da Anthropic está sem créditos. Em console.anthropic.com → Billing, adicione créditos (US$ 5 já bastam para começar).' };
+    }
+    if (err instanceof Anthropic.APIError) {
+      return { ...out, status: 'error', message: `A API respondeu com erro ${err.status ?? ''}: ${err.message}` };
+    }
+    return { ...out, status: 'error', message: 'Não foi possível falar com a API da Anthropic agora. Tente de novo em instantes.' };
+  }
+}
+
 // Fallback automático do servidor quando um pedido é recusado pelos filtros de segurança
 // (disponível para os modelos Opus/Sonnet/Fable; o Haiku não tem essa opção).
 const supportsFallback = !env.AI_MODEL.startsWith('claude-haiku');
@@ -116,6 +166,7 @@ export async function runAssistant(userId: string, businessId: string, task: AiT
     }
   } catch (err) {
     if (err instanceof AppError) throw err;
+    rememberError(err);
     if (err instanceof Anthropic.RateLimitError) throw new AppError(429, 'ai_busy', 'O assistente está muito ocupado agora. Tente em alguns instantes.');
     if (err instanceof Anthropic.AuthenticationError) {
       console.error('Chave da API da Anthropic inválida.');

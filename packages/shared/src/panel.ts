@@ -185,6 +185,8 @@ export interface PanelStaffDTO {
   kind: 'person' | 'resource';
   serviceIds: string[];
   openingHours: Record<string, Array<[string, string]>> | null;
+  /** Acima do limite do plano atual: não aparece para clientes até a empresa voltar a pagar ou remover outra agenda. */
+  paused?: boolean;
 }
 
 export interface PanelAgendaItemDTO {
@@ -233,6 +235,11 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
 };
 
 /** Plano vigente (um plano pago vencido volta a valer como Grátis). */
+/** Agendas que funcionam no plano atual: as primeiras da lista (ordem definida pela empresa). As demais ficam pausadas. */
+export function staffWithinPlan<T>(staff: T[], plan: PlanId): T[] {
+  return staff.slice(0, PLANS[plan].maxStaff);
+}
+
 export function effectivePlan(plan: PlanId, planUntil: string | Date | null, now: Date = new Date()): PlanId {
   if (plan === 'free') return 'free';
   if (planUntil && new Date(planUntil).getTime() < now.getTime()) return 'free';

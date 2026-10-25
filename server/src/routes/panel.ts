@@ -10,7 +10,7 @@ import { panelRepo } from '../repositories/panel';
 import { usersRepo } from '../repositories/users';
 const usersRepoMe = usersRepo.me;
 import { panel } from '../services/panel';
-import { aiEnabled, runAssistant } from '../services/ai';
+import { aiDiagnostics, aiEnabled, runAssistant } from '../services/ai';
 import { streamSSE } from 'hono/streaming';
 import { aiRequestSchema } from '@conecta/shared';
 
@@ -117,6 +117,7 @@ adminRoutes.get('/billing-status', async (c) => {
   return c.json(billingSetupStatus());
 });
 adminRoutes.get('/businesses', async (c) => c.json(await withUser(uid(c), (db) => panelRepo.adminList(db, (c.req.query('q') ?? '').slice(0, 60)))));
+adminRoutes.get('/ai-status', async (c) => c.json(await aiDiagnostics(c.req.query('test') === '1')));
 adminRoutes.put('/businesses/:businessId/plan', async (c) => {
   const { plan, until } = parse(z.object({ plan: z.enum(['free', 'pro', 'team']), until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional() }), await c.req.json());
   await withUser(uid(c), (db) => panelRepo.adminSetPlan(db, bid(c), plan, until ? new Date(`${until}T23:59:59-03:00`) : null));

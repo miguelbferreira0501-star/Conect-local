@@ -67,7 +67,11 @@ export function PanelStaffPage() {
       <div className="flex justify-end">
         <Button size="sm" icon={<Plus className="h-4 w-4" />} disabled={atLimit} onClick={() => open()}>Adicionar {profile.staffLabel.toLowerCase()}</Button>
       </div>
-      {atLimit && b.staff.length > 0 && <Alert tone="info">Você atingiu o limite do plano. Para mais agendas, mude de plano.</Alert>}
+      {b.staff.some((s) => s.paused) ? (
+        <Alert tone="warning" title="Algumas agendas estão pausadas">
+          Seu plano atual permite {plan.maxStaff} {plan.maxStaff === 1 ? 'agenda' : 'agendas'}. As marcadas como “Pausada” não aparecem para os clientes. <Link to="../plano" className="font-semibold underline">Assine um plano</Link> para reativá-las.
+        </Alert>
+      ) : atLimit && b.staff.length > 0 && <Alert tone="info">Você atingiu o limite do plano. Para mais agendas, mude de plano.</Alert>}
       {b.staff.length === 0 ? (
         <EmptyState icon={<Users className="h-8 w-8" />} title="Agenda única">Cadastre {profile.staffLabelPlural.toLowerCase()} para o cliente poder escolher com quem (ou onde) agendar.</EmptyState>
       ) : (
@@ -76,7 +80,7 @@ export function PanelStaffPage() {
             <li key={s.id} className="card flex flex-wrap items-center gap-3 p-4">
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-brand-700"><UserRound className="h-5 w-5" /></span>
               <div className="min-w-0 flex-1">
-                <p className="font-semibold">{s.name}{s.roleTitle ? <span className="font-normal text-muted"> · {s.roleTitle}</span> : null}</p>
+                <p className="font-semibold">{s.name}{s.roleTitle ? <span className="font-normal text-muted"> · {s.roleTitle}</span> : null} {s.paused && <Tag tone="warning">Pausada</Tag>}</p>
                 <p className="text-sm text-muted">
                   {s.serviceIds.length === 0 ? 'Faz todos os serviços agendáveis' : `${s.serviceIds.length} serviço(s)`} · {s.openingHours ? 'horário próprio' : 'horário da empresa'}
                 </p>

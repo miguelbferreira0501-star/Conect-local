@@ -1,4 +1,4 @@
-import type { BusinessRow, ServiceMode } from '@conecta/shared';
+import type { BusinessRow, PlanId, ServiceMode } from '@conecta/shared';
 
 export type { BusinessRow };
 import { query, type Db } from '../db/pool';
@@ -80,8 +80,8 @@ export const businessesRepo = {
   },
 
   async basicById(id: string, db?: Db) {
-    const rows = await query<{ id: string; slug: string; name: string; accepts_booking: boolean; accepts_quote: boolean; opening_hours: BusinessRow['opening_hours']; timezone: string; is_demo: boolean }>(
-      `SELECT b.id, b.slug, b.name, b.accepts_booking, b.accepts_quote, b.opening_hours, b.is_demo, ci.timezone
+    const rows = await query<{ id: string; slug: string; name: string; accepts_booking: boolean; accepts_quote: boolean; opening_hours: BusinessRow['opening_hours']; timezone: string; is_demo: boolean; plan: PlanId; plan_until: Date | null }>(
+      `SELECT b.id, b.slug, b.name, b.accepts_booking, b.accepts_quote, b.opening_hours, b.is_demo, b.plan, b.plan_until, ci.timezone
        FROM businesses b JOIN cities ci ON ci.ibge = b.city_ibge WHERE b.id = $1 AND b.status = 'active'`,
       [id],
       db,
