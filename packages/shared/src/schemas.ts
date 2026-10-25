@@ -99,6 +99,8 @@ export type QuoteRequestInput = z.infer<typeof quoteRequestSchema>;
 export const bookingRequestSchema = z.object({
   businessId: uuid,
   serviceId: uuid,
+  /** Profissional/recurso escolhido; ausente = sem preferência */
+  staffId: uuid.nullable().optional(),
   startsAt: z.string().datetime({ offset: true, message: 'Horário inválido.' }),
   notes: z.string().trim().max(500, 'Use no máximo 500 caracteres.').optional(),
   contactPhone: phoneSchema.optional(),

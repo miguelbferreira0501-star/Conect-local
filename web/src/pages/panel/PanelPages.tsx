@@ -5,7 +5,7 @@ import {
   CalendarCheck, CheckCircle2, Circle, Clock, FileText, ImagePlus, MessageCircle, Phone, Plus, Star, Store, Trash2,
 } from 'lucide-react';
 import {
-  describeDayHours, formatDuration, formatPhoneBR, formatRating, formatServicePrice, relativeTime, serviceInputSchema, WEEKDAY_NAMES,
+  BOOKING_MODE_LABELS, bookingProfile, describeDayHours, formatDuration, PERIODS, type BookingMode, type Period, formatPhoneBR, formatRating, formatServicePrice, relativeTime, serviceInputSchema, WEEKDAY_NAMES,
   type PanelBusinessDTO, type PanelRequestDTO, type ServiceInput,
 } from '@conecta/shared';
 import { api, ApiError } from '@/lib/api';
@@ -20,6 +20,7 @@ import { Sheet } from '@/components/ui/Sheet';
 import { Tag } from '@/components/ui/Tags';
 import { useToast } from '@/components/ui/Toast';
 import { BusinessProfileForm, EMPTY_PROFILE, type ProfileForm } from './BusinessProfileForm';
+import { AiReplyButton } from './PanelPages2';
 
 const useBiz = () => useOutletContext<PanelBusinessDTO>();
 
@@ -187,7 +188,16 @@ function RequestCard({ r, businessId }: { r: PanelRequestDTO; businessId: string
         </span>
       </div>
       <h3 className="mt-2 font-semibold">{r.serviceName ?? 'Serviço não especificado'}</h3>
-      {r.startsAt && <p className="font-medium text-brand-800">{new Date(r.startsAt).toLocaleString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })}</p>}
+      {r.startsAt && (
+        <p className="font-medium text-brand-800">
+          {r.bookingMode === 'day'
+            ? `${new Date(r.startsAt).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })} · diária`
+            : r.bookingMode === 'period'
+              ? `${new Date(r.startsAt).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })} · ${PERIODS[r.period as Period]?.label ?? ''} (combine a hora com o cliente)`
+              : new Date(r.startsAt).toLocaleString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })}
+        </p>
+      )}
+      {r.staffName && <p className="text-sm">Com: <strong>{r.staffName}</strong></p>}
       {r.preferredDate && <p className="text-sm">Data desejada: {new Date(r.preferredDate + 'T12:00:00').toLocaleDateString('pt-BR')}</p>}
       {r.description && <p className="mt-1 whitespace-pre-line text-sm">{r.description}</p>}
       {r.neighborhood && <p className="text-sm text-muted">Bairro: {r.neighborhood}</p>}
@@ -239,8 +249,8 @@ export function PanelProfilePage() {
 }
 
 // ── Serviços ──
-type ServiceForm = { name: string; description: string; priceType: ServiceInput['priceType']; priceMin: string; priceMax: string; durationMinutes: string; bookable: boolean; notes: string };
-const EMPTY_SERVICE: ServiceForm = { name: '', description: '', priceType: 'fixed', priceMin: '', priceMax: '', durationMinutes: '', bookable: false, notes: '' };
+type ServiceForm = { name: string; description: string; priceType: ServiceInput['priceType']; priceMin: string; priceMax: string; durationMinutes: string; bookable: boolean; bookingMode: BookingMode; notes: string };
+const EMPTY_SERVICE: ServiceForm = { name: '', description: '', priceType: 'fixed', priceMin: '', priceMax: '', durationMinutes: '', bookable: false, bookingMode: 'slot', notes: '' };
 
 export function PanelServicesPage() {
   const b = useBiz();
@@ -255,7 +265,7 @@ export function PanelServicesPage() {
   const submit = () => {
     if (!editing) return;
     const f = editing.f;
-    const body = { name: f.name, description: f.description, priceType: f.priceType, priceMin: num(f.priceMin), priceMax: num(f.priceMax), durationMinutes: num(f.durationMinutes), bookable: f.bookable, notes: f.notes };
+    const body = { name: f.name, description: f.description, priceType: f.priceType, priceMin: num(f.priceMin), priceMax: num(f.priceMax), durationMinutes: num(f.durationMinutes), bookable: f.bookable, bookingMode: f.bookingMode, notes: f.notes };
     const parsed = serviceInputSchema.safeParse(body);
     if (!parsed.success) {
       const e: Record<string, string> = {};
@@ -273,7 +283,7 @@ export function PanelServicesPage() {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted">{b.services.length} serviço(s). Preços ajudam o cliente a decidir.</p>
-        <Button size="sm" icon={<Plus className="h-4 w-4" />} onClick={() => { setErrors({}); setEditing({ id: null, f: EMPTY_SERVICE }); }}>Adicionar serviço</Button>
+        <Button size="sm" icon={<Plus className="h-4 w-4" />} onClick={() => { setErrors({}); setEditing({ id: null, f: { ...EMPTY_SERVICE, bookingMode: bookingProfile(b.profile.categorySlug).mode } }); }}>Adicionar serviço</Button>
       </div>
       {b.services.length === 0 && <EmptyState icon={<FileText className="h-8 w-8" />} title="Nenhum serviço cadastrado">Cadastre o que você oferece, com preço e duração quando possível.</EmptyState>}
       <ul className="space-y-2">
@@ -283,10 +293,10 @@ export function PanelServicesPage() {
               <p className="font-semibold">{s.name}</p>
               <p className="text-sm text-muted">
                 {s.priceType === 'fixed' && s.priceMin === 0 ? 'Gratuito' : formatServicePrice({ priceType: s.priceType, priceMinCents: s.priceMin == null ? null : s.priceMin * 100, priceMaxCents: s.priceMax == null ? null : s.priceMax * 100 })}
-                {s.durationMinutes ? ` · ${formatDuration(s.durationMinutes)}` : ''}{s.bookable ? ' · agendável' : ''}
+                {s.durationMinutes ? ` · ${formatDuration(s.durationMinutes)}` : ''}{s.bookable ? ` · agendável (${BOOKING_MODE_LABELS[s.bookingMode].title.toLowerCase()})` : ''}
               </p>
             </div>
-            <Button size="sm" variant="secondary" onClick={() => { setErrors({}); setEditing({ id: s.id, f: { name: s.name, description: s.description ?? '', priceType: s.priceType, priceMin: s.priceMin?.toString().replace('.', ',') ?? '', priceMax: s.priceMax?.toString().replace('.', ',') ?? '', durationMinutes: s.durationMinutes?.toString() ?? '', bookable: s.bookable, notes: s.notes ?? '' } }); }}>Editar</Button>
+            <Button size="sm" variant="secondary" onClick={() => { setErrors({}); setEditing({ id: s.id, f: { name: s.name, description: s.description ?? '', priceType: s.priceType, priceMin: s.priceMin?.toString().replace('.', ',') ?? '', priceMax: s.priceMax?.toString().replace('.', ',') ?? '', durationMinutes: s.durationMinutes?.toString() ?? '', bookable: s.bookable, bookingMode: s.bookingMode, notes: s.notes ?? '' } }); }}>Editar</Button>
             <button aria-label={`Remover ${s.name}`} className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted hover:bg-danger-50 hover:text-danger-700"
               onClick={() => remove.mutate(s.id, { onSuccess: () => toast('Serviço removido.'), onError: (e) => toast(e.message, 'error') })}><Trash2 className="h-4 w-4" /></button>
           </li>
@@ -310,7 +320,21 @@ export function PanelServicesPage() {
               </div>
             )}
             <TextField label="Duração (minutos)" optional inputMode="numeric" value={editing.f.durationMinutes} onChange={(e) => set({ durationMinutes: e.target.value })} error={errors.durationMinutes} placeholder="60" />
-            <Checkbox label="Clientes podem agendar este serviço pelo app" description="Precisa de duração e dos horários de funcionamento." checked={editing.f.bookable} onChange={(e) => set({ bookable: e.target.checked })} />
+            <Checkbox label="Clientes podem agendar este serviço pelo app" description="Usa os horários de funcionamento (e os da equipe, se houver)." checked={editing.f.bookable} onChange={(e) => set({ bookable: e.target.checked })} />
+            {editing.f.bookable && (
+              <fieldset>
+                <legend className="label">Tipo de agenda</legend>
+                <div className="space-y-2">
+                  {(Object.keys(BOOKING_MODE_LABELS) as BookingMode[]).map((m) => (
+                    <label key={m} className={`flex cursor-pointer gap-3 rounded-xl border p-3 ${editing.f.bookingMode === m ? 'border-brand-700 bg-brand-50' : 'border-line'}`}>
+                      <input type="radio" name="booking-mode" className="mt-1 h-4 w-4 accent-[rgb(var(--brand-700))]" checked={editing.f.bookingMode === m} onChange={() => set({ bookingMode: m })} />
+                      <span><span className="block font-medium">{BOOKING_MODE_LABELS[m].title}</span><span className="text-sm text-muted">{BOOKING_MODE_LABELS[m].description}</span></span>
+                    </label>
+                  ))}
+                </div>
+                {errors.durationMinutes && editing.f.bookingMode === 'slot' && <p className="mt-1 text-sm text-danger-700">{errors.durationMinutes}</p>}
+              </fieldset>
+            )}
             <TextField label="Observações" optional value={editing.f.notes} onChange={(e) => set({ notes: e.target.value })} maxLength={200} placeholder="Ex.: material incluso" />
           </div>
         )}
@@ -475,7 +499,11 @@ export function PanelReviewsPage() {
             {editing?.id === r.id ? (
               <div className="mt-3 space-y-2">
                 <TextArea label="Resposta pública" value={editing.body} maxLength={1000} onChange={(e) => setEditing({ id: r.id, body: e.target.value })} className="field min-h-[90px]" />
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <AiReplyButton businessId={b.id} reviewId={r.id}
+                    onStart={() => setEditing({ id: r.id, body: '' })}
+                    onText={(t) => setEditing((cur) => (cur && cur.id === r.id ? { ...cur, body: cur.body + t } : cur))}
+                    onDone={(err) => { if (err) toast(err, 'error'); }} />
                   <Button size="sm" loading={reply.isPending} onClick={() => reply.mutate({ id: r.id, body: editing.body.trim() }, { onSuccess: () => { toast('Resposta publicada.'); setEditing(null); }, onError: (e) => toast(e.message, 'error') })}>Publicar resposta</Button>
                   <Button size="sm" variant="ghost" onClick={() => setEditing(null)}>Cancelar</Button>
                 </div>

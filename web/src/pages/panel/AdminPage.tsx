@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BadgeCheck, ShieldAlert } from 'lucide-react';
+import { formatCents, PLANS, type PlanId } from '@conecta/shared';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Alert, EmptyState, PageLoader } from '@/components/ui/Feedback';
@@ -9,7 +10,7 @@ import { Sheet } from '@/components/ui/Sheet';
 import { DemoTag, Tag } from '@/components/ui/Tags';
 import { useToast } from '@/components/ui/Toast';
 
-interface AdminBiz { id: string; slug: string; name: string; status: string; suspendedReason: string | null; verifiedAt: string | null; isDemo: boolean; createdAt: string; category: string; city: string; uf: string; reviewCount: number }
+interface AdminBiz { plan: 'free' | 'pro' | 'team'; planUntil: string | null; id: string; slug: string; name: string; status: string; suspendedReason: string | null; verifiedAt: string | null; isDemo: boolean; createdAt: string; category: string; city: string; uf: string; reviewCount: number }
 
 /** Moderação: suspender/reativar empresas e conceder o selo "Perfil verificado". */
 export function AdminPage() {
@@ -60,6 +61,7 @@ export function AdminPage() {
                 : <Button size="sm" variant="danger" onClick={() => { setReason(''); setSuspending(b); }}>Suspender</Button>}
               <Button size="sm" variant="secondary" onClick={() => update(b, { verified: !b.verifiedAt })}>{b.verifiedAt ? 'Remover verificação' : 'Marcar como verificada'}</Button>
             </div>
+            <PlanEditor b={b} onSaved={() => qc.invalidateQueries({ queryKey: ['admin', 'businesses'] })} />
           </li>
         ))}
       </ul>
@@ -72,6 +74,42 @@ export function AdminPage() {
           <Alert tone="warning">Use “Marcar como verificada” somente depois de conferir CNPJ ou documento do responsável, endereço e telefone.</Alert>
         </div>
       </Sheet>
+    </div>
+  );
+}
+
+function PlanEditor({ b, onSaved }: { b: AdminBiz; onSaved: () => void }) {
+  const toast = useToast();
+  const [plan, setPlan] = useState(b.plan);
+  const [until, setUntil] = useState(b.planUntil ? b.planUntil.slice(0, 10) : '');
+  const [saving, setSaving] = useState(false);
+  const save = async () => {
+    setSaving(true);
+    try {
+      await api.put(`/admin/businesses/${b.id}/plan`, { plan, until: plan === 'free' ? null : until || null });
+      toast('Plano atualizado.');
+      onSaved();
+    } catch (e) {
+      toast((e as Error).message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+  return (
+    <div className="mt-3 flex flex-wrap items-end gap-2 rounded-xl bg-surface p-3">
+      <label className="text-sm">
+        <span className="block text-muted">Plano</span>
+        <select className="field w-auto py-2" value={plan} onChange={(e) => setPlan(e.target.value as AdminBiz['plan'])}>
+          {(Object.keys(PLANS) as PlanId[]).map((id) => <option key={id} value={id}>{PLANS[id].name}{PLANS[id].priceCents ? ` (${formatCents(PLANS[id].priceCents)}/mês)` : ''}</option>)}
+        </select>
+      </label>
+      {plan !== 'free' && (
+        <label className="text-sm">
+          <span className="block text-muted">Pago até</span>
+          <input type="date" className="field w-auto py-2" value={until} onChange={(e) => setUntil(e.target.value)} />
+        </label>
+      )}
+      <Button size="sm" variant="secondary" loading={saving} onClick={save}>Salvar plano</Button>
     </div>
   );
 }

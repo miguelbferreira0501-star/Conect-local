@@ -25,6 +25,11 @@ services:
       # Seu e-mail (o mesmo da conta criada no app) para acessar /admin:
       - key: ADMIN_EMAILS
         sync: false
+      # Assistente de IA (chave em console.anthropic.com). Sem ela, o assistente fica "em breve".
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: AI_MODEL
+        value: claude-opus-5-5
       # Preencha depois de gerar o app Android (PWABuilder mostra esses valores):
       - key: ANDROID_PACKAGE_NAME
         sync: false

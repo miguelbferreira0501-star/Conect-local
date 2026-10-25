@@ -92,7 +92,7 @@ export const businessesRepo = {
   services: (businessId: string, db?: Db) =>
     query(
       `SELECT id, name, description, price_type AS "priceType", price_min_cents AS "priceMinCents",
-         price_max_cents AS "priceMaxCents", duration_minutes AS "durationMinutes", bookable, notes
+         price_max_cents AS "priceMaxCents", duration_minutes AS "durationMinutes", bookable, booking_mode AS "bookingMode", notes
        FROM services WHERE business_id = $1 AND active ORDER BY sort_order, name`,
       [businessId],
       db,
@@ -100,12 +100,21 @@ export const businessesRepo = {
 
   service: async (businessId: string, serviceId: string, db?: Db) =>
     (
-      await query<{ id: string; name: string; bookable: boolean; duration_minutes: number | null }>(
-        `SELECT id, name, bookable, duration_minutes FROM services WHERE id = $1 AND business_id = $2 AND active`,
+      await query<{ id: string; name: string; bookable: boolean; duration_minutes: number | null; booking_mode: 'slot' | 'period' | 'day' }>(
+        `SELECT id, name, bookable, duration_minutes, booking_mode FROM services WHERE id = $1 AND business_id = $2 AND active`,
         [serviceId, businessId],
         db,
       )
     )[0] ?? null,
+
+  /** Equipe ativa com os serviços que cada um faz. */
+  staff: (businessId: string, db?: Db) =>
+    query<{ id: string; name: string; roleTitle: string | null; kind: 'person' | 'resource'; openingHours: Record<string, Array<[string, string]>> | null; serviceIds: string[] }>(
+      `SELECT s.id, s.name, s.role_title AS "roleTitle", s.kind, s.opening_hours AS "openingHours",
+         coalesce(array_agg(ss.service_id) FILTER (WHERE ss.service_id IS NOT NULL), '{}') AS "serviceIds"
+       FROM business_staff s LEFT JOIN staff_services ss ON ss.staff_id = s.id
+       WHERE s.business_id = $1 AND s.active GROUP BY s.id ORDER BY s.sort_order, s.name`,
+      [businessId], db),
 
   photos: (businessId: string, db?: Db) =>
     query(`SELECT id, url, caption FROM photos WHERE business_id = $1 ORDER BY sort_order`, [businessId], db),
@@ -149,7 +158,7 @@ export const businessesRepo = {
     query<{ name: string; requests: number }>(`SELECT * FROM app.popular_services($1, $2, $3)`, [city, since, limit]),
 
   busyRanges: (businessId: string, from: Date, to: Date, db?: Db) =>
-    query<{ starts_at: Date; ends_at: Date }>(`SELECT * FROM app.business_busy_ranges($1, $2, $3)`, [businessId, from, to], db),
+    query<{ starts_at: Date; ends_at: Date; staff_id: string | null }>(`SELECT * FROM app.business_busy_ranges($1, $2, $3)`, [businessId, from, to], db),
 
   suggestNames: (city: number, q: string) =>
     query<{ name: string; slug: string }>(

@@ -21,6 +21,9 @@ export interface ActivityRow {
   closed_at: string | Date | null;
   review_id: string | null;
   business_message?: string | null;
+  booking_mode?: 'slot' | 'period' | 'day';
+  period?: string | null;
+  staff_name?: string | null;
 }
 
 export const ACTIVITY_LIMITS = { maxActiveFutureBookings: 10, maxQuotesPerDay: 15, reviewWindowDays: 180 };
@@ -47,6 +50,9 @@ export function toActivityDTO(a: ActivityRow, lastReviewByBusiness: Map<string, 
     reviewId: a.review_id,
     canMarkDone: a.type === 'booking' ? active && !!startsAt && startsAt <= now : a.status === 'sent' || a.status === 'answered',
     businessMessage: a.business_message ?? null,
+    bookingMode: a.booking_mode ?? 'slot',
+    period: a.period ?? null,
+    staffName: a.staff_name ?? null,
     canCancel: a.type === 'booking' ? active && !!startsAt && startsAt > now : a.status === 'sent' || a.status === 'answered',
   };
 }

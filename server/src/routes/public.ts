@@ -79,6 +79,6 @@ publicRoutes.get('/businesses/:id/reviews', async (c) => {
 
 publicRoutes.get('/businesses/:id/availability', async (c) => {
   const id = parse(uuid, c.req.param('id'));
-  const q = parse(z.object({ serviceId: uuid, date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Data inválida.') }), c.req.query());
-  return c.json(await withUser(null, (db) => availability(db, id, q.serviceId, q.date)));
+  const q = parse(z.object({ serviceId: uuid, date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Data inválida.'), staffId: uuid.optional() }), c.req.query());
+  return c.json(await withUser(null, (db) => availability(db, id, q.serviceId, q.date, q.staffId)));
 });

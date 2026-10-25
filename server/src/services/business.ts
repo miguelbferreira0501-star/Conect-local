@@ -1,4 +1,4 @@
-import { BOOKING_RULES, computeSlots, hoursAreFresh, type BusinessDetailDTO, type ReviewDTO } from '@conecta/shared';
+import { BOOKING_RULES, bookingProfile, computeAvailability, hoursAreFresh, type BusinessDetailDTO, type ReviewDTO } from '@conecta/shared';
 import { withUser, type Db } from '../db/pool';
 import { AppError, notFound } from '../lib/errors';
 import { zonedToUtc } from '../lib/time';
@@ -20,6 +20,7 @@ export async function businessDetail(slug: string, userId: string | null): Promi
     const distribution = await businessesRepo.ratingDistribution(row.id, db);
     const aspects = await businessesRepo.aspectAverages(row.id, db);
     const isFavorite = userId ? await favoritesRepo.isFavorite(db, row.id) : false;
+    const staff = await businessesRepo.staff(row.id, db);
     const card = toCard(scored);
     return {
       ...card,
@@ -50,6 +51,8 @@ export async function businessDetail(slug: string, userId: string | null): Promi
       aspectAverages: aspects,
       verifiedAt: row.verified_at ? new Date(row.verified_at).toISOString() : null,
       isFavorite,
+      staff: staff.map(({ openingHours: _h, ...st }) => st),
+      staffLabel: bookingProfile(row.cat_slug).staffLabel,
     };
   });
 }
@@ -80,15 +83,33 @@ export async function businessReviews(
 
 export { BOOKING_RULES };
 
-/** Horários livres de um serviço numa data (no fuso da cidade da empresa). */
-export async function availability(db: Db, businessId: string, serviceId: string, date: string, now = new Date()) {
+/**
+ * Disponibilidade de um serviço (qualquer tipo de agenda), por profissional/recurso.
+ * `staffId` restringe a uma pessoa; sem ele, junta todos que fazem o serviço ("sem preferência").
+ */
+export async function availability(db: Db, businessId: string, serviceId: string, date: string, staffId?: string | null, now = new Date()) {
   const biz = await businessesRepo.basicById(businessId, db);
   if (!biz) throw notFound('Empresa não encontrada.');
   if (!biz.accepts_booking) throw new AppError(422, 'booking_unavailable', 'Esta empresa não oferece agendamento pela plataforma.');
   const svc = await businessesRepo.service(businessId, serviceId, db);
-  if (!svc || !svc.bookable || !svc.duration_minutes) throw new AppError(422, 'service_not_bookable', 'Este serviço não pode ser agendado pela plataforma.');
-  const dayStart = zonedToUtc(date, 0, biz.timezone);
-  const busy = await businessesRepo.busyRanges(businessId, dayStart, new Date(dayStart.getTime() + 86_400_000), db);
-  const slots = computeSlots({ date, timezone: biz.timezone, durationMinutes: svc.duration_minutes, openingHours: biz.opening_hours, busy, now });
-  return { date, timezone: biz.timezone, durationMinutes: svc.duration_minutes, slots };
+  if (!svc || !svc.bookable || (svc.booking_mode === 'slot' && !svc.duration_minutes)) {
+    throw new AppError(422, 'service_not_bookable', 'Este serviço não pode ser agendado pela plataforma.');
+  }
+  const allStaff = await businessesRepo.staff(businessId, db);
+  let staff = allStaff.filter((s) => s.serviceIds.length === 0 || s.serviceIds.includes(serviceId));
+  if (staffId) {
+    staff = staff.filter((s) => s.id === staffId);
+    if (!staff.length) throw new AppError(422, 'invalid_staff', 'Este profissional não faz este serviço.');
+  }
+  const days = svc.booking_mode === 'day' ? 60 : 1;
+  const from = zonedToUtc(date, 0, biz.timezone);
+  const busy = await businessesRepo.busyRanges(businessId, from, new Date(from.getTime() + (days + 1) * 86_400_000), db);
+  const result = computeAvailability({
+    mode: svc.booking_mode, date, timezone: biz.timezone, durationMinutes: svc.duration_minutes, businessHours: biz.opening_hours,
+    staff: staff.map((s) => ({ id: s.id, name: s.name, openingHours: s.openingHours })), busy, now, days,
+  });
+  return {
+    date, timezone: biz.timezone, mode: svc.booking_mode, durationMinutes: svc.duration_minutes, slots: result.slots,
+    staff: staff.map((s) => ({ id: s.id, name: s.name, roleTitle: s.roleTitle })),
+  };
 }

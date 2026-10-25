@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { CalendarClock, CalendarDays, FileText, Star } from 'lucide-react';
-import type { ActivityDTO } from '@conecta/shared';
+import { PERIODS, type ActivityDTO, type Period } from '@conecta/shared';
 import { api } from '@/lib/api';
 import { useActivities } from '@/lib/queries';
 import { PageHeader } from '@/components/Layout';
@@ -99,7 +99,11 @@ function ActivityCard({ a }: { a: ActivityDTO }) {
     }
   };
   const when = a.startsAt
-    ? new Date(a.startsAt).toLocaleString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+    ? a.bookingMode === 'day'
+      ? `${new Date(a.startsAt).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' })} · diária`
+      : a.bookingMode === 'period'
+        ? `${new Date(a.startsAt).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' })} · ${PERIODS[a.period as Period]?.label.toLowerCase() ?? ''}`
+        : new Date(a.startsAt).toLocaleString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
     : a.preferredDate
       ? `Data desejada: ${new Date(a.preferredDate + 'T12:00:00').toLocaleDateString('pt-BR')}`
       : `Pedido em ${new Date(a.createdAt).toLocaleDateString('pt-BR')}`;
@@ -118,7 +122,7 @@ function ActivityCard({ a }: { a: ActivityDTO }) {
           </div>
           <h3 className="mt-1 font-semibold"><Link to={`/empresa/${a.business.slug}`} className="hover:underline">{a.business.name}</Link></h3>
           <p className="text-sm text-muted">{a.serviceName ?? a.business.categoryName}</p>
-          <p className="mt-0.5 text-sm">{when}</p>
+          <p className="mt-0.5 text-sm">{when}{a.staffName ? ` · com ${a.staffName}` : ''}</p>
           {a.type === 'quote' && a.status === 'sent' && <p className="mt-1 text-xs text-muted">A empresa responde pelo contato que você informou.</p>}
           {a.businessMessage && (
             <div className="mt-2 rounded-xl bg-surface p-3 text-sm">

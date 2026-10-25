@@ -74,6 +74,14 @@ try {
   await owner.getByText('Horários salvos e confirmados.').waitFor();
   ok('horários salvos');
 
+  await owner.getByRole('navigation', { name: 'Seções do painel' }).getByRole('link', { name: 'Equipe' }).click();
+  await owner.getByRole('button', { name: /^Adicionar profissional/ }).click();
+  await owner.getByLabel('Nome', { exact: true }).fill('Rita');
+  await owner.getByRole('button', { name: 'Salvar', exact: true }).click();
+  await owner.getByText('Faz todos os serviços agendáveis').waitFor();
+  await shot(owner, '4b-equipe');
+  ok('profissional cadastrada');
+
   await owner.getByRole('navigation', { name: 'Seções do painel' }).getByRole('link', { name: 'Fotos' }).click();
   const chooser = owner.waitForEvent('filechooser');
   await owner.locator('.card', { hasText: 'Foto de capa' }).getByRole('button', { name: 'Enviar' }).click();
@@ -91,6 +99,7 @@ try {
   ok('empresa aparece na busca na hora');
   await customer.getByText(BIZ).first().click();
   await customer.getByRole('link', { name: 'Agendar', exact: true }).last().click();
+  await customer.getByRole('button', { name: /Rita/ }).click();
   await customer.locator('[aria-label="Dia"] button:not([disabled])').nth(1).click();
   await customer.locator('[aria-label="Horário"] button').first().click();
   await customer.getByRole('button', { name: 'Solicitar agendamento' }).click();
@@ -99,6 +108,7 @@ try {
 
   await owner.getByRole('navigation', { name: 'Seções do painel' }).getByRole('link', { name: /Pedidos/ }).click();
   await owner.getByText('Carlos Cliente').waitFor();
+  await owner.getByText('Com: Rita').waitFor();
   await shot(owner, '6-pedidos');
   await owner.getByRole('button', { name: 'Confirmar horário' }).click();
   await owner.getByText('Pedido atualizado.').waitFor();
@@ -106,7 +116,8 @@ try {
 
   await customer.goto(`${BASE}/atividades`);
   await customer.getByText('Confirmado').first().waitFor();
-  ok('cliente vê o agendamento confirmado');
+  await customer.getByText(/com Rita/).first().waitFor();
+  ok('cliente vê o agendamento confirmado com a profissional');
 
   await customer.goto(`${BASE}/admin`);
   await customer.getByText('Área restrita').waitFor();

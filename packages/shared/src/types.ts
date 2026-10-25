@@ -70,7 +70,17 @@ export interface ServiceDTO {
   priceMaxCents: number | null;
   durationMinutes: number | null;
   bookable: boolean;
+  bookingMode: 'slot' | 'period' | 'day';
   notes: string | null;
+}
+
+export interface PublicStaffDTO {
+  id: string;
+  name: string;
+  roleTitle: string | null;
+  kind: 'person' | 'resource';
+  /** Serviços que faz; vazio = todos */
+  serviceIds: string[];
 }
 
 export interface PhotoDTO { id: string; url: string; caption: string | null }
@@ -98,6 +108,9 @@ export interface BusinessDetailDTO extends BusinessCardDTO {
   aspectAverages: Partial<Record<ReviewAspect, number>>;
   verifiedAt: string | null;
   isFavorite: boolean;
+  staff: PublicStaffDTO[];
+  /** Como o app chama quem atende nesta categoria ("Profissional", "Quadra"...) */
+  staffLabel: string;
 }
 
 export interface ReviewDTO {
@@ -133,6 +146,9 @@ export interface ActivityDTO {
   canCancel: boolean;
   /** Mensagem da empresa (resposta ao orçamento ou observação no agendamento). */
   businessMessage: string | null;
+  bookingMode?: 'slot' | 'period' | 'day';
+  period?: string | null;
+  staffName?: string | null;
 }
 
 export interface UserDTO {

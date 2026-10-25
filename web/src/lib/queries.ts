@@ -74,13 +74,19 @@ export const useReviews = (businessId: string | undefined, sort: string, page: n
     placeholderData: keepPreviousData,
   });
 
-export const useAvailability = (businessId: string | undefined, serviceId: string | undefined, date: string | undefined) =>
+export interface AvailabilityResponse {
+  date: string;
+  timezone: string;
+  mode: 'slot' | 'period' | 'day';
+  durationMinutes: number | null;
+  slots: Array<{ startsAt: string; endsAt: string; label: string; staffIds: string[] }>;
+  staff: Array<{ id: string; name: string; roleTitle: string | null }>;
+}
+
+export const useAvailability = (businessId: string | undefined, serviceId: string | undefined, date: string | undefined, staffId?: string | null) =>
   useQuery({
-    queryKey: ['availability', businessId, serviceId, date],
-    queryFn: () =>
-      api.get<{ date: string; durationMinutes: number; slots: Array<{ startsAt: string; label: string }> }>(
-        `/businesses/${businessId}/availability${qs({ serviceId, date })}`,
-      ),
+    queryKey: ['availability', businessId, serviceId, date, staffId ?? null],
+    queryFn: () => api.get<AvailabilityResponse>(`/businesses/${businessId}/availability${qs({ serviceId, date, staffId: staffId ?? undefined })}`),
     enabled: !!businessId && !!serviceId && !!date,
   });
 

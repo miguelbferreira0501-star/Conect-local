@@ -5,7 +5,7 @@
  * apenas no navegador de quem a abriu (localStorage). Não há segurança real aqui: é só para visualizar.
  */
 import {
-  ACTIVITY_LIMITS, BRAND, RANKING_PARAMS, REVIEW_RULES, bookingRequestSchema, buildDiscoverSections, computeSlots,
+  ACTIVITY_LIMITS, BRAND, RANKING_PARAMS, REVIEW_RULES, bookingProfile, bookingRequestSchema, buildDiscoverSections, computeAvailability,
   haversineKm, hoursAreFresh, localDateOf, loginSchema, normalize, profileUpdateSchema, publicAuthorName, quoteRequestSchema, registerSchema,
   reviewInputSchema, reviewReportSchema, reviewUpdateSchema, scoreRows, searchQuerySchema, sortScored, toActivityDTO, toCard,
   type ActivityRow, type BusinessRow, type CityDTO, type SuggestionDTO,
@@ -203,8 +203,9 @@ function availability(bizId: string, serviceId: string, date: string) {
   const svc = (servicesByBiz.get(bizId) ?? []).find((s) => s.id === serviceId);
   if (!b.accepts_booking || !svc?.bookable) throw new MockError(422, 'service_not_bookable', 'Este serviço não pode ser agendado pela plataforma.');
   const tz = cities.get(b.city_ibge)!.timezone;
-  const busy = S.bookings.filter((x) => x.business_id === bizId && (x.status === 'requested' || x.status === 'confirmed'));
-  return { date, timezone: tz, durationMinutes: svc.duration_minutes, slots: computeSlots({ date, timezone: tz, durationMinutes: svc.duration_minutes, openingHours: b.opening_hours, busy }) };
+  const busy = S.bookings.filter((x) => x.business_id === bizId && (x.status === 'requested' || x.status === 'confirmed')).map((x) => ({ ...x, staff_id: null }));
+  const r = computeAvailability({ mode: 'slot', date, timezone: tz, durationMinutes: svc.duration_minutes, businessHours: b.opening_hours, staff: [], busy });
+  return { date, timezone: tz, mode: 'slot', durationMinutes: svc.duration_minutes, slots: r.slots, staff: [] };
 }
 
 // ── Rotas ──
@@ -308,9 +309,11 @@ export async function handle(method: string, fullPath: string, body: Json): Prom
         contact: { phone: b.phone, whatsapp: b.whatsapp, website: b.website, instagram: b.instagram, facebook: b.facebook, email: b.email },
         services: (servicesByBiz.get(b.id) ?? []).map((s) => ({
           id: s.id, name: s.name, description: s.description, priceType: s.price_type, priceMinCents: s.price_min_cents, priceMaxCents: s.price_max_cents,
-          durationMinutes: s.duration_minutes, bookable: s.bookable, notes: s.notes,
+          durationMinutes: s.duration_minutes, bookable: s.bookable, bookingMode: 'slot', notes: s.notes,
         })),
         photos: [],
+        staff: [],
+        staffLabel: bookingProfile(catById.get(b.category_id)!.slug).staffLabel,
         ratingDistribution: st.dist,
         aspectAverages: Object.fromEntries(Object.entries(aspectsAgg).filter(([, v]) => v.length >= 3).map(([k, v]) => [k, Math.round((v.reduce((a, c) => a + c, 0) / v.length) * 10) / 10])),
         verifiedAt: b.verified_at?.toISOString() ?? null,

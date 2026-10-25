@@ -9,6 +9,9 @@ export default defineConfig({
       DEMO_MODE: 'true',
       NODE_ENV: 'test',
       WEB_DIST: '/nao-existe',
+      // Assistente de IA aponta para um simulador local da API (ver test/ai.test.ts).
+      ANTHROPIC_API_KEY: 'chave-de-teste',
+      ANTHROPIC_BASE_URL: 'http://127.0.0.1:4599',
     },
     fileParallelism: false,
     testTimeout: 30000,

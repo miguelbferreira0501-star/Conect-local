@@ -37,17 +37,21 @@ export async function createBooking(userId: string, input: BookingRequestInput) 
     if (!biz) throw notFound('Empresa não encontrada.');
     const startsAt = new Date(input.startsAt);
     const localDate = localDateOf(startsAt, biz.timezone);
-    const avail = await availability(db, input.businessId, input.serviceId, localDate);
-    if (!avail.slots.some((s) => new Date(s.startsAt).getTime() === startsAt.getTime())) {
-      throw new AppError(409, 'slot_unavailable', 'Este horário não está mais disponível. Escolha outro.');
-    }
+    const avail = await availability(db, input.businessId, input.serviceId, localDate, input.staffId ?? null);
+    const slot = avail.slots.find((s) => new Date(s.startsAt).getTime() === startsAt.getTime());
+    if (!slot) throw new AppError(409, 'slot_unavailable', 'Este horário não está mais disponível. Escolha outro.');
+    // Sem preferência: fica com quem estiver livre (o primeiro da equipe, na ordem definida pela empresa).
+    const staffId = avail.staff.length ? (input.staffId ?? slot.staffIds[0]) : null;
     const created = await activitiesRepo.createBooking(db, {
       businessId: input.businessId,
       serviceId: input.serviceId,
       startsAt,
-      endsAt: new Date(startsAt.getTime() + avail.durationMinutes * 60_000),
+      endsAt: new Date(slot.endsAt),
       notes: input.notes,
       phone: input.contactPhone,
+      staffId,
+      mode: avail.mode,
+      period: avail.mode === 'period' ? slot.label : null,
     });
     return { id: created.id, status: 'requested' as const, isDemoBusiness: biz.is_demo };
   });

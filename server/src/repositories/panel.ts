@@ -4,7 +4,8 @@ import { query, type Db } from '../db/pool';
 const profileCols = `b.id, b.slug, b.name, b.status, b.suspended_reason, b.verified_at, b.is_demo, b.professional_name, c.slug AS category_slug,
   b.short_description, b.description, b.city_ibge, b.neighborhood, b.street, b.postal_code, b.address_public, b.mode_in_person,
   b.mode_at_customer, b.mode_online, b.phone, b.whatsapp, b.website, b.instagram, b.email, b.price_level, b.accepts_booking,
-  b.accepts_quote, b.logo_url, b.cover_url, b.opening_hours, b.hours_updated_at, b.requests_received, b.requests_answered`;
+  b.accepts_quote, b.logo_url, b.cover_url, b.opening_hours, b.hours_updated_at, b.requests_received, b.requests_answered,
+  b.plan, b.plan_until`;
 
 export const panelRepo = {
   myBusinesses: (db: Db) =>
@@ -24,7 +25,7 @@ export const panelRepo = {
   photos: (db: Db, id: string) => query<{ id: string; url: string }>(`SELECT id, url FROM photos WHERE business_id = $1 ORDER BY sort_order, id`, [id], db),
 
   services: (db: Db, id: string) =>
-    query(`SELECT id, name, description, price_type, price_min_cents, price_max_cents, duration_minutes, bookable, notes
+    query(`SELECT id, name, description, price_type, price_min_cents, price_max_cents, duration_minutes, bookable, booking_mode, notes
            FROM services WHERE business_id = $1 AND active ORDER BY sort_order, name`, [id], db),
 
   stats: async (db: Db, id: string) => {
@@ -67,15 +68,15 @@ export const panelRepo = {
 
   insertService: async (db: Db, businessId: string, s: Record<string, unknown>) =>
     (await query<{ id: string }>(
-      `INSERT INTO services (business_id, name, description, price_type, price_min_cents, price_max_cents, duration_minutes, bookable, notes, sort_order)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, (SELECT coalesce(max(sort_order), 0) + 1 FROM services WHERE business_id = $1)) RETURNING id`,
-      [businessId, s.name, s.description, s.price_type, s.price_min_cents, s.price_max_cents, s.duration_minutes, s.bookable, s.notes], db))[0].id,
+      `INSERT INTO services (business_id, name, description, price_type, price_min_cents, price_max_cents, duration_minutes, bookable, notes, booking_mode, sort_order)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, (SELECT coalesce(max(sort_order), 0) + 1 FROM services WHERE business_id = $1)) RETURNING id`,
+      [businessId, s.name, s.description, s.price_type, s.price_min_cents, s.price_max_cents, s.duration_minutes, s.bookable, s.notes, s.booking_mode], db))[0].id,
 
   updateService: (db: Db, businessId: string, serviceId: string, s: Record<string, unknown>) =>
     query(
-      `UPDATE services SET name = $3, description = $4, price_type = $5, price_min_cents = $6, price_max_cents = $7, duration_minutes = $8, bookable = $9, notes = $10
+      `UPDATE services SET name = $3, description = $4, price_type = $5, price_min_cents = $6, price_max_cents = $7, duration_minutes = $8, bookable = $9, notes = $10, booking_mode = $11
        WHERE id = $2 AND business_id = $1`,
-      [businessId, serviceId, s.name, s.description, s.price_type, s.price_min_cents, s.price_max_cents, s.duration_minutes, s.bookable, s.notes], db),
+      [businessId, serviceId, s.name, s.description, s.price_type, s.price_min_cents, s.price_max_cents, s.duration_minutes, s.bookable, s.notes, s.booking_mode], db),
 
   /** Serviços com histórico (agendamentos, avaliações) são desativados em vez de apagados. */
   removeService: (db: Db, businessId: string, serviceId: string) =>
@@ -108,13 +109,14 @@ export const panelRepo = {
       `SELECT * FROM (
          SELECT bk.id, 'booking' AS type, bk.status, s.name AS service_name, bk.starts_at, NULL::text AS preferred_date, bk.notes AS description,
            NULL::text AS contact_preference, NULL::text AS neighborhood, bk.created_at, bk.business_note AS business_response,
-           bk.contact_phone, cu.name AS customer_name, cu.email AS customer_email, cu.phone AS customer_phone
-         FROM bookings bk JOIN services s ON s.id = bk.service_id
+           bk.contact_phone, cu.name AS customer_name, cu.email AS customer_email, cu.phone AS customer_phone,
+           bk.booking_mode, bk.period, st.name AS staff_name
+         FROM bookings bk JOIN services s ON s.id = bk.service_id LEFT JOIN business_staff st ON st.id = bk.staff_id
          LEFT JOIN LATERAL app.business_customer(bk.business_id, bk.user_id) cu ON true
          WHERE bk.business_id = $1
          UNION ALL
          SELECT q.id, 'quote', q.status, s.name, NULL, q.preferred_date::text, q.description, q.contact_preference, q.neighborhood, q.created_at,
-           q.business_response, q.contact_phone, cu.name, cu.email, cu.phone
+           q.business_response, q.contact_phone, cu.name, cu.email, cu.phone, NULL, NULL, NULL
          FROM quote_requests q LEFT JOIN services s ON s.id = q.service_id
          LEFT JOIN LATERAL app.business_customer(q.business_id, q.user_id) cu ON true
          WHERE q.business_id = $1
@@ -149,11 +151,50 @@ export const panelRepo = {
   deleteReply: (db: Db, businessId: string, reviewId: string) =>
     query(`DELETE FROM review_replies WHERE review_id = $2 AND business_id = $1`, [businessId, reviewId], db),
 
+  // ── Equipe ──
+  staffCount: async (db: Db, businessId: string) =>
+    (await query<{ n: number }>(`SELECT count(*)::int AS n FROM business_staff WHERE business_id = $1 AND active`, [businessId], db))[0].n,
+
+  insertStaff: async (db: Db, businessId: string, v: { name: string; roleTitle: string | null; kind: string; openingHours: unknown }) =>
+    (await query<{ id: string }>(
+      `INSERT INTO business_staff (business_id, name, role_title, kind, opening_hours, sort_order)
+       VALUES ($1, $2, $3, $4, $5, (SELECT coalesce(max(sort_order), 0) + 1 FROM business_staff WHERE business_id = $1)) RETURNING id`,
+      [businessId, v.name, v.roleTitle, v.kind, v.openingHours ? JSON.stringify(v.openingHours) : null], db))[0].id,
+
+  updateStaff: (db: Db, businessId: string, id: string, v: { name: string; roleTitle: string | null; kind: string; openingHours: unknown }) =>
+    query(`UPDATE business_staff SET name = $3, role_title = $4, kind = $5, opening_hours = $6 WHERE id = $2 AND business_id = $1`,
+      [businessId, id, v.name, v.roleTitle, v.kind, v.openingHours ? JSON.stringify(v.openingHours) : null], db),
+
+  /** Desativa (mantém o histórico dos agendamentos). */
+  removeStaff: (db: Db, businessId: string, id: string) =>
+    query(`UPDATE business_staff SET active = false WHERE id = $2 AND business_id = $1`, [businessId, id], db),
+
+  setStaffServices: async (db: Db, staffId: string, serviceIds: string[]) => {
+    await query(`DELETE FROM staff_services WHERE staff_id = $1`, [staffId], db);
+    if (serviceIds.length) await query(`INSERT INTO staff_services (staff_id, service_id) SELECT $1, unnest($2::uuid[]) ON CONFLICT DO NOTHING`, [staffId, serviceIds], db);
+  },
+
+  agenda: (db: Db, businessId: string, from: Date, to: Date) =>
+    query(
+      `SELECT bk.id, bk.status, bk.starts_at, bk.ends_at, bk.booking_mode, bk.period, s.name AS service_name, bk.staff_id, st.name AS staff_name,
+         cu.name AS customer_name, coalesce(bk.contact_phone, cu.phone) AS customer_phone
+       FROM bookings bk JOIN services s ON s.id = bk.service_id LEFT JOIN business_staff st ON st.id = bk.staff_id
+       LEFT JOIN LATERAL app.business_customer(bk.business_id, bk.user_id) cu ON true
+       WHERE bk.business_id = $1 AND bk.status IN ('requested', 'confirmed', 'completed') AND bk.starts_at < $3 AND bk.ends_at > $2
+       ORDER BY bk.starts_at`,
+      [businessId, from, to], db),
+
+  aiUsageThisMonth: async (db: Db, businessId: string) =>
+    (await query<{ requests: number }>(`SELECT requests FROM ai_usage WHERE business_id = $1 AND month = date_trunc('month', now())::date`, [businessId], db))[0]?.requests ?? 0,
+
+  recordAiUsage: (db: Db, businessId: string, input: number, output: number) =>
+    query(`SELECT app.record_ai_usage($1, $2, $3)`, [businessId, input, output], db),
+
   // ── Administração ──
   adminList: (db: Db, q: string) =>
     query(
       `SELECT b.id, b.slug, b.name, b.status, b.suspended_reason AS "suspendedReason", b.verified_at AS "verifiedAt", b.is_demo AS "isDemo",
-         b.created_at AS "createdAt", c.short_name AS category, ci.name AS city, ci.uf, coalesce(st.review_count, 0) AS "reviewCount"
+         b.created_at AS "createdAt", b.plan, b.plan_until AS "planUntil", c.short_name AS category, ci.name AS city, ci.uf, coalesce(st.review_count, 0) AS "reviewCount"
        FROM businesses b JOIN categories c ON c.id = b.category_id JOIN cities ci ON ci.ibge = b.city_ibge
        LEFT JOIN business_review_stats st ON st.business_id = b.id
        WHERE app.is_admin() AND ($1 = '' OR app.norm(b.name) LIKE '%' || app.norm($1) || '%')
@@ -162,6 +203,9 @@ export const panelRepo = {
 
   adminUpdate: (db: Db, id: string, status: string, verified: boolean, reason: string | null) =>
     query(`SELECT app.admin_update_business($1, $2, $3, $4)`, [id, status, verified, reason], db),
+
+  adminSetPlan: (db: Db, id: string, plan: string, until: Date | null) =>
+    query(`SELECT app.admin_set_plan($1, $2, $3)`, [id, plan, until], db),
 
   isAdmin: async (db: Db) => (await query<{ a: boolean }>(`SELECT app.is_admin() AS a`, [], db))[0].a,
 };

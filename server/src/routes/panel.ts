@@ -8,6 +8,9 @@ import { requireAuth } from '../middleware/auth';
 import type { AppEnv, Ctx } from '../middleware/context';
 import { panelRepo } from '../repositories/panel';
 import { panel } from '../services/panel';
+import { aiEnabled, runAssistant } from '../services/ai';
+import { streamSSE } from 'hono/streaming';
+import { aiRequestSchema } from '@conecta/shared';
 
 const uid = (c: Ctx) => c.get('userId') as string;
 const bid = (c: Ctx) => parse(uuid, c.req.param('businessId'));
@@ -62,6 +65,35 @@ panelRoutes.post('/businesses/:businessId/requests/:type/:id', async (c) => {
   return c.json(await panel.actOnRequest(uid(c), bid(c), type, parse(uuid, c.req.param('id')), action, message));
 });
 
+panelRoutes.post('/businesses/:businessId/staff', async (c) => c.json(await panel.saveStaff(uid(c), bid(c), null, await c.req.json()), 201));
+panelRoutes.put('/businesses/:businessId/staff/:staffId', async (c) =>
+  c.json(await panel.saveStaff(uid(c), bid(c), parse(uuid, c.req.param('staffId')), await c.req.json())));
+panelRoutes.delete('/businesses/:businessId/staff/:staffId', async (c) =>
+  c.json(await panel.removeStaff(uid(c), bid(c), parse(uuid, c.req.param('staffId')))));
+
+panelRoutes.get('/businesses/:businessId/agenda', async (c) => {
+  const { from, days } = parse(z.object({ from: z.string().datetime({ offset: true }).optional(), days: z.coerce.number().int().min(1).max(31).default(7) }), c.req.query());
+  return c.json(await panel.agenda(uid(c), bid(c), from ? new Date(from) : new Date(Date.now() - 86_400_000), days));
+});
+
+// Assistente de IA (resposta em tempo real via Server-Sent Events)
+panelRoutes.get('/ai/status', (c) => c.json({ enabled: aiEnabled() }));
+panelRoutes.post('/businesses/:businessId/ai', async (c) => {
+  if (!hit(`ai:${uid(c)}`, 30, 60 * 60_000)) throw new AppError(429, 'rate_limited', 'Muitos pedidos ao assistente. Aguarde alguns minutos.');
+  const businessId = bid(c);
+  const { task, message, reviewId } = parse(aiRequestSchema, await c.req.json());
+  return streamSSE(c, async (stream) => {
+    try {
+      await runAssistant(uid(c), businessId, task, message, reviewId, { onText: (t) => stream.writeSSE({ event: 'text', data: JSON.stringify(t) }) });
+      await stream.writeSSE({ event: 'done', data: '{}' });
+    } catch (err) {
+      const message = err instanceof AppError ? err.message : 'O assistente está indisponível no momento.';
+      if (!(err instanceof AppError)) console.error(err);
+      await stream.writeSSE({ event: 'error', data: JSON.stringify({ message, code: err instanceof AppError ? err.code : 'internal' }) });
+    }
+  });
+});
+
 panelRoutes.get('/businesses/:businessId/reviews', async (c) => c.json(await panel.reviews(uid(c), bid(c))));
 panelRoutes.put('/businesses/:businessId/reviews/:reviewId/reply', async (c) => {
   const { body } = parse(replySchema, await c.req.json());
@@ -78,6 +110,11 @@ adminRoutes.use('*', requireAuth, async (c, next) => {
 });
 adminRoutes.get('/me', (c) => c.json({ admin: true }));
 adminRoutes.get('/businesses', async (c) => c.json(await withUser(uid(c), (db) => panelRepo.adminList(db, (c.req.query('q') ?? '').slice(0, 60)))));
+adminRoutes.put('/businesses/:businessId/plan', async (c) => {
+  const { plan, until } = parse(z.object({ plan: z.enum(['free', 'pro', 'team']), until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional() }), await c.req.json());
+  await withUser(uid(c), (db) => panelRepo.adminSetPlan(db, bid(c), plan, until ? new Date(`${until}T23:59:59-03:00`) : null));
+  return c.json({ ok: true });
+});
 adminRoutes.patch('/businesses/:businessId', async (c) => {
   const { status, verified, reason } = parse(adminBusinessUpdateSchema, await c.req.json());
   await withUser(uid(c), (db) => panelRepo.adminUpdate(db, bid(c), status, verified, reason || null));

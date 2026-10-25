@@ -73,6 +73,7 @@ export const serviceInputSchema = z
     priceMax: z.number().min(0).max(1_000_000).nullable().default(null),
     durationMinutes: z.number().int().min(5, 'Duração mínima de 5 minutos.').max(1440).nullable().default(null),
     bookable: z.boolean().default(false),
+    bookingMode: z.enum(['slot', 'period', 'day']).default('slot'),
     notes: optionalText(200),
   })
   .superRefine((v, ctx) => {
@@ -82,7 +83,7 @@ export const serviceInputSchema = z
     if (v.priceType === 'range' && (v.priceMax == null || v.priceMin == null || v.priceMax < v.priceMin)) {
       ctx.addIssue({ code: 'custom', path: ['priceMax'], message: 'O valor máximo precisa ser maior que o mínimo.' });
     }
-    if (v.bookable && !v.durationMinutes) {
+    if (v.bookable && v.bookingMode === 'slot' && !v.durationMinutes) {
       ctx.addIssue({ code: 'custom', path: ['durationMinutes'], message: 'Para aceitar agendamento, informe a duração.' });
     }
   });
@@ -131,7 +132,9 @@ export interface PanelBusinessDTO {
   photos: Array<{ id: string; url: string }>;
   openingHours: Record<string, Array<[string, string]>> | null;
   hoursUpdatedAt: string | null;
-  services: Array<{ id: string; name: string; description: string | null; priceType: 'fixed' | 'from' | 'range' | 'quote'; priceMin: number | null; priceMax: number | null; durationMinutes: number | null; bookable: boolean; notes: string | null }>;
+  services: Array<{ id: string; name: string; description: string | null; priceType: 'fixed' | 'from' | 'range' | 'quote'; priceMin: number | null; priceMax: number | null; durationMinutes: number | null; bookable: boolean; bookingMode: 'slot' | 'period' | 'day'; notes: string | null }>;
+  staff: PanelStaffDTO[];
+  plan: { id: PlanId; effective: PlanId; until: string | null; aiUsedThisMonth: number };
   stats: { reviewCount: number; average: number | null; pendingRequests: number; requestsReceived: number; requestsAnswered: number };
 }
 
@@ -147,6 +150,9 @@ export interface PanelRequestDTO {
   neighborhood: string | null;
   createdAt: string;
   businessResponse: string | null;
+  bookingMode: 'slot' | 'period' | 'day' | null;
+  period: string | null;
+  staffName: string | null;
   customer: { name: string; email: string | null; phone: string | null } | null;
 }
 
@@ -159,3 +165,85 @@ export interface PanelReviewDTO {
   createdAt: string;
   reply: { body: string; createdAt: string } | null;
 }
+
+// ── Equipe (profissionais/recursos) ──
+export const staffInputSchema = z.object({
+  name: z.string().trim().min(1, 'Informe o nome.').max(60, 'Use no máximo 60 caracteres.'),
+  roleTitle: z.string().trim().max(60).optional().transform((v) => v || null),
+  kind: z.enum(['person', 'resource']),
+  serviceIds: z.array(uuid).max(100).default([]),
+  /** null = segue o horário da empresa */
+  openingHours: openingHoursSchema.nullable().default(null),
+});
+export type StaffInput = z.input<typeof staffInputSchema>;
+
+export interface PanelStaffDTO {
+  id: string;
+  name: string;
+  roleTitle: string | null;
+  kind: 'person' | 'resource';
+  serviceIds: string[];
+  openingHours: Record<string, Array<[string, string]>> | null;
+}
+
+export interface PanelAgendaItemDTO {
+  id: string;
+  status: string;
+  startsAt: string;
+  endsAt: string;
+  mode: 'slot' | 'period' | 'day';
+  period: string | null;
+  serviceName: string;
+  staffId: string | null;
+  staffName: string | null;
+  customerName: string | null;
+  customerPhone: string | null;
+}
+
+// ── Planos ──
+export type PlanId = 'free' | 'pro' | 'team';
+export interface PlanDefinition {
+  id: PlanId;
+  name: string;
+  priceCents: number;
+  maxStaff: number;
+  aiRequestsPerMonth: number;
+  highlights: string[];
+}
+
+/**
+ * Planos mensais. Importante: o plano NÃO muda a posição na busca nem concede selos —
+ * a confiança do app depende disso. Pagos dão mais agendas, mais IA e ferramentas de gestão.
+ */
+export const PLANS: Record<PlanId, PlanDefinition> = {
+  free: {
+    id: 'free', name: 'Grátis', priceCents: 0, maxStaff: 1, aiRequestsPerMonth: 10,
+    highlights: ['Perfil completo com fotos, serviços e preços', 'Pedidos de orçamento ilimitados', 'Agenda on-line com 1 profissional ou recurso', 'Responder avaliações', '10 usos do assistente de IA por mês'],
+  },
+  pro: {
+    id: 'pro', name: 'Profissional', priceCents: 4990, maxStaff: 3, aiRequestsPerMonth: 80,
+    highlights: ['Tudo do Grátis', 'Até 3 profissionais ou recursos, cada um com sua agenda', 'Agenda da semana por profissional', '80 usos do assistente de IA por mês'],
+  },
+  team: {
+    id: 'team', name: 'Equipe', priceCents: 9990, maxStaff: 10, aiRequestsPerMonth: 250,
+    highlights: ['Tudo do Profissional', 'Até 10 profissionais ou recursos', '250 usos do assistente de IA por mês', 'Suporte prioritário'],
+  },
+};
+
+/** Plano vigente (um plano pago vencido volta a valer como Grátis). */
+export function effectivePlan(plan: PlanId, planUntil: string | Date | null, now: Date = new Date()): PlanId {
+  if (plan === 'free') return 'free';
+  if (planUntil && new Date(planUntil).getTime() < now.getTime()) return 'free';
+  return plan;
+}
+
+// ── Assistente de IA ──
+export const AI_TASKS = ['description', 'services', 'reply', 'tips', 'chat'] as const;
+export type AiTask = (typeof AI_TASKS)[number];
+export const aiRequestSchema = z.object({
+  task: z.enum(AI_TASKS),
+  /** Pergunta livre (chat) ou observações extras do dono da empresa */
+  message: z.string().trim().max(1500, 'Use no máximo 1500 caracteres.').optional(),
+  reviewId: uuid.optional(),
+});
+export type AiRequestInput = z.infer<typeof aiRequestSchema>;

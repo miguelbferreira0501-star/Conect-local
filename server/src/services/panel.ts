@@ -1,12 +1,13 @@
 /** Regras do painel das empresas. */
 import { randomBytes } from 'node:crypto';
 import {
-  PANEL_LIMITS, type BusinessProfileInput, type PanelBusinessDTO, type PanelRequestDTO, type PanelReviewDTO, businessProfileSchema,
+  PANEL_LIMITS, PLANS, effectivePlan, staffInputSchema, type PanelAgendaItemDTO, type PanelStaffDTO, type PlanId, type BusinessProfileInput, type PanelBusinessDTO, type PanelRequestDTO, type PanelReviewDTO, businessProfileSchema,
   openingHoursSchema, serviceInputSchema,
 } from '@conecta/shared';
 import type { z } from 'zod';
 import { withUser, type Db } from '../db/pool';
 import { AppError, forbidden, notFound, parse } from '../lib/errors';
+import { businessesRepo } from '../repositories/businesses';
 import { locationsRepo } from '../repositories/locations';
 import { panelRepo } from '../repositories/panel';
 
@@ -93,6 +94,8 @@ export const panel = {
       const photos = await panelRepo.photos(db, businessId);
       const services = await panelRepo.services(db, businessId);
       const stats = await panelRepo.stats(db, businessId);
+      const staff = await businessesRepo.staff(businessId, db);
+      const aiUsed = await panelRepo.aiUsageThisMonth(db, businessId);
       return {
         id: b.id, slug: b.slug, name: b.name, status: b.status, suspendedReason: b.suspended_reason,
         verifiedAt: b.verified_at ? new Date(b.verified_at).toISOString() : null, isDemo: b.is_demo,
@@ -108,8 +111,10 @@ export const panel = {
         services: services.map((s) => ({
           id: s.id, name: s.name, description: s.description, priceType: s.price_type,
           priceMin: s.price_min_cents == null ? null : s.price_min_cents / 100, priceMax: s.price_max_cents == null ? null : s.price_max_cents / 100,
-          durationMinutes: s.duration_minutes, bookable: s.bookable, notes: s.notes,
+          durationMinutes: s.duration_minutes, bookable: s.bookable, bookingMode: s.booking_mode, notes: s.notes,
         })),
+        staff: staff as PanelStaffDTO[],
+        plan: { id: b.plan, effective: effectivePlan(b.plan, b.plan_until), until: b.plan_until ? new Date(b.plan_until).toISOString() : null, aiUsedThisMonth: aiUsed },
         stats: { ...stats, requestsReceived: b.requests_received, requestsAnswered: b.requests_answered },
       };
     });
@@ -142,7 +147,8 @@ export const panel = {
       name: s.name, description: s.description, price_type: s.priceType,
       price_min_cents: s.priceType === 'quote' ? null : cents(s.priceMin),
       price_max_cents: s.priceType === 'range' ? cents(s.priceMax) : null,
-      duration_minutes: s.durationMinutes, bookable: s.bookable && !!s.durationMinutes, notes: s.notes,
+      duration_minutes: s.durationMinutes, bookable: s.bookable && (s.bookingMode !== 'slot' || !!s.durationMinutes), notes: s.notes,
+      booking_mode: s.bookingMode,
     };
     return withUser(userId, async (db) => {
       await requireMember(db, businessId);
@@ -211,6 +217,7 @@ export const panel = {
         startsAt: r.starts_at ? new Date(r.starts_at).toISOString() : null, preferredDate: r.preferred_date,
         description: r.description, contactPreference: r.contact_preference, neighborhood: r.neighborhood,
         createdAt: new Date(r.created_at).toISOString(), businessResponse: r.business_response,
+        bookingMode: r.booking_mode ?? null, period: r.period ?? null, staffName: r.staff_name ?? null,
         customer: r.customer_name
           ? { name: r.customer_name, phone: r.contact_phone || r.customer_phone || null, email: r.customer_email }
           : null,
@@ -240,6 +247,42 @@ export const panel = {
       return { ok: true };
     });
   },
+
+  async saveStaff(userId: string, businessId: string, staffId: string | null, input: unknown) {
+    const v = parse(staffInputSchema, input);
+    return withUser(userId, async (db) => {
+      await requireMember(db, businessId);
+      if (!staffId) {
+        const b = await panelRepo.business(db, businessId);
+        const plan = PLANS[effectivePlan(b.plan as PlanId, b.plan_until)];
+        if ((await panelRepo.staffCount(db, businessId)) >= plan.maxStaff) {
+          throw new AppError(402, 'plan_limit', `O plano ${plan.name} permite até ${plan.maxStaff} ${plan.maxStaff === 1 ? 'agenda' : 'agendas'}. Mude de plano para adicionar mais.`);
+        }
+      }
+      const id = staffId ?? (await panelRepo.insertStaff(db, businessId, v));
+      if (staffId) await panelRepo.updateStaff(db, businessId, staffId, v);
+      await panelRepo.setStaffServices(db, id, v.serviceIds);
+      return { id };
+    });
+  },
+
+  removeStaff: (userId: string, businessId: string, staffId: string) =>
+    withUser(userId, async (db) => {
+      await requireMember(db, businessId);
+      await panelRepo.removeStaff(db, businessId, staffId);
+      return { ok: true };
+    }),
+
+  agenda: (userId: string, businessId: string, from: Date, days: number): Promise<PanelAgendaItemDTO[]> =>
+    withUser(userId, async (db) => {
+      await requireMember(db, businessId);
+      const rows = await panelRepo.agenda(db, businessId, from, new Date(from.getTime() + days * 86_400_000));
+      return rows.map((r) => ({
+        id: r.id, status: r.status, startsAt: new Date(r.starts_at).toISOString(), endsAt: new Date(r.ends_at).toISOString(),
+        mode: r.booking_mode, period: r.period, serviceName: r.service_name, staffId: r.staff_id, staffName: r.staff_name,
+        customerName: r.customer_name, customerPhone: r.customer_phone,
+      }));
+    }),
 
   reviews: (userId: string, businessId: string) =>
     withUser(userId, async (db) => {

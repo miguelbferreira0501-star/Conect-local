@@ -22,6 +22,10 @@ banco PostgreSQL protegido por políticas de segurança. “Conecta Local” é 
 | **Avaliações** | Só após contratação confirmada; nota + comentário + aspectos opcionais; editar por 30 dias; excluir; denunciar. |
 | **Perfil** | Conta, dados, minhas avaliações, privacidade (lembrar cidade, **excluir conta** — LGPD), “Como funciona”, termos. |
 | **Painel das empresas** (`/empresas`) | Cadastro (aparece na hora), perfil, cidades atendidas, logo/capa/fotos (reduzidas no navegador), serviços e preços, horários, pedidos (confirmar/recusar agendamentos, responder orçamentos, contato do cliente), resposta pública às avaliações. |
+| **Agendas por nicho** | Cada serviço usa *horário marcado* (salão, pet, tatuagem, quadras), *dia + turno* (limpeza, reformas, serviços em casa) ou *diária* (espaços de eventos). Padrões por categoria em `packages/shared/src/booking.ts`. |
+| **Equipe** | Profissionais ou recursos (quadras, salas) com agenda própria, serviços que fazem e folgas; cliente escolhe ou marca “sem preferência”. Agenda da semana por profissional no painel. |
+| **Assistente de IA** | No painel: escreve o perfil, sugere serviços e preços de referência, rascunha respostas a avaliações e dá dicas — com regras de honestidade. Claude via SDK oficial, resposta em tempo real, limite mensal por plano. Variáveis: `ANTHROPIC_API_KEY`, `AI_MODEL`, `AI_EFFORT`. |
+| **Planos** | Grátis / Profissional / Equipe (`packages/shared/src/panel.ts`), com limites de agendas e de IA. O plano **não** altera ranking nem selos. Definido em `/admin` até a integração de pagamento. Análise de preço e custos: [docs/PLANOS-E-CUSTOS.md](docs/PLANOS-E-CUSTOS.md). |
 | **Administração** (`/admin`) | Suspender/reativar empresas e conceder o selo “Perfil verificado”. Acesso pelos e-mails em `ADMIN_EMAILS`. |
 
 Navegação sem cadastro: a pessoa explora tudo e só precisa de conta para favoritar, agendar, pedir orçamento e avaliar.
