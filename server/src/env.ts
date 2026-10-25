@@ -31,8 +31,11 @@ const envSchema = z.object({
   AI_EFFORT: z.enum(['low', 'medium', 'high']).default('low'),
   /** Pagamentos (Asaas). Sem chave, a assinatura on-line fica indisponível. */
   ASAAS_API_KEY: z.string().optional(),
-  /** Sandbox por padrão. Produção: https://api.asaas.com/v3 */
-  ASAAS_API_URL: z.string().url().default('https://api-sandbox.asaas.com/v3'),
+  /** Opcional: se vazio, o servidor descobre sozinho se a chave é de produção ou de testes (sandbox). */
+  ASAAS_API_URL: z.string().url().optional(),
+  /** Endereço público do site (o Render informa sozinho em RENDER_EXTERNAL_URL). */
+  PUBLIC_URL: z.string().url().optional(),
+  RENDER_EXTERNAL_URL: z.string().url().optional(),
   /** Token configurado no painel da Asaas para autenticar os avisos (webhooks). */
   ASAAS_WEBHOOK_TOKEN: z.string().min(16).optional(),
   /** Permitir compra de planos dentro do app das lojas (exige conformidade com as regras da loja). */

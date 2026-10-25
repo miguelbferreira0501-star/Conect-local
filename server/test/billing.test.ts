@@ -7,7 +7,7 @@ import { app, call, newUser, setupDatabase } from './helpers';
 setupDatabase();
 
 /** Simulador da API v3 da Asaas. */
-const state = { requests: [] as Array<{ method: string; path: string; body: any; key?: string }>, paymentStatus: 'PENDING', canceled: [] as string[] };
+const state = { requests: [] as Array<{ method: string; path: string; body: any; key?: string }>, paymentStatus: 'PENDING', canceled: [] as string[], webhooks: [] as any[], webhookUpdates: 0 };
 let server: Server;
 beforeAll(async () => {
   server = createServer((req, res) => {
@@ -19,6 +19,11 @@ beforeAll(async () => {
       state.requests.push({ method: req.method!, path, body, key: req.headers['access_token'] as string });
       const json = (code: number, data: object) => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(JSON.stringify(data)); };
       if (req.method === 'POST' && path === '/customers') return json(200, { id: 'cus_1' });
+      if (path.startsWith('/webhooks')) {
+        if (req.method === 'GET') return json(200, { data: state.webhooks });
+        if (req.method === 'POST') { state.webhooks.push({ id: 'wh_1', url: body.url, enabled: true, body }); return json(200, { id: 'wh_1' }); }
+        if (req.method === 'PUT') { state.webhookUpdates++; return json(200, { id: 'wh_1' }); }
+      }
       if (req.method === 'POST' && path === '/subscriptions') return json(200, { id: `sub_${state.requests.length}` });
       let m = /^\/subscriptions\/([^/]+)\/payments$/.exec(path);
       if (m) return json(200, { data: [{ id: `pay_${m[1]}`, status: 'PENDING', value: body?.value ?? 49.9, dueDate: '2026-10-25', invoiceUrl: `https://sandbox.asaas.com/i/${m[1]}`, subscription: m[1] }] });
@@ -41,6 +46,23 @@ const profile = {
 };
 const webhook = (body: object, token = 'token-do-webhook-de-teste-123') =>
   app.request('/api/webhooks/asaas', { method: 'POST', headers: { 'content-type': 'application/json', 'asaas-access-token': token }, body: JSON.stringify(body) });
+
+describe('configuração automática da Asaas', () => {
+  it('cadastra o aviso de pagamento com o token e não duplica ao reiniciar', async () => {
+    process.env.PUBLIC_URL = 'https://meusite.onrender.com';
+    const { env } = await import('../src/env');
+    (env as { PUBLIC_URL?: string }).PUBLIC_URL = 'https://meusite.onrender.com';
+    const { ensureAsaasWebhook } = await import('../src/services/billing/asaas');
+    const first = await ensureAsaasWebhook('dono@teste.com');
+    expect(first.webhook).toBe('ok');
+    expect(state.webhooks).toHaveLength(1);
+    expect(state.webhooks[0].body).toMatchObject({ url: 'https://meusite.onrender.com/api/webhooks/asaas', authToken: 'token-do-webhook-de-teste-123', enabled: true });
+    expect(state.webhooks[0].body.events).toContain('PAYMENT_RECEIVED');
+    await ensureAsaasWebhook('dono@teste.com');
+    expect(state.webhooks).toHaveLength(1);
+    expect(state.webhookUpdates).toBe(1);
+  });
+});
 
 describe('assinatura paga', () => {
   it('Pix: checkout no app → aviso de pagamento → plano ativo', async () => {

@@ -45,23 +45,8 @@ O uso real fica registrado na tabela `ai_usage` (pedidos e tokens por empresa/m�
 
 ## Configurar a Asaas
 
-1. Crie a conta em asaas.com (comece pelo **sandbox**, ambiente de testes) e gere a chave da API.
-2. No Render: `ASAAS_API_KEY` = a chave; `ASAAS_WEBHOOK_TOKEN` já é gerado pelo Render — copie o valor.
-3. Na Asaas, em **Integrações → Webhooks**, adicione `https://SEU-SITE/api/webhooks/asaas`, cole o mesmo token em
-   “Token de autenticação” e marque os eventos de **Cobranças** e **Assinaturas**.
-4. Teste com o sandbox; para cobrar de verdade, troque `ASAAS_API_URL` para `https://api.asaas.com/v3` e use a chave
-   de produção.
-
-## Margem estimada
-
-Cenário: das empresas cadastradas, 60% no Grátis, 30% no Profissional, 10% no Equipe; uso médio de 30% do limite de IA.
-
-| Empresas | Receita/mês | Custos (IA Opus) | Lucro (Opus) | Custos (IA Haiku) | Lucro (Haiku) |
-| --- | --- | --- | --- | --- | --- |
-| 100 | R$ 2.496 | R$ 631 | **R$ 1.865 (75%)** | R$ 407 | **R$ 2.089 (84%)** |
-| 500 | R$ 12.480 | R$ 2.803 | **R$ 9.677 (78%)** | R$ 1.683 | **R$ 10.797 (87%)** |
-| 2.000 | R$ 49.920 | R$ 12.111 | **R$ 37.809 (76%)** | R$ 7.631 | **R$ 42.289 (85%)** |
-
-Custos incluídos: hospedagem/banco, IA, meio de pagamento e impostos. **Não incluídos**: marketing para atrair
-clientes e empresas, atendimento/suporte, contador (~R$ 300–500/mês), seu pró-labore e eventuais funcionários.
-Na prática, a margem final depende principalmente de quanto se gasta para conquistar cada empresa pagante.
+1. Crie a conta em asaas.com (pode começar pela conta de **testes/sandbox**) e copie a **chave da API**.
+2. No Render, em **Environment**, cole a chave em `ASAAS_API_KEY` e salve.
+3. Pronto: ao reiniciar, o servidor descobre se a chave é de testes ou de produção e cadastra sozinho, na Asaas,
+   o aviso de pagamento (`/api/webhooks/asaas`) com o token `ASAAS_WEBHOOK_TOKEN`. Confira em **/admin** →
+   “Pagamentos funcionando”. Para cobrar de verdade, troque pela chave de produção.

@@ -38,6 +38,7 @@ export function AdminPage() {
     <div className="container-app max-w-4xl py-6">
       <h1 className="text-2xl font-bold">Administração</h1>
       <p className="mb-4 text-muted">Empresas aparecem no app assim que se cadastram. Aqui você suspende perfis falsos ou irregulares e concede o selo “Perfil verificado” depois de conferir documentos.</p>
+      <BillingSetupCard />
       <form className="mb-4 flex gap-2" onSubmit={(e) => { e.preventDefault(); setTerm(q.trim()); }} role="search">
         <label htmlFor="admin-q" className="sr-only">Buscar empresa</label>
         <input id="admin-q" className="field" placeholder="Buscar empresa pelo nome" value={q} onChange={(e) => setQ(e.target.value)} />
@@ -110,6 +111,25 @@ function PlanEditor({ b, onSaved }: { b: AdminBiz; onSaved: () => void }) {
         </label>
       )}
       <Button size="sm" variant="secondary" loading={saving} onClick={save}>Salvar plano</Button>
+    </div>
+  );
+}
+
+function BillingSetupCard() {
+  const [recheck, setRecheck] = useState(0);
+  const q = useQuery({
+    queryKey: ['admin', 'billing-status', recheck],
+    queryFn: () => api.get<{ configured: boolean; environment: string | null; webhook: string; message: string }>(`/admin/billing-status${recheck ? '?recheck=1' : ''}`),
+  });
+  if (!q.data) return null;
+  const ok = q.data.configured && q.data.webhook === 'ok';
+  return (
+    <div className="mb-4">
+      <Alert tone={ok ? 'success' : 'warning'} title={ok ? 'Pagamentos funcionando' : 'Pagamentos ainda não estão prontos'}
+        action={<Button size="sm" variant="secondary" loading={q.isFetching} onClick={() => setRecheck((n) => n + 1)}>Verificar de novo</Button>}>
+        {q.data.message}
+        {ok && q.data.environment?.includes('sandbox') && ' Atenção: chave de TESTES — nenhuma cobrança é real. Para cobrar de verdade, troque pela chave de produção.'}
+      </Alert>
     </div>
   );
 }

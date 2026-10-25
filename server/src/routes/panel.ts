@@ -7,6 +7,8 @@ import { hit } from '../lib/rateLimit';
 import { requireAuth } from '../middleware/auth';
 import type { AppEnv, Ctx } from '../middleware/context';
 import { panelRepo } from '../repositories/panel';
+import { usersRepo } from '../repositories/users';
+const usersRepoMe = usersRepo.me;
 import { panel } from '../services/panel';
 import { aiEnabled, runAssistant } from '../services/ai';
 import { streamSSE } from 'hono/streaming';
@@ -109,6 +111,11 @@ adminRoutes.use('*', requireAuth, async (c, next) => {
   await next();
 });
 adminRoutes.get('/me', (c) => c.json({ admin: true }));
+adminRoutes.get('/billing-status', async (c) => {
+  const { billingSetupStatus, ensureAsaasWebhook } = await import('../services/billing/asaas');
+  if (c.req.query('recheck') === '1') await ensureAsaasWebhook((await withUser(uid(c), (db) => usersRepoMe(db)))?.email ?? 'contato@exemplo.com.br');
+  return c.json(billingSetupStatus());
+});
 adminRoutes.get('/businesses', async (c) => c.json(await withUser(uid(c), (db) => panelRepo.adminList(db, (c.req.query('q') ?? '').slice(0, 60)))));
 adminRoutes.put('/businesses/:businessId/plan', async (c) => {
   const { plan, until } = parse(z.object({ plan: z.enum(['free', 'pro', 'team']), until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional() }), await c.req.json());

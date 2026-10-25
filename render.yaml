@@ -30,13 +30,12 @@ services:
         sync: false
       - key: AI_MODEL
         value: claude-opus-5-5
-      # Pagamentos (Asaas): chave da API e token dos avisos (webhooks). Sandbox por padrão.
+      # Pagamentos (Asaas): basta colar a chave. O ambiente (testes/produção) e o aviso de pagamento
+      # são configurados automaticamente ao iniciar.
       - key: ASAAS_API_KEY
         sync: false
       - key: ASAAS_WEBHOOK_TOKEN
         generateValue: true
-      - key: ASAAS_API_URL
-        value: https://api-sandbox.asaas.com/v3
       # Preencha depois de gerar o app Android (PWABuilder mostra esses valores):
       - key: ANDROID_PACKAGE_NAME
         sync: false
