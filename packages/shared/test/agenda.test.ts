@@ -52,3 +52,14 @@ describe('planos', () => {
     expect(PLANS.pro.maxStaff).toBeGreaterThan(PLANS.free.maxStaff);
   });
 });
+
+import { isValidCpfCnpj } from '../src';
+describe('CPF/CNPJ', () => {
+  it('aceita documentos válidos e recusa inválidos', () => {
+    expect(isValidCpfCnpj('529.982.247-25')).toBe(true);
+    expect(isValidCpfCnpj('111.111.111-11')).toBe(false);
+    expect(isValidCpfCnpj('529.982.247-24')).toBe(false);
+    expect(isValidCpfCnpj('11.222.333/0001-81')).toBe(true);
+    expect(isValidCpfCnpj('11.222.333/0001-82')).toBe(false);
+  });
+});

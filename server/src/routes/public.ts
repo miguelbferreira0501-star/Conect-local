@@ -15,7 +15,7 @@ const longCache = 'public, max-age=86400, stale-while-revalidate=604800';
 
 publicRoutes.get('/health', (c) => c.json({ ok: true }));
 
-publicRoutes.get('/config', (c) => c.json({ brand: BRAND, demoMode: env.DEMO_MODE }));
+publicRoutes.get('/config', (c) => c.json({ brand: BRAND, demoMode: env.DEMO_MODE, storePayments: env.STORE_APP_PAYMENTS }));
 
 publicRoutes.get('/locations/states', async (c) => {
   c.header('Cache-Control', longCache);

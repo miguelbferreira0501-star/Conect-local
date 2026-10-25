@@ -10,6 +10,7 @@ import type { AppEnv } from './middleware/context';
 import { csrfMiddleware } from './middleware/csrf';
 import { accountRoutes } from './routes/account';
 import { adminRoutes, imageRoutes, panelRoutes } from './routes/panel';
+import { billingRoutes, webhookRoutes } from './routes/billing';
 import { publicRoutes } from './routes/public';
 import { bodyLimit } from 'hono/body-limit';
 
@@ -46,10 +47,14 @@ export function createApp() {
     ]);
   });
 
+  // Avisos de pagamento chegam de outro servidor: sem sessão nem cabeçalho anti-CSRF (autenticados por token).
+  app.route('/api', webhookRoutes);
+
   const api = new Hono<AppEnv>();
   api.use('*', bodyLimit({ maxSize: 1024 * 1024, onError: (c) => c.json({ error: { code: 'too_large', message: 'Envio muito grande (máximo de 1 MB).' } }, 413) }));
   api.use('*', sessionMiddleware, csrfMiddleware);
   api.route('/', imageRoutes);
+  api.route('/panel', billingRoutes);
   api.route('/panel', panelRoutes);
   api.route('/admin', adminRoutes);
   api.route('/', publicRoutes);

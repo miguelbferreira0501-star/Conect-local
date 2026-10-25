@@ -247,3 +247,56 @@ export const aiRequestSchema = z.object({
   reviewId: uuid.optional(),
 });
 export type AiRequestInput = z.infer<typeof aiRequestSchema>;
+
+// ── Pagamento da assinatura ──
+/** Valida CPF (11 dígitos) ou CNPJ (14 dígitos) pelos dígitos verificadores. */
+export function isValidCpfCnpj(value: string): boolean {
+  const d = value.replace(/\D/g, '');
+  if (!/^\d{11}$|^\d{14}$/.test(d) || /^(\d)\1+$/.test(d)) return false;
+  const calc = (digits: string, weights: number[]) => {
+    const sum = weights.reduce((acc, w, i) => acc + Number(digits[i]) * w, 0);
+    const r = sum % 11;
+    return r < 2 ? 0 : 11 - r;
+  };
+  if (d.length === 11) {
+    const w1 = [10, 9, 8, 7, 6, 5, 4, 3, 2];
+    const w2 = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
+    // CPF: resto 10 ou 11 vira 0
+    const dv = (digits: string, w: number[]) => {
+      const s = w.reduce((acc, x, i) => acc + Number(digits[i]) * x, 0);
+      const r = (s * 10) % 11;
+      return r === 10 ? 0 : r;
+    };
+    return dv(d, w1) === Number(d[9]) && dv(d, w2) === Number(d[10]);
+  }
+  const w1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+  const w2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+  return calc(d, w1) === Number(d[12]) && calc(d, w2) === Number(d[13]);
+}
+
+export const checkoutSchema = z.object({
+  plan: z.enum(['pro', 'team']),
+  method: z.enum(['PIX', 'CREDIT_CARD']),
+  cpfCnpj: z.string().trim().transform((v) => v.replace(/\D/g, '')).refine(isValidCpfCnpj, 'Informe um CPF ou CNPJ válido.'),
+  holderName: z.string().trim().min(3, 'Informe o nome do responsável.').max(100),
+});
+export type CheckoutInput = z.input<typeof checkoutSchema>;
+
+export interface CheckoutResultDTO {
+  subscriptionId: string;
+  paymentId: string;
+  method: 'PIX' | 'CREDIT_CARD';
+  valueCents: number;
+  /** Página segura do meio de pagamento (cartão ou alternativa ao Pix) */
+  invoiceUrl: string | null;
+  pix: { qrCodeImage: string; copyPaste: string; expiresAt: string | null } | null;
+}
+
+export interface BillingStatusDTO {
+  enabled: boolean;
+  plan: PlanId;
+  effectivePlan: PlanId;
+  planUntil: string | null;
+  subscription: { id: string; plan: PlanId; method: 'PIX' | 'CREDIT_CARD'; status: 'pending' | 'active' | 'canceled'; valueCents: number; createdAt: string } | null;
+  lastPayment: { status: string; dueDate: string | null; paidAt: string | null; invoiceUrl: string | null } | null;
+}

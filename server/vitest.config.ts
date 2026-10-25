@@ -12,6 +12,10 @@ export default defineConfig({
       // Assistente de IA aponta para um simulador local da API (ver test/ai.test.ts).
       ANTHROPIC_API_KEY: 'chave-de-teste',
       ANTHROPIC_BASE_URL: 'http://127.0.0.1:4599',
+      // Pagamentos apontam para um simulador local da Asaas (ver test/billing.test.ts).
+      ASAAS_API_KEY: 'chave-asaas-teste',
+      ASAAS_API_URL: 'http://127.0.0.1:4598/v3',
+      ASAAS_WEBHOOK_TOKEN: 'token-do-webhook-de-teste-123',
     },
     fileParallelism: false,
     testTimeout: 30000,

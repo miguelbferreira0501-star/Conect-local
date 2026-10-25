@@ -39,8 +39,18 @@ O uso real fica registrado na tabela `ai_usage` (pedidos e tokens por empresa/m�
 - **Meio de pagamento** (Pix/cartão, ex.: Asaas, Mercado Pago): ~1% a 5% por cobrança — estimativa média de 4%.
 - **Impostos**: empresa no Simples Nacional; serviços de software costumam começar em ~6% (Anexo III, depende do
   "Fator R") ou 15,5% (Anexo V). Estimamos 6%–8%. O MEI não cobre esta atividade.
-- **Lojas de apps**: vendendo os planos **somente pelo site**, não há taxa do Google/Apple (15%–30%). O app das lojas
-  mostra os planos sem botão de compra.
+- **Lojas de apps**: no site e no app instalado pelo navegador, o pagamento é direto (Pix/cartão, sem taxa de loja).
+  No app baixado da Google Play/App Store, as regras das lojas exigem o sistema de pagamento delas para assinaturas
+  digitais (15%–30%); por isso a compra fica desligada lá (`STORE_APP_PAYMENTS=false`) e a empresa assina pelo site.
+
+## Configurar a Asaas
+
+1. Crie a conta em asaas.com (comece pelo **sandbox**, ambiente de testes) e gere a chave da API.
+2. No Render: `ASAAS_API_KEY` = a chave; `ASAAS_WEBHOOK_TOKEN` já é gerado pelo Render — copie o valor.
+3. Na Asaas, em **Integrações → Webhooks**, adicione `https://SEU-SITE/api/webhooks/asaas`, cole o mesmo token em
+   “Token de autenticação” e marque os eventos de **Cobranças** e **Assinaturas**.
+4. Teste com o sandbox; para cobrar de verdade, troque `ASAAS_API_URL` para `https://api.asaas.com/v3` e use a chave
+   de produção.
 
 ## Margem estimada
 

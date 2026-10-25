@@ -1,0 +1,117 @@
+import { createServer, type Server } from 'node:http';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import pg from 'pg';
+import { resetRateLimits } from '../src/lib/rateLimit';
+import { app, call, newUser, setupDatabase } from './helpers';
+
+setupDatabase();
+
+/** Simulador da API v3 da Asaas. */
+const state = { requests: [] as Array<{ method: string; path: string; body: any; key?: string }>, paymentStatus: 'PENDING', canceled: [] as string[] };
+let server: Server;
+beforeAll(async () => {
+  server = createServer((req, res) => {
+    let raw = '';
+    req.on('data', (c) => (raw += c));
+    req.on('end', () => {
+      const body = raw ? JSON.parse(raw) : null;
+      const path = req.url!.replace('/v3', '');
+      state.requests.push({ method: req.method!, path, body, key: req.headers['access_token'] as string });
+      const json = (code: number, data: object) => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(JSON.stringify(data)); };
+      if (req.method === 'POST' && path === '/customers') return json(200, { id: 'cus_1' });
+      if (req.method === 'POST' && path === '/subscriptions') return json(200, { id: `sub_${state.requests.length}` });
+      let m = /^\/subscriptions\/([^/]+)\/payments$/.exec(path);
+      if (m) return json(200, { data: [{ id: `pay_${m[1]}`, status: 'PENDING', value: body?.value ?? 49.9, dueDate: '2026-10-25', invoiceUrl: `https://sandbox.asaas.com/i/${m[1]}`, subscription: m[1] }] });
+      m = /^\/payments\/([^/]+)\/pixQrCode$/.exec(path);
+      if (m) return json(200, { encodedImage: 'iVBORw0KGgo=', payload: '00020126PIXCOPIAECOLA', expirationDate: '2026-10-26 23:59:59' });
+      m = /^\/payments\/([^/]+)$/.exec(path);
+      if (m) return json(200, { id: m[1], status: state.paymentStatus, value: 49.9, dueDate: '2026-10-25', invoiceUrl: null, subscription: m[1].replace('pay_', '') });
+      m = /^\/subscriptions\/([^/]+)$/.exec(path);
+      if (req.method === 'DELETE' && m) { state.canceled.push(m[1]); return json(200, { deleted: true }); }
+      json(404, { errors: [{ description: 'não encontrado' }] });
+    });
+  });
+  await new Promise<void>((r) => server.listen(4598, '127.0.0.1', r));
+});
+afterAll(() => new Promise<void>((r) => server.close(() => r())));
+
+const profile = {
+  name: 'Oficina Paga', categorySlug: 'automotivo', shortDescription: 'Oficina mecânica completa.', cityIbge: 4209102, street: 'Rua C, 3',
+  modeInPerson: true, modeAtCustomer: false, modeOnline: false, whatsapp: '47999990000', acceptsBooking: true, acceptsQuote: true,
+};
+const webhook = (body: object, token = 'token-do-webhook-de-teste-123') =>
+  app.request('/api/webhooks/asaas', { method: 'POST', headers: { 'content-type': 'application/json', 'asaas-access-token': token }, body: JSON.stringify(body) });
+
+describe('assinatura paga', () => {
+  it('Pix: checkout no app → aviso de pagamento → plano ativo', async () => {
+    resetRateLimits();
+    const owner = await newUser('Dono Pagante');
+    const { body: biz } = await call('POST', '/panel/businesses', profile, owner.cookie);
+    expect((await call('POST', `/panel/businesses/${biz.id}/billing/checkout`, { plan: 'pro', method: 'PIX', cpfCnpj: '111.111.111-11', holderName: 'Dono Pagante' }, owner.cookie)).status).toBe(422);
+
+    const co = await call('POST', `/panel/businesses/${biz.id}/billing/checkout`, { plan: 'pro', method: 'PIX', cpfCnpj: '529.982.247-25', holderName: 'Dono Pagante' }, owner.cookie);
+    expect(co.status).toBe(201);
+    expect(co.body.pix.copyPaste).toBe('00020126PIXCOPIAECOLA');
+    expect(co.body.pix.qrCodeImage).toMatch(/^data:image\/png;base64,/);
+    const subReq = state.requests.find((r) => r.path === '/subscriptions')!;
+    expect(subReq.body).toMatchObject({ customer: 'cus_1', billingType: 'PIX', value: 49.9, cycle: 'MONTHLY', externalReference: biz.id });
+    expect(subReq.key).toBe('chave-asaas-teste');
+
+    // CPF não fica guardado no nosso banco
+    const db = new pg.Client({ connectionString: process.env.DATABASE_OWNER_URL });
+    await db.connect();
+    const dump = JSON.stringify((await db.query(`SELECT * FROM subscriptions s JOIN businesses b ON b.id = s.business_id WHERE b.id = $1`, [biz.id])).rows);
+    expect(dump).not.toContain('52998224725');
+
+    let st = (await call('GET', `/panel/businesses/${biz.id}/billing`, undefined, owner.cookie)).body;
+    expect(st.subscription.status).toBe('pending');
+    expect(st.effectivePlan).toBe('free');
+
+    const pay = { id: co.body.paymentId, status: 'RECEIVED', value: 49.9, dueDate: '2026-10-25', invoiceUrl: null, subscription: co.body.subscriptionId };
+    expect((await webhook({ id: 'evt_fake', event: 'PAYMENT_RECEIVED', payment: pay }, 'token-errado-xxxxxxxx')).status).toBe(401);
+    const ok = await webhook({ id: 'evt_1', event: 'PAYMENT_RECEIVED', payment: pay });
+    expect((await ok.json()).result).toBe('activated');
+    expect((await (await webhook({ id: 'evt_1', event: 'PAYMENT_RECEIVED', payment: pay })).json()).result).toBe('duplicate');
+
+    st = (await call('GET', `/panel/businesses/${biz.id}/billing`, undefined, owner.cookie)).body;
+    expect(st.subscription.status).toBe('active');
+    expect(st.effectivePlan).toBe('pro');
+    const until = new Date(st.planUntil);
+    expect(until.getTime()).toBeGreaterThan(new Date('2026-11-25').getTime());
+
+    // Plano pago libera mais agendas
+    expect((await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'A', kind: 'person' }, owner.cookie)).status).toBe(201);
+    expect((await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'B', kind: 'person' }, owner.cookie)).status).toBe(201);
+
+    // Cancelar: período pago continua valendo
+    expect((await call('POST', `/panel/businesses/${biz.id}/billing/cancel`, {}, owner.cookie)).status).toBe(200);
+    expect(state.canceled).toContain(co.body.subscriptionId);
+    st = (await call('GET', `/panel/businesses/${biz.id}/billing`, undefined, owner.cookie)).body;
+    expect(st.subscription.status).toBe('canceled');
+    expect(st.effectivePlan).toBe('pro');
+    await db.end();
+  });
+
+  it('sem aviso da Asaas, a tela de status confere o pagamento direto', async () => {
+    resetRateLimits();
+    const owner = await newUser();
+    const { body: biz } = await call('POST', '/panel/businesses', { ...profile, name: 'Oficina Sem Aviso' }, owner.cookie);
+    const co = await call('POST', `/panel/businesses/${biz.id}/billing/checkout`, { plan: 'team', method: 'CREDIT_CARD', cpfCnpj: '11.222.333/0001-81', holderName: 'Empresa LTDA' }, owner.cookie);
+    expect(co.status).toBe(201);
+    expect(co.body.pix).toBeNull();
+    expect(co.body.invoiceUrl).toMatch(/^https:\/\/sandbox\.asaas\.com\/i\//);
+    state.paymentStatus = 'CONFIRMED';
+    const st = (await call('GET', `/panel/businesses/${biz.id}/billing`, undefined, owner.cookie)).body;
+    expect(st.effectivePlan).toBe('team');
+    state.paymentStatus = 'PENDING';
+  });
+
+  it('somente dono/gerente assina; outra pessoa não vê nem altera', async () => {
+    resetRateLimits();
+    const owner = await newUser();
+    const intruder = await newUser();
+    const { body: biz } = await call('POST', '/panel/businesses', { ...profile, name: 'Oficina Protegida' }, owner.cookie);
+    expect((await call('GET', `/panel/businesses/${biz.id}/billing`, undefined, intruder.cookie)).status).toBe(403);
+    expect((await call('POST', `/panel/businesses/${biz.id}/billing/checkout`, { plan: 'pro', method: 'PIX', cpfCnpj: '529.982.247-25', holderName: 'X Y' }, intruder.cookie)).status).toBe(403);
+  });
+});

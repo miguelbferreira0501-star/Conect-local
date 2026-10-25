@@ -29,6 +29,14 @@ const envSchema = z.object({
   AI_MODEL: z.string().default('claude-opus-5-5'),
   /** Profundidade de raciocínio: low (padrão, barato e rápido) | medium | high */
   AI_EFFORT: z.enum(['low', 'medium', 'high']).default('low'),
+  /** Pagamentos (Asaas). Sem chave, a assinatura on-line fica indisponível. */
+  ASAAS_API_KEY: z.string().optional(),
+  /** Sandbox por padrão. Produção: https://api.asaas.com/v3 */
+  ASAAS_API_URL: z.string().url().default('https://api-sandbox.asaas.com/v3'),
+  /** Token configurado no painel da Asaas para autenticar os avisos (webhooks). */
+  ASAAS_WEBHOOK_TOKEN: z.string().min(16).optional(),
+  /** Permitir compra de planos dentro do app das lojas (exige conformidade com as regras da loja). */
+  STORE_APP_PAYMENTS: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
   SESSION_DAYS: z.coerce.number().int().min(1).max(365).default(30),
 });
 

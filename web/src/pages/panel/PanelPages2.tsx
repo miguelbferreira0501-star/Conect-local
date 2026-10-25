@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bot, CalendarDays, Check, Copy, Crown, Lightbulb, ListPlus, MessageSquareText, PenLine, Plus, Send, Trash2, UserRound, Users } from 'lucide-react';
 import {
-  bookingProfile, formatCents, PERIODS, PLANS, WEEKDAY_NAMES, type AiTask, type PanelAgendaItemDTO, type PanelBusinessDTO, type PanelStaffDTO, type Period, type PlanId,
+  bookingProfile, checkoutSchema, formatCents, PERIODS, PLANS, WEEKDAY_NAMES, type AiTask, type BillingStatusDTO, type CheckoutResultDTO, type PanelAgendaItemDTO, type PanelBusinessDTO, type PanelStaffDTO, type Period, type PlanId,
 } from '@conecta/shared';
 import { api, ApiError } from '@/lib/api';
 import { streamAssistant } from '@/lib/ai';
 import { usePanelMutation } from '@/lib/panelQueries';
+import { useConfig } from '@/lib/queries';
 import { isStoreApp } from '@/lib/platform';
-import { Button, ButtonLink } from '@/components/ui/Button';
+import { Button, buttonClass } from '@/components/ui/Button';
 import { Alert, EmptyState, PageLoader } from '@/components/ui/Feedback';
 import { Checkbox, ChipToggle, TextArea, TextField } from '@/components/ui/Form';
 import { Sheet } from '@/components/ui/Sheet';
@@ -316,19 +317,56 @@ export function AiReplyButton({ businessId, reviewId, onStart, onText, onDone }:
   );
 }
 
-// ── Plano ──
+// ── Plano e assinatura ──
+const SUB_STATUS: Record<string, string> = { pending: 'Aguardando pagamento', active: 'Ativa', canceled: 'Cancelada' };
+
 export function PanelPlanPage() {
   const b = useBiz();
-  const current = b.plan.effective;
-  const inStoreApp = isStoreApp();
+  const qc = useQueryClient();
+  const toast = useToast();
+  const config = useConfig() as { data?: { storePayments?: boolean } };
+  const canBuy = !isStoreApp() || !!config.data?.storePayments;
+  const status = useQuery({ queryKey: ['panel', 'billing', b.id], queryFn: () => api.get<BillingStatusDTO>(`/panel/businesses/${b.id}/billing`) });
+  const [buying, setBuying] = useState<PlanId | null>(null);
+  const [canceling, setCanceling] = useState(false);
+  const [cancelBusy, setCancelBusy] = useState(false);
+  if (status.isLoading) return <PageLoader />;
+  const st = status.data;
+  const current = st?.effectivePlan ?? b.plan.effective;
+  const sub = st?.subscription;
+  const refresh = () => { qc.invalidateQueries({ queryKey: ['panel', 'billing', b.id] }); qc.invalidateQueries({ queryKey: ['panel', 'business', b.id] }); };
+
   return (
     <div className="space-y-4">
       <Alert tone="info">O plano não muda a sua posição na busca nem dá selos — isso depende só das avaliações e do perfil. Os planos pagos dão mais agendas, mais uso do assistente e ferramentas de gestão.</Alert>
-      {b.plan.id !== 'free' && b.plan.until && <p className="text-sm">Seu plano {PLANS[b.plan.id].name} vale até <strong>{new Date(b.plan.until).toLocaleDateString('pt-BR')}</strong>.</p>}
+
+      {sub && (
+        <section className="card p-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="font-semibold">Sua assinatura: {PLANS[sub.plan].name}</h2>
+            <Tag tone={sub.status === 'active' ? 'accent' : sub.status === 'pending' ? 'warning' : 'neutral'}>{SUB_STATUS[sub.status]}</Tag>
+          </div>
+          <p className="mt-1 text-sm text-muted">
+            {formatCents(sub.valueCents)}/mês · {sub.method === 'PIX' ? 'Pix' : 'Cartão de crédito'}
+            {st?.planUntil && current !== 'free' ? ` · plano válido até ${new Date(st.planUntil).toLocaleDateString('pt-BR')}` : ''}
+          </p>
+          {sub.status === 'pending' && st?.lastPayment?.invoiceUrl && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <a href={st.lastPayment.invoiceUrl} target="_blank" rel="noopener noreferrer" className={buttonClass('primary', 'sm')}>Pagar agora</a>
+              <Button size="sm" variant="secondary" onClick={() => status.refetch()}>Já paguei — verificar</Button>
+            </div>
+          )}
+          {sub.method === 'PIX' && sub.status === 'active' && <p className="mt-2 text-sm text-muted">Todo mês você recebe a cobrança Pix por e-mail. Também dá para pagar pelo link da fatura.</p>}
+          {sub.status !== 'canceled' && canBuy && <Button size="sm" variant="ghost" className="mt-3" onClick={() => setCanceling(true)}>Cancelar assinatura</Button>}
+          {sub.status === 'canceled' && current !== 'free' && <p className="mt-2 text-sm">O plano continua valendo até o fim do período já pago.</p>}
+        </section>
+      )}
+
       <div className="grid gap-3 md:grid-cols-3">
         {(Object.keys(PLANS) as PlanId[]).map((id) => {
           const p = PLANS[id];
           const active = id === current;
+          const subscribedHere = sub && sub.status !== 'canceled' && sub.plan === id;
           return (
             <section key={id} className={`card flex flex-col p-5 ${active ? 'border-brand-700 ring-2 ring-brand-500/20' : ''}`}>
               <div className="flex items-center gap-2">
@@ -340,22 +378,118 @@ export function PanelPlanPage() {
                 {p.highlights.map((h) => <li key={h} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-accent-600" />{h}</li>)}
               </ul>
               <div className="mt-4">
-                {active ? <Tag tone="brand">Seu plano atual</Tag> : id === 'free' || inStoreApp ? null : (
-                  <ButtonLink to="#assinar" size="sm" variant={id === 'pro' ? 'primary' : 'secondary'} onClick={(e) => { e.preventDefault(); document.getElementById('assinar')?.scrollIntoView({ behavior: 'smooth' }); }}>Quero o {p.name}</ButtonLink>
-                )}
+                {active ? <Tag tone="brand">Seu plano atual</Tag>
+                  : id === 'free' || !canBuy || subscribedHere ? null
+                  : st?.enabled
+                    ? <Button size="sm" variant={id === 'pro' ? 'primary' : 'secondary'} onClick={() => setBuying(id)}>Assinar {p.name}</Button>
+                    : <p className="text-sm text-muted">Assinatura on-line em breve.</p>}
               </div>
             </section>
           );
         })}
       </div>
-      {inStoreApp ? (
-        <p className="text-sm text-muted">A mudança de plano é feita pelo site do Conecta Local, no navegador.</p>
-      ) : (
-        <section id="assinar" className="card p-5">
+      {!canBuy && <p className="text-sm text-muted">A mudança de plano é feita pelo site do Conecta Local, no navegador.</p>}
+      {canBuy && !st?.enabled && (
+        <section className="card p-5">
           <h2 className="font-semibold">Como assinar</h2>
-          <p className="mt-1 text-sm text-muted">O pagamento on-line (Pix e cartão) está chegando. Por enquanto, fale com a equipe pelo e-mail do suporte informando o nome da empresa e o plano: liberamos na hora após o Pix.</p>
+          <p className="mt-1 text-sm text-muted">O pagamento on-line ainda não foi ativado. Fale com a equipe pelo e-mail do suporte informando a empresa e o plano.</p>
         </section>
       )}
+      <p className="text-xs text-muted">Pagamentos processados pela Asaas. Seus dados de cartão e CPF/CNPJ ficam com o meio de pagamento — o Conecta Local não os armazena.</p>
+
+      {buying && <CheckoutSheet businessId={b.id} plan={buying} onClose={() => { setBuying(null); refresh(); }} onPaid={() => { setBuying(null); refresh(); toast(`Pagamento confirmado! Plano ${PLANS[buying].name} ativo.`); }} />}
+      <Sheet open={canceling} onClose={() => setCanceling(false)} title="Cancelar assinatura?"
+        footer={<div className="flex gap-3"><Button variant="secondary" onClick={() => setCanceling(false)}>Voltar</Button><Button block variant="danger" loading={cancelBusy}
+          onClick={async () => { setCancelBusy(true); try { await api.post(`/panel/businesses/${b.id}/billing/cancel`); toast('Assinatura cancelada.'); refresh(); setCanceling(false); } catch (e) { toast((e as Error).message, 'error'); } finally { setCancelBusy(false); } }}>Cancelar assinatura</Button></div>}>
+        <p>Não haverá novas cobranças. O plano continua valendo até o fim do período já pago; depois, sua empresa volta ao Grátis — sem perder perfil, avaliações ou histórico.</p>
+      </Sheet>
     </div>
+  );
+}
+
+function CheckoutSheet({ businessId, plan, onClose, onPaid }: { businessId: string; plan: PlanId; onClose: () => void; onPaid: () => void }) {
+  const p = PLANS[plan];
+  const [method, setMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX');
+  const [doc, setDoc] = useState('');
+  const [holder, setHolder] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<CheckoutResultDTO | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  // Depois de gerar a cobrança, confere a cada 5 s se o pagamento caiu.
+  useEffect(() => {
+    if (!result) return;
+    const t = setInterval(async () => {
+      try {
+        const st = await api.get<BillingStatusDTO>(`/panel/businesses/${businessId}/billing`);
+        if (st.subscription?.status === 'active' && st.effectivePlan === plan) { clearInterval(t); onPaid(); }
+      } catch { /* tenta de novo */ }
+    }, 5000);
+    return () => clearInterval(t);
+  }, [result, businessId, plan, onPaid]);
+
+  const submit = async () => {
+    setApiError(null);
+    const parsed = checkoutSchema.safeParse({ plan, method, cpfCnpj: doc, holderName: holder });
+    if (!parsed.success) {
+      const e: Record<string, string> = {};
+      for (const i of parsed.error.issues) e[String(i.path[0])] ??= i.message;
+      return setErrors(e);
+    }
+    setErrors({});
+    setLoading(true);
+    try {
+      const r = await api.post<CheckoutResultDTO>(`/panel/businesses/${businessId}/billing/checkout`, { plan, method, cpfCnpj: doc, holderName: holder });
+      setResult(r);
+      if (r.method === 'CREDIT_CARD' && r.invoiceUrl) window.open(r.invoiceUrl, '_blank', 'noopener');
+    } catch (e) {
+      setApiError((e as ApiError).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Sheet open onClose={onClose} title={result ? 'Finalize o pagamento' : `Assinar ${p.name} — ${formatCents(p.priceCents)}/mês`}
+      footer={!result ? <Button block size="lg" loading={loading} onClick={submit}>{method === 'PIX' ? 'Gerar Pix' : 'Ir para o pagamento com cartão'}</Button> : undefined}>
+      {!result ? (
+        <div className="space-y-4">
+          <fieldset>
+            <legend className="label">Forma de pagamento</legend>
+            <div className="flex gap-2">
+              <ChipToggle selected={method === 'PIX'} onClick={() => setMethod('PIX')}>Pix</ChipToggle>
+              <ChipToggle selected={method === 'CREDIT_CARD'} onClick={() => setMethod('CREDIT_CARD')}>Cartão de crédito</ChipToggle>
+            </div>
+            <p className="mt-2 text-sm text-muted">{method === 'PIX' ? 'Pague agora com o QR Code. Nos próximos meses, a cobrança Pix chega por e-mail.' : 'Cobrança automática todo mês no cartão. Você digita o cartão na página segura do meio de pagamento.'}</p>
+          </fieldset>
+          <TextField label="Nome do responsável ou razão social" value={holder} onChange={(e) => { setHolder(e.target.value); setErrors(({ holderName: _h, ...r }) => r); }} error={errors.holderName} autoComplete="name" />
+          <TextField label="CPF ou CNPJ" inputMode="numeric" value={doc} onChange={(e) => { setDoc(e.target.value); setErrors(({ cpfCnpj: _c, ...r }) => r); }} error={errors.cpfCnpj} hint="Exigido para emitir a cobrança. Não fica guardado no Conecta Local." />
+          <p className="text-sm">Total hoje: <strong>{formatCents(p.priceCents)}</strong>. Renova todo mês; cancele quando quiser.</p>
+          {apiError && <Alert tone="error">{apiError}</Alert>}
+        </div>
+      ) : result.pix ? (
+        <div className="space-y-4 text-center">
+          <p>Abra o app do seu banco, escolha <strong>Pix → Ler QR Code</strong> ou use o “copia e cola”.</p>
+          <img src={result.pix.qrCodeImage} alt="QR Code Pix" className="mx-auto h-56 w-56 rounded-xl border border-line bg-white p-2" />
+          <div className="rounded-xl bg-surface p-3 text-left">
+            <p className="break-all font-mono text-xs">{result.pix.copyPaste}</p>
+          </div>
+          <Button variant="secondary" icon={copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            onClick={async () => { try { await navigator.clipboard.writeText(result.pix!.copyPaste); setCopied(true); } catch { /* sem permissão */ } }}>
+            {copied ? 'Código copiado' : 'Copiar código Pix'}
+          </Button>
+          <p className="flex items-center justify-center gap-2 text-sm text-muted"><span className="h-2 w-2 animate-pulse rounded-full bg-accent-600" /> Aguardando a confirmação do pagamento…</p>
+          <p className="text-xs text-muted">Assim que o Pix cair, o plano é ativado automaticamente. Pode fechar esta janela.</p>
+        </div>
+      ) : (
+        <div className="space-y-4 text-center">
+          <p>Abrimos a página segura do meio de pagamento em uma nova aba. Se não abriu, toque abaixo.</p>
+          {result.invoiceUrl && <a href={result.invoiceUrl} target="_blank" rel="noopener noreferrer" className={buttonClass('primary', 'lg', 'w-full')}>Pagar com cartão</a>}
+          <p className="flex items-center justify-center gap-2 text-sm text-muted"><span className="h-2 w-2 animate-pulse rounded-full bg-accent-600" /> Aguardando a confirmação do pagamento…</p>
+        </div>
+      )}
+    </Sheet>
   );
 }
