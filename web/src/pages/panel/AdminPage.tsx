@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BadgeCheck, ShieldAlert } from 'lucide-react';
 import { formatCents, PLANS, type PlanId } from '@conecta/shared';
 import { api } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/Button';
 import { Alert, EmptyState, PageLoader } from '@/components/ui/Feedback';
 import { TextArea } from '@/components/ui/Form';
@@ -20,6 +21,7 @@ export function AdminPage() {
   const toast = useToast();
   const [suspending, setSuspending] = useState<AdminBiz | null>(null);
   const [reason, setReason] = useState('');
+  const { user } = useAuth();
   const access = useQuery({ queryKey: ['admin', 'me'], queryFn: () => api.get('/admin/me'), retry: false });
   const list = useQuery({ queryKey: ['admin', 'businesses', term], queryFn: () => api.get<AdminBiz[]>(`/admin/businesses?q=${encodeURIComponent(term)}`), enabled: access.isSuccess });
   const update = async (b: AdminBiz, patch: { status?: string; verified?: boolean; reason?: string }) => {
@@ -33,7 +35,14 @@ export function AdminPage() {
     }
   };
   if (access.isLoading) return <PageLoader />;
-  if (access.isError) return <div className="container-app py-8"><EmptyState icon={<ShieldAlert className="h-8 w-8" />} title="Área restrita">Somente administradores acessam esta página.</EmptyState></div>;
+  if (access.isError) return (
+    <div className="container-app py-8">
+      <EmptyState icon={<ShieldAlert className="h-8 w-8" />} title="Área restrita">
+        Somente administradores acessam esta página.
+        {user && <span className="mt-2 block">Você entrou como <strong>{user.email}</strong>. Para liberar, esse e-mail precisa estar, exatamente igual, na variável <strong>ADMIN_EMAILS</strong> do Render.</span>}
+      </EmptyState>
+    </div>
+  );
   return (
     <div className="container-app max-w-4xl py-6">
       <h1 className="text-2xl font-bold">Administração</h1>

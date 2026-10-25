@@ -108,6 +108,15 @@ describe('painel das empresas', () => {
     expect(leaked.rowCount).toBe(0);
   });
 
+  it('e-mail listado em ADMIN_EMAILS vira administrador ao abrir /admin, sem reiniciar', async () => {
+    resetRateLimits();
+    const r = await call('POST', '/auth/register', { name: 'Chefe', email: 'chefe@teste.com', password: 'Senha1234', acceptTerms: true });
+    expect(r.status).toBe(201);
+    expect((await call('GET', '/admin/me', undefined, r.cookie)).status).toBe(200);
+    const other = await newUser('Curioso');
+    expect((await call('GET', '/admin/me', undefined, other.cookie)).status).toBe(403);
+  });
+
   it('administrador suspende e verifica; empresa suspensa some da busca', async () => {
     resetRateLimits();
     const admin = await newUser('Admin');

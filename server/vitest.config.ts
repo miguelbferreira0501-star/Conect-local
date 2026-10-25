@@ -16,6 +16,7 @@ export default defineConfig({
       ASAAS_API_KEY: 'chave-asaas-teste',
       ASAAS_API_URL: 'http://127.0.0.1:4598/v3',
       ASAAS_WEBHOOK_TOKEN: 'token-do-webhook-de-teste-123',
+      ADMIN_EMAILS: ' Chefe@Teste.com ',
     },
     fileParallelism: false,
     testTimeout: 30000,

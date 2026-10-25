@@ -1,7 +1,9 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { adminBusinessUpdateSchema, imageUploadSchema, replySchema, requestActionSchema, uuid } from '@conecta/shared';
+import pg from 'pg';
 import { withUser } from '../db/pool';
+import { env } from '../env';
 import { AppError, forbidden, notFound, parse } from '../lib/errors';
 import { hit } from '../lib/rateLimit';
 import { requireAuth } from '../middleware/auth';
@@ -107,9 +109,28 @@ panelRoutes.delete('/businesses/:businessId/reviews/:reviewId/reply', async (c) 
 /** Administração: /api/admin/... (somente usuários com papel admin). */
 export const adminRoutes = new Hono<AppEnv>();
 adminRoutes.use('*', requireAuth, async (c, next) => {
-  if (!(await withUser(uid(c), (db) => panelRepo.isAdmin(db)))) throw forbidden('Área restrita a administradores.');
+  if (!(await withUser(uid(c), (db) => panelRepo.isAdmin(db)))) {
+    // E-mail listado em ADMIN_EMAILS vira administrador na primeira visita (não precisa reiniciar o servidor).
+    const me = await withUser(uid(c), (db) => usersRepoMe(db));
+    if (!me || !adminEmails().includes(me.email.trim().toLowerCase())) throw forbidden('Área restrita a administradores.');
+    await promoteToAdmin(uid(c));
+  }
   await next();
 });
+
+function adminEmails() {
+  return (env.ADMIN_EMAILS ?? '').split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
+}
+
+async function promoteToAdmin(userId: string) {
+  const client = new pg.Client({ connectionString: env.DATABASE_OWNER_URL });
+  await client.connect();
+  try {
+    await client.query(`UPDATE users SET role = 'admin' WHERE id = $1`, [userId]);
+  } finally {
+    await client.end();
+  }
+}
 adminRoutes.get('/me', (c) => c.json({ admin: true }));
 adminRoutes.get('/billing-status', async (c) => {
   const { billingSetupStatus, ensureAsaasWebhook } = await import('../services/billing/asaas');
