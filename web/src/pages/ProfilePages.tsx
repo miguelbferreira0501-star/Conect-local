@@ -71,7 +71,7 @@ export function ProfilePage() {
           <MenuItem to="/perfil/privacidade" icon={ShieldCheck} label="Privacidade e dados" />
           <MenuItem to="/como-funciona" icon={Info} label="Como funcionam avaliações e ranking" />
           <MenuItem to="/termos" icon={FileText} label="Termos de uso e privacidade" />
-          <MenuItem to="/para-empresas" icon={Store} label="Tenho uma empresa" hint="Painel empresarial em breve" />
+          <MenuItem to="/empresas" icon={Store} label="Tenho uma empresa" hint="Cadastre e gerencie sua empresa" />
         </ul>
 
         {user && (

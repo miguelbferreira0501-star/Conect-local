@@ -21,6 +21,8 @@ const envSchema = z.object({
   /** App Android (Play Store): nome do pacote e impressões SHA-256 do certificado (separadas por vírgula). */
   ANDROID_PACKAGE_NAME: z.string().regex(/^[a-zA-Z][\w.]*$/).optional(),
   ANDROID_CERT_SHA256: z.string().optional(),
+  /** E-mails que recebem o papel de administrador a cada inicialização (separados por vírgula). */
+  ADMIN_EMAILS: z.string().optional(),
   SESSION_DAYS: z.coerce.number().int().min(1).max(365).default(30),
 });
 

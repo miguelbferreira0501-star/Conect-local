@@ -10,12 +10,12 @@ export const activitiesRepo = {
       `SELECT * FROM (
          SELECT bk.id, 'booking' AS type, bk.status, b.id AS business_id, b.slug AS business_slug, b.name AS business_name,
            b.logo_url, c.name AS category_name, b.is_demo, s.name AS service_name, s.id AS service_id, bk.starts_at,
-           NULL::text AS preferred_date, bk.notes AS description, bk.created_at, bk.completed_at AS closed_at, r.id AS review_id
+           NULL::text AS preferred_date, bk.notes AS description, bk.created_at, bk.completed_at AS closed_at, r.id AS review_id, bk.business_note AS business_message
          FROM bookings bk JOIN businesses b ON b.id = bk.business_id JOIN categories c ON c.id = b.category_id
          JOIN services s ON s.id = bk.service_id LEFT JOIN reviews r ON r.booking_id = bk.id
          UNION ALL
          SELECT q.id, 'quote', q.status, b.id, b.slug, b.name, b.logo_url, c.name, b.is_demo, s.name, s.id, NULL,
-           q.preferred_date::text, q.description, q.created_at, q.hired_at, r.id
+           q.preferred_date::text, q.description, q.created_at, q.hired_at, r.id, q.business_response
          FROM quote_requests q JOIN businesses b ON b.id = q.business_id JOIN categories c ON c.id = b.category_id
          LEFT JOIN services s ON s.id = q.service_id LEFT JOIN reviews r ON r.quote_id = q.id
        ) a ORDER BY coalesce(a.starts_at, a.created_at) DESC`,

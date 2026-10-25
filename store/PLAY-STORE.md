@@ -6,9 +6,10 @@ navegador, e se atualiza sozinho quando o site é atualizado — sem reenviar o 
 ## Antes de começar
 
 - [ ] Site publicado com HTTPS (Render + Neon — veja o README).
-- [ ] **Empresas reais cadastradas e `DEMO_MODE=false`.** A Play Store não aceita apps que apresentam
+- [ ] **Empresas reais cadastradas pelo painel (`/empresas`) e `DEMO_MODE=false`** no Render (as fictícias são apagadas sozinhas na reinicialização). A Play Store não aceita apps que apresentam
       empresas ou avaliações fictícias como reais (política de conteúdo enganoso).
 - [ ] Termos e política de privacidade revisados (hoje são texto-modelo em `/termos`).
+- [ ] `ADMIN_EMAILS` no Render com o seu e-mail, para moderar em `/admin`.
 - [ ] E-mail de suporte real em `packages/shared/src/brand.ts`.
 - [ ] Conta de desenvolvedor no [Google Play Console](https://play.google.com/console) (taxa única de US$ 25).
       Contas pessoais novas precisam de um **teste fechado com pelo menos 12 testadores por 14 dias**

@@ -20,6 +20,7 @@ const STATUS: Record<string, { label: string; tone: 'neutral' | 'brand' | 'accen
   confirmed: { label: 'Confirmado', tone: 'brand' },
   completed: { label: 'Realizado', tone: 'accent' },
   cancelled: { label: 'Cancelado', tone: 'neutral' },
+  declined: { label: 'Recusado pela empresa', tone: 'neutral' },
   sent: { label: 'Pedido enviado', tone: 'warning' },
   answered: { label: 'Respondido', tone: 'brand' },
   hired: { label: 'Contratado', tone: 'accent' },
@@ -119,6 +120,12 @@ function ActivityCard({ a }: { a: ActivityDTO }) {
           <p className="text-sm text-muted">{a.serviceName ?? a.business.categoryName}</p>
           <p className="mt-0.5 text-sm">{when}</p>
           {a.type === 'quote' && a.status === 'sent' && <p className="mt-1 text-xs text-muted">A empresa responde pelo contato que você informou.</p>}
+          {a.businessMessage && (
+            <div className="mt-2 rounded-xl bg-surface p-3 text-sm">
+              <p className="font-semibold">Mensagem da empresa</p>
+              <p className="whitespace-pre-line">{a.businessMessage}</p>
+            </div>
+          )}
         </div>
       </div>
       <div className="mt-3 flex flex-wrap gap-2">

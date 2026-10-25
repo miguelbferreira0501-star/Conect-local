@@ -114,7 +114,7 @@ export interface ReviewDTO {
   business?: { id: string; slug: string; name: string };
 }
 
-export type BookingStatus = 'requested' | 'confirmed' | 'completed' | 'cancelled';
+export type BookingStatus = 'requested' | 'confirmed' | 'completed' | 'cancelled' | 'declined';
 export type QuoteStatus = 'sent' | 'answered' | 'hired' | 'closed';
 
 export interface ActivityDTO {
@@ -131,6 +131,8 @@ export interface ActivityDTO {
   reviewId: string | null;
   canMarkDone: boolean;
   canCancel: boolean;
+  /** Mensagem da empresa (resposta ao orçamento ou observação no agendamento). */
+  businessMessage: string | null;
 }
 
 export interface UserDTO {

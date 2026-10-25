@@ -12,3 +12,4 @@ export * from './time';
 export * from './scoring';
 export * from './booking';
 export * from './activities';
+export * from './panel';

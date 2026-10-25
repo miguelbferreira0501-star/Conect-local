@@ -20,6 +20,7 @@ export interface ActivityRow {
   created_at: string | Date;
   closed_at: string | Date | null;
   review_id: string | null;
+  business_message?: string | null;
 }
 
 export const ACTIVITY_LIMITS = { maxActiveFutureBookings: 10, maxQuotesPerDay: 15, reviewWindowDays: 180 };
@@ -45,6 +46,7 @@ export function toActivityDTO(a: ActivityRow, lastReviewByBusiness: Map<string, 
     canReview: done && !a.review_id && withinWindow && cooldownOk,
     reviewId: a.review_id,
     canMarkDone: a.type === 'booking' ? active && !!startsAt && startsAt <= now : a.status === 'sent' || a.status === 'answered',
+    businessMessage: a.business_message ?? null,
     canCancel: a.type === 'booking' ? active && !!startsAt && startsAt > now : a.status === 'sent' || a.status === 'answered',
   };
 }

@@ -1,42 +1,11 @@
-import { beforeAll, afterAll, describe, expect, it } from 'vitest';
-import pg from 'pg';
-import { createApp } from '../src/app';
-import { migrate, reset } from '../src/db/cli';
-import { loadLocations } from '../src/db/locations';
-import { DEMO_ACCOUNT, seedDemo } from '../src/db/seed';
-import { pool, withUser } from '../src/db/pool';
+import { describe, expect, it } from 'vitest';
+import { DEMO_ACCOUNT } from '../src/db/seed';
+import { withUser } from '../src/db/pool';
+import { app, call, newUser, setupDatabase } from './helpers';
 import { resetRateLimits } from '../src/lib/rateLimit';
 
-const app = createApp();
+setupDatabase();
 const H = { 'content-type': 'application/json', 'x-requested-with': 'conecta' };
-
-async function call(method: string, path: string, body?: unknown, cookie?: string) {
-  const res = await app.request(`/api${path}`, {
-    method,
-    headers: { ...H, ...(cookie ? { cookie } : {}) },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-  const setCookie = res.headers.get('set-cookie');
-  return { status: res.status, body: await res.json(), cookie: setCookie?.split(';')[0] };
-}
-
-async function newUser(name = 'Teste Silva') {
-  const email = `t${Date.now()}${Math.random().toString(16).slice(2, 6)}@teste.com`;
-  const r = await call('POST', '/auth/register', { name, email, password: 'Senha1234', acceptTerms: true });
-  expect(r.status).toBe(201);
-  return { id: r.body.user.id as string, cookie: r.cookie as string, email };
-}
-
-beforeAll(async () => {
-  const owner = new pg.Client({ connectionString: process.env.DATABASE_OWNER_URL });
-  await owner.connect();
-  await reset(owner);
-  await migrate(owner);
-  await loadLocations(owner);
-  await seedDemo(owner, { quiet: true });
-  await owner.end();
-});
-afterAll(() => pool.end());
 
 describe('localidades e busca', () => {
   it('lista os 27 estados e municípios por UF', async () => {

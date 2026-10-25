@@ -9,7 +9,9 @@ import { sessionMiddleware } from './middleware/auth';
 import type { AppEnv } from './middleware/context';
 import { csrfMiddleware } from './middleware/csrf';
 import { accountRoutes } from './routes/account';
+import { adminRoutes, imageRoutes, panelRoutes } from './routes/panel';
 import { publicRoutes } from './routes/public';
+import { bodyLimit } from 'hono/body-limit';
 
 export function createApp() {
   const app = new Hono<AppEnv>();
@@ -45,7 +47,11 @@ export function createApp() {
   });
 
   const api = new Hono<AppEnv>();
+  api.use('*', bodyLimit({ maxSize: 1024 * 1024, onError: (c) => c.json({ error: { code: 'too_large', message: 'Envio muito grande (máximo de 1 MB).' } }, 413) }));
   api.use('*', sessionMiddleware, csrfMiddleware);
+  api.route('/', imageRoutes);
+  api.route('/panel', panelRoutes);
+  api.route('/admin', adminRoutes);
   api.route('/', publicRoutes);
   api.route('/', accountRoutes);
   api.notFound((c) => c.json({ error: { code: 'not_found', message: 'Rota não encontrada.' } }, 404));

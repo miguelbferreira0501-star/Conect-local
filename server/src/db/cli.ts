@@ -55,8 +55,18 @@ export async function deploy(client: pg.Client) {
   const cities = (await client.query('SELECT count(*)::int AS n FROM cities')).rows[0].n;
   if (cities < 5000) await loadLocations(client);
   if (env.DEMO_MODE) {
-    const n = (await client.query('SELECT count(*)::int AS n FROM businesses')).rows[0].n;
+    const n = (await client.query('SELECT count(*)::int AS n FROM businesses WHERE is_demo')).rows[0].n;
     if (n === 0) await seedDemo(client);
+  } else {
+    // Lançamento: remove empresas, clientes e avaliações fictícias (as reais não são tocadas).
+    const r = await client.query('DELETE FROM businesses WHERE is_demo');
+    await client.query(`DELETE FROM users WHERE email LIKE '%@exemplo.invalid' OR email = 'demo@conectalocal.app'`);
+    if (r.rowCount) console.log(`✔ dados de demonstração removidos (${r.rowCount} empresas)`);
+  }
+  const admins = (env.ADMIN_EMAILS ?? '').split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
+  if (admins.length) {
+    const r = await client.query(`UPDATE users SET role = 'admin' WHERE email = ANY($1) AND role <> 'admin'`, [admins]);
+    if (r.rowCount) console.log(`✔ administradores definidos: ${r.rowCount}`);
   }
 }
 

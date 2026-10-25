@@ -22,6 +22,9 @@ services:
         generateValue: true
       - key: DATABASE_OWNER_URL
         sync: false
+      # Seu e-mail (o mesmo da conta criada no app) para acessar /admin:
+      - key: ADMIN_EMAILS
+        sync: false
       # Preencha depois de gerar o app Android (PWABuilder mostra esses valores):
       - key: ANDROID_PACKAGE_NAME
         sync: false

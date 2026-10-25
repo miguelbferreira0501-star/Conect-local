@@ -21,6 +21,8 @@ banco PostgreSQL protegido por políticas de segurança. “Conecta Local” é 
 | **Atividades** | Agendamentos e orçamentos com status, cancelar, “O serviço foi realizado”, “Contratei”, avaliar. |
 | **Avaliações** | Só após contratação confirmada; nota + comentário + aspectos opcionais; editar por 30 dias; excluir; denunciar. |
 | **Perfil** | Conta, dados, minhas avaliações, privacidade (lembrar cidade, **excluir conta** — LGPD), “Como funciona”, termos. |
+| **Painel das empresas** (`/empresas`) | Cadastro (aparece na hora), perfil, cidades atendidas, logo/capa/fotos (reduzidas no navegador), serviços e preços, horários, pedidos (confirmar/recusar agendamentos, responder orçamentos, contato do cliente), resposta pública às avaliações. |
+| **Administração** (`/admin`) | Suspender/reativar empresas e conceder o selo “Perfil verificado”. Acesso pelos e-mails em `ADMIN_EMAILS`. |
 
 Navegação sem cadastro: a pessoa explora tudo e só precisa de conta para favoritar, agendar, pedir orçamento e avaliar.
 
@@ -74,7 +76,7 @@ npm run dev          # API em :3001 e app em http://localhost:5173
 
 ```bash
 npm test             # 22 testes de regras (ranking, selos, validação) + 19 testes de API/segurança
-npm run test:e2e     # navegador: localização, busca, filtros, empresa, login, favorito, agendamento,
+npm run test:e2e     # navegador (e `node e2e/panel.mjs` para o painel das empresas): localização, busca, filtros, empresa, login, favorito, agendamento,
                      # avaliação, orçamento, cidade sem empresas e layout desktop
 ```
 
@@ -117,8 +119,8 @@ No plano gratuito do Render o app "dorme" após 15 min sem acesso; o primeiro ac
 
 ## Próximos passos
 
-- **Painel empresarial** — o banco já tem `business_members`, políticas RLS de edição para membros,
-  `review_replies`, áreas de atendimento e contadores de resposta (selo “Responde às solicitações”).
+- Convite de funcionários para o painel (`business_members` já suporta `manager`/`staff`).
+- Geocodificação do endereço (para mostrar distância e mapa das empresas reais).
 - Envio real de pedidos às empresas (e-mail/WhatsApp Business API) e notificações ao cliente.
 - Recuperação de senha por e-mail (precisa de um provedor de e-mail).
 - Upload de fotos (Supabase Storage/S3) e processo de verificação de empresas.
