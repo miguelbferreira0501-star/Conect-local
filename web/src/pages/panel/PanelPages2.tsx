@@ -430,8 +430,8 @@ function CheckoutSheet({ businessId, plan, onClose, onPaid, startsAt }: { busine
         </div>
       ) : (
         <div className="space-y-4 text-center">
-          <p>Abrimos a página segura do meio de pagamento em uma nova aba. Se não abriu, toque abaixo.</p>
-          {result.invoiceUrl && <a href={result.invoiceUrl} target="_blank" rel="noopener noreferrer" className={buttonClass('primary', 'lg', 'w-full')}>Pagar com cartão</a>}
+          <p>{result.method === 'PIX' ? 'Abra a fatura para pagar com Pix.' : 'Abrimos a página segura do meio de pagamento em uma nova aba. Se não abriu, toque abaixo.'}</p>
+          {result.invoiceUrl && <a href={result.invoiceUrl} target="_blank" rel="noopener noreferrer" className={buttonClass('primary', 'lg', 'w-full')}>{result.method === 'PIX' ? 'Abrir a fatura' : 'Pagar com cartão'}</a>}
           <p className="flex items-center justify-center gap-2 text-sm text-muted"><span className="h-2 w-2 animate-pulse rounded-full bg-accent-600" /> Aguardando a confirmação do pagamento…</p>
         </div>
       )}

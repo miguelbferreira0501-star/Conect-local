@@ -103,6 +103,11 @@ export const asaas = {
 
   cancelSubscription: (subscriptionId: string) => request<{ deleted: boolean }>('DELETE', `/subscriptions/${encodeURIComponent(subscriptionId)}`),
 
+  /** Chaves Pix da conta Asaas (sem chave, a Asaas não gera QR Code Pix). */
+  listPixKeys: () => request<{ data: Array<{ id: string; key: string; type: string; status: string }> }>('GET', '/pix/addressKeys?limit=20'),
+  /** Pela API só dá para criar chave aleatória (EVP); exige conta aprovada. */
+  createPixKey: () => request<{ id: string; key: string; type: string; status: string }>('POST', '/pix/addressKeys', { type: 'EVP' }),
+
   listWebhooks: () => request<{ data: Array<{ id: string; url: string; enabled: boolean }> }>('GET', '/webhooks?limit=100'),
   createWebhook: (w: object) => request<{ id: string }>('POST', '/webhooks', w),
   updateWebhook: (id: string, w: object) => request<{ id: string }>('PUT', `/webhooks/${encodeURIComponent(id)}`, w),
@@ -118,6 +123,8 @@ export const publicUrl = () => (env.PUBLIC_URL ?? env.RENDER_EXTERNAL_URL ?? '')
 
 export interface BillingSetupStatus {
   configured: boolean;
+  /** Chave Pix ativa na conta Asaas: 'ok', 'missing' (sem chave) ou 'unknown' (não deu para conferir) */
+  pixKey?: 'ok' | 'pending' | 'missing' | 'unknown';
   environment: string | null;
   webhook: 'ok' | 'missing_public_url' | 'missing_token' | 'error' | 'not_checked';
   message: string;
@@ -141,9 +148,38 @@ export async function ensureAsaasWebhook(contactEmail: string): Promise<BillingS
     const existing = (await asaas.listWebhooks()).data.find((w) => w.url === url);
     if (existing) await asaas.updateWebhook(existing.id, body);
     else await asaas.createWebhook(body);
-    return (setupStatus = { configured: true, environment, webhook: 'ok', message: `Pagamentos conectados à Asaas (${environment}). Avisos de pagamento configurados.` });
+    const pixKey = await pixKeyStatus();
+    return (setupStatus = {
+      configured: true, environment, webhook: 'ok', pixKey,
+      message: `Pagamentos conectados à Asaas (${environment}). Avisos de pagamento configurados.`
+        + (pixKey === 'missing' ? ' Falta cadastrar uma chave Pix na Asaas: sem ela, o Pix das assinaturas não é gerado.' : '')
+        + (pixKey === 'pending' ? ' A chave Pix está sendo ativada pela Asaas (leva alguns minutos).' : ''),
+    });
   } catch (e) {
     console.error('Configuração da Asaas:', (e as Error).message);
     return (setupStatus = { configured: false, environment: resolved?.name ?? null, webhook: 'error', message: (e as Error).message });
   }
+}
+
+async function pixKeyStatus(): Promise<'ok' | 'pending' | 'missing' | 'unknown'> {
+  try {
+    const keys = (await asaas.listPixKeys()).data;
+    if (keys.some((k) => k.status === 'ACTIVE')) return 'ok';
+    return keys.some((k) => k.status !== 'DELETED' && k.status !== 'ERROR') ? 'pending' : 'missing';
+  } catch {
+    return 'unknown';
+  }
+}
+
+/** Cria uma chave Pix aleatória na conta Asaas e atualiza o status mostrado em /admin. */
+export async function createAsaasPixKey(contactEmail: string) {
+  try {
+    await asaas.createPixKey();
+  } catch (e) {
+    const msg = (e as Error).message;
+    throw new AppError(422, 'pix_key_error', /aprova|approv|prova de vida/i.test(msg)
+      ? 'A Asaas só deixa criar chave Pix depois que a conta está aprovada (documentos e prova de vida). Confira no app da Asaas.'
+      : msg);
+  }
+  return ensureAsaasWebhook(contactEmail);
 }

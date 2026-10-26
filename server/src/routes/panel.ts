@@ -158,6 +158,10 @@ adminRoutes.get('/billing-status', async (c) => {
   if (c.req.query('recheck') === '1') await ensureAsaasWebhook((await withUser(uid(c), (db) => usersRepoMe(db)))?.email ?? 'contato@exemplo.com.br');
   return c.json(billingSetupStatus());
 });
+adminRoutes.post('/billing/pix-key', async (c) => {
+  const { createAsaasPixKey } = await import('../services/billing/asaas');
+  return c.json(await createAsaasPixKey((await withUser(uid(c), (db) => usersRepoMe(db)))?.email ?? 'contato@exemplo.com.br'));
+});
 adminRoutes.get('/businesses', async (c) => c.json(await withUser(uid(c), (db) => panelRepo.adminList(db, (c.req.query('q') ?? '').slice(0, 60)))));
 adminRoutes.put('/businesses/:businessId/plan', async (c) => {
   const { plan, until } = parse(z.object({ plan: z.enum(['free', 'pro', 'team']), until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional() }), await c.req.json());

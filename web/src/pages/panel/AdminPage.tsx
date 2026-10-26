@@ -128,8 +128,14 @@ function BillingSetupCard() {
   const [recheck, setRecheck] = useState(0);
   const q = useQuery({
     queryKey: ['admin', 'billing-status', recheck],
-    queryFn: () => api.get<{ configured: boolean; environment: string | null; webhook: string; message: string }>(`/admin/billing-status${recheck ? '?recheck=1' : ''}`),
+    queryFn: () => api.get<{ configured: boolean; environment: string | null; webhook: string; message: string; pixKey?: string }>(`/admin/billing-status${recheck ? '?recheck=1' : ''}`),
   });
+  const [creating, setCreating] = useState(false);
+  const [pixError, setPixError] = useState<string | null>(null);
+  const createPix = async () => {
+    setCreating(true); setPixError(null);
+    try { await api.post('/admin/billing/pix-key', {}); setRecheck((n) => n + 1); } catch (e) { setPixError((e as Error).message); } finally { setCreating(false); }
+  };
   if (!q.data) return null;
   const ok = q.data.configured && q.data.webhook === 'ok';
   return (
@@ -139,6 +145,16 @@ function BillingSetupCard() {
         {q.data.message}
         {ok && q.data.environment?.includes('sandbox') && ' Atenção: chave de TESTES — nenhuma cobrança é real. Para cobrar de verdade, troque pela chave de produção.'}
       </Alert>
+      {ok && q.data.pixKey === 'missing' && (
+        <div className="mt-3">
+          <Alert tone="warning" title="Falta a chave Pix na Asaas"
+            action={<Button size="sm" loading={creating} onClick={createPix}>Criar chave Pix aleatória</Button>}>
+            Sem chave Pix, a Asaas não gera o QR Code das assinaturas. Toque no botão para criar uma chave aleatória na sua conta Asaas
+            (ou cadastre CPF/CNPJ, e-mail ou celular no app da Asaas, em Pix → Minhas chaves).
+          </Alert>
+          {pixError && <div className="mt-2"><Alert tone="error">{pixError}</Alert></div>}
+        </div>
+      )}
     </div>
   );
 }

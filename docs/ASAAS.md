@@ -35,6 +35,10 @@ O CPF/CNPJ e o cartão ficam só na Asaas. O Pataí não guarda esses dados.
 3. No Render, troque o valor de `ASAAS_API_KEY` pela chave de produção e faça o deploy.
 4. Confira de novo o cartão **Pagamentos** em `/admin`.
 5. Cadastre uma conta bancária na Asaas para sacar o dinheiro recebido.
+6. **Cadastre uma chave Pix na Asaas** (sem ela, a Asaas não gera o QR Code Pix das assinaturas). Dois jeitos:
+   - pelo Pataí: em `/admin`, no cartão Pagamentos, toque em **Criar chave Pix aleatória**;
+   - pelo app/site da Asaas: **Pix → Minhas chaves → Cadastrar chave** (CPF/CNPJ, e-mail, celular ou aleatória).
+   A Asaas só libera chave Pix depois da conta aprovada (documentos e prova de vida).
 
 Você **não** precisa configurar o webhook à mão: ao iniciar, o servidor cadastra o aviso
 `https://SEU-SITE/api/webhooks/asaas` com o token `ASAAS_WEBHOOK_TOKEN` (gerado pelo Render).
@@ -58,4 +62,5 @@ funciona normalmente.
 | "A chave do Asaas foi recusada" | Gere uma chave nova e cole sem espaços. Chave de testes só funciona no sandbox e vice-versa. |
 | "falta o endereço público do site (PUBLIC_URL)" | No Render isso é automático. Fora dele, defina `PUBLIC_URL=https://seu-dominio`. |
 | "falta ASAAS_WEBHOOK_TOKEN" | No Render: Environment → adicione `ASAAS_WEBHOOK_TOKEN` com um texto aleatório de 20+ caracteres. |
+| "Falta cadastrar uma chave Pix na Asaas" | Veja o passo 6 acima. Enquanto isso, a assinatura por Pix mostra o link da fatura em vez do QR Code. |
 | Pagou e o plano não ativou | Na aba Plano toque em "Já paguei — verificar" (o app confere direto na Asaas). |

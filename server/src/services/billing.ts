@@ -68,7 +68,12 @@ export const billing = {
     await applyPayment(`created:${first.id}`, 'PAYMENT_CREATED', { ...first, subscription: sub.id });
     let pix: CheckoutResultDTO['pix'] = null;
     if (input.method === 'PIX') {
-      const qr = await asaas.pixQrCode(first.id);
+      const qr = await asaas.pixQrCode(first.id).catch((e: Error) => {
+        // Sem chave Pix na conta Asaas não há QR Code; a fatura continua valendo (boleto/cartão/Pix pela página).
+        console.error('Asaas Pix QR Code:', e.message);
+        return null;
+      });
+      if (!qr) return { subscriptionId: sub.id, paymentId: first.id, method: input.method, valueCents: plan.priceCents, invoiceUrl: first.invoiceUrl ?? null, pix: null, firstDueDate: firstDue };
       pix = { qrCodeImage: `data:image/png;base64,${qr.encodedImage}`, copyPaste: qr.payload, expiresAt: qr.expirationDate ?? null };
     }
     return { subscriptionId: sub.id, paymentId: first.id, method: input.method, valueCents: plan.priceCents, invoiceUrl: first.invoiceUrl ?? null, pix, firstDueDate: firstDue };

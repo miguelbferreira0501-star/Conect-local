@@ -7,7 +7,7 @@ import { app, call, newUser, setupDatabase } from './helpers';
 setupDatabase();
 
 /** Simulador da API v3 da Asaas. */
-const state = { requests: [] as Array<{ method: string; path: string; body: any; key?: string }>, paymentStatus: 'PENDING', canceled: [] as string[], webhooks: [] as any[], webhookUpdates: 0 };
+const state = { requests: [] as Array<{ method: string; path: string; body: any; key?: string }>, paymentStatus: 'PENDING', canceled: [] as string[], webhooks: [] as any[], webhookUpdates: 0, pixKeys: [] as any[] };
 const subValues = new Map<string, number>();
 let server: Server;
 beforeAll(async () => {
@@ -24,6 +24,10 @@ beforeAll(async () => {
         if (req.method === 'GET') return json(200, { data: state.webhooks });
         if (req.method === 'POST') { state.webhooks.push({ id: 'wh_1', url: body.url, enabled: true, body }); return json(200, { id: 'wh_1' }); }
         if (req.method === 'PUT') { state.webhookUpdates++; return json(200, { id: 'wh_1' }); }
+      }
+      if (path.startsWith('/pix/addressKeys')) {
+        if (req.method === 'GET') return json(200, { data: state.pixKeys });
+        if (req.method === 'POST' && body?.type === 'EVP') { const k = { id: 'pk_1', key: 'b7c1e5c2-1111-4222-8333-944455556666', type: 'EVP', status: 'ACTIVE' }; state.pixKeys.push(k); return json(200, k); }
       }
       if (req.method === 'POST' && path === '/subscriptions') { const id = `sub_${state.requests.length}`; subValues.set(id, body.value); return json(200, { id }); }
       let m = /^\/subscriptions\/([^/]+)\/payments$/.exec(path);
@@ -62,6 +66,19 @@ describe('configuração automática da Asaas', () => {
     await ensureAsaasWebhook('dono@teste.com');
     expect(state.webhooks).toHaveLength(1);
     expect(state.webhookUpdates).toBe(1);
+  });
+
+  it('avisa quando falta chave Pix na Asaas e cria uma chave aleatória pelo /admin', async () => {
+    const { ensureAsaasWebhook, createAsaasPixKey } = await import('../src/services/billing/asaas');
+    const st = await ensureAsaasWebhook('dono@teste.com');
+    expect(st.pixKey).toBe('missing');
+    expect(st.message).toMatch(/chave Pix/);
+    const after = await createAsaasPixKey('dono@teste.com');
+    expect(state.requests.some((r) => r.method === 'POST' && r.path === '/pix/addressKeys' && r.body.type === 'EVP')).toBe(true);
+    expect(after.pixKey).toBe('ok');
+    // Só administrador pode criar a chave
+    const someone = await newUser();
+    expect((await call('POST', '/admin/billing/pix-key', {}, someone.cookie)).status).toBe(403);
   });
 });
 
