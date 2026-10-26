@@ -22,11 +22,12 @@ jobs:
         working-directory: android
         continue-on-error: true
         run: |
-          set -o pipefail
           npm i -g @bubblewrap/cli@1.27.0 2>&1 | tail -3
           mkdir -p ~/.bubblewrap
           echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_HOME\"}" > ~/.bubblewrap/config.json
-          (yes | bubblewrap update --skipVersionUpgrade --manifest=./twa-manifest.json && yes | bubblewrap build --skipSigning --manifest=./twa-manifest.json) 2>&1 | tee ../build.log
+          { yes | bubblewrap update --skipVersionUpgrade --manifest=./twa-manifest.json; yes | bubblewrap build --skipSigning --manifest=./twa-manifest.json; } > ../build.log 2>&1 || true
+          tail -40 ../build.log
+          test -f app-release-bundle.aab
       - name: Publicar resultado no branch android-build
         if: always()
         run: |
