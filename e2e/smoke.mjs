@@ -86,12 +86,13 @@ try {
   // 6. Ficha do pet e agendamento com o pet
   const back = page.url();
   await page.goto(`${BASE}/pets`);
+  await page.waitForLoadState('networkidle');
   const existing = await page.getByText('Thor', { exact: true }).count();
   if (!existing) {
     await page.getByRole('button', { name: /Cadastrar pet|Adicionar outro pet/ }).first().click();
     await page.getByLabel('Nome', { exact: true }).fill('Thor');
-    await page.getByRole('button', { name: /Pequeno/ }).click();
-    await page.getByRole('button', { name: 'Medo de secador' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: /^Pequeno/ }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Medo de secador' }).click();
     await page.getByLabel(/Saúde/).fill('Alergia a shampoo com perfume');
     await shot('ficha-pet');
     await page.getByRole('dialog').getByRole('button', { name: 'Cadastrar pet' }).click();
@@ -101,8 +102,8 @@ try {
   await page.goto(back);
   await page.getByRole('link', { name: 'Agendar', exact: true }).last().click();
   await page.getByRole('heading', { name: 'Para qual pet?' }).waitFor();
-  check((await page.getByRole('radio', { name: 'Thor' }).getAttribute('aria-checked')) === 'true', 'pet já escolhido no agendamento');
-  await page.getByRole('heading', { name: '1. Escolha o serviço' }).waitFor();
+  check((await page.getByRole('radio', { name: 'Thor', exact: true }).getAttribute('aria-checked')) === 'true', 'pet já escolhido no agendamento');
+  await page.getByRole('heading', { name: 'Serviço', exact: true }).waitFor();
   await page.locator('input[name="service"]').first().check();
   const day = page.locator('[role="radiogroup"][aria-label="Dia"] button:not([disabled])').nth(1);
   await day.click();

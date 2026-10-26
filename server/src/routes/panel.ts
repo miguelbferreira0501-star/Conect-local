@@ -13,9 +13,7 @@ import { usersRepo } from '../repositories/users';
 const usersRepoMe = usersRepo.me;
 import { panel } from '../services/panel';
 import * as pets from '../services/pets';
-import { aiDiagnostics, aiEnabled, runAssistant } from '../services/ai';
-import { streamSSE } from 'hono/streaming';
-import { aiRequestSchema } from '@conecta/shared';
+import * as benefits from '../services/benefits';
 
 const uid = (c: Ctx) => c.get('userId') as string;
 const bid = (c: Ctx) => parse(uuid, c.req.param('businessId'));
@@ -52,6 +50,21 @@ panelRoutes.put('/businesses/:businessId/services/:serviceId', async (c) =>
 panelRoutes.delete('/businesses/:businessId/services/:serviceId', async (c) =>
   c.json(await panel.removeService(uid(c), bid(c), parse(uuid, c.req.param('serviceId')))));
 
+// Benefícios: sinal Pix, fidelidade, pacotes e relatórios
+const pid = (c: Ctx, name: string) => parse(uuid, c.req.param(name));
+panelRoutes.put('/businesses/:businessId/settings', async (c) => c.json(await benefits.saveSettings(uid(c), bid(c), await c.req.json())));
+panelRoutes.get('/businesses/:businessId/packages', async (c) => c.json(await benefits.panelPackages(uid(c), bid(c))));
+panelRoutes.post('/businesses/:businessId/packages', async (c) => c.json(await benefits.savePackage(uid(c), bid(c), null, await c.req.json()), 201));
+panelRoutes.put('/businesses/:businessId/packages/:packageId', async (c) =>
+  c.json(await benefits.savePackage(uid(c), bid(c), pid(c, 'packageId'), await c.req.json())));
+panelRoutes.delete('/businesses/:businessId/packages/:packageId', async (c) => c.json(await benefits.removePackage(uid(c), bid(c), pid(c, 'packageId'))));
+panelRoutes.get('/businesses/:businessId/customer-packages', async (c) => c.json(await benefits.panelCustomerPackages(uid(c), bid(c))));
+panelRoutes.post('/businesses/:businessId/customer-packages/:id', async (c) =>
+  c.json(await benefits.updateCustomerPackage(uid(c), bid(c), pid(c, 'id'), await c.req.json())));
+panelRoutes.post('/businesses/:businessId/bookings/:bookingId/deposit-paid', async (c) =>
+  c.json(await benefits.markDepositPaid(uid(c), bid(c), pid(c, 'bookingId'))));
+panelRoutes.get('/businesses/:businessId/reports', async (c) => c.json(await benefits.report(uid(c), bid(c), c.req.query('month') || undefined)));
+
 panelRoutes.post('/businesses/:businessId/images', async (c) => {
   if (!hit(`upload:${uid(c)}`, 60, 60 * 60_000)) throw new AppError(429, 'rate_limited', 'Muitos envios de imagem. Aguarde um pouco.');
   const { kind, dataUrl } = parse(imageUploadSchema, await c.req.json());
@@ -79,24 +92,6 @@ panelRoutes.delete('/businesses/:businessId/staff/:staffId', async (c) =>
 panelRoutes.get('/businesses/:businessId/agenda', async (c) => {
   const { from, days } = parse(z.object({ from: z.string().datetime({ offset: true }).optional(), days: z.coerce.number().int().min(1).max(31).default(7) }), c.req.query());
   return c.json(await panel.agenda(uid(c), bid(c), from ? new Date(from) : new Date(Date.now() - 86_400_000), days));
-});
-
-// Assistente de IA (resposta em tempo real via Server-Sent Events)
-panelRoutes.get('/ai/status', (c) => c.json({ enabled: aiEnabled() }));
-panelRoutes.post('/businesses/:businessId/ai', async (c) => {
-  if (!hit(`ai:${uid(c)}`, 30, 60 * 60_000)) throw new AppError(429, 'rate_limited', 'Muitos pedidos ao assistente. Aguarde alguns minutos.');
-  const businessId = bid(c);
-  const { task, message, reviewId } = parse(aiRequestSchema, await c.req.json());
-  return streamSSE(c, async (stream) => {
-    try {
-      await runAssistant(uid(c), businessId, task, message, reviewId, { onText: (t) => stream.writeSSE({ event: 'text', data: JSON.stringify(t) }) });
-      await stream.writeSSE({ event: 'done', data: '{}' });
-    } catch (err) {
-      const message = err instanceof AppError ? err.message : 'O assistente está indisponível no momento.';
-      if (!(err instanceof AppError)) console.error(err);
-      await stream.writeSSE({ event: 'error', data: JSON.stringify({ message, code: err instanceof AppError ? err.code : 'internal' }) });
-    }
-  });
 });
 
 // Pet ao Vivo (lado da empresa)
@@ -147,7 +142,6 @@ adminRoutes.get('/billing-status', async (c) => {
   return c.json(billingSetupStatus());
 });
 adminRoutes.get('/businesses', async (c) => c.json(await withUser(uid(c), (db) => panelRepo.adminList(db, (c.req.query('q') ?? '').slice(0, 60)))));
-adminRoutes.get('/ai-status', async (c) => c.json(await aiDiagnostics(c.req.query('test') === '1')));
 adminRoutes.put('/businesses/:businessId/plan', async (c) => {
   const { plan, until } = parse(z.object({ plan: z.enum(['free', 'pro', 'team']), until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional() }), await c.req.json());
   await withUser(uid(c), (db) => panelRepo.adminSetPlan(db, bid(c), plan, until ? new Date(`${until}T23:59:59-03:00`) : null));

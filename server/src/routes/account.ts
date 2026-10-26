@@ -14,6 +14,7 @@ import { clientIp, type AppEnv, type Ctx } from '../middleware/context';
 import { favoritesRepo } from '../repositories/favorites';
 import * as activities from '../services/activities';
 import * as pets from '../services/pets';
+import * as benefits from '../services/benefits';
 import * as auth from '../services/auth';
 import { globalMean, scoreRows, toCard } from '../services/cards';
 import * as reviews from '../services/reviews';
@@ -125,6 +126,14 @@ me.get('/pets/:id/photo', async (c) => privateImage(await pets.petPhoto(uid(c), 
 me.get('/live/:id/photo', async (c) => privateImage(await pets.livePhoto(uid(c), parse(uuid, c.req.param('id'))), c));
 // Pet ao Vivo (lado do tutor)
 me.get('/bookings/:id/live', async (c) => c.json(await pets.listLive(uid(c), parse(uuid, c.req.param('id')))));
+
+me.get('/me/packages', async (c) => c.json(await benefits.myPackages(uid(c))));
+me.post('/me/packages', async (c) => {
+  if (!hit(`pkg:${uid(c)}`, 20, 60 * 60_000)) throw new AppError(429, 'rate_limited', 'Muitos pedidos. Aguarde um pouco.');
+  return c.json(await benefits.requestPackage(uid(c), await c.req.json()), 201);
+});
+me.post('/me/packages/:id/cancel', async (c) => c.json(await benefits.cancelMyPackage(uid(c), parse(uuid, c.req.param('id')))));
+me.get('/me/reminders', async (c) => c.json(await benefits.reminders(uid(c))));
 
 me.post('/bookings', async (c) => {
   limit(c, 'booking', 20, 60 * 60_000);

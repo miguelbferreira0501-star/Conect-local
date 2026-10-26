@@ -63,7 +63,9 @@ describe('agendas com profissionais', () => {
     expect(av.slots.map((s: { label: string }) => s.label)).toEqual(['morning', 'afternoon', 'evening']);
     const c = await newUser();
     const morning = av.slots[0];
-    expect((await call('POST', '/bookings', { businessId: biz.id, serviceId: svc.id, startsAt: morning.startsAt }, c.cookie)).status).toBe(201);
+    // Pet sitter vai até a casa do tutor: o endereço é obrigatório
+    expect((await call('POST', '/bookings', { businessId: biz.id, serviceId: svc.id, startsAt: morning.startsAt }, c.cookie)).status).toBe(422);
+    expect((await call('POST', '/bookings', { businessId: biz.id, serviceId: svc.id, startsAt: morning.startsAt, address: 'Rua das Flores, 10' }, c.cookie)).status).toBe(201);
     const after = (await call('GET', `/businesses/${biz.id}/availability?serviceId=${svc.id}&date=${day(3)}`)).body;
     expect(after.slots.map((s: { label: string }) => s.label)).toEqual(['afternoon', 'evening']);
     expect((await call('GET', '/me/activities', undefined, c.cookie)).body[0].period).toBe('morning');

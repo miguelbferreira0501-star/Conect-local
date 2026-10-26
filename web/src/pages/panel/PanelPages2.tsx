@@ -1,12 +1,13 @@
+import { BookingExtras } from '@/components/BookingExtras';
+import { PanelDeposit } from './PanelBookingBits';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bot, CalendarDays, Check, Copy, Crown, Lightbulb, ListPlus, MessageCircle, MessageSquareText, Radio, PenLine, Plus, Send, Trash2, UserRound, Users } from 'lucide-react';
 import {
-  bookingProfile, checkoutSchema, reminderMessage, reviewRequestMessage, whatsappLink, formatCents, PERIODS, PLANS, WEEKDAY_NAMES, type AiTask, type BillingStatusDTO, type CheckoutResultDTO, type PanelAgendaItemDTO, type PanelBusinessDTO, type PanelStaffDTO, type Period, type PlanId,
+  bookingProfile, checkoutSchema, reminderMessage, reviewRequestMessage, whatsappLink, formatCents, PERIODS, PLANS, WEEKDAY_NAMES, type BillingStatusDTO, type CheckoutResultDTO, type PanelAgendaItemDTO, type PanelBusinessDTO, type PanelStaffDTO, type Period, type PlanId,
 } from '@conecta/shared';
 import { api, ApiError } from '@/lib/api';
-import { streamAssistant } from '@/lib/ai';
 import { usePanelMutation } from '@/lib/panelQueries';
 import { useConfig } from '@/lib/queries';
 import { isStoreApp } from '@/lib/platform';
@@ -196,6 +197,8 @@ export function PanelAgendaPage() {
                   <div className="min-w-0 flex-1">
                     <p className="font-medium">{i.serviceName}{i.partySize ? <span className="font-normal"> · {i.partySize} pessoas</span> : null}{i.staffName ? <span className="font-normal text-muted"> · {i.staffName}</span> : null}</p>
                     <p className="text-sm text-muted">{i.pet ? <span className="font-medium text-accent-700">🐾 {i.pet.name} · </span> : null}{i.customerName ?? 'Cliente'}{i.customerPhone ? ` · ${i.customerPhone}` : ''}</p>
+                    <BookingExtras endsAt={i.endsAt} mode={i.mode} address={i.address} destination={i.destination} details={i.details} />
+                    {i.deposit && i.status !== 'cancelled' && i.status !== 'declined' && <PanelDeposit businessId={b.id} bookingId={i.id} deposit={i.deposit} />}
                   </div>
                   {i.status !== 'requested' && (
                     <button onClick={() => setLiveTarget({ id: i.id, title: `${i.serviceName} · ${when(i)}`, status: i.status, pet: i.pet })}
@@ -232,123 +235,6 @@ function AgendaWhatsApp({ item: i, biz }: { item: PanelAgendaItemDTO; biz: Panel
   );
 }
 
-// ── Assistente de IA ──
-const TASKS: Array<{ id: AiTask; label: string; hint: string; Icon: typeof Bot }> = [
-  { id: 'description', label: 'Escrever meu perfil', hint: 'Frase curta e descrição a partir dos seus dados', Icon: PenLine },
-  { id: 'services', label: 'Sugerir serviços', hint: 'Serviços comuns no seu ramo, com faixa de preço de referência', Icon: ListPlus },
-  { id: 'tips', label: 'Como conseguir mais clientes', hint: '5 ações práticas para o seu perfil', Icon: Lightbulb },
-  { id: 'chat', label: 'Perguntar outra coisa', hint: 'Ideias de promoções, posts, atendimento…', Icon: MessageSquareText },
-];
-
-export function useAiStatus() {
-  return useQuery({ queryKey: ['panel', 'ai-status'], queryFn: () => api.get<{ enabled: boolean }>('/panel/ai/status'), staleTime: 5 * 60_000 });
-}
-
-export function PanelAssistantPage() {
-  const b = useBiz();
-  const status = useAiStatus();
-  const plan = PLANS[b.plan.effective];
-  const [task, setTask] = useState<AiTask>('description');
-  const [message, setMessage] = useState('');
-  const [output, setOutput] = useState('');
-  const [running, setRunning] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [used, setUsed] = useState(b.plan.aiUsedThisMonth);
-  const abort = useRef<AbortController | null>(null);
-  useEffect(() => () => abort.current?.abort(), []);
-
-  const run = async () => {
-    setOutput('');
-    setErr(null);
-    setRunning(true);
-    abort.current = new AbortController();
-    try {
-      await streamAssistant(b.id, { task, message: message.trim() || undefined }, (t) => setOutput((o) => o + t), abort.current.signal);
-      setUsed((u) => u + 1);
-    } catch (e) {
-      if ((e as Error).name !== 'AbortError') setErr((e as ApiError).message);
-    } finally {
-      setRunning(false);
-    }
-  };
-  const copy = async () => {
-    try { await navigator.clipboard.writeText(output); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { /* sem permissão */ }
-  };
-
-  if (status.data && !status.data.enabled) {
-    return <Alert tone="info" title="Assistente em breve">O assistente de IA ainda não foi ativado nesta plataforma.</Alert>;
-  }
-  const remaining = Math.max(0, plan.aiRequestsPerMonth - used);
-  return (
-    <div className="space-y-4">
-      <div className="card flex items-start gap-3 p-5">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-700"><Bot className="h-6 w-6" /></span>
-        <div>
-          <h2 className="font-semibold">Assistente do seu negócio</h2>
-          <p className="text-sm text-muted">Ele usa os dados do seu perfil para sugerir textos e ideias. Revise sempre antes de usar: você é quem conhece o seu negócio.</p>
-          <p className="mt-1 text-sm">{remaining} de {plan.aiRequestsPerMonth} usos restantes neste mês ({plan.name}).</p>
-        </div>
-      </div>
-      <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="O que você quer?">
-        {TASKS.map(({ id, label, hint, Icon }) => (
-          <button key={id} type="button" role="radio" aria-checked={task === id} onClick={() => setTask(id)}
-            className={`card flex items-start gap-3 p-4 text-left transition ${task === id ? 'border-brand-700 ring-2 ring-brand-500/20' : 'hover:border-brand-200'}`}>
-            <Icon className="mt-0.5 h-5 w-5 text-brand-fg" aria-hidden="true" />
-            <span><span className="block font-semibold">{label}</span><span className="text-sm text-muted">{hint}</span></span>
-          </button>
-        ))}
-      </div>
-      <TextArea label={task === 'chat' ? 'Sua pergunta' : 'Algo a mais que o assistente deve saber?'} optional={task !== 'chat'} value={message} maxLength={1500}
-        onChange={(e) => setMessage(e.target.value)} className="field min-h-[90px]"
-        placeholder={task === 'chat' ? 'Ex.: Que promoção posso fazer para o Dia das Mães?' : 'Ex.: Atendo há 8 anos, sou especialista em noivas, tenho estacionamento.'} />
-      <Button block size="lg" loading={running} disabled={remaining === 0 || (task === 'chat' && !message.trim())} onClick={run} icon={<Send className="h-5 w-5" />}>
-        {running ? 'Escrevendo…' : 'Pedir ao assistente'}
-      </Button>
-      {remaining === 0 && <Alert tone="warning">Os usos deste mês acabaram. Eles renovam no dia 1º, ou mude de plano para ter mais.</Alert>}
-      {err && <Alert tone="error">{err}</Alert>}
-      {(output || running) && (
-        <section className="card p-5" aria-live="polite">
-          <div className="mb-2 flex items-center justify-between">
-            <h3 className="font-semibold">Sugestão</h3>
-            {!running && output && <Button size="sm" variant="secondary" icon={copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} onClick={copy}>{copied ? 'Copiado' : 'Copiar'}</Button>}
-          </div>
-          <div className="whitespace-pre-wrap leading-relaxed">{output}{running && <span className="ml-0.5 inline-block h-4 w-2 animate-pulse bg-brand-500 align-middle" />}</div>
-          {!running && output && (
-            <p className="mt-3 text-sm text-muted">
-              Para usar: copie e cole em {task === 'description' ? <Link to="../perfil" className="font-medium text-brand-fg hover:underline">Perfil</Link> : task === 'services' ? <Link to="../servicos" className="font-medium text-brand-fg hover:underline">Serviços</Link> : 'onde quiser'}. Confira preços e informações antes de publicar.
-            </p>
-          )}
-        </section>
-      )}
-    </div>
-  );
-}
-
-/** Botão "Sugerir resposta com IA" usado na tela de avaliações. */
-export function AiReplyButton({ businessId, reviewId, onStart, onText, onDone }: { businessId: string; reviewId: string; onStart: () => void; onText: (t: string) => void; onDone: (err?: string) => void }) {
-  const status = useAiStatus();
-  const [running, setRunning] = useState(false);
-  if (!status.data?.enabled) return null;
-  return (
-    <Button size="sm" variant="ghost" loading={running} icon={<Bot className="h-4 w-4" />}
-      onClick={async () => {
-        setRunning(true);
-        onStart();
-        try {
-          await streamAssistant(businessId, { task: 'reply', reviewId }, onText);
-          onDone();
-        } catch (e) {
-          onDone((e as Error).message);
-        } finally {
-          setRunning(false);
-        }
-      }}>
-      Sugerir resposta com IA
-    </Button>
-  );
-}
-
 // ── Plano e assinatura ──
 const SUB_STATUS: Record<string, string> = { pending: 'Aguardando pagamento', active: 'Ativa', canceled: 'Cancelada' };
 
@@ -370,7 +256,18 @@ export function PanelPlanPage() {
 
   return (
     <div className="space-y-4">
-      <Alert tone="info">O plano não muda a sua posição na busca nem dá selos — isso depende só das avaliações e do perfil. Os planos pagos dão mais agendas, mais uso do assistente e ferramentas de gestão.</Alert>
+      <Alert tone="info">O plano não muda a sua posição na busca nem dá selos — isso depende só das avaliações e do perfil.</Alert>
+
+      {current !== 'free' && !sub && st?.planUntil && (
+        <Alert tone="success" title={`Teste grátis até ${new Date(st.planUntil).toLocaleDateString('pt-BR')}`}>
+          Aproveite todos os recursos. Para não pausar a agenda on-line depois dessa data, assine o Plano Pataí.
+        </Alert>
+      )}
+      {current === 'free' && (
+        <Alert tone="warning" title="Agenda on-line pausada">
+          Seu perfil continua aparecendo para os clientes, mas agendamentos, Pet ao Vivo, pacotes e fidelidade voltam quando você assinar.
+        </Alert>
+      )}
 
       {sub && (
         <section className="card p-5">
@@ -380,7 +277,7 @@ export function PanelPlanPage() {
           </div>
           <p className="mt-1 text-sm text-muted">
             {formatCents(sub.valueCents)}/mês · {sub.method === 'PIX' ? 'Pix' : 'Cartão de crédito'}
-            {st?.planUntil && current !== 'free' ? ` · plano válido até ${new Date(st.planUntil).toLocaleDateString('pt-BR')}` : ''}
+            {st?.planUntil && current !== 'free' ? ` · válido até ${new Date(st.planUntil).toLocaleDateString('pt-BR')}` : ''}
           </p>
           {sub.status === 'pending' && st?.lastPayment?.invoiceUrl && (
             <div className="mt-3 flex flex-wrap gap-2">
@@ -394,32 +291,25 @@ export function PanelPlanPage() {
         </section>
       )}
 
-      <div className="grid gap-3 md:grid-cols-3">
-        {(Object.keys(PLANS) as PlanId[]).map((id) => {
-          const p = PLANS[id];
-          const active = id === current;
-          const subscribedHere = sub && sub.status !== 'canceled' && sub.plan === id;
-          return (
-            <section key={id} className={`card flex flex-col p-5 ${active ? 'border-brand-700 ring-2 ring-brand-500/20' : ''}`}>
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg font-semibold">{p.name}</h2>
-                {id === 'pro' && <Tag tone="accent" icon={<Crown className="h-3.5 w-3.5" />}>Mais escolhido</Tag>}
-              </div>
-              <p className="mt-1 text-2xl font-bold tabular-nums">{p.priceCents ? formatCents(p.priceCents) : 'R$ 0'}<span className="text-sm font-normal text-muted">{p.priceCents ? '/mês' : ''}</span></p>
-              <ul className="mt-3 flex-1 space-y-1.5 text-sm">
-                {p.highlights.map((h) => <li key={h} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-accent-600" />{h}</li>)}
-              </ul>
-              <div className="mt-4">
-                {active ? <Tag tone="brand">Seu plano atual</Tag>
-                  : id === 'free' || !canBuy || subscribedHere ? null
-                  : st?.enabled
-                    ? <Button size="sm" variant={id === 'pro' ? 'primary' : 'secondary'} onClick={() => setBuying(id)}>Assinar {p.name}</Button>
-                    : <p className="text-sm text-muted">Assinatura on-line em breve.</p>}
-              </div>
-            </section>
-          );
-        })}
-      </div>
+      <section className="card relative overflow-hidden p-5">
+        <span className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-accent-600/20" aria-hidden="true" />
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold">{PLANS.pro.name}</h2>
+          <Tag tone="accent" icon={<Crown className="h-3.5 w-3.5" />}>Tudo incluído</Tag>
+        </div>
+        <p className="mt-1 text-3xl font-bold tabular-nums">{formatCents(PLANS.pro.priceCents)}<span className="text-sm font-normal text-muted">/mês</span></p>
+        <p className="text-sm text-muted">Sem comissão por atendimento. Sem fidelidade: cancele quando quiser.</p>
+        <ul className="mt-4 space-y-1.5 text-sm">
+          {PLANS.pro.highlights.map((h) => <li key={h} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-accent-600" />{h}</li>)}
+        </ul>
+        <div className="mt-5">
+          {sub && sub.status !== 'canceled' ? null
+            : !canBuy ? null
+            : st?.enabled
+              ? <Button block onClick={() => setBuying('pro')}>{current === 'free' ? 'Assinar e reativar a agenda' : 'Assinar o Plano Pataí'}</Button>
+              : <p className="text-sm text-muted">Assinatura on-line em breve.</p>}
+        </div>
+      </section>
       {!canBuy && <p className="text-sm text-muted">A mudança de plano é feita pelo site do Pataí, no navegador.</p>}
       {canBuy && !st?.enabled && (
         <section className="card p-5">

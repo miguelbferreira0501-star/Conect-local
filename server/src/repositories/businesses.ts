@@ -17,7 +17,10 @@ export interface CandidateFilters {
 }
 
 const BASE_SELECT = `
-  SELECT b.*, c.slug AS cat_slug, c.name AS cat_name, c.short_name AS cat_short, c.icon AS cat_icon, c.keywords AS cat_keywords,
+  SELECT b.*,
+    -- Agenda on-line só com plano ativo (ou teste grátis); sem assinatura o perfil segue visível.
+    (b.accepts_booking AND b.plan <> 'free' AND (b.plan_until IS NULL OR b.plan_until > now())) AS accepts_booking,
+    c.slug AS cat_slug, c.name AS cat_name, c.short_name AS cat_short, c.icon AS cat_icon, c.keywords AS cat_keywords,
     ci.name AS city_name, ci.uf AS city_uf, ci.timezone,
     coalesce(st.review_count, 0) AS review_count, st.average, st.stddev, st.first_review_at, st.last_review_at,
     coalesce(svc.names, '{}') AS service_names, coalesce(svc.cnt, 0)::int AS services_count,
@@ -80,9 +83,10 @@ export const businessesRepo = {
   },
 
   async basicById(id: string, db?: Db) {
-    const rows = await query<{ id: string; slug: string; name: string; accepts_booking: boolean; accepts_quote: boolean; opening_hours: BusinessRow['opening_hours']; timezone: string; is_demo: boolean; plan: PlanId; plan_until: Date | null }>(
-      `SELECT b.id, b.slug, b.name, b.accepts_booking, b.accepts_quote, b.opening_hours, b.is_demo, b.plan, b.plan_until, ci.timezone
-       FROM businesses b JOIN cities ci ON ci.ibge = b.city_ibge WHERE b.id = $1 AND b.status = 'active'`,
+    const rows = await query<{ id: string; slug: string; name: string; accepts_booking: boolean; accepts_quote: boolean; opening_hours: BusinessRow['opening_hours']; timezone: string; is_demo: boolean; plan: PlanId; plan_until: Date | null; cat_slug: string; pix_key: string | null; loyalty_every: number | null }>(
+      `SELECT b.id, b.slug, b.name, (b.accepts_booking AND b.plan <> 'free' AND (b.plan_until IS NULL OR b.plan_until > now())) AS accepts_booking,
+         b.accepts_quote, b.opening_hours, b.is_demo, b.plan, b.plan_until, ci.timezone, c.slug AS cat_slug, b.pix_key, b.loyalty_every
+       FROM businesses b JOIN cities ci ON ci.ibge = b.city_ibge JOIN categories c ON c.id = b.category_id WHERE b.id = $1 AND b.status = 'active'`,
       [id],
       db,
     );
@@ -108,7 +112,7 @@ export const businessesRepo = {
   services: (businessId: string, db?: Db) =>
     query(
       `SELECT id, name, description, price_type AS "priceType", price_min_cents AS "priceMinCents",
-         price_max_cents AS "priceMaxCents", duration_minutes AS "durationMinutes", bookable, booking_mode AS "bookingMode", notes
+         price_max_cents AS "priceMaxCents", duration_minutes AS "durationMinutes", bookable, booking_mode AS "bookingMode", notes, deposit_cents AS "depositCents"
        FROM services WHERE business_id = $1 AND active ORDER BY sort_order, name`,
       [businessId],
       db,
@@ -116,8 +120,8 @@ export const businessesRepo = {
 
   service: async (businessId: string, serviceId: string, db?: Db) =>
     (
-      await query<{ id: string; name: string; bookable: boolean; duration_minutes: number | null; booking_mode: 'slot' | 'period' | 'day' }>(
-        `SELECT id, name, bookable, duration_minutes, booking_mode FROM services WHERE id = $1 AND business_id = $2 AND active`,
+      await query<{ id: string; name: string; bookable: boolean; duration_minutes: number | null; booking_mode: 'slot' | 'period' | 'day'; deposit_cents: number | null; price_type: string; price_min_cents: number | null }>(
+        `SELECT id, name, bookable, duration_minutes, booking_mode, deposit_cents, price_type, price_min_cents FROM services WHERE id = $1 AND business_id = $2 AND active`,
         [serviceId, businessId],
         db,
       )

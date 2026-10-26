@@ -6,7 +6,7 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import type pg from 'pg';
-import { CATEGORY_DEFINITIONS, publicAuthorName, type OpeningHours } from '@conecta/shared';
+import { bookingProfile, CATEGORY_DEFINITIONS, publicAuthorName, type OpeningHours } from '@conecta/shared';
 import { CATEGORY_TEMPLATES, DEMO_CITIES, DEMO_FIRST_NAMES, DEMO_LAST_NAMES, GENERIC_PHRASES, type CategoryTemplate } from './seedData';
 
 export const DEMO_ACCOUNT = { email: 'demo@conectalocal.app', password: 'Demo1234', name: 'Cliente Demonstração' };
@@ -153,7 +153,8 @@ export async function seedDemo(client: pg.Client, opts: { now?: Date; quiet?: bo
           const bookable = tpl.booking && !!s.bookable;
           svcs.push({ id: sid, bookable, duration: s.duration ?? null });
           const adj = (v?: number) => (v == null ? null : Math.round(v * between(0.9, 1.15)) * 100);
-          serviceRows.push([sid, id, s.name, s.description ?? null, s.priceType, s.priceType === 'quote' ? null : s.min === 0 ? 0 : adj(s.min), s.priceType === 'range' ? Math.round((s.max as number) * 1.1) * 100 : null, s.duration ?? null, bookable, s.notes ?? null, order]);
+          const mode = s.mode ?? (bookingProfile(def.slug).mode === 'period' ? 'period' : 'slot');
+          serviceRows.push([sid, id, s.name, s.description ?? null, s.priceType, s.priceType === 'quote' ? null : s.min === 0 ? 0 : adj(s.min), s.priceType === 'range' ? Math.round((s.max as number) * 1.1) * 100 : null, s.duration ?? null, bookable || (tpl.booking && mode === 'day' && !!s.bookable), s.notes ?? null, order, mode]);
         });
         // Áreas de atendimento além da sede
         if (modes.at_customer && city.areas.length) {
@@ -207,7 +208,27 @@ export async function seedDemo(client: pg.Client, opts: { now?: Date; quiet?: bo
     }
 
     await insertMany(client, 'businesses', ['id', 'slug', 'name', 'professional_name', 'category_id', 'short_description', 'description', 'street', 'neighborhood', 'postal_code', 'city_ibge', 'lat', 'lon', 'address_public', 'phone', 'whatsapp', 'website', 'instagram', 'price_level', 'mode_in_person', 'mode_at_customer', 'mode_online', 'accepts_booking', 'accepts_quote', 'opening_hours', 'hours_updated_at', 'verified_at', 'verification_method', 'is_demo', 'created_at', 'updated_at'], businessRows);
-    await insertMany(client, 'services', ['id', 'business_id', 'name', 'description', 'price_type', 'price_min_cents', 'price_max_cents', 'duration_minutes', 'bookable', 'notes', 'sort_order'], serviceRows);
+    // Empresas de exemplo ficam com o plano ativo (sem vencimento) para a agenda funcionar na demonstração.
+    await client.query(`UPDATE businesses SET plan = 'pro', plan_until = NULL WHERE is_demo`);
+    await insertMany(client, 'services', ['id', 'business_id', 'name', 'description', 'price_type', 'price_min_cents', 'price_max_cents', 'duration_minutes', 'bookable', 'notes', 'sort_order', 'booking_mode'], serviceRows);
+    // Benefícios de exemplo: Pix fictício (e-mail @exemplo.invalid), cartão fidelidade, sinal e pacotes.
+    await client.query(
+      `UPDATE businesses b SET pix_key = 'pix+' || left(b.slug, 30) || '@exemplo.invalid', loyalty_every = 10
+       FROM categories c WHERE c.id = b.category_id AND b.is_demo AND c.slug IN ('banho-e-tosa', 'passeador', 'hospedagem-e-creche', 'adestramento')`);
+    await client.query(
+      `UPDATE services s SET deposit_cents = CASE WHEN s.booking_mode = 'day' THEN 3000 ELSE 2000 END
+       FROM businesses b JOIN categories c ON c.id = b.category_id
+       WHERE s.business_id = b.id AND b.is_demo AND s.bookable AND c.slug IN ('banho-e-tosa', 'hospedagem-e-creche') AND s.price_min_cents >= 4000`);
+    await client.query(
+      `INSERT INTO packages (business_id, service_id, name, sessions, price_cents, validity_days)
+       SELECT DISTINCT ON (s.business_id) s.business_id, s.id,
+         CASE c.slug WHEN 'passeador' THEN 'Clube 8 passeios no mês' WHEN 'adestramento' THEN 'Pacote 4 aulas' ELSE 'Clube 4 banhos no mês' END,
+         CASE c.slug WHEN 'passeador' THEN 8 ELSE 4 END,
+         (round(s.price_min_cents * CASE c.slug WHEN 'passeador' THEN 8 ELSE 4 END * 0.85 / 100) * 100)::int, 30
+       FROM services s JOIN businesses b ON b.id = s.business_id JOIN categories c ON c.id = b.category_id
+       WHERE b.is_demo AND s.bookable AND s.booking_mode = 'slot' AND s.price_type IN ('fixed', 'from') AND s.price_min_cents > 0
+         AND c.slug IN ('banho-e-tosa', 'passeador', 'adestramento')
+       ORDER BY s.business_id, s.sort_order`);
     if (areaRows.length) await insertMany(client, 'business_service_areas', ['business_id', 'city_ibge'], areaRows);
     if (bookingRows.length) await insertMany(client, 'bookings', ['id', 'user_id', 'business_id', 'service_id', 'starts_at', 'ends_at', 'status', 'created_at', 'completed_at'], bookingRows);
     if (quoteRows.length) await insertMany(client, 'quote_requests', ['id', 'user_id', 'business_id', 'service_id', 'description', 'contact_preference', 'status', 'created_at', 'hired_at'], quoteRows);

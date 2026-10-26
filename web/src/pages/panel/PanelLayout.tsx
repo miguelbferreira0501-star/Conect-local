@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Bot, CalendarClock, CalendarDays, Clock, Crown, ExternalLink, Image, LayoutDashboard, ListChecks, QrCode, Star, Store, Users } from 'lucide-react';
+import { ArrowLeft, Bot, Gift, CalendarClock, CalendarDays, Clock, Crown, ExternalLink, Image, LayoutDashboard, ListChecks, QrCode, Star, Store, Users } from 'lucide-react';
 import { useMyBusinesses, usePanelBusiness, usePanelRequests } from '@/lib/panelQueries';
 import { Logo } from '@/components/Layout';
 import { RequireAuth } from '@/components/RequireAuth';
@@ -30,10 +30,10 @@ const TABS = [
   { to: '', label: 'Início', Icon: LayoutDashboard, end: true },
   { to: 'pedidos', label: 'Pedidos', Icon: CalendarClock },
   { to: 'agenda', label: 'Agenda', Icon: CalendarDays },
-  { to: 'assistente', label: 'Assistente IA', Icon: Bot },
   { to: 'divulgar', label: 'Divulgar', Icon: QrCode },
   { to: 'perfil', label: 'Perfil', Icon: Store },
   { to: 'servicos', label: 'Serviços', Icon: ListChecks },
+  { to: 'clube', label: 'Clube e Pix', Icon: Gift },
   { to: 'equipe', label: 'Equipe', Icon: Users },
   { to: 'horarios', label: 'Horários', Icon: Clock },
   { to: 'fotos', label: 'Fotos', Icon: Image },

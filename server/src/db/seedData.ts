@@ -14,6 +14,8 @@ export interface ServiceTemplate {
   duration?: number; // minutos
   bookable?: boolean;
   notes?: string;
+  /** Tipo de agenda (padrão: o da categoria). 'day' = diária/estadia. */
+  mode?: 'slot' | 'period' | 'day';
 }
 
 export interface CategoryTemplate {
@@ -132,8 +134,8 @@ export const CATEGORY_TEMPLATES: Record<string, CategoryTemplate> = {
     services: [
       { name: 'Creche — dia inteiro', priceType: 'fixed', min: 70, ...h(600), notes: 'Das 8h às 18h, com atividades e soneca.' },
       { name: 'Creche — meio período', priceType: 'fixed', min: 45, ...h(300) },
-      { name: 'Hospedagem — diária', priceType: 'fixed', min: 95, notes: 'Combine as datas pelo pedido de orçamento.' },
-      { name: 'Hospedagem de gato — diária', priceType: 'fixed', min: 80 },
+      { name: 'Hospedagem — diária', priceType: 'fixed', min: 95, bookable: true, mode: 'day', notes: 'Escolha a entrada e a saída; o valor é por noite.' },
+      { name: 'Hospedagem de gato — diária', priceType: 'fixed', min: 80, bookable: true, mode: 'day' },
       { name: 'Pacote creche — 10 dias', priceType: 'from', min: 600 },
     ],
     descriptions: [

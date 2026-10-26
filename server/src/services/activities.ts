@@ -1,5 +1,8 @@
 import { randomUUID } from 'node:crypto';
-import { ACTIVITY_LIMITS, localDateOf, repeatDates, toActivityDTO, type BookingRequestInput, type QuoteRequestInput } from '@conecta/shared';
+import {
+  ACTIVITY_LIMITS, BOOKING_LIMITS, bookingFlow, bookingOccurrences, FLOW_NEEDS_ADDRESS, localDateOf, stayNights, toActivityDTO, zonedToUtc,
+  type BookingRequestInput, type QuoteRequestInput,
+} from '@conecta/shared';
 
 export { ACTIVITY_LIMITS, toActivityDTO };
 import { withUser, type Db } from '../db/pool';
@@ -34,9 +37,53 @@ export async function createBooking(userId: string, input: BookingRequestInput) 
     await db.query('SELECT pg_advisory_xact_lock(hashtext($1))', [input.businessId]);
     const biz = await businessesRepo.basicById(input.businessId, db);
     if (!biz) throw notFound('Empresa não encontrada.');
+    const svc = await businessesRepo.service(input.businessId, input.serviceId, db);
+    if (!svc) throw new AppError(422, 'invalid_service', 'Serviço inválido para esta empresa.');
     if (input.petId && !(await petsRepo.ownsPet(db, input.petId))) throw new AppError(422, 'invalid_pet', 'Escolha um dos seus pets.');
+    const flow = bookingFlow(biz.cat_slug, svc.booking_mode);
+    const d = input.details ?? {};
+    const needsAddress = FLOW_NEEDS_ADDRESS.has(flow) || d.pickup || d.atHome;
+    if (needsAddress && !input.address) throw new AppError(422, 'validation_error', 'Informe o endereço.', { address: 'Informe o endereço.' });
+    if (flow === 'ride' && !input.destination) throw new AppError(422, 'validation_error', 'Informe para onde levar o pet.', { destination: 'Informe para onde levar o pet.' });
+    const pkg = input.customerPackageId ? await packageForBooking(db, input.customerPackageId, input.businessId, input.serviceId) : null;
+    const extra = {
+      address: needsAddress ? input.address ?? null : null, destination: flow === 'ride' ? input.destination ?? null : null,
+      details: { ...d, houseNotes: flow === 'sitter' ? d.houseNotes : undefined },
+      depositCents: svc.deposit_cents && biz.pix_key && !pkg ? svc.deposit_cents : null, customerPackageId: pkg?.id ?? null,
+    };
     const first = new Date(input.startsAt);
-    const dates = input.repeat ? repeatDates(first, input.repeat) : [first];
+
+    // Hospedagem: uma reserva só, da entrada até a saída, na mesma vaga em todas as noites.
+    if (svc.booking_mode === 'day' && input.untilDate) {
+      const checkIn = localDateOf(first, biz.timezone);
+      const nights = stayNights(checkIn, input.untilDate);
+      if (!nights.length || nights.length > BOOKING_LIMITS.maxStayNights) throw new AppError(422, 'validation_error', `A saída precisa ser depois da entrada (até ${BOOKING_LIMITS.maxStayNights} noites).`, { untilDate: 'Data de saída inválida.' });
+      const avail = await availability(db, input.businessId, input.serviceId, checkIn, input.staffId ?? null);
+      const byDay = new Map(avail.slots.map((x) => [x.label, x]));
+      let staffIds: string[] | null = null;
+      for (const n of nights) {
+        const slot = byDay.get(n);
+        if (!slot) throw new AppError(409, 'slot_unavailable', `Não há vaga na noite de ${n.split('-').reverse().join('/')}. Escolha outras datas.`);
+        staffIds = staffIds === null ? slot.staffIds : staffIds.filter((x) => slot.staffIds.includes(x));
+      }
+      if (avail.staff.length && !staffIds?.length) throw new AppError(409, 'slot_unavailable', 'Não há a mesma vaga livre em todas as noites. Tente outras datas.');
+      const staffId = avail.staff.length ? (input.staffId ?? staffIds![0]) : null;
+      const created = await activitiesRepo.createBooking(db, {
+        businessId: input.businessId, serviceId: input.serviceId, startsAt: zonedToUtc(checkIn, 0, biz.timezone), endsAt: zonedToUtc(input.untilDate, 0, biz.timezone),
+        notes: input.notes, phone: input.contactPhone, staffId, mode: 'day', period: null, partySize: null, petId: input.petId ?? null, seriesId: null,
+        ...extra, depositCents: extra.depositCents ? extra.depositCents * nights.length : null,
+      });
+      return { id: created.id, ids: [created.id], skipped: [], seriesId: null, nights: nights.length, status: 'requested' as const, isDemoBusiness: biz.is_demo,
+        depositCents: extra.depositCents ? extra.depositCents * nights.length : null };
+    }
+
+    let dates: Date[];
+    try {
+      dates = bookingOccurrences({ startsAt: first, timezone: biz.timezone, mode: svc.booking_mode, repeat: input.repeat ?? null, weekdays: input.weekdays ?? null, untilDate: input.untilDate ?? null, periods: input.periods ?? null });
+    } catch (e) {
+      throw new AppError(422, 'validation_error', (e as Error).message);
+    }
+    if (pkg && dates.length > pkg.remaining) throw new AppError(422, 'package_exhausted', `Seu pacote tem ${pkg.remaining} ${pkg.remaining === 1 ? 'sessão restante' : 'sessões restantes'}.`);
     if ((await activitiesRepo.countActiveFutureBookings(db)) + dates.length > ACTIVITY_LIMITS.maxActiveFutureBookings) {
       throw new AppError(429, 'too_many_bookings', 'Você já tem muitos agendamentos em aberto. Cancele ou conclua algum antes de marcar outro.');
     }
@@ -45,11 +92,11 @@ export async function createBooking(userId: string, input: BookingRequestInput) 
     const skipped: string[] = [];
     for (const [i, startsAt] of dates.entries()) {
       const avail = await availability(db, input.businessId, input.serviceId, localDateOf(startsAt, biz.timezone), input.staffId ?? null);
-      if (i === 0 && avail.mode === 'day' && dates.length > 1) throw new AppError(422, 'repeat_unavailable', 'Diárias não podem ser repetidas automaticamente.');
+      if (i === 0 && avail.mode === 'day' && dates.length > 1) throw new AppError(422, 'repeat_unavailable', 'Para diárias, escolha a data de saída.');
       const slot = avail.slots.find((s) => new Date(s.startsAt).getTime() === startsAt.getTime());
       if (!slot) {
-        if (i === 0) throw new AppError(409, 'slot_unavailable', 'Este horário não está mais disponível. Escolha outro.');
-        skipped.push(startsAt.toISOString()); // repetição sem vaga: as outras continuam
+        if (dates.length === 1) throw new AppError(409, 'slot_unavailable', 'Este horário não está mais disponível. Escolha outro.');
+        skipped.push(startsAt.toISOString()); // sem vaga nesta data: as outras continuam
         continue;
       }
       // Sem preferência: fica com quem estiver livre (o primeiro da equipe, na ordem definida pela empresa).
@@ -57,12 +104,24 @@ export async function createBooking(userId: string, input: BookingRequestInput) 
       const created = await activitiesRepo.createBooking(db, {
         businessId: input.businessId, serviceId: input.serviceId, startsAt, endsAt: new Date(slot.endsAt), notes: input.notes,
         phone: input.contactPhone, staffId, mode: avail.mode, period: avail.mode === 'period' ? slot.label : null,
-        partySize: input.partySize ?? null, petId: input.petId ?? null, seriesId,
+        partySize: input.partySize ?? null, petId: input.petId ?? null, seriesId, ...extra,
+        // Sinal só no primeiro atendimento da série (garante a vaga; os demais seguem o combinado).
+        depositCents: ids.length === 0 ? extra.depositCents : null,
       });
       ids.push(created.id);
     }
-    return { id: ids[0], ids, skipped, seriesId, status: 'requested' as const, isDemoBusiness: biz.is_demo };
+    if (!ids.length) throw new AppError(409, 'slot_unavailable', 'Nenhuma das datas tem vaga. Escolha outros dias ou horários.');
+    return { id: ids[0], ids, skipped, seriesId, status: 'requested' as const, isDemoBusiness: biz.is_demo, depositCents: extra.depositCents };
   });
+}
+
+/** Pacote do clube: precisa estar ativo, ser do tutor, da empresa e do serviço, e ter sessões livres. */
+async function packageForBooking(db: Db, customerPackageId: string, businessId: string, serviceId: string) {
+  const p = await activitiesRepo.customerPackage(db, customerPackageId);
+  if (!p || p.business_id !== businessId || p.service_id !== serviceId) throw new AppError(422, 'invalid_package', 'Este pacote não vale para este serviço.');
+  if (p.status !== 'active' || (p.expires_at && new Date(p.expires_at) < new Date())) throw new AppError(422, 'invalid_package', 'Este pacote não está ativo.');
+  if (p.remaining <= 0) throw new AppError(422, 'package_exhausted', 'As sessões deste pacote acabaram.');
+  return p;
 }
 
 /** Cancela este e os próximos agendamentos da mesma série (ex.: parar os passeios semanais). */

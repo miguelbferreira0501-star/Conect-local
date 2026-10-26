@@ -1,3 +1,5 @@
+import { BookingExtras } from '@/components/BookingExtras';
+import { PanelDeposit, PanelLoyalty } from './PanelBookingBits';
 import { useRef, useState } from 'react';
 import { Link, Navigate, useNavigate, useOutletContext } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -21,7 +23,6 @@ import { Sheet } from '@/components/ui/Sheet';
 import { Tag } from '@/components/ui/Tags';
 import { useToast } from '@/components/ui/Toast';
 import { BusinessProfileForm, EMPTY_PROFILE, type ProfileForm } from './BusinessProfileForm';
-import { AiReplyButton } from './PanelPages2';
 
 const useBiz = () => useOutletContext<PanelBusinessDTO>();
 
@@ -168,6 +169,7 @@ export function PanelRequestsPage() {
 
 function RequestCard({ r, businessId }: { r: PanelRequestDTO; businessId: string }) {
   const toast = useToast();
+  const biz = useOutletContext<PanelBusinessDTO>();
   const [sheet, setSheet] = useState<null | 'decline' | 'answer'>(null);
   const [msg, setMsg] = useState('');
   const act = usePanelMutation(businessId, (body: { action: string; message?: string }) => api.post(`/panel/businesses/${businessId}/requests/${r.type}/${r.id}`, body), ['requests']);
@@ -199,6 +201,9 @@ function RequestCard({ r, businessId }: { r: PanelRequestDTO; businessId: string
         </p>
       )}
       {r.partySize && <p className="text-sm"><strong>{r.partySize} {r.partySize === 1 ? 'pessoa' : 'pessoas'}</strong></p>}
+      {r.type === 'booking' && <BookingExtras endsAt={r.endsAt} mode={r.bookingMode} address={r.address} destination={r.destination} details={r.details} fromPackage={r.fromPackage} />}
+      {r.type === 'booking' && <PanelLoyalty every={biz?.settings?.loyaltyEvery ?? null} visits={r.customerVisits} />}
+      {r.type === 'booking' && r.status !== 'declined' && r.status !== 'cancelled' && <PanelDeposit businessId={businessId} bookingId={r.id} deposit={r.deposit} />}
       {r.pet && <div className="mt-2"><PetCard pet={r.pet} /></div>}
       {r.type === 'booking' && r.status === 'confirmed' && <p className="mt-2 text-sm text-accent-700">Na Agenda, use “Pet ao Vivo” para mandar as fotos de cada etapa ao tutor.</p>}
       {r.staffName && <p className="text-sm">{r.partySize ? 'Mesa/ambiente' : 'Com'}: <strong>{r.staffName}</strong></p>}
@@ -253,8 +258,8 @@ export function PanelProfilePage() {
 }
 
 // ── Serviços ──
-type ServiceForm = { name: string; description: string; priceType: ServiceInput['priceType']; priceMin: string; priceMax: string; durationMinutes: string; bookable: boolean; bookingMode: BookingMode; notes: string };
-const EMPTY_SERVICE: ServiceForm = { name: '', description: '', priceType: 'fixed', priceMin: '', priceMax: '', durationMinutes: '', bookable: false, bookingMode: 'slot', notes: '' };
+type ServiceForm = { name: string; description: string; priceType: ServiceInput['priceType']; priceMin: string; priceMax: string; durationMinutes: string; bookable: boolean; bookingMode: BookingMode; notes: string; deposit: string };
+const EMPTY_SERVICE: ServiceForm = { name: '', description: '', priceType: 'fixed', priceMin: '', priceMax: '', durationMinutes: '', bookable: false, bookingMode: 'slot', notes: '', deposit: '' };
 
 export function PanelServicesPage() {
   const b = useBiz();
@@ -269,7 +274,7 @@ export function PanelServicesPage() {
   const submit = () => {
     if (!editing) return;
     const f = editing.f;
-    const body = { name: f.name, description: f.description, priceType: f.priceType, priceMin: num(f.priceMin), priceMax: num(f.priceMax), durationMinutes: num(f.durationMinutes), bookable: f.bookable, bookingMode: f.bookingMode, notes: f.notes };
+    const body = { name: f.name, description: f.description, priceType: f.priceType, priceMin: num(f.priceMin), priceMax: num(f.priceMax), durationMinutes: num(f.durationMinutes), bookable: f.bookable, bookingMode: f.bookingMode, notes: f.notes, deposit: f.bookable ? num(f.deposit) : null };
     const parsed = serviceInputSchema.safeParse(body);
     if (!parsed.success) {
       const e: Record<string, string> = {};
@@ -304,7 +309,7 @@ export function PanelServicesPage() {
                 {s.durationMinutes ? ` · ${formatDuration(s.durationMinutes)}` : ''}{s.bookable ? ` · agendável (${BOOKING_MODE_LABELS[s.bookingMode].title.toLowerCase()})` : ''}
               </p>
             </div>
-            <Button size="sm" variant="secondary" onClick={() => { setErrors({}); setEditing({ id: s.id, f: { name: s.name, description: s.description ?? '', priceType: s.priceType, priceMin: s.priceMin?.toString().replace('.', ',') ?? '', priceMax: s.priceMax?.toString().replace('.', ',') ?? '', durationMinutes: s.durationMinutes?.toString() ?? '', bookable: s.bookable, bookingMode: s.bookingMode, notes: s.notes ?? '' } }); }}>Editar</Button>
+            <Button size="sm" variant="secondary" onClick={() => { setErrors({}); setEditing({ id: s.id, f: { name: s.name, description: s.description ?? '', priceType: s.priceType, priceMin: s.priceMin?.toString().replace('.', ',') ?? '', priceMax: s.priceMax?.toString().replace('.', ',') ?? '', durationMinutes: s.durationMinutes?.toString() ?? '', bookable: s.bookable, bookingMode: s.bookingMode, notes: s.notes ?? '', deposit: s.deposit?.toString().replace('.', ',') ?? '' } }); }}>Editar</Button>
             <button aria-label={`Remover ${s.name}`} className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted hover:bg-danger-50 hover:text-danger-700"
               onClick={() => remove.mutate(s.id, { onSuccess: () => toast('Serviço removido.'), onError: (e) => toast(e.message, 'error') })}><Trash2 className="h-4 w-4" /></button>
           </li>
@@ -342,6 +347,11 @@ export function PanelServicesPage() {
                 </div>
                 {errors.durationMinutes && editing.f.bookingMode === 'slot' && <p className="mt-1 text-sm text-danger-700">{errors.durationMinutes}</p>}
               </fieldset>
+            )}
+            {editing.f.bookable && (
+              <TextField label={editing.f.bookingMode === 'day' ? 'Sinal por diária (R$)' : 'Sinal para garantir o horário (R$)'} optional inputMode="decimal" value={editing.f.deposit}
+                onChange={(e) => set({ deposit: e.target.value })} error={errors.deposit} placeholder="Ex.: 20,00"
+                hint={b.settings.pixKey ? 'O cliente paga pelo Pix na sua chave e você confirma no pedido.' : 'Cadastre sua chave Pix em "Clube e Pix" para cobrar sinal.'} />
             )}
             <TextField label="Observações" optional value={editing.f.notes} onChange={(e) => set({ notes: e.target.value })} maxLength={200} placeholder="Ex.: material incluso" />
           </div>
@@ -508,10 +518,6 @@ export function PanelReviewsPage() {
               <div className="mt-3 space-y-2">
                 <TextArea label="Resposta pública" value={editing.body} maxLength={1000} onChange={(e) => setEditing({ id: r.id, body: e.target.value })} className="field min-h-[90px]" />
                 <div className="flex flex-wrap gap-2">
-                  <AiReplyButton businessId={b.id} reviewId={r.id}
-                    onStart={() => setEditing({ id: r.id, body: '' })}
-                    onText={(t) => setEditing((cur) => (cur && cur.id === r.id ? { ...cur, body: cur.body + t } : cur))}
-                    onDone={(err) => { if (err) toast(err, 'error'); }} />
                   <Button size="sm" loading={reply.isPending} onClick={() => reply.mutate({ id: r.id, body: editing.body.trim() }, { onSuccess: () => { toast('Resposta publicada.'); setEditing(null); }, onError: (e) => toast(e.message, 'error') })}>Publicar resposta</Button>
                   <Button size="sm" variant="ghost" onClick={() => setEditing(null)}>Cancelar</Button>
                 </div>

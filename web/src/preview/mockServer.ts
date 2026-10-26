@@ -10,6 +10,7 @@ import {
   reviewInputSchema, reviewReportSchema, reviewUpdateSchema, scoreRows, searchQuerySchema, sortScored, toActivityDTO, toCard,
   type ActivityRow, type BusinessRow, type CityDTO, type SuggestionDTO,
   LIVE_STAGE_DETAILS, liveFlow, petInputSchema, repeatDates, type LiveStage, type LiveUpdateDTO, type PetDTO,
+  bookingOccurrences, RETURN_AFTER_DAYS, type MyPackageDTO, type PackageDTO,
 } from '@conecta/shared';
 import type { ZodTypeAny } from 'zod';
 import raw from './data.json';
@@ -63,7 +64,8 @@ interface State {
   session: string | null;
   favorites: Record<string, string[]>;
   bookings: Array<{ id: string; user_id: string; business_id: string; service_id: string; starts_at: string; ends_at: string; status: string; notes?: string; created_at: string; completed_at?: string | null;
-    pet_id?: string | null; series_id?: string | null; sim?: boolean }>;
+    pet_id?: string | null; series_id?: string | null; sim?: boolean; address?: string | null; destination?: string | null; details?: Json; deposit_cents?: number | null; customer_package_id?: string | null }>;
+  myPackages?: Array<{ id: string; user_id: string; package_id: string; business_id: string; status: 'requested' | 'active' | 'cancelled'; created_at: string; pet_id: string | null }>;
   pets: Array<PetDTO & { user_id: string }>;
   quotes: Array<{ id: string; user_id: string; business_id: string; service_id: string | null; description: string; preferred_date: string | null; contact_preference: string; status: string; created_at: string; hired_at?: string | null }>;
   reviews: Review[];
@@ -257,6 +259,9 @@ function activityRows(userId: string): ActivityRow[] {
       live_count: live.length, live_last_stage: live.at(-1)?.stage ?? null, live_last_at: live.at(-1)?.createdAt ?? null,
       id: b.id, type: 'booking' as const, status: b.status, ...base(b.business_id), service_name: svcName(b.business_id, b.service_id), service_id: b.service_id,
       starts_at: b.starts_at, preferred_date: null, description: b.notes ?? null, created_at: b.created_at, closed_at: b.completed_at ?? null, review_id: reviewFor('booking_id', b.id),
+      ends_at: b.ends_at, address: b.address ?? null, destination: b.destination ?? null, details: b.details ?? {}, deposit_cents: b.deposit_cents ?? null,
+      deposit_status: b.deposit_cents ? ('pending' as const) : null, pix_key: pixKeyFor(bizById.get(b.business_id)), customer_package_id: b.customer_package_id ?? null,
+      city_name: cities.get(bizById.get(b.business_id).city_ibge)?.name ?? '',
     }; }),
     ...S.quotes.filter((q) => q.user_id === userId).map((q) => ({
       id: q.id, type: 'quote' as const, status: q.status, ...base(q.business_id), service_name: svcName(q.business_id, q.service_id), service_id: q.service_id,
@@ -284,6 +289,48 @@ function availability(bizId: string, serviceId: string, date: string) {
   const busy = S.bookings.filter((x) => x.business_id === bizId && (x.status === 'requested' || x.status === 'confirmed')).map((x) => ({ ...x, staff_id: null }));
   const r = computeAvailability({ mode: 'slot', date, timezone: tz, durationMinutes: svc.duration_minutes, businessHours: b.opening_hours, staff: [], busy });
   return { date, timezone: tz, mode: 'slot', durationMinutes: svc.duration_minutes, slots: r.slots, staff: [] };
+}
+
+// ── Benefícios na prévia: Pix fictício, cartão fidelidade, sinal e pacotes ──
+const BENEFIT_CATS = new Set(['banho-e-tosa', 'passeador', 'hospedagem-e-creche', 'adestramento']);
+const catSlug = (b: Json) => catById.get(b.category_id)?.slug ?? '';
+const pixKeyFor = (b: Json) => (BENEFIT_CATS.has(catSlug(b)) ? `pix+${b.slug.slice(0, 30)}@exemplo.invalid` : null);
+const depositFor = (b: Json, s: Json) => (['banho-e-tosa', 'hospedagem-e-creche'].includes(catSlug(b)) && s.bookable && (s.price_min_cents ?? 0) >= 4000 ? 2000 : null);
+function packagesFor(b: Json): PackageDTO[] {
+  const cat = catSlug(b);
+  if (!['banho-e-tosa', 'passeador', 'adestramento'].includes(cat)) return [];
+  const s = (servicesByBiz.get(b.id) ?? []).find((x) => x.bookable && ['fixed', 'from'].includes(x.price_type) && x.price_min_cents > 0);
+  if (!s) return [];
+  const n = cat === 'passeador' ? 8 : 4;
+  return [{ id: `pkg-${s.id}`, serviceId: s.id, serviceName: s.name, name: cat === 'passeador' ? 'Clube 8 passeios no mês' : cat === 'adestramento' ? 'Pacote 4 aulas' : 'Clube 4 banhos no mês',
+    sessions: n, priceCents: Math.round((s.price_min_cents * n * 0.85) / 100) * 100, validityDays: 30, active: true, singlePriceCents: s.price_min_cents }];
+}
+function myPackages(userId: string): MyPackageDTO[] {
+  return (S.myPackages ?? []).filter((x) => x.user_id === userId && x.status !== 'cancelled').map((x) => {
+    const b = bizById.get(x.business_id)!;
+    const p = packagesFor(b).find((y) => y.id === x.package_id)!;
+    const used = S.bookings.filter((bk) => bk.customer_package_id === x.id && bk.status !== 'cancelled').length;
+    // Na prévia a empresa "confirma o pagamento" sozinha depois de alguns segundos.
+    const status = x.status === 'requested' && Date.now() - new Date(x.created_at).getTime() > 15_000 ? 'active' : x.status;
+    return { id: x.id, name: p.name, serviceId: p.serviceId, serviceName: p.serviceName, business: { id: b.id, slug: b.slug, name: b.name, pixKey: pixKeyFor(b), city: cities.get(b.city_ibge)!.name },
+      sessions: p.sessions, remaining: p.sessions - used, priceCents: p.priceCents, status, expiresAt: null, createdAt: x.created_at, petName: S.pets.find((pt) => pt.id === x.pet_id)?.name ?? null };
+  });
+}
+function reminders(userId: string) {
+  const seen = new Set<string>();
+  const out = [];
+  for (const bk of S.bookings.filter((x) => x.user_id === userId).map(simStatus).filter((x) => x.status === 'completed').sort((a, b) => b.starts_at.localeCompare(a.starts_at))) {
+    const key = `${bk.pet_id}-${bk.service_id}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const b = bizById.get(bk.business_id)!;
+    const days = Math.floor((Date.now() - new Date(bk.starts_at).getTime()) / 86_400_000);
+    const upcoming = S.bookings.some((x) => x.user_id === userId && x.service_id === bk.service_id && new Date(x.starts_at) > new Date() && ['requested', 'confirmed'].includes(x.status));
+    if (upcoming || RETURN_AFTER_DAYS[catSlug(b)] == null || days < RETURN_AFTER_DAYS[catSlug(b)] || days > 120) continue;
+    out.push({ petId: bk.pet_id ?? null, petName: S.pets.find((p) => p.id === bk.pet_id)?.name ?? null, business: { slug: b.slug, name: b.name }, serviceId: bk.service_id,
+      serviceName: (servicesByBiz.get(b.id) ?? []).find((s) => s.id === bk.service_id)?.name ?? 'atendimento', daysSince: days });
+  }
+  return out.slice(0, 3);
 }
 
 // ── Rotas ──
@@ -388,7 +435,12 @@ export async function handle(method: string, fullPath: string, body: Json): Prom
         services: (servicesByBiz.get(b.id) ?? []).map((s) => ({
           id: s.id, name: s.name, description: s.description, priceType: s.price_type, priceMinCents: s.price_min_cents, priceMaxCents: s.price_max_cents,
           durationMinutes: s.duration_minutes, bookable: s.bookable, bookingMode: 'slot', notes: s.notes, cityPrice: cityPriceFor(b, s.name),
+          depositCents: pixKeyFor(b) ? depositFor(b, s) : null,
         })),
+        pixKey: pixKeyFor(b),
+        loyaltyEvery: BENEFIT_CATS.has(catSlug(b)) ? 10 : null,
+        myLoyaltyVisits: u && BENEFIT_CATS.has(catSlug(b)) ? S.bookings.filter((x) => x.user_id === u.id && x.business_id === b.id).map(simStatus).filter((x) => x.status === 'completed').length : null,
+        packages: packagesFor(b),
         photos: [],
         staff: [],
         staffLabel: bookingProfile(catById.get(b.category_id)!.slug).staffLabel,
@@ -405,6 +457,8 @@ export async function handle(method: string, fullPath: string, body: Json): Prom
       return scoreRows(rows, { q: '', mean: globalMean() }).map((s) => toCard(s));
     }
     if (path === '/me/activities') return activities(requireUser().id);
+    if (path === '/me/packages') return myPackages(requireUser().id);
+    if (path === '/me/reminders') return reminders(requireUser().id);
     if (path === '/me/pets') { const uu = requireUser(); return S.pets.filter((p) => p.user_id === uu.id).map(({ user_id: _u, ...p }) => p); }
     if ((r = m(/^\/bookings\/([^/]+)\/live$/))) {
       const uu = requireUser();
@@ -496,11 +550,36 @@ export async function handle(method: string, fullPath: string, body: Json): Prom
     const { user_id: _u, ...dto } = pet;
     return method === 'DELETE' ? { ok: true } : dto;
   }
+  if (method === 'POST' && path === '/me/packages') {
+    const pid = String(body?.packageId ?? '');
+    const b = businesses.find((x) => packagesFor(x).some((p) => p.id === pid));
+    if (!b) throw new MockError(404, 'not_found', 'Pacote não encontrado.');
+    S.myPackages ??= [];
+    if (S.myPackages.some((x) => x.user_id === u.id && x.package_id === pid && x.status !== 'cancelled')) throw new MockError(409, 'conflict', 'Você já pediu este pacote.');
+    const id = uid();
+    S.myPackages.push({ id, user_id: u.id, package_id: pid, business_id: b.id, status: 'requested', created_at: new Date().toISOString(), pet_id: body?.petId ?? null });
+    save();
+    return { id };
+  }
+  if ((r = m(/^\/me\/packages\/(.+)\/cancel$/)) && method === 'POST') {
+    const x = (S.myPackages ?? []).find((y) => y.id === r![1] && y.user_id === u.id);
+    if (x) x.status = 'cancelled';
+    save();
+    return { ok: true };
+  }
   if (method === 'POST' && path === '/bookings') {
     const input = parse(bookingRequestSchema, body);
     const b = bizById.get(input.businessId)!;
     const first = new Date(input.startsAt);
-    const dates = input.repeat ? repeatDates(first, input.repeat) : [first];
+    const tz = cities.get(b.city_ibge)!.timezone;
+    const dates = input.weekdays?.length && input.repeat
+      ? bookingOccurrences({ startsAt: first, timezone: tz, mode: 'slot', repeat: input.repeat, weekdays: input.weekdays })
+      : input.repeat ? repeatDates(first, input.repeat) : [first];
+    const svcRow = (servicesByBiz.get(b.id) ?? []).find((x) => x.id === input.serviceId);
+    const pkg = input.customerPackageId ? myPackages(u.id).find((x) => x.id === input.customerPackageId && x.status === 'active') : null;
+    if (input.customerPackageId && !pkg) throw new MockError(422, 'invalid_package', 'Este pacote não está ativo.');
+    if (pkg && dates.length > pkg.remaining) throw new MockError(422, 'package_exhausted', `Seu pacote tem ${pkg.remaining} sessões restantes.`);
+    const depositCents = !pkg && pixKeyFor(b) && svcRow ? depositFor(b, svcRow) : null;
     if (S.bookings.filter((x) => x.user_id === u.id && ['requested', 'confirmed'].includes(x.status) && new Date(x.starts_at) > new Date()).length + dates.length > ACTIVITY_LIMITS.maxActiveFutureBookings) {
       throw new MockError(429, 'too_many_bookings', 'Você já tem muitos agendamentos em aberto.');
     }
@@ -518,11 +597,12 @@ export async function handle(method: string, fullPath: string, body: Json): Prom
       const id = uid();
       // Só o primeiro da série "acontece" na prévia (para mostrar o Pet ao Vivo).
       S.bookings.push({ id, user_id: u.id, business_id: b.id, service_id: input.serviceId, starts_at: startsAt.toISOString(), ends_at: new Date(startsAt.getTime() + avail.durationMinutes * 60_000).toISOString(),
-        status: 'requested', notes: input.notes, created_at: new Date().toISOString(), pet_id: input.petId ?? null, series_id: seriesId, sim: i === 0 });
+        status: 'requested', notes: input.notes, created_at: new Date().toISOString(), pet_id: input.petId ?? null, series_id: seriesId, sim: i === 0,
+        address: input.address ?? null, destination: input.destination ?? null, details: input.details ?? {}, deposit_cents: ids.length === 0 ? depositCents : null, customer_package_id: pkg?.id ?? null });
       ids.push(id);
     }
     save();
-    return { id: ids[0], ids, skipped, seriesId, status: 'requested', isDemoBusiness: true };
+    return { id: ids[0], ids, skipped, seriesId, status: 'requested', isDemoBusiness: true, depositCents };
   }
   if ((r = m(/^\/bookings\/(.+)\/cancel-series$/))) {
     const ref = S.bookings.find((x) => x.id === r![1] && x.user_id === u.id);

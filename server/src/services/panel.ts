@@ -112,7 +112,9 @@ export const panel = {
           id: s.id, name: s.name, description: s.description, priceType: s.price_type,
           priceMin: s.price_min_cents == null ? null : s.price_min_cents / 100, priceMax: s.price_max_cents == null ? null : s.price_max_cents / 100,
           durationMinutes: s.duration_minutes, bookable: s.bookable, bookingMode: s.booking_mode, notes: s.notes,
+          deposit: s.deposit_cents == null ? null : s.deposit_cents / 100,
         })),
+        settings: { pixKey: b.pix_key ?? null, loyaltyEvery: b.loyalty_every ?? null },
         staff: staff.map((s, i) => ({ ...s, paused: i >= PLANS[effectivePlan(b.plan as PlanId, b.plan_until)].maxStaff })) as PanelStaffDTO[],
         plan: { id: b.plan, effective: effectivePlan(b.plan, b.plan_until), until: b.plan_until ? new Date(b.plan_until).toISOString() : null, aiUsedThisMonth: aiUsed },
         stats: { ...stats, requestsReceived: b.requests_received, requestsAnswered: b.requests_answered },
@@ -149,6 +151,7 @@ export const panel = {
       price_max_cents: s.priceType === 'range' ? cents(s.priceMax) : null,
       duration_minutes: s.durationMinutes, bookable: s.bookable && (s.bookingMode !== 'slot' || !!s.durationMinutes), notes: s.notes,
       booking_mode: s.bookingMode,
+      deposit_cents: s.deposit ? Math.round(s.deposit * 100) : null,
     };
     return withUser(userId, async (db) => {
       await requireMember(db, businessId);
@@ -219,6 +222,8 @@ export const panel = {
         createdAt: new Date(r.created_at).toISOString(), businessResponse: r.business_response,
         bookingMode: r.booking_mode ?? null, period: r.period ?? null, staffName: r.staff_name ?? null, partySize: r.party_size ?? null,
         pet: r.pet ?? null, liveCount: r.live_count ?? 0,
+        endsAt: r.ends_at ? new Date(r.ends_at).toISOString() : null, address: r.address ?? null, destination: r.destination ?? null, details: r.details ?? {},
+        deposit: r.deposit_cents ? { cents: r.deposit_cents, status: r.deposit_status ?? 'pending' } : null, fromPackage: !!r.from_package, customerVisits: r.customer_visits ?? 0,
         customer: r.customer_name
           ? { name: r.customer_name, phone: r.contact_phone || r.customer_phone || null, email: r.customer_email }
           : null,
@@ -282,6 +287,8 @@ export const panel = {
         id: r.id, status: r.status, startsAt: new Date(r.starts_at).toISOString(), endsAt: new Date(r.ends_at).toISOString(),
         mode: r.booking_mode, period: r.period, serviceName: r.service_name, staffId: r.staff_id, staffName: r.staff_name, partySize: r.party_size,
         customerName: r.customer_name, customerPhone: r.customer_phone, pet: r.pet ?? null, liveCount: r.live_count ?? 0,
+        address: r.address ?? null, destination: r.destination ?? null, details: r.details ?? {},
+        deposit: r.deposit_cents ? { cents: r.deposit_cents, status: r.deposit_status ?? 'pending' } : null,
       }));
     }),
 

@@ -7,7 +7,7 @@ import {
   BADGES, comparePriceWithCity, formatCents, describeDayHours, formatDuration, formatPhoneBR, formatRating, formatServicePrice, isOpenAt, PRICE_LEVEL_LABELS, REPORT_REASONS, REVIEW_ASPECT_LABELS,
   relativeTime, reviewCountLabel, WEEKDAY_NAMES, type BusinessDetailDTO, type ReviewAspect, type ServiceMode,
 } from '@conecta/shared';
-import { BRAND, isReservationCategory } from '@conecta/shared';
+import { BRAND, bookingFlow, FLOW_COPY, isReservationCategory } from '@conecta/shared';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useBusiness, useReviews } from '@/lib/queries';
@@ -21,6 +21,7 @@ import { DemoTag, Tag, TrustBadge } from '@/components/ui/Tags';
 import { useToast } from '@/components/ui/Toast';
 import { BusinessCover, BusinessLogo } from '@/components/ui/Visual';
 import { locationLabel } from '@/components/BusinessCard';
+import { LoyaltyCard, PackagesSection } from '@/components/Benefits';
 
 type TabId = 'visao-geral' | 'servicos' | 'avaliacoes' | 'fotos' | 'contato';
 
@@ -168,6 +169,14 @@ export function BusinessPage() {
   );
 }
 
+/** Rótulo do botão principal de acordo com a área (passeio, hospedagem, corrida…). */
+function flowCta(b: BusinessDetailDTO, compact?: boolean) {
+  const main = b.services.find((s) => s.bookable);
+  const flow = bookingFlow(b.category.slug, main?.bookingMode);
+  if (flow === 'grooming' || flow === 'generic') return compact ? 'Agendar' : 'Agendar horário';
+  return FLOW_COPY[flow].cta;
+}
+
 function PrimaryActions({ b, primary, onContact, compact }: { b: BusinessDetailDTO; primary: string; onContact: () => void; compact?: boolean }) {
   const contact = hasContact(b);
   const reservation = isReservationCategory(b.category.slug);
@@ -175,7 +184,7 @@ function PrimaryActions({ b, primary, onContact, compact }: { b: BusinessDetailD
     <>
       {b.acceptsBooking && (
         <ButtonLink to={`/empresa/${b.slug}/agendar`} icon={<CalendarCheck className="h-5 w-5" />} className={compact ? 'flex-1 whitespace-nowrap' : ''}>
-          {isReservationCategory(b.category.slug) ? (compact ? 'Reservar' : 'Reservar mesa') : compact ? 'Agendar' : 'Agendar horário'}
+          {flowCta(b, compact)}
         </ButtonLink>
       )}
       {b.acceptsQuote && !reservation && (
@@ -236,6 +245,8 @@ function Overview({ b, onTab }: { b: BusinessDetailDTO; onTab: (t: TabId) => voi
       </div>
 
       <aside className="space-y-5">
+        {b.loyaltyEvery && <LoyaltyCard every={b.loyaltyEvery} visits={b.myLoyaltyVisits} />}
+        <PackagesSection b={b} />
         {(b.address.street || b.address.neighborhood) && b.modes.includes('in_person') && (
           <section className="card p-5">
             <h2 className="mb-2 font-semibold">Endereço</h2>
@@ -306,6 +317,7 @@ function Services({ b }: { b: BusinessDetailDTO }) {
               <p className="mt-1 flex flex-wrap gap-x-3 text-sm text-muted">
                 {s.durationMinutes && <span className="inline-flex items-center gap-1"><Clock className="h-4 w-4" aria-hidden="true" />{formatDuration(s.durationMinutes)}</span>}
                 {s.bookable && <span className="inline-flex items-center gap-1 text-accent-700"><CalendarCheck className="h-4 w-4" aria-hidden="true" />Agendamento on-line</span>}
+                {!!s.depositCents && b.pixKey && <span>Sinal de {formatCents(s.depositCents)} no Pix</span>}
               </p>
               {s.notes && <p className="mt-1 text-sm text-ink/80">{s.notes}</p>}
             </div>
@@ -315,7 +327,7 @@ function Services({ b }: { b: BusinessDetailDTO }) {
             </div>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            {s.bookable && b.acceptsBooking && <ButtonLink size="sm" to={`/empresa/${b.slug}/agendar?servico=${s.id}`}>{isReservationCategory(b.category.slug) ? 'Reservar' : 'Agendar'}</ButtonLink>}
+            {s.bookable && b.acceptsBooking && <ButtonLink size="sm" to={`/empresa/${b.slug}/agendar?servico=${s.id}`}>{FLOW_COPY[bookingFlow(b.category.slug, s.bookingMode)].cta}</ButtonLink>}
             {b.acceptsQuote && !isReservationCategory(b.category.slug) && <ButtonLink size="sm" variant="secondary" to={`/empresa/${b.slug}/orcamento?servico=${s.id}`}>{s.priceType === 'quote' ? 'Solicitar orçamento' : 'Tirar dúvidas / orçamento'}</ButtonLink>}
           </div>
         </li>

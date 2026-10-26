@@ -22,9 +22,9 @@ const PanelReviewsPage = lazy(() => panel().then((m) => ({ default: m.PanelRevie
 const panel2 = () => import('./pages/panel/PanelPages2');
 const PanelStaffPage = lazy(() => panel2().then((m) => ({ default: m.PanelStaffPage })));
 const PanelAgendaPage = lazy(() => panel2().then((m) => ({ default: m.PanelAgendaPage })));
-const PanelAssistantPage = lazy(() => panel2().then((m) => ({ default: m.PanelAssistantPage })));
 const PanelPlanPage = lazy(() => panel2().then((m) => ({ default: m.PanelPlanPage })));
 const PanelPromotePage = lazy(() => import('./pages/panel/PanelPromote').then((m) => ({ default: m.PanelPromotePage })));
+const PanelBenefitsPage = lazy(() => import('./pages/panel/PanelBenefits').then((m) => ({ default: m.PanelBenefitsPage })));
 const AdminPage = lazy(() => import('./pages/panel/AdminPage').then((m) => ({ default: m.AdminPage })));
 
 // Telas menos acessadas são carregadas sob demanda (bom para celulares de entrada).
@@ -65,9 +65,9 @@ export function App() {
             <Route path="avaliacoes" element={<PanelReviewsPage />} />
             <Route path="equipe" element={<PanelStaffPage />} />
             <Route path="agenda" element={<PanelAgendaPage />} />
-            <Route path="assistente" element={<PanelAssistantPage />} />
             <Route path="divulgar" element={<PanelPromotePage />} />
             <Route path="plano" element={<PanelPlanPage />} />
+            <Route path="clube" element={<PanelBenefitsPage />} />
           </Route>
         </Route>
         <Route path="admin" element={<PanelShell />}>

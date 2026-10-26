@@ -1,6 +1,6 @@
 /** Ficha do pet e Pet ao Vivo (etapas do atendimento com fotos). */
-import { FINAL_LIVE_STAGES, liveUpdateSchema, petInputSchema, type LiveStage } from '@conecta/shared';
-import { withUser } from '../db/pool';
+import { effectivePlan, FINAL_LIVE_STAGES, liveUpdateSchema, petInputSchema, planIsActive, type LiveStage, type PlanId } from '@conecta/shared';
+import { withUser, type Db } from '../db/pool';
 import { AppError, forbidden, notFound, parse } from '../lib/errors';
 import { decodeImage } from '../lib/images';
 import { panelRepo } from '../repositories/panel';
@@ -8,6 +8,14 @@ import { liveRepo, petsRepo } from '../repositories/pets';
 import { query } from '../db/pool';
 
 export const PET_LIMITS = { maxPets: 10 };
+
+/** Recursos do plano (Pet ao Vivo, pacotes, fidelidade) exigem assinatura ativa ou teste grátis. */
+export async function requireActivePlan(db: Db, businessId: string) {
+  const biz = await panelRepo.business(db, businessId);
+  if (!biz || !planIsActive(effectivePlan(biz.plan as PlanId, biz.plan_until))) {
+    throw new AppError(402, 'plan_required', 'Este recurso faz parte do Plano Pataí. Assine em Plano para continuar.');
+  }
+}
 
 export const listPets = (userId: string) => withUser(userId, (db) => petsRepo.list(db));
 
@@ -58,6 +66,7 @@ export async function addLive(userId: string, businessId: string, bookingId: str
   return withUser(userId, async (db) => {
     const role = await panelRepo.role(db, businessId);
     if (role !== 'owner' && role !== 'manager') throw forbidden('Você não tem acesso a esta empresa.');
+    await requireActivePlan(db, businessId);
     const b = await panelRepo.booking(db, businessId, bookingId);
     if (!b) throw notFound('Agendamento não encontrado.');
     if (b.status !== 'confirmed' && b.status !== 'completed') {

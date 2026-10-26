@@ -1,4 +1,5 @@
 import { repeatSchema } from './pets';
+import { flowFieldsSchema } from './flows';
 /**
  * Esquemas de validação usados no cliente E no servidor.
  * O servidor sempre revalida — a validação do navegador é só conveniência.
@@ -112,7 +113,9 @@ export const bookingRequestSchema = z.object({
   petId: uuid.nullable().optional(),
   /** Repetir o mesmo horário (ex.: passeio toda semana) */
   repeat: repeatSchema.nullable().optional(),
-});
+  /** Usar uma sessão de um pacote do clube */
+  customerPackageId: uuid.nullable().optional(),
+}).merge(flowFieldsSchema);
 export type BookingRequestInput = z.infer<typeof bookingRequestSchema>;
 
 export const REVIEW_ASPECTS = ['atendimento', 'pontualidade', 'qualidade', 'preco'] as const;

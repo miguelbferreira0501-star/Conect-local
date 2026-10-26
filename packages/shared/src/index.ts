@@ -15,3 +15,6 @@ export * from './activities';
 export * from './panel';
 export * from './whatsapp';
 export * from './pets';
+export * from './flows';
+export * from './pix';
+export * from './benefits';

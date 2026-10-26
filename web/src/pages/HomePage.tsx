@@ -15,7 +15,8 @@ import { Sheet } from '@/components/ui/Sheet';
 import { LIVE_STAGES, type LiveStage, type PetDTO } from '@conecta/shared';
 import { usePets } from '@/lib/pets';
 import { PetAvatar, PetFormSheet } from '@/components/pets';
-import { Camera, Plus, Radio } from 'lucide-react';
+import { BellRing, Camera, Plus, Radio } from 'lucide-react';
+import { useReminders } from '@/lib/benefits';
 
 export function HomePage() {
   const { city, openPicker } = useUserLocation();
@@ -64,6 +65,7 @@ export function HomePage() {
 
       <div className="container-app space-y-9 py-7">
         {user && <HomePets />}
+        {user && <ReturnReminders />}
         {user ? <LiveNowOrBanner /> : <LiveBanner />}
         {!city && (
           <EmptyState icon={<MapPin className="h-8 w-8" />} title="Para começar, escolha sua cidade" action={<Button onClick={openPicker}>Escolher cidade</Button>}>
@@ -248,5 +250,26 @@ function LiveBanner() {
       <p className="mt-1 max-w-md text-xl font-bold leading-snug">Acompanhe cada etapa do banho, do passeio e da visita — com fotos.</p>
       <p className="mt-1 flex items-center gap-1.5 text-sm text-white/85"><Camera className="h-4 w-4 shrink-0" aria-hidden="true" /> 🛁 No banho → 💨 Secando → ✂️ Na tosa → ✅ Pronto</p>
     </div>
+  );
+}
+
+/** Lembrete automático de retorno: "faz 16 dias do último banho do Thor". */
+function ReturnReminders() {
+  const r = useReminders();
+  if (!r.data?.length) return null;
+  return (
+    <section className="space-y-2" aria-label="Lembretes de retorno" data-testid="reminders">
+      {r.data.map((x) => (
+        <Link key={`${x.petId}-${x.serviceId}`} to={`/empresa/${x.business.slug}/agendar?servico=${x.serviceId}`}
+          className="card flex items-center gap-3 p-4 transition hover:border-brand-600">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent-600/15 text-accent-600"><BellRing className="h-5 w-5" aria-hidden /></span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold">{x.petName ? `Hora de agendar para ${x.petName}?` : 'Hora de agendar de novo?'}</span>
+            <span className="block text-sm text-muted">Faz {x.daysSince} dias do último {x.serviceName.toLowerCase()} em {x.business.name}.</span>
+          </span>
+          <ChevronRight className="h-5 w-5 text-muted" aria-hidden />
+        </Link>
+      ))}
+    </section>
   );
 }

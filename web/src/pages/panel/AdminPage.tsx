@@ -48,7 +48,6 @@ export function AdminPage() {
       <h1 className="text-2xl font-bold">Administração</h1>
       <p className="mb-4 text-muted">Empresas aparecem no app assim que se cadastram. Aqui você suspende perfis falsos ou irregulares e concede o selo “Perfil verificado” depois de conferir documentos.</p>
       <BillingSetupCard />
-      <AiSetupCard />
       <form className="mb-4 flex gap-2" onSubmit={(e) => { e.preventDefault(); setTerm(q.trim()); }} role="search">
         <label htmlFor="admin-q" className="sr-only">Buscar empresa</label>
         <input id="admin-q" className="field" placeholder="Buscar empresa pelo nome" value={q} onChange={(e) => setQ(e.target.value)} />
@@ -144,26 +143,3 @@ function BillingSetupCard() {
   );
 }
 
-function AiSetupCard() {
-  const [test, setTest] = useState(0);
-  const q = useQuery({
-    queryKey: ['admin', 'ai-status', test],
-    queryFn: () => api.get<{ configured: boolean; model: string; status: string; message: string; lastError: { at: string; status: number | null; message: string } | null }>(`/admin/ai-status${test ? '?test=1' : ''}`),
-  });
-  if (!q.data) return null;
-  const d = q.data;
-  const ok = d.status === 'ok';
-  const tone = ok ? 'success' : d.status === 'unknown' ? 'info' : 'warning';
-  const title = ok ? 'Assistente de IA funcionando' : d.status === 'unknown' ? 'Assistente de IA configurado' : 'Assistente de IA com problema';
-  return (
-    <div className="mb-4">
-      <Alert tone={tone} title={title}
-        action={d.configured ? <Button size="sm" variant="secondary" loading={q.isFetching} onClick={() => setTest((n) => n + 1)}>Testar assistente</Button> : undefined}>
-        {d.message}
-        {!ok && d.lastError && (
-          <span className="mt-1 block text-xs opacity-80">Último erro ({new Date(d.lastError.at).toLocaleString('pt-BR')}): {d.lastError.status ?? ''} {d.lastError.message}</span>
-        )}
-      </Alert>
-    </div>
-  );
-}

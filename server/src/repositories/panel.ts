@@ -26,7 +26,7 @@ export const panelRepo = {
   photos: (db: Db, id: string) => query<{ id: string; url: string }>(`SELECT id, url FROM photos WHERE business_id = $1 ORDER BY sort_order, id`, [id], db),
 
   services: (db: Db, id: string) =>
-    query(`SELECT id, name, description, price_type, price_min_cents, price_max_cents, duration_minutes, bookable, booking_mode, notes
+    query(`SELECT id, name, description, price_type, price_min_cents, price_max_cents, duration_minutes, bookable, booking_mode, notes, deposit_cents
            FROM services WHERE business_id = $1 AND active ORDER BY sort_order, name`, [id], db),
 
   stats: async (db: Db, id: string) => {
@@ -69,15 +69,15 @@ export const panelRepo = {
 
   insertService: async (db: Db, businessId: string, s: Record<string, unknown>) =>
     (await query<{ id: string }>(
-      `INSERT INTO services (business_id, name, description, price_type, price_min_cents, price_max_cents, duration_minutes, bookable, notes, booking_mode, sort_order)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, (SELECT coalesce(max(sort_order), 0) + 1 FROM services WHERE business_id = $1)) RETURNING id`,
-      [businessId, s.name, s.description, s.price_type, s.price_min_cents, s.price_max_cents, s.duration_minutes, s.bookable, s.notes, s.booking_mode], db))[0].id,
+      `INSERT INTO services (business_id, name, description, price_type, price_min_cents, price_max_cents, duration_minutes, bookable, notes, booking_mode, deposit_cents, sort_order)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, (SELECT coalesce(max(sort_order), 0) + 1 FROM services WHERE business_id = $1)) RETURNING id`,
+      [businessId, s.name, s.description, s.price_type, s.price_min_cents, s.price_max_cents, s.duration_minutes, s.bookable, s.notes, s.booking_mode, s.deposit_cents ?? null], db))[0].id,
 
   updateService: (db: Db, businessId: string, serviceId: string, s: Record<string, unknown>) =>
     query(
-      `UPDATE services SET name = $3, description = $4, price_type = $5, price_min_cents = $6, price_max_cents = $7, duration_minutes = $8, bookable = $9, notes = $10, booking_mode = $11
+      `UPDATE services SET name = $3, description = $4, price_type = $5, price_min_cents = $6, price_max_cents = $7, duration_minutes = $8, bookable = $9, notes = $10, booking_mode = $11, deposit_cents = $12
        WHERE id = $2 AND business_id = $1`,
-      [businessId, serviceId, s.name, s.description, s.price_type, s.price_min_cents, s.price_max_cents, s.duration_minutes, s.bookable, s.notes, s.booking_mode], db),
+      [businessId, serviceId, s.name, s.description, s.price_type, s.price_min_cents, s.price_max_cents, s.duration_minutes, s.bookable, s.notes, s.booking_mode, s.deposit_cents ?? null], db),
 
   /** Serviços com histórico (agendamentos, avaliações) são desativados em vez de apagados. */
   removeService: (db: Db, businessId: string, serviceId: string) =>
@@ -113,14 +113,17 @@ export const panelRepo = {
            bk.contact_phone, cu.name AS customer_name, cu.email AS customer_email, cu.phone AS customer_phone,
            bk.booking_mode, bk.period, st.name AS staff_name, bk.party_size,
            (SELECT row_to_json(x) FROM (SELECT ${PET_COLS()} FROM pets p WHERE p.id = bk.pet_id) x) AS pet,
-           (SELECT count(*)::int FROM booking_updates u WHERE u.booking_id = bk.id) AS live_count
+           (SELECT count(*)::int FROM booking_updates u WHERE u.booking_id = bk.id) AS live_count,
+           bk.ends_at, bk.address, bk.destination, bk.details, bk.deposit_cents, bk.deposit_status, bk.customer_package_id IS NOT NULL AS from_package,
+           (SELECT count(*)::int FROM bookings x WHERE x.business_id = bk.business_id AND x.user_id = bk.user_id AND x.status = 'completed') AS customer_visits
          FROM bookings bk JOIN services s ON s.id = bk.service_id LEFT JOIN business_staff st ON st.id = bk.staff_id
          LEFT JOIN LATERAL app.business_customer(bk.business_id, bk.user_id) cu ON true
          WHERE bk.business_id = $1
          UNION ALL
          SELECT q.id, 'quote', q.status, s.name, NULL, q.preferred_date::text, q.description, q.contact_preference, q.neighborhood, q.created_at,
            q.business_response, q.contact_phone, cu.name, cu.email, cu.phone, NULL, NULL, NULL, NULL,
-           (SELECT row_to_json(x) FROM (SELECT ${PET_COLS()} FROM pets p WHERE p.id = q.pet_id) x), 0
+           (SELECT row_to_json(x) FROM (SELECT ${PET_COLS()} FROM pets p WHERE p.id = q.pet_id) x), 0,
+           NULL, NULL, NULL, NULL, NULL, NULL, false, 0
          FROM quote_requests q LEFT JOIN services s ON s.id = q.service_id
          LEFT JOIN LATERAL app.business_customer(q.business_id, q.user_id) cu ON true
          WHERE q.business_id = $1
@@ -183,7 +186,8 @@ export const panelRepo = {
       `SELECT bk.id, bk.status, bk.starts_at, bk.ends_at, bk.booking_mode, bk.period, s.name AS service_name, bk.staff_id, st.name AS staff_name, bk.party_size,
          cu.name AS customer_name, coalesce(bk.contact_phone, cu.phone) AS customer_phone,
          (SELECT row_to_json(x) FROM (SELECT ${PET_COLS()} FROM pets p WHERE p.id = bk.pet_id) x) AS pet,
-         (SELECT count(*)::int FROM booking_updates u WHERE u.booking_id = bk.id) AS live_count
+         (SELECT count(*)::int FROM booking_updates u WHERE u.booking_id = bk.id) AS live_count,
+         bk.address, bk.destination, bk.details, bk.deposit_cents, bk.deposit_status
        FROM bookings bk JOIN services s ON s.id = bk.service_id LEFT JOIN business_staff st ON st.id = bk.staff_id
        LEFT JOIN LATERAL app.business_customer(bk.business_id, bk.user_id) cu ON true
        WHERE bk.business_id = $1 AND bk.status IN ('requested', 'confirmed', 'completed') AND bk.starts_at < $3 AND bk.ends_at > $2

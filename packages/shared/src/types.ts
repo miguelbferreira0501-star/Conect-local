@@ -74,6 +74,8 @@ export interface ServiceDTO {
   notes: string | null;
   /** Mediana do mesmo serviço na cidade (3+ empresas), para o cliente saber se o preço é justo. */
   cityPrice?: CityPriceRef | null;
+  /** Sinal pedido para garantir o horário (pago no Pix da empresa) */
+  depositCents?: number | null;
 }
 
 export interface PublicStaffDTO {
@@ -113,6 +115,13 @@ export interface BusinessDetailDTO extends BusinessCardDTO {
   staff: PublicStaffDTO[];
   /** Como o app chama quem atende nesta categoria ("Profissional", "Quadra"...) */
   staffLabel: string;
+  /** Chave Pix da empresa para o sinal (null = não cobra sinal pelo app) */
+  pixKey: string | null;
+  /** Cartão fidelidade: a cada N atendimentos, o próximo é grátis (null = sem cartão) */
+  loyaltyEvery: number | null;
+  /** Atendimentos concluídos do tutor logado nesta empresa (null = deslogado) */
+  myLoyaltyVisits: number | null;
+  packages: import('./benefits').PackageDTO[];
 }
 
 export interface ReviewDTO {
@@ -158,6 +167,13 @@ export interface ActivityDTO {
   seriesId?: string | null;
   /** Pet ao Vivo: quantas etapas a empresa já mostrou e qual foi a última */
   live?: { count: number; lastStage: string; lastAt: string } | null;
+  endsAt?: string | null;
+  address?: string | null;
+  destination?: string | null;
+  details?: { pickup?: boolean; atHome?: boolean; roundTrip?: boolean; returnTime?: string; houseNotes?: string };
+  /** Sinal pelo Pix da empresa */
+  deposit?: { cents: number; status: 'pending' | 'paid'; pixKey: string | null; city: string } | null;
+  fromPackage?: boolean;
 }
 
 export interface UserDTO {

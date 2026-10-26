@@ -76,6 +76,8 @@ export const serviceInputSchema = z
     bookable: z.boolean().default(false),
     bookingMode: z.enum(['slot', 'period', 'day']).default('slot'),
     notes: optionalText(200),
+    /** Sinal pelo Pix para garantir o horário (em reais) */
+    deposit: z.number().min(1, 'Sinal mínimo de R$ 1,00.').max(1000, 'Sinal máximo de R$ 1.000.').nullable().default(null),
   })
   .superRefine((v, ctx) => {
     if ((v.priceType === 'fixed' || v.priceType === 'from' || v.priceType === 'range') && v.priceMin == null) {
@@ -133,7 +135,8 @@ export interface PanelBusinessDTO {
   photos: Array<{ id: string; url: string }>;
   openingHours: Record<string, Array<[string, string]>> | null;
   hoursUpdatedAt: string | null;
-  services: Array<{ id: string; name: string; description: string | null; priceType: 'fixed' | 'from' | 'range' | 'quote'; priceMin: number | null; priceMax: number | null; durationMinutes: number | null; bookable: boolean; bookingMode: 'slot' | 'period' | 'day'; notes: string | null }>;
+  services: Array<{ id: string; name: string; description: string | null; priceType: 'fixed' | 'from' | 'range' | 'quote'; priceMin: number | null; priceMax: number | null; durationMinutes: number | null; bookable: boolean; bookingMode: 'slot' | 'period' | 'day'; notes: string | null; deposit: number | null }>;
+  settings: { pixKey: string | null; loyaltyEvery: number | null };
   staff: PanelStaffDTO[];
   plan: { id: PlanId; effective: PlanId; until: string | null; aiUsedThisMonth: number };
   stats: { reviewCount: number; average: number | null; pendingRequests: number; requestsReceived: number; requestsAnswered: number };
@@ -157,6 +160,14 @@ export interface PanelRequestDTO {
   partySize: number | null;
   pet: PetDTO | null;
   liveCount?: number;
+  endsAt?: string | null;
+  address?: string | null;
+  destination?: string | null;
+  details?: { pickup?: boolean; atHome?: boolean; roundTrip?: boolean; returnTime?: string; houseNotes?: string };
+  deposit?: { cents: number; status: 'pending' | 'paid' } | null;
+  fromPackage?: boolean;
+  /** Atendimentos já concluídos deste cliente na empresa (cartão fidelidade) */
+  customerVisits?: number;
   customer: { name: string; email: string | null; phone: string | null } | null;
 }
 
@@ -205,6 +216,10 @@ export interface PanelAgendaItemDTO {
   partySize: number | null;
   pet: PetDTO | null;
   liveCount?: number;
+  address?: string | null;
+  destination?: string | null;
+  details?: { pickup?: boolean; atHome?: boolean; roundTrip?: boolean; returnTime?: string; houseNotes?: string };
+  deposit?: { cents: number; status: 'pending' | 'paid' } | null;
   customerName: string | null;
   customerPhone: string | null;
 }
@@ -221,23 +236,33 @@ export interface PlanDefinition {
 }
 
 /**
- * Planos mensais. Importante: o plano NÃO muda a posição na busca nem concede selos —
- * a confiança do app depende disso. Pagos dão mais agendas, mais IA e ferramentas de gestão.
+ * Plano único (R$ 49,99/mês). Toda empresa nova ganha um teste grátis; depois, sem assinatura,
+ * o perfil continua visível (com orçamentos e avaliações), mas a agenda on-line, o Pet ao Vivo e as
+ * ferramentas pagas ficam pausados. O plano NUNCA muda a posição na busca nem concede selos.
+ * ('team' existe só para assinaturas antigas e equivale ao plano atual.)
  */
+export const TRIAL_DAYS = 30;
+const PAID_HIGHLIGHTS = [
+  'Agenda on-line do jeito do seu serviço (banho, passeio, visita, hospedagem…)',
+  'Até 15 profissionais, vagas ou veículos, cada um com sua agenda',
+  'Pet ao Vivo: fotos de cada etapa para o tutor',
+  'Sinal pelo Pix para garantir o horário',
+  'Clube de pacotes e cartão fidelidade',
+  'Lembrete automático para o cliente voltar',
+  'Relatórios do mês e clientes que sumiram',
+  'Cartaz com QR Code e lembretes pelo WhatsApp',
+];
 export const PLANS: Record<PlanId, PlanDefinition> = {
   free: {
-    id: 'free', name: 'Grátis', priceCents: 0, maxStaff: 1, aiRequestsPerMonth: 10,
-    highlights: ['Perfil completo com fotos, serviços e preços', 'Pedidos de orçamento ilimitados', 'Agenda on-line com 1 profissional ou recurso', 'Responder avaliações', '10 usos do assistente de IA por mês'],
+    id: 'free', name: 'Sem assinatura', priceCents: 0, maxStaff: 1, aiRequestsPerMonth: 0,
+    highlights: ['Perfil visível na busca', 'Pedidos de orçamento', 'Responder avaliações'],
   },
-  pro: {
-    id: 'pro', name: 'Profissional', priceCents: 4990, maxStaff: 3, aiRequestsPerMonth: 80,
-    highlights: ['Tudo do Grátis', 'Até 3 profissionais ou recursos, cada um com sua agenda', 'Agenda da semana por profissional', '80 usos do assistente de IA por mês'],
-  },
-  team: {
-    id: 'team', name: 'Equipe', priceCents: 9990, maxStaff: 10, aiRequestsPerMonth: 250,
-    highlights: ['Tudo do Profissional', 'Até 10 profissionais ou recursos', '250 usos do assistente de IA por mês', 'Suporte prioritário'],
-  },
+  pro: { id: 'pro', name: 'Plano Pataí', priceCents: 4999, maxStaff: 15, aiRequestsPerMonth: 0, highlights: PAID_HIGHLIGHTS },
+  team: { id: 'team', name: 'Plano Pataí', priceCents: 4999, maxStaff: 15, aiRequestsPerMonth: 0, highlights: PAID_HIGHLIGHTS },
 };
+export const PAID_PLAN: PlanId = 'pro';
+/** Agenda on-line, Pet ao Vivo, pacotes e fidelidade exigem plano ativo (ou teste grátis). */
+export const planIsActive = (plan: PlanId) => plan !== 'free';
 
 /** Plano vigente (um plano pago vencido volta a valer como Grátis). */
 /** Agendas que funcionam no plano atual: as primeiras da lista (ordem definida pela empresa). As demais ficam pausadas. */
@@ -289,7 +314,7 @@ export function isValidCpfCnpj(value: string): boolean {
 }
 
 export const checkoutSchema = z.object({
-  plan: z.enum(['pro', 'team']),
+  plan: z.literal('pro').default('pro'),
   method: z.enum(['PIX', 'CREDIT_CARD']),
   cpfCnpj: z.string().trim().transform((v) => v.replace(/\D/g, '')).refine(isValidCpfCnpj, 'Informe um CPF ou CNPJ válido.'),
   holderName: z.string().trim().min(3, 'Informe o nome do responsável.').max(100),

@@ -1,3 +1,5 @@
+import { BookingExtras } from '@/components/BookingExtras';
+import { DepositCard } from '@/components/DepositCard';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -127,6 +129,7 @@ function ActivityCard({ a }: { a: ActivityDTO }) {
           <p className="text-sm text-muted">{a.serviceName ?? a.business.categoryName}</p>
           {a.pet && <p className="mt-0.5 flex items-center gap-1 text-sm font-medium text-accent-700"><PawPrint className="h-4 w-4" aria-hidden="true" /> {a.pet.name}</p>}
           <p className="mt-0.5 text-sm">{when}{a.partySize ? ` · ${a.partySize} ${a.partySize === 1 ? 'pessoa' : 'pessoas'}` : ''}{a.staffName ? ` · ${a.partySize ? '' : 'com '}${a.staffName}` : ''}</p>
+          {a.type === 'booking' && <BookingExtras endsAt={a.endsAt} mode={a.bookingMode} address={a.address} destination={a.destination} details={a.details} fromPackage={a.fromPackage} />}
           {a.type === 'quote' && a.status === 'sent' && <p className="mt-1 text-xs text-muted">A empresa responde pelo contato que você informou.</p>}
           {a.businessMessage && (
             <div className="mt-2 rounded-xl bg-surface p-3 text-sm">
@@ -136,6 +139,9 @@ function ActivityCard({ a }: { a: ActivityDTO }) {
           )}
         </div>
       </div>
+      {a.type === 'booking' && a.deposit && (a.status === 'requested' || a.status === 'confirmed' || a.deposit.status === 'paid') && (
+        <div className="mt-3"><DepositCard cents={a.deposit.cents} status={a.deposit.status} pixKey={a.deposit.pixKey} businessName={a.business.name} city={a.deposit.city} txid={a.id.replace(/-/g, '').slice(0, 25)} /></div>
+      )}
       {a.type === 'booking' && (a.live || a.status === 'confirmed') && <LiveSection a={a} />}
       <div className="mt-3 flex flex-wrap gap-2">
         {a.canReview && <ButtonLink size="sm" to={`/avaliar/${a.type}/${a.id}`} icon={<Star className="h-4 w-4" />}>Avaliar</ButtonLink>}

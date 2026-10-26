@@ -1,10 +1,11 @@
-import { BOOKING_RULES, bookingProfile, computeAvailability, effectivePlan, hoursAreFresh, staffWithinPlan, type PlanId, type BusinessDetailDTO, type ReviewDTO } from '@conecta/shared';
+import { BOOKING_RULES, bookingProfile, computeAvailability, effectivePlan, hoursAreFresh, planIsActive, staffWithinPlan, type PlanId, type BusinessDetailDTO, type ReviewDTO } from '@conecta/shared';
 import { withUser, type Db } from '../db/pool';
 import { AppError, notFound } from '../lib/errors';
 import { zonedToUtc } from '../lib/time';
 import { businessesRepo } from '../repositories/businesses';
 import { favoritesRepo } from '../repositories/favorites';
 import { reviewsRepo } from '../repositories/reviews';
+import { publicBenefits } from './benefits';
 import { globalMean, scoreRows, toCard } from './cards';
 
 export async function businessDetail(slug: string, userId: string | null): Promise<BusinessDetailDTO> {
@@ -25,6 +26,9 @@ export async function businessDetail(slug: string, userId: string | null): Promi
     const priceRefs = await businessesRepo.cityPriceRefs(row.city_ibge, row.cat_slug, services.map((s) => s.name as string), db);
     const refByName = new Map(priceRefs.map((p) => [p.name, { medianCents: p.median, businesses: p.n }]));
     const card = toCard(scored);
+    const planActive = planIsActive(effectivePlan(r.plan, r.plan_until));
+    const benefits = await publicBenefits(db, row.id, planActive, !!userId);
+    const extra = row as typeof row & { pix_key: string | null; loyalty_every: number | null };
     return {
       ...card,
       description: row.description,
@@ -56,6 +60,10 @@ export async function businessDetail(slug: string, userId: string | null): Promi
       isFavorite,
       staff: staff.map(({ openingHours: _h, ...st }) => st),
       staffLabel: bookingProfile(row.cat_slug).staffLabel,
+      pixKey: planActive ? extra.pix_key : null,
+      loyaltyEvery: planActive ? extra.loyalty_every : null,
+      myLoyaltyVisits: planActive && extra.loyalty_every ? benefits.myLoyaltyVisits : null,
+      packages: benefits.packages,
     };
   });
 }

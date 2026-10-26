@@ -27,11 +27,11 @@ beforeAll(async () => {
       }
       if (req.method === 'POST' && path === '/subscriptions') { const id = `sub_${state.requests.length}`; subValues.set(id, body.value); return json(200, { id }); }
       let m = /^\/subscriptions\/([^/]+)\/payments$/.exec(path);
-      if (m) return json(200, { data: [{ id: `pay_${m[1]}`, status: 'PENDING', value: subValues.get(m[1]) ?? 49.9, dueDate: '2026-10-25', invoiceUrl: `https://sandbox.asaas.com/i/${m[1]}`, subscription: m[1] }] });
+      if (m) return json(200, { data: [{ id: `pay_${m[1]}`, status: 'PENDING', value: subValues.get(m[1]) ?? 49.99, dueDate: '2026-10-25', invoiceUrl: `https://sandbox.asaas.com/i/${m[1]}`, subscription: m[1] }] });
       m = /^\/payments\/([^/]+)\/pixQrCode$/.exec(path);
       if (m) return json(200, { encodedImage: 'iVBORw0KGgo=', payload: '00020126PIXCOPIAECOLA', expirationDate: '2026-10-26 23:59:59' });
       m = /^\/payments\/([^/]+)$/.exec(path);
-      if (m) return json(200, { id: m[1], status: state.paymentStatus, value: subValues.get(m[1].replace('pay_', '')) ?? 49.9, dueDate: '2026-10-25', invoiceUrl: null, subscription: m[1].replace('pay_', '') });
+      if (m) return json(200, { id: m[1], status: state.paymentStatus, value: subValues.get(m[1].replace('pay_', '')) ?? 49.99, dueDate: '2026-10-25', invoiceUrl: null, subscription: m[1].replace('pay_', '') });
       m = /^\/subscriptions\/([^/]+)$/.exec(path);
       if (req.method === 'DELETE' && m) { state.canceled.push(m[1]); return json(200, { deleted: true }); }
       json(404, { errors: [{ description: 'não encontrado' }] });
@@ -65,11 +65,24 @@ describe('configuração automática da Asaas', () => {
   });
 });
 
+/** Encerra o teste grátis (como se os 30 dias tivessem passado). */
+async function endTrial(businessId: string) {
+  const db = new pg.Client({ connectionString: process.env.DATABASE_OWNER_URL });
+  await db.connect();
+  await db.query(`UPDATE businesses SET plan = 'free', plan_until = NULL WHERE id = $1`, [businessId]);
+  await db.end();
+}
+
 describe('assinatura paga', () => {
   it('Pix: checkout no app → aviso de pagamento → plano ativo', async () => {
     resetRateLimits();
     const owner = await newUser('Dono Pagante');
     const { body: biz } = await call('POST', '/panel/businesses', profile, owner.cookie);
+    // Empresa nova começa com 30 dias de teste grátis
+    const trial = (await call('GET', `/panel/businesses/${biz.id}/billing`, undefined, owner.cookie)).body;
+    expect(trial.effectivePlan).toBe('pro');
+    expect(new Date(trial.planUntil).getTime() - Date.now()).toBeGreaterThan(29 * 86_400_000);
+    await endTrial(biz.id);
     expect((await call('POST', `/panel/businesses/${biz.id}/billing/checkout`, { plan: 'pro', method: 'PIX', cpfCnpj: '111.111.111-11', holderName: 'Dono Pagante' }, owner.cookie)).status).toBe(422);
 
     const co = await call('POST', `/panel/businesses/${biz.id}/billing/checkout`, { plan: 'pro', method: 'PIX', cpfCnpj: '529.982.247-25', holderName: 'Dono Pagante' }, owner.cookie);
@@ -77,7 +90,7 @@ describe('assinatura paga', () => {
     expect(co.body.pix.copyPaste).toBe('00020126PIXCOPIAECOLA');
     expect(co.body.pix.qrCodeImage).toMatch(/^data:image\/png;base64,/);
     const subReq = state.requests.find((r) => r.path === '/subscriptions')!;
-    expect(subReq.body).toMatchObject({ customer: 'cus_1', billingType: 'PIX', value: 49.9, cycle: 'MONTHLY', externalReference: biz.id });
+    expect(subReq.body).toMatchObject({ customer: 'cus_1', billingType: 'PIX', value: 49.99, cycle: 'MONTHLY', externalReference: biz.id });
     expect(subReq.key).toBe('chave-asaas-teste');
 
     // CPF não fica guardado no nosso banco
@@ -90,7 +103,7 @@ describe('assinatura paga', () => {
     expect(st.subscription.status).toBe('pending');
     expect(st.effectivePlan).toBe('free');
 
-    const pay = { id: co.body.paymentId, status: 'RECEIVED', value: 49.9, dueDate: '2026-10-25', invoiceUrl: null, subscription: co.body.subscriptionId };
+    const pay = { id: co.body.paymentId, status: 'RECEIVED', value: 49.99, dueDate: '2026-10-25', invoiceUrl: null, subscription: co.body.subscriptionId };
     expect((await webhook({ id: 'evt_fake', event: 'PAYMENT_RECEIVED', payment: pay }, 'token-errado-xxxxxxxx')).status).toBe(401);
     const ok = await webhook({ id: 'evt_1', event: 'PAYMENT_RECEIVED', payment: pay });
     expect((await ok.json()).result).toBe('activated');
@@ -119,6 +132,7 @@ describe('assinatura paga', () => {
     resetRateLimits();
     const owner = await newUser('Dono Esperto');
     const { body: biz } = await call('POST', '/panel/businesses', { ...profile, name: 'Ateliê Pausa' }, owner.cookie);
+    await endTrial(biz.id);
     const co = await call('POST', `/panel/businesses/${biz.id}/billing/checkout`, { plan: 'pro', method: 'PIX', cpfCnpj: '529.982.247-25', holderName: 'Dono Esperto' }, owner.cookie);
     expect(co.status).toBe(201);
     const pay = { id: co.body.paymentId, status: 'RECEIVED', value: 1, dueDate: '2026-10-25', invoiceUrl: null, subscription: co.body.subscriptionId };
@@ -127,12 +141,12 @@ describe('assinatura paga', () => {
     expect((await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'A', kind: 'person' }, owner.cookie)).status).toBe(201);
     expect((await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'B', kind: 'person' }, owner.cookie)).status).toBe(402);
 
-    expect((await (await webhook({ id: 'evt_full', event: 'PAYMENT_RECEIVED', payment: { ...pay, value: 49.9 } })).json()).result).toBe('activated');
+    expect((await (await webhook({ id: 'evt_full', event: 'PAYMENT_RECEIVED', payment: { ...pay, value: 49.99 } })).json()).result).toBe('activated');
     expect((await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'B', kind: 'person' }, owner.cookie)).status).toBe(201);
     let pub = (await call('GET', `/businesses/${biz.slug}`)).body;
     expect(pub.staff.map((x: { name: string }) => x.name)).toEqual(['A', 'B']);
 
-    // Venceu sem pagar: volta ao Grátis e só a primeira agenda continua aceitando clientes
+    // Venceu sem pagar: fica sem assinatura e só a primeira agenda continua aceitando clientes
     const db = new pg.Client({ connectionString: process.env.DATABASE_OWNER_URL });
     await db.connect();
     await db.query(`UPDATE businesses SET plan_until = now() - interval '1 day' WHERE id = $1`, [biz.id]);
@@ -149,13 +163,14 @@ describe('assinatura paga', () => {
     resetRateLimits();
     const owner = await newUser();
     const { body: biz } = await call('POST', '/panel/businesses', { ...profile, name: 'Oficina Sem Aviso' }, owner.cookie);
-    const co = await call('POST', `/panel/businesses/${biz.id}/billing/checkout`, { plan: 'team', method: 'CREDIT_CARD', cpfCnpj: '11.222.333/0001-81', holderName: 'Empresa LTDA' }, owner.cookie);
+    await endTrial(biz.id);
+    const co = await call('POST', `/panel/businesses/${biz.id}/billing/checkout`, { plan: 'pro', method: 'CREDIT_CARD', cpfCnpj: '11.222.333/0001-81', holderName: 'Empresa LTDA' }, owner.cookie);
     expect(co.status).toBe(201);
     expect(co.body.pix).toBeNull();
     expect(co.body.invoiceUrl).toMatch(/^https:\/\/sandbox\.asaas\.com\/i\//);
     state.paymentStatus = 'CONFIRMED';
     const st = (await call('GET', `/panel/businesses/${biz.id}/billing`, undefined, owner.cookie)).body;
-    expect(st.effectivePlan).toBe('team');
+    expect(st.effectivePlan).toBe('pro');
     state.paymentStatus = 'PENDING';
   });
 

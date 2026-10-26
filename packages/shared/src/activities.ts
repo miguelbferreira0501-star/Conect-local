@@ -31,6 +31,15 @@ export interface ActivityRow {
   live_count?: number | null;
   live_last_stage?: string | null;
   live_last_at?: string | Date | null;
+  ends_at?: string | Date | null;
+  address?: string | null;
+  destination?: string | null;
+  details?: Record<string, unknown> | null;
+  deposit_cents?: number | null;
+  deposit_status?: 'pending' | 'paid' | null;
+  pix_key?: string | null;
+  city_name?: string | null;
+  customer_package_id?: string | null;
 }
 
 export const ACTIVITY_LIMITS = { maxActiveFutureBookings: 30, maxQuotesPerDay: 15, reviewWindowDays: 180 };
@@ -63,6 +72,12 @@ export function toActivityDTO(a: ActivityRow, lastReviewByBusiness: Map<string, 
     partySize: a.party_size ?? null,
     pet: a.pet_id ? { id: a.pet_id, name: a.pet_name ?? 'Pet' } : null,
     seriesId: a.series_id ?? null,
+    endsAt: a.ends_at ? new Date(a.ends_at).toISOString() : null,
+    address: a.address ?? null,
+    destination: a.destination ?? null,
+    details: (a.details ?? {}) as ActivityDTO['details'],
+    deposit: a.deposit_cents ? { cents: a.deposit_cents, status: a.deposit_status ?? 'pending', pixKey: a.pix_key ?? null, city: a.city_name ?? '' } : null,
+    fromPackage: !!a.customer_package_id,
     live: a.live_count ? { count: a.live_count, lastStage: a.live_last_stage ?? 'photo', lastAt: new Date(a.live_last_at ?? a.created_at).toISOString() } : null,
     canCancel: a.type === 'booking' ? active && !!startsAt && startsAt > now : a.status === 'sent' || a.status === 'answered',
   };
