@@ -135,7 +135,7 @@ export async function ensureAsaasWebhook(contactEmail: string): Promise<BillingS
     if (!env.ASAAS_WEBHOOK_TOKEN) return (setupStatus = { configured: true, environment, webhook: 'missing_token', message: 'Chave aceita, mas falta ASAAS_WEBHOOK_TOKEN.' });
     const url = `${base}/api/webhooks/asaas`;
     const body = {
-      name: 'Conecta Local', url, email: contactEmail, enabled: true, interrupted: false, apiVersion: 3,
+      name: 'Pataí', url, email: contactEmail, enabled: true, interrupted: false, apiVersion: 3,
       authToken: env.ASAAS_WEBHOOK_TOKEN, sendType: 'SEQUENTIALLY', events: WEBHOOK_EVENTS,
     };
     const existing = (await asaas.listWebhooks()).data.find((w) => w.url === url);

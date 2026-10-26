@@ -28,26 +28,28 @@ try {
   await page.getByLabel('Estado').selectOption('SC');
   await page.getByPlaceholder('Digite o nome da cidade').fill('joinv');
   await page.getByRole('option', { name: 'Joinville' }).click();
-  await page.getByRole('heading', { name: /Encontre empresas confiáveis em Joinville/ }).waitFor();
+  await page.getByRole('heading', { name: /Cuidado de confiança para o seu pet em Joinville/ }).waitFor();
   check(true, 'cidade escolhida pelo seletor estado → cidade');
-  await page.getByText('Bem avaliadas em Joinville').waitFor();
+  await page.getByText('Bem avaliados em Joinville').waitFor();
+  await page.getByText('Banho e tosa em Joinville').waitFor();
+  check(await page.getByText('Pet ao Vivo').first().isVisible(), 'banner do Pet ao Vivo');
   await shot('inicio');
-  check(await page.getByRole('link', { name: 'Estética', exact: true }).isVisible(), 'categorias exibidas');
+  check(await page.getByRole('link', { name: 'Banho e tosa', exact: true }).isVisible(), 'serviços pet exibidos');
 
   // 2. Busca com sugestões
-  await page.getByRole('combobox').fill('eletri');
-  await page.getByRole('listbox').getByText('Eletricista', { exact: true }).waitFor();
+  await page.getByRole('combobox').fill('passe');
+  await page.getByRole('listbox').getByText('Passeador de cães', { exact: true }).waitFor();
   await shot('sugestoes');
   await page.getByRole('combobox').press('Enter');
-  await page.waitForURL(/buscar\?q=eletri/);
+  await page.waitForURL(/buscar\?q=passe/);
   await page.getByText(/resultado/).first().waitFor();
   await shot('resultados');
   const cards = await page.locator('article').count();
   check(cards > 0, `busca retornou ${cards} empresa(s)`);
 
   // 3. Categoria + filtros
-  await page.goto(`${BASE}/categoria/pet`);
-  await page.getByRole('heading', { name: 'Pet shops e cuidados com animais' }).waitFor();
+  await page.goto(`${BASE}/categoria/pet-sitter`);
+  await page.getByRole('heading', { name: 'Pet sitter (cuidado em casa)' }).waitFor();
   await page.getByRole('button', { name: /^Filtros/ }).click();
   await page.getByRole('button', { name: '4+ ★' }).click();
   await shot('filtros');
@@ -56,7 +58,7 @@ try {
   check(true, 'filtro de nota mínima aplicado na URL');
 
   // 4. Página da empresa
-  await page.goto(`${BASE}/categoria/estetica-e-beleza`);
+  await page.goto(`${BASE}/categoria/banho-e-tosa`);
   await page.locator('article a').first().click();
   await page.getByRole('tab', { name: 'Visão geral' }).waitFor();
   await shot('empresa');
@@ -81,8 +83,25 @@ try {
   if (wasFav) { await fav.click(); await page.getByText('Salva nos favoritos.').waitFor(); }
   check(true, 'login e salvar favorito');
 
-  // 6. Agendamento
+  // 6. Ficha do pet e agendamento com o pet
+  const back = page.url();
+  await page.goto(`${BASE}/pets`);
+  const existing = await page.getByText('Thor', { exact: true }).count();
+  if (!existing) {
+    await page.getByRole('button', { name: /Cadastrar pet|Adicionar outro pet/ }).first().click();
+    await page.getByLabel('Nome', { exact: true }).fill('Thor');
+    await page.getByRole('button', { name: /Pequeno/ }).click();
+    await page.getByRole('button', { name: 'Medo de secador' }).click();
+    await page.getByLabel(/Saúde/).fill('Alergia a shampoo com perfume');
+    await shot('ficha-pet');
+    await page.getByRole('dialog').getByRole('button', { name: 'Cadastrar pet' }).click();
+    await page.getByText('Thor foi cadastrado!').waitFor();
+  }
+  check(await page.getByText('Thor', { exact: true }).first().isVisible(), 'ficha do pet cadastrada');
+  await page.goto(back);
   await page.getByRole('link', { name: 'Agendar', exact: true }).last().click();
+  await page.getByRole('heading', { name: 'Para qual pet?' }).waitFor();
+  check((await page.getByRole('radio', { name: 'Thor' }).getAttribute('aria-checked')) === 'true', 'pet já escolhido no agendamento');
   await page.getByRole('heading', { name: '1. Escolha o serviço' }).waitFor();
   await page.locator('input[name="service"]').first().check();
   const day = page.locator('[role="radiogroup"][aria-label="Dia"] button:not([disabled])').nth(1);
@@ -112,10 +131,10 @@ try {
   check(true, 'avaliação publicada após serviço realizado');
 
   // 8. Orçamento
-  await page.goto(`${BASE}/buscar?q=pintura`);
+  await page.goto(`${BASE}/buscar?q=adestramento`);
   await page.locator('article a').first().click();
   await page.getByRole('link', { name: /Orçamento|Solicitar orçamento/ }).first().click();
-  await page.getByLabel(/O que você precisa/).fill('Pintura de um apartamento de 2 quartos, paredes e teto.');
+  await page.getByLabel(/O que você precisa/).fill('Meu cachorro puxa muito na guia e late para outros cães.');
   await page.getByLabel('Telefone com DDD').fill('47999990000');
   await shot('orcamento');
   await page.getByRole('button', { name: 'Enviar pedido de orçamento' }).click();
@@ -144,9 +163,9 @@ try {
   // 11. Telas grandes
   await page.setViewportSize({ width: 1366, height: 900 });
   await page.getByRole('button', { name: /Joinville|Curitiba|Florianópolis|São Paulo/ }).first().click();
-  await page.getByText(/Bem avaliadas em/).waitFor();
+  await page.getByText(/Bem avaliados em/).waitFor();
   await shot('desktop-inicio');
-  await page.goto(`${BASE}/buscar?q=fotografo`);
+  await page.goto(`${BASE}/buscar?q=passeio`);
   await page.locator('article').first().waitFor();
   await shot('desktop-busca');
 

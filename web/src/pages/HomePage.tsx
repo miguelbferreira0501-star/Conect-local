@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ChevronDown, ChevronRight, LayoutGrid, MapPin, MapPinOff, ShieldCheck, User } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useUserLocation } from '@/lib/location';
-import { fetchCity, useCategories, useDiscover, useSearch } from '@/lib/queries';
+import { fetchCity, useActivities, useCategories, useDiscover, useSearch } from '@/lib/queries';
 import { BusinessCard } from '@/components/BusinessCard';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { Logo } from '@/components/Layout';
@@ -12,6 +12,10 @@ import { Button } from '@/components/ui/Button';
 import { CardSkeleton, EmptyState, ErrorState, Skeleton } from '@/components/ui/Feedback';
 import { useFirstRunLocation } from '@/hooks/useFirstRunLocation';
 import { Sheet } from '@/components/ui/Sheet';
+import { LIVE_STAGES, type LiveStage, type PetDTO } from '@conecta/shared';
+import { usePets } from '@/lib/pets';
+import { PetAvatar, PetFormSheet } from '@/components/pets';
+import { Camera, Plus, Radio } from 'lucide-react';
 
 export function HomePage() {
   const { city, openPicker } = useUserLocation();
@@ -23,12 +27,12 @@ export function HomePage() {
 
   return (
     <div>
-      <header className="bg-white">
+      <header className="bg-card">
         <div className="container-app flex items-center gap-3 pt-3 md:pt-6">
           <Link to="/" className="md:hidden" aria-label="Início"><Logo /></Link>
           <div className="flex-1" />
           <Link to="/perfil" aria-label={user ? `Perfil de ${user.name}` : 'Entrar ou criar conta'}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-brand-50 font-semibold text-brand-700 hover:bg-brand-100">
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-brand-50 font-semibold text-brand-fg hover:bg-brand-100">
             {user ? user.name.charAt(0).toUpperCase() : <User className="h-5 w-5" />}
           </Link>
         </div>
@@ -37,19 +41,30 @@ export function HomePage() {
             <MapPin className="h-5 w-5 text-accent-600" aria-hidden="true" />
             <span>
               <span className="block font-semibold leading-tight">{city ? `${city.name}, ${city.uf}` : 'Escolha sua cidade'}</span>
-              <span className="text-sm text-brand-600 group-hover:underline">{city ? 'Alterar localização' : 'Toque para selecionar'}</span>
+              <span className="text-sm text-brand-fg group-hover:underline">{city ? 'Alterar localização' : 'Toque para selecionar'}</span>
             </span>
             <ChevronDown className="h-4 w-4 text-muted" aria-hidden="true" />
           </button>
-          <h1 className="mt-4 max-w-2xl text-[26px] font-bold leading-tight md:text-4xl">
-            Encontre empresas confiáveis{city ? <> em <span className="text-brand-700">{city.name}</span></> : ' perto de você'}
-          </h1>
-          <p className="mt-1.5 text-muted">Compare avaliações reais, veja preços e agende em poucos toques.</p>
+          {user ? (
+            <div className="mt-4">
+              <h1 className="text-[26px] font-bold leading-tight md:text-4xl">Olá, <span className="text-brand-fg">{user.name.split(' ')[0]}</span></h1>
+              <p className="text-muted first-letter:uppercase">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' })}</p>
+            </div>
+          ) : (
+            <>
+              <h1 className="mt-4 max-w-2xl text-[26px] font-bold leading-tight md:text-4xl">
+                Cuidado de confiança para o seu pet{city ? <> em <span className="text-brand-fg">{city.name}</span></> : ''}
+              </h1>
+              <p className="mt-1.5 text-muted">Banho e tosa, passeador e pet sitter com avaliações reais — e você acompanha tudo ao vivo.</p>
+            </>
+          )}
           <div className="mt-5 max-w-2xl"><SearchBox /></div>
         </div>
       </header>
 
       <div className="container-app space-y-9 py-7">
+        {user && <HomePets />}
+        {user ? <LiveNowOrBanner /> : <LiveBanner />}
         {!city && (
           <EmptyState icon={<MapPin className="h-8 w-8" />} title="Para começar, escolha sua cidade" action={<Button onClick={openPicker}>Escolher cidade</Button>}>
             Mostramos as empresas que atendem a sua região. Você pode mudar a cidade quando quiser.
@@ -57,7 +72,7 @@ export function HomePage() {
         )}
 
         <section aria-labelledby="cat-title">
-          <h2 id="cat-title" className="section-title mb-3">Categorias</h2>
+          <h2 id="cat-title" className="section-title mb-3">Serviços</h2>
           {categories.isLoading ? (
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">{Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} className="h-[92px]" />)}</div>
           ) : categories.isError ? (
@@ -66,16 +81,16 @@ export function HomePage() {
             <ul className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-6">
               {(categories.data!.length > 12 ? categories.data!.slice(0, 11) : categories.data!).map((c) => (
                 <li key={c.slug}>
-                  <Link to={`/categoria/${c.slug}`} className="flex h-full min-h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border border-line bg-white p-2.5 text-center transition hover:border-brand-200 hover:bg-brand-50" title={c.name}>
-                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><CategoryIcon icon={c.icon} /></span>
+                  <Link to={`/categoria/${c.slug}`} className="flex h-full min-h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border border-line bg-card p-2.5 text-center transition hover:border-brand-200 hover:bg-brand-50" title={c.name}>
+                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-fg"><CategoryIcon icon={c.icon} /></span>
                     <span className="text-[13px] font-medium leading-tight">{c.shortName}</span>
                   </Link>
                 </li>
               ))}
               {categories.data!.length > 12 && (
                 <li>
-                  <button onClick={() => setAllOpen(true)} className="flex h-full min-h-[92px] w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-brand-200 bg-white p-2.5 text-center transition hover:bg-brand-50">
-                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-surface text-brand-700"><LayoutGrid className="h-6 w-6" aria-hidden="true" /></span>
+                  <button onClick={() => setAllOpen(true)} className="flex h-full min-h-[92px] w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-brand-200 bg-card p-2.5 text-center transition hover:bg-brand-50">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-surface text-brand-fg"><LayoutGrid className="h-6 w-6" aria-hidden="true" /></span>
                     <span className="text-[13px] font-medium leading-tight">Ver todas</span>
                   </button>
                 </li>
@@ -88,8 +103,8 @@ export function HomePage() {
           <ul className="divide-y divide-line">
             {categories.data?.map((c) => (
               <li key={c.slug}>
-                <Link to={`/categoria/${c.slug}`} className="flex min-h-[56px] items-center gap-3 py-2 hover:text-brand-700">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><CategoryIcon icon={c.icon} className="h-5 w-5" /></span>
+                <Link to={`/categoria/${c.slug}`} className="flex min-h-[56px] items-center gap-3 py-2 hover:text-brand-fg">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-fg"><CategoryIcon icon={c.icon} className="h-5 w-5" /></span>
                   <span><span className="block font-medium">{c.name}</span><span className="text-sm text-muted">{c.description}</span></span>
                 </Link>
               </li>
@@ -110,13 +125,13 @@ export function HomePage() {
                 <h2 id={`sec-${s.id}`} className="section-title">{s.title}</h2>
                 {s.subtitle && <p className="text-sm text-muted">{s.subtitle}</p>}
               </div>
-              {s.id === 'restaurants' && (
-                <Link to="/categoria/restaurantes?ordem=rating" className="inline-flex min-h-[44px] shrink-0 items-center text-sm font-semibold text-brand-700 hover:underline">
+              {s.id === 'grooming' && (
+                <Link to="/categoria/banho-e-tosa?ordem=rating" className="inline-flex min-h-[44px] shrink-0 items-center text-sm font-semibold text-brand-fg hover:underline">
                   Ver todos <ChevronRight className="h-4 w-4" />
                 </Link>
               )}
               {s.id === 'top-rated' && (
-                <Link to="/buscar?ordem=rating" className="inline-flex min-h-[44px] shrink-0 items-center text-sm font-semibold text-brand-700 hover:underline">
+                <Link to="/buscar?ordem=rating" className="inline-flex min-h-[44px] shrink-0 items-center text-sm font-semibold text-brand-fg hover:underline">
                   Ver todas <ChevronRight className="h-4 w-4" />
                 </Link>
               )}
@@ -134,7 +149,7 @@ export function HomePage() {
             <ul className="flex flex-wrap gap-2">
               {discover.data.popularServices.map((p) => (
                 <li key={p.name}>
-                  <Link to={`/buscar?q=${encodeURIComponent(p.name)}`} className="inline-flex min-h-[40px] items-center rounded-full border border-line bg-white px-4 text-sm font-medium hover:border-brand-200 hover:bg-brand-50">
+                  <Link to={`/buscar?q=${encodeURIComponent(p.name)}`} className="inline-flex min-h-[40px] items-center rounded-full border border-line bg-card px-4 text-sm font-medium hover:border-brand-200 hover:bg-brand-50">
                     {p.name}
                   </Link>
                 </li>
@@ -149,7 +164,7 @@ export function HomePage() {
             <h2 className="font-semibold">Como garantimos avaliações confiáveis</h2>
             <p className="text-sm text-muted">Só avalia quem contratou pela plataforma. A ordem dos resultados não pode ser comprada.</p>
           </div>
-          <Link to="/como-funciona" className="font-semibold text-brand-700 hover:underline">Saiba como funciona</Link>
+          <Link to="/como-funciona" className="font-semibold text-brand-fg hover:underline">Saiba como funciona</Link>
         </section>
       </div>
     </div>
@@ -167,7 +182,7 @@ function NoBusinessesHere() {
         {nearby.data?.nearbyCities?.map((c) => (
           <li key={c.ibge}>
             <button
-              className="inline-flex min-h-[40px] items-center rounded-full border border-line bg-white px-4 text-sm font-medium text-ink hover:bg-brand-50"
+              className="inline-flex min-h-[40px] items-center rounded-full border border-line bg-card px-4 text-sm font-medium text-ink hover:bg-brand-50"
               onClick={async () => setCity(await fetchCity(c.ibge))}
             >
               {c.name}, {c.uf} · {c.distanceKm} km
@@ -176,5 +191,62 @@ function NoBusinessesHere() {
         ))}
       </ul>
     </EmptyState>
+  );
+}
+
+function HomePets() {
+  const pets = usePets();
+  const [adding, setAdding] = useState<PetDTO | null | undefined>(undefined);
+  if (pets.isLoading) return null;
+  return (
+    <section aria-labelledby="pets-title">
+      <div className="mb-3 flex items-end justify-between">
+        <h2 id="pets-title" className="section-title">Meus pets</h2>
+        {!!pets.data?.length && <Link to="/pets" className="text-sm font-semibold text-brand-fg hover:underline">Editar</Link>}
+      </div>
+      <div className="scroll-row">
+        {pets.data?.map((p) => (
+          <Link key={p.id} to="/pets" className="flex w-[84px] shrink-0 flex-col items-center gap-1.5 text-center">
+            <PetAvatar pet={p} size={72} />
+            <span className="w-full truncate text-sm font-medium">{p.name}</span>
+          </Link>
+        ))}
+        <button onClick={() => setAdding(null)} className="flex w-[84px] shrink-0 flex-col items-center gap-1.5 text-center">
+          <span className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-2 border-dashed border-brand-200 text-brand-fg"><Plus className="h-7 w-7" /></span>
+          <span className="text-sm font-medium text-brand-fg">{pets.data?.length ? 'Adicionar' : 'Cadastrar pet'}</span>
+        </button>
+      </div>
+      <PetFormSheet pet={adding} onClose={() => setAdding(undefined)} />
+    </section>
+  );
+}
+
+/** Se tem atendimento hoje, mostra o "ao vivo"; senão, apresenta o recurso. */
+function LiveNowOrBanner() {
+  const acts = useActivities();
+  const today = (acts.data ?? []).find((a) => a.type === 'booking' && (a.status === 'confirmed' || (a.status === 'completed' && a.live)) && a.startsAt
+    && Math.abs(Date.now() - new Date(a.startsAt).getTime()) < 12 * 3_600_000);
+  if (!today) return <LiveBanner />;
+  const last = today.live ? LIVE_STAGES[today.live.lastStage as LiveStage] : null;
+  return (
+    <Link to="/atividades" className="block rounded-2xl border border-accent-600/40 bg-accent-50 p-4 transition hover:border-accent-600">
+      <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-accent-700">
+        <Radio className={`h-4 w-4 ${today.live ? 'animate-pulse' : ''}`} aria-hidden="true" /> {today.live ? 'Ao vivo agora' : 'Hoje'}
+      </p>
+      <p className="mt-1 text-lg font-semibold">{today.pet ? `${today.pet.name} · ` : ''}{today.serviceName}</p>
+      <p className="text-sm text-muted">{today.business.name} · {new Date(today.startsAt!).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+      <p className="mt-2 text-sm">{last ? `${last.emoji} ${last.label} — toque para ver as fotos` : 'Quando começar, as fotos de cada etapa aparecem aqui.'}</p>
+    </Link>
+  );
+}
+
+function LiveBanner() {
+  return (
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 to-brand-900 p-5 text-white">
+      <span className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-accent-600/30" aria-hidden="true" />
+      <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-white/85"><Radio className="h-4 w-4" aria-hidden="true" /> Pet ao Vivo</p>
+      <p className="mt-1 max-w-md text-xl font-bold leading-snug">Acompanhe cada etapa do banho, do passeio e da visita — com fotos.</p>
+      <p className="mt-1 flex items-center gap-1.5 text-sm text-white/85"><Camera className="h-4 w-4 shrink-0" aria-hidden="true" /> 🛁 No banho → 💨 Secando → ✂️ Na tosa → ✅ Pronto</p>
+    </div>
   );
 }

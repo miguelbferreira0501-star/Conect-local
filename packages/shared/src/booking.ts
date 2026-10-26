@@ -5,7 +5,7 @@ import { weekdayOf, zonedToUtc } from './time';
 export const BOOKING_RULES = {
   slotStepMinutes: 30,
   minLeadMinutes: 60,
-  maxDaysAhead: 60,
+  maxDaysAhead: 90,
 };
 
 export interface SlotInput {
@@ -63,19 +63,13 @@ export const PERIODS: Record<Period, { label: string; start: string; end: string
  * `staffLabel` é como o app chama quem atende: "Profissional", "Quadra", "Espaço"...
  */
 export const BOOKING_PROFILES: Record<string, { mode: BookingMode; staffLabel: string; staffLabelPlural: string; staffKind: 'person' | 'resource' }> = {
-  // Restaurante: reserva de mesa em horário marcado; cada mesa/ambiente é uma agenda.
-  restaurantes: { mode: 'slot', staffLabel: 'Mesa', staffLabelPlural: 'Mesas e ambientes', staffKind: 'resource' },
-  'estetica-e-beleza': { mode: 'slot', staffLabel: 'Profissional', staffLabelPlural: 'Profissionais', staffKind: 'person' },
-  automotivo: { mode: 'slot', staffLabel: 'Mecânico', staffLabelPlural: 'Mecânicos', staffKind: 'person' },
-  pet: { mode: 'slot', staffLabel: 'Profissional', staffLabelPlural: 'Profissionais', staffKind: 'person' },
-  'tatuagem-e-piercing': { mode: 'slot', staffLabel: 'Tatuador(a)', staffLabelPlural: 'Tatuadores', staffKind: 'person' },
-  esportes: { mode: 'slot', staffLabel: 'Quadra', staffLabelPlural: 'Quadras', staffKind: 'resource' },
-  limpeza: { mode: 'period', staffLabel: 'Equipe', staffLabelPlural: 'Equipes', staffKind: 'person' },
-  fotografia: { mode: 'slot', staffLabel: 'Fotógrafo(a)', staffLabelPlural: 'Fotógrafos', staffKind: 'person' },
-  'espacos-para-eventos': { mode: 'day', staffLabel: 'Espaço', staffLabelPlural: 'Espaços', staffKind: 'resource' },
-  'reformas-e-manutencao': { mode: 'period', staffLabel: 'Profissional', staffLabelPlural: 'Profissionais', staffKind: 'person' },
-  'servicos-para-casa': { mode: 'period', staffLabel: 'Profissional', staffLabelPlural: 'Profissionais', staffKind: 'person' },
-  informatica: { mode: 'slot', staffLabel: 'Técnico(a)', staffLabelPlural: 'Técnicos', staffKind: 'person' },
+  'banho-e-tosa': { mode: 'slot', staffLabel: 'Banhista/tosador(a)', staffLabelPlural: 'Banhistas e tosadores', staffKind: 'person' },
+  passeador: { mode: 'slot', staffLabel: 'Passeador(a)', staffLabelPlural: 'Passeadores', staffKind: 'person' },
+  // Pet sitter combina o turno da visita (manhã/tarde/noite) e a hora exata com o tutor.
+  'pet-sitter': { mode: 'period', staffLabel: 'Cuidador(a)', staffLabelPlural: 'Cuidadores', staffKind: 'person' },
+  'hospedagem-e-creche': { mode: 'day', staffLabel: 'Vaga', staffLabelPlural: 'Vagas', staffKind: 'resource' },
+  adestramento: { mode: 'slot', staffLabel: 'Adestrador(a)', staffLabelPlural: 'Adestradores', staffKind: 'person' },
+  'pet-taxi': { mode: 'slot', staffLabel: 'Veículo', staffLabelPlural: 'Veículos', staffKind: 'resource' },
   'outros-servicos': { mode: 'slot', staffLabel: 'Profissional', staffLabelPlural: 'Profissionais', staffKind: 'person' },
 };
 export const bookingProfile = (categorySlug: string) => BOOKING_PROFILES[categorySlug] ?? BOOKING_PROFILES['outros-servicos'];

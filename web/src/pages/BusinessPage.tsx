@@ -93,11 +93,11 @@ export function BusinessPage() {
         <BusinessCover name={b.name} coverUrl={b.coverUrl} icon={b.category.icon} className="h-36 md:h-52" />
         <div className="absolute inset-x-0 top-0">
           <div className="container-app flex items-center justify-between py-3">
-            <button aria-label="Voltar" onClick={() => (loc.key !== 'default' ? nav(-1) : nav('/'))} className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/95 shadow-card hover:bg-white">
+            <button aria-label="Voltar" onClick={() => (loc.key !== 'default' ? nav(-1) : nav('/'))} className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-card/95 shadow-card hover:bg-card">
               <ArrowLeft className="h-5 w-5" />
             </button>
             <div className="flex gap-2">
-              <button aria-label="Compartilhar" onClick={share} className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/95 shadow-card hover:bg-white"><Share2 className="h-5 w-5" /></button>
+              <button aria-label="Compartilhar" onClick={share} className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-card/95 shadow-card hover:bg-card"><Share2 className="h-5 w-5" /></button>
               <FavoriteButton businessId={b.id} isFavorite={b.isFavorite} name={b.name} variant="overlay" />
             </div>
           </div>
@@ -139,7 +139,7 @@ export function BusinessPage() {
         <div role="tablist" aria-label="Seções da empresa" className="scroll-row sticky top-0 z-20 mt-5 border-b border-line bg-surface/95 pb-0 backdrop-blur">
           {tabs.map((t) => (
             <button key={t.id} role="tab" id={`tab-${t.id}`} aria-selected={current === t.id} aria-controls={`panel-${t.id}`} onClick={() => setTab(t.id)}
-              className={`min-h-[48px] shrink-0 border-b-2 px-3 text-[15px] font-medium transition ${current === t.id ? 'border-brand-700 text-brand-700' : 'border-transparent text-muted hover:text-ink'}`}>
+              className={`min-h-[48px] shrink-0 border-b-2 px-3 text-[15px] font-medium transition ${current === t.id ? 'border-brand-700 text-brand-fg' : 'border-transparent text-muted hover:text-ink'}`}>
               {t.label}
             </button>
           ))}
@@ -159,7 +159,7 @@ export function BusinessPage() {
       </div>
 
       {/* Barra de ação fixa no celular */}
-      <div className="fixed inset-x-0 bottom-[60px] z-30 border-t border-line bg-white/95 px-4 py-2.5 backdrop-blur md:hidden">
+      <div className="fixed inset-x-0 bottom-[60px] z-30 border-t border-line bg-card/95 px-4 py-2.5 backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-lg gap-2.5">
           <PrimaryActions b={b} primary={primary} onContact={() => setTab('contato')} compact />
         </div>
@@ -208,7 +208,7 @@ function Overview({ b, onTab }: { b: BusinessDetailDTO; onTab: (t: TabId) => voi
           <ul className="space-y-2.5">
             {b.modes.map((m) => {
               const Icon = MODE_ICON[m];
-              return <li key={m} className="flex items-center gap-3"><Icon className="h-5 w-5 text-brand-600" aria-hidden="true" />{MODE_TEXT[m]}</li>;
+              return <li key={m} className="flex items-center gap-3"><Icon className="h-5 w-5 text-brand-fg" aria-hidden="true" />{MODE_TEXT[m]}</li>;
             })}
           </ul>
           {(b.serviceAreaCities.length > 0 || b.modes.includes('at_customer')) && (
@@ -221,7 +221,7 @@ function Overview({ b, onTab }: { b: BusinessDetailDTO; onTab: (t: TabId) => voi
           <section className="card p-5">
             <div className="mb-2 flex items-center justify-between">
               <h2 className="font-semibold">{isReservationCategory(b.category.slug) ? 'Destaques do cardápio' : 'Principais serviços'}</h2>
-              <button className="min-h-[44px] text-sm font-semibold text-brand-700 hover:underline" onClick={() => onTab('servicos')}>Ver todos</button>
+              <button className="min-h-[44px] text-sm font-semibold text-brand-fg hover:underline" onClick={() => onTab('servicos')}>Ver todos</button>
             </div>
             <ul className="divide-y divide-line">
               {b.services.slice(0, 3).map((s) => (
@@ -242,7 +242,7 @@ function Overview({ b, onTab }: { b: BusinessDetailDTO; onTab: (t: TabId) => voi
             <p className="text-ink/90">{[b.address.street, b.address.neighborhood].filter(Boolean).join(' – ')}</p>
             <p className="text-ink/90">{b.city.name}, {b.city.uf}</p>
             {mapUrl && (
-              <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-[44px] items-center gap-1.5 font-semibold text-brand-700 hover:underline">
+              <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-[44px] items-center gap-1.5 font-semibold text-brand-fg hover:underline">
                 <MapPin className="h-4 w-4" /> Ver no mapa <ExternalLink className="h-3.5 w-3.5" /><span className="sr-only">(abre em nova aba)</span>
               </a>
             )}
@@ -250,7 +250,7 @@ function Overview({ b, onTab }: { b: BusinessDetailDTO; onTab: (t: TabId) => voi
         )}
         {b.openingHours && Object.keys(b.openingHours).length > 0 && (
           <section className="card p-5">
-            <h2 className="mb-1 flex items-center gap-2 font-semibold"><Clock className="h-5 w-5 text-brand-600" aria-hidden="true" /> Horários</h2>
+            <h2 className="mb-1 flex items-center gap-2 font-semibold"><Clock className="h-5 w-5 text-brand-fg" aria-hidden="true" /> Horários</h2>
             {b.hoursFresh ? (
               b.modes.includes('in_person') && (
                 <p className={`mb-2 text-sm font-medium ${isOpenAt(b.openingHours, today, b.timezone) ? 'text-accent-700' : 'text-muted'}`}>
@@ -287,7 +287,7 @@ function Overview({ b, onTab }: { b: BusinessDetailDTO; onTab: (t: TabId) => voi
             </ul>
           )}
           <p className="mt-3 text-sm text-muted">Na plataforma desde {new Date(b.createdAt).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}.</p>
-          <Link to="/como-funciona" className="mt-1 inline-block text-sm font-semibold text-brand-700 hover:underline">Como funcionam os selos</Link>
+          <Link to="/como-funciona" className="mt-1 inline-block text-sm font-semibold text-brand-fg hover:underline">Como funcionam os selos</Link>
         </section>
       </aside>
     </div>
@@ -393,7 +393,7 @@ function Reviews({ b }: { b: BusinessDetailDTO }) {
             <li key={r.id} className="card p-4">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 font-semibold text-brand-700" aria-hidden="true">{r.authorName.charAt(0)}</span>
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 font-semibold text-brand-fg" aria-hidden="true">{r.authorName.charAt(0)}</span>
                   <div>
                     <p className="font-semibold">{r.authorName}{r.isMine && <span className="ml-1 text-sm font-normal text-muted">(você)</span>}</p>
                     <p className="text-sm text-muted">{relativeTime(r.createdAt)}{r.serviceName ? ` · ${r.serviceName}` : ''}</p>
@@ -500,7 +500,7 @@ function Contact({ b }: { b: BusinessDetailDTO }) {
       <ul className="card divide-y divide-line">
         {items.map((i) => (
           <li key={i.label} className="flex items-center gap-3 p-4">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-700"><i.icon className="h-5 w-5" aria-hidden="true" /></span>
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-fg"><i.icon className="h-5 w-5" aria-hidden="true" /></span>
             <div className="min-w-0 flex-1">
               <p className="text-sm text-muted">{i.label}</p>
               <p className="truncate font-medium">{i.value}</p>
@@ -508,7 +508,7 @@ function Contact({ b }: { b: BusinessDetailDTO }) {
             {b.isDemo ? (
               <span className="text-sm text-muted">Desativado</span>
             ) : (
-              <a href={i.href} target={i.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer" className="inline-flex min-h-[44px] items-center rounded-xl border border-line px-3.5 text-sm font-semibold text-brand-700 hover:bg-brand-50">
+              <a href={i.href} target={i.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer" className="inline-flex min-h-[44px] items-center rounded-xl border border-line px-3.5 text-sm font-semibold text-brand-fg hover:bg-brand-50">
                 {i.action}
               </a>
             )}

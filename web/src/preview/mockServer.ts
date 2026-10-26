@@ -9,6 +9,7 @@ import {
   CITY_PRICE_MIN_BUSINESSES, median, serviceReferenceCents, haversineKm, hoursAreFresh, localDateOf, loginSchema, normalize, profileUpdateSchema, publicAuthorName, quoteRequestSchema, registerSchema,
   reviewInputSchema, reviewReportSchema, reviewUpdateSchema, scoreRows, searchQuerySchema, sortScored, toActivityDTO, toCard,
   type ActivityRow, type BusinessRow, type CityDTO, type SuggestionDTO,
+  LIVE_STAGE_DETAILS, liveFlow, petInputSchema, repeatDates, type LiveStage, type LiveUpdateDTO, type PetDTO,
 } from '@conecta/shared';
 import type { ZodTypeAny } from 'zod';
 import raw from './data.json';
@@ -61,12 +62,15 @@ interface State {
   users: Array<{ id: string; name: string; email: string; pwd: string; phone: string | null; cityIbge: number | null; createdAt: string }>;
   session: string | null;
   favorites: Record<string, string[]>;
-  bookings: Array<{ id: string; user_id: string; business_id: string; service_id: string; starts_at: string; ends_at: string; status: string; notes?: string; created_at: string; completed_at?: string | null }>;
+  bookings: Array<{ id: string; user_id: string; business_id: string; service_id: string; starts_at: string; ends_at: string; status: string; notes?: string; created_at: string; completed_at?: string | null;
+    pet_id?: string | null; series_id?: string | null; sim?: boolean }>;
+  pets: Array<PetDTO & { user_id: string }>;
   quotes: Array<{ id: string; user_id: string; business_id: string; service_id: string | null; description: string; preferred_date: string | null; contact_preference: string; status: string; created_at: string; hired_at?: string | null }>;
   reviews: Review[];
   reports: Array<{ review_id: string; user_id: string }>;
 }
-const KEY = 'cl_preview_state_v1';
+const KEY = 'cl_preview_state_v2';
+const DEMO_PET = '00000000-0000-4000-8000-00000000a001';
 const DEMO_ID = '00000000-0000-4000-8000-000000000001';
 
 function initialState(): State {
@@ -79,12 +83,26 @@ function initialState(): State {
     quotes: d.quotes.map((q: Json) => ({ ...q, user_id: DEMO_ID, created_at: at(q.created_at)!.toISOString() })),
     reviews: [],
     reports: [],
+    pets: [{ id: DEMO_PET, user_id: DEMO_ID, name: 'Thor', species: 'dog', breed: 'Shih-tzu', size: 'small', sex: 'male', birthYear: 2021, weightKg: 6.5,
+      temperament: ['Medroso', 'Medo de secador'], healthNotes: 'Alergia a shampoo com perfume.', careNotes: null, groomingNotes: 'Tosa bebê, orelhas compridas.', vaccinesUpToDate: true, photoUrl: null }],
   };
 }
-let S: State = storage.get<State | null>(KEY, null) ?? initialState();
+
+/** Prévia: um banho de hoje já "acontecendo", para o Pet ao Vivo aparecer logo de cara. */
+function withLiveDemo(st: State): State {
+  const shop = businesses.find((b) => b.city_ibge === D.demo.cityIbge && catById.get(b.category_id)?.slug === 'banho-e-tosa' && (servicesByBiz.get(b.id) ?? []).some((x) => x.bookable));
+  if (!shop) return st;
+  const svc = (servicesByBiz.get(shop.id) ?? []).find((x) => x.bookable)!;
+  const start = new Date(NOW + 20 * 60_000);
+  start.setMinutes(0, 0, 0);
+  st.bookings.push({ id: uid(), user_id: DEMO_ID, business_id: shop.id, service_id: svc.id, starts_at: start.toISOString(), ends_at: new Date(start.getTime() + (svc.duration_minutes ?? 60) * 60_000).toISOString(),
+    status: 'confirmed', created_at: new Date(NOW - 25_000).toISOString(), pet_id: DEMO_PET, sim: true });
+  return st;
+}
+let S: State = storage.get<State | null>(KEY, null) ?? withLiveDemo(initialState());
 const save = () => storage.set(KEY, S);
 export function resetPreview() {
-  S = initialState();
+  S = withLiveDemo(initialState());
   save();
 }
 
@@ -182,6 +200,47 @@ function nearbyCities(city: CityDTO) {
     .slice(0, 5);
 }
 
+// ── Pet ao Vivo simulado (a prévia não tem empresa real do outro lado) ──
+const SIM_NOTES: Record<string, (pet: string) => string> = {
+  checkin: (p) => `${p} chegou e foi recebido com carinho!`, bath: () => 'Banho com shampoo hipoalergênico, água morninha.',
+  drying: () => 'Secagem em temperatura baixa, sem susto.', grooming: () => 'Tosa do jeitinho que está na ficha ✂️',
+  ready: (p) => `${p} está pronto e cheiroso! Pode vir buscar.`, walk_start: () => 'Saímos! Rota tranquila pelo parque.',
+  walk_end: () => 'Voltamos! 42 minutos de passeio.', visit_start: () => 'Cheguei! Tudo certo por aqui.',
+  visit_end: () => 'Tudo feito, com muito carinho.', pickup: (p) => `Buscamos ${p}. A caminho!`, dropoff: (p) => `${p} foi entregue em segurança.`,
+  done: () => 'Atendimento concluído.',
+};
+const SIM_ART: Record<string, [string, string, string]> = {
+  checkin: ['🐶', '#3b2f8f', '#6250EB'], bath: ['🛁', '#0e4a6e', '#2a9fd6'], drying: ['💨', '#2b3a55', '#7a8cb8'], grooming: ['✂️', '#5a2a5e', '#c06ad0'],
+  ready: ['✨', '#6b3a10', '#FF8A3D'], walk_start: ['🦮', '#1f4d2b', '#4cbf6b'], walk_end: ['🏠', '#1f4d2b', '#7ad48f'], visit_start: ['🔑', '#3b2f8f', '#6250EB'],
+  visit_end: ['😺', '#6b3a10', '#FF8A3D'], pickup: ['🚗', '#2b3a55', '#5a7bd1'], dropoff: ['✅', '#1f4d2b', '#4cbf6b'], done: ['🏅', '#6b3a10', '#FF8A3D'],
+};
+function simPhoto(stage: string, pet: string) {
+  const [emoji, a, b] = SIM_ART[stage] ?? ['📸', '#333', '#666'];
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="640" height="400" fill="url(#g)"/><text x="320" y="230" font-size="150" text-anchor="middle">${emoji}</text><text x="320" y="330" font-size="30" font-family="Arial" fill="#fff" text-anchor="middle" opacity="0.9">${pet} · foto ilustrativa da prévia</text></svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+const SIM_STEP_MS = 14_000;
+function simLive(b: State['bookings'][number]): LiveUpdateDTO[] {
+  if (!b.sim) return [];
+  const biz = bizById.get(b.business_id);
+  const flow = liveFlow(catById.get(biz?.category_id)?.slug ?? '');
+  const pet = S.pets.find((p) => p.id === b.pet_id)?.name ?? 'Seu pet';
+  const t0 = new Date(b.created_at).getTime() + 8_000;
+  return flow.map((stage: LiveStage, i: number) => ({ stage, at: t0 + i * SIM_STEP_MS })).filter((x) => x.at <= Date.now()).map((x, i) => ({
+    id: `${b.id}-${i}`, stage: x.stage, note: SIM_NOTES[x.stage]?.(pet) ?? null,
+    details: Object.fromEntries((LIVE_STAGE_DETAILS[x.stage] ?? []).map((d) => [d, true])), photoUrl: simPhoto(x.stage, pet), createdAt: new Date(x.at).toISOString(),
+  }));
+}
+/** Na prévia, a "empresa" confirma sozinha e conclui ao fim das etapas. */
+function simStatus(b: State['bookings'][number]) {
+  if (!b.sim || b.status === 'cancelled') return b;
+  const flow = liveFlow(catById.get(bizById.get(b.business_id)?.category_id)?.slug ?? '');
+  const live = simLive(b);
+  if (live.length >= flow.length && b.status !== 'completed') { b.status = 'completed'; b.completed_at = live.at(-1)!.createdAt; save(); }
+  else if (b.status === 'requested' && Date.now() - new Date(b.created_at).getTime() > 5_000) { b.status = 'confirmed'; save(); }
+  return b;
+}
+
 function activityRows(userId: string): ActivityRow[] {
   const reviewFor = (k: 'booking_id' | 'quote_id', id: string) => S.reviews.find((r) => r[k] === id)?.id ?? null;
   const base = (bizId: string) => {
@@ -190,10 +249,15 @@ function activityRows(userId: string): ActivityRow[] {
   };
   const svcName = (bizId: string, sid: string | null) => (servicesByBiz.get(bizId) ?? []).find((s) => s.id === sid)?.name ?? null;
   const rows: ActivityRow[] = [
-    ...S.bookings.filter((b) => b.user_id === userId).map((b) => ({
+    ...S.bookings.filter((b) => b.user_id === userId).map(simStatus).map((b) => {
+      const live = simLive(b);
+      const pet = S.pets.find((p) => p.id === b.pet_id);
+      return {
+      pet_id: pet?.id ?? null, pet_name: pet?.name ?? null, series_id: b.series_id ?? null,
+      live_count: live.length, live_last_stage: live.at(-1)?.stage ?? null, live_last_at: live.at(-1)?.createdAt ?? null,
       id: b.id, type: 'booking' as const, status: b.status, ...base(b.business_id), service_name: svcName(b.business_id, b.service_id), service_id: b.service_id,
       starts_at: b.starts_at, preferred_date: null, description: b.notes ?? null, created_at: b.created_at, closed_at: b.completed_at ?? null, review_id: reviewFor('booking_id', b.id),
-    })),
+    }; }),
     ...S.quotes.filter((q) => q.user_id === userId).map((q) => ({
       id: q.id, type: 'quote' as const, status: q.status, ...base(q.business_id), service_name: svcName(q.business_id, q.service_id), service_id: q.service_id,
       starts_at: null, preferred_date: q.preferred_date, description: q.description, created_at: q.created_at, closed_at: q.hired_at ?? null, review_id: reviewFor('quote_id', q.id),
@@ -341,6 +405,13 @@ export async function handle(method: string, fullPath: string, body: Json): Prom
       return scoreRows(rows, { q: '', mean: globalMean() }).map((s) => toCard(s));
     }
     if (path === '/me/activities') return activities(requireUser().id);
+    if (path === '/me/pets') { const uu = requireUser(); return S.pets.filter((p) => p.user_id === uu.id).map(({ user_id: _u, ...p }) => p); }
+    if ((r = m(/^\/bookings\/([^/]+)\/live$/))) {
+      const uu = requireUser();
+      const bk = S.bookings.find((x) => x.id === r![1] && x.user_id === uu.id);
+      if (!bk) throw new MockError(404, 'not_found', 'Agendamento não encontrado.');
+      return simLive(bk);
+    }
     if ((r = m(/^\/me\/review-eligibility\/(.+)$/))) return activities(requireUser().id).filter((a) => a.business.id === r![1] && a.canReview);
     if (path === '/me/reviews') {
       const u = requireUser();
@@ -406,19 +477,63 @@ export async function handle(method: string, fullPath: string, body: Json): Prom
     save();
     return { ok: true };
   }
+  if (path === '/me/pets' && method === 'POST') {
+    if (S.pets.filter((p) => p.user_id === u.id).length >= 10) throw new MockError(422, 'limit', 'Você pode cadastrar até 10 pets.');
+    const v = parse(petInputSchema, body);
+    const pet = { ...v, id: uid(), user_id: u.id, photoUrl: null } as State['pets'][number];
+    S.pets.push(pet);
+    save();
+    const { user_id: _u, ...dto } = pet;
+    return dto;
+  }
+  if ((r = m(/^\/me\/pets\/([^/]+)(\/photo)?$/))) {
+    const pet = S.pets.find((p) => p.id === r![1] && p.user_id === u.id);
+    if (!pet) throw new MockError(404, 'not_found', 'Pet não encontrado.');
+    if (r[2]) pet.photoUrl = (body as { dataUrl: string | null }).dataUrl;
+    else if (method === 'DELETE') S.pets = S.pets.filter((p) => p !== pet);
+    else Object.assign(pet, parse(petInputSchema, body));
+    save();
+    const { user_id: _u, ...dto } = pet;
+    return method === 'DELETE' ? { ok: true } : dto;
+  }
   if (method === 'POST' && path === '/bookings') {
     const input = parse(bookingRequestSchema, body);
-    if (S.bookings.filter((b) => b.user_id === u.id && ['requested', 'confirmed'].includes(b.status) && new Date(b.starts_at) > new Date()).length >= ACTIVITY_LIMITS.maxActiveFutureBookings) {
+    const b = bizById.get(input.businessId)!;
+    const first = new Date(input.startsAt);
+    const dates = input.repeat ? repeatDates(first, input.repeat) : [first];
+    if (S.bookings.filter((x) => x.user_id === u.id && ['requested', 'confirmed'].includes(x.status) && new Date(x.starts_at) > new Date()).length + dates.length > ACTIVITY_LIMITS.maxActiveFutureBookings) {
       throw new MockError(429, 'too_many_bookings', 'Você já tem muitos agendamentos em aberto.');
     }
-    const b = bizById.get(input.businessId)!;
-    const startsAt = new Date(input.startsAt);
-    const avail = availability(input.businessId, input.serviceId, localDateOf(startsAt, cities.get(b.city_ibge)!.timezone));
-    if (!avail.slots.some((s) => new Date(s.startsAt).getTime() === startsAt.getTime())) throw new MockError(409, 'slot_unavailable', 'Este horário não está mais disponível. Escolha outro.');
-    const id = uid();
-    S.bookings.push({ id, user_id: u.id, business_id: b.id, service_id: input.serviceId, starts_at: startsAt.toISOString(), ends_at: new Date(startsAt.getTime() + avail.durationMinutes * 60_000).toISOString(), status: 'requested', notes: input.notes, created_at: new Date().toISOString() });
+    if (input.petId && !S.pets.some((p) => p.id === input.petId && p.user_id === u.id)) throw new MockError(422, 'invalid_pet', 'Escolha um dos seus pets.');
+    const seriesId = dates.length > 1 ? uid() : null;
+    const ids: string[] = [];
+    const skipped: string[] = [];
+    for (const [i, startsAt] of dates.entries()) {
+      const avail = availability(input.businessId, input.serviceId, localDateOf(startsAt, cities.get(b.city_ibge)!.timezone));
+      if (!avail.slots.some((x) => new Date(x.startsAt).getTime() === startsAt.getTime())) {
+        if (i === 0) throw new MockError(409, 'slot_unavailable', 'Este horário não está mais disponível. Escolha outro.');
+        skipped.push(startsAt.toISOString());
+        continue;
+      }
+      const id = uid();
+      // Só o primeiro da série "acontece" na prévia (para mostrar o Pet ao Vivo).
+      S.bookings.push({ id, user_id: u.id, business_id: b.id, service_id: input.serviceId, starts_at: startsAt.toISOString(), ends_at: new Date(startsAt.getTime() + avail.durationMinutes * 60_000).toISOString(),
+        status: 'requested', notes: input.notes, created_at: new Date().toISOString(), pet_id: input.petId ?? null, series_id: seriesId, sim: i === 0 });
+      ids.push(id);
+    }
     save();
-    return { id, status: 'requested', isDemoBusiness: true };
+    return { id: ids[0], ids, skipped, seriesId, status: 'requested', isDemoBusiness: true };
+  }
+  if ((r = m(/^\/bookings\/(.+)\/cancel-series$/))) {
+    const ref = S.bookings.find((x) => x.id === r![1] && x.user_id === u.id);
+    if (!ref?.series_id) throw new MockError(404, 'not_found', 'Agendamento não encontrado.');
+    let n = 0;
+    for (const x of S.bookings) {
+      if (x.series_id === ref.series_id && x.user_id === u.id && x.starts_at >= ref.starts_at && new Date(x.starts_at) > new Date() && ['requested', 'confirmed'].includes(x.status)) { x.status = 'cancelled'; n++; }
+    }
+    if (!n) throw new MockError(409, 'invalid_state', 'Não há agendamentos futuros para cancelar nesta série.');
+    save();
+    return { ok: true, cancelled: n };
   }
   if ((r = m(/^\/bookings\/(.+)\/(cancel|complete)$/))) {
     const b = S.bookings.find((x) => x.id === r![1] && x.user_id === u.id);

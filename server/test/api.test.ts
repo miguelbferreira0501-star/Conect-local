@@ -19,11 +19,11 @@ describe('localidades e busca', () => {
   });
 
   it('busca por termo usa palavras-chave da categoria e não inventa nota', async () => {
-    const r = await call('GET', '/search?city=4209102&q=eletricista');
+    const r = await call('GET', '/search?city=4209102&q=tosa');
     expect(r.status).toBe(200);
     expect(r.body.total).toBeGreaterThan(0);
     for (const b of r.body.items) {
-      expect(b.category.slug).toBe('reformas-e-manutencao');
+      expect(b.category.slug).toBe('banho-e-tosa');
       if (b.rating.count === 0) expect(b.rating.average).toBeNull();
     }
   });
@@ -53,7 +53,7 @@ describe('localidades e busca', () => {
   });
 
   it('preço justo: compara com a mediana do mesmo serviço na cidade (3+ empresas)', async () => {
-    const biz = (await call('GET', '/businesses/espaco-bem-cuidar-joinville')).body;
+    const biz = (await call('GET', '/businesses/banho-tosa-bem-cuidar-joinville')).body;
     const withRef = biz.services.filter((s: { cityPrice: unknown }) => s.cityPrice);
     expect(withRef.length).toBeGreaterThan(0);
     for (const s of withRef) {
@@ -167,7 +167,7 @@ describe('agendamento, orçamento e avaliação', () => {
     resetRateLimits();
     const a = await newUser();
     const b = await newUser();
-    const biz = (await call('GET', '/businesses/espaco-bem-cuidar-joinville')).body;
+    const biz = (await call('GET', '/businesses/banho-tosa-bem-cuidar-joinville')).body;
     const svc = biz.services.find((s: { bookable: boolean }) => s.bookable);
     let slot: string | undefined;
     for (let d = 1; d < 10 && !slot; d++) {
@@ -190,7 +190,7 @@ describe('agendamento, orçamento e avaliação', () => {
 
   it('orçamento exige telefone quando o contato é por WhatsApp; contratado libera avaliação', async () => {
     const u = await newUser();
-    const biz = (await call('GET', '/businesses/espaco-bem-cuidar-joinville')).body;
+    const biz = (await call('GET', '/businesses/banho-tosa-bem-cuidar-joinville')).body;
     const noPhone = await call('POST', '/quotes', { businessId: biz.id, description: 'Preciso de um orçamento para limpeza de pele.', contactPreference: 'whatsapp' }, u.cookie);
     expect(noPhone.status).toBe(422);
     const q = await call('POST', '/quotes', { businessId: biz.id, description: 'Preciso de um orçamento para limpeza de pele.', contactPreference: 'whatsapp', contactPhone: '(47) 99999-0000' }, u.cookie);

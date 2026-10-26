@@ -1,5 +1,6 @@
 /** SQL do painel das empresas. Todas as consultas rodam com o usuário na sessão (RLS). */
 import { query, type Db } from '../db/pool';
+import { PET_COLS } from './pets';
 
 const profileCols = `b.id, b.slug, b.name, b.status, b.suspended_reason, b.verified_at, b.is_demo, b.professional_name, c.slug AS category_slug,
   b.short_description, b.description, b.city_ibge, b.neighborhood, b.street, b.postal_code, b.address_public, b.mode_in_person,
@@ -110,13 +111,16 @@ export const panelRepo = {
          SELECT bk.id, 'booking' AS type, bk.status, s.name AS service_name, bk.starts_at, NULL::text AS preferred_date, bk.notes AS description,
            NULL::text AS contact_preference, NULL::text AS neighborhood, bk.created_at, bk.business_note AS business_response,
            bk.contact_phone, cu.name AS customer_name, cu.email AS customer_email, cu.phone AS customer_phone,
-           bk.booking_mode, bk.period, st.name AS staff_name, bk.party_size
+           bk.booking_mode, bk.period, st.name AS staff_name, bk.party_size,
+           (SELECT row_to_json(x) FROM (SELECT ${PET_COLS()} FROM pets p WHERE p.id = bk.pet_id) x) AS pet,
+           (SELECT count(*)::int FROM booking_updates u WHERE u.booking_id = bk.id) AS live_count
          FROM bookings bk JOIN services s ON s.id = bk.service_id LEFT JOIN business_staff st ON st.id = bk.staff_id
          LEFT JOIN LATERAL app.business_customer(bk.business_id, bk.user_id) cu ON true
          WHERE bk.business_id = $1
          UNION ALL
          SELECT q.id, 'quote', q.status, s.name, NULL, q.preferred_date::text, q.description, q.contact_preference, q.neighborhood, q.created_at,
-           q.business_response, q.contact_phone, cu.name, cu.email, cu.phone, NULL, NULL, NULL, NULL
+           q.business_response, q.contact_phone, cu.name, cu.email, cu.phone, NULL, NULL, NULL, NULL,
+           (SELECT row_to_json(x) FROM (SELECT ${PET_COLS()} FROM pets p WHERE p.id = q.pet_id) x), 0
          FROM quote_requests q LEFT JOIN services s ON s.id = q.service_id
          LEFT JOIN LATERAL app.business_customer(q.business_id, q.user_id) cu ON true
          WHERE q.business_id = $1
@@ -177,7 +181,9 @@ export const panelRepo = {
   agenda: (db: Db, businessId: string, from: Date, to: Date) =>
     query(
       `SELECT bk.id, bk.status, bk.starts_at, bk.ends_at, bk.booking_mode, bk.period, s.name AS service_name, bk.staff_id, st.name AS staff_name, bk.party_size,
-         cu.name AS customer_name, coalesce(bk.contact_phone, cu.phone) AS customer_phone
+         cu.name AS customer_name, coalesce(bk.contact_phone, cu.phone) AS customer_phone,
+         (SELECT row_to_json(x) FROM (SELECT ${PET_COLS()} FROM pets p WHERE p.id = bk.pet_id) x) AS pet,
+         (SELECT count(*)::int FROM booking_updates u WHERE u.booking_id = bk.id) AS live_count
        FROM bookings bk JOIN services s ON s.id = bk.service_id LEFT JOIN business_staff st ON st.id = bk.staff_id
        LEFT JOIN LATERAL app.business_customer(bk.business_id, bk.user_id) cu ON true
        WHERE bk.business_id = $1 AND bk.status IN ('requested', 'confirmed', 'completed') AND bk.starts_at < $3 AND bk.ends_at > $2

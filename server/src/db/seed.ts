@@ -64,6 +64,8 @@ export async function syncCategories(client: pg.Client) {
       [c.slug, c.name, c.shortName, c.icon, c.description, c.keywords, i],
     );
   }
+  // Foco no nicho pet: categorias fora da lista atual ficam inativas (somem do app e do cadastro).
+  await client.query(`UPDATE categories SET active = (slug = ANY($1)) WHERE active <> (slug = ANY($1))`, [CATEGORY_DEFINITIONS.map((c) => c.slug)]);
 }
 
 export async function seedDemo(client: pg.Client, opts: { now?: Date; quiet?: boolean } = {}) {
@@ -145,9 +147,6 @@ export async function seedDemo(client: pg.Client, opts: { now?: Date; quiet?: bo
         ]);
         // Serviços: 4 a 6 do modelo
         const pool = [...tpl.services].sort(() => rnd() - 0.5).slice(0, int(4, Math.min(6, tpl.services.length)));
-        // Restaurantes de exemplo sempre aceitam reserva de mesa.
-        const reservation = tpl.services.find((x) => x.name === 'Reserva de mesa');
-        if (reservation && !pool.includes(reservation)) pool.unshift(reservation);
         const svcs: Array<{ id: string; bookable: boolean; duration: number | null }> = [];
         pool.forEach((s, order) => {
           const sid = randomUUID();

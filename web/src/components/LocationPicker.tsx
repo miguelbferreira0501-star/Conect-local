@@ -62,14 +62,14 @@ export function LocationPicker() {
     <Sheet open={pickerOpen} onClose={closePicker} title="Onde você está?">
       <div className="space-y-4">
         {geoStep === 'idle' && (
-          <button onClick={() => setGeoStep('explain')} className="flex min-h-[52px] w-full items-center gap-3 rounded-xl border border-line px-4 text-left font-medium text-brand-700 hover:bg-brand-50">
+          <button onClick={() => setGeoStep('explain')} className="flex min-h-[52px] w-full items-center gap-3 rounded-xl border border-line px-4 text-left font-medium text-brand-fg hover:bg-brand-50">
             <Crosshair className="h-5 w-5" aria-hidden="true" /> Usar minha localização atual
           </button>
         )}
         {geoStep === 'explain' && (
           <div className="rounded-xl border border-brand-100 bg-brand-50 p-4">
-            <p className="font-semibold text-brand-800">Por que pedimos sua localização?</p>
-            <p className="mt-1 text-sm text-brand-800">
+            <p className="font-semibold text-brand-fg">Por que pedimos sua localização?</p>
+            <p className="mt-1 text-sm text-brand-fg">
               Para descobrir sua cidade e mostrar a distância até as empresas. Usamos apenas enquanto o app estiver aberto e não salvamos suas coordenadas.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -114,7 +114,7 @@ export function LocationPicker() {
                   role="option"
                   aria-selected={city?.ibge === c.ibge}
                   onClick={() => choose(c.ibge)}
-                  className={`flex min-h-[48px] w-full items-center gap-2 border-b border-line px-4 text-left last:border-0 hover:bg-brand-50 ${city?.ibge === c.ibge ? 'bg-brand-50 font-semibold text-brand-800' : ''}`}
+                  className={`flex min-h-[48px] w-full items-center gap-2 border-b border-line px-4 text-left last:border-0 hover:bg-brand-50 ${city?.ibge === c.ibge ? 'bg-brand-50 font-semibold text-brand-fg' : ''}`}
                 >
                   <MapPin className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" /> {c.name}
                 </button>

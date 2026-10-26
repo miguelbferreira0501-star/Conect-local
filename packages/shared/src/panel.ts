@@ -1,3 +1,4 @@
+import type { PetDTO } from './pets';
 /** Esquemas e tipos do painel das empresas (validados no navegador e no servidor). */
 import { z } from 'zod';
 import { ibgeCode, phoneSchema, uuid } from './schemas';
@@ -154,6 +155,8 @@ export interface PanelRequestDTO {
   period: string | null;
   staffName: string | null;
   partySize: number | null;
+  pet: PetDTO | null;
+  liveCount?: number;
   customer: { name: string; email: string | null; phone: string | null } | null;
 }
 
@@ -200,6 +203,8 @@ export interface PanelAgendaItemDTO {
   staffId: string | null;
   staffName: string | null;
   partySize: number | null;
+  pet: PetDTO | null;
+  liveCount?: number;
   customerName: string | null;
   customerPhone: string | null;
 }

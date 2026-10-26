@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CalendarClock, Heart, House, Search, User, X } from 'lucide-react';
+import { ArrowLeft, CalendarClock, House, PawPrint, Search, User, X } from 'lucide-react';
 import { BRAND } from '@conecta/shared';
 import { useConfig } from '@/lib/queries';
 import { storage } from '@/lib/storage';
@@ -9,18 +9,21 @@ import { LocationPicker } from './LocationPicker';
 const NAV = [
   { to: '/', label: 'Início', Icon: House, end: true },
   { to: '/buscar', label: 'Buscar', Icon: Search },
-  { to: '/favoritos', label: 'Favoritos', Icon: Heart },
-  { to: '/atividades', label: 'Atividades', Icon: CalendarClock },
+  { to: '/atividades', label: 'Agenda', Icon: CalendarClock },
+  { to: '/pets', label: 'Meus pets', Icon: PawPrint },
   { to: '/perfil', label: 'Perfil', Icon: User },
 ];
 
 export function Logo({ className = '' }: { className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-2 font-bold text-brand-700 ${className}`}>
-      <svg viewBox="0 0 64 64" width={30} height={30} aria-hidden="true" className="h-[30px] w-[30px]">
-        <rect width="64" height="64" rx="14" fill="rgb(var(--brand-700))" />
-        <path d="M32 12c-8.3 0-15 6.5-15 14.6C17 37.5 32 52 32 52s15-14.5 15-25.4C47 18.5 40.3 12 32 12z" fill="#fff" />
-        <path d="m25.5 31.5 4.5 4.5 9-9.5" fill="none" stroke="rgb(var(--accent-600))" strokeWidth="4.2" strokeLinecap="round" strokeLinejoin="round" />
+    <span className={`inline-flex items-center gap-2 font-extrabold text-ink ${className}`}>
+      <svg viewBox="0 0 64 64" width={32} height={32} aria-hidden="true" className="h-8 w-8">
+        <rect width="64" height="64" rx="16" fill="rgb(var(--brand-700))" />
+        <g fill="#fff">
+          <circle cx="19.5" cy="28" r="4.4" /><circle cx="27" cy="20.5" r="4.7" /><circle cx="37" cy="20.5" r="4.7" /><circle cx="44.5" cy="28" r="4.4" />
+          <path d="M32 31c-6.6 0-12.4 6.3-12.4 11.4 0 3.7 2.9 5.5 6.2 5.5 2.5 0 3.9-1.3 6.2-1.3s3.7 1.3 6.2 1.3c3.3 0 6.2-1.8 6.2-5.5C44.4 37.3 38.6 31 32 31z" />
+        </g>
+        <circle cx="50" cy="13.5" r="6" fill="rgb(var(--accent-600))" stroke="#fff" strokeWidth="2.6" />
       </svg>
       <span className="text-[19px] tracking-tight">{BRAND.name}</span>
     </span>
@@ -53,16 +56,16 @@ function DemoBanner() {
 export function AppLayout() {
   return (
     <div className="min-h-screen md:flex">
-      <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[70] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:shadow-raised">
+      <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[70] focus:rounded-lg focus:bg-card focus:px-4 focus:py-2 focus:shadow-raised">
         Pular para o conteúdo
       </a>
       {/* Navegação lateral em telas grandes */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-line bg-white px-4 py-6 md:flex lg:w-72">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-line bg-card px-4 py-6 md:flex lg:w-72">
         <NavLink to="/" className="mb-8 px-3"><Logo /></NavLink>
         <nav aria-label="Navegação principal" className="flex flex-col gap-1">
           {NAV.map(({ to, label, Icon, end }) => (
             <NavLink key={to} to={to} end={end}
-              className={({ isActive }) => `flex min-h-[48px] items-center gap-3 rounded-xl px-3 font-medium transition ${isActive ? 'bg-brand-50 text-brand-700' : 'text-ink hover:bg-surface'}`}>
+              className={({ isActive }) => `flex min-h-[48px] items-center gap-3 rounded-xl px-3 font-medium transition ${isActive ? 'bg-brand-50 text-brand-fg' : 'text-ink hover:bg-surface'}`}>
               {({ isActive }) => (<><Icon className="h-[22px] w-[22px]" strokeWidth={isActive ? 2.4 : 1.9} aria-hidden="true" />{label}</>)}
             </NavLink>
           ))}
@@ -78,12 +81,12 @@ export function AppLayout() {
       </div>
 
       {/* Navegação inferior no celular */}
-      <nav aria-label="Navegação principal" className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 backdrop-blur md:hidden">
+      <nav aria-label="Navegação principal" className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-line bg-card/95 backdrop-blur md:hidden">
         <ul className="mx-auto grid max-w-lg grid-cols-5">
           {NAV.map(({ to, label, Icon, end }) => (
             <li key={to}>
               <NavLink to={to} end={end}
-                className={({ isActive }) => `flex min-h-[60px] flex-col items-center justify-center gap-0.5 text-[11.5px] font-medium ${isActive ? 'text-brand-700' : 'text-muted'}`}>
+                className={({ isActive }) => `flex min-h-[60px] flex-col items-center justify-center gap-0.5 text-[11.5px] font-medium ${isActive ? 'text-brand-fg' : 'text-muted'}`}>
                 {({ isActive }) => (
                   <>
                     <span className={`flex h-7 w-12 items-center justify-center rounded-full transition ${isActive ? 'bg-brand-50' : ''}`}>
@@ -107,7 +110,7 @@ export function PageHeader({ title, back = true, actions, subtitle }: { title: s
   const nav = useNavigate();
   const loc = useLocation();
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-line bg-card/95 backdrop-blur">
       <div className="container-app flex min-h-[60px] items-center gap-2 py-2">
         {back && (
           <button aria-label="Voltar" onClick={() => (typeof back === 'string' ? nav(back) : loc.key !== 'default' ? nav(-1) : nav('/'))}

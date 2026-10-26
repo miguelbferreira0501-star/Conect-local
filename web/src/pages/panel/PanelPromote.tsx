@@ -34,8 +34,8 @@ export function PanelPromotePage() {
         Clientes que chegam pelo seu cartaz ou link agendam sozinhos, recebem lembrete e podem avaliar depois. Mais avaliações = melhor posição na busca (o plano pago não compra posição).
       </Alert>
 
-      <section id="print-poster" className="card mx-auto max-w-md p-6 text-center">
-        <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">{BRAND.name}</p>
+      <section id="print-poster" className="light-area mx-auto max-w-md rounded-2xl p-6 text-center">
+        <p className="text-sm font-semibold uppercase tracking-wide text-brand-fg">{BRAND.name}</p>
         <h2 className="mt-1 text-2xl font-bold">{b.name}</h2>
         {b.stats.average != null && b.stats.reviewCount > 0 && (
           <p className="mt-1 inline-flex items-center gap-1 text-sm">
@@ -51,11 +51,11 @@ export function PanelPromotePage() {
 
       <div className="flex flex-wrap justify-center gap-2">
         <Button icon={<Printer className="h-4 w-4" />} onClick={() => window.print()}>Imprimir cartaz</Button>
-        <a className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-line bg-white px-4 font-semibold text-brand-700 hover:bg-surface"
+        <a className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-line bg-card px-4 font-semibold text-brand-fg hover:bg-surface"
           href={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`} download={`qrcode-${b.slug}.svg`}>
           <Download className="h-4 w-4" aria-hidden="true" />Baixar QR Code
         </a>
-        <a className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-line bg-white px-4 font-semibold text-brand-700 hover:bg-surface"
+        <a className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-line bg-card px-4 font-semibold text-brand-fg hover:bg-surface"
           href={`https://wa.me/?text=${encodeURIComponent(texts.whatsapp)}`} target="_blank" rel="noopener noreferrer">
           <MessageCircle className="h-4 w-4" aria-hidden="true" />Enviar no WhatsApp
         </a>

@@ -13,6 +13,7 @@ import { requireAuth, SESSION_COOKIE } from '../middleware/auth';
 import { clientIp, type AppEnv, type Ctx } from '../middleware/context';
 import { favoritesRepo } from '../repositories/favorites';
 import * as activities from '../services/activities';
+import * as pets from '../services/pets';
 import * as auth from '../services/auth';
 import { globalMean, scoreRows, toCard } from '../services/cards';
 import * as reviews from '../services/reviews';
@@ -106,11 +107,31 @@ me.delete('/me/favorites/:businessId', async (c) => {
 
 me.get('/me/activities', async (c) => c.json(await activities.listActivities(uid(c))));
 
+// Ficha dos pets
+me.get('/me/pets', async (c) => c.json(await pets.listPets(uid(c))));
+me.post('/me/pets', async (c) => c.json(await pets.savePet(uid(c), null, await c.req.json()), 201));
+me.put('/me/pets/:id', async (c) => c.json(await pets.savePet(uid(c), parse(uuid, c.req.param('id')), await c.req.json())));
+me.delete('/me/pets/:id', async (c) => c.json(await pets.deletePet(uid(c), parse(uuid, c.req.param('id')))));
+me.put('/me/pets/:id/photo', async (c) => {
+  const { dataUrl } = parse(z.object({ dataUrl: z.string().max(800_000).nullable() }), await c.req.json());
+  return c.json(await pets.setPetPhoto(uid(c), parse(uuid, c.req.param('id')), dataUrl));
+});
+// Fotos privadas: só quem pode ver a ficha ou o atendimento (regras no banco).
+const privateImage = (img: { mime: string; data: Buffer } | null, c: Ctx) => {
+  if (!img) throw new AppError(404, 'not_found', 'Imagem não encontrada.');
+  return c.body(new Uint8Array(img.data), 200, { 'Content-Type': img.mime, 'Cache-Control': 'private, max-age=86400', 'X-Content-Type-Options': 'nosniff' });
+};
+me.get('/pets/:id/photo', async (c) => privateImage(await pets.petPhoto(uid(c), parse(uuid, c.req.param('id'))), c));
+me.get('/live/:id/photo', async (c) => privateImage(await pets.livePhoto(uid(c), parse(uuid, c.req.param('id'))), c));
+// Pet ao Vivo (lado do tutor)
+me.get('/bookings/:id/live', async (c) => c.json(await pets.listLive(uid(c), parse(uuid, c.req.param('id')))));
+
 me.post('/bookings', async (c) => {
   limit(c, 'booking', 20, 60 * 60_000);
   return c.json(await activities.createBooking(uid(c), parse(bookingRequestSchema, await c.req.json())), 201);
 });
 me.post('/bookings/:id/cancel', async (c) => c.json(await activities.updateBooking(uid(c), parse(uuid, c.req.param('id')), 'cancel')));
+me.post('/bookings/:id/cancel-series', async (c) => c.json(await activities.cancelSeries(uid(c), parse(uuid, c.req.param('id')))));
 me.post('/bookings/:id/complete', async (c) => c.json(await activities.updateBooking(uid(c), parse(uuid, c.req.param('id')), 'complete')));
 
 me.post('/quotes', async (c) => {

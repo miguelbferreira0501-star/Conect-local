@@ -1,3 +1,4 @@
+import { repeatSchema } from './pets';
 /**
  * Esquemas de validação usados no cliente E no servidor.
  * O servidor sempre revalida — a validação do navegador é só conveniência.
@@ -89,6 +90,7 @@ export const quoteRequestSchema = z.object({
   contactPreference: z.enum(['whatsapp', 'phone', 'email']),
   contactPhone: phoneSchema.optional(),
   neighborhood: z.string().trim().max(80).optional(),
+  petId: uuid.nullable().optional(),
 }).superRefine((v, ctx) => {
   if (v.contactPreference !== 'email' && !v.contactPhone) {
     ctx.addIssue({ code: 'custom', path: ['contactPhone'], message: 'Informe um telefone para a empresa entrar em contato.' });
@@ -106,6 +108,10 @@ export const bookingRequestSchema = z.object({
   startsAt: z.string().datetime({ offset: true, message: 'Horário inválido.' }),
   notes: z.string().trim().max(500, 'Use no máximo 500 caracteres.').optional(),
   contactPhone: phoneSchema.optional(),
+  /** Pet atendido (ficha do pet) */
+  petId: uuid.nullable().optional(),
+  /** Repetir o mesmo horário (ex.: passeio toda semana) */
+  repeat: repeatSchema.nullable().optional(),
 });
 export type BookingRequestInput = z.infer<typeof bookingRequestSchema>;
 

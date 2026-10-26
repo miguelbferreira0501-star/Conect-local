@@ -82,7 +82,7 @@ export function TermsPage() {
           <p><strong>Finalidade:</strong> criar sua conta, enviar seus pedidos às empresas escolhidas e exibir suas avaliações.</p>
           <p><strong>Compartilhamento:</strong> seus dados de contato só são enviados à empresa com a qual você fizer um pedido. Não vendemos dados pessoais.</p>
           <p><strong>Localização:</strong> a localização do aparelho só é usada com sua permissão, enquanto o app está aberto, e não é armazenada.</p>
-          <p><strong>Seus direitos:</strong> você pode acessar, corrigir e excluir seus dados a qualquer momento em Perfil → Privacidade e dados. Veja também <a href="/excluir-conta" className="font-semibold text-brand-700 underline">como excluir sua conta</a>.</p>
+          <p><strong>Seus direitos:</strong> você pode acessar, corrigir e excluir seus dados a qualquer momento em Perfil → Privacidade e dados. Veja também <a href="/excluir-conta" className="font-semibold text-brand-fg underline">como excluir sua conta</a>.</p>
           <p><strong>Contato:</strong> {BRAND.supportEmail}</p>
         </Section>
       </div>

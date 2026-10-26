@@ -6,16 +6,16 @@
 @layer base {
   html { -webkit-text-size-adjust: 100%; }
   body { @apply bg-surface text-ink antialiased; font-size: 16px; }
-  :focus-visible { @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-white; }
+  :focus-visible { @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-surface; }
   h1, h2, h3 { @apply text-ink; letter-spacing: -0.01em; }
 }
 
 @layer components {
   .container-app { @apply mx-auto w-full max-w-content px-4 md:px-8; }
-  .card { @apply rounded-2xl border border-line bg-white shadow-card; }
+  .card { @apply rounded-2xl border border-line bg-card shadow-card; }
   .label { @apply mb-1.5 block text-sm font-medium text-ink; }
   .field {
-    @apply block w-full rounded-xl border border-line bg-white px-3.5 py-3 text-base text-ink placeholder:text-muted/80
+    @apply block w-full rounded-xl border border-line bg-card px-3.5 py-3 text-base text-ink placeholder:text-muted/80
       transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:bg-surface;
   }
   .field-error { @apply border-danger-700 focus:border-danger-700 focus:ring-danger-700/20; }

@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { CalendarClock, CalendarDays, FileText, Star } from 'lucide-react';
-import { PERIODS, type ActivityDTO, type Period } from '@conecta/shared';
+import { CalendarClock, CalendarDays, ChevronDown, FileText, PawPrint, Radio, Repeat, Star } from 'lucide-react';
+import { LIVE_STAGES, PERIODS, type ActivityDTO, type LiveStage, type Period } from '@conecta/shared';
+import { useLive } from '@/lib/pets';
+import { LiveTimeline } from '@/components/pets';
 import { api } from '@/lib/api';
 import { useActivities } from '@/lib/queries';
 import { PageHeader } from '@/components/Layout';
@@ -30,7 +32,7 @@ const STATUS: Record<string, { label: string; tone: 'neutral' | 'brand' | 'accen
 export function ActivitiesPage() {
   return (
     <div>
-      <PageHeader title="Atividades" back={false} />
+      <PageHeader title="Agenda" back={false} />
       <div className="container-app max-w-3xl py-5">
         <RequireAuth title="Acompanhe seus pedidos" reason="Entre para ver seus agendamentos, pedidos de orçamento e avaliar os serviços contratados.">
           <ActivityList />
@@ -60,7 +62,7 @@ function ActivityList() {
   return (
     <>
       {toReview > 0 && (
-        <div className="mb-4 flex items-center gap-3 rounded-2xl border border-star/40 bg-[#FFF8EB] p-4">
+        <div className="mb-4 flex items-center gap-3 rounded-2xl border border-star/40 bg-warning-50 p-4">
           <Star className="h-6 w-6 shrink-0 text-star" fill="currentColor" strokeWidth={0} aria-hidden="true" />
           <p className="text-sm"><strong>{toReview === 1 ? '1 serviço aguarda' : `${toReview} serviços aguardam`} sua avaliação.</strong> Sua opinião ajuda outras pessoas a decidir.</p>
         </div>
@@ -119,9 +121,11 @@ function ActivityCard({ a }: { a: ActivityDTO }) {
               {a.type === 'booking' ? <CalendarDays className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />}
               {a.type === 'booking' ? 'Agendamento' : 'Orçamento'}
             </span>
+            {a.seriesId && <span className="inline-flex items-center gap-1 text-xs text-muted"><Repeat className="h-3.5 w-3.5" /> Repete</span>}
           </div>
           <h3 className="mt-1 font-semibold"><Link to={`/empresa/${a.business.slug}`} className="hover:underline">{a.business.name}</Link></h3>
           <p className="text-sm text-muted">{a.serviceName ?? a.business.categoryName}</p>
+          {a.pet && <p className="mt-0.5 flex items-center gap-1 text-sm font-medium text-accent-700"><PawPrint className="h-4 w-4" aria-hidden="true" /> {a.pet.name}</p>}
           <p className="mt-0.5 text-sm">{when}{a.partySize ? ` · ${a.partySize} ${a.partySize === 1 ? 'pessoa' : 'pessoas'}` : ''}{a.staffName ? ` · ${a.partySize ? '' : 'com '}${a.staffName}` : ''}</p>
           {a.type === 'quote' && a.status === 'sent' && <p className="mt-1 text-xs text-muted">A empresa responde pelo contato que você informou.</p>}
           {a.businessMessage && (
@@ -132,6 +136,7 @@ function ActivityCard({ a }: { a: ActivityDTO }) {
           )}
         </div>
       </div>
+      {a.type === 'booking' && (a.live || a.status === 'confirmed') && <LiveSection a={a} />}
       <div className="mt-3 flex flex-wrap gap-2">
         {a.canReview && <ButtonLink size="sm" to={`/avaliar/${a.type}/${a.id}`} icon={<Star className="h-4 w-4" />}>Avaliar</ButtonLink>}
         {a.reviewId && <ButtonLink size="sm" variant="secondary" to="/perfil/avaliacoes">Ver minha avaliação</ButtonLink>}
@@ -143,6 +148,9 @@ function ActivityCard({ a }: { a: ActivityDTO }) {
         )}
         {a.canCancel && a.type === 'booking' && (
           <Button size="sm" variant="danger" onClick={() => setConfirm({ action: 'cancel', title: 'Cancelar agendamento?', text: 'O horário será liberado para outras pessoas.', button: 'Cancelar agendamento', danger: true })}>Cancelar</Button>
+        )}
+        {a.canCancel && a.type === 'booking' && a.seriesId && (
+          <Button size="sm" variant="ghost" onClick={() => setConfirm({ action: 'cancel-series', title: 'Cancelar este e os próximos?', text: 'Todos os agendamentos repetidos a partir deste serão cancelados. Os anteriores continuam no histórico.', button: 'Cancelar os próximos', danger: true })}>Cancelar os próximos</Button>
         )}
         {a.canCancel && a.type === 'quote' && (
           <Button size="sm" variant="ghost" onClick={() => setConfirm({ action: 'close', title: 'Encerrar pedido?', text: 'Use se você desistiu ou contratou outra empresa.', button: 'Encerrar pedido' })}>Encerrar</Button>
@@ -158,5 +166,28 @@ function ActivityCard({ a }: { a: ActivityDTO }) {
         <p>{confirm?.text}</p>
       </Sheet>
     </article>
+  );
+}
+
+/** Pet ao Vivo: etapas e fotos que a empresa manda durante o atendimento. */
+function LiveSection({ a }: { a: ActivityDTO }) {
+  const happening = a.status === 'confirmed' && !!a.startsAt && Math.abs(Date.now() - new Date(a.startsAt).getTime()) < 12 * 3_600_000;
+  const [open, setOpen] = useState(happening && !!a.live);
+  const live = useLive(open ? a.id : undefined, { live: happening });
+  const last = a.live ? LIVE_STAGES[a.live.lastStage as LiveStage] : null;
+  return (
+    <div className="mt-3 rounded-xl border border-accent-600/30 bg-accent-50 p-3">
+      <button className="flex w-full items-center gap-2 text-left" onClick={() => setOpen(!open)} aria-expanded={open}>
+        <Radio className={`h-5 w-5 text-accent-600 ${happening && a.live ? 'animate-pulse' : ''}`} aria-hidden="true" />
+        <span className="flex-1">
+          <span className="block font-semibold">{happening && a.live ? 'Ao vivo agora' : 'Pet ao Vivo'}</span>
+          <span className="block text-sm text-muted">
+            {last ? `${last.emoji} ${last.label} · ${new Date(a.live!.lastAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}` : 'As fotos de cada etapa aparecem aqui durante o atendimento.'}
+          </span>
+        </span>
+        <ChevronDown className={`h-5 w-5 text-muted transition ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+      </button>
+      {open && <div className="mt-3">{live.isLoading ? <p className="text-sm text-muted">Carregando…</p> : <LiveTimeline updates={live.data ?? []} />}</div>}
+    </div>
   );
 }

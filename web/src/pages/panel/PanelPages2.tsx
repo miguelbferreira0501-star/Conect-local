@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bot, CalendarDays, Check, Copy, Crown, Lightbulb, ListPlus, MessageCircle, MessageSquareText, PenLine, Plus, Send, Trash2, UserRound, Users } from 'lucide-react';
+import { Bot, CalendarDays, Check, Copy, Crown, Lightbulb, ListPlus, MessageCircle, MessageSquareText, Radio, PenLine, Plus, Send, Trash2, UserRound, Users } from 'lucide-react';
 import {
   bookingProfile, checkoutSchema, reminderMessage, reviewRequestMessage, whatsappLink, formatCents, PERIODS, PLANS, WEEKDAY_NAMES, type AiTask, type BillingStatusDTO, type CheckoutResultDTO, type PanelAgendaItemDTO, type PanelBusinessDTO, type PanelStaffDTO, type Period, type PlanId,
 } from '@conecta/shared';
@@ -15,6 +15,7 @@ import { Alert, EmptyState, PageLoader } from '@/components/ui/Feedback';
 import { Checkbox, ChipToggle, TextArea, TextField } from '@/components/ui/Form';
 import { Sheet } from '@/components/ui/Sheet';
 import { Tag } from '@/components/ui/Tags';
+import { LiveSheet, type LiveTarget } from './LiveSheet';
 import { useToast } from '@/components/ui/Toast';
 
 const useBiz = () => useOutletContext<PanelBusinessDTO>();
@@ -62,7 +63,7 @@ export function PanelStaffPage() {
             : <>Cada {profile.staffLabel.toLowerCase()} tem a própria agenda: dois clientes podem marcar o mesmo horário com pessoas (ou {profile.staffKind === 'resource' ? 'quadras/salas' : 'recursos'}) diferentes.
           O cliente pode escolher ou marcar “sem preferência”. Sem ninguém cadastrado, a empresa tem uma agenda única.</>}
         </p>
-        <p className="mt-2 text-sm">Seu plano ({plan.name}) permite <strong>{plan.maxStaff}</strong> {plan.maxStaff === 1 ? 'agenda' : 'agendas'}. <Link to="../plano" className="font-semibold text-brand-700 hover:underline">Ver planos</Link></p>
+        <p className="mt-2 text-sm">Seu plano ({plan.name}) permite <strong>{plan.maxStaff}</strong> {plan.maxStaff === 1 ? 'agenda' : 'agendas'}. <Link to="../plano" className="font-semibold text-brand-fg hover:underline">Ver planos</Link></p>
       </div>
       <div className="flex justify-end">
         <Button size="sm" icon={<Plus className="h-4 w-4" />} disabled={atLimit} onClick={() => open()}>Adicionar {profile.staffLabel.toLowerCase()}</Button>
@@ -78,7 +79,7 @@ export function PanelStaffPage() {
         <ul className="space-y-2">
           {b.staff.map((s) => (
             <li key={s.id} className="card flex flex-wrap items-center gap-3 p-4">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-brand-700"><UserRound className="h-5 w-5" /></span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-brand-fg"><UserRound className="h-5 w-5" /></span>
               <div className="min-w-0 flex-1">
                 <p className="font-semibold">{s.name}{s.roleTitle ? <span className="font-normal text-muted"> · {s.roleTitle}</span> : null} {s.paused && <Tag tone="warning">Pausada</Tag>}</p>
                 <p className="text-sm text-muted">
@@ -159,6 +160,7 @@ export function PanelAgendaPage() {
     refetchInterval: 60_000,
   });
   const [staffFilter, setStaffFilter] = useState<string | 'all'>('all');
+  const [liveTarget, setLiveTarget] = useState<LiveTarget | null>(null);
   if (agenda.isLoading) return <PageLoader />;
   const items = (agenda.data ?? []).filter((i) => staffFilter === 'all' || i.staffId === staffFilter);
   const byDay = new Map<string, PanelAgendaItemDTO[]>();
@@ -193,8 +195,14 @@ export function PanelAgendaPage() {
                   <span className="w-20 font-semibold tabular-nums">{when(i)}</span>
                   <div className="min-w-0 flex-1">
                     <p className="font-medium">{i.serviceName}{i.partySize ? <span className="font-normal"> · {i.partySize} pessoas</span> : null}{i.staffName ? <span className="font-normal text-muted"> · {i.staffName}</span> : null}</p>
-                    <p className="text-sm text-muted">{i.customerName ?? 'Cliente'}{i.customerPhone ? ` · ${i.customerPhone}` : ''}</p>
+                    <p className="text-sm text-muted">{i.pet ? <span className="font-medium text-accent-700">🐾 {i.pet.name} · </span> : null}{i.customerName ?? 'Cliente'}{i.customerPhone ? ` · ${i.customerPhone}` : ''}</p>
                   </div>
+                  {i.status !== 'requested' && (
+                    <button onClick={() => setLiveTarget({ id: i.id, title: `${i.serviceName} · ${when(i)}`, status: i.status, pet: i.pet })}
+                      className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl bg-accent-600 px-3 text-sm font-semibold text-[#1f1005] hover:bg-accent-700">
+                      <Radio className="h-4 w-4" aria-hidden="true" />{i.liveCount ? `Ao vivo (${i.liveCount})` : 'Pet ao Vivo'}
+                    </button>
+                  )}
                   {i.status === 'requested' ? <Tag tone="warning">Aguardando você</Tag> : i.status === 'confirmed' ? <Tag tone="brand">Confirmado</Tag> : <Tag tone="accent">Realizado</Tag>}
                   <AgendaWhatsApp item={i} biz={b} />
                 </li>
@@ -203,6 +211,7 @@ export function PanelAgendaPage() {
           </section>
         ))
       )}
+      <LiveSheet businessId={b.id} categorySlug={b.profile.categorySlug} target={liveTarget} onClose={() => { setLiveTarget(null); agenda.refetch(); }} />
     </div>
   );
 }
@@ -217,7 +226,7 @@ function AgendaWhatsApp({ item: i, biz }: { item: PanelAgendaItemDTO; biz: Panel
   const href = whatsappLink(i.customerPhone, text);
   if (!href) return null;
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-line bg-white px-3 text-sm font-semibold text-brand-700 hover:bg-surface">
+    <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-line bg-card px-3 text-sm font-semibold text-brand-fg hover:bg-surface">
       <MessageCircle className="h-4 w-4" aria-hidden="true" />{upcoming ? 'Enviar lembrete' : 'Pedir avaliação'}
     </a>
   );
@@ -285,7 +294,7 @@ export function PanelAssistantPage() {
         {TASKS.map(({ id, label, hint, Icon }) => (
           <button key={id} type="button" role="radio" aria-checked={task === id} onClick={() => setTask(id)}
             className={`card flex items-start gap-3 p-4 text-left transition ${task === id ? 'border-brand-700 ring-2 ring-brand-500/20' : 'hover:border-brand-200'}`}>
-            <Icon className="mt-0.5 h-5 w-5 text-brand-600" aria-hidden="true" />
+            <Icon className="mt-0.5 h-5 w-5 text-brand-fg" aria-hidden="true" />
             <span><span className="block font-semibold">{label}</span><span className="text-sm text-muted">{hint}</span></span>
           </button>
         ))}
@@ -307,7 +316,7 @@ export function PanelAssistantPage() {
           <div className="whitespace-pre-wrap leading-relaxed">{output}{running && <span className="ml-0.5 inline-block h-4 w-2 animate-pulse bg-brand-500 align-middle" />}</div>
           {!running && output && (
             <p className="mt-3 text-sm text-muted">
-              Para usar: copie e cole em {task === 'description' ? <Link to="../perfil" className="font-medium text-brand-700 hover:underline">Perfil</Link> : task === 'services' ? <Link to="../servicos" className="font-medium text-brand-700 hover:underline">Serviços</Link> : 'onde quiser'}. Confira preços e informações antes de publicar.
+              Para usar: copie e cole em {task === 'description' ? <Link to="../perfil" className="font-medium text-brand-fg hover:underline">Perfil</Link> : task === 'services' ? <Link to="../servicos" className="font-medium text-brand-fg hover:underline">Serviços</Link> : 'onde quiser'}. Confira preços e informações antes de publicar.
             </p>
           )}
         </section>
@@ -411,14 +420,14 @@ export function PanelPlanPage() {
           );
         })}
       </div>
-      {!canBuy && <p className="text-sm text-muted">A mudança de plano é feita pelo site do Conecta Local, no navegador.</p>}
+      {!canBuy && <p className="text-sm text-muted">A mudança de plano é feita pelo site do Pataí, no navegador.</p>}
       {canBuy && !st?.enabled && (
         <section className="card p-5">
           <h2 className="font-semibold">Como assinar</h2>
           <p className="mt-1 text-sm text-muted">O pagamento on-line ainda não foi ativado. Fale com a equipe pelo e-mail do suporte informando a empresa e o plano.</p>
         </section>
       )}
-      <p className="text-xs text-muted">Pagamentos processados pela Asaas. Seus dados de cartão e CPF/CNPJ ficam com o meio de pagamento — o Conecta Local não os armazena.</p>
+      <p className="text-xs text-muted">Pagamentos processados pela Asaas. Seus dados de cartão e CPF/CNPJ ficam com o meio de pagamento — o Pataí não os armazena.</p>
 
       {buying && <CheckoutSheet businessId={b.id} plan={buying} onClose={() => { setBuying(null); refresh(); }} onPaid={() => { setBuying(null); refresh(); toast(`Pagamento confirmado! Plano ${PLANS[buying].name} ativo.`); }} />}
       <Sheet open={canceling} onClose={() => setCanceling(false)} title="Cancelar assinatura?"
@@ -488,14 +497,14 @@ function CheckoutSheet({ businessId, plan, onClose, onPaid }: { businessId: stri
             <p className="mt-2 text-sm text-muted">{method === 'PIX' ? 'Pague agora com o QR Code. Nos próximos meses, a cobrança Pix chega por e-mail.' : 'Cobrança automática todo mês no cartão. Você digita o cartão na página segura do meio de pagamento.'}</p>
           </fieldset>
           <TextField label="Nome do responsável ou razão social" value={holder} onChange={(e) => { setHolder(e.target.value); setErrors(({ holderName: _h, ...r }) => r); }} error={errors.holderName} autoComplete="name" />
-          <TextField label="CPF ou CNPJ" inputMode="numeric" value={doc} onChange={(e) => { setDoc(e.target.value); setErrors(({ cpfCnpj: _c, ...r }) => r); }} error={errors.cpfCnpj} hint="Exigido para emitir a cobrança. Não fica guardado no Conecta Local." />
+          <TextField label="CPF ou CNPJ" inputMode="numeric" value={doc} onChange={(e) => { setDoc(e.target.value); setErrors(({ cpfCnpj: _c, ...r }) => r); }} error={errors.cpfCnpj} hint="Exigido para emitir a cobrança. Não fica guardado no Pataí." />
           <p className="text-sm">Total hoje: <strong>{formatCents(p.priceCents)}</strong>. Renova todo mês; cancele quando quiser.</p>
           {apiError && <Alert tone="error">{apiError}</Alert>}
         </div>
       ) : result.pix ? (
         <div className="space-y-4 text-center">
           <p>Abra o app do seu banco, escolha <strong>Pix → Ler QR Code</strong> ou use o “copia e cola”.</p>
-          <img src={result.pix.qrCodeImage} alt="QR Code Pix" className="mx-auto h-56 w-56 rounded-xl border border-line bg-white p-2" />
+          <img src={result.pix.qrCodeImage} alt="QR Code Pix" className="mx-auto h-56 w-56 rounded-xl border border-line bg-card p-2" />
           <div className="rounded-xl bg-surface p-3 text-left">
             <p className="break-all font-mono text-xs">{result.pix.copyPaste}</p>
           </div>

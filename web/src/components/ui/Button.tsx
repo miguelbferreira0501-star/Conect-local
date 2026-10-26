@@ -9,10 +9,10 @@ const base =
   'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition select-none disabled:cursor-not-allowed disabled:opacity-55';
 const variants: Record<Variant, string> = {
   primary: 'bg-brand-700 text-white hover:bg-brand-800 active:bg-brand-900',
-  accent: 'bg-accent-600 text-white hover:bg-accent-700',
-  secondary: 'border border-line bg-white text-brand-700 hover:bg-brand-50 active:bg-brand-100',
-  ghost: 'text-brand-700 hover:bg-brand-50',
-  danger: 'border border-danger-700/30 bg-white text-danger-700 hover:bg-danger-50',
+  accent: 'bg-accent-600 text-[#1f1005] hover:bg-accent-700',
+  secondary: 'border border-line bg-card text-brand-fg hover:bg-brand-50 active:bg-brand-100',
+  ghost: 'text-brand-fg hover:bg-brand-50',
+  danger: 'border border-danger-700/30 bg-card text-danger-700 hover:bg-danger-50',
 };
 const sizes: Record<Size, string> = {
   sm: 'min-h-[40px] px-3.5 text-sm',

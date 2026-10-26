@@ -12,6 +12,7 @@ import { panelRepo } from '../repositories/panel';
 import { usersRepo } from '../repositories/users';
 const usersRepoMe = usersRepo.me;
 import { panel } from '../services/panel';
+import * as pets from '../services/pets';
 import { aiDiagnostics, aiEnabled, runAssistant } from '../services/ai';
 import { streamSSE } from 'hono/streaming';
 import { aiRequestSchema } from '@conecta/shared';
@@ -97,6 +98,14 @@ panelRoutes.post('/businesses/:businessId/ai', async (c) => {
     }
   });
 });
+
+// Pet ao Vivo (lado da empresa)
+panelRoutes.get('/businesses/:businessId/bookings/:bookingId/live', async (c) => c.json(await pets.listLive(uid(c), parse(uuid, c.req.param('bookingId')))));
+panelRoutes.post('/businesses/:businessId/bookings/:bookingId/live', async (c) => {
+  if (!hit(`live:${uid(c)}`, 120, 60 * 60_000)) throw new AppError(429, 'rate_limited', 'Muitas atualizações em pouco tempo. Aguarde um pouco.');
+  return c.json(await pets.addLive(uid(c), bid(c), parse(uuid, c.req.param('bookingId')), await c.req.json()), 201);
+});
+panelRoutes.delete('/businesses/:businessId/live/:updateId', async (c) => c.json(await pets.removeLive(uid(c), bid(c), parse(uuid, c.req.param('updateId')))));
 
 panelRoutes.get('/businesses/:businessId/reviews', async (c) => c.json(await panel.reviews(uid(c), bid(c))));
 panelRoutes.put('/businesses/:businessId/reviews/:reviewId/reply', async (c) => {

@@ -4,7 +4,7 @@ import { mkdirSync, readFileSync } from 'node:fs';
 const { chromium } = createRequire(import.meta.url)('playwright'); // NODE_PATH ou dependência local
 
 const svg = readFileSync('web/public/icon.svg', 'utf8');
-const BRAND = '#123C7A';
+const BRAND = '#6250EB';
 mkdirSync('store', { recursive: true });
 const browser = await chromium.launch();
 const page = await browser.newPage();
@@ -23,7 +23,7 @@ for (const [size, file, scale] of jobs) {
   const inner = Math.round(size * scale);
   const art = scale === 1
     ? svg.replace('<svg ', `<svg width="${size}" height="${size}" `)
-    : svg.replace('<rect width="64" height="64" rx="14" fill="#123C7A"/>', '').replace('<svg ', `<svg width="${inner}" height="${inner}" `);
+    : svg.replace('<rect width="64" height="64" rx="16" fill="#6250EB"/>', '').replace('<svg ', `<svg width="${inner}" height="${inner}" `);
   await page.setContent(`<html><body style="margin:0;width:${size}px;height:${size}px;background:${BRAND};display:flex;align-items:center;justify-content:center">${art}</body></html>`);
   await page.screenshot({ path: file, clip: { x: 0, y: 0, width: size, height: size } });
 }

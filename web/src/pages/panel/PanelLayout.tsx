@@ -9,12 +9,12 @@ import { Alert, PageLoader } from '@/components/ui/Feedback';
 export function PanelShell() {
   return (
     <div className="min-h-screen bg-surface">
-      <header className="border-b border-line bg-white">
+      <header className="border-b border-line bg-card">
         <div className="container-app flex min-h-[60px] items-center gap-3">
           <NavLink to="/empresas" aria-label="Painel das empresas"><Logo /></NavLink>
           <span className="hidden rounded-full bg-accent-50 px-2.5 py-0.5 text-xs font-semibold text-accent-700 sm:inline">Para empresas</span>
           <div className="flex-1" />
-          <NavLink to="/" className="inline-flex min-h-[44px] items-center gap-1 text-sm font-medium text-brand-700 hover:underline">
+          <NavLink to="/" className="inline-flex min-h-[44px] items-center gap-1 text-sm font-medium text-brand-fg hover:underline">
             <ArrowLeft className="h-4 w-4" /> Voltar ao app
           </NavLink>
         </div>
@@ -53,20 +53,20 @@ export function BusinessPanelLayout() {
   const b = biz.data;
   return (
     <div>
-      <div className="border-b border-line bg-white">
+      <div className="border-b border-line bg-card">
         <div className="container-app py-3">
           <div className="flex flex-wrap items-center gap-2">
             {mine.data && mine.data.length > 1 ? (
               <label className="min-w-0">
                 <span className="sr-only">Empresa</span>
-                <select value={b.id} onChange={(e) => nav(`/empresas/${e.target.value}`)} className="max-w-full rounded-lg border border-line bg-white px-2 py-1.5 text-lg font-semibold">
+                <select value={b.id} onChange={(e) => nav(`/empresas/${e.target.value}`)} className="max-w-full rounded-lg border border-line bg-card px-2 py-1.5 text-lg font-semibold">
                   {mine.data.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
                 </select>
               </label>
             ) : (
               <h1 className="truncate text-lg font-semibold">{b.name}</h1>
             )}
-            <a href={`/empresa/${b.slug}`} target="_blank" rel="noopener" className="inline-flex min-h-[40px] items-center gap-1 text-sm font-medium text-brand-700 hover:underline">
+            <a href={`/empresa/${b.slug}`} target="_blank" rel="noopener" className="inline-flex min-h-[40px] items-center gap-1 text-sm font-medium text-brand-fg hover:underline">
               Ver página pública <ExternalLink className="h-3.5 w-3.5" /><span className="sr-only">(abre em nova aba)</span>
             </a>
           </div>
@@ -75,7 +75,7 @@ export function BusinessPanelLayout() {
               <NavLink key={label} to={to} end={end}
                 className={({ isActive }) => `inline-flex min-h-[42px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-medium transition ${isActive ? 'bg-brand-700 text-white' : 'bg-surface text-ink hover:bg-brand-50'}`}>
                 <Icon className="h-4 w-4" aria-hidden="true" />{label}
-                {label === 'Pedidos' && pending > 0 && <span className="ml-0.5 rounded-full bg-danger-700 px-1.5 text-xs font-bold text-white">{pending}</span>}
+                {label === 'Pedidos' && pending > 0 && <span className="ml-0.5 rounded-full bg-danger-700 px-1.5 text-xs font-bold text-[#2a0a0a]">{pending}</span>}
               </NavLink>
             ))}
           </nav>

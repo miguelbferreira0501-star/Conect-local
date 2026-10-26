@@ -5,7 +5,7 @@ import { BADGES, type BadgeId } from '@conecta/shared';
 export function Tag({ children, tone = 'neutral', icon }: { children: ReactNode; tone?: 'neutral' | 'brand' | 'accent' | 'warning'; icon?: ReactNode }) {
   const tones = {
     neutral: 'bg-surface text-muted border-line',
-    brand: 'bg-brand-50 text-brand-800 border-brand-100',
+    brand: 'bg-brand-50 text-brand-fg border-brand-100',
     accent: 'bg-accent-50 text-accent-700 border-accent-100',
     warning: 'bg-warning-50 text-warning-700 border-warning-700/20',
   };

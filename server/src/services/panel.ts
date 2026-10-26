@@ -218,6 +218,7 @@ export const panel = {
         description: r.description, contactPreference: r.contact_preference, neighborhood: r.neighborhood,
         createdAt: new Date(r.created_at).toISOString(), businessResponse: r.business_response,
         bookingMode: r.booking_mode ?? null, period: r.period ?? null, staffName: r.staff_name ?? null, partySize: r.party_size ?? null,
+        pet: r.pet ?? null, liveCount: r.live_count ?? 0,
         customer: r.customer_name
           ? { name: r.customer_name, phone: r.contact_phone || r.customer_phone || null, email: r.customer_email }
           : null,
@@ -280,7 +281,7 @@ export const panel = {
       return rows.map((r) => ({
         id: r.id, status: r.status, startsAt: new Date(r.starts_at).toISOString(), endsAt: new Date(r.ends_at).toISOString(),
         mode: r.booking_mode, period: r.period, serviceName: r.service_name, staffId: r.staff_id, staffName: r.staff_name, partySize: r.party_size,
-        customerName: r.customer_name, customerPhone: r.customer_phone,
+        customerName: r.customer_name, customerPhone: r.customer_phone, pet: r.pet ?? null, liveCount: r.live_count ?? 0,
       }));
     }),
 

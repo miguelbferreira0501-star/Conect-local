@@ -37,7 +37,7 @@ export function BusinessCard({ b, layout = 'list' }: { b: BusinessCardDTO; layou
             <BusinessLogo name={b.name} logoUrl={b.logoUrl} size={48} className="ring-4 ring-white" />
             {b.isDemo && <DemoTag />}
           </div>
-          <h3 className="line-clamp-1 font-semibold group-hover:text-brand-700">{b.name}</h3>
+          <h3 className="line-clamp-1 font-semibold group-hover:text-brand-fg">{b.name}</h3>
           <p className="text-sm text-muted">{b.category.shortName}</p>
           <div className="mt-1.5"><RatingInline rating={b.rating} compact /></div>
           <p className="mt-1 line-clamp-1 text-xs text-muted">{locationLabel(b)}</p>
@@ -92,7 +92,7 @@ export function BusinessCard({ b, layout = 'list' }: { b: BusinessCardDTO; layou
               ))}
             </ul>
             {b.isNewcomer && <p className="mt-3 text-sm text-muted">“Nova na plataforma” indica que a empresa chegou há pouco tempo. Não é um selo de qualidade.</p>}
-            <Link to="/como-funciona" className="mt-4 inline-block font-semibold text-brand-700 underline-offset-2 hover:underline">Como ordenamos os resultados</Link>
+            <Link to="/como-funciona" className="mt-4 inline-block font-semibold text-brand-fg underline-offset-2 hover:underline">Como ordenamos os resultados</Link>
           </Sheet>
         </>
       )}

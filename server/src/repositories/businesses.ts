@@ -39,7 +39,7 @@ export const businessesRepo = {
   /** Empresas que podem aparecer para uma cidade, já com filtros estruturados aplicados. */
   async candidates(f: CandidateFilters, db?: Db): Promise<BusinessRow[]> {
     const params: unknown[] = [f.city];
-    const where: string[] = [`b.status = 'active'`];
+    const where: string[] = [`b.status = 'active'`, 'c.active'];
     const loc = [
       `b.city_ibge = $1`,
       `EXISTS (SELECT 1 FROM business_service_areas a WHERE a.business_id = b.id AND a.city_ibge = $1)`,

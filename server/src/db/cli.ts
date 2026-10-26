@@ -56,7 +56,8 @@ export async function deploy(client: pg.Client) {
   if (cities < 5000) await loadLocations(client);
   await syncCategories(client);
   if (env.DEMO_MODE) {
-    const n = (await client.query('SELECT count(*)::int AS n FROM businesses WHERE is_demo')).rows[0].n;
+    // Recria a demonstração quando não há exemplos nas categorias atuais (ex.: depois da troca de nicho).
+    const n = (await client.query('SELECT count(*)::int AS n FROM businesses b JOIN categories c ON c.id = b.category_id WHERE b.is_demo AND c.active')).rows[0].n;
     if (n === 0) await seedDemo(client);
   } else {
     // Lançamento: remove empresas, clientes e avaliações fictícias (as reais não são tocadas).

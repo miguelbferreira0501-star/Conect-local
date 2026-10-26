@@ -74,7 +74,7 @@ export function SearchBox({ initial = '', autoFocus = false, size = 'lg', onSubm
           if (e.key === 'ArrowUp') { e.preventDefault(); setActive((a) => Math.max(-1, a - 1)); }
           if (e.key === 'Escape') setOpen(false);
         }}
-        className={`w-full rounded-2xl border border-line bg-white pr-24 text-ink shadow-card placeholder:text-muted focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/15 [&::-webkit-search-cancel-button]:hidden ${
+        className={`w-full rounded-2xl border border-line bg-card pr-24 text-ink shadow-card placeholder:text-muted focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/15 [&::-webkit-search-cancel-button]:hidden ${
           size === 'lg' ? 'h-[60px] pl-14 text-[17px]' : 'h-[52px] pl-12 text-base'
         }`}
       />
@@ -90,7 +90,7 @@ export function SearchBox({ initial = '', autoFocus = false, size = 'lg', onSubm
         </button>
       </div>
       {items.length > 0 && (
-        <ul id={listId} role="listbox" className="absolute inset-x-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-line bg-white py-1 shadow-raised">
+        <ul id={listId} role="listbox" className="absolute inset-x-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-line bg-card py-1 shadow-raised">
           {items.map((s, i) => (
             <li key={`${s.type}-${s.label}`} id={`${listId}-${i}`} role="option" aria-selected={i === active}>
               <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => pick(s)}

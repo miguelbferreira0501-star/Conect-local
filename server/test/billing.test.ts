@@ -42,7 +42,7 @@ beforeAll(async () => {
 afterAll(() => new Promise<void>((r) => server.close(() => r())));
 
 const profile = {
-  name: 'Oficina Paga', categorySlug: 'automotivo', shortDescription: 'Oficina mecânica completa.', cityIbge: 4209102, street: 'Rua C, 3',
+  name: 'Oficina Paga', categorySlug: 'banho-e-tosa', shortDescription: 'Oficina mecânica completa.', cityIbge: 4209102, street: 'Rua C, 3',
   modeInPerson: true, modeAtCustomer: false, modeOnline: false, whatsapp: '47999990000', acceptsBooking: true, acceptsQuote: true,
 };
 const webhook = (body: object, token = 'token-do-webhook-de-teste-123') =>

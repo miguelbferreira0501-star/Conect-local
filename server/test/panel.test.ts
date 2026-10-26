@@ -7,7 +7,7 @@ import { call, newUser, setupDatabase } from './helpers';
 setupDatabase();
 
 const profile = {
-  name: 'Elétrica Teste Real', categorySlug: 'reformas-e-manutencao', shortDescription: 'Instalações elétricas residenciais com garantia.',
+  name: 'Elétrica Teste Real', categorySlug: 'banho-e-tosa', shortDescription: 'Instalações elétricas residenciais com garantia.',
   description: 'Atendemos casas e apartamentos.', cityIbge: 4209102, neighborhood: 'Centro', street: '', addressPublic: true,
   serviceAreaCities: [4201307, 4209102], modeInPerson: false, modeAtCustomer: true, modeOnline: false,
   whatsapp: '(47) 99999-1111', priceLevel: 2, acceptsBooking: true, acceptsQuote: true,
@@ -55,7 +55,7 @@ describe('painel das empresas', () => {
     resetRateLimits();
     const owner = await newUser('Dona Salão');
     const customer = await newUser('Cliente Feliz');
-    const { body: biz } = await call('POST', '/panel/businesses', { ...profile, name: 'Salão Teste', categorySlug: 'estetica-e-beleza', modeInPerson: true, street: 'Rua A, 10' }, owner.cookie);
+    const { body: biz } = await call('POST', '/panel/businesses', { ...profile, name: 'Salão Teste', categorySlug: 'banho-e-tosa', modeInPerson: true, street: 'Rua A, 10' }, owner.cookie);
     const { body: svc } = await call('POST', `/panel/businesses/${biz.id}/services`, { name: 'Corte', priceType: 'fixed', priceMin: 50, durationMinutes: 30, bookable: true }, owner.cookie);
     const allDays = Object.fromEntries(['0', '1', '2', '3', '4', '5', '6'].map((d) => [d, [['00:00', '23:30']]]));
     await call('PUT', `/panel/businesses/${biz.id}/hours`, allDays, owner.cookie);
@@ -142,7 +142,7 @@ describe('painel das empresas', () => {
     resetRateLimits();
     const owner = await newUser();
     const { body: biz } = await call('POST', '/panel/businesses', { ...profile, name: 'Empresa Com Resposta' }, owner.cookie);
-    const demo = (await call('GET', '/businesses/espaco-bem-cuidar-joinville')).body;
+    const demo = (await call('GET', '/businesses/banho-tosa-bem-cuidar-joinville')).body;
     const review = (await call('GET', `/businesses/${demo.id}/reviews`)).body.items[0];
     // Tenta responder avaliação de outra empresa usando a própria como "dona" da resposta
     await expect(withUser(owner.id, (db) => db.query(`INSERT INTO review_replies (review_id, business_id, body) VALUES ($1, $2, 'oi')`, [review.id, biz.id]))).rejects.toThrow(/row-level security/);

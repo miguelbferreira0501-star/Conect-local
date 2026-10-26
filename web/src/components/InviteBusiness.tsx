@@ -13,7 +13,7 @@ export function InviteBusiness({ cityName, compact = false }: { cityName?: strin
         <p className="text-sm text-muted">Indique pelo WhatsApp. O cadastro é grátis e ajuda outras pessoas da cidade.</p>
       </div>
       <a href={`https://wa.me/?text=${encodeURIComponent(text)}`} target="_blank" rel="noopener noreferrer"
-        className="inline-flex min-h-[44px] items-center rounded-xl bg-accent-700 px-4 font-semibold text-white hover:bg-accent-600">
+        className="inline-flex min-h-[44px] items-center rounded-xl bg-brand-700 px-4 font-semibold text-white hover:bg-brand-800">
         Indicar empresa
       </a>
     </div>

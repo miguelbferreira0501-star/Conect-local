@@ -152,6 +152,12 @@ export interface ActivityDTO {
   period?: string | null;
   staffName?: string | null;
   partySize?: number | null;
+  /** Pet atendido */
+  pet?: { id: string; name: string } | null;
+  /** Agendamentos repetidos compartilham a mesma série */
+  seriesId?: string | null;
+  /** Pet ao Vivo: quantas etapas a empresa já mostrou e qual foi a última */
+  live?: { count: number; lastStage: string; lastAt: string } | null;
 }
 
 export interface UserDTO {

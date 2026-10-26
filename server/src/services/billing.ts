@@ -50,7 +50,7 @@ export const billing = {
     const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
     const sub = await asaas.createSubscription({
       customer, billingType: input.method, value: plan.priceCents / 100, nextDueDate: today,
-      description: `Conecta Local — plano ${plan.name} (mensal)`, externalReference: businessId,
+      description: `Pataí — plano ${plan.name} (mensal)`, externalReference: businessId,
     });
     await withUser(userId, (db) =>
       query(`SELECT app.billing_register_subscription($1, $2, $3, $4, $5, $6)`, [businessId, customer, sub.id, input.plan, input.method, plan.priceCents], db));

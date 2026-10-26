@@ -31,6 +31,7 @@ const AdminPage = lazy(() => import('./pages/panel/AdminPage').then((m) => ({ de
 const BusinessPage = lazy(() => import('./pages/BusinessPage').then((m) => ({ default: m.BusinessPage })));
 const BookingPage = lazy(() => import('./pages/BookingPage').then((m) => ({ default: m.BookingPage })));
 const QuotePage = lazy(() => import('./pages/QuotePage').then((m) => ({ default: m.QuotePage })));
+const PetsPage = lazy(() => import('./pages/PetsPage').then((m) => ({ default: m.PetsPage })));
 const FavoritesPage = lazy(() => import('./pages/FavoritesPage').then((m) => ({ default: m.FavoritesPage })));
 const ActivitiesPage = lazy(() => import('./pages/ActivitiesPage').then((m) => ({ default: m.ActivitiesPage })));
 const ReviewFormPage = lazy(() => import('./pages/ReviewFormPage').then((m) => ({ default: m.ReviewFormPage })));
@@ -80,6 +81,7 @@ export function App() {
           <Route path="empresa/:slug/agendar" element={<BookingPage />} />
           <Route path="empresa/:slug/orcamento" element={<QuotePage />} />
           <Route path="favoritos" element={<FavoritesPage />} />
+          <Route path="pets" element={<PetsPage />} />
           <Route path="atividades" element={<ActivitiesPage />} />
           <Route path="avaliar/:type/:id" element={<ReviewFormPage />} />
           <Route path="entrar" element={<LoginPage />} />

@@ -2,8 +2,9 @@
 import { CategoryIcon } from '../CategoryIcon';
 
 const PALETTES = [
-  ['#E7EEF9', '#123C7A'], ['#E3F5F1', '#0B7A6A'], ['#FDF1E3', '#9A5B00'], ['#F1ECFA', '#5B3FA0'],
-  ['#E9F3FB', '#1A5E8C'], ['#FCEBEE', '#A2324B'], ['#EEF4E6', '#4A6B1F'], ['#F0F1F4', '#3E4756'],
+  // Tema escuro: fundo profundo + cor viva para as iniciais e o ícone.
+  ['#272250', '#B3A8FF'], ['#13312C', '#5FE0C6'], ['#3A2614', '#FFB27A'], ['#33203F', '#E3A8FF'],
+  ['#14283A', '#7CC4FF'], ['#3A1A24', '#FF9BB3'], ['#22301A', '#B6E37A'], ['#26262E', '#C9C9D6'],
 ];
 
 export function paletteFor(key: string) {

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { CalendarCheck, CalendarX2, CheckCircle2, Clock, UserRound } from 'lucide-react';
-import { formatDuration, formatServicePrice, isReservationCategory, PERIODS, type BusinessDetailDTO, type Period } from '@conecta/shared';
+import { formatDuration, formatServicePrice, isReservationCategory, PERIODS, REPEAT_OPTIONS, type BusinessDetailDTO, type Period, type PetDTO } from '@conecta/shared';
 import { api, ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useAvailability, useBusiness } from '@/lib/queries';
@@ -11,6 +11,9 @@ import { RequireAuth } from '@/components/RequireAuth';
 import { Button, ButtonLink } from '@/components/ui/Button';
 import { Alert, EmptyState, ErrorState, PageLoader, Skeleton } from '@/components/ui/Feedback';
 import { ChipToggle, TextArea, TextField } from '@/components/ui/Form';
+import { usePets } from '@/lib/pets';
+import { PetAvatar, PetFormSheet } from '@/components/pets';
+import { Plus, Repeat } from 'lucide-react';
 
 const WEEK_SHORT = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
@@ -60,7 +63,15 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
   const [phone, setPhone] = useState(user?.phone ?? '');
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<ApiError | null>(null);
-  const [done, setDone] = useState<{ startsAt: string; label: string } | null>(null);
+  const [done, setDone] = useState<{ startsAt: string; label: string; count: number; skipped: number } | null>(null);
+  const pets = usePets();
+  const [petId, setPetId] = useState<string | null | undefined>(undefined); // undefined = ainda não escolheu
+  const chosenPetId = petId === undefined ? pets.data?.[0]?.id ?? null : petId;
+  const [addingPet, setAddingPet] = useState<PetDTO | null | undefined>(undefined);
+  const [everyWeeks, setEveryWeeks] = useState<0 | 1 | 2 | 4>(0);
+  const maxRepeat = everyWeeks === 1 ? 12 : everyWeeks === 2 ? 6 : 3;
+  const [repeatCount, setRepeatCount] = useState(4);
+  const count = Math.min(repeatCount, maxRepeat);
   // Na diária, buscamos a lista de dias a partir de hoje.
   const avail = useAvailability(b.id, serviceId || undefined, mode === 'day' ? dates[0].iso : date, staffId);
   const chosen = avail.data?.slots.find((x) => x.startsAt === slot);
@@ -82,8 +93,9 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
     return (
       <div className="card p-6 text-center">
         <CheckCircle2 className="mx-auto h-14 w-14 text-accent-600" aria-hidden="true" />
-        <h2 className="mt-3 text-xl font-semibold">{reservation ? 'Pedido de reserva registrado' : 'Pedido de agendamento registrado'}</h2>
+        <h2 className="mt-3 text-xl font-semibold">{done.count > 1 ? `${done.count} agendamentos registrados` : reservation ? 'Pedido de reserva registrado' : 'Pedido de agendamento registrado'}</h2>
         <p className="mt-2 text-muted"><strong className="text-ink">{service?.name}</strong> com {b.name}<br />{done.label}</p>
+        {done.skipped > 0 && <div className="mt-3"><Alert tone="warning">{done.skipped} {done.skipped === 1 ? 'data não tinha' : 'datas não tinham'} vaga nesse horário e ficaram de fora. Você pode marcar à parte.</Alert></div>}
         <Alert tone="info" title="Aguardando confirmação da empresa">
           {mode === 'period' ? 'A empresa vai combinar com você o horário exato dentro do turno escolhido.' : 'O horário fica reservado para você enquanto a empresa confirma.'} Acompanhe o status em Atividades.
         </Alert>
@@ -108,10 +120,15 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
     setSubmitting(true);
     setErr(null);
     try {
-      await api.post('/bookings', { businessId: b.id, serviceId, startsAt: chosen.startsAt, staffId, notes: notes || undefined, contactPhone: phone || undefined, partySize: reservation ? people : undefined });
+      const r = await api.post<{ ids: string[]; skipped: string[] }>('/bookings', {
+        businessId: b.id, serviceId, startsAt: chosen.startsAt, staffId, notes: notes || undefined, contactPhone: phone || undefined,
+        partySize: reservation ? people : undefined, petId: chosenPetId, repeat: everyWeeks && mode !== 'day' ? { everyWeeks, count } : null,
+      });
       qc.invalidateQueries({ queryKey: ['activities'] });
       qc.invalidateQueries({ queryKey: ['availability'] });
-      setDone({ startsAt: chosen.startsAt, label: describe(chosen) + (reservation ? ` · ${people} ${people === 1 ? 'pessoa' : 'pessoas'}` : '') + (staffId ? ` · ${reservation ? '' : 'com '}${b.staff.find((s) => s.id === staffId)?.name}` : '') });
+      const petName = pets.data?.find((p) => p.id === chosenPetId)?.name;
+      const repeatLabel = everyWeeks && mode !== 'day' ? ` · ${REPEAT_OPTIONS.find((o) => o.everyWeeks === everyWeeks)?.label.toLowerCase()}` : '';
+      setDone({ count: r.ids?.length ?? 1, skipped: r.skipped?.length ?? 0, startsAt: chosen.startsAt, label: (petName ? `${petName} · ` : '') + describe(chosen) + repeatLabel + (reservation ? ` · ${people} ${people === 1 ? 'pessoa' : 'pessoas'}` : '') + (staffId ? ` · ${reservation ? '' : 'com '}${b.staff.find((s) => s.id === staffId)?.name}` : '') });
       window.scrollTo({ top: 0 });
     } catch (e) {
       setErr(e as ApiError);
@@ -125,13 +142,34 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
 
   return (
     <div className="space-y-6">
+      <section>
+        <h2 className="mb-2 font-semibold">Para qual pet?</h2>
+        {pets.isLoading ? <Skeleton className="h-16" /> : (
+          <div className="scroll-row" role="radiogroup" aria-label="Pet">
+            {pets.data?.map((p) => (
+              <button key={p.id} type="button" role="radio" aria-checked={chosenPetId === p.id} onClick={() => setPetId(p.id)}
+                className={`flex shrink-0 items-center gap-2 rounded-2xl border px-3 py-2 transition ${chosenPetId === p.id ? 'border-brand-700 bg-brand-50' : 'border-line bg-card hover:bg-brand-50'}`}>
+                <PetAvatar pet={p} size={40} />
+                <span className="font-medium">{p.name}</span>
+              </button>
+            ))}
+            <button type="button" onClick={() => setAddingPet(null)} className="flex shrink-0 items-center gap-2 rounded-2xl border border-dashed border-brand-200 px-3 py-2 text-brand-fg hover:bg-brand-50">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50"><Plus className="h-5 w-5" /></span>
+              <span className="font-medium">{pets.data?.length ? 'Outro pet' : 'Cadastrar meu pet'}</span>
+            </button>
+          </div>
+        )}
+        {!pets.isLoading && !pets.data?.length && <p className="mt-2 text-sm text-muted">Com a ficha, quem atender já sabe raça, porte, alergias e medos do seu pet.</p>}
+        <PetFormSheet pet={addingPet} onClose={() => setAddingPet(undefined)} onSaved={(p) => setPetId(p.id)} />
+      </section>
+
       {reservation && (
         <section>
           <h2 className="mb-2 font-semibold">1. Quantas pessoas?</h2>
           <div className="flex items-center gap-3">
-            <button type="button" aria-label="Menos uma pessoa" disabled={people <= 1} onClick={() => setPeople(people - 1)} className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-line bg-white text-xl font-semibold disabled:opacity-40">−</button>
+            <button type="button" aria-label="Menos uma pessoa" disabled={people <= 1} onClick={() => setPeople(people - 1)} className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-line bg-card text-xl font-semibold disabled:opacity-40">−</button>
             <span className="min-w-[90px] text-center text-lg font-semibold" aria-live="polite">{people} {people === 1 ? 'pessoa' : 'pessoas'}</span>
-            <button type="button" aria-label="Mais uma pessoa" disabled={people >= 50} onClick={() => setPeople(people + 1)} className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-line bg-white text-xl font-semibold disabled:opacity-40">+</button>
+            <button type="button" aria-label="Mais uma pessoa" disabled={people >= 50} onClick={() => setPeople(people + 1)} className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-line bg-card text-xl font-semibold disabled:opacity-40">+</button>
           </div>
           {people > 12 && <p className="mt-2 text-sm text-muted">Para grupos grandes, o restaurante pode pedir para confirmar por telefone.</p>}
         </section>
@@ -177,7 +215,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
               return (
                 <button key={d.iso} type="button" role="radio" aria-checked={selected} disabled={closed} onClick={() => { setDate(d.iso); setSlot(''); }}
                   aria-label={`${WEEK_SHORT[d.weekday]} ${d.day}/${d.month}${closed ? ' — fechado' : ''}`}
-                  className={`flex min-h-[64px] w-[60px] shrink-0 flex-col items-center justify-center rounded-xl border text-sm transition disabled:opacity-40 ${selected ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-white hover:bg-brand-50'}`}>
+                  className={`flex min-h-[64px] w-[60px] shrink-0 flex-col items-center justify-center rounded-xl border text-sm transition disabled:opacity-40 ${selected ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-card hover:bg-brand-50'}`}>
                   <span className="text-xs uppercase">{WEEK_SHORT[d.weekday]}</span>
                   <span className="text-lg font-semibold">{d.day}</span>
                 </button>
@@ -197,7 +235,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
             <div className="grid grid-cols-4 gap-2 sm:grid-cols-6" role="radiogroup" aria-label="Horário">
               {avail.data.slots.map((x) => (
                 <button key={x.startsAt} type="button" role="radio" aria-checked={slot === x.startsAt} onClick={() => pick(x.startsAt)}
-                  className={`min-h-[48px] rounded-xl border text-[15px] font-medium transition ${slot === x.startsAt ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-white hover:bg-brand-50'}`}>
+                  className={`min-h-[48px] rounded-xl border text-[15px] font-medium transition ${slot === x.startsAt ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-card hover:bg-brand-50'}`}>
                   {x.label}
                 </button>
               ))}
@@ -209,7 +247,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
                 const p = PERIODS[x.label as Period];
                 return (
                   <button key={x.startsAt} type="button" role="radio" aria-checked={slot === x.startsAt} onClick={() => pick(x.startsAt)}
-                    className={`min-h-[64px] rounded-xl border px-4 text-left transition ${slot === x.startsAt ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-white hover:bg-brand-50'}`}>
+                    className={`min-h-[64px] rounded-xl border px-4 text-left transition ${slot === x.startsAt ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-card hover:bg-brand-50'}`}>
                     <span className="block font-semibold">{p.label}</span>
                     <span className={`text-sm ${slot === x.startsAt ? 'text-white/85' : 'text-muted'}`}>Entre {p.start} e {p.end}</span>
                   </button>
@@ -224,7 +262,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
                 const wd = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
                 return (
                   <button key={x.startsAt} type="button" role="radio" aria-checked={slot === x.startsAt} onClick={() => pick(x.startsAt)}
-                    className={`min-h-[56px] rounded-xl border text-sm transition ${slot === x.startsAt ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-white hover:bg-brand-50'}`}>
+                    className={`min-h-[56px] rounded-xl border text-sm transition ${slot === x.startsAt ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-card hover:bg-brand-50'}`}>
                     <span className="block text-xs uppercase">{WEEK_SHORT[wd]}</span>
                     <span className="font-semibold">{String(d).padStart(2, '0')}/{String(m).padStart(2, '0')}</span>
                   </button>
@@ -233,6 +271,25 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
             </div>
           )}
           {mode !== 'day' && <p className="mt-2 flex items-center gap-1 text-sm text-muted"><Clock className="h-4 w-4" aria-hidden="true" /> Horário de {b.city.name}.</p>}
+        </section>
+      )}
+
+      {chosen && mode !== 'day' && (
+        <section>
+          <h2 className="mb-2 flex items-center gap-2 font-semibold"><Repeat className="h-5 w-5 text-accent-600" aria-hidden="true" /> Repetir este horário?</h2>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Repetição">
+            <ChipToggle selected={everyWeeks === 0} onClick={() => setEveryWeeks(0)}>Só desta vez</ChipToggle>
+            {REPEAT_OPTIONS.map((o) => <ChipToggle key={o.everyWeeks} selected={everyWeeks === o.everyWeeks} onClick={() => setEveryWeeks(o.everyWeeks)}>{o.label}</ChipToggle>)}
+          </div>
+          {everyWeeks > 0 && (
+            <div className="mt-3">
+              <p className="label">Quantas vezes?</p>
+              <div className="flex flex-wrap gap-2">
+                {[2, 3, 4, 6, 8, 12].filter((n) => n <= maxRepeat).map((n) => <ChipToggle key={n} selected={count === n} onClick={() => setRepeatCount(n)}>{n} vezes</ChipToggle>)}
+              </div>
+              <p className="mt-2 text-sm text-muted">Mesmo dia da semana e horário. Se alguma data não tiver vaga, ela fica de fora e as outras continuam. Você pode cancelar as próximas quando quiser.</p>
+            </div>
+          )}
         </section>
       )}
 
@@ -247,10 +304,10 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
 
       {err && <Alert tone="error">{err.message}</Alert>}
 
-      <div className="sticky bottom-[64px] z-10 -mx-4 border-t border-line bg-white/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0">
+      <div className="sticky bottom-[64px] z-10 -mx-4 border-t border-line bg-card/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0">
         {chosen && <p className="mb-2 text-center text-sm font-medium">{describe(chosen)}</p>}
         <Button block size="lg" disabled={!chosen} loading={submitting} onClick={submit} icon={<CalendarCheck className="h-5 w-5" />}>
-          {chosen ? (reservation ? 'Solicitar reserva' : 'Solicitar agendamento') : mode === 'day' ? 'Escolha uma data' : mode === 'period' ? 'Escolha um turno' : 'Escolha um horário'}
+          {chosen ? (reservation ? 'Solicitar reserva' : everyWeeks && mode !== 'day' ? `Solicitar ${count} agendamentos` : 'Solicitar agendamento') : mode === 'day' ? 'Escolha uma data' : mode === 'period' ? 'Escolha um turno' : 'Escolha um horário'}
         </Button>
         <p className="mt-2 text-center text-xs text-muted">Você pode cancelar pelo app até o horário marcado.</p>
       </div>

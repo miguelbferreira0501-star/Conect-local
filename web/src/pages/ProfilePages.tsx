@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { ChevronRight, FileText, Info, LogOut, MapPin, ShieldCheck, Star, Store, Trash2, UserRound } from 'lucide-react';
+import { ChevronRight, FileText, Info, LogOut, MapPin, ShieldCheck, Star, Store, Trash2, UserRound , Heart, PawPrint} from 'lucide-react';
 import { BRAND, profileUpdateSchema, relativeTime, REVIEW_RULES, reviewUpdateSchema } from '@conecta/shared';
 import { api, ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -22,7 +22,7 @@ function MenuItem({ to, icon: Icon, label, hint }: { to: string; icon: typeof St
   return (
     <li>
       <Link to={to} className="flex min-h-[60px] items-center gap-3 px-4 py-2 hover:bg-surface">
-        <Icon className="h-5 w-5 text-brand-600" aria-hidden="true" />
+        <Icon className="h-5 w-5 text-brand-fg" aria-hidden="true" />
         <span className="flex-1"><span className="block font-medium">{label}</span>{hint && <span className="text-sm text-muted">{hint}</span>}</span>
         <ChevronRight className="h-5 w-5 text-muted" aria-hidden="true" />
       </Link>
@@ -50,7 +50,7 @@ export function ProfilePage() {
         ) : (
           <div className="card p-5">
             <h2 className="text-lg font-semibold">Você está navegando sem conta</h2>
-            <p className="mt-1 text-muted">Crie uma conta para salvar favoritos, agendar e avaliar empresas.</p>
+            <p className="mt-1 text-muted">Crie uma conta para cadastrar seus pets, agendar e acompanhar tudo ao vivo.</p>
             <div className="mt-4 flex flex-wrap gap-3">
               <ButtonLink to="/entrar?voltar=/perfil">Entrar</ButtonLink>
               <ButtonLink to="/criar-conta?voltar=/perfil" variant="secondary">Criar conta</ButtonLink>
@@ -59,11 +59,13 @@ export function ProfilePage() {
         )}
 
         <ul className="card divide-y divide-line overflow-hidden">
+          {user && <MenuItem to="/pets" icon={PawPrint} label="Meus pets" hint="Ficha com raça, porte, alergias e medos" />}
+          {user && <MenuItem to="/favoritos" icon={Heart} label="Favoritos" />}
           {user && <MenuItem to="/perfil/dados" icon={UserRound} label="Meus dados" hint="Nome, telefone e cidade" />}
           {user && <MenuItem to="/perfil/avaliacoes" icon={Star} label="Minhas avaliações" />}
           <li>
             <button onClick={openPicker} className="flex min-h-[60px] w-full items-center gap-3 px-4 py-2 text-left hover:bg-surface">
-              <MapPin className="h-5 w-5 text-brand-600" aria-hidden="true" />
+              <MapPin className="h-5 w-5 text-brand-fg" aria-hidden="true" />
               <span className="flex-1"><span className="block font-medium">Localização</span><span className="text-sm text-muted">{city ? `${city.name}, ${city.uf}` : 'Não definida'}</span></span>
               <ChevronRight className="h-5 w-5 text-muted" aria-hidden="true" />
             </button>
@@ -71,7 +73,7 @@ export function ProfilePage() {
           <MenuItem to="/perfil/privacidade" icon={ShieldCheck} label="Privacidade e dados" />
           <MenuItem to="/como-funciona" icon={Info} label="Como funcionam avaliações e ranking" />
           <MenuItem to="/termos" icon={FileText} label="Termos de uso e privacidade" />
-          <MenuItem to="/empresas" icon={Store} label="Tenho uma empresa" hint="Cadastre e gerencie sua empresa" />
+          <MenuItem to="/empresas" icon={Store} label="Tenho um pet shop ou atendo pets" hint="Cadastre seu negócio de graça" />
         </ul>
 
         {user && (
@@ -282,7 +284,7 @@ export function PrivacyPage() {
             <li>Nas avaliações, aparece apenas seu primeiro nome e a inicial do sobrenome.</li>
             <li>Não vendemos dados pessoais.</li>
           </ul>
-          <Link to="/termos" className="mt-3 inline-block text-sm font-semibold text-brand-700 hover:underline">Ler a política de privacidade</Link>
+          <Link to="/termos" className="mt-3 inline-block text-sm font-semibold text-brand-fg hover:underline">Ler a política de privacidade</Link>
         </section>
         {user && (
           <section className="card border-danger-700/20 p-5">
@@ -319,7 +321,7 @@ export function ForBusinessPage() {
             Regras que valem para todas: avaliações legítimas não podem ser removidas, e a posição nos resultados não pode ser comprada.
             Anúncios, se existirem, serão sempre identificados como “Patrocinado”.
           </p>
-          <p className="mt-3 text-sm">Interessado? Escreva para <a className="font-semibold text-brand-700" href={`mailto:${BRAND.supportEmail}`}>{BRAND.supportEmail}</a>.</p>
+          <p className="mt-3 text-sm">Interessado? Escreva para <a className="font-semibold text-brand-fg" href={`mailto:${BRAND.supportEmail}`}>{BRAND.supportEmail}</a>.</p>
         </div>
       </div>
     </div>

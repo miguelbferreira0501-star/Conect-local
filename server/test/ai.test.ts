@@ -47,7 +47,7 @@ async function sse(path: string, body: object, cookie: string) {
 }
 
 const profile = {
-  name: 'Ateliê da IA', categorySlug: 'outros-servicos', shortDescription: 'Ajustes e consertos de roupas.', cityIbge: 4209102,
+  name: 'Ateliê da IA', categorySlug: 'banho-e-tosa', shortDescription: 'Ajustes e consertos de roupas.', cityIbge: 4209102,
   street: 'Rua A, 1', modeInPerson: true, modeAtCustomer: false, modeOnline: false, whatsapp: '47999990000', acceptsBooking: true, acceptsQuote: true,
 };
 
@@ -73,7 +73,7 @@ describe('assistente de IA', () => {
     resetRateLimits();
     const ownerDb = new pg.Client({ connectionString: process.env.DATABASE_OWNER_URL });
     await ownerDb.connect();
-    const demo = (await ownerDb.query(`SELECT b.id FROM businesses b WHERE slug = 'espaco-bem-cuidar-joinville'`)).rows[0];
+    const demo = (await ownerDb.query(`SELECT b.id FROM businesses b WHERE slug = 'banho-tosa-bem-cuidar-joinville'`)).rows[0];
     const owner = await newUser('Dono Demo');
     await ownerDb.query(`INSERT INTO business_members (business_id, user_id, role) VALUES ($1, $2, 'owner')`, [demo.id, owner.id]);
     await ownerDb.end();

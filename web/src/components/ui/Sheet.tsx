@@ -50,7 +50,7 @@ export function Sheet({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`relative flex max-h-[92vh] w-full flex-col rounded-t-2xl bg-white shadow-raised outline-none md:rounded-2xl ${size === 'lg' ? 'md:max-w-2xl' : 'md:max-w-lg'}`}
+        className={`relative flex max-h-[92vh] w-full flex-col rounded-t-2xl bg-card shadow-raised outline-none md:rounded-2xl ${size === 'lg' ? 'md:max-w-2xl' : 'md:max-w-lg'}`}
       >
         <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3.5">
           <h2 id={titleId} className="text-lg font-semibold">{title}</h2>

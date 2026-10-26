@@ -61,7 +61,7 @@ export function SelectField({ label, error, hint, optional, children, ...rest }:
 export function Checkbox({ label, description, ...rest }: { label: ReactNode; description?: ReactNode } & InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className="flex min-h-[44px] cursor-pointer items-start gap-3 py-1">
-      <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0 rounded border-line text-brand-700 accent-[rgb(var(--brand-700))]" {...rest} />
+      <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0 rounded border-line text-brand-fg accent-[rgb(var(--brand-700))]" {...rest} />
       <span>
         <span className="text-[15px] text-ink">{label}</span>
         {description && <span className="block text-sm text-muted">{description}</span>}
@@ -78,7 +78,7 @@ export function ChipToggle({ selected, onClick, children, icon }: { selected: bo
       aria-pressed={selected}
       onClick={onClick}
       className={`inline-flex min-h-[40px] items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition ${
-        selected ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-white text-ink hover:border-brand-200 hover:bg-brand-50'
+        selected ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-card text-ink hover:border-brand-200 hover:bg-brand-50'
       }`}
     >
       {icon}

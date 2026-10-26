@@ -14,3 +14,4 @@ export * from './booking';
 export * from './activities';
 export * from './panel';
 export * from './whatsapp';
+export * from './pets';

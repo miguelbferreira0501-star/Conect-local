@@ -75,7 +75,7 @@ export function LoginPage() {
           <Button type="submit" block size="lg" loading={loading}>Entrar</Button>
         </form>
         <p className="mt-6 text-center text-muted">
-          Ainda não tem conta? <Link to={`/criar-conta?voltar=${encodeURIComponent(back)}`} className="font-semibold text-brand-700 hover:underline">Criar conta grátis</Link>
+          Ainda não tem conta? <Link to={`/criar-conta?voltar=${encodeURIComponent(back)}`} className="font-semibold text-brand-fg hover:underline">Criar conta grátis</Link>
         </p>
         {config.data?.demoMode && (
           <div className="mt-6">
@@ -135,14 +135,14 @@ export function RegisterPage() {
           <PasswordField label="Crie uma senha" value={form.password} onChange={(v) => setForm({ ...form, password: v })} error={errors.password} autoComplete="new-password" hint="Pelo menos 8 caracteres, com letras e números." />
           <div>
             <Checkbox checked={form.acceptTerms} onChange={(e) => setForm({ ...form, acceptTerms: e.target.checked })}
-              label={<>Li e aceito os <Link to="/termos" className="font-semibold text-brand-700 underline">termos de uso e a política de privacidade</Link> do {BRAND.name}.</>} />
+              label={<>Li e aceito os <Link to="/termos" className="font-semibold text-brand-fg underline">termos de uso e a política de privacidade</Link> do {BRAND.name}.</>} />
             {errors.acceptTerms && <p className="text-sm text-danger-700">{errors.acceptTerms}</p>}
           </div>
           {apiError && <Alert tone="error">{apiError}</Alert>}
           <Button type="submit" block size="lg" loading={loading}>Criar conta</Button>
         </form>
         <p className="mt-6 text-center text-muted">
-          Já tem conta? <Link to={`/entrar?voltar=${encodeURIComponent(back)}`} className="font-semibold text-brand-700 hover:underline">Entrar</Link>
+          Já tem conta? <Link to={`/entrar?voltar=${encodeURIComponent(back)}`} className="font-semibold text-brand-fg hover:underline">Entrar</Link>
         </p>
       </div>
     </div>

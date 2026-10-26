@@ -8,6 +8,7 @@ import {
   BOOKING_MODE_LABELS, bookingProfile, describeDayHours, isReservationCategory, formatDuration, PERIODS, type BookingMode, type Period, formatPhoneBR, formatRating, formatServicePrice, relativeTime, serviceInputSchema, WEEKDAY_NAMES,
   type PanelBusinessDTO, type PanelRequestDTO, type ServiceInput,
 } from '@conecta/shared';
+import { PetCard } from '@/components/pets';
 import { api, ApiError } from '@/lib/api';
 import { resizeImage } from '@/lib/image';
 import { useMyBusinesses, usePanelMutation, usePanelRequests, usePanelReviews } from '@/lib/panelQueries';
@@ -111,7 +112,7 @@ export function PanelDashboard() {
         <ul className="mt-3 divide-y divide-line">
           {checklist.map((c) => (
             <li key={c.label}>
-              <Link to={c.to} className="flex min-h-[48px] items-center gap-3 hover:text-brand-700">
+              <Link to={c.to} className="flex min-h-[48px] items-center gap-3 hover:text-brand-fg">
                 {c.done ? <CheckCircle2 className="h-5 w-5 text-accent-600" /> : <Circle className="h-5 w-5 text-muted" />}
                 <span className={c.done ? 'text-muted line-through' : ''}>{c.label}</span>
               </Link>
@@ -121,7 +122,7 @@ export function PanelDashboard() {
       </section>
       <p className="text-sm text-muted">
         Sua posição na busca depende de nota ajustada, quantidade e recência das avaliações, perfil completo e relevância —
-        <Link to="/como-funciona" className="ml-1 font-medium text-brand-700 hover:underline">veja como funciona</Link>. O selo “Perfil verificado” é concedido pela equipe após conferência de documentos.
+        <Link to="/como-funciona" className="ml-1 font-medium text-brand-fg hover:underline">veja como funciona</Link>. O selo “Perfil verificado” é concedido pela equipe após conferência de documentos.
       </p>
     </div>
   );
@@ -189,7 +190,7 @@ function RequestCard({ r, businessId }: { r: PanelRequestDTO; businessId: string
       </div>
       <h3 className="mt-2 font-semibold">{r.serviceName ?? 'Serviço não especificado'}</h3>
       {r.startsAt && (
-        <p className="font-medium text-brand-800">
+        <p className="font-medium text-brand-fg">
           {r.bookingMode === 'day'
             ? `${new Date(r.startsAt).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })} · diária`
             : r.bookingMode === 'period'
@@ -198,6 +199,8 @@ function RequestCard({ r, businessId }: { r: PanelRequestDTO; businessId: string
         </p>
       )}
       {r.partySize && <p className="text-sm"><strong>{r.partySize} {r.partySize === 1 ? 'pessoa' : 'pessoas'}</strong></p>}
+      {r.pet && <div className="mt-2"><PetCard pet={r.pet} /></div>}
+      {r.type === 'booking' && r.status === 'confirmed' && <p className="mt-2 text-sm text-accent-700">Na Agenda, use “Pet ao Vivo” para mandar as fotos de cada etapa ao tutor.</p>}
       {r.staffName && <p className="text-sm">{r.partySize ? 'Mesa/ambiente' : 'Com'}: <strong>{r.staffName}</strong></p>}
       {r.preferredDate && <p className="text-sm">Data desejada: {new Date(r.preferredDate + 'T12:00:00').toLocaleDateString('pt-BR')}</p>}
       {r.description && <p className="mt-1 whitespace-pre-line text-sm">{r.description}</p>}
@@ -209,8 +212,8 @@ function RequestCard({ r, businessId }: { r: PanelRequestDTO; businessId: string
           {(r.contactPreference === 'email' || !phone) && r.customer.email && <p>{r.customer.email}</p>}
           {r.contactPreference && <p className="text-muted">Prefere contato por {{ whatsapp: 'WhatsApp', phone: 'ligação', email: 'e-mail' }[r.contactPreference]}</p>}
           <div className="mt-2 flex flex-wrap gap-2">
-            {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-line bg-white px-3 font-semibold text-brand-700"><MessageCircle className="h-4 w-4" />Abrir WhatsApp</a>}
-            {phone && <a href={`tel:+55${phone}`} className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-line bg-white px-3 font-semibold text-brand-700"><Phone className="h-4 w-4" />Ligar</a>}
+            {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-line bg-card px-3 font-semibold text-brand-fg"><MessageCircle className="h-4 w-4" />Abrir WhatsApp</a>}
+            {phone && <a href={`tel:+55${phone}`} className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-line bg-card px-3 font-semibold text-brand-fg"><Phone className="h-4 w-4" />Ligar</a>}
           </div>
         </div>
       )}
@@ -371,7 +374,7 @@ export function PanelHoursPage() {
               <div className="flex flex-wrap items-center gap-3">
                 <span className="w-20 font-semibold">{WEEKDAY_NAMES[n]}</span>
                 <Checkbox label="Aberto" checked={open} onChange={(e) => setDay(d, e.target.checked ? [['08:00', '18:00']] : [])} />
-                {open && n === 1 && <button className="ml-auto text-sm font-medium text-brand-700 hover:underline" onClick={() => copyToWeekdays(d)}>Copiar para seg. a sex.</button>}
+                {open && n === 1 && <button className="ml-auto text-sm font-medium text-brand-fg hover:underline" onClick={() => copyToWeekdays(d)}>Copiar para seg. a sex.</button>}
               </div>
               {open && (
                 <div className="mt-2 space-y-2">
@@ -385,7 +388,7 @@ export function PanelHoursPage() {
                       {ranges.length > 1 && <button aria-label="Remover intervalo" className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted hover:bg-surface" onClick={() => setDay(d, ranges.filter((_, j) => j !== i))}><Trash2 className="h-4 w-4" /></button>}
                     </div>
                   ))}
-                  {ranges.length < 2 && <button className="text-sm font-medium text-brand-700 hover:underline" onClick={() => setDay(d, [...ranges, ['13:00', '18:00']])}>+ Intervalo (ex.: depois do almoço)</button>}
+                  {ranges.length < 2 && <button className="text-sm font-medium text-brand-fg hover:underline" onClick={() => setDay(d, [...ranges, ['13:00', '18:00']])}>+ Intervalo (ex.: depois do almoço)</button>}
                 </div>
               )}
             </li>
@@ -439,7 +442,7 @@ export function PanelPhotosPage() {
             {b.photos.map((p) => (
               <li key={p.id} className="relative">
                 <img src={p.url} alt="" className="aspect-square w-full rounded-xl object-cover" />
-                <button aria-label="Remover foto" className="absolute right-2 top-2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-danger-700 shadow-card"
+                <button aria-label="Remover foto" className="absolute right-2 top-2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-card/95 text-danger-700 shadow-card"
                   onClick={() => remove.mutate({ kind: 'photo', id: p.id })}><Trash2 className="h-4 w-4" /></button>
               </li>
             ))}

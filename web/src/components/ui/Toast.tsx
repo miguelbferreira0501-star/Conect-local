@@ -18,7 +18,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {items.map((t) => (
           <div
             key={t.id}
-            className="pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-xl bg-ink px-4 py-3 text-sm text-white shadow-raised"
+            className="pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-xl border border-line bg-card px-4 py-3 text-sm text-ink shadow-raised"
             role={t.tone === 'error' ? 'alert' : 'status'}
           >
             {t.tone === 'success' ? <CheckCircle2 className="h-5 w-5 text-accent-100" /> : <AlertCircle className="h-5 w-5 text-red-300" />}

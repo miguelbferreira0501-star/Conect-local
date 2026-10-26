@@ -25,9 +25,15 @@ export interface ActivityRow {
   period?: string | null;
   staff_name?: string | null;
   party_size?: number | null;
+  pet_id?: string | null;
+  pet_name?: string | null;
+  series_id?: string | null;
+  live_count?: number | null;
+  live_last_stage?: string | null;
+  live_last_at?: string | Date | null;
 }
 
-export const ACTIVITY_LIMITS = { maxActiveFutureBookings: 10, maxQuotesPerDay: 15, reviewWindowDays: 180 };
+export const ACTIVITY_LIMITS = { maxActiveFutureBookings: 30, maxQuotesPerDay: 15, reviewWindowDays: 180 };
 
 export function toActivityDTO(a: ActivityRow, lastReviewByBusiness: Map<string, Date>, now = new Date()): ActivityDTO {
   const startsAt = a.starts_at ? new Date(a.starts_at) : null;
@@ -55,6 +61,9 @@ export function toActivityDTO(a: ActivityRow, lastReviewByBusiness: Map<string, 
     period: a.period ?? null,
     staffName: a.staff_name ?? null,
     partySize: a.party_size ?? null,
+    pet: a.pet_id ? { id: a.pet_id, name: a.pet_name ?? 'Pet' } : null,
+    seriesId: a.series_id ?? null,
+    live: a.live_count ? { count: a.live_count, lastStage: a.live_last_stage ?? 'photo', lastAt: new Date(a.live_last_at ?? a.created_at).toISOString() } : null,
     canCancel: a.type === 'booking' ? active && !!startsAt && startsAt > now : a.status === 'sent' || a.status === 'answered',
   };
 }

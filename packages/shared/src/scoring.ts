@@ -216,20 +216,20 @@ export function buildDiscoverSections(scored: Scored[], cityName: string, nowDat
     .filter((s) => s.row.review_count >= 5)
     .sort((a, b) => b.ranking.bayesianRating - a.ranking.bayesianRating || tie(a, b))
     .slice(0, 8);
-  // Quem chega numa cidade nova quer saber onde comer: restaurantes primeiro, por nota ajustada.
-  const food = [...scored]
-    .filter((s) => s.row.cat_slug === 'restaurantes')
+  // Banho e tosa é o serviço mais procurado: os mais bem avaliados da cidade vêm primeiro.
+  const grooming = [...scored]
+    .filter((s) => s.row.cat_slug === 'banho-e-tosa')
     .sort((a, b) => b.ranking.bayesianRating - a.ranking.bayesianRating || tie(a, b))
     .slice(0, 8);
-  if (food.length) sections.push({ id: 'restaurants', title: `Onde comer em ${city.name}`, subtitle: 'Restaurantes mais bem avaliados por quem foi', items: food.map((s) => toCard(s)) });
+  if (grooming.length) sections.push({ id: 'grooming', title: `Banho e tosa em ${city.name}`, subtitle: 'Mais bem avaliados por tutores de verdade', items: grooming.map((s) => toCard(s)) });
 
-  if (topRated.length) sections.push({ id: 'top-rated', title: `Bem avaliadas em ${city.name}`, subtitle: 'Nota ajustada pela quantidade de avaliações', items: topRated.map((s) => toCard(s)) });
+  if (topRated.length) sections.push({ id: 'top-rated', title: `Bem avaliados em ${city.name}`, subtitle: 'Nota ajustada pela quantidade de avaliações', items: topRated.map((s) => toCard(s)) });
 
   const byCategory = new Map<string, Scored>();
   for (const s of topRated.length ? [...scored].filter((x) => x.row.review_count >= 5).sort((a, b) => b.ranking.bayesianRating - a.ranking.bayesianRating) : []) {
     if (!byCategory.has(s.row.cat_slug)) byCategory.set(s.row.cat_slug, s);
   }
-  if (byCategory.size >= 3) sections.push({ id: 'best-per-category', title: 'A mais bem avaliada de cada categoria', items: [...byCategory.values()].map((s) => toCard(s)) });
+  if (byCategory.size >= 3) sections.push({ id: 'best-per-category', title: 'O melhor de cada serviço', items: [...byCategory.values()].map((s) => toCard(s)) });
 
   const recent = scored
     .filter((s) => s.row.last_review_at && now - new Date(s.row.last_review_at).getTime() < 30 * 86_400_000)

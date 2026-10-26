@@ -75,19 +75,19 @@ export function SearchPage() {
 
   return (
     <div>
-      <div className="sticky top-0 z-30 border-b border-line bg-white/95 backdrop-blur">
+      <div className="sticky top-0 z-30 border-b border-line bg-card/95 backdrop-blur">
         <div className="container-app space-y-2.5 py-3">
           <SearchBox size="md" initial={f.q} onSubmit={(q) => update({ q })} autoFocus={!hasQuery && !slugFixed} />
           <div className="flex flex-wrap items-center gap-2">
-            <button onClick={openPicker} className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-line bg-white px-3.5 text-sm font-medium hover:bg-brand-50">
+            <button onClick={openPicker} className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-line bg-card px-3.5 text-sm font-medium hover:bg-brand-50">
               <MapPin className="h-4 w-4 text-accent-600" aria-hidden="true" />
               {city ? `${city.name}, ${city.uf}` : 'Escolher cidade'}
               <span className="sr-only">— alterar localização</span>
             </button>
-            <button onClick={() => setFiltersOpen(true)} className={`inline-flex min-h-[40px] items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium ${activeCount ? 'border-brand-700 bg-brand-50 text-brand-800' : 'border-line bg-white hover:bg-brand-50'}`}>
+            <button onClick={() => setFiltersOpen(true)} className={`inline-flex min-h-[40px] items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium ${activeCount ? 'border-brand-700 bg-brand-50 text-brand-fg' : 'border-line bg-card hover:bg-brand-50'}`}>
               <SlidersHorizontal className="h-4 w-4" aria-hidden="true" /> Filtros{activeCount ? ` (${activeCount})` : ''}
             </button>
-            <label className="relative inline-flex min-h-[40px] items-center rounded-full border border-line bg-white pl-3.5 pr-8 text-sm font-medium hover:bg-brand-50">
+            <label className="relative inline-flex min-h-[40px] items-center rounded-full border border-line bg-card pl-3.5 pr-8 text-sm font-medium hover:bg-brand-50">
               <span className="sr-only">Ordenar por</span>
               <select value={f.sort} onChange={(e) => update({ sort: e.target.value as SortOption })} className="appearance-none bg-transparent focus:outline-none">
                 {SORT_OPTIONS.map((s) => (
@@ -121,7 +121,7 @@ export function SearchPage() {
             {f.sort === 'relevance' && first && first.total > 0 && (
               <p className="mb-4 text-sm text-muted">
                 Ordenados por nota ajustada, quantidade e recência das avaliações, perfil e relevância.{' '}
-                <Link to="/como-funciona" className="font-medium text-brand-700 hover:underline">Entenda</Link>
+                <Link to="/como-funciona" className="font-medium text-brand-fg hover:underline">Entenda</Link>
               </p>
             )}
 
@@ -144,7 +144,7 @@ export function SearchPage() {
                   <ul className="mt-3 flex flex-wrap justify-center gap-2">
                     {first.nearbyCities.map((c) => (
                       <li key={c.ibge}>
-                        <button onClick={async () => setCity(await fetchCity(c.ibge))} className="inline-flex min-h-[40px] items-center rounded-full border border-line bg-white px-4 text-sm font-medium text-ink hover:bg-brand-50">
+                        <button onClick={async () => setCity(await fetchCity(c.ibge))} className="inline-flex min-h-[40px] items-center rounded-full border border-line bg-card px-4 text-sm font-medium text-ink hover:bg-brand-50">
                           {c.name}, {c.uf} · {c.distanceKm} km
                         </button>
                       </li>
