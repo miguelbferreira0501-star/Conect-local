@@ -29,11 +29,12 @@ let resolved: { name: string; url: string } | null = null;
  */
 export async function asaasEnvironment(): Promise<{ name: string; url: string }> {
   if (resolved) return resolved;
-  if (env.ASAAS_API_URL) return (resolved = { name: env.ASAAS_API_URL.includes('sandbox') ? 'testes (sandbox)' : 'produção', url: env.ASAAS_API_URL });
   // As chaves atuais dizem o ambiente no começo: $aact_prod_… (produção) e $aact_hmlg_… (testes).
+  // O começo da chave vale mais que ASAAS_API_URL (evita chave de produção indo para o sandbox).
   const key = (env.ASAAS_API_KEY ?? '').trim();
   if (key.startsWith('$aact_prod_')) return (resolved = ENVIRONMENTS[0]);
   if (key.startsWith('$aact_hmlg_')) return (resolved = ENVIRONMENTS[1]);
+  if (env.ASAAS_API_URL) return (resolved = { name: env.ASAAS_API_URL.includes('sandbox') ? 'testes (sandbox)' : 'produção', url: env.ASAAS_API_URL });
   for (const e of ENVIRONMENTS) {
     try {
       const res = await fetch(`${e.url}/webhooks?limit=1`, { headers: { access_token: (env.ASAAS_API_KEY ?? '').trim(), 'User-Agent': 'conecta-local' }, signal: AbortSignal.timeout(15_000) });
