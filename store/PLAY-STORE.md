@@ -15,13 +15,20 @@ navegador, e se atualiza sozinho quando o site é atualizado — sem reenviar o 
       Contas pessoais novas precisam de um **teste fechado com pelo menos 12 testadores por 14 dias**
       antes de liberar para todos.
 
-## 1. Gerar o app (PWABuilder)
+## 1. Gerar o app
+
+**Caminho atual (recomendado):** o GitHub gera o app pelo workflow **Android (TWA)** (`.github/workflows/android-twa.yml`,
+configuração em `android/twa-manifest.json`). O resultado sem assinatura vai para o branch `android-build`; a assinatura
+é feita fora do GitHub com o `signing.keystore` original (`jarsigner`), para a chave nunca ir para o repositório.
+Para uma nova versão, aumente `appVersionCode` e `appVersionName` no `twa-manifest.json`.
+
+**Alternativa (PWABuilder):**
 
 1. Acesse https://www.pwabuilder.com, digite o endereço do site (ex.: `https://conecta-local.onrender.com`) e clique em **Start**.
 2. Clique em **Package for stores** → **Android** → **Generate Package**.
    - *Package ID*: `br.com.conectalocal.app` (não pode ser trocado depois).
-   - *App name*: `Conecta Local` · *Launcher name*: `Conecta`.
-   - Deixe o PWABuilder **criar uma nova chave de assinatura** (signing key).
+   - *App name* e *Launcher name*: `Pataí`.
+   - Em *Signing key*, escolha **Use mine** e envie o `signing.keystore` original (o primeiro gerado). Nunca crie uma chave nova depois de publicar.
 3. Baixe o `.zip`. Dentro dele estão:
    - `*.aab` → o arquivo que vai para a Play Store;
    - `signing.keystore` e `signing-key-info.txt` → **guarde em lugar seguro** (sem eles não dá para atualizar o app);
@@ -94,3 +101,31 @@ Revise as respostas se integrar outros serviços (analytics, e-mail, mapas).
 ## Atualizar as imagens da loja
 
 Com o servidor rodando localmente: `node scripts/make-store-assets.mjs` (e `node scripts/make-icons.mjs` para ícones).
+
+
+## Textos da ficha (Pataí)
+
+**Nome do app:** Pataí: banho, tosa e pet ao vivo
+
+**Descrição curta (até 80 caracteres):** Banho e tosa, passeador e pet sitter — e você acompanha seu pet ao vivo.
+
+**Descrição completa:**
+
+Pataí é o jeito mais tranquilo de cuidar do seu pet. Encontre banho e tosa, passeadores, pet sitters, hospedagem,
+creche, adestradores e táxi dog na sua cidade — com avaliações de clientes reais.
+
+🐾 PET AO VIVO — receba uma foto em cada etapa: chegou, no banho, secando, na tosa, pronto para buscar. No passeio,
+veja a saída e a volta (e se fez xixi e cocô). Na visita do pet sitter, o checklist de comida, água e caixinha.
+
+📋 FICHA DO PET — raça, porte, comportamento, alergias, medos e a tosa preferida vão junto em cada agendamento.
+
+🔁 AGENDAMENTO REPETIDO — passeio toda semana ou banho a cada 15 dias, sem precisar marcar de novo.
+
+⭐ AVALIAÇÕES DE VERDADE — só avalia quem foi atendido pelo app. Ninguém compra o primeiro lugar da busca.
+
+Para profissionais e pet shops: cadastro grátis, agenda online por profissional, pedidos organizados,
+lembretes no WhatsApp, cartaz com QR Code e assistente com inteligência artificial.
+
+**Categoria:** Estilo de vida (ou Casa e decoração → prefira Estilo de vida) · **Tags:** pets, animais de estimação.
+
+**Imagens:** `store/icone-play-512.png`, `store/banner-1024x500.png` e `store/capturas/*.png` (geradas por `scripts/make-store-assets.mjs`).

@@ -297,7 +297,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
         <section className="space-y-4">
           <h2 className="font-semibold">Detalhes</h2>
           <TextArea label="Observações para a empresa" optional maxLength={500} value={notes} onChange={(e) => setNotes(e.target.value)}
-            placeholder={mode === 'period' ? 'Ex.: endereço de referência, tamanho do imóvel, se tem animais…' : 'Ex.: é a primeira vez, tenho alergia a algum produto…'} className="field min-h-[90px]" />
+            placeholder={mode === 'period' ? 'Ex.: portão azul, interfone 12; deixe a ração no pote da cozinha' : 'Ex.: ele chega de coleira vermelha; prefere perfume suave'} className="field min-h-[90px]" />
           <TextField label="Telefone para contato" optional={mode !== 'period'} type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(47) 99999-9999" error={err?.fields?.contactPhone} />
         </section>
       )}
