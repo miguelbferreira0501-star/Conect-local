@@ -1,8 +1,11 @@
 # Gera o app Android (TWA) do Pataí sem assinatura.
 # A assinatura é feita fora do GitHub, com o keystore guardado pelo dono do app (nunca vai para o repositório).
+# O resultado (e o registro da compilação) vai para o branch "android-build".
 name: Android (TWA)
 on:
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,17 +18,24 @@ jobs:
       - name: Acordar o site (ícones e manifesto)
         run: for i in 1 2 3 4 5 6; do curl -sf https://conecta-local-6267.onrender.com/manifest.webmanifest && break; sleep 20; done
       - name: Gerar projeto e compilar
+        id: build
         working-directory: android
+        continue-on-error: true
         run: |
-          npm i -g @bubblewrap/cli@1.27.0
+          set -o pipefail
+          npm i -g @bubblewrap/cli@1.27.0 2>&1 | tail -3
           mkdir -p ~/.bubblewrap
           echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_HOME\"}" > ~/.bubblewrap/config.json
-          yes | bubblewrap update --skipVersionUpgrade --manifest=./twa-manifest.json
-          yes | bubblewrap build --skipSigning --manifest=./twa-manifest.json
-          ls -la
-      - uses: actions/upload-artifact@v4
-        with:
-          name: pacote-android-sem-assinatura
-          path: |
-            android/app-release-bundle.aab
-            android/app-release-unsigned-aligned.apk
+          (yes | bubblewrap update --skipVersionUpgrade --manifest=./twa-manifest.json && yes | bubblewrap build --skipSigning --manifest=./twa-manifest.json) 2>&1 | tee ../build.log
+      - name: Publicar resultado no branch android-build
+        if: always()
+        run: |
+          mkdir -p out
+          cp build.log out/ 2>/dev/null || true
+          cp android/app-release-bundle.aab android/app-release-unsigned-aligned.apk out/ 2>/dev/null || true
+          ls -la out
+          cd out
+          git init -q -b android-build
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add -A && git commit -qm "Build ${{ github.run_id }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" android-build
