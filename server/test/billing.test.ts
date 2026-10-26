@@ -138,21 +138,21 @@ describe('assinatura paga', () => {
     const pay = { id: co.body.paymentId, status: 'RECEIVED', value: 1, dueDate: '2026-10-25', invoiceUrl: null, subscription: co.body.subscriptionId };
     expect((await (await webhook({ id: 'evt_under', event: 'PAYMENT_RECEIVED', payment: pay })).json()).result).toBe('underpaid');
     expect((await call('GET', `/panel/businesses/${biz.id}/billing`, undefined, owner.cookie)).body.effectivePlan).toBe('free');
-    expect((await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'A', kind: 'person' }, owner.cookie)).status).toBe(201);
-    expect((await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'B', kind: 'person' }, owner.cookie)).status).toBe(402);
+    // Sem assinatura o painel fica bloqueado
+    expect((await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'A', kind: 'person' }, owner.cookie)).status).toBe(402);
 
     expect((await (await webhook({ id: 'evt_full', event: 'PAYMENT_RECEIVED', payment: { ...pay, value: 49.99 } })).json()).result).toBe('activated');
+    expect((await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'A', kind: 'person' }, owner.cookie)).status).toBe(201);
     expect((await call('POST', `/panel/businesses/${biz.id}/staff`, { name: 'B', kind: 'person' }, owner.cookie)).status).toBe(201);
-    let pub = (await call('GET', `/businesses/${biz.slug}`)).body;
+    const pub = (await call('GET', `/businesses/${biz.slug}`)).body;
     expect(pub.staff.map((x: { name: string }) => x.name)).toEqual(['A', 'B']);
 
-    // Venceu sem pagar: fica sem assinatura e só a primeira agenda continua aceitando clientes
+    // Venceu sem pagar: a empresa sai do app (some do perfil público e da busca)
     const db = new pg.Client({ connectionString: process.env.DATABASE_OWNER_URL });
     await db.connect();
     await db.query(`UPDATE businesses SET plan_until = now() - interval '1 day' WHERE id = $1`, [biz.id]);
     await db.end();
-    pub = (await call('GET', `/businesses/${biz.slug}`)).body;
-    expect(pub.staff.map((x: { name: string }) => x.name)).toEqual(['A']);
+    expect((await call('GET', `/businesses/${biz.slug}`)).status).toBe(404);
     const panel = (await call('GET', `/panel/businesses/${biz.id}`, undefined, owner.cookie)).body;
     expect(panel.plan.effective).toBe('free');
     expect(panel.staff.map((x: { name: string; paused: boolean }) => [x.name, x.paused])).toEqual([['A', false], ['B', true]]);
@@ -172,6 +172,32 @@ describe('assinatura paga', () => {
     const st = (await call('GET', `/panel/businesses/${biz.id}/billing`, undefined, owner.cookie)).body;
     expect(st.effectivePlan).toBe('pro');
     state.paymentStatus = 'PENDING';
+  });
+
+  it('teste grátis: uma vez por conta; assinar durante o teste cobra só quando ele acaba', async () => {
+    resetRateLimits();
+    const owner = await newUser('Dona Teste');
+    expect((await call('GET', '/panel/trial', undefined, owner.cookie)).body.available).toBe(true);
+    const { body: biz } = await call('POST', '/panel/businesses', { ...profile, name: 'Pet Teste Grátis' }, owner.cookie);
+    const panel = (await call('GET', `/panel/businesses/${biz.id}`, undefined, owner.cookie)).body;
+    expect(panel.plan).toMatchObject({ effective: 'pro', trial: true, subscribed: false });
+    expect((await call('GET', '/panel/trial', undefined, owner.cookie)).body.available).toBe(false);
+
+    const co = await call('POST', `/panel/businesses/${biz.id}/billing/checkout`, { plan: 'pro', method: 'PIX', cpfCnpj: '529.982.247-25', holderName: 'Dona Teste' }, owner.cookie);
+    expect(co.status).toBe(201);
+    const trialEnd = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date(panel.plan.until));
+    expect(co.body.firstDueDate).toBe(trialEnd);
+    expect(state.requests.filter((r) => r.path === '/subscriptions').at(-1)!.body.nextDueDate).toBe(trialEnd);
+    expect((await call('GET', `/panel/businesses/${biz.id}`, undefined, owner.cookie)).body.plan).toMatchObject({ trial: false, subscribed: true });
+
+    // Segunda empresa da mesma conta: sem novo teste — fica fora do app até assinar
+    const { body: second } = await call('POST', '/panel/businesses', { ...profile, name: 'Pet Sem Teste' }, owner.cookie);
+    const p2 = (await call('GET', `/panel/businesses/${second.id}`, undefined, owner.cookie)).body;
+    expect(p2.plan.effective).toBe('free');
+    expect((await call('GET', `/businesses/${second.slug}`)).status).toBe(404);
+    const search = (await call('GET', `/search?city=4209102&q=${encodeURIComponent('Pet Sem Teste')}`)).body;
+    expect(JSON.stringify(search)).not.toContain(second.id);
+    expect((await call('PUT', `/panel/businesses/${second.id}/hours`, {}, owner.cookie)).status).toBe(402);
   });
 
   it('somente dono/gerente assina; outra pessoa não vê nem altera', async () => {

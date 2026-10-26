@@ -42,7 +42,8 @@ export const businessesRepo = {
   /** Empresas que podem aparecer para uma cidade, já com filtros estruturados aplicados. */
   async candidates(f: CandidateFilters, db?: Db): Promise<BusinessRow[]> {
     const params: unknown[] = [f.city];
-    const where: string[] = [`b.status = 'active'`, 'c.active'];
+    // Só aparecem para os clientes empresas com assinatura ativa (ou no teste grátis).
+    const where: string[] = [`b.status = 'active'`, 'c.active', 'app.plan_active(b.plan, b.plan_until)'];
     const loc = [
       `b.city_ibge = $1`,
       `EXISTS (SELECT 1 FROM business_service_areas a WHERE a.business_id = b.id AND a.city_ibge = $1)`,
@@ -183,7 +184,7 @@ export const businessesRepo = {
   suggestNames: (city: number, q: string) =>
     query<{ name: string; slug: string }>(
       `SELECT b.name, b.slug FROM businesses b
-       WHERE b.status = 'active' AND (b.city_ibge = $1 OR EXISTS (SELECT 1 FROM business_service_areas a WHERE a.business_id = b.id AND a.city_ibge = $1))
+       WHERE b.status = 'active' AND app.plan_active(b.plan, b.plan_until) AND (b.city_ibge = $1 OR EXISTS (SELECT 1 FROM business_service_areas a WHERE a.business_id = b.id AND a.city_ibge = $1))
          AND (app.norm(b.name) LIKE '%' || app.norm($2) || '%' OR app.norm(b.professional_name) LIKE '%' || app.norm($2) || '%')
        ORDER BY b.name LIMIT 4`,
       [city, q],
@@ -192,7 +193,7 @@ export const businessesRepo = {
   suggestServices: (city: number, q: string) =>
     query<{ name: string }>(
       `SELECT DISTINCT s.name FROM services s JOIN businesses b ON b.id = s.business_id
-       WHERE b.status = 'active' AND s.active
+       WHERE b.status = 'active' AND app.plan_active(b.plan, b.plan_until) AND s.active
          AND (b.city_ibge = $1 OR EXISTS (SELECT 1 FROM business_service_areas a WHERE a.business_id = b.id AND a.city_ibge = $1))
          AND app.norm(s.name) LIKE '%' || app.norm($2) || '%'
        ORDER BY s.name LIMIT 4`,

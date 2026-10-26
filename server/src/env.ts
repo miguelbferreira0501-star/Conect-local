@@ -23,12 +23,6 @@ const envSchema = z.object({
   ANDROID_CERT_SHA256: z.string().optional(),
   /** E-mails que recebem o papel de administrador a cada inicialização (separados por vírgula). */
   ADMIN_EMAILS: z.string().optional(),
-  /** Assistente de IA do painel (opcional). Sem chave, o assistente aparece como indisponível. */
-  ANTHROPIC_API_KEY: z.string().optional(),
-  /** Modelo do assistente. Padrão: claude-opus-5-5. Para custo ~40x menor: claude-haiku-5-5. */
-  AI_MODEL: z.string().default('claude-opus-5-5'),
-  /** Profundidade de raciocínio: low (padrão, barato e rápido) | medium | high */
-  AI_EFFORT: z.enum(['low', 'medium', 'high']).default('low'),
   /** Pagamentos (Asaas). Sem chave, a assinatura on-line fica indisponível. */
   ASAAS_API_KEY: z.string().optional(),
   /** Opcional: se vazio, o servidor descobre sozinho se a chave é de produção ou de testes (sandbox). */

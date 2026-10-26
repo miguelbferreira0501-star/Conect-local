@@ -87,7 +87,10 @@ describe('agendamento por área', () => {
     expect(one.address).toBe('Rua das Palmeiras, 50 – ap 3');
     expect(one.details.houseNotes).toMatch(/portaria/);
 
-    const walker = await newBusiness(o.cookie, 'Passeios do Bairro', 'passeador', { name: 'Passeio 1h', priceType: 'fixed', priceMin: 35, durationMinutes: 60 });
+    // O teste grátis vale uma vez por conta: cada empresa aqui tem seu dono.
+    const o2 = await newUser('Dono Passeio');
+    const o3 = await newUser('Dono Táxi');
+    const walker = await newBusiness(o2.cookie, 'Passeios do Bairro', 'passeador', { name: 'Passeio 1h', priceType: 'fixed', priceMin: 35, durationMinutes: 60 });
     const wav = (await call('GET', `/businesses/${walker.biz.id}/availability?serviceId=${walker.svc.id}&date=${day(1)}`)).body;
     const first = wav.slots.find((s: { startsAt: string }) => new Date(s.startsAt).getUTCHours() === 12);
     const wd = new Date(`${day(1)}T12:00:00Z`).getUTCDay();
@@ -100,7 +103,7 @@ describe('agendamento por área', () => {
     expect(w.body.ids.length).toBeGreaterThanOrEqual(3);
     expect(w.body.seriesId).toBeTruthy();
 
-    const taxi = await newBusiness(o.cookie, 'Táxi Dog Rápido', 'pet-taxi', { name: 'Corrida', priceType: 'from', priceMin: 25, durationMinutes: 60 });
+    const taxi = await newBusiness(o3.cookie, 'Táxi Dog Rápido', 'pet-taxi', { name: 'Corrida', priceType: 'from', priceMin: 25, durationMinutes: 60 });
     const tav = (await call('GET', `/businesses/${taxi.biz.id}/availability?serviceId=${taxi.svc.id}&date=${day(2)}`)).body;
     expect((await call('POST', '/bookings', { businessId: taxi.biz.id, serviceId: taxi.svc.id, startsAt: tav.slots[2].startsAt, address: 'Rua A, 1' }, t.cookie)).status).toBe(422);
     const ride = await call('POST', '/bookings', {
@@ -188,11 +191,11 @@ describe('benefícios do plano', () => {
     expect((await call('GET', `/panel/businesses/${biz.id}/reports?month=2026-13`, undefined, o.cookie)).status).toBe(422);
     expect((await call('GET', `/panel/businesses/${biz.id}/reports`, undefined, t.cookie)).status).toBe(403);
 
-    // Sem assinatura: benefícios somem do perfil e o relatório pede o plano
+    // Sem assinatura: a empresa sai do app e o painel fica bloqueado para alterações
     await owner((db) => db.query(`UPDATE businesses SET plan = 'free', plan_until = NULL WHERE id = $1`, [biz.id]));
-    const off = (await call('GET', `/businesses/${biz.slug}`, undefined, t.cookie)).body;
-    expect(off.loyaltyEvery).toBeNull();
-    expect(off.acceptsBooking).toBe(false);
+    expect((await call('GET', `/businesses/${biz.slug}`, undefined, t.cookie)).status).toBe(404);
+    expect((await call('GET', `/businesses/${biz.slug}`, undefined, o.cookie)).status).toBe(200); // a equipe ainda vê
     expect((await call('GET', `/panel/businesses/${biz.id}/reports`, undefined, o.cookie)).status).toBe(402);
+    expect((await call('PUT', `/panel/businesses/${biz.id}/settings`, { pixKey: null, loyaltyEvery: 5 }, o.cookie)).status).toBe(402);
   });
 });

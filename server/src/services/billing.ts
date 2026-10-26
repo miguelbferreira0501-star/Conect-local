@@ -31,7 +31,7 @@ export const billing = {
 
   async checkout(userId: string, businessId: string, input: Required<Pick<CheckoutInput, 'plan' | 'method' | 'holderName'>> & { cpfCnpj: string }): Promise<CheckoutResultDTO> {
     const plan = PLANS[input.plan];
-    const { email, customerId, current } = await withUser(userId, async (db) => {
+    const { email, customerId, current, planUntil } = await withUser(userId, async (db) => {
       await requireMember(db, businessId);
       const me = await usersRepo.me(db);
       const b = await panelRepo.business(db, businessId);
@@ -39,7 +39,7 @@ export const billing = {
       if (b.is_demo) throw new AppError(422, 'demo', 'Empresas de exemplo não podem assinar planos.');
       const sub = await latestSubscription(db, businessId);
       const cust = (await query<{ billing_customer_id: string | null }>(`SELECT billing_customer_id FROM businesses WHERE id = $1`, [businessId], db))[0];
-      return { email: me!.email, customerId: cust?.billing_customer_id ?? null, current: sub };
+      return { email: me!.email, customerId: cust?.billing_customer_id ?? null, current: sub, planUntil: effectivePlan(b.plan, b.plan_until) !== 'free' ? b.plan_until : null };
     });
     if (current && current.status === 'active' && current.plan === input.plan) {
       throw new AppError(409, 'already_subscribed', `Você já assina o plano ${plan.name}.`);
@@ -47,9 +47,11 @@ export const billing = {
 
     // Cliente no meio de pagamento (o CPF/CNPJ fica só lá).
     const customer = customerId ?? (await asaas.createCustomer({ name: input.holderName, cpfCnpj: input.cpfCnpj, email, externalReference: businessId })).id;
-    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+    // Ainda no teste grátis (ou com período pago): a primeira cobrança vence quando ele acabar.
+    const day = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(d);
+    const firstDue = planUntil && new Date(planUntil) > new Date() ? day(new Date(planUntil)) : day(new Date());
     const sub = await asaas.createSubscription({
-      customer, billingType: input.method, value: plan.priceCents / 100, nextDueDate: today,
+      customer, billingType: input.method, value: plan.priceCents / 100, nextDueDate: firstDue,
       description: `Pataí — plano ${plan.name} (mensal)`, externalReference: businessId,
     });
     await withUser(userId, (db) =>
@@ -69,7 +71,7 @@ export const billing = {
       const qr = await asaas.pixQrCode(first.id);
       pix = { qrCodeImage: `data:image/png;base64,${qr.encodedImage}`, copyPaste: qr.payload, expiresAt: qr.expirationDate ?? null };
     }
-    return { subscriptionId: sub.id, paymentId: first.id, method: input.method, valueCents: plan.priceCents, invoiceUrl: first.invoiceUrl ?? null, pix };
+    return { subscriptionId: sub.id, paymentId: first.id, method: input.method, valueCents: plan.priceCents, invoiceUrl: first.invoiceUrl ?? null, pix, firstDueDate: firstDue };
   },
 
   async status(userId: string, businessId: string): Promise<BillingStatusDTO> {

@@ -2,12 +2,12 @@ import { BookingExtras } from '@/components/BookingExtras';
 import { PanelDeposit, PanelLoyalty } from './PanelBookingBits';
 import { useRef, useState } from 'react';
 import { Link, Navigate, useNavigate, useOutletContext } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  CalendarCheck, CheckCircle2, Circle, Clock, FileText, ImagePlus, MessageCircle, Phone, Plus, Star, Store, Trash2,
+  CalendarCheck, CheckCircle2, Crown, Circle, Clock, FileText, ImagePlus, MessageCircle, Phone, Plus, Star, Store, Trash2,
 } from 'lucide-react';
 import {
-  BOOKING_MODE_LABELS, bookingProfile, describeDayHours, isReservationCategory, formatDuration, PERIODS, type BookingMode, type Period, formatPhoneBR, formatRating, formatServicePrice, relativeTime, serviceInputSchema, WEEKDAY_NAMES,
+  BOOKING_MODE_LABELS, formatCents, PLANS, bookingProfile, describeDayHours, isReservationCategory, formatDuration, PERIODS, type BookingMode, type Period, formatPhoneBR, formatRating, formatServicePrice, relativeTime, serviceInputSchema, WEEKDAY_NAMES,
   type PanelBusinessDTO, type PanelRequestDTO, type ServiceInput,
 } from '@conecta/shared';
 import { PetCard } from '@/components/pets';
@@ -56,16 +56,45 @@ export function CreateBusinessPage() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const toast = useToast();
+  const trial = useQuery({ queryKey: ['panel', 'trial'], queryFn: () => api.get<{ available: boolean; days: number }>('/panel/trial') });
+  const [choice, setChoice] = useState<'trial' | 'subscribe'>('trial');
+  const canTrial = trial.data?.available ?? true;
+  const mode = canTrial ? choice : 'subscribe';
+  const price = formatCents(PLANS.pro.priceCents);
   return (
     <div className="container-app max-w-3xl py-6">
       <h1 className="mb-1 text-2xl font-bold">Cadastrar empresa</h1>
       <p className="mb-5 text-muted">Você poderá adicionar fotos, serviços e horários logo em seguida.</p>
-      <BusinessProfileForm initial={EMPTY_PROFILE} submitLabel="Cadastrar empresa"
+      <section className="card mb-5 p-5" aria-labelledby="plano-cadastro">
+        <h2 id="plano-cadastro" className="flex items-center gap-2 font-semibold"><Crown className="h-5 w-5 text-accent-600" aria-hidden /> Plano Pataí · {price}/mês</h2>
+        <p className="mt-1 text-sm text-muted">Para aparecer no app e receber agendamentos, a empresa precisa de assinatura ativa. Sem comissão, cancele quando quiser.</p>
+        {canTrial ? (
+          <div className="mt-3 space-y-2" role="radiogroup" aria-label="Como começar">
+            {([
+              ['trial', `Começar com ${trial.data?.days ?? 30} dias grátis`, `Sem cartão agora. Depois do teste, assine por ${price}/mês para continuar no app.`],
+              ['subscribe', 'Já deixar a assinatura pronta', `Cadastre Pix ou cartão agora. A primeira cobrança só vem quando o teste de ${trial.data?.days ?? 30} dias acabar.`],
+            ] as const).map(([id, title, text]) => (
+              <label key={id} className={`flex cursor-pointer gap-3 rounded-xl border p-3 ${choice === id ? 'border-brand-700 bg-brand-50' : 'border-line'}`}>
+                <input type="radio" name="inicio" className="mt-1 h-4 w-4 accent-[rgb(var(--brand-700))]" checked={choice === id} onChange={() => setChoice(id)} />
+                <span><span className="block font-medium">{title}</span><span className="text-sm text-muted">{text}</span></span>
+              </label>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-3"><Alert tone="warning">Você já usou o teste grátis nesta conta. A nova empresa começa a aparecer no app depois da assinatura ({price}/mês).</Alert></div>
+        )}
+      </section>
+      <BusinessProfileForm initial={EMPTY_PROFILE} submitLabel={mode === 'trial' ? 'Cadastrar e começar o teste grátis' : 'Cadastrar e ir para a assinatura'}
         onSubmit={async (v) => {
           const r = await api.post<{ id: string }>('/panel/businesses', v);
-          await qc.invalidateQueries({ queryKey: ['panel', 'mine'] });
-          toast('Empresa cadastrada! Agora complete o perfil.');
-          nav(`/empresas/${r.id}`);
+          await qc.invalidateQueries({ queryKey: ['panel'] });
+          if (mode === 'trial') {
+            toast('Empresa cadastrada! Seu teste grátis começou.');
+            nav(`/empresas/${r.id}`);
+          } else {
+            toast('Empresa cadastrada! Agora escolha Pix ou cartão.');
+            nav(`/empresas/${r.id}/plano?assinar=1`);
+          }
         }} />
     </div>
   );

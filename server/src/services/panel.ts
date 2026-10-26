@@ -96,6 +96,7 @@ export const panel = {
       const stats = await panelRepo.stats(db, businessId);
       const staff = await businessesRepo.staff(businessId, db);
       const aiUsed = await panelRepo.aiUsageThisMonth(db, businessId);
+      const paying = (await db.query(`SELECT 1 FROM subscriptions WHERE business_id = $1 AND status <> 'canceled' LIMIT 1`, [businessId])).rows.length > 0;
       return {
         id: b.id, slug: b.slug, name: b.name, status: b.status, suspendedReason: b.suspended_reason,
         verifiedAt: b.verified_at ? new Date(b.verified_at).toISOString() : null, isDemo: b.is_demo,
@@ -116,7 +117,12 @@ export const panel = {
         })),
         settings: { pixKey: b.pix_key ?? null, loyaltyEvery: b.loyalty_every ?? null },
         staff: staff.map((s, i) => ({ ...s, paused: i >= PLANS[effectivePlan(b.plan as PlanId, b.plan_until)].maxStaff })) as PanelStaffDTO[],
-        plan: { id: b.plan, effective: effectivePlan(b.plan, b.plan_until), until: b.plan_until ? new Date(b.plan_until).toISOString() : null, aiUsedThisMonth: aiUsed },
+        plan: {
+          id: b.plan, effective: effectivePlan(b.plan, b.plan_until), until: b.plan_until ? new Date(b.plan_until).toISOString() : null, aiUsedThisMonth: aiUsed,
+          // Teste grátis: plano ativo sem assinatura cadastrada
+          trial: !b.is_demo && !paying && effectivePlan(b.plan, b.plan_until) !== 'free',
+          subscribed: paying,
+        },
         stats: { ...stats, requestsReceived: b.requests_received, requestsAnswered: b.requests_answered },
       };
     });

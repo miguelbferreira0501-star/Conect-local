@@ -70,9 +70,10 @@ describe('agendas com profissionais', () => {
     expect(after.slots.map((s: { label: string }) => s.label)).toEqual(['afternoon', 'evening']);
     expect((await call('GET', '/me/activities', undefined, c.cookie)).body[0].period).toBe('morning');
 
-    const { body: hall } = await call('POST', '/panel/businesses', { ...base, name: 'Salão Festa', categorySlug: 'hospedagem-e-creche' }, owner.cookie);
-    await call('PUT', `/panel/businesses/${hall.id}/hours`, allDays, owner.cookie);
-    const { body: diaria } = await call('POST', `/panel/businesses/${hall.id}/services`, { name: 'Locação (diária)', priceType: 'fixed', priceMin: 1500, bookable: true, bookingMode: 'day' }, owner.cookie);
+    const owner2 = await newUser();
+    const { body: hall } = await call('POST', '/panel/businesses', { ...base, name: 'Salão Festa', categorySlug: 'hospedagem-e-creche' }, owner2.cookie);
+    await call('PUT', `/panel/businesses/${hall.id}/hours`, allDays, owner2.cookie);
+    const { body: diaria } = await call('POST', `/panel/businesses/${hall.id}/services`, { name: 'Locação (diária)', priceType: 'fixed', priceMin: 1500, bookable: true, bookingMode: 'day' }, owner2.cookie);
     const days = (await call('GET', `/businesses/${hall.id}/availability?serviceId=${diaria.id}&date=${day(1)}`)).body;
     expect(days.mode).toBe('day');
     expect(days.slots.length).toBeGreaterThan(50);

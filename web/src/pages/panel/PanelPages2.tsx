@@ -1,7 +1,7 @@
 import { BookingExtras } from '@/components/BookingExtras';
 import { PanelDeposit } from './PanelBookingBits';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useOutletContext } from 'react-router-dom';
+import { Link, useOutletContext, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bot, CalendarDays, Check, Copy, Crown, Lightbulb, ListPlus, MessageCircle, MessageSquareText, Radio, PenLine, Plus, Send, Trash2, UserRound, Users } from 'lucide-react';
 import {
@@ -246,6 +246,11 @@ export function PanelPlanPage() {
   const canBuy = !isStoreApp() || !!config.data?.storePayments;
   const status = useQuery({ queryKey: ['panel', 'billing', b.id], queryFn: () => api.get<BillingStatusDTO>(`/panel/businesses/${b.id}/billing`) });
   const [buying, setBuying] = useState<PlanId | null>(null);
+  // Vindo do cadastro ("Já deixar a assinatura pronta"): abre o pagamento direto.
+  const [params, setParams] = useSearchParams();
+  useEffect(() => {
+    if (params.get('assinar') === '1' && status.data?.enabled && canBuy && !status.data.subscription) { setBuying('pro'); setParams({}, { replace: true }); }
+  }, [params, status.data, canBuy, setParams]);
   const [canceling, setCanceling] = useState(false);
   const [cancelBusy, setCancelBusy] = useState(false);
   if (status.isLoading) return <PageLoader />;
@@ -260,12 +265,12 @@ export function PanelPlanPage() {
 
       {current !== 'free' && !sub && st?.planUntil && (
         <Alert tone="success" title={`Teste grátis até ${new Date(st.planUntil).toLocaleDateString('pt-BR')}`}>
-          Aproveite todos os recursos. Para não pausar a agenda on-line depois dessa data, assine o Plano Pataí.
+          Aproveite todos os recursos. Depois dessa data, a empresa só continua no app com a assinatura — assine agora e a primeira cobrança só vem quando o teste acabar.
         </Alert>
       )}
-      {current === 'free' && (
-        <Alert tone="warning" title="Agenda on-line pausada">
-          Seu perfil continua aparecendo para os clientes, mas agendamentos, Pet ao Vivo, pacotes e fidelidade voltam quando você assinar.
+      {current === 'free' && !b.isDemo && (
+        <Alert tone="warning" title="Empresa fora do app">
+          Sem assinatura, sua empresa não aparece na busca e o painel fica bloqueado. Assine para voltar na hora — nada do que você cadastrou foi apagado.
         </Alert>
       )}
 
@@ -279,6 +284,9 @@ export function PanelPlanPage() {
             {formatCents(sub.valueCents)}/mês · {sub.method === 'PIX' ? 'Pix' : 'Cartão de crédito'}
             {st?.planUntil && current !== 'free' ? ` · válido até ${new Date(st.planUntil).toLocaleDateString('pt-BR')}` : ''}
           </p>
+          {sub.status === 'pending' && current !== 'free' && st?.lastPayment?.dueDate && new Date(`${st.lastPayment.dueDate}T23:59:59`) > new Date() && (
+            <p className="mt-2 text-sm">Primeira cobrança em <strong>{new Date(`${st.lastPayment.dueDate}T12:00:00`).toLocaleDateString('pt-BR')}</strong>. Até lá, aproveite o teste grátis.</p>
+          )}
           {sub.status === 'pending' && st?.lastPayment?.invoiceUrl && (
             <div className="mt-3 flex flex-wrap gap-2">
               <a href={st.lastPayment.invoiceUrl} target="_blank" rel="noopener noreferrer" className={buttonClass('primary', 'sm')}>Pagar agora</a>
@@ -319,18 +327,20 @@ export function PanelPlanPage() {
       )}
       <p className="text-xs text-muted">Pagamentos processados pela Asaas. Seus dados de cartão e CPF/CNPJ ficam com o meio de pagamento — o Pataí não os armazena.</p>
 
-      {buying && <CheckoutSheet businessId={b.id} plan={buying} onClose={() => { setBuying(null); refresh(); }} onPaid={() => { setBuying(null); refresh(); toast(`Pagamento confirmado! Plano ${PLANS[buying].name} ativo.`); }} />}
+      {buying && <CheckoutSheet businessId={b.id} plan={buying} startsAt={current !== 'free' ? st?.planUntil : null} onClose={() => { setBuying(null); refresh(); }} onPaid={() => { setBuying(null); refresh(); toast(`Pagamento confirmado! Plano ${PLANS[buying].name} ativo.`); }} />}
       <Sheet open={canceling} onClose={() => setCanceling(false)} title="Cancelar assinatura?"
         footer={<div className="flex gap-3"><Button variant="secondary" onClick={() => setCanceling(false)}>Voltar</Button><Button block variant="danger" loading={cancelBusy}
           onClick={async () => { setCancelBusy(true); try { await api.post(`/panel/businesses/${b.id}/billing/cancel`); toast('Assinatura cancelada.'); refresh(); setCanceling(false); } catch (e) { toast((e as Error).message, 'error'); } finally { setCancelBusy(false); } }}>Cancelar assinatura</Button></div>}>
-        <p>Não haverá novas cobranças. O plano continua valendo até o fim do período já pago; depois, sua empresa volta ao Grátis — sem perder perfil, avaliações ou histórico.</p>
+        <p>Não haverá novas cobranças. O plano continua valendo até o fim do período já pago; depois, sua empresa sai do app (some da busca e o painel fica bloqueado) — sem perder perfil, avaliações ou histórico. Dá para voltar quando quiser.</p>
       </Sheet>
     </div>
   );
 }
 
-function CheckoutSheet({ businessId, plan, onClose, onPaid }: { businessId: string; plan: PlanId; onClose: () => void; onPaid: () => void }) {
+function CheckoutSheet({ businessId, plan, onClose, onPaid, startsAt }: { businessId: string; plan: PlanId; onClose: () => void; onPaid: () => void; startsAt?: string | null }) {
   const p = PLANS[plan];
+  // No teste grátis, a primeira cobrança vence quando ele acabar.
+  const later = startsAt && new Date(startsAt) > new Date() ? new Date(startsAt).toLocaleDateString('pt-BR') : null;
   const [method, setMethod] = useState<'PIX' | 'CREDIT_CARD'>('PIX');
   const [doc, setDoc] = useState('');
   const [holder, setHolder] = useState('');
@@ -365,7 +375,7 @@ function CheckoutSheet({ businessId, plan, onClose, onPaid }: { businessId: stri
     try {
       const r = await api.post<CheckoutResultDTO>(`/panel/businesses/${businessId}/billing/checkout`, { plan, method, cpfCnpj: doc, holderName: holder });
       setResult(r);
-      if (r.method === 'CREDIT_CARD' && r.invoiceUrl) window.open(r.invoiceUrl, '_blank', 'noopener');
+      if (r.method === 'CREDIT_CARD' && r.invoiceUrl && !later) window.open(r.invoiceUrl, '_blank', 'noopener');
     } catch (e) {
       setApiError((e as ApiError).message);
     } finally {
@@ -375,7 +385,7 @@ function CheckoutSheet({ businessId, plan, onClose, onPaid }: { businessId: stri
 
   return (
     <Sheet open onClose={onClose} title={result ? 'Finalize o pagamento' : `Assinar ${p.name} — ${formatCents(p.priceCents)}/mês`}
-      footer={!result ? <Button block size="lg" loading={loading} onClick={submit}>{method === 'PIX' ? 'Gerar Pix' : 'Ir para o pagamento com cartão'}</Button> : undefined}>
+      footer={!result ? <Button block size="lg" loading={loading} onClick={submit}>{later ? 'Cadastrar assinatura' : method === 'PIX' ? 'Gerar Pix' : 'Ir para o pagamento com cartão'}</Button> : undefined}>
       {!result ? (
         <div className="space-y-4">
           <fieldset>
@@ -388,8 +398,21 @@ function CheckoutSheet({ businessId, plan, onClose, onPaid }: { businessId: stri
           </fieldset>
           <TextField label="Nome do responsável ou razão social" value={holder} onChange={(e) => { setHolder(e.target.value); setErrors(({ holderName: _h, ...r }) => r); }} error={errors.holderName} autoComplete="name" />
           <TextField label="CPF ou CNPJ" inputMode="numeric" value={doc} onChange={(e) => { setDoc(e.target.value); setErrors(({ cpfCnpj: _c, ...r }) => r); }} error={errors.cpfCnpj} hint="Exigido para emitir a cobrança. Não fica guardado no Pataí." />
-          <p className="text-sm">Total hoje: <strong>{formatCents(p.priceCents)}</strong>. Renova todo mês; cancele quando quiser.</p>
+          <p className="text-sm">{later
+            ? <>Nada a pagar hoje. Primeira cobrança de <strong>{formatCents(p.priceCents)}</strong> em <strong>{later}</strong>, quando o teste grátis acaba. Renova todo mês; cancele quando quiser.</>
+            : <>Total hoje: <strong>{formatCents(p.priceCents)}</strong>. Renova todo mês; cancele quando quiser.</>}</p>
           {apiError && <Alert tone="error">{apiError}</Alert>}
+        </div>
+      ) : later ? (
+        <div className="space-y-3 text-center" data-testid="subscription-scheduled">
+          <Check className="mx-auto h-10 w-10 text-accent-600" aria-hidden />
+          <p className="text-lg font-semibold">Assinatura cadastrada!</p>
+          <p className="text-muted">Aproveite o teste grátis. A primeira cobrança de {formatCents(p.priceCents)} vence em {later}
+            {result.method === 'PIX'
+              ? '. O Pix chega no seu e-mail antes do vencimento (se preferir, já dá para pagar pela fatura).'
+              : '. O link para pagar com cartão chega no seu e-mail antes do vencimento; depois do primeiro pagamento, os próximos meses são cobrados no cartão automaticamente.'}</p>
+          {result.invoiceUrl && <a href={result.invoiceUrl} target="_blank" rel="noopener noreferrer" className={buttonClass('secondary', 'md')}>Ver a fatura</a>}
+          <Button block variant="ghost" onClick={onClose}>Fechar</Button>
         </div>
       ) : result.pix ? (
         <div className="space-y-4 text-center">

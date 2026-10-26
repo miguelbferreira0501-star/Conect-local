@@ -138,7 +138,7 @@ export interface PanelBusinessDTO {
   services: Array<{ id: string; name: string; description: string | null; priceType: 'fixed' | 'from' | 'range' | 'quote'; priceMin: number | null; priceMax: number | null; durationMinutes: number | null; bookable: boolean; bookingMode: 'slot' | 'period' | 'day'; notes: string | null; deposit: number | null }>;
   settings: { pixKey: string | null; loyaltyEvery: number | null };
   staff: PanelStaffDTO[];
-  plan: { id: PlanId; effective: PlanId; until: string | null; aiUsedThisMonth: number };
+  plan: { id: PlanId; effective: PlanId; until: string | null; aiUsedThisMonth: number; trial?: boolean; subscribed?: boolean };
   stats: { reviewCount: number; average: number | null; pendingRequests: number; requestsReceived: number; requestsAnswered: number };
 }
 
@@ -329,6 +329,8 @@ export interface CheckoutResultDTO {
   /** Página segura do meio de pagamento (cartão ou alternativa ao Pix) */
   invoiceUrl: string | null;
   pix: { qrCodeImage: string; copyPaste: string; expiresAt: string | null } | null;
+  /** Vencimento da primeira cobrança (no teste grátis, o dia em que ele acaba) */
+  firstDueDate?: string;
 }
 
 export interface BillingStatusDTO {

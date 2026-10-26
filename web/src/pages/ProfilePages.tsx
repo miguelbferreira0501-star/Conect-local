@@ -73,7 +73,7 @@ export function ProfilePage() {
           <MenuItem to="/perfil/privacidade" icon={ShieldCheck} label="Privacidade e dados" />
           <MenuItem to="/como-funciona" icon={Info} label="Como funcionam avaliações e ranking" />
           <MenuItem to="/termos" icon={FileText} label="Termos de uso e privacidade" />
-          <MenuItem to="/empresas" icon={Store} label="Tenho um pet shop ou atendo pets" hint="Cadastre seu negócio de graça" />
+          <MenuItem to="/empresas" icon={Store} label="Tenho um pet shop ou atendo pets" hint="30 dias grátis, depois R$ 49,99/mês" />
         </ul>
 
         {user && (

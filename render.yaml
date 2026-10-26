@@ -25,11 +25,6 @@ services:
       # Seu e-mail (o mesmo da conta criada no app) para acessar /admin:
       - key: ADMIN_EMAILS
         sync: false
-      # Assistente de IA (chave em console.anthropic.com). Sem ela, o assistente fica "em breve".
-      - key: ANTHROPIC_API_KEY
-        sync: false
-      - key: AI_MODEL
-        value: claude-opus-5-5
       # Pagamentos (Asaas): basta colar a chave. O ambiente (testes/produção) e o aviso de pagamento
       # são configurados automaticamente ao iniciar.
       - key: ASAAS_API_KEY

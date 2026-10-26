@@ -1,4 +1,6 @@
-import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { formatCents, PLANS } from '@conecta/shared';
+import { ButtonLink } from '@/components/ui/Button';
 import { ArrowLeft, Bot, Gift, CalendarClock, CalendarDays, Clock, Crown, ExternalLink, Image, LayoutDashboard, ListChecks, QrCode, Star, Store, Users } from 'lucide-react';
 import { useMyBusinesses, usePanelBusiness, usePanelRequests } from '@/lib/panelQueries';
 import { Logo } from '@/components/Layout';
@@ -47,10 +49,16 @@ export function BusinessPanelLayout() {
   const mine = useMyBusinesses();
   const reqs = usePanelRequests(businessId);
   const nav = useNavigate();
+  const loc = useLocation();
   const pending = reqs.data?.filter((r) => r.status === 'requested' || r.status === 'sent').length ?? 0;
   if (biz.isLoading) return <PageLoader />;
   if (biz.isError || !biz.data) return <div className="container-app py-8"><Alert tone="error">{(biz.error as Error)?.message ?? 'Empresa não encontrada.'}</Alert></div>;
   const b = biz.data;
+  // Teste grátis acabou sem assinatura: o painel fica bloqueado (só a aba Plano abre).
+  const locked = !b.isDemo && b.plan.effective === 'free';
+  const onPlan = /\/plano\/?$/.test(loc.pathname);
+  const tabs = locked ? TABS.filter((t) => t.to === 'plano') : TABS;
+  const trialDays = b.plan.trial && b.plan.until ? Math.max(0, Math.ceil((new Date(b.plan.until).getTime() - Date.now()) / 86_400_000)) : null;
   return (
     <div>
       <div className="border-b border-line bg-card">
@@ -71,7 +79,7 @@ export function BusinessPanelLayout() {
             </a>
           </div>
           <nav aria-label="Seções do painel" className="scroll-row mt-2">
-            {TABS.map(({ to, label, Icon, end }) => (
+            {tabs.map(({ to, label, Icon, end }) => (
               <NavLink key={label} to={to} end={end}
                 className={({ isActive }) => `inline-flex min-h-[42px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-medium transition ${isActive ? 'bg-brand-700 text-white' : 'bg-surface text-ink hover:bg-brand-50'}`}>
                 <Icon className="h-4 w-4" aria-hidden="true" />{label}
@@ -88,8 +96,27 @@ export function BusinessPanelLayout() {
           </Alert>
         </div>
       )}
+      {trialDays != null && !onPlan && (
+        <div className="container-app pt-4">
+          <Alert tone={trialDays <= 5 ? 'warning' : 'info'} title={trialDays === 0 ? 'Seu teste grátis termina hoje' : `Teste grátis: ${trialDays} ${trialDays === 1 ? 'dia restante' : 'dias restantes'}`}
+            action={<ButtonLink size="sm" to="plano">Assinar</ButtonLink>}>
+            Depois do teste, a empresa só continua no app com o Plano Pataí ({formatCents(PLANS.pro.priceCents)}/mês). Assine agora e a primeira cobrança só vem no fim do teste.
+          </Alert>
+        </div>
+      )}
       <div className="container-app max-w-4xl py-5">
-        <Outlet context={b} />
+        {locked && !onPlan ? (
+          <section className="card p-6 text-center" data-testid="panel-locked">
+            <h2 className="text-xl font-semibold">Assine para usar o Pataí</h2>
+            <p className="mx-auto mt-2 max-w-md text-muted">
+              Sua empresa está fora do app: não aparece na busca e não recebe agendamentos. Assine o Plano Pataí por {formatCents(PLANS.pro.priceCents)}/mês
+              e tudo volta na hora — perfil, avaliações, serviços e histórico continuam guardados.
+            </p>
+            <ButtonLink className="mt-4" to="plano">Ver assinatura</ButtonLink>
+          </section>
+        ) : (
+          <Outlet context={b} />
+        )}
       </div>
     </div>
   );

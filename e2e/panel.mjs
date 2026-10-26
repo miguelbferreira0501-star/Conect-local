@@ -45,12 +45,16 @@ try {
   await owner.getByRole('button', { name: 'Joinville' }).click();
   await owner.getByLabel('Endereço (rua e número)').fill('Rua das Flores, 120');
   await owner.getByRole('textbox', { name: /^Bairro/ }).fill('Centro');
-  await owner.getByRole('button', { name: 'Cadastrar empresa' }).click();
+  await owner.getByText('Começar com 30 dias grátis').waitFor();
+  ok('cadastro mostra o plano e o teste grátis');
+  await owner.getByRole('button', { name: 'Cadastrar e começar o teste grátis' }).click();
   await owner.getByText('Informe pelo menos um contato').waitFor();
   ok('validação exige contato');
   await owner.getByRole('textbox', { name: /^WhatsApp/ }).fill('47999990001');
-  await owner.getByRole('button', { name: 'Cadastrar empresa' }).click();
+  await owner.getByRole('button', { name: 'Cadastrar e começar o teste grátis' }).click();
   await owner.getByText('Perfil completo atrai mais clientes').waitFor();
+  await owner.getByText(/Teste grátis: 30 dias restantes/).waitFor();
+  ok('teste grátis de 30 dias começou');
   await shot(owner, '2-inicio');
   ok('empresa cadastrada');
 

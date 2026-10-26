@@ -3,7 +3,7 @@ import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { z } from 'zod';
 import {
   bookingRequestSchema, loginSchema, profileUpdateSchema, quoteRequestSchema, registerSchema, reviewInputSchema,
-  reviewReportSchema, reviewUpdateSchema, uuid,
+  reviewReportSchema, reviewUpdateSchema, uuid, effectivePlan, planIsActive, type PlanId,
 } from '@conecta/shared';
 import { withUser } from '../db/pool';
 import { env } from '../env';
@@ -89,7 +89,7 @@ me.get('/me/favorites', async (c) => {
   // Reaproveita o mesmo formato de cartão da busca.
   const rows = (
     await Promise.all(ids.map((id) => businessesRepo.basicById(id).then((b) => (b ? businessesRepo.bySlug(b.slug) : null))))
-  ).filter((r): r is NonNullable<typeof r> => !!r);
+  ).filter((r): r is NonNullable<typeof r> => !!r && planIsActive(effectivePlan((r as unknown as { plan: PlanId }).plan, (r as unknown as { plan_until: Date | null }).plan_until)));
   const mean = await globalMean();
   return c.json(scoreRows(rows, { q: '', mean }).map((s) => toCard(s)));
 });

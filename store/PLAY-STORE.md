@@ -123,8 +123,8 @@ veja a saída e a volta (e se fez xixi e cocô). Na visita do pet sitter, o chec
 
 ⭐ AVALIAÇÕES DE VERDADE — só avalia quem foi atendido pelo app. Ninguém compra o primeiro lugar da busca.
 
-Para profissionais e pet shops: cadastro grátis, agenda online por profissional, pedidos organizados,
-lembretes no WhatsApp, cartaz com QR Code e assistente com inteligência artificial.
+Para profissionais e pet shops: 30 dias grátis para testar, agenda online por profissional, Pet ao Vivo,
+sinal pelo Pix, clube de pacotes, cartão fidelidade e relatórios. Depois, plano mensal sem comissão.
 
 **Categoria:** Estilo de vida (ou Casa e decoração → prefira Estilo de vida) · **Tags:** pets, animais de estimação.
 

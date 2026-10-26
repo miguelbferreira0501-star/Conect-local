@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { adminBusinessUpdateSchema, imageUploadSchema, replySchema, requestActionSchema, uuid } from '@conecta/shared';
+import { effectivePlan, planIsActive, type PlanId, adminBusinessUpdateSchema, imageUploadSchema, replySchema, requestActionSchema, uuid } from '@conecta/shared';
 import pg from 'pg';
 import { withUser } from '../db/pool';
 import { env } from '../env';
@@ -35,7 +35,24 @@ imageRoutes.get('/images/:id', async (c) => {
 export const panelRoutes = new Hono<AppEnv>();
 panelRoutes.use('*', requireAuth);
 
+// Sem assinatura (teste grátis acabou), o painel fica só para leitura: dá para ver o histórico,
+// responder pedidos já feitos e assinar (rotas de cobrança ficam em billingRoutes).
+panelRoutes.use('/businesses/:businessId/*', async (c, next) => {
+  if (c.req.method === 'GET' || /\/requests\//.test(c.req.path)) return next();
+  const id = parse(uuid, c.req.param('businessId'));
+  const b = await withUser(uid(c), (db) => panelRepo.business(db, id));
+  if (b && !b.is_demo && !planIsActive(effectivePlan(b.plan as PlanId, b.plan_until))) {
+    throw new AppError(402, 'plan_required', 'Seu teste grátis terminou. Assine o Plano Pataí para voltar a usar o painel.');
+  }
+  return next();
+});
+
 panelRoutes.get('/businesses', async (c) => c.json(await panel.myBusinesses(uid(c))));
+/** O teste grátis de 30 dias vale uma vez por conta. */
+panelRoutes.get('/trial', async (c) => c.json(await withUser(uid(c), async (db) => {
+  const r = (await db.query(`SELECT trial_used_at FROM users WHERE id = app.current_user_id()`)).rows[0];
+  return { available: !r?.trial_used_at, days: 30 };
+})));
 panelRoutes.post('/businesses', async (c) => {
   if (!hit(`create-biz:${uid(c)}`, 5, 60 * 60_000)) throw new AppError(429, 'rate_limited', 'Muitas tentativas. Aguarde um pouco.');
   return c.json(await panel.create(uid(c), await c.req.json()), 201);

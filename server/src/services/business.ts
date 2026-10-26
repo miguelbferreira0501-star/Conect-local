@@ -1,5 +1,5 @@
 import { BOOKING_RULES, bookingProfile, computeAvailability, effectivePlan, hoursAreFresh, planIsActive, staffWithinPlan, type PlanId, type BusinessDetailDTO, type ReviewDTO } from '@conecta/shared';
-import { withUser, type Db } from '../db/pool';
+import { query, withUser, type Db } from '../db/pool';
 import { AppError, notFound } from '../lib/errors';
 import { zonedToUtc } from '../lib/time';
 import { businessesRepo } from '../repositories/businesses';
@@ -27,6 +27,10 @@ export async function businessDetail(slug: string, userId: string | null): Promi
     const refByName = new Map(priceRefs.map((p) => [p.name, { medianCents: p.median, businesses: p.n }]));
     const card = toCard(scored);
     const planActive = planIsActive(effectivePlan(r.plan, r.plan_until));
+    // Sem assinatura a empresa não aparece para os clientes (a equipe ainda vê a própria página).
+    if (!planActive && !(userId && (await query(`SELECT 1 FROM business_members WHERE business_id = $1 AND user_id = app.current_user_id()`, [row.id], db)).length)) {
+      throw notFound('Esta empresa não está disponível no momento.');
+    }
     const benefits = await publicBenefits(db, row.id, planActive, !!userId);
     const extra = row as typeof row & { pix_key: string | null; loyalty_every: number | null };
     return {

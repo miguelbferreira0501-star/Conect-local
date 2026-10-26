@@ -29,7 +29,7 @@ export const locationsRepo = {
     query<{ ibge: number; name: string; uf: string; distanceKm: number; businesses: number }>(
       `SELECT c.ibge, c.name, c.uf, count(b.id)::int AS businesses,
          round((6371 * 2 * asin(sqrt(power(sin(radians(c.lat - $2) / 2), 2) + cos(radians($2)) * cos(radians(c.lat)) * power(sin(radians(c.lon - $3) / 2), 2))))::numeric, 0)::int AS "distanceKm"
-       FROM cities c JOIN businesses b ON b.city_ibge = c.ibge AND b.status = 'active'
+       FROM cities c JOIN businesses b ON b.city_ibge = c.ibge AND b.status = 'active' AND app.plan_active(b.plan, b.plan_until)
        WHERE c.ibge <> $1
        GROUP BY c.ibge
        ORDER BY "distanceKm" LIMIT $4`,
