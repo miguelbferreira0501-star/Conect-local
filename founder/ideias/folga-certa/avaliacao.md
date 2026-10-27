@@ -15,16 +15,16 @@ Base: brief, perfil do fundador, [concorrentes.md](concorrentes.md) e buscas na 
 - [NEED: dados da RAIS por tamanho (3 a 30 funcionários) e por setor]
 
 **Brasil**
-- **TAM:** ASSUMPTION: metade do total está no perfil, ou seja, cerca de 800 mil negócios. Isso dá **cerca de R$ 375 milhões por ano**.
-- **SAM:** ASSUMPTION: 10% pagariam mesmo com o Sebrae grátis, cerca de 80 mil negócios. Isso dá **cerca de R$ 37 milhões por ano**.
-- **SOM (3 anos, fundador sozinho):** ASSUMPTION: 0,5% do SAM, cerca de 400 clientes. Isso dá **cerca de R$ 190 mil por ano**.
+- **TAM:** ASSUMPTION: metade no perfil, cerca de 800 mil negócios = **cerca de R$ 375 mi/ano**.
+- **SAM:** ASSUMPTION: 10% pagariam mesmo com o Sebrae grátis, cerca de 80 mil = **cerca de R$ 37 mi/ano**.
+- **SOM (3 anos, sozinho):** ASSUMPTION: 0,5% do SAM, cerca de 400 clientes = **cerca de R$ 190 mil/ano**.
 
 **Joinville**
-- **De cima para baixo:** ASSUMPTION: 25% dos 23,4 mil estabelecimentos estão no perfil, cerca de 5.900.
-- **De baixo para cima:** ASSUMPTION: metade dos 47 mil comerciários está em lojas pequenas, com 8 pessoas em média. Isso dá cerca de 2.900 lojas, sem contar restaurantes e salões. As duas contas apontam para **4 a 6 mil negócios**.
+- **De cima para baixo:** ASSUMPTION: 25% dos 23,4 mil no perfil = cerca de 5.900.
+- **De baixo para cima:** ASSUMPTION: metade dos 47 mil comerciários em lojas pequenas de 8 pessoas = cerca de 2.900 lojas, fora restaurantes e salões. Juntas: **4 a 6 mil negócios**.
 - **TAM:** cerca de 5 mil × R$ 468 = **R$ 2,3 milhões por ano**.
-- **SAM:** ASSUMPTION: 20% são alcançáveis e topam pagar, cerca de 1.000 negócios. Isso dá **cerca de R$ 470 mil por ano**.
-- **SOM (12 meses):** ASSUMPTION: 50 a 100 clientes. Isso dá **R$ 23 mil a R$ 47 mil por ano**.
+- **SAM:** ASSUMPTION: 20% alcançáveis e dispostos a pagar, cerca de 1.000 = **R$ 470 mil/ano**.
+- **SOM (12 meses):** ASSUMPTION: 50 a 100 clientes = **R$ 23 a 47 mil/ano**.
 
 | Métrica | Hoje | Em 2 a 3 anos |
 |---|---|---|
@@ -95,13 +95,13 @@ O prazo de 16/12 é real e você tem um canal que funciona: a venda porta a port
 
 | Categoria | Premissa | Confiança | Teste |
 |---|---|---|---|
-| Valor | O dono quer mais do que o Sebrae já dá de graça | Baixa | Experimento 1 |
+| Valor | O dono quer mais que o Sebrae grátis | Baixa | Experimento 1 |
 | Usabilidade | Cadastrar a equipe leva 10 minutos no celular | Média | Cronometrar 5 donos fazendo isso |
 | Viabilidade | O cliente paga e continua pagando depois de dezembro | Baixa | Pré-venda e quantos ainda pagam no 3º mês |
 | Execução técnica | A lei e a convenção cabem num motor de escala confiável | Média | Validar 3 escalas com um contador |
-| Ética e lei | Um erro não gera processo para o cliente, e um fundador menor de idade pode assinar e receber | Baixa | Aviso "revise com o contador" e venda pelo MEI de um adulto responsável |
+| Ética e lei | Erro na escala não vira processo; fundador menor pode assinar e receber | Baixa | Aviso "revise com o contador"; vender via MEI de um adulto responsável |
 | Ir ao mercado | Porta a porta e contadores chegam às lojas antes de 16/12 | Média | Experimento 3 |
-| Estratégia | O Sebrae ou os sistemas de ponto não fecham o espaço em semanas | Baixa | Acompanhar as novidades deles toda semana |
+| Estratégia | Sebrae e sistemas de ponto não fecham o espaço em semanas | Baixa | Checar as novidades deles toda semana |
 | Equipe | Uma pessoa sozinha vende, entrega e atende no pico | Média | Limitar o piloto a 15 clientes |
 
 ## 4. Experimentos (hipótese XYZ)
