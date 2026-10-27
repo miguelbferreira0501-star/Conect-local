@@ -1,0 +1,23 @@
+{
+  "business": "Pataí (assinatura para empresas pet, Joinville)",
+  "unit": "empresa pagante no mês",
+  "price": 49.99,
+  "variable": [
+    {"label": "Taxa Asaas por cobrança recebida (Pix R$ 1,99; cartão R$ 0,49 + 2,99% = R$ 1,98)", "cost": 1.99},
+    {"label": "Imposto Simples Nacional, estimativa 6% (Anexo III)", "cost": 3.00}
+  ],
+  "fixed_monthly": [
+    {"label": "Servidor Render Starter (US$ 7)", "cost": 40},
+    {"label": "Banco de dados Neon pago (US$ 19)", "cost": 105},
+    {"label": "Contador para o CNPJ no Simples (estimativa)", "cost": 200},
+    {"label": "Pró-labore do fundador (não informado: 0)", "cost": 0},
+    {"label": "Marketing pago (não informado: 0)", "cost": 0}
+  ],
+  "startup": [
+    {"label": "Conta Google Play Console (US$ 25, já paga)", "cost": 138},
+    {"label": "Vídeo em motion graphics (não informado: 0)", "cost": 0}
+  ],
+  "days_per_month": 1,
+  "plan_per_day": 30,
+  "ramp_per_day": [0, 2, 4, 6, 9, 12, 15, 18, 21, 24, 27, 30]
+}
