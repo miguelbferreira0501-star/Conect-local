@@ -99,15 +99,11 @@ De cima para baixo: não achei relatório de mercado de "software para contador"
 
 ## 7. Raciocínio por dimensão (idea-validator)
 
-**Gravidade do problema: Strong.** A dor volta todo mês, nos dias 1 a 10, e afeta a entrega de obrigações com multa. Já existem gambiarras (grupo por cliente, etiquetas, planilha) e ferramentas pagas. Foi a 2ª maior dificuldade numa pesquisa de 2020 (21,7%). Ressalva: o dado de horas gastas vem de fornecedor, e o dado de pesquisa tem 6 anos.
-
-**Evidência de mercado: Strong.** Há várias empresas cobrando, duas compradas por grupos grandes, e preços entre R$ 100 e R$ 389/mês. O que falta é saber quantos escritórios usam e o preço oficial, por isso é um Strong com ressalva.
-
-**Diferenciação: Weak.** "Coleta pelo WhatsApp com IA" já é anunciada pelo Ultradocs e montada pelo G-Click com parceiros. "Sem login" e "a IA confere período e CNPJ" são melhorias de experiência de uso, não algo que se defenda. Não há efeito de rede nem dado exclusivo. A única cunha possível é o segmento (escritório pequeno sem suíte) e o preço.
-
-**Viabilidade técnica: Moderate.** O MVP sai em semanas com API, OCR e IA comprados prontos. A parte difícil: verificação na Meta e conta por escritório, manter o modelo como utilidade, ler bem extratos de dezenas de bancos, e LGPD com contrato assinado. O dono da conta precisa ser maior de idade ou ter CNPJ.
-
-**Viabilidade do negócio: Moderate.** Margem bruta alta: o custo variável fica abaixo de R$ 50 por escritório por mês (ESTIMATIVA). Mas US$ 1 milhão por ano (cerca de R$ 5,4 milhões; câmbio é ESTIMATIVA) a R$ 149/mês pede uns 3.000 escritórios, pouco mais de 1% do SAM. Para chegar lá, vender visita a visita ou por WhatsApp não basta. O caminho seria canal com Sescon, CRC ou fornecedores de sistema contábil.
+**Problema: Strong.** A dor volta todo mês, multa atrasos e já tem gambiarra e ferramenta paga. Ressalva: o dado de horas é de fornecedor e a pesquisa é de 2020.
+**Mercado: Strong.** Vários fornecedores cobram de R$ 100 a R$ 389/mês, e dois foram comprados por grupos grandes. Falta saber quantos escritórios usam cada um.
+**Diferenciação: Weak.** "Coleta pelo WhatsApp com IA" já é vendida pelo Ultradocs e montada pelo G-Click com parceiros. "Sem login" e "a IA confere" melhoram a experiência, mas não se defendem: não há efeito de rede nem dado exclusivo.
+**Técnica: Moderate.** O MVP sai em semanas com peças prontas. O difícil é a verificação na Meta, manter o modelo como utilidade, ler extratos de dezenas de bancos e fechar contrato de LGPD.
+**Negócio: Moderate.** O custo variável fica abaixo de R$ 50 por escritório por mês (ESTIMATIVA). Mas US$ 1 milhão por ano (cerca de R$ 5,4 milhões) a R$ 149 pede uns 3.000 escritórios, e isso exige canal (Sescon, CRC, sistemas contábeis), não só visitas.
 
 ## 8. Premissas de maior risco (identify-assumptions-new)
 
@@ -140,11 +136,5 @@ De cima para baixo: não achei relatório de mercado de "software para contador"
 
 ## Premissas e lacunas
 
-- [NEED: preço oficial de Acessórias, G-Click, Tareffa, Onvio, Zap Contábil, WhatsContábil, Pasta Contábil, ContadorFlow e Ultradocs.]
-- [NEED: número de escritórios clientes de cada concorrente.]
-- [NEED: % de escritórios pequenos sem software de gestão.]
-- [NEED: tabela oficial da Meta em reais e a regra da janela de 24 horas após 01/10/2026.]
-- [NEED: dado de quantos clientes abrem os links de lembrete.]
-- ASSUMPTION: preço de R$ 149/mês; 50% dos escritórios entre 30 e 300 clientes; metade sem suíte; câmbio de cerca de R$ 5,4 por dólar; custo de IA abaixo de US$ 5 por escritório por mês.
-- ASSUMPTION: o "Gestta" de R$ 127 não é a Gestta da Thomson Reuters.
-- ASSUMPTION: o fundador menor de idade precisa de um responsável legal ou de CNPJ para a verificação na Meta e para o DPA.
+- [NEED: preços oficiais e número de clientes de cada concorrente; % de escritórios pequenos sem software; tabela oficial da Meta em reais; taxa de abertura dos links de lembrete.]
+- ASSUMPTION: preço de R$ 149; 50% dos escritórios entre 30 e 300 clientes, metade deles sem suíte; câmbio de cerca de R$ 5,4 por dólar; o "Gestta" de R$ 127 não é o da Thomson Reuters; o fundador menor de idade precisa de responsável legal ou CNPJ.
