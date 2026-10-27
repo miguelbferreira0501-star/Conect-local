@@ -1,17 +1,16 @@
 # Avaliação: Folga Certa (27/10/2026)
 
-O que usei: o brief, o perfil do fundador, [concorrentes.md](concorrentes.md) e buscas na web. **Ninguém conversou ainda com um dono de loja.** Por isso, tudo aqui é hipótese, não validação.
+Base: brief, perfil do fundador, [concorrentes.md](concorrentes.md) e buscas na web. **Nenhum dono de loja foi ouvido**, então tudo aqui é hipótese.
 
 ## 1. Tamanho do mercado
 
 **Em uma linha:** o **TAM** é todo o dinheiro possível se todos os clientes pagassem, o **SAM** é a parte que você consegue alcançar e o **SOM** é o que dá para conquistar de verdade em 1 a 3 anos.
 
-**Quem conta:** comércios e serviços com 3 a 30 funcionários que trabalham em 6x1. A conta usa o plano de R$ 39 por mês, que dá R$ 468 por ano por cliente.
+**Quem conta:** negócios de 3 a 30 funcionários em 6x1, no plano de R$ 39/mês (R$ 468/ano).
 
 **Dados com fonte**
 - O Brasil tem 4.700.860 estabelecimentos com empregados ([RAIS 2024](https://agenciagov.ebc.com.br/noticias/202512/rais-de-2024-aponta-crescimento-de-3-3-no-numero-de-empregos-formais-no-pais)).
 - O comércio ganhou 34.325 estabelecimentos, uma alta de 2,1% ([Quark RH](https://quarkrh.com.br/?p=6888)). Fazendo a conta ao contrário, chega-se a cerca de **1,6 milhão de comércios com empregados**. ASSUMPTION: o número é derivado, não publicado.
-- Em Pernambuco, 91% dos empregos do comércio têm jornada acima de 40 h ([Mercado & Consumo](https://mercadoeconsumo.com.br/15/10/2026/economia/fim-da-escala-6x1-entidades-empresariais-alertam-para-alta-de-custos-e-inflacao/)).
 - Joinville tem cerca de 23,4 mil estabelecimentos de comércio e serviços ([NSC](https://www.nsctotal.com.br/?p=7229603)) e cerca de 47 mil trabalhadores no comércio ([NSC](https://www.nsctotal.com.br/?p=7599871)).
 - [NEED: dados da RAIS por tamanho (3 a 30 funcionários) e por setor]
 
@@ -34,9 +33,9 @@ O que usei: o brief, o perfil do fundador, [concorrentes.md](concorrentes.md) e 
 | SOM Brasil | cerca de R$ 190 mil/ano | depende de o cliente continuar pagando depois do pico |
 | TAM / SAM / SOM Joinville | R$ 2,3 milhões / R$ 470 mil / R$ 23 a 47 mil | igual ou menor |
 
-**O que muda o mercado:** há dois picos, em 16/12/2026 (42 h) e por volta de 12/2027 (40 h). Depois deles, sobra só a manutenção da escala. Uma matéria diz que a 6x1 pode continuar se houver acordo coletivo ([ES Hoje](https://eshoje.com.br/brasil/2026/10/escala-6x1-comercio-natal/)). [NEED: confirmar no texto da emenda]
+**O que muda o mercado:** picos em 16/12/2026 (42 h) e 12/2027 (40 h); depois, só manutenção. Uma matéria diz que a 6x1 pode continuar se houver acordo coletivo ([ES Hoje](https://eshoje.com.br/brasil/2026/10/escala-6x1-comercio-natal/)). [NEED: confirmar no texto da emenda]
 
-**A premissa mais fraca:** que 10% pagam mesmo com uma opção grátis. A confiança nela é baixa, e o Experimento 1 serve para testar isso.
+**Premissa mais fraca:** 10% pagam mesmo com opção grátis (confiança baixa; testar no Experimento 1).
 
 ## 2. Veredito
 
@@ -66,17 +65,17 @@ O prazo de 16/12 é real e você tem um canal que funciona: a venda porta a port
 
 ## Reasoning
 
-**Problem Severity (Moderate):** a primeira etapa cai no pico do Natal. As lojas podem precisar de até 20% mais funcionários, e 88% do setor de bares e restaurantes já tem dificuldade para contratar ([Consumidor Moderno](https://consumidormoderno.com.br/fim-escala-6x1-natal-precos-atendimento/)). Por outro lado, 51% dos pequenos donos dizem que não terão impacto ([Sebrae Pulso](https://viva.com.br/dinheiro/fim-da-escala-6x1-nao-impacta-maioria-dos-micro-e-pequenos-empreendedores.html)). Hoje eles se viram com planilha ou com o contador. ASSUMPTION: refazer a escala toda semana dói. Nenhum dono confirmou isso ainda.
+**Problem Severity (Moderate):** a primeira etapa cai no pico do Natal. Lojas podem precisar de até 20% mais gente ([Consumidor Moderno](https://consumidormoderno.com.br/fim-escala-6x1-natal-precos-atendimento/)). Por outro lado, 51% dos pequenos donos dizem que não terão impacto ([Sebrae Pulso](https://viva.com.br/dinheiro/fim-da-escala-6x1-nao-impacta-maioria-dos-micro-e-pequenos-empreendedores.html)). Hoje usam planilha ou o contador. ASSUMPTION: refazer a escala toda semana dói.
 
-**Market Evidence (Moderate):** há quem pague por escala (Factorial, Escala Jornadas, sistemas de ponto), mas as evidências são de empresas médias e grandes. A procura cresce por força da lei, só que por pouco tempo. [NEED: um dono de loja pequena que já pague por escala]
+**Market Evidence (Moderate):** há quem pague por escala (Factorial, Escala Jornadas, sistemas de ponto), mas as evidências são de empresas médias e grandes. [NEED: um dono de loja pequena que já pague por escala]
 
-**Solution Differentiation (Weak):** a promessa "escala dentro das regras + custo da mudança" o Sebrae entrega de graça ([Site Contábil](https://sitecontabil.com.br/noticias_empresariais/ler/sebrae-lanca-ferramenta-para-calcular-custos-e-reorganizar-equipes-com-mudanca-na-escala-6x1)). Sobram duas coisas: mandar a escala para o celular e avisar trocas, o que a Factorial já faz, e aplicar a convenção de Joinville. As duas são fáceis de copiar.
+**Solution Differentiation (Weak):** a promessa "escala dentro das regras + custo da mudança" o Sebrae entrega de graça ([Site Contábil](https://sitecontabil.com.br/noticias_empresariais/ler/sebrae-lanca-ferramenta-para-calcular-custos-e-reorganizar-equipes-com-mudanca-na-escala-6x1)). Sobram o envio ao celular com aviso de trocas (a Factorial já faz) e a convenção de Joinville, ambos fáceis de copiar.
 
 **Feasibility (Moderate):** o Pataí já tinha as mesmas peças: painel, notificações e Pix. Um motor de escala com as regras (2 folgas, 42 h, 11 h entre jornadas, um domingo a cada 3) cabe em 4 a 6 semanas. O difícil é acertar a lei e a convenção, porque um erro vira processo trabalhista para o cliente. [NEED: convenção coletiva de 2026 dos comerciários de Joinville]
 
 **Business Viability (Weak):** US$ 1 milhão por ano equivale a cerca de R$ 5,5 milhões (ASSUMPTION: câmbio de 5,5). Dividido por R$ 600 por cliente por ano, dá cerca de 9 mil clientes, mais que todo o SAM de Joinville. A compra se concentra em dezembro, e talvez em 2027 de novo. ASSUMPTION: menos da metade continua pagando depois de 3 meses.
 
-**A mudança de rumo:** vender um **"Escala pronta"**, um serviço avulso de R$ 149 a R$ 290 (ASSUMPTION), feito junto com o dono e com a ajuda de contadores de Joinville, até 16/12. O software fica como ferramenta interna sua. A versão mensal só vale a pena se os clientes pedirem para continuar.
+**A mudança de rumo:** vender um **"Escala pronta"**, um serviço avulso de R$ 149 a R$ 290 (ASSUMPTION), feito junto com o dono e com a ajuda de contadores de Joinville, até 16/12. O software vira ferramenta interna; mensalidade só se pedirem.
 
 ## Killer questions
 1. Quem já viu o Sebrae grátis paga R$ 49 ou mais para você fazer a escala junto? Quantos de cada 20?
@@ -84,18 +83,12 @@ O prazo de 16/12 é real e você tem um canal que funciona: a venda porta a port
 3. A convenção de Joinville permite manter a 6x1 ou dividir as folgas de outro jeito? E quem responde se a escala estiver errada?
 
 ## Next 3 experiments
-- **Experiment:** 20 conversas porta a porta perguntando "como vai fazer a escala em dezembro?" e "já viu o Sebrae?", sem vender nada.
-  **Cost:** 2 dias, R$ 0.
-  **Signal:** se 8 ou mais disserem que ainda não resolveram e que acham difícil, a ideia sobe. Se a maioria disser "o contador faz", ela desce.
-- **Experiment:** oferecer o "Escala pronta" a R$ 149, com pagamento antecipado por Pix e entrega manual.
-  **Cost:** 1 a 2 semanas, R$ 0.
-  **Signal:** 3 ou mais pagamentos em 30 lojas fazem a ideia subir. Nenhum pagamento significa STOP.
-- **Experiment:** oferecer comissão por indicação a 5 contadores.
-  **Cost:** 1 semana, R$ 0.
-  **Signal:** se 2 ou mais indicarem clientes que pagam, o canal funciona.
+- **Experiment:** 20 conversas porta a porta ("como vai fazer a escala de dezembro? já viu o Sebrae?"), sem vender. **Cost:** 2 dias, R$ 0. **Signal:** 8 ou mais sem solução e achando difícil = sobe; "o contador faz" = desce.
+- **Experiment:** pré-venda do "Escala pronta" por R$ 149 via Pix, entrega à mão. **Cost:** 1 a 2 semanas, R$ 0. **Signal:** 3 ou mais pagamentos em 30 lojas = sobe; zero = STOP.
+- **Experiment:** comissão de indicação para 5 contadores. **Cost:** 1 semana, R$ 0. **Signal:** 2 ou mais indicando clientes pagantes = canal funciona.
 
 ## Assumptions and gaps
-- ASSUMPTION: 1,6 milhão de comércios (derivado); 50% no perfil; 10% pagam; 25% em Joinville; 20% alcançáveis; 50 a 100 clientes; câmbio de 5,5; menos da metade continua pagando; a dor é semanal; preço de R$ 149 a R$ 290.
+- ASSUMPTION: 1,6 mi de comércios; 50% no perfil; 10% pagam; 25% em Joinville; 20% alcançáveis; 50 a 100 clientes; câmbio 5,5; retenção < 50%; dor semanal; preço R$ 149 a 290.
 - [NEED: dados da RAIS por tamanho e setor] [NEED: convenção de 2026 de Joinville] [NEED: se a 6x1 pode continuar por acordo] [NEED: um dono pequeno que pague por escala] [NEED: opiniões de quem usou o Escala Sebrae]
 
 ## 3. Premissas de risco (8 categorias)
@@ -121,4 +114,4 @@ O prazo de 16/12 é real e você tem um canal que funciona: a venda porta a port
 | 2 | **Feito à mão:** montar a escala de quem pagou numa planilha, mandar por WhatsApp para a equipe e então oferecer R$ 39/mês | Quantos aceitam a mensalidade | 30% ou mais. Abaixo de 10%, vender só o serviço avulso |
 | 3 | **Página + 5 contadores:** a página "Sua escala pronta para a lei nova", com um link de indicação para cada contador | Pedidos pagos em 14 dias | 5 ou mais |
 
-Só conta quem **paga**. Elogio não conta. Se os experimentos 1 e 3 falharem até 10/12, o veredito vira **STOP**.
+Só conta quem **paga**. Se os experimentos 1 e 3 falharem até 10/12, o veredito vira **STOP**.
