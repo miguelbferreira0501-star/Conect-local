@@ -46,6 +46,8 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Notificações no celular (push e toque na notificação)
+        importScripts: ['push-sw.js'],
         navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
           {

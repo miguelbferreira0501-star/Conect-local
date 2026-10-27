@@ -1,3 +1,4 @@
+import { syncPush, unlinkPush } from './push';
 import { createContext, useContext, type ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { LoginInput, RegisterInput, UserDTO } from '@conecta/shared';
@@ -28,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     qc.setQueryData(['me'], user);
     // Dados que dependem de quem está logado (favoritos, "isMine" etc.) são descartados para não exibir estado antigo.
     qc.removeQueries({ predicate: (q) => !PUBLIC_KEYS.has(String(q.queryKey[0])) });
+    void syncPush().catch(() => {});
     return user;
   };
 
@@ -37,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login: async (input) => afterAuth((await api.post<{ user: UserDTO }>('/auth/login', input)).user),
     register: async (input) => afterAuth((await api.post<{ user: UserDTO }>('/auth/register', input)).user),
     logout: async () => {
+      await unlinkPush().catch(() => {});
       await api.post('/auth/logout');
       qc.setQueryData(['me'], null);
       qc.removeQueries({ predicate: (q) => !PUBLIC_KEYS.has(String(q.queryKey[0])) });

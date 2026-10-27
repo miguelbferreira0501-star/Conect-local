@@ -6,6 +6,7 @@ import { decodeImage } from '../lib/images';
 import { panelRepo } from '../repositories/panel';
 import { liveRepo, petsRepo } from '../repositories/pets';
 import { query } from '../db/pool';
+import { notifyLive } from './push';
 
 export const PET_LIMITS = { maxPets: 10 };
 
@@ -75,6 +76,7 @@ export async function addLive(userId: string, businessId: string, bookingId: str
     const update = await liveRepo.add(db, {
       bookingId, businessId, stage: v.stage, note: v.note, details: v.details, mime: img?.mime ?? null, photo: img?.data ?? null,
     });
+    await notifyLive(db, bookingId, v.stage as LiveStage, v.note ?? null);
     // Etapa final conclui o atendimento: o tutor já pode avaliar.
     if (FINAL_LIVE_STAGES.has(v.stage as LiveStage) && b.status === 'confirmed') {
       await query(`UPDATE bookings SET status = 'completed', completed_at = now(), updated_at = now() WHERE id = $1`, [bookingId], db);

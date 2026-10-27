@@ -17,6 +17,7 @@ import { usePets } from '@/lib/pets';
 import { PetAvatar, PetFormSheet } from '@/components/pets';
 import { BellRing, Camera, Plus, Radio } from 'lucide-react';
 import { useReminders } from '@/lib/benefits';
+import { PushPrompt } from '@/components/PushPrompt';
 
 export function HomePage() {
   const { city, openPicker } = useUserLocation();
@@ -65,6 +66,7 @@ export function HomePage() {
 
       <div className="container-app space-y-9 py-7">
         {user && <HomePets />}
+        {user && <PushPrompt variant="tutor" />}
         {user && <ReturnReminders />}
         {user ? <LiveNowOrBanner /> : <LiveBanner />}
         {!city && (

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
-  ACTIVITY_LIMITS, BOOKING_LIMITS, bookingFlow, bookingOccurrences, FLOW_NEEDS_ADDRESS, localDateOf, stayNights, toActivityDTO, zonedToUtc,
+  ACTIVITY_LIMITS, BOOKING_LIMITS, effectivePlan, planIsActive, bookingFlow, bookingOccurrences, FLOW_NEEDS_ADDRESS, localDateOf, stayNights, toActivityDTO, zonedToUtc,
   type BookingRequestInput, type QuoteRequestInput,
 } from '@conecta/shared';
 
@@ -12,6 +12,7 @@ import { businessesRepo } from '../repositories/businesses';
 import { petsRepo } from '../repositories/pets';
 import { reviewsRepo } from '../repositories/reviews';
 import { availability } from './business';
+import { notifyBusiness } from './push';
 
 async function lastReviewMap(db: Db) {
   const mine = (await reviewsRepo.mine(db)) as Array<{ business: { id: string }; createdAt: Date }>;
@@ -30,6 +31,14 @@ export const listActivities = (userId: string) =>
     const last = await lastReviewMap(db);
     return rows.map((r) => toActivityDTO(r, last));
   });
+
+const whenLabel = (d: Date, tz: string) =>
+  new Intl.DateTimeFormat('pt-BR', { timeZone: tz, weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).format(d);
+
+/** Avisa a empresa no celular: pedido novo esperando confirmação. */
+async function notifyNewBooking(db: Db, businessId: string, service: string, when: string) {
+  await notifyBusiness(db, businessId, { title: '🐾 Novo pedido de agendamento', body: `${service} · ${when}. Toque para confirmar.`, url: `/empresas/${businessId}/pedidos`, tag: `req-${businessId}` });
+}
 
 export async function createBooking(userId: string, input: BookingRequestInput) {
   return withUser(userId, async (db) => {
@@ -73,6 +82,7 @@ export async function createBooking(userId: string, input: BookingRequestInput) 
         notes: input.notes, phone: input.contactPhone, staffId, mode: 'day', period: null, partySize: null, petId: input.petId ?? null, seriesId: null,
         ...extra, depositCents: extra.depositCents ? extra.depositCents * nights.length : null,
       });
+      await notifyNewBooking(db, input.businessId, svc.name, `${nights.length} ${nights.length === 1 ? 'diária' : 'diárias'} a partir de ${checkIn.split('-').reverse().join('/')}`);
       return { id: created.id, ids: [created.id], skipped: [], seriesId: null, nights: nights.length, status: 'requested' as const, isDemoBusiness: biz.is_demo,
         depositCents: extra.depositCents ? extra.depositCents * nights.length : null };
     }
@@ -111,6 +121,7 @@ export async function createBooking(userId: string, input: BookingRequestInput) 
       ids.push(created.id);
     }
     if (!ids.length) throw new AppError(409, 'slot_unavailable', 'Nenhuma das datas tem vaga. Escolha outros dias ou horários.');
+    await notifyNewBooking(db, input.businessId, svc.name, whenLabel(dates[0], biz.timezone) + (ids.length > 1 ? ` (+${ids.length - 1})` : ''));
     return { id: ids[0], ids, skipped, seriesId, status: 'requested' as const, isDemoBusiness: biz.is_demo, depositCents: extra.depositCents };
   });
 }
@@ -159,12 +170,14 @@ export async function createQuote(userId: string, input: QuoteRequestInput) {
     }
     const biz = await businessesRepo.basicById(input.businessId, db);
     if (!biz) throw notFound('Empresa não encontrada.');
+    if (!planIsActive(effectivePlan(biz.plan, biz.plan_until))) throw notFound('Empresa não encontrada.');
     if (!biz.accepts_quote) throw new AppError(422, 'quote_unavailable', 'Esta empresa não recebe pedidos de orçamento pela plataforma.');
     if (input.serviceId && !(await businessesRepo.service(input.businessId, input.serviceId, db))) {
       throw new AppError(422, 'invalid_service', 'Serviço inválido para esta empresa.');
     }
     if (input.petId && !(await petsRepo.ownsPet(db, input.petId))) throw new AppError(422, 'invalid_pet', 'Escolha um dos seus pets.');
     const created = await activitiesRepo.createQuote(db, { ...input, phone: input.contactPhone });
+    await notifyBusiness(db, input.businessId, { title: '💬 Novo pedido de orçamento', body: input.description.slice(0, 120), url: `/empresas/${input.businessId}/pedidos`, tag: `quote-${created.id}` });
     return { id: created.id, status: 'sent' as const, isDemoBusiness: biz.is_demo };
   });
 }

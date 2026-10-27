@@ -15,6 +15,7 @@ import { favoritesRepo } from '../repositories/favorites';
 import * as activities from '../services/activities';
 import * as pets from '../services/pets';
 import * as benefits from '../services/benefits';
+import * as push from '../services/push';
 import * as auth from '../services/auth';
 import { globalMean, scoreRows, toCard } from '../services/cards';
 import * as reviews from '../services/reviews';
@@ -127,6 +128,13 @@ me.get('/live/:id/photo', async (c) => privateImage(await pets.livePhoto(uid(c),
 // Pet ao Vivo (lado do tutor)
 me.get('/bookings/:id/live', async (c) => c.json(await pets.listLive(uid(c), parse(uuid, c.req.param('id')))));
 
+// Notificações no celular
+me.post('/me/push', async (c) => c.json(await push.saveSubscription(uid(c), await c.req.json()), 201));
+me.post('/me/push/remove', async (c) => c.json(await push.removeSubscription(uid(c), String((await c.req.json())?.endpoint ?? '').slice(0, 1000))));
+me.post('/me/push/test', async (c) => {
+  if (!hit(`push-test:${uid(c)}`, 5, 60 * 60_000)) throw new AppError(429, 'rate_limited', 'Muitos testes. Aguarde um pouco.');
+  return c.json(await push.sendTest(uid(c)));
+});
 me.get('/me/packages', async (c) => c.json(await benefits.myPackages(uid(c))));
 me.post('/me/packages', async (c) => {
   if (!hit(`pkg:${uid(c)}`, 20, 60 * 60_000)) throw new AppError(429, 'rate_limited', 'Muitos pedidos. Aguarde um pouco.');

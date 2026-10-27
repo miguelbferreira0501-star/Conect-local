@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { BRAND, ibgeCode, searchQuerySchema, uuid } from '@conecta/shared';
 import { withUser } from '../db/pool';
 import { env } from '../env';
+import { vapidKeys } from '../services/push';
 import { notFound, parse } from '../lib/errors';
 import type { AppEnv } from '../middleware/context';
 import { locationsRepo } from '../repositories/locations';
@@ -16,6 +17,8 @@ const longCache = 'public, max-age=86400, stale-while-revalidate=604800';
 publicRoutes.get('/health', (c) => c.json({ ok: true }));
 
 publicRoutes.get('/config', (c) => c.json({ brand: BRAND, demoMode: env.DEMO_MODE, storePayments: env.STORE_APP_PAYMENTS }));
+/** Chave pública para o navegador assinar as notificações. */
+publicRoutes.get('/push/key', async (c) => c.json({ publicKey: (await vapidKeys()).publicKey }));
 
 publicRoutes.get('/locations/states', async (c) => {
   c.header('Cache-Control', longCache);

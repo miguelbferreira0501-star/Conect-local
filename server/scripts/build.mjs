@@ -9,7 +9,7 @@ await build({
   target: 'node20',
   format: 'esm',
   outfile: 'dist/index.js',
-  external: ['pg', 'bcryptjs', 'hono', '@hono/node-server', 'zod'],
+  external: ['pg', 'bcryptjs', 'hono', '@hono/node-server', 'zod', 'web-push'],
   sourcemap: true,
 });
 cpSync('src/db/migrations', 'dist/migrations', { recursive: true });

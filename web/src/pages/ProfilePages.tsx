@@ -1,3 +1,4 @@
+import { PushSettingsItem } from '@/components/PushPrompt';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -63,6 +64,7 @@ export function ProfilePage() {
           {user && <MenuItem to="/favoritos" icon={Heart} label="Favoritos" />}
           {user && <MenuItem to="/perfil/dados" icon={UserRound} label="Meus dados" hint="Nome, telefone e cidade" />}
           {user && <MenuItem to="/perfil/avaliacoes" icon={Star} label="Minhas avaliações" />}
+          {user && <PushSettingsItem />}
           <li>
             <button onClick={openPicker} className="flex min-h-[60px] w-full items-center gap-3 px-4 py-2 text-left hover:bg-surface">
               <MapPin className="h-5 w-5 text-brand-fg" aria-hidden="true" />

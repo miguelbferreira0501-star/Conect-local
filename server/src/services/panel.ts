@@ -10,6 +10,7 @@ import { AppError, forbidden, notFound, parse } from '../lib/errors';
 import { businessesRepo } from '../repositories/businesses';
 import { locationsRepo } from '../repositories/locations';
 import { panelRepo } from '../repositories/panel';
+import { notifyBookingStatus } from './push';
 
 type Profile = z.output<typeof businessProfileSchema>;
 
@@ -243,9 +244,12 @@ export const panel = {
       if (type === 'booking') {
         const b = await panelRepo.booking(db, businessId, id);
         if (!b) throw notFound('Agendamento não encontrado.');
-        if (action === 'confirm' && b.status === 'requested') await panelRepo.setBooking(db, id, 'confirmed', msg);
-        else if (action === 'decline' && (b.status === 'requested' || b.status === 'confirmed') && new Date(b.starts_at) > new Date()) {
+        if (action === 'confirm' && b.status === 'requested') {
+          await panelRepo.setBooking(db, id, 'confirmed', msg);
+          await notifyBookingStatus(db, id, 'confirmed');
+        } else if (action === 'decline' && (b.status === 'requested' || b.status === 'confirmed') && new Date(b.starts_at) > new Date()) {
           await panelRepo.setBooking(db, id, 'declined', msg);
+          await notifyBookingStatus(db, id, 'declined');
         } else throw new AppError(409, 'invalid_state', 'Este agendamento não pode mais ser alterado.');
       } else {
         const q = await panelRepo.quote(db, businessId, id);

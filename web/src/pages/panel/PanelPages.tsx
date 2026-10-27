@@ -1,3 +1,4 @@
+import { PushPrompt } from '@/components/PushPrompt';
 import { BookingExtras } from '@/components/BookingExtras';
 import { PanelDeposit, PanelLoyalty } from './PanelBookingBits';
 import { useRef, useState } from 'react';
@@ -116,6 +117,7 @@ export function PanelDashboard() {
   const rate = b.stats.requestsReceived ? Math.round((b.stats.requestsAnswered / b.stats.requestsReceived) * 100) : null;
   return (
     <div className="space-y-5">
+      <PushPrompt variant="business" />
       <div className="grid gap-3 sm:grid-cols-3">
         <Link to="pedidos" className="card p-4 hover:shadow-raised">
           <p className="text-sm text-muted">Pedidos aguardando você</p>

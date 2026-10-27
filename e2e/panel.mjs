@@ -145,7 +145,8 @@ try {
   await owner.getByText('Enviado para o tutor.').waitFor();
   ok('empresa enviou a etapa "Chegou" com foto');
   await customer.reload();
-  await customer.getByText('Pet ao Vivo').first().click();
+  await customer.getByText(/Pet ao Vivo|Ao vivo agora/).first().waitFor();
+  if (!(await customer.getByText('Chegou calminha!').count())) await customer.getByText(/Pet ao Vivo|Ao vivo agora/).first().click();
   await customer.getByText('Chegou calminha!').waitFor();
   await customer.getByAltText('Foto: Chegou').waitFor();
   await shot(customer, '8-tutor-ao-vivo');

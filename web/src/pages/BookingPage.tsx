@@ -18,6 +18,7 @@ import { Button, ButtonLink } from '@/components/ui/Button';
 import { Alert, EmptyState, ErrorState, PageLoader, Skeleton } from '@/components/ui/Feedback';
 import { Checkbox, ChipToggle, TextArea, TextField } from '@/components/ui/Form';
 import { DepositCard } from '@/components/DepositCard';
+import { PushPrompt } from '@/components/PushPrompt';
 
 const WEEK_SHORT = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
@@ -219,6 +220,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
         <h2 className="mt-3 text-xl font-semibold">{done.count > 1 ? `${done.count} agendamentos registrados` : 'Pedido de agendamento registrado'}</h2>
         <p className="mt-2 text-muted"><strong className="text-ink">{service?.name}</strong> com {b.name}<br />{done.label}</p>
         {done.skipped > 0 && <div className="mt-3"><Alert tone="warning">{done.skipped} {done.skipped === 1 ? 'data não tinha' : 'datas não tinham'} vaga e ficaram de fora.</Alert></div>}
+        <div className="mt-4 text-left"><PushPrompt variant="booking" /></div>
         {done.depositCents && <div className="mt-4 text-left"><DepositCard cents={done.depositCents} pixKey={b.pixKey ?? null} businessName={b.name} city={b.city.name} /></div>}
         <div className="mt-3"><Alert tone="info" title="Aguardando confirmação da empresa">Acompanhe em Agenda. No dia, as fotos de cada etapa aparecem no Pet ao Vivo.</Alert></div>
         {b.isDemo && <div className="mt-3"><Alert tone="warning">Empresa de exemplo: nenhuma empresa real recebeu este pedido.</Alert></div>}

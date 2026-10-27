@@ -23,6 +23,9 @@ const envSchema = z.object({
   ANDROID_CERT_SHA256: z.string().optional(),
   /** E-mails que recebem o papel de administrador a cada inicialização (separados por vírgula). */
   ADMIN_EMAILS: z.string().optional(),
+  /** Notificações (opcional): sem elas, as chaves são geradas e guardadas no banco no primeiro uso. */
+  VAPID_PUBLIC_KEY: z.string().optional(),
+  VAPID_PRIVATE_KEY: z.string().optional(),
   /** Pagamentos (Asaas). Sem chave, a assinatura on-line fica indisponível. */
   ASAAS_API_KEY: z.string().optional(),
   /** Opcional: se vazio, o servidor descobre sozinho se a chave é de produção ou de testes (sandbox). */
