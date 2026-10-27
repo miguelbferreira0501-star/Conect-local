@@ -1,5 +1,7 @@
+import { paletteFor } from './ui/Visual';
 import { useRef, useState } from 'react';
-import { Camera, Cat, Dog, HeartPulse, PawPrint, Scissors, ShieldCheck, Syringe, TriangleAlert } from 'lucide-react';
+import { Camera, Cat, Check, Dog, HeartPulse, PawPrint, Scissors, ShieldCheck, Syringe, TriangleAlert } from 'lucide-react';
+import { StageIcon } from './StageIcon';
 import {
   LIVE_DETAILS, LIVE_STAGES, PET_SIZES, PET_SPECIES, PET_TEMPERAMENTS, petInputSchema, petSummary,
   type LiveUpdateDTO, type PetDTO, type PetInput, type PetSize, type PetSpecies,
@@ -15,11 +17,13 @@ import { useToast } from '@/components/ui/Toast';
 
 export function PetAvatar({ pet, size = 48 }: { pet: Pick<PetDTO, 'name' | 'species' | 'photoUrl'>; size?: number }) {
   const Icon = pet.species === 'cat' ? Cat : pet.species === 'dog' ? Dog : PawPrint;
+  // Sem foto: tom claro de identidade do próprio pet (estável pelo nome), sem anel colorido.
+  const [bg, fg] = paletteFor(pet.name || pet.species);
   return pet.photoUrl ? (
-    <img src={pet.photoUrl} alt="" width={size} height={size} className="shrink-0 rounded-full border-2 border-brand-700 object-cover" style={{ width: size, height: size }} />
+    <img src={pet.photoUrl} alt="" width={size} height={size} className="shrink-0 rounded-full object-cover" style={{ width: size, height: size }} />
   ) : (
-    <span className="flex shrink-0 items-center justify-center rounded-full border-2 border-brand-700 bg-brand-50 text-brand-fg" style={{ width: size, height: size }} aria-hidden="true">
-      <Icon style={{ width: size * 0.5, height: size * 0.5 }} />
+    <span className="flex shrink-0 items-center justify-center rounded-full" style={{ width: size, height: size, background: bg, color: fg }} aria-hidden="true">
+      <Icon style={{ width: size * 0.48, height: size * 0.48 }} strokeWidth={1.6} />
     </span>
   );
 }
@@ -75,7 +79,7 @@ function PetForm({ pet, onDone }: { pet: PetDTO | null; onDone: (p: PetDTO) => v
   return (
     <div className="space-y-5 pb-2">
       <div className="flex items-center gap-4">
-        {preview ? <img src={preview} alt="" className="h-20 w-20 rounded-full border-2 border-brand-700 object-cover" /> : <PetAvatar pet={{ name: f.name, species: f.species, photoUrl: null }} size={80} />}
+        {preview ? <img src={preview} alt="" className="h-20 w-20 rounded-full object-cover" /> : <PetAvatar pet={{ name: f.name, species: f.species, photoUrl: null }} size={80} />}
         <div className="space-y-1">
           <Button size="sm" variant="secondary" icon={<Camera className="h-4 w-4" />} onClick={() => file.current?.click()}>{preview ? 'Trocar foto' : 'Adicionar foto'}</Button>
           {preview && <button className="block text-sm text-muted underline" onClick={() => setPhoto(null)}>Remover foto</button>}
@@ -161,7 +165,7 @@ export function PetCard({ pet }: { pet: PetDTO }) {
       </div>
       {pet.temperament.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {pet.temperament.map((t) => <span key={t} className="rounded-full bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700">{t}</span>)}
+          {pet.temperament.map((t) => <span key={t} className="rounded bg-raised px-2 py-0.5 text-xs font-medium text-[#374151]">{t}</span>)}
         </div>
       )}
       {pet.vaccinesUpToDate === false && <p className="mt-2 flex items-center gap-1 text-sm text-warning-700"><Syringe className="h-4 w-4" /> Vacinas não estão em dia</p>}
@@ -169,7 +173,7 @@ export function PetCard({ pet }: { pet: PetDTO }) {
         <dl className="mt-3 space-y-2 text-sm">
           {pet.healthNotes && <div><dt className="flex items-center gap-1 font-medium"><HeartPulse className="h-4 w-4 text-danger-700" /> Saúde</dt><dd className="text-ink/90">{pet.healthNotes}</dd></div>}
           {pet.careNotes && <div><dt className="flex items-center gap-1 font-medium"><TriangleAlert className="h-4 w-4 text-warning-700" /> Cuidados e medos</dt><dd className="text-ink/90">{pet.careNotes}</dd></div>}
-          {pet.groomingNotes && <div><dt className="flex items-center gap-1 font-medium"><Scissors className="h-4 w-4 text-brand-fg" /> Tosa preferida</dt><dd className="text-ink/90">{pet.groomingNotes}</dd></div>}
+          {pet.groomingNotes && <div><dt className="flex items-center gap-1 font-medium"><Scissors className="h-4 w-4 text-muted" aria-hidden /> Tosa preferida</dt><dd className="text-ink/90">{pet.groomingNotes}</dd></div>}
         </dl>
       )}
     </div>
@@ -179,23 +183,27 @@ export function PetCard({ pet }: { pet: PetDTO }) {
 /** Linha do tempo do "Pet ao Vivo". */
 export function LiveTimeline({ updates, emptyText }: { updates: LiveUpdateDTO[]; emptyText?: string }) {
   if (!updates.length) {
-    return <p className="flex items-center gap-2 text-sm text-muted"><ShieldCheck className="h-4 w-4 text-accent-600" /> {emptyText ?? 'Quando o atendimento começar, as etapas e fotos aparecem aqui.'}</p>;
+    return <p className="flex items-center gap-2 text-sm text-muted"><ShieldCheck className="h-4 w-4" aria-hidden /> {emptyText ?? 'Quando o atendimento começar, as etapas e fotos aparecem aqui.'}</p>;
   }
   return (
-    <ol className="relative space-y-4 border-l-2 border-brand-200 pl-5">
+    <ol className="relative space-y-5 border-l border-line pl-6">
       {updates.map((u, i) => {
         const st = LIVE_STAGES[u.stage];
         const latest = i === updates.length - 1;
         const checks = Object.entries(u.details ?? {}).filter(([, v]) => v).map(([k]) => LIVE_DETAILS[k as keyof typeof LIVE_DETAILS]);
         return (
           <li key={u.id} className="relative">
-            <span className={`absolute -left-[31px] top-0 flex h-6 w-6 items-center justify-center rounded-full text-sm ${latest ? 'bg-accent-600 ring-4 ring-accent-600/25' : 'bg-brand-700'}`} aria-hidden="true">{st.emoji}</span>
-            <p className="font-semibold">{st.label} <span className="font-normal text-muted">· {new Date(u.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span></p>
+            <span className={`absolute -left-[37px] top-0 flex h-6 w-6 items-center justify-center rounded-full ${latest ? 'bg-brand-700 text-white' : 'border border-line bg-card text-muted'}`} aria-hidden="true"><StageIcon stage={u.stage} className="h-3.5 w-3.5" /></span>
+            <p className="font-semibold">{st.label} <time className="font-normal text-muted">· {new Date(u.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</time></p>
             {u.note && <p className="text-sm text-ink/90">{u.note}</p>}
-            {checks.length > 0 && <p className="mt-1 text-sm text-accent-700">{checks.map((c) => `✓ ${c}`).join('   ')}</p>}
+            {checks.length > 0 && (
+              <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink">
+                {checks.map((c) => <li key={c} className="inline-flex items-center gap-1"><Check className="h-3.5 w-3.5 text-success-700" aria-hidden />{c}</li>)}
+              </ul>
+            )}
             {u.photoUrl && (
               <a href={u.photoUrl} target="_blank" rel="noopener noreferrer" className="mt-2 block">
-                <img src={u.photoUrl} alt={`Foto: ${st.label}`} loading="lazy" className="max-h-72 w-full rounded-xl border border-line object-cover" />
+                <img src={u.photoUrl} alt={`Foto: ${st.label}`} loading="lazy" className="max-h-72 w-full rounded-2xl object-cover" />
               </a>
             )}
           </li>

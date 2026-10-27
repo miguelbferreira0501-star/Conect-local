@@ -22,7 +22,7 @@ import { useToast } from '@/components/ui/Toast';
 function MenuItem({ to, icon: Icon, label, hint }: { to: string; icon: typeof Star; label: string; hint?: string }) {
   return (
     <li>
-      <Link to={to} className="flex min-h-[60px] items-center gap-3 px-4 py-2 hover:bg-surface">
+      <Link to={to} className="flex min-h-[60px] items-center gap-3 px-4 py-2 hover:bg-raised">
         <Icon className="h-5 w-5 text-brand-fg" aria-hidden="true" />
         <span className="flex-1"><span className="block font-medium">{label}</span>{hint && <span className="text-sm text-muted">{hint}</span>}</span>
         <ChevronRight className="h-5 w-5 text-muted" aria-hidden="true" />
@@ -66,7 +66,7 @@ export function ProfilePage() {
           {user && <MenuItem to="/perfil/avaliacoes" icon={Star} label="Minhas avaliações" />}
           {user && <PushSettingsItem />}
           <li>
-            <button onClick={openPicker} className="flex min-h-[60px] w-full items-center gap-3 px-4 py-2 text-left hover:bg-surface">
+            <button onClick={openPicker} className="flex min-h-[60px] w-full items-center gap-3 px-4 py-2 text-left hover:bg-raised">
               <MapPin className="h-5 w-5 text-brand-fg" aria-hidden="true" />
               <span className="flex-1"><span className="block font-medium">Localização</span><span className="text-sm text-muted">{city ? `${city.name}, ${city.uf}` : 'Não definida'}</span></span>
               <ChevronRight className="h-5 w-5 text-muted" aria-hidden="true" />
@@ -317,7 +317,7 @@ export function ForBusinessPage() {
           <h2 className="text-lg font-semibold">Painel empresarial em breve</h2>
           <p className="mt-2 text-muted">
             Em breve, empresas poderão gerenciar perfil, serviços, preços, horários, áreas de atendimento, pedidos de orçamento,
-            agendamentos e responder avaliações publicamente — tudo em uma única conta, mesmo atendendo várias cidades.
+            agendamentos e responder avaliações publicamente, tudo em uma única conta, mesmo atendendo várias cidades.
           </p>
           <p className="mt-3 text-sm text-muted">
             Regras que valem para todas: avaliações legítimas não podem ser removidas, e a posição nos resultados não pode ser comprada.

@@ -53,7 +53,7 @@ function SettingsCard() {
   return (
     <section className="card space-y-4 p-5">
       <div>
-        <h2 className="flex items-center gap-2 font-semibold"><QrCode className="h-5 w-5 text-accent-600" aria-hidden /> Sinal pelo Pix</h2>
+        <h2 className="flex items-center gap-2 font-semibold"><QrCode className="h-5 w-5 text-muted" aria-hidden /> Sinal pelo Pix</h2>
         <p className="mt-1 text-sm text-muted">
           Peça um sinal para garantir o horário e diminuir as faltas. O cliente paga direto na sua chave Pix (o app não fica com nada).
           Defina o valor do sinal em cada serviço, na aba Serviços.
@@ -61,7 +61,7 @@ function SettingsCard() {
       </div>
       <TextField label="Sua chave Pix" optional placeholder="CPF, CNPJ, e-mail, celular ou chave aleatória" value={pix} onChange={(e) => setPix(e.target.value)} />
       <div>
-        <h3 className="flex items-center gap-2 font-semibold"><Gift className="h-5 w-5 text-accent-600" aria-hidden /> Cartão fidelidade</h3>
+        <h3 className="flex items-center gap-2 font-semibold"><Gift className="h-5 w-5 text-muted" aria-hidden /> Cartão fidelidade</h3>
         <Checkbox label="Ativar cartão fidelidade" description="O cliente vê os carimbos no seu perfil e você vê no pedido quando o próximo é grátis." checked={loyalty} onChange={(e) => setLoyalty(e.target.checked)} />
         {loyalty && (
           <SelectField label="A cada quantos atendimentos o próximo é grátis?" value={every} onChange={(e) => setEvery(e.target.value)}>
@@ -101,10 +101,10 @@ function PackagesCard() {
   return (
     <section className="card p-5">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="flex items-center gap-2 font-semibold"><Package className="h-5 w-5 text-accent-600" aria-hidden /> Clube de pacotes</h2>
+        <h2 className="flex items-center gap-2 font-semibold"><Package className="h-5 w-5 text-muted" aria-hidden /> Clube de pacotes</h2>
         <Button size="sm" icon={<Plus className="h-4 w-4" />} onClick={() => open()} disabled={!services.length}>Novo pacote</Button>
       </div>
-      <p className="mt-1 text-sm text-muted">Ex.: "4 banhos por mês". O cliente paga adiantado e agenda cada sessão pelo app — renda garantida e cliente fiel.</p>
+      <p className="mt-1 text-sm text-muted">Ex.: "4 banhos por mês". O cliente paga adiantado e agenda cada sessão pelo app, renda garantida e cliente fiel.</p>
       {list.isLoading ? <PageLoader /> : !list.data?.length ? (
         <p className="mt-3 text-sm text-muted">Nenhum pacote ainda.</p>
       ) : (
@@ -207,20 +207,22 @@ function ReportCard() {
   const r = useReport(b.id, month);
   return (
     <section className="card p-5" data-testid="report">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <h2 className="flex items-center gap-2 font-semibold"><BarChart3 className="h-5 w-5 text-accent-600" aria-hidden /> Relatório do mês</h2>
-        <div className="w-48"><SelectField label="Mês" value={month} onChange={(e) => setMonth(e.target.value)}>{months.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}</SelectField></div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="flex items-center gap-2 font-semibold"><BarChart3 className="h-5 w-5 text-muted" aria-hidden /> Relatório do mês</h2>
+        <label className="w-48"><span className="sr-only">Mês</span>
+          <select className="field min-h-[36px] py-1.5 text-sm" value={month} onChange={(e) => setMonth(e.target.value)}>{months.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}</select>
+        </label>
       </div>
       {r.isLoading ? <PageLoader /> : r.error ? <Alert tone="warning">{(r.error as Error).message}</Alert> : r.data && (
         <>
-          <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <dl className="mt-4 grid grid-cols-2 overflow-hidden rounded-2xl border border-line sm:grid-cols-4">
             {[
               ['Atendimentos', String(r.data.completed)],
               ['Faturamento estimado', formatCents(r.data.revenueCents)],
               ['Clientes novos', String(r.data.newCustomers)],
               ['Clientes que voltaram', String(r.data.returningCustomers)],
             ].map(([k, v]) => (
-              <div key={k} className="rounded-xl border border-line p-3"><dt className="text-xs text-muted">{k}</dt><dd className="mt-1 text-xl font-semibold">{v}</dd></div>
+              <div key={k} className="-ml-px -mt-px border-l border-t border-line p-3 md:p-4"><dt className="text-sm text-muted">{k}</dt><dd className="num mt-1 text-xl font-semibold">{v}</dd></div>
             ))}
           </dl>
           <p className="mt-2 text-xs text-muted">Faturamento estimado pelos preços cadastrados e pacotes ativados no mês. Cancelados/recusados: {r.data.cancelled}.</p>
@@ -228,13 +230,13 @@ function ReportCard() {
             <div>
               <h3 className="mb-2 text-sm font-semibold">Serviços mais feitos</h3>
               {r.data.topServices.length ? (
-                <ul className="space-y-1.5 text-sm">{r.data.topServices.map((s) => <Bar key={s.name} label={s.name} value={s.count} max={r.data!.topServices[0].count} />)}</ul>
+                <ul className="space-y-2.5 text-sm">{r.data.topServices.map((s, i) => <Bar key={s.name} label={s.name} value={s.count} max={r.data!.topServices[0].count} lead={i === 0} />)}</ul>
               ) : <p className="text-sm text-muted">Sem atendimentos concluídos.</p>}
             </div>
             <div>
               <h3 className="mb-2 text-sm font-semibold">Horários mais cheios</h3>
               {r.data.busiestHours.length ? (
-                <ul className="space-y-1.5 text-sm">{r.data.busiestHours.map((h) => <Bar key={h.hour} label={`${String(h.hour).padStart(2, '0')}h`} value={h.count} max={r.data!.busiestHours[0].count} />)}</ul>
+                <ul className="space-y-2.5 text-sm">{r.data.busiestHours.map((h, i) => <Bar key={h.hour} label={`${h.hour}h`} value={h.count} max={r.data!.busiestHours[0].count} lead={i === 0} />)}</ul>
               ) : <p className="text-sm text-muted">Sem dados ainda.</p>}
             </div>
           </div>
@@ -247,14 +249,14 @@ function ReportCard() {
                     <span>{c.name}{c.petName ? ` · ${c.petName}` : ''} <span className="text-muted">· {c.daysSince} dias</span></span>
                     {whatsappLink(c.phone) && (
                       <a className="inline-flex min-h-[40px] items-center gap-1 font-semibold text-brand-fg hover:underline" target="_blank" rel="noopener noreferrer"
-                        href={whatsappLink(c.phone, `Oi, ${c.name}! Sentimos falta ${c.petName ? `do(a) ${c.petName}` : 'de vocês'} aqui na ${b.name}. Quer agendar? Pelo app Pataí é rapidinho 🐾`) ?? undefined}>
+                        href={whatsappLink(c.phone, `Oi, ${c.name}! Sentimos falta ${c.petName ? `do(a) ${c.petName}` : 'de vocês'} aqui na ${b.name}. Quer agendar? Pelo app Pataí é rapidinho.`) ?? undefined}>
                         <MessageCircle className="h-4 w-4" /> Chamar
                       </a>
                     )}
                   </li>
                 ))}
               </ul>
-            ) : <EmptyState icon={<Gift className="h-6 w-6" />} title="Ninguém sumido">Todos os clientes voltaram nos últimos 45 dias.</EmptyState>}
+            ) : <p className="mt-2 rounded-2xl border border-dashed border-line px-4 py-3 text-sm text-muted">Ninguém sumido: todos os clientes voltaram nos últimos 45 dias.</p>}
           </div>
         </>
       )}
@@ -262,11 +264,12 @@ function ReportCard() {
   );
 }
 
-function Bar({ label, value, max }: { label: string; value: number; max: number }) {
+/** Barra fina proporcional: cinza, com o primeiro do ranking na cor da marca. */
+function Bar({ label, value, max, lead }: { label: string; value: number; max: number; lead?: boolean }) {
   return (
     <li>
-      <div className="flex justify-between"><span>{label}</span><span className="text-muted">{value}</span></div>
-      <div className="mt-1 h-2 rounded-full bg-brand-50"><div className="h-2 rounded-full bg-accent-600" style={{ width: `${Math.max(6, (value / max) * 100)}%` }} /></div>
+      <div className="flex justify-between"><span>{label}</span><span className="num text-muted">{value}</span></div>
+      <div className="mt-1 h-[3px] rounded-full bg-rule"><div className={`h-[3px] rounded-full ${lead ? 'bg-brand-700' : 'bg-[#9ca3af]'}`} style={{ width: `${(value / max) * 88}%` }} /></div>
     </li>
   );
 }

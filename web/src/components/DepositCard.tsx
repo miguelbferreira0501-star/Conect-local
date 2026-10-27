@@ -40,21 +40,21 @@ export function DepositCard({ cents, pixKey, businessName, city, status = 'pendi
   };
 
   return (
-    <div className="rounded-2xl border border-accent-600/40 bg-card p-4" data-testid="deposit-card">
-      <p className="font-semibold text-brand-fg">{title ?? 'Sinal para garantir o horário'}: {formatCents(cents)}</p>
+    <div className="rounded-2xl bg-raised p-4" data-testid="deposit-card">
+      <p className="flex items-baseline justify-between gap-3 font-semibold text-ink"><span>{title ?? 'Sinal para garantir o horário'}</span><span className="num shrink-0">{formatCents(cents)}</span></p>
       {code ? (
         <>
           <p className="mt-1 text-sm text-muted">Pague pelo Pix direto para {businessName}. {note ?? 'O valor é descontado no dia do atendimento.'}</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button size="sm" variant="accent" icon={copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} onClick={copy}>
+            <Button size="sm" icon={copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} onClick={copy}>
               {copied ? 'Código copiado' : 'Copiar Pix copia e cola'}
             </Button>
             <Button size="sm" variant="secondary" icon={<QrCode className="h-4 w-4" />} onClick={() => setShowQr((v) => !v)}>
-              {showQr ? 'Esconder QR Code' : 'Mostrar QR Code'}
+              {showQr ? 'Esconder QR Code' : 'QR Code'}
             </Button>
           </div>
           {svg && <div className="light-area mx-auto mt-3 w-48 rounded-xl bg-white p-2" aria-label="QR Code do Pix" dangerouslySetInnerHTML={{ __html: svg }} />}
-          <p className="mt-3 break-all rounded-lg bg-brand-50 p-2 font-mono text-[11px] text-muted" aria-label="Código Pix">{code}</p>
+          {showQr && <p className="mt-3 break-all rounded-xl bg-card p-2 font-mono text-[11px] text-muted" aria-label="Código Pix">{code}</p>} {/* taste-skill-ignore: o Pix copia e cola é um código */}
         </>
       ) : (
         <p className="mt-1 text-sm text-muted">A empresa vai combinar com você como pagar o sinal.</p>

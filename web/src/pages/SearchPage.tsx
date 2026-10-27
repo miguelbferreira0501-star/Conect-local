@@ -75,12 +75,12 @@ export function SearchPage() {
 
   return (
     <div>
-      <div className="sticky top-0 z-30 border-b border-line bg-card/95 backdrop-blur">
+      <div className="sticky top-0 z-30 border-b border-line bg-card">
         <div className="container-app space-y-2.5 py-3">
           <SearchBox size="md" initial={f.q} onSubmit={(q) => update({ q })} autoFocus={!hasQuery && !slugFixed} />
           <div className="flex flex-wrap items-center gap-2">
             <button onClick={openPicker} className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-line bg-card px-3.5 text-sm font-medium hover:bg-brand-50">
-              <MapPin className="h-4 w-4 text-accent-600" aria-hidden="true" />
+              <MapPin className="h-4 w-4 text-muted" aria-hidden="true" />
               {city ? `${city.name}, ${city.uf}` : 'Escolher cidade'}
               <span className="sr-only">— alterar localização</span>
             </button>
@@ -210,7 +210,7 @@ function FiltersSheet({ open, onClose, filters, onApply, slugFixed, neighborhood
           <legend className="label">Nota mínima</legend>
           <div className="flex flex-wrap gap-2">
             {[undefined, 3, 4, 4.5].map((n) => (
-              <ChipToggle key={String(n)} selected={draft.minRating === n} onClick={() => set({ minRating: n })}>{n ? `${String(n).replace('.', ',')}+ ★` : 'Qualquer'}</ChipToggle>
+              <ChipToggle key={String(n)} selected={draft.minRating === n} onClick={() => set({ minRating: n })}>{n ? `${String(n).replace('.', ',')} ou mais` : 'Qualquer'}</ChipToggle>
             ))}
           </div>
         </fieldset>

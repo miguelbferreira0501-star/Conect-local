@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 
 const COPY = {
-  tutor: { title: 'Receba os avisos do seu pet', text: 'Pet ao Vivo, horário confirmado, lembrete na véspera e a hora de voltar — direto no celular.' },
+  tutor: { title: 'Receba os avisos do seu pet', text: 'Pet ao Vivo, horário confirmado, lembrete na véspera e a hora de voltar, direto no celular.' },
   business: { title: 'Avise-me de novos pedidos', text: 'Receba no celular cada agendamento, orçamento e pedido de pacote assim que chegar.' },
   booking: { title: 'Quer saber quando confirmarem?', text: 'Ative as notificações e acompanhe a confirmação e o Pet ao Vivo pelo celular.' },
 } as const;
@@ -37,7 +37,7 @@ export function PushPrompt({ variant }: { variant: keyof typeof COPY }) {
   };
   return (
     <section className="card flex items-start gap-3 p-4" data-testid="push-prompt">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-700/20 text-brand-fg"><BellRing className="h-5 w-5" aria-hidden /></span>
+      <BellRing className="mt-0.5 h-5 w-5 shrink-0 text-brand-700" aria-hidden />
       <div className="min-w-0 flex-1">
         <p className="font-semibold">{c.title}</p>
         <p className="text-sm text-muted">{state === 'denied' ? 'As notificações estão bloqueadas neste aparelho. Libere nas configurações do navegador ou do app para receber os avisos.' : c.text}</p>

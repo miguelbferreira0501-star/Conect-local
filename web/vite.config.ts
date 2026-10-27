@@ -37,7 +37,7 @@ export default defineConfig({
         orientation: 'portrait',
         categories: ['business', 'lifestyle', 'shopping'],
         display: 'standalone',
-        background_color: '#0F0F12',
+        background_color: '#fbf7f8',
         theme_color: BRAND.themeColor,
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },

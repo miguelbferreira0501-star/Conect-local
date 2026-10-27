@@ -33,7 +33,7 @@ export function FavoriteButton({ businessId, isFavorite, name, variant = 'plain'
       aria-pressed={isFavorite}
       aria-label={isFavorite ? `Remover ${name} dos favoritos` : `Salvar ${name} nos favoritos`}
       className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition ${
-        variant === 'overlay' ? 'bg-card/95 shadow-card hover:bg-card' : 'hover:bg-brand-50'
+        variant === 'overlay' ? 'border border-line bg-card hover:bg-raised' : 'hover:bg-brand-50'
       }`}
     >
       <Heart className={`h-[22px] w-[22px] ${isFavorite ? 'text-danger-700' : 'text-ink'}`} fill={isFavorite ? 'currentColor' : 'none'} strokeWidth={2} />

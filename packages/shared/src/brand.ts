@@ -9,5 +9,5 @@ export const BRAND = {
   description:
     'Agende banho e tosa, passeador e pet sitter de confiança na sua cidade e acompanhe seu pet ao vivo, com fotos de cada etapa.',
   supportEmail: 'contato@exemplo.com.br',
-  themeColor: '#0F0F12',
+  themeColor: '#fbf7f8',
 } as const;

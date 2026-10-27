@@ -3,14 +3,15 @@ import { BadgeCheck, CalendarCheck, MessageSquareReply, ShieldCheck, Users } fro
 import { BADGES, type BadgeId } from '@conecta/shared';
 
 export function Tag({ children, tone = 'neutral', icon }: { children: ReactNode; tone?: 'neutral' | 'brand' | 'accent' | 'warning'; icon?: ReactNode }) {
+  // Selos: fundo pálido com texto escuro do mesmo tom, cantos de 4px, sem borda.
   const tones = {
-    neutral: 'bg-surface text-muted border-line',
-    brand: 'bg-brand-50 text-brand-fg border-brand-100',
-    accent: 'bg-accent-50 text-accent-700 border-accent-100',
-    warning: 'bg-warning-50 text-warning-700 border-warning-700/20',
+    neutral: 'bg-raised text-[#374151]',
+    brand: 'bg-brand-50 text-brand-900',
+    accent: 'bg-brand-50 text-brand-900',
+    warning: 'bg-warning-50 text-warning-700',
   };
   return (
-    <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-medium ${tones[tone]}`}>
+    <span className={`inline-flex flex-none items-center gap-1 whitespace-nowrap rounded px-2 py-0.5 text-xs font-medium ${tones[tone]}`}>
       {icon}
       {children}
     </span>
@@ -34,7 +35,7 @@ export function TrustBadge({ id, withTitle = true }: { id: BadgeId; withTitle?: 
   const def = BADGES[id];
   return (
     <span title={withTitle ? def.criteria : undefined}>
-      <Tag tone={id === 'verified' ? 'brand' : 'accent'} icon={<Icon className="h-3.5 w-3.5" aria-hidden="true" />}>
+      <Tag tone={id === 'verified' ? 'brand' : 'neutral'} icon={<Icon className="h-3.5 w-3.5" aria-hidden="true" />}>
         {def.label}
       </Tag>
     </span>

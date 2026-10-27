@@ -37,7 +37,7 @@ const whenLabel = (d: Date, tz: string) =>
 
 /** Avisa a empresa no celular: pedido novo esperando confirmação. */
 async function notifyNewBooking(db: Db, businessId: string, service: string, when: string) {
-  await notifyBusiness(db, businessId, { title: '🐾 Novo pedido de agendamento', body: `${service} · ${when}. Toque para confirmar.`, url: `/empresas/${businessId}/pedidos`, tag: `req-${businessId}` });
+  await notifyBusiness(db, businessId, { title: 'Novo pedido de agendamento', body: `${service} · ${when}. Toque para confirmar.`, url: `/empresas/${businessId}/pedidos`, tag: `req-${businessId}` });
 }
 
 export async function createBooking(userId: string, input: BookingRequestInput) {
@@ -177,7 +177,7 @@ export async function createQuote(userId: string, input: QuoteRequestInput) {
     }
     if (input.petId && !(await petsRepo.ownsPet(db, input.petId))) throw new AppError(422, 'invalid_pet', 'Escolha um dos seus pets.');
     const created = await activitiesRepo.createQuote(db, { ...input, phone: input.contactPhone });
-    await notifyBusiness(db, input.businessId, { title: '💬 Novo pedido de orçamento', body: input.description.slice(0, 120), url: `/empresas/${input.businessId}/pedidos`, tag: `quote-${created.id}` });
+    await notifyBusiness(db, input.businessId, { title: 'Novo pedido de orçamento', body: input.description.slice(0, 120), url: `/empresas/${input.businessId}/pedidos`, tag: `quote-${created.id}` });
     return { id: created.id, status: 'sent' as const, isDemoBusiness: biz.is_demo };
   });
 }

@@ -18,10 +18,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {items.map((t) => (
           <div
             key={t.id}
-            className="pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-xl border border-line bg-card px-4 py-3 text-sm text-ink shadow-raised"
+            className="toast pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-2xl bg-ink px-4 py-3 text-sm text-white shadow-float"
             role={t.tone === 'error' ? 'alert' : 'status'}
           >
-            {t.tone === 'success' ? <CheckCircle2 className="h-5 w-5 text-accent-100" /> : <AlertCircle className="h-5 w-5 text-red-300" />}
+            {t.tone === 'success' ? <CheckCircle2 className="h-5 w-5 text-[#86efac]" aria-hidden /> : <AlertCircle className="h-5 w-5 text-[#fca5a5]" aria-hidden />}
             <span className="flex-1">{t.message}</span>
             <button aria-label="Fechar aviso" className="rounded p-1 hover:bg-white/10" onClick={() => setItems((s) => s.filter((x) => x.id !== t.id))}>
               <X className="h-4 w-4" />

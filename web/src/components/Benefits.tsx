@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gift, Package, Stamp } from 'lucide-react';
+import { Check, Gift, Package, Stamp } from 'lucide-react';
 import { formatCents, loyaltyProgress, packageSavings, type BusinessDetailDTO } from '@conecta/shared';
 import { ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -17,12 +17,12 @@ export function LoyaltyCard({ every, visits, compact }: { every: number; visits:
   const p = loyaltyProgress(visits ?? 0, every);
   return (
     <section className={compact ? '' : 'card p-5'} data-testid="loyalty-card">
-      {!compact && <h2 className="mb-1 flex items-center gap-2 font-semibold"><Stamp className="h-5 w-5 text-accent-600" aria-hidden /> Cartão fidelidade</h2>}
+      {!compact && <h2 className="mb-1 flex items-center gap-2 font-semibold"><Stamp className="h-5 w-5 text-muted" aria-hidden /> Cartão fidelidade</h2>}
       <p className="text-sm text-muted">A cada {every} atendimentos, o próximo é grátis.</p>
       <div className="mt-3 flex flex-wrap gap-1.5" aria-label={`${p.stamps} de ${every} carimbos`}>
         {Array.from({ length: every }, (_, i) => (
-          <span key={i} className={`grid h-7 w-7 place-items-center rounded-full border text-xs ${i < p.stamps ? 'border-accent-600 bg-accent-600 text-[#1f1005]' : 'border-line text-muted'}`}>
-            {i < p.stamps ? '🐾' : i + 1}
+          <span key={i} className={`grid h-7 w-7 place-items-center rounded-full border text-xs ${i < p.stamps ? 'border-brand-700 bg-brand-700 text-white' : 'border-line text-muted'}`}>
+            {i < p.stamps ? <Check className="h-3.5 w-3.5" strokeWidth={2.5} aria-label="carimbado" /> : i + 1}
           </span>
         ))}
         <span className="grid h-7 w-7 place-items-center rounded-full border border-dashed border-accent-600 text-accent-600"><Gift className="h-3.5 w-3.5" aria-hidden /></span>
@@ -30,7 +30,7 @@ export function LoyaltyCard({ every, visits, compact }: { every: number; visits:
       {visits == null ? (
         <p className="mt-2 text-xs text-muted">Entre na sua conta para ver seus carimbos.</p>
       ) : p.nextIsFree ? (
-        <p className="mt-2 text-sm font-semibold text-accent-600">Seu próximo atendimento é grátis! 🎉</p>
+        <p className="mt-2 text-sm font-semibold text-accent-600">Seu próximo atendimento é grátis.</p>
       ) : (
         <p className="mt-2 text-xs text-muted">{p.stamps} de {every} carimbos{p.rewardsEarned ? ` · ${p.rewardsEarned} prêmio(s) já ganhos` : ''}</p>
       )}
@@ -70,7 +70,7 @@ export function PackagesSection({ b }: { b: BusinessDetailDTO }) {
 
   return (
     <section className="card p-5" data-testid="packages">
-      <h2 className="mb-1 flex items-center gap-2 font-semibold"><Package className="h-5 w-5 text-accent-600" aria-hidden /> Clube de pacotes</h2>
+      <h2 className="mb-1 flex items-center gap-2 font-semibold"><Package className="h-5 w-5 text-muted" aria-hidden /> Clube de pacotes</h2>
       <p className="mb-3 text-sm text-muted">Pague uma vez e agende cada sessão pelo app.</p>
       <ul className="space-y-3">
         {b.packages.map((p) => {
@@ -89,7 +89,7 @@ export function PackagesSection({ b }: { b: BusinessDetailDTO }) {
                 </div>
               </div>
               {has ? (
-                <p className="mt-2 text-sm text-muted">{has.status === 'requested' ? 'Pedido enviado — aguardando a empresa confirmar o pagamento.' : `Você tem ${has.remaining} de ${has.sessions} sessões.`}</p>
+                <p className="mt-2 text-sm text-muted">{has.status === 'requested' ? 'Pedido enviado, aguardando a empresa confirmar o pagamento.' : `Você tem ${has.remaining} de ${has.sessions} sessões.`}</p>
               ) : (
                 <Button size="sm" variant="secondary" className="mt-2" onClick={() => ask(p)}>Quero este pacote</Button>
               )}

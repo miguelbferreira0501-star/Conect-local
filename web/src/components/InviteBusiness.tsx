@@ -7,7 +7,7 @@ export function InviteBusiness({ cityName, compact = false }: { cityName?: strin
   const text = `Oi! Sou seu cliente e indiquei você no ${BRAND.name}${cityName ? `, o app para achar empresas de confiança em ${cityName}` : ''}. Dá para testar grátis por 30 dias e receber agendamentos e avaliações: ${link}`;
   return (
     <div className={`card flex flex-wrap items-center gap-3 ${compact ? 'p-4' : 'p-5'}`}>
-      <HeartHandshake className="h-7 w-7 shrink-0 text-accent-700" aria-hidden="true" />
+      <HeartHandshake className="h-7 w-7 shrink-0 text-muted" aria-hidden="true" />
       <div className="min-w-0 flex-1">
         <p className="font-semibold">Conhece uma empresa boa que não está aqui?</p>
         <p className="text-sm text-muted">Indique pelo WhatsApp. Ela testa grátis por 30 dias e ajuda outras pessoas da cidade.</p>

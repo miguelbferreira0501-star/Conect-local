@@ -49,7 +49,7 @@ export function StarInput({ value, onChange, label, size = 36, error }: { value:
       <div className="flex items-center gap-1" role="radiogroup" aria-describedby={error ? `${id}-err` : undefined} onMouseLeave={() => setHover(0)}>
         {[1, 2, 3, 4, 5].map((i) => (
           <label key={i} className="cursor-pointer rounded-lg p-1 focus-within:ring-2 focus-within:ring-brand-500" onMouseEnter={() => setHover(i)}>
-            <input type="radio" name={id} value={i} checked={value === i} onChange={() => onChange(i)} className="sr-only" aria-label={`${i} ${i === 1 ? 'estrela' : 'estrelas'} — ${LABELS[i]}`} />
+            <input type="radio" name={id} value={i} checked={value === i} onChange={() => onChange(i)} className="sr-only" aria-label={`${i} ${i === 1 ? 'estrela' : 'estrelas'}, ${LABELS[i]}`} />
             <Star className={i <= shown ? 'text-star' : 'text-line'} style={{ width: size, height: size }} fill="currentColor" strokeWidth={0} />
           </label>
         ))}

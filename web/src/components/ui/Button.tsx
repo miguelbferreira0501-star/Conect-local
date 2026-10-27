@@ -6,18 +6,19 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent';
 type Size = 'md' | 'lg' | 'sm';
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition select-none disabled:cursor-not-allowed disabled:opacity-55';
+  'pressable inline-flex items-center justify-center gap-2 rounded-xl font-semibold select-none transition-[transform,background-color,border-color,color] duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100';
+// Um único estilo cheio (a cor da marca). O resto é contorno ou texto.
 const variants: Record<Variant, string> = {
-  primary: 'bg-brand-700 text-white hover:bg-brand-800 active:bg-brand-900',
-  accent: 'bg-accent-600 text-[#1f1005] hover:bg-accent-700',
-  secondary: 'border border-line bg-card text-brand-fg hover:bg-brand-50 active:bg-brand-100',
-  ghost: 'text-brand-fg hover:bg-brand-50',
-  danger: 'border border-danger-700/30 bg-card text-danger-700 hover:bg-danger-50',
+  primary: 'bg-brand-700 text-white hover:bg-brand-800',
+  accent: 'bg-brand-700 text-white hover:bg-brand-800',
+  secondary: 'border border-control bg-card text-ink hover:bg-raised',
+  ghost: 'text-ink hover:bg-raised',
+  danger: 'border border-danger-700/40 bg-card text-danger-700 hover:bg-danger-50',
 };
 const sizes: Record<Size, string> = {
-  sm: 'min-h-[40px] px-3.5 text-sm',
-  md: 'min-h-[48px] px-5 text-[15px]',
-  lg: 'min-h-[54px] px-6 text-base',
+  sm: 'min-h-[36px] px-3 text-sm',
+  md: 'min-h-[44px] px-4 text-[15px]',
+  lg: 'min-h-[48px] px-5 text-base',
 };
 
 export function buttonClass(variant: Variant = 'primary', size: Size = 'md', extra = '') {

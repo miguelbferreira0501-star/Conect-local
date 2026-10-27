@@ -1,35 +1,42 @@
-/* Paleta da marca Pataí (tema escuro). Valores em RGB. Os tons 50–200 são fundos suaves; 500–900, cores sólidas. */
+/*
+ * Paleta Pataí — estilo "accent ladder" (tema claro).
+ * Uma cor só (framboesa) em força total apenas em marcas pequenas: o botão principal, os dados,
+ * o ícone ativo. Os tons claros dela fazem o trabalho de área (item ativo, selos, faixas).
+ * Valores em RGB para os utilitários do Tailwind.
+ */
 :root {
-  color-scheme: dark;
-  --brand-50: 36 32 60;
-  --brand-100: 48 42 82;
-  --brand-200: 76 66 130;
-  --brand-500: 129 112 255;
-  --brand-600: 113 96 250;
-  --brand-700: 98 80 235; /* #6250EB — violeta Pataí (fundo de botões, texto branco) */
-  --brand-800: 84 66 214;
-  --brand-900: 70 54 190;
-  --brand-fg: 170 158 255; /* violeta claro para textos e links sobre o fundo escuro */
-  --accent-50: 46 30 18;
-  --accent-100: 74 46 24;
-  --accent-600: 255 138 61; /* #FF8A3D — laranja "ao vivo" */
-  --accent-700: 255 164 102; /* laranja claro para textos */
-  --ink: 240 240 245;
-  --muted: 163 163 176;
-  --line: 44 44 52;
-  --surface: 15 15 18; /* fundo da página */
-  --card: 26 26 31; /* cartões e campos */
-  --star: 255 196 61;
+  color-scheme: light;
+  /* Escada da cor da marca */
+  --brand-50: 253 242 247;  /* #fdf2f7 — fundo suave (item ativo, selos) */
+  --brand-100: 248 219 232; /* #f8dbe8 — faixas de progresso */
+  --brand-200: 241 188 211; /* #f1bcd3 */
+  --brand-500: 212 97 143;  /* #d4618f */
+  --brand-600: 194 69 122;  /* #c2457a */
+  --brand-700: 184 51 106;  /* #b8336a — botão principal (texto branco, 5,6:1) */
+  --brand-800: 157 43 90;   /* #9d2b5a — pressionado */
+  --brand-900: 107 29 62;   /* #6b1d3e — texto sobre os tons claros */
+  --brand-fg: 157 43 90;    /* links e textos na cor da marca (6,9:1 no branco) */
+  /* "Ao vivo" e destaques usam a mesma cor: uma família só */
+  --accent-50: 253 242 247;
+  --accent-100: 248 219 232;
+  --accent-600: 184 51 106;
+  --accent-700: 157 43 90;
+  /* Tinta e superfícies */
+  --ink: 17 24 39;          /* #111827 */
+  --muted: 95 102 114;      /* #5f6672 — 5,6:1 no branco */
+  --line: 229 231 235;      /* #e5e7eb — bordas de cartões */
+  --rule: 242 242 242;      /* #f2f2f2 — linhas entre itens */
+  --control: 209 213 219;   /* #d1d5db — bordas de campos e botões secundários */
+  --surface: 251 247 248;   /* #fbf7f8 — fundo da página, um passo na direção da marca */
+  --card: 255 255 255;
+  --raised: 243 244 246;    /* #f3f4f6 — um passo de tom (hover, poço de valores) */
+  --star: 17 24 39;         /* estrelas em tinta, não em amarelo */
 }
 
-/* Áreas que precisam ficar claras (ex.: cartaz para imprimir com QR Code). */
+/* Áreas para imprimir (cartaz com QR Code): já são claras; mantém branco puro. */
 .light-area {
-  --ink: 17 17 20;
-  --muted: 82 82 94;
-  --line: 222 222 230;
   --card: 255 255 255;
-  --surface: 246 246 250;
-  --brand-fg: 84 66 214;
+  --surface: 255 255 255;
   color: rgb(var(--ink));
   background: #fff;
 }

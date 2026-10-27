@@ -143,7 +143,7 @@ function BillingSetupCard() {
       <Alert tone={ok ? 'success' : 'warning'} title={ok ? 'Pagamentos funcionando' : 'Pagamentos ainda não estão prontos'}
         action={<Button size="sm" variant="secondary" loading={q.isFetching} onClick={() => setRecheck((n) => n + 1)}>Verificar de novo</Button>}>
         {q.data.message}
-        {ok && q.data.environment?.includes('sandbox') && ' Atenção: chave de TESTES — nenhuma cobrança é real. Para cobrar de verdade, troque pela chave de produção.'}
+        {ok && q.data.environment?.includes('sandbox') && ' Atenção: chave de TESTES, nenhuma cobrança é real. Para cobrar de verdade, troque pela chave de produção.'}
       </Alert>
       {ok && q.data.pixKey === 'missing' && (
         <div className="mt-3">

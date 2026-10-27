@@ -57,7 +57,7 @@ export function BookingPage() {
 function Section({ title, children, icon }: { title: string; children: React.ReactNode; icon?: React.ReactNode }) {
   return (
     <section>
-      <h2 className="mb-2 flex items-center gap-2 font-semibold">{icon}{title}</h2>
+      <h2 className="mb-2.5 flex items-center gap-2 text-base font-semibold">{icon}{title}</h2>
       {children}
     </section>
   );
@@ -71,7 +71,7 @@ function DateStrip({ dates, value, onChange, isOpen, label = 'Dia' }: { dates: R
         const selected = value === d.iso;
         return (
           <button key={d.iso} type="button" role="radio" aria-checked={selected} disabled={closed} onClick={() => onChange(d.iso)}
-            aria-label={`${WEEK_SHORT[d.weekday]} ${d.day}/${d.month}${closed ? ' — fechado' : ''}`}
+            aria-label={`${WEEK_SHORT[d.weekday]} ${d.day}/${d.month}${closed ? ', fechado' : ''}`}
             className={`flex min-h-[64px] w-[60px] shrink-0 flex-col items-center justify-center rounded-xl border text-sm transition disabled:opacity-40 ${selected ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-card hover:bg-brand-50'}`}>
             <span className="text-xs uppercase">{WEEK_SHORT[d.weekday]}</span>
             <span className="text-lg font-semibold">{d.day}</span>
@@ -216,7 +216,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
   if (done) {
     return (
       <div className="card p-6 text-center">
-        <CheckCircle2 className="mx-auto h-14 w-14 text-accent-600" aria-hidden="true" />
+        <CheckCircle2 className="mx-auto h-12 w-12 text-success-700" aria-hidden="true" />
         <h2 className="mt-3 text-xl font-semibold">{done.count > 1 ? `${done.count} agendamentos registrados` : 'Pedido de agendamento registrado'}</h2>
         <p className="mt-2 text-muted"><strong className="text-ink">{service?.name}</strong> com {b.name}<br />{done.label}</p>
         {done.skipped > 0 && <div className="mt-3"><Alert tone="warning">{done.skipped} {done.skipped === 1 ? 'data não tinha' : 'datas não tinham'} vaga e ficaram de fora.</Alert></div>}
@@ -246,7 +246,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
               </button>
             ))}
             <button type="button" onClick={() => setAddingPet(null)} className="flex shrink-0 items-center gap-2 rounded-2xl border border-dashed border-brand-200 px-3 py-2 text-brand-fg hover:bg-brand-50">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50"><Plus className="h-5 w-5" /></span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-full border border-dashed border-control text-muted"><Plus className="h-5 w-5" aria-hidden /></span>
               <span className="font-medium">{pets.data?.length ? 'Outro pet' : 'Cadastrar meu pet'}</span>
             </button>
           </div>
@@ -255,18 +255,18 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
       </Section>
 
       <Section title="Serviço">
-        <div className="space-y-2" role="radiogroup" aria-label="Serviço">
+        <div className="card overflow-hidden" role="radiogroup" aria-label="Serviço">
           {bookable.map((s) => {
             const sizeHint = chosenPet?.size && /porte/i.test(s.name) && new RegExp({ mini: 'pequeno|mini', small: 'pequeno', medium: 'médio', large: 'grande', giant: 'grande|gigante' }[chosenPet.size], 'i').test(s.name);
             return (
-              <label key={s.id} className={`card flex cursor-pointer items-center gap-3 p-4 transition ${serviceId === s.id ? 'border-brand-700 ring-2 ring-brand-500/20' : 'hover:border-brand-200'}`}>
+              <label key={s.id} className={`flex cursor-pointer items-center gap-3 border-b border-rule px-4 py-3.5 transition-colors duration-150 last:border-b-0 ${serviceId === s.id ? 'bg-brand-50' : 'hover:bg-raised'}`}>
                 <input type="radio" name="service" className="h-5 w-5 accent-[rgb(var(--brand-700))]" checked={serviceId === s.id} onChange={() => { setServiceId(s.id); setSlot(''); setStaffId(null); setCheckOut(''); }} />
                 <span className="flex-1">
                   <span className="block font-medium">{s.name}</span>
                   <span className="text-sm text-muted">{s.bookingMode === 'day' ? 'Por noite' : s.bookingMode === 'period' ? 'Por visita' : s.durationMinutes ? formatDuration(s.durationMinutes) : ''}{s.depositCents ? ` · sinal de ${formatCents(s.depositCents)}` : ''}</span>
-                  {sizeHint && <span className="mt-0.5 block text-xs font-semibold text-accent-700">Indicado para o porte de {chosenPet!.name}</span>}
+                  {sizeHint && <span className="mt-0.5 block text-xs font-medium text-brand-900">Indicado para o porte de {chosenPet!.name}</span>}
                 </span>
-                <span className="text-sm font-semibold">{formatServicePrice(s)}</span>
+                <span className="num shrink-0 text-right text-sm font-semibold">{formatServicePrice(s)}</span>
               </label>
             );
           })}
@@ -277,7 +277,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
         <Section title="Usar meu pacote?">
           <div className="flex flex-wrap gap-2">
             <ChipToggle selected={!usePackage} onClick={() => setUsePackage(null)}>Não, pagar avulso</ChipToggle>
-            {packagesHere.map((p) => <ChipToggle key={p.id} selected={usePackage === p.id} onClick={() => setUsePackage(p.id)}>🎟️ {p.name} · {p.remaining} restantes</ChipToggle>)}
+            {packagesHere.map((p) => <ChipToggle key={p.id} selected={usePackage === p.id} onClick={() => setUsePackage(p.id)}>{p.name} · {p.remaining} restantes</ChipToggle>)}
           </div>
         </Section>
       )}
@@ -386,7 +386,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
 
       {/* ── Repetição ── */}
       {chosen && repeatAllowed && (
-        <Section title={useWeekdays ? (flow === 'walk' ? 'Passear em quais dias?' : 'Em quais dias da semana?') : 'Repetir este horário?'} icon={<Repeat className="h-5 w-5 text-accent-600" aria-hidden="true" />}>
+        <Section title={useWeekdays ? (flow === 'walk' ? 'Passear em quais dias?' : 'Em quais dias da semana?') : 'Repetir este horário?'} icon={<Repeat className="h-5 w-5 text-muted" aria-hidden="true" />}>
           <div className="flex flex-wrap gap-2">
             <ChipToggle selected={everyWeeks === 0} onClick={() => setEveryWeeks(0)}>Só desta vez</ChipToggle>
             {REPEAT_OPTIONS.filter((o) => !useWeekdays || o.everyWeeks !== 4).map((o) => <ChipToggle key={o.everyWeeks} selected={everyWeeks === o.everyWeeks} onClick={() => setEveryWeeks(o.everyWeeks)}>{o.label}</ChipToggle>)}
@@ -428,7 +428,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
         </Section>
       )}
       {serviceId && needsAddress && (
-        <Section title={flow === 'walk' ? 'Onde buscar o cão?' : flow === 'sitter' ? 'Endereço da sua casa' : flow === 'ride' ? 'Trajeto' : 'Seu endereço'} icon={<MapPin className="h-5 w-5 text-accent-600" aria-hidden="true" />}>
+        <Section title={flow === 'walk' ? 'Onde buscar o cão?' : flow === 'sitter' ? 'Endereço da sua casa' : flow === 'ride' ? 'Trajeto' : 'Seu endereço'} icon={<MapPin className="h-5 w-5 text-muted" aria-hidden="true" />}>
           <div className="space-y-3">
             <TextField label={flow === 'ride' ? 'Buscar o pet em' : 'Endereço'} value={address} maxLength={200} autoComplete="street-address" onChange={(e) => setAddress(e.target.value)} placeholder="Rua, número, bairro (e apartamento)" error={err?.fields?.address} />
             {flow === 'ride' && (
@@ -459,7 +459,7 @@ function BookingForm({ b }: { b: BusinessDetailDTO }) {
       {occErr && <Alert tone="warning">{occErr}</Alert>}
       {err && <Alert tone="error">{err.message}</Alert>}
 
-      <div className="sticky bottom-[64px] z-10 -mx-4 border-t border-line bg-card/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0">
+      <div className="sticky bottom-[58px] z-10 -mx-4 border-t border-line bg-card px-4 py-3 md:static md:mx-0 md:border-0 md:bg-transparent md:p-0">
         {ready && <p className="mb-1 text-center text-sm font-medium">{describe()}</p>}
         {ready && depositTotal && <p className="mb-2 text-center text-xs text-accent-700">Sinal de {formatCents(depositTotal)} pelo Pix para garantir</p>}
         {pkg && ready && <p className="mb-2 text-center text-xs text-accent-700">Usando o pacote {pkg.name} ({pkg.remaining - count} restarão)</p>}

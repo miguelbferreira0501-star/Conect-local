@@ -22,7 +22,8 @@ export function PageLoader({ label = 'Carregando…' }: { label?: string }) {
 }
 
 export function Skeleton({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse rounded-xl bg-line/70 ${className}`} aria-hidden="true" />;
+  // Carregando: o layout final com blocos cinza lisos no tamanho real (sem brilho piscando).
+  return <div className={`rounded-xl bg-raised ${className}`} aria-hidden="true" />;
 }
 
 export function CardSkeleton() {
@@ -40,16 +41,16 @@ export function CardSkeleton() {
 
 type Tone = 'info' | 'success' | 'warning' | 'error';
 const tones: Record<Tone, { cls: string; Icon: typeof Info }> = {
-  info: { cls: 'bg-brand-50 text-brand-fg border-brand-100', Icon: Info },
+  info: { cls: 'bg-brand-50 text-brand-900 border-brand-100', Icon: Info },
   success: { cls: 'bg-success-50 text-success-700 border-success-700/20', Icon: CheckCircle2 },
-  warning: { cls: 'bg-warning-50 text-warning-700 border-warning-700/20', Icon: TriangleAlert },
+  warning: { cls: 'bg-warning-50 text-warning-700 border-warning-200', Icon: TriangleAlert },
   error: { cls: 'bg-danger-50 text-danger-700 border-danger-700/20', Icon: AlertCircle },
 };
 
 export function Alert({ tone = 'info', title, children, action }: { tone?: Tone; title?: string; children?: ReactNode; action?: ReactNode }) {
   const { cls, Icon } = tones[tone];
   return (
-    <div role={tone === 'error' ? 'alert' : 'status'} className={`flex gap-3 rounded-xl border p-3.5 text-sm ${cls}`}>
+    <div role={tone === 'error' ? 'alert' : 'status'} className={`flex gap-3 rounded-2xl border p-3.5 text-sm ${cls}`}>
       <Icon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
       <div className="min-w-0 flex-1">
         {title && <p className="font-semibold">{title}</p>}
@@ -63,7 +64,7 @@ export function Alert({ tone = 'info', title, children, action }: { tone?: Tone;
 export function EmptyState({ icon, title, children, action }: { icon: ReactNode; title: string; children?: ReactNode; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center px-6 py-12 text-center">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 text-brand-fg">{icon}</div>
+      <div className="mb-3 text-muted">{icon}</div>
       <h2 className="text-lg font-semibold">{title}</h2>
       {children && <div className="mt-1.5 max-w-sm text-muted">{children}</div>}
       {action && <div className="mt-5 flex flex-wrap justify-center gap-3">{action}</div>}

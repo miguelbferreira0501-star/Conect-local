@@ -28,13 +28,13 @@ try {
   await page.getByLabel('Estado').selectOption('SC');
   await page.getByPlaceholder('Digite o nome da cidade').fill('joinv');
   await page.getByRole('option', { name: 'Joinville' }).click();
-  await page.getByRole('heading', { name: /Cuidado de confiança para o seu pet em Joinville/ }).waitFor();
+  await page.getByRole('heading', { name: /Cuidado para o seu pet em Joinville/ }).waitFor();
   check(true, 'cidade escolhida pelo seletor estado → cidade');
   await page.getByText('Bem avaliados em Joinville').waitFor();
   await page.getByText('Banho e tosa em Joinville').waitFor();
   check(await page.getByText('Pet ao Vivo').first().isVisible(), 'banner do Pet ao Vivo');
   await shot('inicio');
-  check(await page.getByRole('link', { name: 'Banho e tosa', exact: true }).isVisible(), 'serviços pet exibidos');
+  check(await page.getByRole('link', { name: /^Banho e tosa Pet shops/ }).isVisible(), 'serviços pet exibidos');
 
   // 2. Busca com sugestões
   await page.getByRole('combobox').fill('passe');
@@ -51,7 +51,7 @@ try {
   await page.goto(`${BASE}/categoria/pet-sitter`);
   await page.getByRole('heading', { name: 'Pet sitter (cuidado em casa)' }).waitFor();
   await page.getByRole('button', { name: /^Filtros/ }).click();
-  await page.getByRole('button', { name: '4+ ★' }).click();
+  await page.getByRole('button', { name: '4 ou mais' }).click();
   await shot('filtros');
   await page.getByRole('button', { name: 'Aplicar filtros' }).click();
   await page.waitForURL(/nota=4/);
@@ -124,7 +124,7 @@ try {
   await page.getByRole('button', { name: 'Publicar avaliação' }).click();
   await page.getByText('Escolha de 1 a 5 estrelas.').waitFor();
   check(true, 'validação impede avaliação sem nota');
-  await page.getByLabel('5 estrelas — Excelente').first().check({ force: true });
+  await page.getByLabel('5 estrelas, Excelente').first().check({ force: true });
   await page.getByLabel('Conte como foi').fill('Atendimento muito atencioso, ambiente limpo e cumpriram o horário.');
   await shot('avaliacao');
   await page.getByRole('button', { name: 'Publicar avaliação' }).click();

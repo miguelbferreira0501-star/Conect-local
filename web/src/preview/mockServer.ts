@@ -10,7 +10,7 @@ import {
   reviewInputSchema, reviewReportSchema, reviewUpdateSchema, scoreRows, searchQuerySchema, sortScored, toActivityDTO, toCard,
   type ActivityRow, type BusinessRow, type CityDTO, type SuggestionDTO,
   LIVE_STAGE_DETAILS, liveFlow, petInputSchema, repeatDates, type LiveStage, type LiveUpdateDTO, type PetDTO,
-  bookingOccurrences, RETURN_AFTER_DAYS, type MyPackageDTO, type PackageDTO,
+  bookingOccurrences, RETURN_AFTER_DAYS, LIVE_STAGES, type MyPackageDTO, type PackageDTO,
 } from '@conecta/shared';
 import type { ZodTypeAny } from 'zod';
 import raw from './data.json';
@@ -205,20 +205,17 @@ function nearbyCities(city: CityDTO) {
 // ── Pet ao Vivo simulado (a prévia não tem empresa real do outro lado) ──
 const SIM_NOTES: Record<string, (pet: string) => string> = {
   checkin: (p) => `${p} chegou e foi recebido com carinho!`, bath: () => 'Banho com shampoo hipoalergênico, água morninha.',
-  drying: () => 'Secagem em temperatura baixa, sem susto.', grooming: () => 'Tosa do jeitinho que está na ficha ✂️',
+  drying: () => 'Secagem em temperatura baixa, sem susto.', grooming: () => 'Tosa do jeitinho que está na ficha.',
   ready: (p) => `${p} está pronto e cheiroso! Pode vir buscar.`, walk_start: () => 'Saímos! Rota tranquila pelo parque.',
   walk_end: () => 'Voltamos! 42 minutos de passeio.', visit_start: () => 'Cheguei! Tudo certo por aqui.',
   visit_end: () => 'Tudo feito, com muito carinho.', pickup: (p) => `Buscamos ${p}. A caminho!`, dropoff: (p) => `${p} foi entregue em segurança.`,
   done: () => 'Atendimento concluído.',
 };
-const SIM_ART: Record<string, [string, string, string]> = {
-  checkin: ['🐶', '#3b2f8f', '#6250EB'], bath: ['🛁', '#0e4a6e', '#2a9fd6'], drying: ['💨', '#2b3a55', '#7a8cb8'], grooming: ['✂️', '#5a2a5e', '#c06ad0'],
-  ready: ['✨', '#6b3a10', '#FF8A3D'], walk_start: ['🦮', '#1f4d2b', '#4cbf6b'], walk_end: ['🏠', '#1f4d2b', '#7ad48f'], visit_start: ['🔑', '#3b2f8f', '#6250EB'],
-  visit_end: ['😺', '#6b3a10', '#FF8A3D'], pickup: ['🚗', '#2b3a55', '#5a7bd1'], dropoff: ['✅', '#1f4d2b', '#4cbf6b'], done: ['🏅', '#6b3a10', '#FF8A3D'],
-};
+/** Foto simulada da prévia: ilustração plana na paleta do app (a pata da marca), com o nome da etapa. */
 function simPhoto(stage: string, pet: string) {
-  const [emoji, a, b] = SIM_ART[stage] ?? ['📸', '#333', '#666'];
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="640" height="400" fill="url(#g)"/><text x="320" y="230" font-size="150" text-anchor="middle">${emoji}</text><text x="320" y="330" font-size="30" font-family="Arial" fill="#fff" text-anchor="middle" opacity="0.9">${pet} · foto ilustrativa da prévia</text></svg>`;
+  const label = (LIVE_STAGES as Record<string, { label: string }>)[stage]?.label ?? 'Foto';
+  const paw = '<g fill="#f1bcd3"><circle cx="19.5" cy="27" r="4.6"/><circle cx="27.2" cy="19" r="4.9"/><circle cx="36.8" cy="19" r="4.9"/><circle cx="44.5" cy="27" r="4.6"/><path d="M32 30c-6.9 0-13 6.6-13 12 0 3.9 3 5.8 6.5 5.8 2.6 0 4.1-1.4 6.5-1.4s3.9 1.4 6.5 1.4c3.5 0 6.5-1.9 6.5-5.8 0-5.4-6.1-12-13-12z"/></g>';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400"><rect width="640" height="400" fill="#fdf2f7"/><g transform="translate(224 70) scale(3)">${paw}</g><text x="320" y="320" font-size="30" font-family="DM Sans, Arial" font-weight="600" fill="#6b1d3e" text-anchor="middle">${pet} · ${label}</text><text x="320" y="356" font-size="20" font-family="DM Sans, Arial" fill="#9d2b5a" text-anchor="middle">Imagem ilustrativa da prévia</text></svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 const SIM_STEP_MS = 14_000;

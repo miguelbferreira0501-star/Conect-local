@@ -1,6 +1,7 @@
+import { StageIcon } from '@/components/StageIcon';
 import { useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Camera, Trash2, X } from 'lucide-react';
+import { Camera, Trash2, X , Check } from 'lucide-react';
 import { LIVE_DETAILS, LIVE_STAGE_DETAILS, LIVE_STAGES, FINAL_LIVE_STAGES, liveFlow, type LiveDetail, type LiveStage, type PetDTO } from '@conecta/shared';
 import { api, ApiError } from '@/lib/api';
 import { resizeImage } from '@/lib/image';
@@ -41,7 +42,7 @@ export function LiveSheet({ businessId, categorySlug, target, onClose }: { busin
     setErr('');
     try {
       await api.post(`/panel/businesses/${businessId}/bookings/${target.id}/live`, { stage: current, note: note || undefined, details, photo: photo ?? undefined });
-      toast(FINAL_LIVE_STAGES.has(current) ? 'Enviado! Atendimento concluído — o tutor já pode avaliar.' : 'Enviado para o tutor.');
+      toast(FINAL_LIVE_STAGES.has(current) ? 'Enviado! Atendimento concluído, o tutor já pode avaliar.' : 'Enviado para o tutor.');
       reset();
       await qc.invalidateQueries({ queryKey: ['live', target.id] });
       qc.invalidateQueries({ queryKey: ['panel'] });
@@ -58,7 +59,7 @@ export function LiveSheet({ businessId, categorySlug, target, onClose }: { busin
   };
 
   return (
-    <Sheet open={!!target} onClose={() => { reset(); onClose(); }} title={`Pet ao Vivo${target?.pet ? ` — ${target.pet.name}` : ''}`}>
+    <Sheet open={!!target} onClose={() => { reset(); onClose(); }} title={`Pet ao Vivo${target?.pet ? `: ${target.pet.name}` : ''}`}>
       {target && (
         <div className="space-y-5">
           <p className="text-sm text-muted">{target.title}</p>
@@ -72,7 +73,7 @@ export function LiveSheet({ businessId, categorySlug, target, onClose }: { busin
                 <div className="flex flex-wrap gap-2">
                   {[...flow, 'photo' as LiveStage].map((s) => (
                     <ChipToggle key={s} selected={current === s} onClick={() => { setStage(s); setDetails({}); }}>
-                      {LIVE_STAGES[s].emoji} {LIVE_STAGES[s].label}{done.has(s) && s !== 'photo' ? ' ✓' : ''}
+                      <StageIcon stage={s} />{LIVE_STAGES[s].label}{done.has(s) && s !== 'photo' && <Check className="h-3.5 w-3.5 text-success-700" aria-label="já enviada" />}
                     </ChipToggle>
                   ))}
                 </div>
@@ -82,7 +83,7 @@ export function LiveSheet({ businessId, categorySlug, target, onClose }: { busin
                   <p className="label">{current === 'walk_end' ? 'Relatório do passeio' : 'Checklist da visita'}</p>
                   <div className="flex flex-wrap gap-2">
                     {LIVE_STAGE_DETAILS[current]!.map((d) => (
-                      <ChipToggle key={d} selected={!!details[d]} onClick={() => setDetails({ ...details, [d]: !details[d] })}>{details[d] ? '✓ ' : ''}{LIVE_DETAILS[d]}</ChipToggle>
+                      <ChipToggle key={d} selected={!!details[d]} onClick={() => setDetails({ ...details, [d]: !details[d] })}>{details[d] && <Check className="h-3.5 w-3.5" aria-hidden />}{LIVE_DETAILS[d]}</ChipToggle>
                     ))}
                   </div>
                 </section>

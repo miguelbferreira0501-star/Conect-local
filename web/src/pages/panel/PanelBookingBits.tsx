@@ -1,4 +1,4 @@
-import { Gift } from 'lucide-react';
+import { Check, Gift } from 'lucide-react';
 import { formatCents, loyaltyProgress } from '@conecta/shared';
 import { useDepositPaid } from '@/lib/benefits';
 import { Button } from '@/components/ui/Button';
@@ -12,10 +12,10 @@ export function PanelDeposit({ businessId, bookingId, deposit }: { businessId: s
   return (
     <div className="mt-2 flex flex-wrap items-center gap-2 rounded-xl border border-line p-2.5 text-sm">
       {deposit.status === 'paid' ? (
-        <span className="text-success-700">Sinal de {formatCents(deposit.cents)} recebido ✓</span>
+        <span className="inline-flex items-center gap-1 text-success-700"><Check className="h-4 w-4" aria-hidden />Sinal de {formatCents(deposit.cents)} recebido</span>
       ) : (
         <>
-          <span className="flex-1">Sinal de <strong>{formatCents(deposit.cents)}</strong> pelo Pix — confira no seu banco.</span>
+          <span className="flex-1">Sinal de <strong>{formatCents(deposit.cents)}</strong> pelo Pix, confira no seu banco.</span>
           <Button size="sm" variant="secondary" loading={paid.isPending}
             onClick={() => paid.mutate(bookingId, { onSuccess: () => toast('Sinal marcado como recebido.'), onError: (e) => toast(e.message, 'error') })}>
             Sinal recebido

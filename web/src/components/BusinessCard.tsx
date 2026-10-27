@@ -30,28 +30,28 @@ export function BusinessCard({ b, layout = 'list' }: { b: BusinessCardDTO; layou
   const [why, setWhy] = useState(false);
   if (layout === 'compact') {
     return (
-      <Link to={`/empresa/${b.slug}`} className="card group flex w-[260px] shrink-0 snap-start flex-col overflow-hidden transition hover:shadow-raised md:w-auto">
+      <Link to={`/empresa/${b.slug}`} className="card group flex w-[248px] shrink-0 snap-start flex-col overflow-hidden transition-colors duration-150 hover:border-control md:w-auto">
         <BusinessCover name={b.name} coverUrl={b.coverUrl} icon={b.category.icon} className="h-20" />
         <div className="flex flex-1 flex-col p-3.5">
-          <div className="-mt-9 mb-2 flex items-end justify-between">
-            <BusinessLogo name={b.name} logoUrl={b.logoUrl} size={48} className="ring-4 ring-white" />
+          <div className="relative z-[1] -mt-8 mb-2 flex items-end justify-between">
+            <BusinessLogo name={b.name} logoUrl={b.logoUrl} size={44} className="ring-[3px] ring-white" />
             {b.isDemo && <DemoTag />}
           </div>
-          <h3 className="line-clamp-1 font-semibold group-hover:text-brand-fg">{b.name}</h3>
+          <h3 className="line-clamp-1 font-semibold">{b.name}</h3>
           <p className="text-sm text-muted">{b.category.shortName}</p>
           <div className="mt-1.5"><RatingInline rating={b.rating} compact /></div>
-          <p className="mt-1 line-clamp-1 text-xs text-muted">{locationLabel(b)}</p>
+          <p className="mt-1 line-clamp-1 text-[13px] text-muted">{locationLabel(b)}</p>
         </div>
       </Link>
     );
   }
   return (
-    <article className="card relative overflow-hidden transition hover:shadow-raised">
+    <article className="card relative overflow-hidden transition-colors duration-150 hover:border-control">
       <Link to={`/empresa/${b.slug}`} className="flex gap-3.5 p-4" aria-label={`${b.name}, ${b.category.name}`}>
         <BusinessLogo name={b.name} logoUrl={b.logoUrl} size={64} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5 pr-8">
-            <h3 className="line-clamp-2 text-[17px] font-semibold leading-snug">{b.name}</h3>
+            <h3 className="line-clamp-2 text-base font-semibold leading-snug">{b.name}</h3>
             {b.isDemo && <DemoTag />}
           </div>
           <p className="text-sm text-muted">
@@ -79,7 +79,7 @@ export function BusinessCard({ b, layout = 'list' }: { b: BusinessCardDTO; layou
         <>
           <button
             onClick={() => setWhy(true)}
-            className="absolute right-2 top-2 inline-flex h-10 w-10 items-center justify-center rounded-full text-muted hover:bg-surface hover:text-ink"
+            className="absolute right-2 top-2 inline-flex h-10 w-10 items-center justify-center rounded-full text-muted hover:bg-raised hover:text-ink"
             aria-label={`Por que ${b.name} aparece nesta posição?`}
             title="Por que aparece aqui?"
           >
@@ -88,7 +88,7 @@ export function BusinessCard({ b, layout = 'list' }: { b: BusinessCardDTO; layou
           <Sheet open={why} onClose={() => setWhy(false)} title="Por que aparece aqui?">
             <ul className="space-y-2.5">
               {b.rankingExplanation.map((line) => (
-                <li key={line} className="flex gap-2 text-[15px]"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" />{line}</li>
+                <li key={line} className="flex gap-2 text-[15px]"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ink" />{line}</li>
               ))}
             </ul>
             {b.isNewcomer && <p className="mt-3 text-sm text-muted">“Nova na plataforma” indica que a empresa chegou há pouco tempo. Não é um selo de qualidade.</p>}

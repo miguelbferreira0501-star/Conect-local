@@ -108,7 +108,7 @@ export function BusinessProfileForm({ initial, submitLabel, onSubmit }: { initia
               <div>
                 <span className="label">Cidade</span>
                 <div className="flex min-h-[50px] items-center justify-between rounded-xl border border-line bg-card px-3.5">
-                  <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4 text-accent-600" />{cityName(f.cityIbge)}</span>
+                  <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4 text-muted" />{cityName(f.cityIbge)}</span>
                   <button type="button" className="text-sm font-medium text-brand-fg hover:underline" onClick={() => set({ cityIbge: 0 })}>Trocar</button>
                 </div>
               </div>
@@ -116,7 +116,7 @@ export function BusinessProfileForm({ initial, submitLabel, onSubmit }: { initia
               <div className="relative">
                 <TextField label="Cidade" value={cityTerm} onChange={(e) => setCityTerm(e.target.value)} disabled={!uf} placeholder={uf ? 'Digite o nome da cidade' : 'Escolha o estado primeiro'} error={errors.cityIbge} autoComplete="off" />
                 {cityMatches.length > 0 && (
-                  <ul className="absolute inset-x-0 z-10 mt-1 overflow-hidden rounded-xl border border-line bg-card shadow-raised">
+                  <ul className="absolute inset-x-0 z-10 mt-1 overflow-hidden rounded-xl border border-line bg-card shadow-float">
                     {cityMatches.map((c) => (
                       <li key={c.ibge}><button type="button" className="min-h-[44px] w-full px-4 text-left hover:bg-brand-50" onClick={() => { set({ cityIbge: c.ibge }); setCityTerm(''); }}>{c.name}</button></li>
                     ))}
@@ -162,7 +162,7 @@ export function BusinessProfileForm({ initial, submitLabel, onSubmit }: { initia
             <label htmlFor="area-search" className="sr-only">Adicionar cidade atendida</label>
             <input id="area-search" className="field" placeholder={uf ? 'Digite para adicionar uma cidade' : 'Escolha o estado primeiro'} disabled={!uf} value={areaTerm} onChange={(e) => setAreaTerm(e.target.value)} autoComplete="off" />
             {areaMatches.length > 0 && (
-              <ul className="absolute inset-x-0 z-10 mt-1 overflow-hidden rounded-xl border border-line bg-card shadow-raised">
+              <ul className="absolute inset-x-0 z-10 mt-1 overflow-hidden rounded-xl border border-line bg-card shadow-float">
                 {areaMatches.map((c) => (
                   <li key={c.ibge}><button type="button" className="min-h-[44px] w-full px-4 text-left hover:bg-brand-50" onClick={() => { set({ serviceAreaCities: [...f.serviceAreaCities, c.ibge] }); setAreaTerm(''); }}>+ {c.name}</button></li>
                 ))}

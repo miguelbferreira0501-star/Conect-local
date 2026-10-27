@@ -43,23 +43,23 @@ export function Sheet({
   if (!open) return null;
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center md:p-6">
-      <div className="absolute inset-0 bg-ink/45" onClick={onClose} aria-hidden="true" />
+      <div className="sheet-backdrop absolute inset-0 bg-ink/40" onClick={onClose} aria-hidden="true" />
       <div
         ref={ref}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`relative flex max-h-[92vh] w-full flex-col rounded-t-2xl bg-card shadow-raised outline-none md:rounded-2xl ${size === 'lg' ? 'md:max-w-2xl' : 'md:max-w-lg'}`}
+        className={`sheet-panel relative flex max-h-[92vh] w-full flex-col rounded-t-2xl bg-card shadow-float outline-none md:rounded-2xl ${size === 'lg' ? 'md:max-w-2xl' : 'md:max-w-lg'}`}
       >
-        <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3.5">
+        <div className="flex items-center justify-between gap-3 border-b border-rule px-5 py-3">
           <h2 id={titleId} className="text-lg font-semibold">{title}</h2>
-          <button data-close aria-label="Fechar" onClick={onClose} className="-mr-2 inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-surface">
+          <button data-close aria-label="Fechar" onClick={onClose} className="pressable -mr-2 inline-flex h-11 w-11 items-center justify-center rounded-full text-muted hover:bg-raised hover:text-ink">
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
-        {footer && <div className="pb-safe border-t border-line px-5 py-3">{footer}</div>}
+        {footer && <div className="pb-safe border-t border-rule px-5 py-3">{footer}</div>}
       </div>
     </div>,
     document.body,

@@ -43,7 +43,7 @@ function ReviewForm() {
   if (done && a) {
     return (
       <div className="card p-6 text-center">
-        <CheckCircle2 className="mx-auto h-14 w-14 text-accent-600" aria-hidden="true" />
+        <CheckCircle2 className="mx-auto h-12 w-12 text-success-700" aria-hidden="true" />
         <h2 className="mt-3 text-xl font-semibold">Obrigado pela avaliação!</h2>
         <p className="mt-2 text-muted">Ela já está publicada no perfil de {a.business.name}. Você pode editá-la por até 30 dias.</p>
         <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">

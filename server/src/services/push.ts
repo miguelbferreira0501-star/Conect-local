@@ -71,7 +71,7 @@ export async function removeSubscription(userId: string, endpoint: string) {
 
 export async function sendTest(userId: string) {
   const targets = await withUser(userId, (db) => query<Target>(`SELECT endpoint, p256dh, auth FROM push_subscriptions`, [], db));
-  const sent = await sendPush(targets, { title: `${BRAND.name}: notificações ativadas 🐾`, body: 'Você vai receber os avisos do seu pet por aqui.', url: '/' });
+  const sent = await sendPush(targets, { title: `${BRAND.name}: notificações ativadas`, body: 'Você vai receber os avisos do seu pet por aqui.', url: '/' });
   return { sent };
 }
 
@@ -85,7 +85,7 @@ export async function notifyLive(db: Db, bookingId: string, stage: LiveStage, no
     `SELECT pe.name AS pet, b.name AS biz FROM bookings bk JOIN businesses b ON b.id = bk.business_id LEFT JOIN pets pe ON pe.id = bk.pet_id WHERE bk.id = $1`, [bookingId], db))[0];
   const st = LIVE_STAGES[stage];
   later(() => sendPush(targets, {
-    title: `${st.emoji} ${info?.pet ?? 'Seu pet'}: ${st.label.toLowerCase()}`,
+    title: `${info?.pet ?? 'Seu pet'}: ${st.label.toLowerCase()}`,
     body: note || `${info?.biz ?? 'A empresa'} atualizou o Pet ao Vivo. Toque para ver.`,
     url: '/atividades', tag: `live-${bookingId}`,
   }));
@@ -99,7 +99,7 @@ export async function notifyBookingStatus(db: Db, bookingId: string, status: 'co
      FROM bookings bk JOIN businesses b ON b.id = bk.business_id JOIN cities ci ON ci.ibge = b.city_ibge JOIN services s ON s.id = bk.service_id WHERE bk.id = $1`, [bookingId], db))[0];
   if (!info) return;
   later(() => sendPush(targets, status === 'confirmed'
-    ? { title: '✅ Horário confirmado', body: `${info.svc} em ${info.biz} — ${info.quando}.`, url: '/atividades', tag: `booking-${bookingId}` }
+    ? { title: 'Horário confirmado', body: `${info.svc} em ${info.biz} — ${info.quando}.`, url: '/atividades', tag: `booking-${bookingId}` }
     : { title: 'Pedido não confirmado', body: `${info.biz} não pôde atender ${info.quando}. Que tal outro horário?`, url: '/atividades', tag: `booking-${bookingId}` }));
 }
 

@@ -37,12 +37,12 @@ function PetsList() {
           <ul className="space-y-2">
             {pets.data!.map((p) => (
               <li key={p.id}>
-                <button onClick={() => setEditing(p)} className="card flex w-full items-center gap-3 p-4 text-left transition hover:border-brand-200">
+                <button onClick={() => setEditing(p)} className="card flex w-full items-center gap-3 p-4 text-left transition-colors duration-150 hover:border-control">
                   <PetAvatar pet={p} size={56} />
                   <span className="min-w-0 flex-1">
                     <span className="block text-lg font-semibold">{p.name}</span>
                     <span className="block text-sm text-muted">{petSummary(p)}</span>
-                    {p.temperament.length > 0 && <span className="mt-1 block truncate text-xs text-accent-700">{p.temperament.join(' · ')}</span>}
+                    {p.temperament.length > 0 && <span className="mt-1 block truncate text-xs text-muted">{p.temperament.join(' · ')}</span>}
                   </span>
                   <span className="text-sm font-semibold text-brand-fg">Editar</span>
                 </button>

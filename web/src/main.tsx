@@ -7,6 +7,7 @@ import { AuthProvider } from './lib/auth';
 import { LocationProvider } from './lib/location';
 import { ApiError } from './lib/api';
 import { ToastProvider } from './components/ui/Toast';
+import '@fontsource-variable/dm-sans/wght.css';
 import './styles/index.css';
 
 // A prévia roda dentro de uma moldura sem URL própria: navegação em memória.

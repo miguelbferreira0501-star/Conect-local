@@ -3,6 +3,13 @@
 // Uso: servidor rodando (npm run build && npm start) e `node e2e/panel.mjs`. SHOTS=1 salva capturas.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
+/** Painel no celular: as seções ficam no "Menu do painel". */
+async function goSection(page, name) {
+  await page.getByRole('button', { name: 'Menu do painel' }).click();
+  await page.getByRole('dialog').getByRole('navigation', { name: 'Seções do painel' }).getByRole('link', { name }).click();
+  await page.getByRole('dialog').waitFor({ state: 'detached' });
+}
+
 const { chromium } = createRequire(import.meta.url)('playwright');
 const BASE = process.env.BASE_URL ?? 'http://localhost:3001';
 const SHOTS = process.env.SHOTS === '1';
@@ -58,7 +65,7 @@ try {
   await shot(owner, '2-inicio');
   ok('empresa cadastrada');
 
-  await owner.getByRole('navigation', { name: 'Seções do painel' }).getByRole('link', { name: 'Serviços' }).click();
+  await goSection(owner, 'Serviços');
   await owner.getByRole('button', { name: 'Adicionar serviço' }).click();
   await owner.getByLabel('Nome do serviço').fill('Banho relaxante');
   await owner.getByLabel('Valor (R$)').fill('65,00');
@@ -69,7 +76,7 @@ try {
   await owner.getByText('R$ 65,00 · 30 min · agendável').waitFor();
   ok('serviço cadastrado');
 
-  await owner.getByRole('navigation', { name: 'Seções do painel' }).getByRole('link', { name: 'Horários' }).click();
+  await goSection(owner, 'Horários');
   for (const day of ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']) {
     await owner.locator('li', { hasText: day }).getByRole('checkbox', { name: 'Aberto' }).check();
   }
@@ -78,7 +85,7 @@ try {
   await owner.getByText('Horários salvos e confirmados.').waitFor();
   ok('horários salvos');
 
-  await owner.getByRole('navigation', { name: 'Seções do painel' }).getByRole('link', { name: 'Equipe' }).click();
+  await goSection(owner, 'Equipe');
   await owner.getByRole('button', { name: /^Adicionar banhista/ }).click();
   await owner.getByLabel('Nome', { exact: true }).fill('Rita');
   await owner.getByRole('button', { name: 'Salvar', exact: true }).click();
@@ -86,7 +93,7 @@ try {
   await shot(owner, '4b-equipe');
   ok('profissional cadastrada');
 
-  await owner.getByRole('navigation', { name: 'Seções do painel' }).getByRole('link', { name: 'Fotos' }).click();
+  await goSection(owner, 'Fotos');
   const chooser = owner.waitForEvent('filechooser');
   await owner.locator('.card', { hasText: 'Foto de capa' }).getByRole('button', { name: 'Enviar' }).click();
   await (await chooser).setFiles('e2e/foto-teste.jpg');
@@ -117,7 +124,7 @@ try {
   await customer.getByText('Pedido de agendamento registrado').waitFor();
   ok('cliente agendou');
 
-  await owner.getByRole('navigation', { name: 'Seções do painel' }).getByRole('link', { name: /Pedidos/ }).click();
+  await goSection(owner, /Pedidos/);
   await owner.getByText('Carlos Cliente').waitFor();
   await owner.getByText('Com: Rita').waitFor();
   await owner.getByText('Pipoca', { exact: true }).waitFor();
@@ -133,7 +140,7 @@ try {
   ok('cliente vê o agendamento confirmado com a profissional');
 
   // Pet ao Vivo: empresa manda a etapa com foto; o tutor vê
-  await owner.getByRole('navigation', { name: 'Seções do painel' }).getByRole('link', { name: 'Agenda' }).click();
+  await goSection(owner, 'Agenda');
   await owner.getByRole('button', { name: /Próxima semana|Pet ao Vivo/ }).first().waitFor();
   if (!(await owner.getByRole('button', { name: 'Pet ao Vivo' }).count())) await owner.getByRole('button', { name: 'Próxima semana' }).click();
   await owner.getByRole('button', { name: 'Pet ao Vivo' }).first().click();

@@ -24,8 +24,8 @@ export function PanelPromotePage() {
   const action = reservation ? 'reservar sua mesa' : b.profile.acceptsBooking ? 'agendar' : 'pedir orçamento';
   const texts = {
     whatsapp: `Agora você pode ${action} e ver nossas avaliações pelo ${BRAND.name}: ${url}`,
-    instagram: `📍 ${reservation ? 'Reserve' : b.profile.acceptsBooking ? 'Agende' : 'Peça orçamento'} pelo ${BRAND.name} 👇\n${url}`,
-    afterService: `Obrigado pela visita! Se gostou, deixe sua avaliação no ${BRAND.name} — ajuda muito: ${url}`,
+    instagram: `${reservation ? 'Reserve' : b.profile.acceptsBooking ? 'Agende' : 'Peça orçamento'} pelo ${BRAND.name}:\n${url}`,
+    afterService: `Obrigado pela visita! Se gostou, deixe sua avaliação no ${BRAND.name}, ajuda muito: ${url}`,
   };
 
   return (
@@ -51,11 +51,11 @@ export function PanelPromotePage() {
 
       <div className="flex flex-wrap justify-center gap-2">
         <Button icon={<Printer className="h-4 w-4" />} onClick={() => window.print()}>Imprimir cartaz</Button>
-        <a className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-line bg-card px-4 font-semibold text-brand-fg hover:bg-surface"
+        <a className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-line bg-card px-4 font-semibold text-brand-fg hover:bg-raised"
           href={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`} download={`qrcode-${b.slug}.svg`}>
           <Download className="h-4 w-4" aria-hidden="true" />Baixar QR Code
         </a>
-        <a className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-line bg-card px-4 font-semibold text-brand-fg hover:bg-surface"
+        <a className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-line bg-card px-4 font-semibold text-brand-fg hover:bg-raised"
           href={`https://wa.me/?text=${encodeURIComponent(texts.whatsapp)}`} target="_blank" rel="noopener noreferrer">
           <MessageCircle className="h-4 w-4" aria-hidden="true" />Enviar no WhatsApp
         </a>

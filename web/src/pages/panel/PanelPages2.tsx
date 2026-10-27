@@ -80,7 +80,7 @@ export function PanelStaffPage() {
         <ul className="space-y-2">
           {b.staff.map((s) => (
             <li key={s.id} className="card flex flex-wrap items-center gap-3 p-4">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-brand-fg"><UserRound className="h-5 w-5" /></span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-raised text-muted"><UserRound className="h-5 w-5" aria-hidden /></span>
               <div className="min-w-0 flex-1">
                 <p className="font-semibold">{s.name}{s.roleTitle ? <span className="font-normal text-muted"> · {s.roleTitle}</span> : null} {s.paused && <Tag tone="warning">Pausada</Tag>}</p>
                 <p className="text-sm text-muted">
@@ -189,20 +189,20 @@ export function PanelAgendaPage() {
       ) : (
         [...byDay.entries()].map(([day, list]) => (
           <section key={day} className="card p-4">
-            <h2 className="mb-2 font-semibold capitalize">{day}</h2>
+            <h2 className="mb-2 font-semibold first-letter:uppercase">{day}</h2>
             <ul className="divide-y divide-line">
               {list.map((i) => (
                 <li key={i.id} className="flex flex-wrap items-center gap-3 py-2.5">
                   <span className="w-20 font-semibold tabular-nums">{when(i)}</span>
                   <div className="min-w-0 flex-1">
                     <p className="font-medium">{i.serviceName}{i.partySize ? <span className="font-normal"> · {i.partySize} pessoas</span> : null}{i.staffName ? <span className="font-normal text-muted"> · {i.staffName}</span> : null}</p>
-                    <p className="text-sm text-muted">{i.pet ? <span className="font-medium text-accent-700">🐾 {i.pet.name} · </span> : null}{i.customerName ?? 'Cliente'}{i.customerPhone ? ` · ${i.customerPhone}` : ''}</p>
+                    <p className="text-sm text-muted">{i.pet ? <span className="font-medium text-ink">{i.pet.name} · </span> : null}{i.customerName ?? 'Cliente'}{i.customerPhone ? ` · ${i.customerPhone}` : ''}</p>
                     <BookingExtras endsAt={i.endsAt} mode={i.mode} address={i.address} destination={i.destination} details={i.details} />
                     {i.deposit && i.status !== 'cancelled' && i.status !== 'declined' && <PanelDeposit businessId={b.id} bookingId={i.id} deposit={i.deposit} />}
                   </div>
                   {i.status !== 'requested' && (
                     <button onClick={() => setLiveTarget({ id: i.id, title: `${i.serviceName} · ${when(i)}`, status: i.status, pet: i.pet })}
-                      className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl bg-accent-600 px-3 text-sm font-semibold text-[#1f1005] hover:bg-accent-700">
+                      className="pressable inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-control bg-card px-3 text-sm font-semibold text-ink hover:bg-raised">
                       <Radio className="h-4 w-4" aria-hidden="true" />{i.liveCount ? `Ao vivo (${i.liveCount})` : 'Pet ao Vivo'}
                     </button>
                   )}
@@ -229,7 +229,7 @@ function AgendaWhatsApp({ item: i, biz }: { item: PanelAgendaItemDTO; biz: Panel
   const href = whatsappLink(i.customerPhone, text);
   if (!href) return null;
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-line bg-card px-3 text-sm font-semibold text-brand-fg hover:bg-surface">
+    <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-line bg-card px-3 text-sm font-semibold text-brand-fg hover:bg-raised">
       <MessageCircle className="h-4 w-4" aria-hidden="true" />{upcoming ? 'Enviar lembrete' : 'Pedir avaliação'}
     </a>
   );
@@ -261,16 +261,15 @@ export function PanelPlanPage() {
 
   return (
     <div className="space-y-4">
-      <Alert tone="info">O plano não muda a sua posição na busca nem dá selos — isso depende só das avaliações e do perfil.</Alert>
 
       {current !== 'free' && !sub && st?.planUntil && (
-        <Alert tone="success" title={`Teste grátis até ${new Date(st.planUntil).toLocaleDateString('pt-BR')}`}>
-          Aproveite todos os recursos. Depois dessa data, a empresa só continua no app com a assinatura — assine agora e a primeira cobrança só vem quando o teste acabar.
+        <Alert tone="info" title={`Teste grátis até ${new Date(st.planUntil).toLocaleDateString('pt-BR')}`}>
+          Aproveite todos os recursos. Depois dessa data, a empresa só continua no app com a assinatura, assine agora e a primeira cobrança só vem quando o teste acabar.
         </Alert>
       )}
       {current === 'free' && !b.isDemo && (
         <Alert tone="warning" title="Empresa fora do app">
-          Sem assinatura, sua empresa não aparece na busca e o painel fica bloqueado. Assine para voltar na hora — nada do que você cadastrou foi apagado.
+          Sem assinatura, sua empresa não aparece na busca e o painel fica bloqueado. Assine para voltar na hora, nada do que você cadastrou foi apagado.
         </Alert>
       )}
 
@@ -290,7 +289,7 @@ export function PanelPlanPage() {
           {sub.status === 'pending' && st?.lastPayment?.invoiceUrl && (
             <div className="mt-3 flex flex-wrap gap-2">
               <a href={st.lastPayment.invoiceUrl} target="_blank" rel="noopener noreferrer" className={buttonClass('primary', 'sm')}>Pagar agora</a>
-              <Button size="sm" variant="secondary" onClick={() => status.refetch()}>Já paguei — verificar</Button>
+              <Button size="sm" variant="secondary" onClick={() => status.refetch()}>Já paguei, verificar</Button>
             </div>
           )}
           {sub.method === 'PIX' && sub.status === 'active' && <p className="mt-2 text-sm text-muted">Todo mês você recebe a cobrança Pix por e-mail. Também dá para pagar pelo link da fatura.</p>}
@@ -300,7 +299,6 @@ export function PanelPlanPage() {
       )}
 
       <section className="card relative overflow-hidden p-5">
-        <span className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-accent-600/20" aria-hidden="true" />
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold">{PLANS.pro.name}</h2>
           <Tag tone="accent" icon={<Crown className="h-3.5 w-3.5" />}>Tudo incluído</Tag>
@@ -308,7 +306,7 @@ export function PanelPlanPage() {
         <p className="mt-1 text-3xl font-bold tabular-nums">{formatCents(PLANS.pro.priceCents)}<span className="text-sm font-normal text-muted">/mês</span></p>
         <p className="text-sm text-muted">Sem comissão por atendimento. Sem fidelidade: cancele quando quiser.</p>
         <ul className="mt-4 space-y-1.5 text-sm">
-          {PLANS.pro.highlights.map((h) => <li key={h} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-accent-600" />{h}</li>)}
+          {PLANS.pro.highlights.map((h) => <li key={h} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-success-700" aria-hidden />{h}</li>)}
         </ul>
         <div className="mt-5">
           {sub && sub.status !== 'canceled' ? null
@@ -325,13 +323,14 @@ export function PanelPlanPage() {
           <p className="mt-1 text-sm text-muted">O pagamento on-line ainda não foi ativado. Fale com a equipe pelo e-mail do suporte informando a empresa e o plano.</p>
         </section>
       )}
-      <p className="text-xs text-muted">Pagamentos processados pela Asaas. Seus dados de cartão e CPF/CNPJ ficam com o meio de pagamento — o Pataí não os armazena.</p>
+      <p className="text-xs text-muted">O plano não muda a sua posição na busca nem dá selos: isso depende só das avaliações e do perfil.</p>
+      <p className="text-xs text-muted">Pagamentos processados pela Asaas. Seus dados de cartão e CPF/CNPJ ficam com o meio de pagamento, o Pataí não os armazena.</p>
 
       {buying && <CheckoutSheet businessId={b.id} plan={buying} startsAt={current !== 'free' ? st?.planUntil : null} onClose={() => { setBuying(null); refresh(); }} onPaid={() => { setBuying(null); refresh(); toast(`Pagamento confirmado! Plano ${PLANS[buying].name} ativo.`); }} />}
       <Sheet open={canceling} onClose={() => setCanceling(false)} title="Cancelar assinatura?"
         footer={<div className="flex gap-3"><Button variant="secondary" onClick={() => setCanceling(false)}>Voltar</Button><Button block variant="danger" loading={cancelBusy}
           onClick={async () => { setCancelBusy(true); try { await api.post(`/panel/businesses/${b.id}/billing/cancel`); toast('Assinatura cancelada.'); refresh(); setCanceling(false); } catch (e) { toast((e as Error).message, 'error'); } finally { setCancelBusy(false); } }}>Cancelar assinatura</Button></div>}>
-        <p>Não haverá novas cobranças. O plano continua valendo até o fim do período já pago; depois, sua empresa sai do app (some da busca e o painel fica bloqueado) — sem perder perfil, avaliações ou histórico. Dá para voltar quando quiser.</p>
+        <p>Não haverá novas cobranças. O plano continua valendo até o fim do período já pago; depois, sua empresa sai do app (some da busca e o painel fica bloqueado), sem perder perfil, avaliações ou histórico. Dá para voltar quando quiser.</p>
       </Sheet>
     </div>
   );
@@ -384,7 +383,7 @@ function CheckoutSheet({ businessId, plan, onClose, onPaid, startsAt }: { busine
   };
 
   return (
-    <Sheet open onClose={onClose} title={result ? 'Finalize o pagamento' : `Assinar ${p.name} — ${formatCents(p.priceCents)}/mês`}
+    <Sheet open onClose={onClose} title={result ? 'Finalize o pagamento' : `Assinar ${p.name} por ${formatCents(p.priceCents)}/mês`}
       footer={!result ? <Button block size="lg" loading={loading} onClick={submit}>{later ? 'Cadastrar assinatura' : method === 'PIX' ? 'Gerar Pix' : 'Ir para o pagamento com cartão'}</Button> : undefined}>
       {!result ? (
         <div className="space-y-4">
@@ -405,7 +404,7 @@ function CheckoutSheet({ businessId, plan, onClose, onPaid, startsAt }: { busine
         </div>
       ) : later ? (
         <div className="space-y-3 text-center" data-testid="subscription-scheduled">
-          <Check className="mx-auto h-10 w-10 text-accent-600" aria-hidden />
+          <Check className="mx-auto h-10 w-10 text-success-700" aria-hidden />
           <p className="text-lg font-semibold">Assinatura cadastrada!</p>
           <p className="text-muted">Aproveite o teste grátis. A primeira cobrança de {formatCents(p.priceCents)} vence em {later}
             {result.method === 'PIX'
@@ -419,20 +418,20 @@ function CheckoutSheet({ businessId, plan, onClose, onPaid, startsAt }: { busine
           <p>Abra o app do seu banco, escolha <strong>Pix → Ler QR Code</strong> ou use o “copia e cola”.</p>
           <img src={result.pix.qrCodeImage} alt="QR Code Pix" className="mx-auto h-56 w-56 rounded-xl border border-line bg-card p-2" />
           <div className="rounded-xl bg-surface p-3 text-left">
-            <p className="break-all font-mono text-xs">{result.pix.copyPaste}</p>
+            <p className="break-all font-mono text-xs">{result.pix.copyPaste}</p> {/* taste-skill-ignore: o Pix copia e cola é um código */}
           </div>
           <Button variant="secondary" icon={copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             onClick={async () => { try { await navigator.clipboard.writeText(result.pix!.copyPaste); setCopied(true); } catch { /* sem permissão */ } }}>
             {copied ? 'Código copiado' : 'Copiar código Pix'}
           </Button>
-          <p className="flex items-center justify-center gap-2 text-sm text-muted"><span className="h-2 w-2 animate-pulse rounded-full bg-accent-600" /> Aguardando a confirmação do pagamento…</p>
+          <p className="flex items-center justify-center gap-2 text-sm text-muted"><span className="h-2 w-2 rounded-full bg-brand-700" aria-hidden /> Aguardando a confirmação do pagamento…</p>
           <p className="text-xs text-muted">Assim que o Pix cair, o plano é ativado automaticamente. Pode fechar esta janela.</p>
         </div>
       ) : (
         <div className="space-y-4 text-center">
           <p>{result.method === 'PIX' ? 'Abra a fatura para pagar com Pix.' : 'Abrimos a página segura do meio de pagamento em uma nova aba. Se não abriu, toque abaixo.'}</p>
           {result.invoiceUrl && <a href={result.invoiceUrl} target="_blank" rel="noopener noreferrer" className={buttonClass('primary', 'lg', 'w-full')}>{result.method === 'PIX' ? 'Abrir a fatura' : 'Pagar com cartão'}</a>}
-          <p className="flex items-center justify-center gap-2 text-sm text-muted"><span className="h-2 w-2 animate-pulse rounded-full bg-accent-600" /> Aguardando a confirmação do pagamento…</p>
+          <p className="flex items-center justify-center gap-2 text-sm text-muted"><span className="h-2 w-2 rounded-full bg-brand-700" aria-hidden /> Aguardando a confirmação do pagamento…</p>
         </div>
       )}
     </Sheet>

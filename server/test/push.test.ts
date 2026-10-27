@@ -57,7 +57,7 @@ describe('notificações no celular', () => {
     const av = (await call('GET', `/businesses/${biz.id}/availability?serviceId=${svc.id}&date=${day(1)}`)).body;
     const bk = await call('POST', '/bookings', { businessId: biz.id, serviceId: svc.id, startsAt: av.slots[2].startsAt, petId: pet.id }, t.cookie);
     await flush();
-    expect(to(oDev.endpoint).at(-1)!.msg).toMatchObject({ title: '🐾 Novo pedido de agendamento', url: `/empresas/${biz.id}/pedidos` });
+    expect(to(oDev.endpoint).at(-1)!.msg).toMatchObject({ title: 'Novo pedido de agendamento', url: `/empresas/${biz.id}/pedidos` });
 
     // Quem não fez pedido não consegue os aparelhos da empresa
     const stranger = await newUser();
@@ -66,11 +66,11 @@ describe('notificações no celular', () => {
 
     await call('POST', `/panel/businesses/${biz.id}/requests/booking/${bk.body.id}`, { action: 'confirm' }, o.cookie);
     await flush();
-    expect(to(tDev.endpoint).at(-1)!.msg.title).toBe('✅ Horário confirmado');
+    expect(to(tDev.endpoint).at(-1)!.msg.title).toBe('Horário confirmado');
 
     await call('POST', `/panel/businesses/${biz.id}/bookings/${bk.body.id}/live`, { stage: 'bath' }, o.cookie);
     await flush();
-    expect(to(tDev.endpoint).at(-1)!.msg).toMatchObject({ title: '🛁 Thor: no banho', url: '/atividades' });
+    expect(to(tDev.endpoint).at(-1)!.msg).toMatchObject({ title: 'Thor: no banho', url: '/atividades' });
 
     // Aparelho que sumiu é esquecido
     gone.add(tDev.endpoint);

@@ -57,7 +57,7 @@ function QuoteForm({ b }: { b: BusinessDetailDTO }) {
   if (done) {
     return (
       <div className="card p-6 text-center">
-        <CheckCircle2 className="mx-auto h-14 w-14 text-accent-600" aria-hidden="true" />
+        <CheckCircle2 className="mx-auto h-12 w-12 text-success-700" aria-hidden="true" />
         <h2 className="mt-3 text-xl font-semibold">Pedido de orçamento registrado</h2>
         <p className="mt-2 text-muted">Seu pedido para <strong className="text-ink">{b.name}</strong> foi salvo. A empresa responderá pelo contato que você escolheu.</p>
         {b.isDemo && <div className="mt-3 text-left"><Alert tone="warning">Empresa de exemplo: nenhuma empresa real recebeu este pedido.</Alert></div>}

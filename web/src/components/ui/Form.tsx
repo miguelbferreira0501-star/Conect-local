@@ -77,8 +77,8 @@ export function ChipToggle({ selected, onClick, children, icon }: { selected: bo
       type="button"
       aria-pressed={selected}
       onClick={onClick}
-      className={`inline-flex min-h-[40px] items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition ${
-        selected ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-card text-ink hover:border-brand-200 hover:bg-brand-50'
+      className={`pressable inline-flex min-h-[40px] items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition-colors duration-150 ${
+        selected ? 'border-brand-700 bg-brand-50 text-brand-900' : 'border-control bg-card text-ink hover:bg-raised'
       }`}
     >
       {icon}

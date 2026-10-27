@@ -72,7 +72,7 @@ export function BusinessPage() {
   const tabs: Array<{ id: TabId; label: string }> = [
     { id: 'visao-geral', label: 'Visão geral' },
     ...(b.services.length ? [{ id: 'servicos' as const, label: isReservationCategory(b.category.slug) ? 'Cardápio' : 'Serviços' }] : []),
-    { id: 'avaliacoes', label: `Avaliações${b.rating.count ? ` (${b.rating.count})` : ''}` },
+    { id: 'avaliacoes', label: 'Avaliações' },
     ...(b.photos.length ? [{ id: 'fotos' as const, label: 'Fotos' }] : []),
     ...(hasContact(b) ? [{ id: 'contato' as const, label: 'Contato' }] : []),
   ];
@@ -94,11 +94,11 @@ export function BusinessPage() {
         <BusinessCover name={b.name} coverUrl={b.coverUrl} icon={b.category.icon} className="h-36 md:h-52" />
         <div className="absolute inset-x-0 top-0">
           <div className="container-app flex items-center justify-between py-3">
-            <button aria-label="Voltar" onClick={() => (loc.key !== 'default' ? nav(-1) : nav('/'))} className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-card/95 shadow-card hover:bg-card">
+            <button aria-label="Voltar" onClick={() => (loc.key !== 'default' ? nav(-1) : nav('/'))} className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line bg-card hover:bg-raised">
               <ArrowLeft className="h-5 w-5" />
             </button>
             <div className="flex gap-2">
-              <button aria-label="Compartilhar" onClick={share} className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-card/95 shadow-card hover:bg-card"><Share2 className="h-5 w-5" /></button>
+              <button aria-label="Compartilhar" onClick={share} className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line bg-card hover:bg-raised"><Share2 className="h-5 w-5" /></button>
               <FavoriteButton businessId={b.id} isFavorite={b.isFavorite} name={b.name} variant="overlay" />
             </div>
           </div>
@@ -137,10 +137,10 @@ export function BusinessPage() {
           </div>
         </div>
 
-        <div role="tablist" aria-label="Seções da empresa" className="scroll-row sticky top-0 z-20 mt-5 border-b border-line bg-surface/95 pb-0 backdrop-blur">
+        <div role="tablist" aria-label="Seções da empresa" className="sticky top-0 z-20 mt-5 flex gap-5 overflow-x-auto border-b border-line bg-surface [scrollbar-width:none] md:gap-7">
           {tabs.map((t) => (
             <button key={t.id} role="tab" id={`tab-${t.id}`} aria-selected={current === t.id} aria-controls={`panel-${t.id}`} onClick={() => setTab(t.id)}
-              className={`min-h-[48px] shrink-0 border-b-2 px-3 text-[15px] font-medium transition ${current === t.id ? 'border-brand-700 text-brand-fg' : 'border-transparent text-muted hover:text-ink'}`}>
+              className={`-mb-px min-h-[48px] shrink-0 border-b-2 text-sm font-medium transition-colors duration-150 md:text-[15px] ${current === t.id ? 'border-ink text-ink' : 'border-transparent text-muted hover:text-ink'}`}>
               {t.label}
             </button>
           ))}
@@ -160,7 +160,7 @@ export function BusinessPage() {
       </div>
 
       {/* Barra de ação fixa no celular */}
-      <div className="fixed inset-x-0 bottom-[60px] z-30 border-t border-line bg-card/95 px-4 py-2.5 backdrop-blur md:hidden">
+      <div className="fixed inset-x-0 bottom-[58px] z-30 border-t border-line bg-card px-4 py-2.5 md:hidden">
         <div className="mx-auto flex max-w-lg gap-2.5">
           <PrimaryActions b={b} primary={primary} onContact={() => setTab('contato')} compact />
         </div>
@@ -242,6 +242,23 @@ function Overview({ b, onTab }: { b: BusinessDetailDTO; onTab: (t: TabId) => voi
             </ul>
           </section>
         )}
+        <section className="card p-5">
+          <h2 className="mb-2 flex items-center gap-2 font-semibold"><ShieldCheck className="h-5 w-5 text-muted" aria-hidden="true" /> Confiança</h2>
+          {b.badges.length === 0 ? (
+            <p className="text-sm text-muted">Esta empresa ainda não cumpre os critérios de nenhum selo.</p>
+          ) : (
+            <ul className="space-y-3">
+              {b.badges.map((id) => (
+                <li key={id}>
+                  <TrustBadge id={id} withTitle={false} />
+                  <p className="mt-1 text-sm text-muted">{BADGES[id].criteria}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-3 text-sm text-muted">Na plataforma desde {new Date(b.createdAt).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}.</p>
+          <Link to="/como-funciona" className="mt-1 inline-block text-sm font-semibold text-brand-fg hover:underline">Como funcionam os selos</Link>
+        </section>
       </div>
 
       <aside className="space-y-5">
@@ -261,7 +278,7 @@ function Overview({ b, onTab }: { b: BusinessDetailDTO; onTab: (t: TabId) => voi
         )}
         {b.openingHours && Object.keys(b.openingHours).length > 0 && (
           <section className="card p-5">
-            <h2 className="mb-1 flex items-center gap-2 font-semibold"><Clock className="h-5 w-5 text-brand-fg" aria-hidden="true" /> Horários</h2>
+            <h2 className="mb-1 flex items-center gap-2 font-semibold"><Clock className="h-5 w-5 text-muted" aria-hidden="true" /> Horários</h2>
             {b.hoursFresh ? (
               b.modes.includes('in_person') && (
                 <p className={`mb-2 text-sm font-medium ${isOpenAt(b.openingHours, today, b.timezone) ? 'text-accent-700' : 'text-muted'}`}>
@@ -283,23 +300,6 @@ function Overview({ b, onTab }: { b: BusinessDetailDTO; onTab: (t: TabId) => voi
             </table>
           </section>
         )}
-        <section className="card p-5">
-          <h2 className="mb-2 flex items-center gap-2 font-semibold"><ShieldCheck className="h-5 w-5 text-accent-600" aria-hidden="true" /> Confiança</h2>
-          {b.badges.length === 0 ? (
-            <p className="text-sm text-muted">Esta empresa ainda não cumpre os critérios de nenhum selo.</p>
-          ) : (
-            <ul className="space-y-3">
-              {b.badges.map((id) => (
-                <li key={id}>
-                  <TrustBadge id={id} withTitle={false} />
-                  <p className="mt-1 text-sm text-muted">{BADGES[id].criteria}</p>
-                </li>
-              ))}
-            </ul>
-          )}
-          <p className="mt-3 text-sm text-muted">Na plataforma desde {new Date(b.createdAt).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}.</p>
-          <Link to="/como-funciona" className="mt-1 inline-block text-sm font-semibold text-brand-fg hover:underline">Como funcionam os selos</Link>
-        </section>
       </aside>
     </div>
   );
@@ -316,7 +316,7 @@ function Services({ b }: { b: BusinessDetailDTO }) {
               {s.description && <p className="mt-0.5 text-sm text-muted">{s.description}</p>}
               <p className="mt-1 flex flex-wrap gap-x-3 text-sm text-muted">
                 {s.durationMinutes && <span className="inline-flex items-center gap-1"><Clock className="h-4 w-4" aria-hidden="true" />{formatDuration(s.durationMinutes)}</span>}
-                {s.bookable && <span className="inline-flex items-center gap-1 text-accent-700"><CalendarCheck className="h-4 w-4" aria-hidden="true" />Agendamento on-line</span>}
+                {s.bookable && <span className="inline-flex items-center gap-1 text-ink"><CalendarCheck className="h-4 w-4" aria-hidden="true" />Agendamento on-line</span>}
                 {!!s.depositCents && b.pixKey && <span>Sinal de {formatCents(s.depositCents)} no Pix</span>}
               </p>
               {s.notes && <p className="mt-1 text-sm text-ink/80">{s.notes}</p>}
@@ -362,7 +362,7 @@ function Reviews({ b }: { b: BusinessDetailDTO }) {
                   const count = b.ratingDistribution[n as 1];
                   return (
                     <li key={n}>
-                      <button className={`flex w-full items-center gap-2 rounded-lg px-1 py-1 text-sm hover:bg-surface ${rating === n ? 'bg-brand-50' : ''}`} onClick={() => { setRating(rating === n ? undefined : n); setPage(1); }}
+                      <button className={`flex w-full items-center gap-2 rounded-lg px-1 py-1 text-sm hover:bg-raised ${rating === n ? 'bg-brand-50' : ''}`} onClick={() => { setRating(rating === n ? undefined : n); setPage(1); }}
                         aria-label={`${n} estrelas: ${count} avaliações. ${rating === n ? 'Remover filtro' : 'Filtrar'}`} aria-pressed={rating === n}>
                         <span className="w-3 text-muted">{n}</span>
                         <Star className="h-3.5 w-3.5 text-star" fill="currentColor" strokeWidth={0} aria-hidden="true" />
@@ -412,7 +412,7 @@ function Reviews({ b }: { b: BusinessDetailDTO }) {
                   </div>
                 </div>
                 {!r.isMine && (
-                  <button aria-label="Denunciar avaliação" title="Denunciar" className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted hover:bg-surface" onClick={() => setReportId(r.id)}>
+                  <button aria-label="Denunciar avaliação" title="Denunciar" className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted hover:bg-raised" onClick={() => setReportId(r.id)}>
                     <Flag className="h-4 w-4" />
                   </button>
                 )}
@@ -512,7 +512,7 @@ function Contact({ b }: { b: BusinessDetailDTO }) {
       <ul className="card divide-y divide-line">
         {items.map((i) => (
           <li key={i.label} className="flex items-center gap-3 p-4">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-fg"><i.icon className="h-5 w-5" aria-hidden="true" /></span>
+            <i.icon className="h-5 w-5 shrink-0 text-muted" aria-hidden="true" />
             <div className="min-w-0 flex-1">
               <p className="text-sm text-muted">{i.label}</p>
               <p className="truncate font-medium">{i.value}</p>

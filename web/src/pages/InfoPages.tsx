@@ -25,11 +25,11 @@ export function HowItWorksPage() {
           <p>Usamos uma <strong>nota ajustada</strong> (média bayesiana): cada empresa começa como se tivesse {RANKING_PARAMS.priorWeight} avaliações com a média geral da plataforma. Conforme recebe avaliações reais, a nota ajustada se aproxima da média dela.</p>
           <p>Na ordem “Mais relevantes”, combinamos:</p>
           <ul className="list-disc space-y-1 pl-5">
-            <li><strong>Nota ajustada</strong> — {pct(w.quality)}</li>
-            <li><strong>Quantidade de avaliações</strong>, multiplicada pela nota (muitas avaliações ruins não ajudam) — {pct(w.volume)}</li>
-            <li><strong>Avaliações recentes</strong> (o peso cai pela metade a cada {RANKING_PARAMS.recencyHalfLifeDays} dias sem novas avaliações) — {pct(w.recency)}</li>
-            <li><strong>Consistência</strong> das notas (pouca variação entre clientes) — {pct(w.consistency)}</li>
-            <li><strong>Perfil completo</strong> (descrição, contatos, horários, serviços com preço, fotos) — {pct(w.completeness)}</li>
+            <li><strong>Nota ajustada</strong>: {pct(w.quality)}</li>
+            <li><strong>Quantidade de avaliações</strong>, multiplicada pela nota (muitas avaliações ruins não ajudam, {pct(w.volume)}</li>
+            <li><strong>Avaliações recentes</strong> (o peso cai pela metade a cada {RANKING_PARAMS.recencyHalfLifeDays} dias sem novas avaliações, {pct(w.recency)}</li>
+            <li><strong>Consistência</strong> das notas (pouca variação entre clientes, {pct(w.consistency)}</li>
+            <li><strong>Perfil completo</strong> (descrição, contatos, horários, serviços com preço, fotos, {pct(w.completeness)}</li>
           </ul>
           <p>Depois, o resultado é ajustado pela <strong>relevância para o que você pesquisou</strong> e pela <strong>localização</strong>: empresas com sede na sua cidade vêm antes das que apenas atendem a região ou atendem só on-line.</p>
           <p>Para não esconder quem acabou de chegar, a cada {RANKING_PARAMS.newcomerSlotEvery} posições reservamos uma vaga para uma empresa nova (até {RANKING_PARAMS.newcomerMaxDays} dias e menos de {RANKING_PARAMS.newcomerMaxReviews} avaliações). Ela aparece com a etiqueta “Nova na plataforma”, que <strong>não é selo de qualidade</strong>.</p>

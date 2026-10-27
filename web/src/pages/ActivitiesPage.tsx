@@ -69,9 +69,13 @@ function ActivityList() {
           <p className="text-sm"><strong>{toReview === 1 ? '1 serviço aguarda' : `${toReview} serviços aguardam`} sua avaliação.</strong> Sua opinião ajuda outras pessoas a decidir.</p>
         </div>
       )}
-      <div className="mb-4 flex gap-2">
-        <ChipToggle selected={filter === 'open'} onClick={() => setFilter('open')}>Em andamento</ChipToggle>
-        <ChipToggle selected={filter === 'history'} onClick={() => setFilter('history')}>Histórico</ChipToggle>
+      <div role="tablist" aria-label="Filtrar agenda" className="mb-5 flex gap-5 border-b border-line">
+        {([['open', 'Em andamento'], ['history', 'Histórico']] as const).map(([id, label]) => (
+          <button key={id} role="tab" aria-selected={filter === id} onClick={() => setFilter(id)}
+            className={`-mb-px min-h-[44px] border-b-2 text-[15px] font-medium transition-colors duration-150 ${filter === id ? 'border-ink text-ink' : 'border-transparent text-muted hover:text-ink'}`}>
+            {label}
+          </button>
+        ))}
       </div>
       {list.length === 0 ? (
         <p className="py-8 text-center text-muted">{filter === 'open' ? 'Nada em andamento no momento.' : 'Seu histórico aparecerá aqui.'}</p>
@@ -127,7 +131,7 @@ function ActivityCard({ a }: { a: ActivityDTO }) {
           </div>
           <h3 className="mt-1 font-semibold"><Link to={`/empresa/${a.business.slug}`} className="hover:underline">{a.business.name}</Link></h3>
           <p className="text-sm text-muted">{a.serviceName ?? a.business.categoryName}</p>
-          {a.pet && <p className="mt-0.5 flex items-center gap-1 text-sm font-medium text-accent-700"><PawPrint className="h-4 w-4" aria-hidden="true" /> {a.pet.name}</p>}
+          {a.pet && <p className="mt-0.5 flex items-center gap-1 text-sm font-medium text-ink"><PawPrint className="h-4 w-4 text-muted" aria-hidden="true" /> {a.pet.name}</p>}
           <p className="mt-0.5 text-sm">{when}{a.partySize ? ` · ${a.partySize} ${a.partySize === 1 ? 'pessoa' : 'pessoas'}` : ''}{a.staffName ? ` · ${a.partySize ? '' : 'com '}${a.staffName}` : ''}</p>
           {a.type === 'booking' && <BookingExtras endsAt={a.endsAt} mode={a.bookingMode} address={a.address} destination={a.destination} details={a.details} fromPackage={a.fromPackage} />}
           {a.type === 'quote' && a.status === 'sent' && <p className="mt-1 text-xs text-muted">A empresa responde pelo contato que você informou.</p>}
@@ -182,16 +186,16 @@ function LiveSection({ a }: { a: ActivityDTO }) {
   const live = useLive(open ? a.id : undefined, { live: happening });
   const last = a.live ? LIVE_STAGES[a.live.lastStage as LiveStage] : null;
   return (
-    <div className="mt-3 rounded-xl border border-accent-600/30 bg-accent-50 p-3">
+    <div className="mt-3 rounded-2xl bg-brand-50 p-3">
       <button className="flex w-full items-center gap-2 text-left" onClick={() => setOpen(!open)} aria-expanded={open}>
-        <Radio className={`h-5 w-5 text-accent-600 ${happening && a.live ? 'animate-pulse' : ''}`} aria-hidden="true" />
+        <Radio className="h-5 w-5 text-brand-700" aria-hidden="true" />
         <span className="flex-1">
           <span className="block font-semibold">{happening && a.live ? 'Ao vivo agora' : 'Pet ao Vivo'}</span>
           <span className="block text-sm text-muted">
-            {last ? `${last.emoji} ${last.label} · ${new Date(a.live!.lastAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}` : 'As fotos de cada etapa aparecem aqui durante o atendimento.'}
+            {last ? `${last.label} · ${new Date(a.live!.lastAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}` : 'As fotos de cada etapa aparecem aqui durante o atendimento.'}
           </span>
         </span>
-        <ChevronDown className={`h-5 w-5 text-muted transition ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+        <ChevronDown className={`h-5 w-5 text-muted transition-transform duration-200 ease-out ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>
       {open && <div className="mt-3">{live.isLoading ? <p className="text-sm text-muted">Carregando…</p> : <LiveTimeline updates={live.data ?? []} />}</div>}
     </div>

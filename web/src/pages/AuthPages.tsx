@@ -20,7 +20,7 @@ function PasswordField({ label, value, onChange, error, autoComplete, hint }: { 
   return (
     <div className="relative">
       <TextField label={label} type={show ? 'text' : 'password'} value={value} onChange={(e) => onChange(e.target.value)} error={error} autoComplete={autoComplete} hint={hint} className={`field pr-12 ${error ? 'field-error' : ''}`} />
-      <button type="button" onClick={() => setShow(!show)} aria-label={show ? 'Ocultar senha' : 'Mostrar senha'} className="absolute right-1 top-[30px] inline-flex h-11 w-11 items-center justify-center rounded-full text-muted hover:bg-surface">
+      <button type="button" onClick={() => setShow(!show)} aria-label={show ? 'Ocultar senha' : 'Mostrar senha'} className="absolute right-1 top-[30px] inline-flex h-11 w-11 items-center justify-center rounded-full text-muted hover:bg-raised">
         {show ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
       </button>
     </div>

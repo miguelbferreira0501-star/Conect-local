@@ -12,18 +12,21 @@ const PREVIEW = process.env.PREVIEW_URL ?? 'http://localhost:4700/index.html';
 const CITY = { ibge: 4209102, name: 'Joinville', uf: 'SC', lat: -26.3045, lon: -48.8487, timezone: 'America/Sao_Paulo' };
 mkdirSync('store/capturas', { recursive: true });
 const svg = readFileSync('web/public/icon.svg', 'utf8');
+// Fonte do app (DM Sans) embutida no banner
+const font = readFileSync('node_modules/@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2').toString('base64');
+const fontCss = `<style>@font-face{font-family:'DM Sans Variable';font-weight:100 1000;src:url(data:font/woff2;base64,${font}) format('woff2')}</style>`;
 const browser = await chromium.launch();
 
 // Banner de destaque
 {
   const page = await browser.newPage({ viewport: { width: 1024, height: 500 } });
-  await page.setContent(`<html><body style="margin:0;width:1024px;height:500px;overflow:hidden;font-family:Inter,system-ui,sans-serif;
-    background:radial-gradient(circle at 85% 15%,#FF8A3D55 0,transparent 32%),linear-gradient(135deg,#6250EB 0%,#3A2CA8 100%);color:#fff;display:flex;align-items:center;gap:52px;padding:0 70px;box-sizing:border-box">
-    <div style="flex:none;filter:drop-shadow(0 12px 30px rgba(0,0,0,.35))">${svg.replace('<svg ', '<svg width="210" height="210" ')}</div>
+  await page.setContent(`<html><head>${fontCss}</head><body style="margin:0;width:1024px;height:500px;overflow:hidden;font-family:'DM Sans Variable','DM Sans',system-ui,sans-serif;
+    background:#B8336A;color:#fff;display:flex;align-items:center;gap:56px;padding:0 72px;box-sizing:border-box">
+    <div style="flex:none">${svg.replace('<svg ', '<svg width="196" height="196" ').replace('fill="#B8336A"', 'fill="#9D2B5A"')}</div>
     <div>
-      <div style="font-size:78px;font-weight:800;letter-spacing:-1.5px;line-height:1">Pataí</div>
-      <div style="font-size:31px;margin-top:16px;line-height:1.28;color:#EEEAFF">Banho e tosa, passeador e pet sitter.<br/><b style="color:#FFB27A">Acompanhe seu pet ao vivo.</b></div>
-      <div style="margin-top:22px;font-size:22px;color:#DCD6FF">🛁 No banho → 💨 Secando → ✂️ Na tosa → ✅ Pronto</div>
+      <div style="font-size:80px;font-weight:700;letter-spacing:-2px;line-height:1">Pataí</div>
+      <div style="font-size:32px;margin-top:18px;line-height:1.25;color:#fff">Banho e tosa, passeador e pet sitter.<br/>Acompanhe cada etapa pelo celular.</div>
+      <div style="margin-top:22px;font-size:22px;color:#F8DBE8">Chegou · No banho · Secando · Na tosa · Pronto</div>
     </div></body></html>`);
   await page.screenshot({ path: 'store/banner-1024x500.png' });
   await page.close();

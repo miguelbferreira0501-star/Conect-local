@@ -16,16 +16,15 @@ const NAV = [
 
 export function Logo({ className = '' }: { className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-2 font-extrabold text-ink ${className}`}>
-      <svg viewBox="0 0 64 64" width={32} height={32} aria-hidden="true" className="h-8 w-8">
-        <rect width="64" height="64" rx="16" fill="rgb(var(--brand-700))" />
+    <span className={`inline-flex items-center gap-2 font-bold text-ink ${className}`}>
+      <svg viewBox="0 0 64 64" width={28} height={28} aria-hidden="true" className="h-7 w-7 shrink-0">
+        <rect width="64" height="64" rx="14" fill="rgb(var(--brand-700))" />
         <g fill="#fff">
-          <circle cx="19.5" cy="28" r="4.4" /><circle cx="27" cy="20.5" r="4.7" /><circle cx="37" cy="20.5" r="4.7" /><circle cx="44.5" cy="28" r="4.4" />
-          <path d="M32 31c-6.6 0-12.4 6.3-12.4 11.4 0 3.7 2.9 5.5 6.2 5.5 2.5 0 3.9-1.3 6.2-1.3s3.7 1.3 6.2 1.3c3.3 0 6.2-1.8 6.2-5.5C44.4 37.3 38.6 31 32 31z" />
+          <circle cx="19.5" cy="27" r="4.6" /><circle cx="27.2" cy="19" r="4.9" /><circle cx="36.8" cy="19" r="4.9" /><circle cx="44.5" cy="27" r="4.6" />
+          <path d="M32 30c-6.9 0-13 6.6-13 12 0 3.9 3 5.8 6.5 5.8 2.6 0 4.1-1.4 6.5-1.4s3.9 1.4 6.5 1.4c3.5 0 6.5-1.9 6.5-5.8 0-5.4-6.1-12-13-12z" />
         </g>
-        <circle cx="50" cy="13.5" r="6" fill="rgb(var(--accent-600))" stroke="#fff" strokeWidth="2.6" />
       </svg>
-      <span className="text-[19px] tracking-tight">{BRAND.name}</span>
+      <span className="text-lg tracking-[-0.02em]">{BRAND.name}</span>
     </span>
   );
 }
@@ -35,7 +34,7 @@ function DemoBanner() {
   const [hidden, setHidden] = useState(() => storage.get('cl_demo_banner_hidden', false));
   if (!config.data?.demoMode || hidden) return null;
   return (
-    <div className="border-b border-warning-700/20 bg-warning-50 text-warning-700">
+    <div className="border-b border-warning-200 bg-warning-50 text-warning-700">
       <div className="container-app flex items-center gap-3 py-2 text-sm">
         <p className="flex-1">
           {config.data.preview ? (
@@ -56,21 +55,23 @@ function DemoBanner() {
 export function AppLayout() {
   return (
     <div className="min-h-screen md:flex">
-      <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[70] focus:rounded-lg focus:bg-card focus:px-4 focus:py-2 focus:shadow-raised">
+      <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[70] focus:rounded-lg focus:bg-card focus:px-4 focus:py-2 focus:shadow-float">
         Pular para o conteúdo
       </a>
-      {/* Navegação lateral em telas grandes */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-line bg-card px-4 py-6 md:flex lg:w-72">
-        <NavLink to="/" className="mb-8 px-3"><Logo /></NavLink>
-        <nav aria-label="Navegação principal" className="flex flex-col gap-1">
+      {/* Navegação lateral em telas grandes: no fundo da página, separada por uma linha fina */}
+      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-line px-3 py-6 md:flex">
+        <NavLink to="/" className="mb-7 px-3"><Logo /></NavLink>
+        <nav aria-label="Navegação principal" className="flex flex-col gap-0.5">
           {NAV.map(({ to, label, Icon, end }) => (
             <NavLink key={to} to={to} end={end}
-              className={({ isActive }) => `flex min-h-[48px] items-center gap-3 rounded-xl px-3 font-medium transition ${isActive ? 'bg-brand-50 text-brand-fg' : 'text-ink hover:bg-surface'}`}>
-              {({ isActive }) => (<><Icon className="h-[22px] w-[22px]" strokeWidth={isActive ? 2.4 : 1.9} aria-hidden="true" />{label}</>)}
+              className={({ isActive }) => `flex min-h-[40px] items-center gap-2.5 rounded-xl px-3 text-[15px] transition-colors duration-150 ${isActive ? 'bg-brand-50 font-medium text-brand-900' : 'text-[#374151] hover:bg-raised'}`}>
+              {({ isActive }) => (<><Icon className={`h-[18px] w-[18px] ${isActive ? 'text-brand-700' : 'text-muted'}`} strokeWidth={1.75} aria-hidden="true" />{label}</>)}
             </NavLink>
           ))}
         </nav>
-        <p className="mt-auto px-3 text-xs text-muted">{BRAND.tagline}</p>
+        <NavLink to="/empresas" className="mt-auto rounded-xl px-3 py-2 text-sm text-muted transition-colors duration-150 hover:bg-raised hover:text-ink">
+          Tenho um negócio pet
+        </NavLink>
       </aside>
 
       <div className="min-w-0 flex-1">
@@ -80,18 +81,16 @@ export function AppLayout() {
         </main>
       </div>
 
-      {/* Navegação inferior no celular */}
-      <nav aria-label="Navegação principal" className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-line bg-card/95 backdrop-blur md:hidden">
+      {/* Navegação inferior no celular: fundo opaco, cor da marca só no item ativo */}
+      <nav aria-label="Navegação principal" className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-line bg-card md:hidden">
         <ul className="mx-auto grid max-w-lg grid-cols-5">
           {NAV.map(({ to, label, Icon, end }) => (
             <li key={to}>
               <NavLink to={to} end={end}
-                className={({ isActive }) => `flex min-h-[60px] flex-col items-center justify-center gap-0.5 text-[11.5px] font-medium ${isActive ? 'text-brand-fg' : 'text-muted'}`}>
+                className={({ isActive }) => `pressable flex min-h-[58px] flex-col items-center justify-center gap-1 text-[11.5px] ${isActive ? 'font-semibold text-brand-900' : 'font-medium text-muted'}`}>
                 {({ isActive }) => (
                   <>
-                    <span className={`flex h-7 w-12 items-center justify-center rounded-full transition ${isActive ? 'bg-brand-50' : ''}`}>
-                      <Icon className="h-[22px] w-[22px]" strokeWidth={isActive ? 2.4 : 1.9} aria-hidden="true" />
-                    </span>
+                    <Icon className={`h-[22px] w-[22px] ${isActive ? 'text-brand-700' : ''}`} strokeWidth={isActive ? 2.1 : 1.75} aria-hidden="true" />
                     {label}
                   </>
                 )}
@@ -110,16 +109,16 @@ export function PageHeader({ title, back = true, actions, subtitle }: { title: s
   const nav = useNavigate();
   const loc = useLocation();
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-card/95 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-line bg-card">
       <div className="container-app flex min-h-[60px] items-center gap-2 py-2">
         {back && (
           <button aria-label="Voltar" onClick={() => (typeof back === 'string' ? nav(back) : loc.key !== 'default' ? nav(-1) : nav('/'))}
-            className="-ml-2 inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-surface">
+            className="pressable -ml-2 inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-raised">
             <ArrowLeft className="h-5 w-5" />
           </button>
         )}
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-lg font-semibold">{title}</h1>
+          <h1 className="truncate text-[17px] font-semibold">{title}</h1>
           {subtitle && <div className="truncate text-sm text-muted">{subtitle}</div>}
         </div>
         {actions}

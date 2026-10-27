@@ -1,10 +1,10 @@
 /** Imagens de empresa. Sem foto cadastrada, mostramos uma ilustração neutra (nunca uma foto inventada). */
 import { CategoryIcon } from '../CategoryIcon';
 
+// Tons de identidade: fundo bem claro e tinta escura do mesmo tom, tons distantes entre si.
 const PALETTES = [
-  // Tema escuro: fundo profundo + cor viva para as iniciais e o ícone.
-  ['#272250', '#B3A8FF'], ['#13312C', '#5FE0C6'], ['#3A2614', '#FFB27A'], ['#33203F', '#E3A8FF'],
-  ['#14283A', '#7CC4FF'], ['#3A1A24', '#FF9BB3'], ['#22301A', '#B6E37A'], ['#26262E', '#C9C9D6'],
+  ['#fdf2f7', '#6b1d3e'], ['#ecfdf5', '#065f46'], ['#eff6ff', '#1e3a8a'], ['#fff7ed', '#7c2d12'],
+  ['#f0fdfa', '#134e4a'], ['#fefce8', '#713f12'], ['#fef2f2', '#7f1d1d'], ['#f1f5f9', '#334155'],
 ];
 
 export function paletteFor(key: string) {
@@ -44,11 +44,7 @@ export function BusinessCover({ name, coverUrl, icon, className = '' }: { name: 
   if (coverUrl) return <img src={coverUrl} alt="" loading="lazy" className={`w-full object-cover ${className}`} />;
   return (
     <div aria-hidden="true" className={`relative w-full overflow-hidden ${className}`} style={{ background: bg }}>
-      <svg className="absolute inset-0 h-full w-full opacity-[0.35]" preserveAspectRatio="none" viewBox="0 0 400 120">
-        <circle cx="340" cy="10" r="90" fill={fg} opacity="0.12" />
-        <circle cx="40" cy="130" r="70" fill={fg} opacity="0.08" />
-      </svg>
-      <CategoryIcon icon={icon} className="absolute bottom-3 right-4 h-10 w-10 opacity-40" style={{ color: fg }} />
+      <CategoryIcon icon={icon} className="absolute bottom-3 right-4 h-9 w-9 opacity-30" style={{ color: fg }} />
     </div>
   );
 }

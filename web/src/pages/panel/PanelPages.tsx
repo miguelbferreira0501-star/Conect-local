@@ -39,12 +39,12 @@ export function PanelHomeRedirect() {
   return (
     <div className="container-app max-w-2xl py-8">
       <div className="card p-6">
-        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-50 text-accent-700"><Store className="h-6 w-6" /></span>
+        <Store className="h-6 w-6 shrink-0 text-muted" aria-hidden />
         <h1 className="mt-4 text-2xl font-bold">Cadastre sua empresa</h1>
         <p className="mt-2 text-muted">Apareça para clientes da sua cidade, receba pedidos de orçamento e agendamentos e mostre suas avaliações. O cadastro é grátis e sua empresa aparece na hora.</p>
         <ul className="mt-4 space-y-2 text-sm">
-          {['Perfil com fotos, serviços, preços e horários', 'Pedidos de orçamento e agendamentos em um só lugar', 'Responda às avaliações publicamente', 'Sua posição na busca depende das avaliações — não pode ser comprada'].map((t) => (
-            <li key={t} className="flex gap-2"><CheckCircle2 className="h-5 w-5 shrink-0 text-accent-600" />{t}</li>
+          {['Perfil com fotos, serviços, preços e horários', 'Pedidos de orçamento e agendamentos em um só lugar', 'Responda às avaliações publicamente', 'Sua posição na busca depende das avaliações, não pode ser comprada'].map((t) => (
+            <li key={t} className="flex gap-2"><CheckCircle2 className="h-5 w-5 shrink-0 text-success-700" aria-hidden />{t}</li>
           ))}
         </ul>
         <ButtonLink to="/empresas/nova" size="lg" className="mt-6">Cadastrar minha empresa</ButtonLink>
@@ -67,7 +67,7 @@ export function CreateBusinessPage() {
       <h1 className="mb-1 text-2xl font-bold">Cadastrar empresa</h1>
       <p className="mb-5 text-muted">Você poderá adicionar fotos, serviços e horários logo em seguida.</p>
       <section className="card mb-5 p-5" aria-labelledby="plano-cadastro">
-        <h2 id="plano-cadastro" className="flex items-center gap-2 font-semibold"><Crown className="h-5 w-5 text-accent-600" aria-hidden /> Plano Pataí · {price}/mês</h2>
+        <h2 id="plano-cadastro" className="flex items-center gap-2 font-semibold"><Crown className="h-5 w-5 text-muted" aria-hidden /> Plano Pataí · {price}/mês</h2>
         <p className="mt-1 text-sm text-muted">Para aparecer no app e receber agendamentos, a empresa precisa de assinatura ativa. Sem comissão, cancele quando quiser.</p>
         {canTrial ? (
           <div className="mt-3 space-y-2" role="radiogroup" aria-label="Como começar">
@@ -102,63 +102,7 @@ export function CreateBusinessPage() {
 }
 
 // ── Início ──
-export function PanelDashboard() {
-  const b = useBiz();
-  const checklist = [
-    { done: !!b.logoUrl, label: 'Adicionar logotipo', to: 'fotos' },
-    { done: !!b.coverUrl, label: 'Adicionar foto de capa', to: 'fotos' },
-    { done: b.photos.length >= 3, label: 'Adicionar pelo menos 3 fotos', to: 'fotos' },
-    { done: b.services.length >= 3, label: 'Cadastrar pelo menos 3 serviços', to: 'servicos' },
-    { done: b.services.some((s) => s.priceType !== 'quote'), label: 'Informar preço em algum serviço', to: 'servicos' },
-    { done: !!b.openingHours && Object.keys(b.openingHours).length > 0, label: 'Cadastrar horários de funcionamento', to: 'horarios' },
-    { done: (b.profile.description ?? '').length >= 60, label: 'Escrever uma descrição completa', to: 'perfil' },
-  ];
-  const done = checklist.filter((c) => c.done).length;
-  const rate = b.stats.requestsReceived ? Math.round((b.stats.requestsAnswered / b.stats.requestsReceived) * 100) : null;
-  return (
-    <div className="space-y-5">
-      <PushPrompt variant="business" />
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Link to="pedidos" className="card p-4 hover:shadow-raised">
-          <p className="text-sm text-muted">Pedidos aguardando você</p>
-          <p className="mt-1 text-3xl font-bold tabular-nums">{b.stats.pendingRequests}</p>
-        </Link>
-        <Link to="avaliacoes" className="card p-4 hover:shadow-raised">
-          <p className="text-sm text-muted">Avaliações</p>
-          <p className="mt-1 text-3xl font-bold tabular-nums">{b.stats.average != null ? formatRating(b.stats.average) : '—'}</p>
-          <p className="text-sm text-muted">{b.stats.reviewCount} no total</p>
-        </Link>
-        <div className="card p-4">
-          <p className="text-sm text-muted">Pedidos respondidos</p>
-          <p className="mt-1 text-3xl font-bold tabular-nums">{rate != null ? `${rate}%` : '—'}</p>
-          <p className="text-sm text-muted">{b.stats.requestsAnswered} de {b.stats.requestsReceived}</p>
-        </div>
-      </div>
-      <section className="card p-5">
-        <div className="flex items-center justify-between">
-          <h2 className="font-semibold">Perfil completo atrai mais clientes</h2>
-          <span className="text-sm font-medium text-muted">{done}/{checklist.length}</span>
-        </div>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-accent-600" style={{ width: `${(done / checklist.length) * 100}%` }} /></div>
-        <p className="mt-2 text-sm text-muted">Perfis completos ficam mais bem posicionados na busca.</p>
-        <ul className="mt-3 divide-y divide-line">
-          {checklist.map((c) => (
-            <li key={c.label}>
-              <Link to={c.to} className="flex min-h-[48px] items-center gap-3 hover:text-brand-fg">
-                {c.done ? <CheckCircle2 className="h-5 w-5 text-accent-600" /> : <Circle className="h-5 w-5 text-muted" />}
-                <span className={c.done ? 'text-muted line-through' : ''}>{c.label}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <p className="text-sm text-muted">
-        Sua posição na busca depende de nota ajustada, quantidade e recência das avaliações, perfil completo e relevância —
-        <Link to="/como-funciona" className="ml-1 font-medium text-brand-fg hover:underline">veja como funciona</Link>. O selo “Perfil verificado” é concedido pela equipe após conferência de documentos.
-      </p>
-    </div>
-  );
-}
+export { PanelDashboard } from './PanelHome';
 
 // ── Pedidos ──
 const REQ_STATUS: Record<string, { label: string; tone: 'neutral' | 'brand' | 'accent' | 'warning' }> = {
@@ -223,7 +167,7 @@ function RequestCard({ r, businessId }: { r: PanelRequestDTO; businessId: string
       </div>
       <h3 className="mt-2 font-semibold">{r.serviceName ?? 'Serviço não especificado'}</h3>
       {r.startsAt && (
-        <p className="font-medium text-brand-fg">
+        <p className="font-medium text-ink">
           {r.bookingMode === 'day'
             ? `${new Date(r.startsAt).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })} · diária`
             : r.bookingMode === 'period'
@@ -426,7 +370,7 @@ export function PanelHoursPage() {
                       <span className="text-muted">às</span>
                       <label className="sr-only" htmlFor={`h-${d}-${i}-z`}>Fecha</label>
                       <input id={`h-${d}-${i}-z`} type="time" className="field w-auto" value={z} onChange={(e) => setDay(d, ranges.map((r, j) => (j === i ? [r[0], e.target.value] : r)))} />
-                      {ranges.length > 1 && <button aria-label="Remover intervalo" className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted hover:bg-surface" onClick={() => setDay(d, ranges.filter((_, j) => j !== i))}><Trash2 className="h-4 w-4" /></button>}
+                      {ranges.length > 1 && <button aria-label="Remover intervalo" className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted hover:bg-raised" onClick={() => setDay(d, ranges.filter((_, j) => j !== i))}><Trash2 className="h-4 w-4" /></button>}
                     </div>
                   ))}
                   {ranges.length < 2 && <button className="text-sm font-medium text-brand-fg hover:underline" onClick={() => setDay(d, [...ranges, ['13:00', '18:00']])}>+ Intervalo (ex.: depois do almoço)</button>}
@@ -483,7 +427,7 @@ export function PanelPhotosPage() {
             {b.photos.map((p) => (
               <li key={p.id} className="relative">
                 <img src={p.url} alt="" className="aspect-square w-full rounded-xl object-cover" />
-                <button aria-label="Remover foto" className="absolute right-2 top-2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-card/95 text-danger-700 shadow-card"
+                <button aria-label="Remover foto" className="absolute right-2 top-2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-line bg-card text-danger-700"
                   onClick={() => remove.mutate({ kind: 'photo', id: p.id })}><Trash2 className="h-4 w-4" /></button>
               </li>
             ))}

@@ -140,7 +140,7 @@ export async function requestPackage(userId: string, input: unknown) {
     if (await benefitsRepo.openRequestFor(db, pkg.id)) throw new AppError(409, 'conflict', 'Você já pediu este pacote. Aguarde a empresa confirmar.');
     try {
       const id = await benefitsRepo.requestPackage(db, { packageId: pkg.id, businessId: pkg.business_id, petId: v.petId ?? null, sessions: pkg.sessions, priceCents: pkg.price_cents });
-      await notifyBusiness(db, pkg.business_id, { title: '📦 Pedido de pacote', body: 'Um cliente quer um pacote do seu clube. Confira o pagamento e ative em Clube e Pix.', url: `/empresas/${pkg.business_id}/clube`, tag: `pkg-${id}` });
+      await notifyBusiness(db, pkg.business_id, { title: 'Pedido de pacote', body: 'Um cliente quer um pacote do seu clube. Confira o pagamento e ative em Clube e Pix.', url: `/empresas/${pkg.business_id}/clube`, tag: `pkg-${id}` });
       return { id };
     } catch (e) {
       if ((e as Error).message?.includes('pet_not_owned')) throw new AppError(422, 'validation_error', 'Pet inválido.');
