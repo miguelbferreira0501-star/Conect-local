@@ -84,7 +84,7 @@ O caminho é procurar o que está parado hoje e o que todo brasileiro já tem (o
 | Duolingo do freestyle (treino diário) | Moderada | Bom jeito de entrar no mercado. Plano premium de R$ 9,90 |
 | Batalhas online 1x1 por vídeo, com voto da comunidade | Moderada | Diversão. Cuidado: cobrar inscrição com prêmio pode ser visto como aposta |
 
-O conselho está avaliando o **Rimou** (resultado em `rimou/board.md`).
+O conselho deu 5,0 ao **Rimou** (3 investiriam com condições). Detalhes em `rimou/board.md`.
 
 ---
 
@@ -102,7 +102,7 @@ O conselho está avaliando o **Rimou** (resultado em `rimou/board.md`).
 
 ## Placar da rodada 3
 
-1. **Rimou** (batalha de rima): conselho em andamento
+1. **Rimou** (batalha de rima): conselho 5,0 (3 investiriam com condições). Ver `rimou/board.md`
 2. Quadra ociosa de escola e condomínio (futebol)
 3. Duolingo do freestyle (estilo Ziggur)
 4. Dados de satélite para pequenos produtores (espaço)
