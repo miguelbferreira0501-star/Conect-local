@@ -2,7 +2,7 @@
 Nota: 4/10 | Voto: FUND IF
 
 ## O que é forte
-- **O mercado pequeno é bem escolhido.** Comércio local de Joinville com influenciadores da própria cidade é um nicho que dá para dominar antes de expandir. Nenhum concorrente citado foca uma cidade com público local comprovado.
+- **O mercado pequeno é bem escolhido.** Comércio local de Joinville com influenciadores da própria cidade é um nicho que dá para dominar antes de expandir.
 - **Tem um canal de distribuição real.** O fundador já vende porta a porta e por WhatsApp para pequenas empresas. Isso responde a "como chegam os primeiros 100 clientes".
 - **Pode criar um efeito de rede local.** Cada influenciador cadastrado torna a plataforma mais útil para o próximo comércio, e vice-versa. Numa cidade de ~650 mil habitantes, dá para reunir a maior parte da oferta local.
 
@@ -23,4 +23,4 @@ Nota: 4/10 | Voto: FUND IF
 1. **Provar que os clientes não pulam a plataforma.** Antes de construir mais, fechar de 10 a 20 contratações reais com pagamento retido (pode ser manual) e medir quantos comércios voltam a contratar pela plataforma.
 2. **Ter um ativo que se acumula.** Por exemplo, um histórico de clientes trazidos por cupom para cada influenciador de Joinville, que só existe na plataforma e a torna claramente melhor que a opção grátis do Instagram.
 3. **Dominar a cidade antes de expandir.** Reunir a maioria dos nano e microinfluenciadores ativos de Joinville antes de abrir outra cidade.
-4. **Usar um provedor de pagamento já autorizado** para o split e a retenção, sem depender de licença própria.
+4. **Usar um provedor de pagamento já autorizado** para o split e a retenção.
