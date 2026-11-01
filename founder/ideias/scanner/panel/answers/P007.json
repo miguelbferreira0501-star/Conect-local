@@ -1,0 +1,13 @@
+{
+  "id": "P007",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Eu já uso o Yuka de graça pra ver ingrediente de creme e shampoo, e o Premium dele sai uns R$ 30 por ano. R$ 9,90 por mês dá quase R$ 120 por ano, e eu já pago assinatura demais. No máximo eu baixava e ficava nos 10 scans grátis.",
+  "objection": "Não vejo por que pagar quatro vezes mais que o Yuka por uma coisa que ele já faz. E não sei se esse preço dos mercados perto de mim funciona de verdade aqui em Joinville ou se é só promessa.",
+  "would_change_my_mind": "Se a comparação de preço nos mercados daqui funcionasse mesmo e me fizesse economizar mais que a mensalidade no rancho do mês, ou se tivesse um plano anual na faixa do Yuka.",
+  "price_too_cheap": 1.99,
+  "price_cheap": 3.90,
+  "price_expensive": 6.90,
+  "price_too_expensive": 9.90
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P009",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Eu compro sempre as mesmas marcas e quero entrar e sair rápido do mercado, não vou ficar escaneando rótulo na prateleira. Se um dia tiver dúvida de um produto, tiro foto e pergunto ao ChatGPT, e as promoções já chegam no grupo do WhatsApp.",
+  "objection": "Não vejo por que pagar todo mês por algo que eu usaria uma ou duas vezes, e as 10 leituras grátis já sobram pra minha curiosidade.",
+  "would_change_my_mind": "Se alguém da família tivesse uma alergia ou restrição séria e o app me avisasse sozinho, sem eu ter que conferir rótulo por rótulo.",
+  "price_too_cheap": 2,
+  "price_cheap": 4.9,
+  "price_expensive": 9.9,
+  "price_too_expensive": 15
+}

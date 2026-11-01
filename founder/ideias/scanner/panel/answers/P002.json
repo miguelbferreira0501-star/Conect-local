@@ -1,0 +1,13 @@
+{
+  "id": "P002",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Eu já escaneio código de barras no meu app de dieta pra ver proteína e caloria, e o que ele não mostra eu tiro foto do rótulo e pergunto ao ChatGPT. Com os filhos puxando o carrinho eu não vou parar pra escanear produto por produto, então no máximo uso os 10 grátis e pronto.",
+  "objection": "Uma nota de 0 a 100 não me diz quanto de proteína tem por real gasto, que é o que eu olho. E não sei se esses preços dos mercados aqui de Joinville vão estar atualizados de verdade.",
+  "would_change_my_mind": "Se a lista de compras com o preço mais barato perto de casa funcionasse de verdade e me mostrasse que eu economizo bem mais que R$ 9,90 por mês no rancho.",
+  "price_too_cheap": 2,
+  "price_cheap": 4.9,
+  "price_expensive": 9.9,
+  "price_too_expensive": 15
+}

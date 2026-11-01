@@ -1,0 +1,37 @@
+{
+  "business": "Scanner (nome provisório): app brasileiro que lê o código de barras de alimentos e cosméticos e mostra nota de saúde, ingredientes, alergênicos, alternativas, preço nos mercados próximos e lista de compras",
+  "target": "Brasileiros com smartphone que fazem as compras de supermercado da casa, 20 a 55 anos, em cidade média como Joinville (SC)",
+  "where": "Joinville (SC) e cidades médias do Sul; app nacional",
+  "age": [20, 55],
+  "segments": [
+    {"name": "Classe C (renda familiar mensal em R$)", "share": 0.50, "income": [2800, 7000]},
+    {"name": "Classe B (renda familiar mensal em R$)", "share": 0.35, "income": [7000, 18000]},
+    {"name": "Classe A (renda familiar mensal em R$)", "share": 0.15, "income": [18000, 40000]}
+  ],
+  "behaviours": [
+    {"name": "Caçador de promoção", "share": 0.22, "how": "Compara folhetos e ofertas no WhatsApp, troca de mercado pelo preço."},
+    {"name": "Lê rótulo (saúde)", "share": 0.18, "how": "Olha a lupa e a tabela, evita ultraprocessados, segue perfis de nutrição no Instagram."},
+    {"name": "Pai ou mãe com restrição na família", "share": 0.12, "how": "Tem filho ou alguém em casa com alergia alimentar, doença celíaca ou diabetes; lê cada ingrediente."},
+    {"name": "Fitness / dieta", "share": 0.12, "how": "Conta proteína e calorias, já usa app de dieta."},
+    {"name": "Compra no automático", "share": 0.20, "how": "Compra sempre as mesmas marcas, quer entrar e sair rápido do mercado."},
+    {"name": "Skincare / cosméticos", "share": 0.08, "how": "Pesquisa ingredientes de cremes e shampoos no TikTok antes de comprar."},
+    {"name": "Já usa o Yuka", "share": 0.08, "how": "Baixou o Yuka grátis depois que chegou ao Brasil em 2026 e escaneia de vez em quando."}
+  ],
+  "objections": [
+    "O Yuka já faz isso de graça, e o Premium dele custa uns R$ 30 por ano",
+    "Já tem a lupa de alto em açúcar/sódio na embalagem",
+    "O app do governo Menor Preço Brasil já compara preço de graça",
+    "Posso tirar foto do rótulo e perguntar ao ChatGPT",
+    "Será que vai ter os produtos do meu mercado cadastrados?",
+    "Não pago assinatura de app, só streaming",
+    "Vou usar duas vezes e esquecer",
+    "Quem garante que a nota é confiável e não paga por marca?"
+  ],
+  "habits": [
+    "você faz a compra grande do mês num atacarejo e completa durante a semana no mercado do bairro",
+    "você faz as compras com os filhos junto e com pressa",
+    "você recebe ofertas de mercado em grupo de WhatsApp",
+    "você assina Netflix ou Spotify e acha que já paga assinatura demais",
+    "você faz as compras pelo app do mercado de vez em quando"
+  ]
+}

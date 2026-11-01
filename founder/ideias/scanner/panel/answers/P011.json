@@ -1,0 +1,13 @@
+{
+  "id": "P011",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Eu baixaria e usaria os 10 scans grátis nos meus cremes e shampoos, mas pagar mais uma assinatura de R$ 9,90 todo mês eu não pago; já pago streaming demais e pesquiso ingrediente no TikTok de graça.",
+  "objection": "Não sei se os produtos que eu compro aqui em Joinville, principalmente as marcas de cosmético que eu uso, vão estar cadastrados, e se o preço dos mercados perto de mim vai estar atualizado de verdade.",
+  "would_change_my_mind": "Se nos scans grátis ele achasse todos os meus produtos e me mostrasse uma economia real no mercado maior que os R$ 9,90 do mês, ou um plano anual bem mais barato.",
+  "price_too_cheap": 1.99,
+  "price_cheap": 4.9,
+  "price_expensive": 9.9,
+  "price_too_expensive": 14.9
+}

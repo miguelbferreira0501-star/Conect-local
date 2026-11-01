@@ -1,0 +1,13 @@
+{
+  "id": "P017",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Com o dinheiro contado do jeito que está, não vou pagar R$ 9,90 todo mês por app; eu até baixaria pra usar os 10 grátis e ver o preço nos mercados, mas pagar não. A parte da saúde eu resolvo tirando foto do rótulo e perguntando ao ChatGPT.",
+  "objection": "R$ 9,90 por mês é quase um pacote de arroz ou um litro de óleo, e eu não sei se esse preço dos mercados perto de mim vai estar certo e atualizado — as ofertas que eu pego no WhatsApp e nos folhetos mudam toda semana.",
+  "would_change_my_mind": "Se eu visse na prática que o app me faz economizar bem mais do que R$ 9,90 no mês com as ofertas dos mercados aqui de Joinville, aí talvez eu pagasse.",
+  "price_too_cheap": 1,
+  "price_cheap": 2.9,
+  "price_expensive": 5,
+  "price_too_expensive": 9.9
+}

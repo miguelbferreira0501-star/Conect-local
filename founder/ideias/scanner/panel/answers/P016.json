@@ -1,0 +1,13 @@
+{
+  "id": "P016",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "O aviso de alergênico é exatamente o que eu preciso pro meu filho, mas eu não confio num app pra dizer que algo é seguro sem antes testar. Vou usar os 10 escaneamentos grátis nos produtos que eu já conheço o rótulo de cor e ver se ele acerta e se tem as marcas do meu mercado.",
+  "objection": "Se o app disser que não tem glúten ou amendoim e estiver errado, quem paga é meu filho. E será que vai ter os produtos daqui de Joinville cadastrados, ou só marca grande?",
+  "would_change_my_mind": "Ver no plano grátis que ele acerta os alergênicos dos produtos que eu já compro e reconhece as marcas do meu mercado; aí eu pagaria no mês seguinte.",
+  "price_too_cheap": 2,
+  "price_cheap": 5,
+  "price_expensive": 12,
+  "price_too_expensive": 20
+}

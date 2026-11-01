@@ -1,0 +1,13 @@
+{
+  "id": "P013",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "Eu já leio rótulo e olho a lupa sozinho, então a nota eu até testaria nos 10 scans grátis. Mas pagar R$ 9,90 só faz sentido se o preço dos mercados daqui de Joinville estiver certo, e disso eu duvido no começo.",
+  "objection": "Será que vai ter os produtos e os preços do mercado onde eu compro? Se o preço estiver desatualizado, a lista 'mais barata' não serve pra nada e eu continuo usando as ofertas do grupo de WhatsApp.",
+  "would_change_my_mind": "Usar o grátis por um mês e ver que os preços do Giassi e dos mercados do meu bairro batem com a prateleira, e que a lista me fez economizar mais que os R$ 9,90.",
+  "price_too_cheap": 2,
+  "price_cheap": 4.9,
+  "price_expensive": 9.9,
+  "price_too_expensive": 15
+}
