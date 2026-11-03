@@ -55,19 +55,27 @@ Respiração, 5-4-3-2-1, CVV 188 sempre visível, diário de humor, pote de cois
 - Navegação em 5 áreas: **Início, Atividades, Mundo, Bem-estar, Amigos**.
 - Onboarding em formato de conversa com o Hami: 10 perguntas, plano inicial e apresentação do HamiCare+ com 7 dias grátis.
 
-### Mecânica de peso (o diferencial)
-- O Hami tem um **peso virtual em gramas**, com faixa saudável de **120 a 150 g**. Por ser em gramas de hamster, o número nunca é comparável com o de uma pessoa.
-- **Aparência inicial** (só adultos escolhem): *Fofinho* (165 g), *Equilibrado* (135 g) ou *Mignon* (115 g).
-- **Pesagem semanal**, nunca por exercício:
-  - **Sem sincronização:** o Hami caminha até a faixa saudável, no máximo 3 g por semana, e só se a semana teve pelo menos 3 dias ativos. Dentro da faixa, ele mantém.
-  - **Com sincronização** (opcional, só 18+, com consentimento explícito): o peso-alvo do Hami é o inicial × (média recente da pessoa ÷ peso da pessoa no início). Fica limitado a 105–175 g e anda no máximo 3 g por semana. Assim ele acompanha a pessoa de forma proporcional e gradual.
-  - Comida e exercício **não** mudam o peso diretamente. Exercício melhora o **condicionamento**; comida melhora a **saciedade** e a felicidade.
-- **Menores de 18:** sem números de peso, sem escolha de corpo e sem metas numéricas. O Hami fica sempre equilibrado e evolui só pelo condicionamento e pelos hábitos.
-- **Metas pessoais (adultos):** precisam de 4 semanas ou mais e de, no máximo, 1% do peso por semana. Com altura informada, metas abaixo de IMC 18,5 são recusadas. O app não faz recomendação médica. Se aparecer queda rápida, ele mostra uma mensagem acolhedora sugerindo conversar com um profissional, se a pessoa quiser.
-- **Modo sem números:** esconde todos os pesos, mesmo para adultos.
+### Mecânica de peso (o diferencial) — versão 2: jornada de calorias
+
+Pedido do dono do produto: o foco principal é o Hami **emagrecer ou engordar com a pessoa**, e cada missão saudável tirar "calorias" do Hami, o equivalente ao que a pessoa perderia. Isso substitui a regra antiga "exercício nunca muda o peso" para adultos.
+
+- **Missão no começo:** emagrecer, ganhar peso ou manter (ou só hábitos). Menores de 18 nem veem as opções de peso.
+- **Calorias por missão (estimativas, explicadas na tela):**
+  - Movimento: (MET − 1) × peso da pessoa × horas, ou seja, só o que passa do gasto em repouso. Caminhada de 15 min para 70 kg ≈ 44 kcal.
+  - Trocas saudáveis (emagrecer): refrigerante → água ≈ 140 kcal; fruta no lugar do doce ≈ 90; café sem açúcar ≈ 40; salada antes do almoço ≈ 80. Um copo d'água sozinho vale 5 kcal (sendo honesto: a água quase não queima calorias).
+  - Lanches nutritivos (ganhar): vitamina ≈ 350, lanche extra ≈ 300, castanhas ≈ 180. Para quem quer ganhar, exercício **não** tira peso do Hami (vira condicionamento).
+- **Equivalência:** 7.700 kcal ≈ 1 kg. A meta da pessoa vira o total de calorias da jornada (padrão: 5% do peso). O Hami vai do peso inicial dele até o da meta na mesma proporção: quando a pessoa chega na meta, ele chega na dele. Sem peso informado, as contas usam 70 kg e a tela avisa.
+- **Sem exagero:** até 800 kcal contam por dia (700 para ganhar), o que mantém o ritmo perto de 1% do peso por semana. Descanso nunca tira nada.
+- **Metas:** até 20% do peso por jornada (15% para ganhar), nunca abaixo de IMC 18,5 com altura. Depois da meta, a pessoa escolhe a próxima missão (manter também comemora).
+- **Balança (opcional):** com registros de peso e consentimento, o Hami pode seguir o progresso real em vez das missões. Aviso de cuidado se a queda for rápida.
+- **Menores de 18:** o Hami não muda de peso e não há contagem de calorias.
+- **Nunca público:** peso, calorias, diário e humor ficam fora do perfil, do feed e dos grupos.
 
 ### Aparência
-- **Fofura** (largura do corpo e das bochechas) vem do peso virtual: muda devagar e fica fofa em qualquer valor.
+- **Fofura** (largura do corpo e das bochechas) vem do peso do Hami: muda um pouquinho a cada missão e fica fofa em qualquer valor.
+- **Visual vivo** (arte própria): jardim com céu da hora do dia, botões com volume, abas ilustradas, boas-vindas do dia, tela de ofensiva com raios, álbum de figurinhas, loja da Dona Capivara com coleção do dia e temporada do mês.
+- **Cuidados interativos:** cada cuidado é um minijogo com ferramenta que segue o dedo, partículas e reação do Hami (risada, boca aberta, molhado, brilhando).
+- **Rede social gentil:** perfil com bio e contadores só positivos, stories, toque duplo para curtir e grupos com mural próprio (só amigos de quem criou entram; bloqueio esconde a pessoa no grupo).
 - **Condicionamento** (0 a 100) vem dos últimos 28 dias de movimento. Conta no máximo 1 ponto cheio por dia, então constância vale mais que intensidade.
 - **4 fases**, que nunca regridem (descansar não tira nada):
   1. *Inicial*: topete de filhote.

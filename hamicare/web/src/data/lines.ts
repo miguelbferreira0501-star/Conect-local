@@ -20,14 +20,22 @@ export const TRAITS: Record<TraitId, { label: string; emoji: string; hello: stri
   corajoso: { label: 'Corajoso', emoji: '🦸', hello: 'Um passo de cada vez e a gente chega lá!' },
 };
 
-export const GOALS: Record<GoalId, { label: string; emoji: string; desc: string }> = {
+export const GOALS: Record<GoalId, { label: string; emoji: string; desc: string; weight?: boolean }> = {
+  emagrecer: { label: 'Emagrecer junto com o Hami', emoji: '🔥', desc: 'Cada missão saudável tira calorias de vocês dois', weight: true },
+  ganhar: { label: 'Ganhar peso junto com o Hami', emoji: '💪', desc: 'Lanches nutritivos e força para crescerem juntos', weight: true },
+  manter: { label: 'Manter o peso', emoji: '⚖️', desc: 'Equilíbrio: o Hami fica firme com você', weight: true },
   habitos: { label: 'Criar hábitos saudáveis', emoji: '🌱', desc: 'Água, sono, comida e rotina' },
-  condicionamento: { label: 'Melhorar o condicionamento', emoji: '💪', desc: 'Ter mais fôlego e disposição' },
+  condicionamento: { label: 'Melhorar o condicionamento', emoji: '🫁', desc: 'Ter mais fôlego e disposição' },
   ativo: { label: 'Ter uma rotina mais ativa', emoji: '🚶', desc: 'Se mexer mais no dia a dia' },
-  peso: { label: 'Trabalhar uma meta de peso', emoji: '⚖️', desc: 'Com segurança e no seu ritmo' },
-  equilibrio: { label: 'Manter uma rotina equilibrada', emoji: '⚖', desc: 'Nem oito nem oitenta' },
   cuidar: { label: 'Cuidar melhor de mim', emoji: '💛', desc: 'Autocuidado e saúde emocional' },
 };
+
+/** Como a jornada aparece nas telas. */
+export const JOURNEY_TEXT = {
+  perder: { title: 'Emagrecendo juntos', verb: 'tiraram', sign: '−', emoji: '🔥', unit: 'kcal a menos' },
+  ganhar: { title: 'Ganhando peso juntos', verb: 'somaram', sign: '+', emoji: '💪', unit: 'kcal a mais' },
+  manter: { title: 'Mantendo o equilíbrio', verb: 'movimentaram', sign: '', emoji: '⚖️', unit: 'kcal em movimento' },
+} as const;
 
 export const INCENTIVES: Record<Incentive, { label: string; emoji: string }> = {
   carinho: { label: 'Carinho e palavras gentis', emoji: '🤗' },

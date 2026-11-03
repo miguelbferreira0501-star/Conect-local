@@ -1,21 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Camera, Copy, Flag, Gift as GiftIcon, Home as HomeIcon, MoreHorizontal, Plus, Send, ShieldBan, Trash2, UserPlus, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Flag, Gift as GiftIcon, Plus, ShieldBan, UserPlus, X } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { Room } from '../components/Room';
-import { Empty, Modal, Seg, Sheet, toast } from '../components/ui';
+import { Empty, Modal, Sheet, toast } from '../components/ui';
 import { itemById } from '../data/items';
 import { periodOf } from '../data/lines';
-import { PRESET_COMMENTS, REACTIONS, checkKindness, REASON_TEXT, type ReactionId } from '../shared/moderation';
+import { checkKindness, REASON_TEXT } from '../shared/moderation';
 import { logEvent, payGift, receiveGift, todayKey, useApp } from '../lib/store';
-import { copyText, formatDay } from '../lib/util';
-import { shrinkPhoto } from '../lib/platform';
-import { publicProfileOf, socialBlocked, syncProfile, teenMode, useSocial } from '../lib/social';
-import { postKey, type Feed, type FriendState, type Gift, type GroupChallenge, type Post, type Profile, type SocialApi } from '../lib/social/types';
-import type { Photo, Task } from '../types';
+import { formatDay } from '../lib/util';
+import { socialBlocked, syncProfile, useSocial } from '../lib/social';
+import { postKey, type Feed, type FriendState, type Gift, type GroupChallenge, type Profile, type SocialApi } from '../lib/social/types';
+import { Avatar, Composer, PostCard, type ShareDraft } from './social/Post';
+import { MyHeader, ProfilePage } from './social/Profile';
+import { GroupsTab } from './social/Groups';
 
-export type ShareDraft = { kind: 'foto'; photo: Photo } | { kind: 'atividade'; task: Task } | null;
+export type { ShareDraft };
 
-type Tab = 'feed' | 'amigos' | 'desafios' | 'presentes';
+type Tab = 'feed' | 'grupos' | 'amigos' | 'desafios' | 'presentes';
 
 export function Friends({ share, onShareDone, giftItem, onGiftDone, account }: { share: ShareDraft; onShareDone: () => void; giftItem: string | null; onGiftDone: () => void; account: React.ReactNode }) {
   const s = useApp();
@@ -23,6 +24,9 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account }: {
   const [tab, setTab] = useState<Tab>('feed');
   const [me, setMe] = useState<Profile | null>(null);
   const [fs, setFs] = useState<FriendState | null>(null);
+  const [myPosts, setMyPosts] = useState(0);
+  const [adding, setAdding] = useState(false);
+  const [profile, setProfile] = useState<string | null>(null);
 
   const refreshFriends = useCallback(async () => {
     if (!api) return;
@@ -31,6 +35,7 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account }: {
       const [p, f] = await Promise.all([api.me(), api.friends()]);
       setMe(p);
       setFs(f);
+      if (p) api.profile(p.id).then((pg) => setMyPosts(pg?.posts.length ?? 0)).catch(() => {});
     } catch {
       toast('Não deu pra carregar os amigos agora.');
     }
@@ -39,6 +44,10 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account }: {
   useEffect(() => {
     refreshFriends();
   }, [refreshFriends]);
+
+  useEffect(() => {
+    if (share) setTab('feed');
+  }, [share]);
 
   if (socialBlocked(s)) {
     return (
@@ -54,23 +63,39 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account }: {
         <div className="card grid justify-items-center gap-3 p-5 text-center">
           <Hamster fur={s.pet.fur} phase={s.pet.phase} outfit={s.pet.outfit} size={120} neutral />
           <p className="font-display text-[20px] font-bold">Entre na sua conta para ter amigos</p>
-          <p className="text-[15px] text-muted">Com conta, você ganha um código para adicionar amigos, visitar casas, mandar presentes e ver o feed só de gentileza. Seu progresso também fica salvo na nuvem.</p>
+          <p className="text-[15px] text-muted">Com conta, você ganha um perfil, um código para adicionar amigos, grupos, visitas, presentes e o feed só de gentileza. Seu progresso também fica salvo na nuvem.</p>
         </div>
         {account}
       </Shell>
     );
   }
 
+  const myId = me?.id ?? '';
+  const TABS: { id: Tab; label: string }[] = [
+    { id: 'feed', label: '🏠 Feed' },
+    { id: 'grupos', label: '👥 Grupos' },
+    { id: 'amigos', label: `🐹 Amigos${fs?.incoming.length ? ` (${fs.incoming.length})` : ''}` },
+    { id: 'desafios', label: '🎯 Desafios' },
+    { id: 'presentes', label: '🎁 Presentes' },
+  ];
   return (
     <Shell>
-      <MyCode me={me} api={api} onAdded={refreshFriends} />
-      {api.kind === 'pagina' && <p className="text-[12px] text-muted">Versão de teste: amigos são pessoas com acesso a este link. No app final, tudo passa pelo servidor do HamiCare.</p>}
-      <Seg value={tab} onChange={setTab} label="Seções" options={[{ id: 'feed', label: 'Feed' }, { id: 'amigos', label: `Amigos${fs?.incoming.length ? ` (${fs.incoming.length})` : ''}` }, { id: 'desafios', label: 'Desafios' }, { id: 'presentes', label: 'Presentes' }]} />
-      {tab === 'feed' && <FeedTab api={api} share={share} onShareDone={onShareDone} friends={fs} myId={me?.id ?? ''} />}
-      {tab === 'amigos' && <FriendsTab api={api} fs={fs} refresh={refreshFriends} />}
-      {tab === 'desafios' && <ChallengesTab api={api} profiles={fs ? Object.fromEntries([...fs.friends, ...(me ? [me] : [])].map((p) => [p.id, p])) : {}} myId={me?.id ?? ''} />}
+      <MyHeader me={me} api={api} postsCount={myPosts} friendsCount={fs?.friends.length ?? 0} onAdd={() => setAdding(true)} />
+      <div className="tabs-scroll" role="tablist" aria-label="Seções">
+        {TABS.map((t) => (
+          <button key={t.id} role="tab" aria-selected={tab === t.id} className={`chip ${tab === t.id ? 'chip-accent' : 'chip-plain'}`} onClick={() => setTab(t.id)}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+      {tab === 'feed' && <FeedTab api={api} share={share} onShareDone={onShareDone} friends={fs} myId={myId} onOpenProfile={setProfile} onAdd={() => setAdding(true)} />}
+      {tab === 'grupos' && <GroupsTab api={api} friends={fs?.friends ?? []} myId={myId} onOpenProfile={setProfile} />}
+      {tab === 'amigos' && <FriendsTab api={api} fs={fs} refresh={refreshFriends} onOpenProfile={setProfile} />}
+      {tab === 'desafios' && <ChallengesTab api={api} profiles={fs ? Object.fromEntries([...fs.friends, ...(me ? [me] : [])].map((p) => [p.id, p])) : {}} myId={myId} />}
       {tab === 'presentes' && <GiftsTab api={api} />}
       <GiftSheet api={api} itemId={giftItem} friends={fs?.friends ?? []} onClose={onGiftDone} />
+      <AddFriend open={adding} api={api} onClose={() => setAdding(false)} onAdded={refreshFriends} onOpenProfile={setProfile} />
+      {profile && <ProfilePage userId={profile} api={api} myId={myId} onClose={() => setProfile(null)} onChanged={refreshFriends} />}
     </Shell>
   );
 }
@@ -87,69 +112,64 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function MyCode({ me, api, onAdded }: { me: Profile | null; api: SocialApi; onAdded: () => void }) {
+function AddFriend({ open, api, onClose, onAdded, onOpenProfile }: { open: boolean; api: SocialApi; onClose: () => void; onAdded: () => void; onOpenProfile: (id: string) => void }) {
   const [code, setCode] = useState('');
   const [found, setFound] = useState<Profile | null | 'nada'>(null);
+  useEffect(() => {
+    if (!open) (setCode(''), setFound(null));
+  }, [open]);
   return (
-    <section className="card grid gap-3 p-4" aria-label="Adicionar amigos">
-      <div className="flex items-center gap-2">
-        <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-bold text-muted">Seu código</p>
-          <p className="select-all font-display text-[24px] font-bold tracking-wide">{me?.code ?? '…'}</p>
-        </div>
-        {me && (
-          <button className="btn btn-soft btn-sm" onClick={async () => toast((await copyText(me.code)) ? 'Código copiado' : `Seu código é ${me.code}`)}>
-            <Copy size={16} /> Copiar
+    <Sheet open={open} onClose={onClose} title="Adicionar amigo">
+      <div className="grid gap-3 pt-1">
+        <form
+          className="flex gap-2"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const p = await api.findByCode(code);
+            setFound(p ?? 'nada');
+          }}
+        >
+          <label className="sr-only" htmlFor="friend-code">
+            Código do amigo
+          </label>
+          <input id="friend-code" className="field min-w-0 flex-1 uppercase" placeholder="Código do amigo (HAMI-…)" value={code} onChange={(e) => setCode(e.target.value)} />
+          <button className="btn btn-primary shrink-0" type="submit" disabled={code.trim().length < 4} aria-label="Procurar">
+            <UserPlus size={18} />
           </button>
-        )}
-      </div>
-      <form
-        className="flex gap-2"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          const p = await api.findByCode(code);
-          setFound(p ?? 'nada');
-        }}
-      >
-        <label className="sr-only" htmlFor="friend-code">
-          Código do amigo
-        </label>
-        <input id="friend-code" className="field min-w-0 flex-1 uppercase" placeholder="Código do amigo (HAMI-…)" value={code} onChange={(e) => setCode(e.target.value)} />
-        <button className="btn btn-primary shrink-0" type="submit" disabled={code.trim().length < 4} aria-label="Procurar">
-          <UserPlus size={18} />
-        </button>
-      </form>
-      {found === 'nada' && <p className="text-[14px] text-muted">Não achamos ninguém com esse código. Confira as letras.</p>}
-      {found && found !== 'nada' && (
-        <div className="flex items-center gap-3 rounded-2xl bg-surface2 p-3">
-          <Hamster fur={found.pet.fur} phase={found.pet.phase} outfit={found.pet.outfit} size={60} idle={false} neutral />
-          <div className="min-w-0 flex-1">
-            <p className="font-bold">{found.name}</p>
-            <p className="text-[13px] text-muted">
-              {found.pet.name} · nível {found.level}
-            </p>
+        </form>
+        {found === 'nada' && <p className="text-[14px] text-muted">Não achamos ninguém com esse código. Confira as letras.</p>}
+        {found && found !== 'nada' && (
+          <div className="flex items-center gap-3 rounded-2xl bg-surface2 p-3">
+            <Avatar pet={found.pet} id={found.id} size={52} ring />
+            <div className="min-w-0 flex-1">
+              <p className="font-bold">{found.name}</p>
+              <p className="text-[13px] text-muted">
+                {found.pet.name} · nível {found.level}
+              </p>
+            </div>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={async () => {
+                const r = await api.request(found.id);
+                toast(r === 'ok' ? 'Pedido enviado!' : r === 'fechado' ? 'Essa pessoa não está aceitando pedidos agora.' : 'Não foi possível adicionar.');
+                onAdded();
+                onClose();
+                if (r === 'ok') onOpenProfile(found.id);
+              }}
+            >
+              Pedir amizade
+            </button>
           </div>
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={async () => {
-              const r = await api.request(found.id);
-              toast(r === 'ok' ? 'Pedido enviado!' : r === 'fechado' ? 'Essa pessoa não está aceitando pedidos agora.' : 'Não foi possível adicionar.');
-              setFound(null);
-              setCode('');
-              onAdded();
-            }}
-          >
-            Pedir amizade
-          </button>
-        </div>
-      )}
-    </section>
+        )}
+        <p className="text-[13px] text-muted">Peça o código para a pessoa (ele aparece no perfil dela, em Amigos).</p>
+      </div>
+    </Sheet>
   );
 }
 
 // ---------- Feed ----------
 
-function FeedTab({ api, share, onShareDone, friends, myId }: { api: SocialApi; share: ShareDraft; onShareDone: () => void; friends: FriendState | null; myId: string }) {
+function FeedTab({ api, share, onShareDone, friends, myId, onOpenProfile, onAdd }: { api: SocialApi; share: ShareDraft; onShareDone: () => void; friends: FriendState | null; myId: string; onOpenProfile: (id: string) => void; onAdd: () => void }) {
   const [feed, setFeed] = useState<Feed | null>(null);
   const [composer, setComposer] = useState(false);
   const load = useCallback(() => api.feed().then(setFeed).catch(() => toast('Não deu pra carregar o feed.')), [api]);
@@ -159,16 +179,39 @@ function FeedTab({ api, share, onShareDone, friends, myId }: { api: SocialApi; s
   useEffect(() => {
     if (share) setComposer(true);
   }, [share]);
+  const recent = new Set((feed?.posts ?? []).filter((p) => Date.now() - p.createdAt < 24 * 3_600_000).map((p) => p.authorId));
+  const people = [...(friends?.friends ?? [])].sort((a, b) => Number(recent.has(b.id)) - Number(recent.has(a.id)));
 
   return (
     <div className="grid gap-3">
-      <button className="btn btn-primary" onClick={() => setComposer(true)}>
-        <Plus size={18} /> Compartilhar um momento
-      </button>
+      <div className="stories" aria-label="Amigos">
+        <button className="story" onClick={() => setComposer(true)} aria-label="Compartilhar um momento">
+          <span className="story-add">
+            <Plus size={22} />
+          </span>
+          <span className="story-name">Postar</span>
+        </button>
+        {people.map((p) => (
+          <button key={p.id} className="story" onClick={() => onOpenProfile(p.id)} aria-label={`Perfil de ${p.name}`}>
+            <span className={recent.has(p.id) ? '' : 'opacity-70 grayscale-[0.4]'}>
+              <Avatar pet={p.pet} id={p.id} size={58} ring={recent.has(p.id)} />
+            </span>
+            <span className="story-name">{p.name}</span>
+          </button>
+        ))}
+        {!people.length && (
+          <button className="story" onClick={onAdd} aria-label="Adicionar amigo">
+            <span className="story-add">
+              <UserPlus size={20} />
+            </span>
+            <span className="story-name">Adicionar</span>
+          </button>
+        )}
+      </div>
       {!feed ? (
         <p className="text-center text-muted">Carregando…</p>
       ) : feed.posts.length ? (
-        feed.posts.map((p) => <PostCard key={postKey(p)} post={p} feed={feed} api={api} reload={load} myId={myId} />)
+        feed.posts.map((p) => <PostCard key={postKey(p)} post={p} feed={feed} api={api} reload={load} myId={myId} onOpenProfile={onOpenProfile} />)
       ) : (
         <Empty>{friends?.friends.length ? 'Ainda não tem posts. Que tal ser a primeira pessoa?' : 'Adicione amigos pelo código para ver o feed deles aqui.'}</Empty>
       )}
@@ -186,231 +229,9 @@ function FeedTab({ api, share, onShareDone, friends, myId }: { api: SocialApi; s
   );
 }
 
-function PostCard({ post, feed, api, reload, myId }: { post: Post; feed: Feed; api: SocialApi; reload: () => void; myId: string }) {
-  const s = useApp();
-  const author = feed.profiles[post.authorId];
-  const key = postKey(post);
-  const mine = post.authorId === myId;
-  const reactions = feed.reactions.filter((r) => r.postKey === key);
-  const myReaction = reactions.find((r) => r.authorId === myId)?.kind;
-  const comments = feed.comments.filter((c) => c.postKey === key);
-  const [menu, setMenu] = useState(false);
-  const [text, setText] = useState('');
-  const teen = teenMode(s);
-
-  async function react(kind: ReactionId) {
-    await api.react(key, myReaction === kind ? null : kind);
-    if (myReaction !== kind && !mine) logEvent('vibe');
-    reload();
-  }
-  async function send(t: string) {
-    const r = await api.comment(key, t);
-    if (!r.ok) return toast(r.reason);
-    setText('');
-    reload();
-  }
-
-  return (
-    <article className="card grid gap-3 p-4">
-      <header className="flex items-center gap-3">
-        {author && <Hamster fur={author.pet.fur} phase={author.pet.phase} outfit={author.pet.outfit} size={44} idle={false} neutral />}
-        <div className="min-w-0 flex-1">
-          <p className="font-bold leading-tight">{author?.name ?? 'Amigo'}</p>
-          <p className="text-[12px] text-muted">{new Date(post.createdAt).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
-        </div>
-        <button className="icon-btn !h-9 !w-9" aria-label="Mais opções" onClick={() => setMenu(true)}>
-          <MoreHorizontal size={18} />
-        </button>
-      </header>
-      {post.text && <p className="whitespace-pre-wrap text-[16px]">{post.text}</p>}
-      {post.image && <img src={post.image} alt={post.text || 'Foto compartilhada'} className="max-h-[360px] w-full rounded-2xl object-cover" />}
-      {post.house && !post.image && (
-        <Room house={post.house} period={periodOf()} height={190}>
-          {post.pet && <Hamster fur={post.pet.fur} phase={post.pet.phase} outfit={post.pet.outfit} mood={post.pet.mood} size={100} idle={false} neutral />}
-        </Room>
-      )}
-      {post.pet && !post.house && !post.image && (
-        <div className="grid place-items-center rounded-2xl bg-surface2 py-2">
-          <Hamster fur={post.pet.fur} phase={post.pet.phase} outfit={post.pet.outfit} mood={post.pet.mood} size={160} idle={false} neutral />
-        </div>
-      )}
-      <div className="flex flex-wrap gap-1.5" role="group" aria-label="Reações">
-        {REACTIONS.map((r) => {
-          const n = reactions.filter((x) => x.kind === r.id).length;
-          return (
-            <button key={r.id} className={`chip ${myReaction === r.id ? 'chip-accent' : 'chip-plain'}`} aria-pressed={myReaction === r.id} aria-label={r.label} onClick={() => react(r.id)}>
-              {r.emoji} {n > 0 && <span className="tabular-nums">{n}</span>}
-            </button>
-          );
-        })}
-      </div>
-      {comments.length > 0 && (
-        <ul className="grid gap-1.5">
-          {comments.map((c) => (
-            <li key={c.id} className="flex items-start gap-2 rounded-2xl bg-surface2 px-3 py-2 text-[14px]">
-              <span className="min-w-0 flex-1">
-                <b>{feed.profiles[c.authorId]?.name ?? 'Amigo'}</b> {c.text}
-              </span>
-              {(c.authorId === myId || mine) && (
-                <button
-                  className="text-muted"
-                  aria-label="Remover comentário"
-                  onClick={async () => {
-                    if (c.authorId === myId) await api.deleteComment(c.id);
-                    else await api.hideComment(post.id, c.id);
-                    reload();
-                  }}
-                >
-                  <X size={15} />
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-      <div className="flex gap-1.5 overflow-x-auto pb-1">
-        {PRESET_COMMENTS.slice(0, 6).map((p) => (
-          <button key={p} className="chip chip-plain shrink-0" onClick={() => send(p)}>
-            {p}
-          </button>
-        ))}
-      </div>
-      {!teen && (
-        <form className="flex gap-2" onSubmit={(e) => (e.preventDefault(), text.trim() && send(text))}>
-          <label className="sr-only" htmlFor={`c-${key}`}>
-            Comentário gentil
-          </label>
-          <input id={`c-${key}`} className="field !min-h-[42px] min-w-0 flex-1 !py-2" maxLength={200} placeholder="Escreva algo gentil…" value={text} onChange={(e) => setText(e.target.value)} />
-          <button className="icon-btn !h-[42px] !w-[42px]" type="submit" aria-label="Enviar" disabled={!text.trim()}>
-            <Send size={17} />
-          </button>
-        </form>
-      )}
-      {text && !checkKindness(text).ok && <p className="text-[13px] text-danger">{(() => { const r = checkKindness(text); return r.ok ? '' : REASON_TEXT[r.reason]; })()}</p>}
-
-      <Sheet open={menu} onClose={() => setMenu(false)} title="Opções do post">
-        <div className="grid gap-2 pt-1">
-          {mine ? (
-            <button className="opt" onClick={async () => (await api.deletePost(post.id), setMenu(false), reload())}>
-              <Trash2 size={18} /> Apagar post
-            </button>
-          ) : (
-            <>
-              <button className="opt" onClick={async () => (await api.report({ type: 'post', id: key, userId: post.authorId }, 'conteudo'), setMenu(false), toast('Denúncia enviada. Obrigado por cuidar da comunidade.'))}>
-                <Flag size={18} /> Denunciar post
-              </button>
-              <button className="opt" onClick={async () => (await api.block(post.authorId), setMenu(false), toast('Pessoa bloqueada.'), reload())}>
-                <ShieldBan size={18} /> Bloquear {author?.name ?? 'pessoa'}
-              </button>
-            </>
-          )}
-          {comments.filter((c) => c.authorId !== myId).map((c) => (
-            <button key={c.id} className="opt text-[14px]" onClick={async () => (await api.report({ type: 'comment', id: c.id, userId: c.authorId }, 'comentario'), await api.hideComment(post.id, c.id).catch(() => {}), setMenu(false), toast('Comentário denunciado.'), reload())}>
-              <Flag size={16} /> Denunciar: “{c.text.slice(0, 30)}”
-            </button>
-          ))}
-        </div>
-      </Sheet>
-    </article>
-  );
-}
-
-function Composer({ open, api, draft, onClose, onPosted }: { open: boolean; api: SocialApi; draft: ShareDraft; onClose: () => void; onPosted: () => void }) {
-  const s = useApp();
-  const teen = teenMode(s);
-  const [text, setText] = useState('');
-  const [withHouse, setWithHouse] = useState(false);
-  const [image, setImage] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const file = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    setText(draft?.kind === 'atividade' ? `Concluí: ${draft.task.emoji} ${draft.task.title}` : draft?.kind === 'foto' ? draft.photo.caption : '');
-    setImage(null);
-    setWithHouse(false);
-  }, [open, draft]);
-
-  const pet = draft?.kind === 'foto' ? { name: s.pet.name, fur: draft.photo.snap.fur, phase: draft.photo.snap.phase, outfit: draft.photo.snap.outfit, mood: draft.photo.snap.mood } : { ...publicProfileOf(s).pet, mood: 'animado' as const };
-  const check = text.trim() ? checkKindness(text) : ({ ok: true } as const);
-
-  async function publish() {
-    if (!check.ok) return toast(REASON_TEXT[check.reason]);
-    setBusy(true);
-    try {
-      await api.post({ kind: draft?.kind === 'atividade' ? 'atividade' : image ? 'momento' : withHouse ? 'decoracao' : 'foto', text: text.trim(), pet, house: withHouse ? s.house : undefined, image: image ?? undefined });
-      toast('Compartilhado com seus amigos!');
-      onPosted();
-      onClose();
-    } catch {
-      toast('Não deu pra compartilhar agora.');
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Sheet open={open} onClose={onClose} title="Compartilhar">
-      <div className="grid gap-3 pt-1">
-        {image ? (
-          <div className="relative">
-            <img src={image} alt="Sua foto" className="max-h-[260px] w-full rounded-2xl object-cover" />
-            <button className="icon-btn absolute right-2 top-2" aria-label="Tirar foto" onClick={() => setImage(null)}>
-              <X size={18} />
-            </button>
-          </div>
-        ) : withHouse ? (
-          <Room house={s.house} period={periodOf()} height={180}>
-            <Hamster fur={pet.fur} phase={pet.phase} outfit={pet.outfit} mood={pet.mood} size={96} idle={false} neutral />
-          </Room>
-        ) : (
-          <div className="grid place-items-center rounded-2xl bg-surface2 py-2">
-            <Hamster fur={pet.fur} phase={pet.phase} outfit={pet.outfit} mood={pet.mood} size={140} idle={false} neutral />
-          </div>
-        )}
-        <label className="sr-only" htmlFor="post-text">
-          Texto do post
-        </label>
-        <textarea id="post-text" className="field min-h-[80px] resize-none" maxLength={200} placeholder="Conte o que você conquistou (só coisas boas!)" value={text} onChange={(e) => setText(e.target.value)} />
-        {!check.ok && <p className="text-[13px] text-danger">{REASON_TEXT[check.reason]}</p>}
-        <div className="flex flex-wrap gap-2">
-          <button className={`chip ${withHouse ? 'chip-accent' : 'chip-plain'}`} onClick={() => (setWithHouse(!withHouse), setImage(null))}>
-            <HomeIcon size={14} /> Mostrar minha casa
-          </button>
-          {!teen && s.privacy.sharePhotos && (
-            <button className="chip chip-plain" onClick={() => file.current?.click()}>
-              <Camera size={14} /> Foto real
-            </button>
-          )}
-          <input
-            ref={file}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={async (e) => {
-              const f = e.target.files?.[0];
-              if (!f) return;
-              const data = await shrinkPhoto(f).catch(() => null);
-              if (data) setImage(data);
-              else toast('Não deu pra usar essa foto.');
-              e.target.value = '';
-            }}
-          />
-        </div>
-        {teen && <p className="text-[12px] text-muted">Para menores de 18, o feed mostra só o Hami e a casa, sem fotos reais.</p>}
-        <p className="text-[12px] text-muted">Só seus amigos veem. Peso, diário e humor nunca são compartilhados.</p>
-        <button className="btn btn-primary" disabled={busy || !check.ok} onClick={publish}>
-          Publicar
-        </button>
-      </div>
-    </Sheet>
-  );
-}
-
 // ---------- Amigos ----------
 
-function FriendsTab({ api, fs, refresh }: { api: SocialApi; fs: FriendState | null; refresh: () => void }) {
+function FriendsTab({ api, fs, refresh, onOpenProfile }: { api: SocialApi; fs: FriendState | null; refresh: () => void; onOpenProfile: (id: string) => void }) {
   const [visit, setVisit] = useState<Profile | null>(null);
   if (!fs) return <p className="text-center text-muted">Carregando…</p>;
   const act = async (fn: () => Promise<unknown>, msg: string) => {
@@ -440,8 +261,8 @@ function FriendsTab({ api, fs, refresh }: { api: SocialApi; fs: FriendState | nu
         {fs.friends.length ? (
           fs.friends.map((p) => (
             <PersonRow key={p.id} p={p}>
-              <button className="btn btn-soft btn-sm" onClick={() => setVisit(p)}>
-                Visitar
+              <button className="btn btn-soft btn-sm" onClick={() => onOpenProfile(p.id)}>
+                Perfil
               </button>
               <button
                 className="icon-btn"
@@ -520,7 +341,7 @@ function FriendsTab({ api, fs, refresh }: { api: SocialApi; fs: FriendState | nu
 function PersonRow({ p, children }: { p: Profile; children: React.ReactNode }) {
   return (
     <div className="card flex items-center gap-3 p-3">
-      <Hamster fur={p.pet.fur} phase={p.pet.phase} outfit={p.pet.outfit} size={50} idle={false} neutral />
+      <Avatar pet={p.pet} id={p.id} size={46} />
       <div className="min-w-0 flex-1">
         <p className="truncate font-bold">{p.name}</p>
         <p className="truncate text-[13px] text-muted">

@@ -1,42 +1,90 @@
 import { describe, expect, it } from 'vitest';
-import { BAND, checkGoal, conditioning, fluffOf, pendingWeighIns, phaseFor, rapidChange, weighIn } from './evolution';
-import type { BodyData, DayLog } from '../types';
+import {
+  BAND, DAY_CAP, JOURNEY_GRAMS, checkJourneyGoal, conditioning, dayKcal, defaultGoalKg, directionOf, fluffOf, journeyGrams, journeyKcal,
+  journeyProgress, minDaysLeft, needKcalFor, phaseFor, rapidChange, scaleProgress, taskKcal,
+} from './evolution';
+import type { DayLog, Journey } from '../types';
 import { addDays } from '../lib/util';
 
-const body = (p: Partial<BodyData> = {}): BodyData => ({
-  tracking: false, sync: false, consentAt: null, heightCm: null, logs: [], baselineKg: null, goalKg: null, goalWeeks: null, hideNumbers: false, ...p,
-});
 const day = (cats: string[]): DayLog => ({ done: Object.fromEntries(cats.map((c, i) => [`t${i}`, c])) as DayLog['done'], care: [] });
+const journey = (p: Partial<Journey> = {}): Journey => ({ dir: 'perder', startedAt: '2026-11-01', startGrams: JOURNEY_GRAMS.perder.start, goalGrams: JOURNEY_GRAMS.perder.goal, needKcal: 26950, reachedAt: null, ...p });
 
-describe('peso virtual', () => {
-  it('menores de 18: o peso nunca muda', () => {
-    expect(weighIn({ grams: 165, startGrams: 165, minor: true, sync: true, baselineKg: 80, recentKg: 70, activeDays: 7 }).grams).toBe(165);
+describe('calorias de cada missão', () => {
+  it('movimento: (MET − 1) × kg × horas', () => {
+    // Caminhada de 15 min (MET 3,5) para 70 kg: 2,5 × 70 × 0,25 = 43,75
+    expect(taskKcal({ met: 3.5, min: 15 }, 'perder', 70)).toBe(44);
+    // A mesma caminhada gasta mais para quem pesa mais
+    expect(taskKcal({ met: 3.5, min: 15 }, 'perder', 100)).toBe(63);
   });
-  it('sem sincronização: anda até a faixa saudável, no máximo 3 g por semana, e só com dias ativos', () => {
-    expect(weighIn({ grams: 165, startGrams: 165, minor: false, sync: false, baselineKg: null, recentKg: null, activeDays: 4 }).grams).toBe(162);
-    expect(weighIn({ grams: 165, startGrams: 165, minor: false, sync: false, baselineKg: null, recentKg: null, activeDays: 1 }).grams).toBe(164);
-    expect(weighIn({ grams: 165, startGrams: 165, minor: false, sync: false, baselineKg: null, recentKg: null, activeDays: 0 }).grams).toBe(165);
-    expect(weighIn({ grams: 115, startGrams: 115, minor: false, sync: false, baselineKg: null, recentKg: null, activeDays: 5 }).grams).toBe(118);
+  it('emagrecer conta a troca saudável; ganhar conta o lanche nutritivo', () => {
+    const agua = { swap: 140 };
+    const vitamina = { gain: 350 };
+    expect(taskKcal(agua, 'perder', 70)).toBe(140);
+    expect(taskKcal(agua, 'ganhar', 70)).toBe(0);
+    expect(taskKcal(vitamina, 'ganhar', 70)).toBe(350);
+    expect(taskKcal(vitamina, 'perder', 70)).toBe(0);
   });
-  it('dentro da faixa, o Hami mantém o peso', () => {
-    expect(weighIn({ grams: 140, startGrams: 140, minor: false, sync: false, baselineKg: null, recentKg: null, activeDays: 7 }).grams).toBe(140);
+  it('quem quer ganhar peso não perde nada por se exercitar', () => {
+    expect(taskKcal({ met: 7, min: 20 }, 'ganhar', 70)).toBe(0);
   });
-  it('com sincronização: acompanha a variação proporcional da pessoa, devagar', () => {
-    // A pessoa foi de 100 kg para 90 kg (-10%): alvo do Hami = 165 × 0,9 = 148,5 g.
-    const r = weighIn({ grams: 165, startGrams: 165, minor: false, sync: true, baselineKg: 100, recentKg: 90, activeDays: 0 });
-    expect(r.target).toBe(148.5);
-    expect(r.grams).toBe(162);
+  it('atividade criada pela pessoa ganha uma estimativa pela energia', () => {
+    expect(taskKcal({ cat: 'fitness', energy: 2 }, 'perder', 70)).toBe(58);
+    expect(taskKcal({ cat: 'emocional', energy: 2 }, 'perder', 70)).toBe(0);
   });
-  it('o alvo sincronizado respeita os limites do desenho', () => {
-    expect(weighIn({ grams: 120, startGrams: 120, minor: false, sync: true, baselineKg: 100, recentKg: 50, activeDays: 0 }).target).toBe(105);
+  it('o dia tem teto: exagerar não acelera a jornada', () => {
+    const d: DayLog = { done: {}, care: [], kcal: { a: 600, b: 600 } };
+    expect(dayKcal(d, 'perder')).toBe(DAY_CAP.perder);
+    expect(dayKcal({ done: {}, care: [], kcal: { a: 120 } }, 'perder')).toBe(120);
   });
-  it('faz as pesagens atrasadas, uma por semana', () => {
-    const start = '2026-10-01';
-    const days: Record<string, DayLog> = {};
-    for (let i = 0; i < 21; i++) days[addDays(start, i)] = day(['fitness']);
-    const res = pendingWeighIns({ grams: 165, startGrams: 165, lastWeighIn: start, today: addDays(start, 21), minor: false, body: body(), days });
-    expect(res.map((r) => r.grams)).toEqual([162, 159, 156]);
-    expect(res[0].date).toBe('2026-10-08');
+});
+
+describe('jornada do Hami', () => {
+  it('menores sempre mantêm o peso', () => {
+    expect(directionOf('emagrecer', true)).toBe('manter');
+    expect(directionOf('emagrecer', false)).toBe('perder');
+    expect(directionOf('ganhar', false)).toBe('ganhar');
+    expect(directionOf('habitos', false)).toBe('manter');
+  });
+  it('meta padrão de 5% e calorias necessárias', () => {
+    expect(defaultGoalKg(80, 'perder')).toBe(76);
+    expect(defaultGoalKg(60, 'ganhar')).toBe(63);
+    expect(needKcalFor(80, 76)).toBe(30800);
+  });
+  it('o Hami chega à meta dele quando a pessoa chega à dela', () => {
+    const j = journey();
+    expect(journeyGrams(j, journeyProgress(j, 0))).toBe(165);
+    expect(journeyGrams(j, journeyProgress(j, j.needKcal / 2))).toBe(150);
+    expect(journeyGrams(j, journeyProgress(j, j.needKcal * 3))).toBe(135);
+  });
+  it('cada missão tira um pouquinho, proporcional', () => {
+    const j = journey();
+    // 140 kcal de 26.950 → 0,52% da jornada → 30 g × 0,0052 ≈ 0,2 g
+    expect(165 - journeyGrams(j, journeyProgress(j, 140))).toBeCloseTo(0.2, 1);
+  });
+  it('ganhar peso faz o Hami crescer até a meta', () => {
+    const j = journey({ dir: 'ganhar', startGrams: 115, goalGrams: 140, needKcal: 23100 });
+    expect(journeyGrams(j, journeyProgress(j, 23100))).toBe(140);
+  });
+  it('manter: o Hami fica firme', () => {
+    const j = journey({ dir: 'manter', startGrams: 135, goalGrams: 135, needKcal: 0 });
+    expect(journeyGrams(j, journeyProgress(j, 5000))).toBe(135);
+  });
+  it('soma só os dias da jornada', () => {
+    const days: Record<string, DayLog> = {
+      '2026-10-30': { done: {}, care: [], kcal: { a: 300 } },
+      '2026-11-01': { done: {}, care: [], kcal: { a: 200 } },
+      '2026-11-02': { done: {}, care: [], kcal: { a: 100, b: 50 } },
+    };
+    expect(journeyKcal(days, '2026-11-01', 'perder')).toBe(350);
+    expect(journeyKcal(days, '2026-11-01', 'perder', '2026-11-01')).toBe(200);
+  });
+  it('pela balança: acompanha a variação real da pessoa', () => {
+    expect(scaleProgress('perder', 80, 76, 78)).toBe(0.5);
+    expect(scaleProgress('perder', 80, 76, 82)).toBe(0);
+    expect(scaleProgress('ganhar', 60, 63, 63)).toBe(1);
+  });
+  it('dias mínimos no ritmo seguro', () => {
+    expect(minDaysLeft(journey({ needKcal: 8000 }), 0)).toBe(10);
   });
   it('fofura vai de 0 a 1', () => {
     expect(fluffOf(105)).toBe(0);
@@ -59,15 +107,17 @@ describe('condicionamento e fases', () => {
   });
 });
 
-describe('metas de peso seguras', () => {
-  it('menores não têm meta', () => expect(checkGoal(60, 55, 10, null, true).ok).toBe(false));
-  it('recusa prazos curtos e ritmo acima de 1% por semana', () => {
-    expect(checkGoal(80, 76, 3, null, false).ok).toBe(false);
-    expect(checkGoal(80, 70, 8, null, false).ok).toBe(false);
-    expect(checkGoal(80, 76, 6, null, false).ok).toBe(true);
+describe('metas seguras', () => {
+  it('menores não têm meta', () => expect(checkJourneyGoal(60, 55, 'perder', null, true).ok).toBe(false));
+  it('recusa metas na direção errada ou grandes demais', () => {
+    expect(checkJourneyGoal(80, 82, 'perder', null, false).ok).toBe(false);
+    expect(checkJourneyGoal(80, 60, 'perder', null, false).ok).toBe(false);
+    expect(checkJourneyGoal(80, 72, 'perder', null, false).ok).toBe(true);
+    expect(checkJourneyGoal(60, 75, 'ganhar', null, false).ok).toBe(false);
+    expect(checkJourneyGoal(60, 65, 'ganhar', null, false).ok).toBe(true);
   });
   it('recusa meta abaixo de IMC 18,5', () => {
-    expect(checkGoal(60, 52, 20, 175, false).ok).toBe(false);
+    expect(checkJourneyGoal(60, 55, 'perder', 175, false).ok).toBe(false);
   });
   it('detecta mudança rápida', () => {
     expect(rapidChange([{ date: '2026-10-20', kg: 80 }, { date: '2026-11-03', kg: 76 }], '2026-11-03')).toBe(true);

@@ -1,7 +1,10 @@
 // Tipos centrais do HamiCare (estado salvo no aparelho e no backup da conta).
 
 export type AgeGroup = 'ate12' | '13a17' | '18mais';
-export type GoalId = 'habitos' | 'condicionamento' | 'ativo' | 'peso' | 'equilibrio' | 'cuidar';
+/** Missão principal. emagrecer/ganhar/manter mexem no peso do Hami (só 18+). */
+export type GoalId = 'emagrecer' | 'ganhar' | 'manter' | 'habitos' | 'condicionamento' | 'ativo' | 'cuidar';
+/** Para onde o peso do Hami vai na jornada. */
+export type Direction = 'perder' | 'ganhar' | 'manter';
 export type BodyStart = 'fofinho' | 'equilibrado' | 'mignon';
 export type Category = 'fitness' | 'autocuidado' | 'habitos' | 'emocional';
 export type Mood = 1 | 2 | 3 | 4 | 5;
@@ -24,6 +27,13 @@ export interface Task {
   createdAt: string;
   /** 1 = cabe num dia difícil. Tarefas 2 e 3 somem no modo dia difícil. */
   energy: 1 | 2 | 3;
+  /** Gasto estimado: intensidade (MET) e minutos. */
+  met?: number;
+  min?: number;
+  /** Calorias economizadas numa troca saudável (para quem quer emagrecer). */
+  swap?: number;
+  /** Calorias a mais de um lanche nutritivo (para quem quer ganhar peso). */
+  gain?: number;
 }
 
 export interface DayLog {
@@ -37,6 +47,20 @@ export interface DayLog {
   care: CareId[];
   /** Outros acontecimentos do dia: 'diario', 'pote', 'vibe', 'aventura', 'respirar'… */
   events?: string[];
+  /** id da tarefa → calorias da jornada que ela contou (para desfazer certinho). */
+  kcal?: Record<string, number>;
+}
+
+/** Jornada de peso do Hami: ele emagrece ou ganha peso junto com a pessoa. */
+export interface Journey {
+  dir: Direction;
+  startedAt: string;
+  /** Peso do Hami no começo e na meta (gramas de hamster). */
+  startGrams: number;
+  goalGrams: number;
+  /** Calorias que a pessoa precisa somar nas missões para chegar à meta. */
+  needKcal: number;
+  reachedAt: string | null;
 }
 
 export interface Outfit {
@@ -124,7 +148,7 @@ export interface PetSnap {
   mood: PetMood;
 }
 
-export type PetMood = 'feliz' | 'calmo' | 'sono' | 'animado' | 'dormindo' | 'comendo';
+export type PetMood = 'feliz' | 'calmo' | 'sono' | 'animado' | 'dormindo' | 'comendo' | 'risada' | 'boca' | 'surpreso';
 
 export interface Photo {
   id: string;
@@ -183,6 +207,11 @@ export interface State {
   settings: Settings;
   premium: { trialStart: string | null; until: string | null };
   privacy: { requests: 'todos' | 'ninguem'; sharePhotos: boolean };
+  journey: Journey;
+  /** Último dia em que a pessoa viu o cartão de boas-vindas. */
+  welcomed: string | null;
+  /** Bio do perfil público (passa pelo filtro de gentileza). */
+  bio: string;
   lastGift: string | null;
   updatedAt: number;
   /** Veio do app antigo (Xodó): o onboarding mostra uma mensagem de boas-vindas. */

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Compass, Heart, Home as HomeIcon, ListChecks, Users } from 'lucide-react';
-import { Modal, Sheet, Toaster, toast } from './components/ui';
-import { Hamster } from './components/Hamster';
+import { Sheet, Toaster, toast } from './components/ui';
+import { CelebrationModal, DailyWelcome, StreakScreen } from './components/Celebrate';
+import { TabIcon, type TabId } from './components/TabIcon';
 import { Home } from './screens/Home';
 import { Activities } from './screens/Activities';
 import { World } from './screens/World';
@@ -12,20 +12,18 @@ import { SettingsSheet } from './screens/Settings';
 import { Evolution } from './screens/Evolution';
 import { Paywall } from './screens/Paywall';
 import { AccountSection } from './screens/Account';
-import { getState, minor, onCelebrate, tick, useApp, type Celebration } from './lib/store';
+import { getState, markWelcomed, onCelebrate, tick, todayKey, useApp, type Celebration } from './lib/store';
 import { markReminded, pickReminder, reminderDue, showNotification } from './lib/notify';
 import { syncProfile } from './lib/social';
-import { PHASES } from './logic/evolution';
-import { fmtNum } from './lib/util';
 
-type Tab = 'inicio' | 'atividades' | 'mundo' | 'bem-estar' | 'amigos';
+type Tab = TabId;
 
-const TABS: { id: Tab; label: string; Icon: typeof HomeIcon }[] = [
-  { id: 'inicio', label: 'Início', Icon: HomeIcon },
-  { id: 'atividades', label: 'Atividades', Icon: ListChecks },
-  { id: 'mundo', label: 'Mundo', Icon: Compass },
-  { id: 'bem-estar', label: 'Bem-estar', Icon: Heart },
-  { id: 'amigos', label: 'Amigos', Icon: Users },
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'inicio', label: 'Início' },
+  { id: 'atividades', label: 'Missões' },
+  { id: 'mundo', label: 'Mundo' },
+  { id: 'bem-estar', label: 'Bem-estar' },
+  { id: 'amigos', label: 'Amigos' },
 ];
 
 function initialTab(): Tab {
@@ -84,7 +82,7 @@ export default function App() {
   useEffect(() => {
     const t = setTimeout(() => syncProfile(s), 1500);
     return () => clearTimeout(t);
-  }, [s.profile.name, s.pet.name, s.pet.fur, s.pet.phase, s.pet.outfit, s.house, s.xp, s.privacy.requests]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [s.profile.name, s.pet.name, s.pet.fur, s.pet.phase, s.pet.outfit, s.house, s.xp, s.privacy.requests, s.bio, s.days, s.achievements]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const onHash = () => setTab(initialTab());
@@ -117,6 +115,7 @@ export default function App() {
     go('amigos');
   };
   const current = queue[0];
+  const showWelcome = s.welcomed !== todayKey() && !current;
 
   return (
     <>
@@ -129,9 +128,9 @@ export default function App() {
       </main>
       <nav className="tabbar" aria-label="Seções do app">
         <div className="tabbar-inner">
-          {TABS.map(({ id, label, Icon }) => (
+          {TABS.map(({ id, label }) => (
             <button key={id} className="tab" aria-current={tab === id ? 'page' : undefined} onClick={() => go(id)}>
-              <Icon size={23} strokeWidth={tab === id ? 2.6 : 2} aria-hidden="true" />
+              <TabIcon id={id} />
               {label}
             </button>
           ))}
@@ -143,43 +142,9 @@ export default function App() {
         <Paywall onClose={() => setPlus(false)} />
       </Sheet>
       <CelebrationModal c={current} onClose={() => setQueue((q) => q.slice(1))} />
+      {current?.type === 'streak' && <StreakScreen count={current.count} onClose={() => setQueue((q) => q.slice(1))} onShare={(photo) => (setQueue((q) => q.slice(1)), shareTo({ kind: 'foto', photo }))} />}
+      {showWelcome && <DailyWelcome onClose={markWelcomed} />}
       <Toaster />
     </>
-  );
-}
-
-function CelebrationModal({ c, onClose }: { c: Celebration | undefined; onClose: () => void }) {
-  const s = useApp();
-  if (!c) return null;
-  const hide = minor(s) || s.body.hideNumbers;
-  const content =
-    c.type === 'level'
-      ? { title: `Nível ${c.level}!`, text: 'Cada cuidado seu fez isso acontecer. Confira o mapa: pode ter lugar novo liberado.', mood: 'animado' as const }
-      : c.type === 'phase'
-        ? { title: `Fase ${PHASES[c.phase]}!`, text: `O ${s.pet.name} evoluiu junto com você. Constância é tudo!`, mood: 'animado' as const }
-        : c.type === 'achievement'
-          ? { title: `${c.emoji} ${c.title}`, text: `Conquista nova! +${c.coins} sementes de girassol.`, mood: 'feliz' as const }
-          : {
-              title: 'Pesagem da semana',
-              text: hide
-                ? `O ${s.pet.name} seguiu a jornada dele nesta semana.`
-                : c.grams === c.before
-                  ? `${fmtNum(c.grams)} g: o ${s.pet.name} se manteve. Consistência também é evolução.`
-                  : `${fmtNum(c.before)} g → ${fmtNum(c.grams)} g. Devagar e sempre, junto com você.`,
-              mood: 'feliz' as const,
-            };
-  return (
-    <Modal open onClose={onClose} label={content.title}>
-      <div className="grid justify-items-center gap-2 p-6 text-center">
-        <div className="evolve-pop">
-          <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={content.mood} size={180} />
-        </div>
-        <h2 className="font-display text-[26px] font-bold leading-tight">{content.title}</h2>
-        <p className="text-muted">{content.text}</p>
-        <button className="btn btn-primary mt-2 w-full" onClick={onClose}>
-          Que demais!
-        </button>
-      </div>
-    </Modal>
   );
 }

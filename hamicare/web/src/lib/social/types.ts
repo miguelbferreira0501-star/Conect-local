@@ -21,7 +21,31 @@ export interface Profile {
   /** 13 a 17: só elogios prontos, sem foto real. */
   teen: boolean;
   acceptsRequests: boolean;
+  /** Bio curta (passa pelo filtro de gentileza). */
+  bio?: string;
+  /** Contadores públicos: só coisas boas. */
+  streak?: number;
+  badges?: number;
   updatedAt: number;
+}
+
+/** Perfil aberto de alguém, no estilo rede social. */
+export interface UserPage {
+  profile: Profile;
+  /** Posts do feed geral (só aparecem para amigos). */
+  posts: Post[];
+  friendsCount: number;
+  isFriend: boolean;
+}
+
+export interface Group {
+  id: string;
+  ownerId: string;
+  name: string;
+  emoji: string;
+  color: string;
+  members: string[];
+  createdAt: number;
 }
 
 export type PostKind = 'foto' | 'atividade' | 'conquista' | 'decoracao' | 'momento';
@@ -35,6 +59,8 @@ export interface Post {
   house?: House;
   /** Foto real (JPEG em data URL), só para 18+. */
   image?: string;
+  /** Post do mural de um grupo (não aparece no feed geral). */
+  groupId?: string;
   createdAt: number;
 }
 
@@ -118,6 +144,14 @@ export interface SocialApi {
   gifts(): Promise<Gift[]>;
   sendGift(to: string, itemId: string, note: string): Promise<void>;
   claimGift(id: string): Promise<Gift | null>;
+  /** Perfil de alguém (null se não der para ver). */
+  profile(userId: string): Promise<UserPage | null>;
+  groups(): Promise<{ groups: Group[]; profiles: Record<string, Profile> }>;
+  createGroup(g: { name: string; emoji: string; color: string; members: string[] }): Promise<Group>;
+  addToGroup(groupId: string, userId: string): Promise<void>;
+  /** Sair (ou, para quem criou, tirar alguém). Quem criou e sai apaga o grupo. */
+  leaveGroup(groupId: string, userId: string): Promise<void>;
+  groupFeed(groupId: string): Promise<Feed>;
   challenges(): Promise<GroupChallenge[]>;
   createChallenge(c: { title: string; emoji: string; target: number; days: number }): Promise<void>;
   checkin(id: string): Promise<void>;

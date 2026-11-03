@@ -1,12 +1,16 @@
 // Estado do HamiCare: salvo no aparelho (localStorage) e, com conta, no backup privado do servidor.
 import { useSyncExternalStore } from 'react';
-import type { AgeGroup, Battery, BodyStart, CareId, Category, DayLog, Freq, GoalId, Incentive, Mood, Outfit, PetMood, Photo, State, Task, TraitId, WearSlot } from '../types';
+import type { AgeGroup, Battery, BodyStart, CareId, Category, DayLog, Direction, Freq, GoalId, Incentive, Journey, Mood, Outfit, PetMood, Photo, State, Task, TraitId, WearSlot } from '../types';
 import { LIBRARY, libById, rewardFor } from '../data/tasks';
 import { ITEMS, RECIPES, STYLES, itemById, stylePrice } from '../data/items';
 import { PLACES, placeById } from '../data/world';
 import { FACTS } from '../data/lines';
 import { addDays, clamp, dayDiff, dayKey, hashStr, uid } from './util';
-import { BAND, START_GRAMS, checkGoal, conditioning, isMinor, pendingWeighIns, phaseFor, PHASES } from '../logic/evolution';
+import {
+  BAND, JOURNEY_GRAMS, REF_KG, WEIGH_EVERY_DAYS, checkJourneyGoal, conditioning, defaultGoalKg, directionOf, isMinor, journeyGrams, journeyKcal,
+  journeyProgress, needKcalFor, phaseFor, PHASES, recentAverageKg, scaleProgress, taskKcal,
+} from '../logic/evolution';
+import { streakOf } from '../logic/streak';
 import { XP_TASK, activeQuests, claimKey, levelOf, newAchievements, questProgress, QUESTS } from '../logic/progress';
 
 const KEY = 'hamicare:v2';
@@ -20,7 +24,9 @@ export type Celebration =
   | { type: 'level'; level: number }
   | { type: 'achievement'; title: string; emoji: string; coins: number }
   | { type: 'phase'; phase: number }
-  | { type: 'weigh'; grams: number; before: number };
+  | { type: 'weigh'; grams: number; before: number; kcal: number }
+  | { type: 'goal' }
+  | { type: 'streak'; count: number };
 
 const celebrationListeners = new Set<(c: Celebration) => void>();
 export function onCelebrate(fn: (c: Celebration) => void) {
@@ -74,9 +80,49 @@ export function fresh(): State {
     settings: { theme: 'auto', accent: 'morango', notif: { enabled: false, time: '19:00', kinds: { tarefas: true, hami: true, missoes: true, aventura: true, amigos: true } }, sound: true },
     premium: { trialStart: null, until: null },
     privacy: { requests: 'todos', sharePhotos: true },
+    journey: { dir: 'manter', startedAt: today, startGrams: BAND.center, goalGrams: BAND.center, needKcal: 0, reachedAt: null },
+    welcomed: null,
+    bio: '',
     lastGift: null,
     updatedAt: Date.now(),
   };
+}
+
+// ---------- Jornada de peso ----------
+
+/** Último peso que a pessoa registrou (só com consentimento). */
+export function latestKg(s: State): number | null {
+  const last = [...s.body.logs].sort((a, b) => a.date.localeCompare(b.date)).pop();
+  return last?.kg ?? s.body.baselineKg ?? null;
+}
+
+/** Peso usado nas contas de calorias: o da pessoa, ou 70 kg como estimativa. */
+export const personKg = (s: State) => latestKg(s) ?? REF_KG;
+
+/**
+ * Monta uma jornada nova. O Hami começa do peso atual dele (ou do corpo inicial da jornada)
+ * e a meta dele acompanha a da pessoa.
+ */
+export function buildJourney(dir: Direction, kg: number | null, goalKg: number | null, today: string, fromGrams?: number): Journey {
+  const start = fromGrams ?? JOURNEY_GRAMS[dir].start;
+  const goalGrams = dir === 'perder' ? (start > 135 ? 135 : Math.max(BAND.min, start - 15)) : dir === 'ganhar' ? (start < 140 ? 140 : Math.min(160, start + 15)) : start;
+  const base = kg ?? REF_KG;
+  const goal = goalKg ?? defaultGoalKg(base, dir);
+  return { dir, startedAt: today, startGrams: start, goalGrams, needKcal: dir === 'manter' ? 0 : needKcalFor(base, goal), reachedAt: null };
+}
+
+const OLD_GOAL: Record<string, GoalId> = { peso: 'emagrecer', equilibrio: 'manter' };
+
+/** Completa estados antigos (antes da jornada de calorias) e de backups. */
+function normalize(raw: State): State {
+  const s: State = { ...fresh(), ...raw, v: 2 };
+  const goal = OLD_GOAL[s.profile.goal as string] ?? s.profile.goal;
+  if (goal !== s.profile.goal) s.profile = { ...s.profile, goal };
+  if (!raw.journey) {
+    const dir = directionOf(goal, isMinor(s.profile.ageGroup));
+    s.journey = buildJourney(dir, latestKg(s), s.body.goalKg, todayKey(), s.pet.grams);
+  }
+  return s;
 }
 
 const OLD_FUR: Record<string, string> = { maracuja: 'caramelo', pitanga: 'pessego', acai: 'lavanda', mate: 'menta', ceu: 'ceu' };
@@ -114,7 +160,7 @@ function load(): State {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed?.v === 2) return { ...fresh(), ...parsed };
+      if (parsed?.v === 2) return normalize(parsed);
     }
     const old = localStorage.getItem(OLD_KEY);
     if (old) {
@@ -160,7 +206,7 @@ export function useApp(): State {
 
 /** Troca o estado inteiro (recuperação de backup ou sincronização). */
 export function replaceState(next: State, opts: { silent?: boolean } = {}) {
-  set({ ...fresh(), ...next, v: 2 }, opts);
+  set(normalize(next), opts);
 }
 
 export function resetAll() {
@@ -224,14 +270,8 @@ export function maintain(input: State): State {
   if (!input.onboarded) return input;
   let s = decayStats(input);
   const today = todayKey();
-  // Pesagens semanais pendentes
-  const weighs = pendingWeighIns({ grams: s.pet.grams, startGrams: s.pet.startGrams, lastWeighIn: s.pet.lastWeighIn, today, minor: minor(s), body: s.body, days: s.days });
-  if (weighs.length) {
-    const before = s.pet.grams;
-    const last = weighs[weighs.length - 1];
-    s = { ...s, pet: { ...s.pet, grams: last.grams, lastWeighIn: last.date, weighIns: [...s.pet.weighIns, ...weighs].slice(-120) } };
-    if (!minor(s)) setTimeout(() => celebrate({ type: 'weigh', grams: last.grams, before }), 0);
-  }
+  // Jornada: o peso do Hami acompanha as calorias das missões (ou a balança, se a pessoa quiser).
+  s = applyJourney(s, today);
   // Fase (nunca regride)
   const phase = phaseFor(conditioning(s.days, today));
   if (phase > s.pet.phase) {
@@ -251,6 +291,52 @@ export function maintain(input: State): State {
     s = { ...s, achievements, coins: s.coins + coins };
   }
   return s;
+}
+
+/** Progresso atual da jornada (0 a 1) e calorias somadas. */
+export function journeyNow(s: State, today = todayKey()): { kcal: number; progress: number; byScale: boolean } {
+  const j = s.journey;
+  const kcal = journeyKcal(s.days, j.startedAt, j.dir);
+  if (j.dir !== 'manter' && s.body.sync && s.body.baselineKg && !minor(s)) {
+    const recent = recentAverageKg(s.body.logs, today);
+    if (recent) return { kcal, progress: scaleProgress(j.dir, s.body.baselineKg, s.body.goalKg ?? defaultGoalKg(s.body.baselineKg, j.dir), recent), byScale: true };
+  }
+  return { kcal, progress: journeyProgress(j, kcal), byScale: false };
+}
+
+function applyJourney(input: State, today: string): State {
+  let s = input;
+  const j = s.journey;
+  const { progress } = journeyNow(s, today);
+  const grams = journeyGrams(j, progress);
+  if (grams !== s.pet.grams || s.pet.weighIns[s.pet.weighIns.length - 1]?.date !== today) {
+    const hist = s.pet.weighIns.filter((w) => w.date !== today);
+    s = { ...s, pet: { ...s.pet, grams, weighIns: [...hist, { date: today, grams }].slice(-200) } };
+  }
+  if (progress >= 1 && !j.reachedAt && j.dir !== 'manter') {
+    s = { ...s, journey: { ...j, reachedAt: today } };
+    setTimeout(() => celebrate({ type: 'goal' }), 0);
+  }
+  // Resumo da semana: a cada 7 dias, mostra quanto vocês avançaram.
+  const weeks = Math.floor(dayDiff(s.pet.lastWeighIn, today) / WEIGH_EVERY_DAYS);
+  if (weeks >= 1) {
+    const date = addDays(s.pet.lastWeighIn, weeks * WEIGH_EVERY_DAYS);
+    const from = addDays(date, -WEIGH_EVERY_DAYS);
+    const before = [...s.pet.weighIns].reverse().find((w) => w.date <= from)?.grams ?? s.journey.startGrams;
+    const kcal = journeyKcal(s.days, from > j.startedAt ? from : j.startedAt, j.dir, addDays(date, -1));
+    s = { ...s, pet: { ...s.pet, lastWeighIn: date } };
+    if (!minor(s) && j.dir !== 'manter') setTimeout(() => celebrate({ type: 'weigh', grams: s.pet.grams, before, kcal }), 0);
+  }
+  return s;
+}
+
+/** Troca a missão principal (emagrecer, ganhar, manter ou outra) e começa uma jornada nova. */
+export function setMission(goal: GoalId, goalKg: number | null = null) {
+  const today = todayKey();
+  const dir = directionOf(goal, minor(state));
+  const kg = latestKg(state);
+  const journey = buildJourney(dir, kg, goalKg ?? (dir === state.journey.dir ? state.body.goalKg : null), today, state.pet.grams);
+  commit({ ...state, profile: { ...state.profile, goal }, journey, body: { ...state.body, goalKg: goalKg ?? (dir === state.journey.dir ? state.body.goalKg : null), baselineKg: kg ?? state.body.baselineKg }, pet: { ...state.pet, lastWeighIn: today } });
 }
 
 /** Chamado pelo app a cada minuto e ao voltar para a tela. */
@@ -273,6 +359,8 @@ export interface OnboardingAnswers {
   tracking: boolean;
   weightKg: number | null;
   heightCm: number | null;
+  /** Meta de peso da jornada (kg). null = 5% do peso. */
+  goalKg: number | null;
   fur: string;
   trait: TraitId;
   petName: string;
@@ -281,37 +369,48 @@ export interface OnboardingAnswers {
 }
 
 /** Plano inicial: 4 a 6 atividades escolhidas pelas respostas. */
-export function starterPlan(a: Pick<OnboardingAnswers, 'goal' | 'focus' | 'minutes' | 'likes'>): string[] {
-  const ids = new Set<string>(['agua', 'respirar']);
+export function starterPlan(a: Pick<OnboardingAnswers, 'goal' | 'focus' | 'minutes' | 'likes' | 'ageGroup'>): string[] {
   const easy = a.minutes <= 10;
-  const moving = ['condicionamento', 'ativo', 'peso'].includes(a.goal) || a.focus.includes('fitness');
-  if (moving) {
-    const liked = a.likes.map((id) => libById(id)).filter((t) => t && t.cat === 'fitness' && (!easy || t.energy <= 2));
-    (liked.length ? liked.slice(0, 2) : [libById(easy ? 'alongar' : 'caminhada')]).forEach((t) => t && ids.add(t.id));
-  } else ids.add('alongar');
+  const dir = directionOf(a.goal, isMinor(a.ageGroup));
+  const likedMoves = a.likes.map((id) => libById(id)).filter((t) => t && t.cat === 'fitness' && (!easy || t.energy <= 2));
+  const move = (fallback: string) => (likedMoves.length ? likedMoves[0]!.id : fallback);
+  if (dir === 'perder') return ['agua-refri', 'fruta', move(easy ? 'escada' : 'caminhada'), 'salada', 'agua', 'respirar'];
+  if (dir === 'ganhar') return ['vitamina', 'lanche', 'refeicao', easy ? 'alongar' : 'forca', 'castanhas', 'respirar'];
+  const ids = new Set<string>(['agua', 'respirar']);
+  const moving = ['condicionamento', 'ativo', 'manter'].includes(a.goal) || a.focus.includes('fitness');
+  if (moving) (likedMoves.length ? likedMoves.slice(0, 2).map((t) => t!.id) : [easy ? 'alongar' : 'caminhada']).forEach((id) => ids.add(id));
+  else ids.add('alongar');
   if (a.goal === 'cuidar' || a.focus.includes('autocuidado')) ['dentes', 'pausa'].forEach((i) => ids.add(i));
-  if (a.goal === 'habitos' || a.goal === 'equilibrio' || a.focus.includes('habitos')) ['sono', 'fruta'].forEach((i) => ids.add(i));
+  if (a.goal === 'habitos' || a.goal === 'manter' || a.focus.includes('habitos')) ['sono', 'fruta'].forEach((i) => ids.add(i));
   if (a.focus.includes('emocional')) ids.add('gratidao');
   return [...ids].slice(0, 6);
 }
 
 function libTask(id: string, today: string): Task | null {
   const t = libById(id);
-  return t ? { id: t.id, title: t.title, emoji: t.emoji, cat: t.cat, freq: { kind: 'diaria' }, reward: rewardFor(t.energy), energy: t.energy, createdAt: today } : null;
+  return t
+    ? { id: t.id, title: t.title, emoji: t.emoji, cat: t.cat, freq: { kind: 'diaria' }, reward: rewardFor(t.energy), energy: t.energy, createdAt: today, met: t.met, min: t.min, swap: t.swap, gain: t.gain }
+    : null;
 }
 
 export function completeOnboarding(a: OnboardingAnswers) {
   const today = todayKey();
   const base = state.from ? state : fresh();
   const isMinorAge = isMinor(a.ageGroup);
-  const bodyStart: BodyStart = isMinorAge ? 'equilibrado' : a.body;
-  const grams = START_GRAMS[bodyStart];
+  const goal: GoalId = isMinorAge && (a.goal === 'emagrecer' || a.goal === 'ganhar') ? 'ativo' : a.goal;
+  const dir = directionOf(goal, isMinorAge);
+  const bodyStart: BodyStart = dir === 'perder' ? 'fofinho' : dir === 'ganhar' ? 'mignon' : 'equilibrado';
   const tasks = state.from && state.tasks.length ? state.tasks : (starterPlan(a).map((id) => libTask(id, today)).filter(Boolean) as Task[]);
   const tracking = !isMinorAge && a.tracking;
+  const kg = tracking && a.weightKg ? a.weightKg : null;
+  const goalKg = tracking && kg && a.goalKg && checkJourneyGoal(kg, a.goalKg, dir, a.heightCm, false).ok ? a.goalKg : null;
+  const journey = buildJourney(dir, kg, goalKg, today);
+  const grams = journey.startGrams;
   set({
     ...base,
     onboarded: true,
-    profile: { name: a.userName.trim(), ageGroup: a.ageGroup, goal: isMinorAge && a.goal === 'peso' ? 'ativo' : a.goal, focus: a.focus, minutes: a.minutes, likes: a.likes, incentive: a.incentive, feeling: a.feeling },
+    journey,
+    profile: { name: a.userName.trim(), ageGroup: a.ageGroup, goal, focus: a.focus, minutes: a.minutes, likes: a.likes, incentive: a.incentive, feeling: a.feeling },
     pet: { ...base.pet, name: a.petName.trim() || 'Hami', fur: a.fur, trait: a.trait, body: bodyStart, grams, startGrams: grams, lastWeighIn: today, weighIns: [{ date: today, grams }] },
     body: {
       ...base.body,
@@ -319,11 +418,13 @@ export function completeOnboarding(a: OnboardingAnswers) {
       consentAt: tracking ? new Date().toISOString() : null,
       heightCm: tracking ? a.heightCm : null,
       logs: tracking && a.weightKg ? [{ date: today, kg: a.weightKg }] : [],
-      baselineKg: tracking && a.weightKg ? a.weightKg : null,
+      baselineKg: kg,
+      goalKg,
     },
     tasks,
     days: { ...base.days, [today]: { ...dayOf(base, today), mood: a.feeling } },
     premium: state.premium,
+    welcomed: today,
   });
 }
 
@@ -341,7 +442,22 @@ export function todayTasks(s: State, key = todayKey()): Task[] {
   return s.tasks.filter((t) => isDue(t, key) && (d.battery !== 1 || t.energy === 1 || t.id in d.done));
 }
 
-export function toggleTask(id: string): { reward: number } | null {
+/** Calorias que esta tarefa conta na jornada (0 para menores: sem contagem de calorias). */
+export function kcalOf(s: State, task: Task): number {
+  if (minor(s)) return 0;
+  return taskKcal({ ...libById(task.id), ...stripUndefined(task) }, s.journey.dir, personKg(s));
+}
+
+const stripUndefined = <T extends object>(o: T): Partial<T> => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as Partial<T>;
+
+export interface ToggleResult {
+  reward: number;
+  kcal: number;
+  /** Primeira atividade do dia: a ofensiva subiu. */
+  streak: number | null;
+}
+
+export function toggleTask(id: string): ToggleResult | null {
   const key = todayKey();
   const d = dayOf(state, key);
   const task = state.tasks.find((t) => t.id === id);
@@ -349,21 +465,27 @@ export function toggleTask(id: string): { reward: number } | null {
   if (id in d.done) {
     const done = { ...d.done };
     delete done[id];
-    set(reward(withDay(state, key, { ...d, done }), -task.reward, -XP_TASK));
+    const kcal = { ...(d.kcal ?? {}) };
+    delete kcal[id];
+    commit(reward(withDay(state, key, { ...d, done, kcal }), -task.reward, -XP_TASK));
     return null;
   }
-  let next = withDay(state, key, { ...d, done: { ...d.done, [id]: task.cat } });
+  const kcal = kcalOf(state, task);
+  let next = withDay(state, key, { ...d, done: { ...d.done, [id]: task.cat }, kcal: kcal > 0 ? { ...(d.kcal ?? {}), [id]: kcal } : d.kcal });
   next = reward(next, task.reward, XP_TASK);
   // Durante uma aventura, cada atividade traz o Hami 5 minutos mais cedo.
   if (next.adventure) next = { ...next, adventure: { ...next.adventure, endsAt: next.adventure.endsAt - 5 * 60_000 } };
+  const firstToday = Object.keys(d.done).length === 0;
   // Um dia de cuidado revela uma curiosidade nova sobre o Hami.
-  if (Object.keys(d.done).length === 0 && next.pet.facts.length < FACTS.length) {
+  if (firstToday && next.pet.facts.length < FACTS.length) {
     const fact = FACTS.find((_, i) => !next.pet.facts.includes(String(i)));
     if (fact) next = { ...next, pet: { ...next.pet, facts: [...next.pet.facts, String(FACTS.indexOf(fact))] } };
   }
   next = { ...next, pet: { ...next.pet, stats: { ...next.pet.stats, felicidade: clamp(next.pet.stats.felicidade + 4, 0, 100) } } };
   commit(next);
-  return { reward: task.reward };
+  const streak = firstToday ? streakOf(state.days, key, state.createdAt).count : null;
+  if (streak) setTimeout(() => celebrate({ type: 'streak', count: streak }), 0);
+  return { reward: task.reward, kcal, streak };
 }
 
 export interface TaskInput {
@@ -689,6 +811,24 @@ export function claimQuest(questId: string): boolean {
   return true;
 }
 
+// ---------- Temporada do mês ----------
+
+export const SEASON_GOAL = 20;
+
+export function seasonProgress(s: State, today = todayKey()): { days: number; claimed: boolean } {
+  const from = `${today.slice(0, 7)}-01`;
+  const days = Object.entries(s.days).filter(([k, d]) => k >= from && k <= today && Object.keys(d.done).length > 0).length;
+  return { days, claimed: !!s.claimed[`temporada:${today.slice(0, 7)}`] };
+}
+
+export function claimSeason(): boolean {
+  const today = todayKey();
+  const p = seasonProgress(state, today);
+  if (p.claimed || p.days < SEASON_GOAL) return false;
+  commit(reward({ ...state, claimed: { ...state.claimed, [`temporada:${today.slice(0, 7)}`]: true } }, 120, 150));
+  return true;
+}
+
 // ---------- Dados físicos (opcionais, privados) ----------
 
 export function enableTracking(on: boolean) {
@@ -699,7 +839,7 @@ export function enableTracking(on: boolean) {
 export function setSync(on: boolean) {
   if (minor(state) || !state.body.tracking) return;
   const latest = [...state.body.logs].sort((a, b) => b.date.localeCompare(a.date))[0];
-  commit({ ...state, body: { ...state.body, sync: on, baselineKg: on ? latest?.kg ?? state.body.baselineKg : state.body.baselineKg }, pet: on ? { ...state.pet, startGrams: state.pet.grams } : state.pet });
+  commit({ ...state, body: { ...state.body, sync: on, baselineKg: state.body.baselineKg ?? latest?.kg ?? null } });
 }
 
 export function logWeight(kg: number): boolean {
@@ -712,22 +852,27 @@ export function logWeight(kg: number): boolean {
 
 export function deleteWeightData() {
   commit({ ...state, body: { ...state.body, logs: [], baselineKg: null, goalKg: null, goalWeeks: null, sync: false } });
+  // Sem os dados, a jornada volta para as estimativas (70 kg e meta de 5%).
+  const j = state.journey;
+  if (j.dir !== 'manter') commit({ ...state, journey: { ...j, needKcal: needKcalFor(REF_KG, defaultGoalKg(REF_KG, j.dir)) } });
 }
 
 export function setHeight(cm: number | null) {
   commit({ ...state, body: { ...state.body, heightCm: cm && cm > 80 && cm < 250 ? cm : null } });
 }
 
-export function setGoal(goalKg: number | null, weeks: number | null): { ok: true } | { ok: false; reason: string } {
+/** Meta de peso da jornada (precisa do peso registrado). */
+export function setGoal(goalKg: number | null): { ok: true } | { ok: false; reason: string } {
+  const dir = state.journey.dir;
+  const base = state.body.baselineKg ?? latestKg(state);
   if (goalKg === null) {
-    commit({ ...state, body: { ...state.body, goalKg: null, goalWeeks: null } });
+    commit({ ...state, body: { ...state.body, goalKg: null }, journey: { ...state.journey, needKcal: dir === 'manter' ? 0 : needKcalFor(base ?? REF_KG, defaultGoalKg(base ?? REF_KG, dir)) } });
     return { ok: true };
   }
-  const current = [...state.body.logs].sort((a, b) => b.date.localeCompare(a.date))[0]?.kg;
-  if (!current) return { ok: false, reason: 'Registre seu peso atual primeiro.' };
-  const check = checkGoal(current, goalKg, weeks ?? 0, state.body.heightCm, minor(state));
+  if (!base) return { ok: false, reason: 'Registre seu peso atual primeiro.' };
+  const check = checkJourneyGoal(base, goalKg, dir, state.body.heightCm, minor(state));
   if (!check.ok) return check;
-  commit({ ...state, body: { ...state.body, goalKg, goalWeeks: weeks } });
+  commit({ ...state, body: { ...state.body, goalKg, baselineKg: base }, journey: { ...state.journey, needKcal: needKcalFor(base, goalKg), reachedAt: null } });
   return { ok: true };
 }
 
@@ -740,7 +885,10 @@ export function setHideNumbers(hide: boolean) {
 export function updateProfile(patch: Partial<State['profile']>) {
   let next: State = { ...state, profile: { ...state.profile, ...patch } };
   // Ficou menor de idade: desliga tudo que é número de peso.
-  if (patch.ageGroup && isMinor(patch.ageGroup)) next = { ...next, body: { ...next.body, tracking: false, sync: false, goalKg: null, goalWeeks: null } };
+  if (patch.ageGroup && isMinor(patch.ageGroup)) {
+    next = { ...next, body: { ...next.body, tracking: false, sync: false, goalKg: null, goalWeeks: null } };
+    if (next.journey.dir !== 'manter') next = { ...next, journey: buildJourney('manter', null, null, todayKey(), BAND.center), profile: { ...next.profile, goal: 'ativo' } };
+  }
   commit(next);
 }
 
@@ -750,6 +898,15 @@ export function updatePet(patch: Partial<Pick<State['pet'], 'name' | 'fur' | 'tr
 
 export function updateSettings(patch: Partial<State['settings']>) {
   commit({ ...state, settings: { ...state.settings, ...patch } });
+}
+
+/** O cartão de boas-vindas aparece uma vez por dia. */
+export function markWelcomed() {
+  commit({ ...state, welcomed: todayKey() });
+}
+
+export function setBio(bio: string) {
+  commit({ ...state, bio: bio.trim().slice(0, 120) });
 }
 
 export function updatePrivacy(patch: Partial<State['privacy']>) {

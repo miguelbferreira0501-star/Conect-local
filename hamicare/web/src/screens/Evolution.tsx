@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Lock, Trash2, X } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { Bar, LineChart, Modal, toast } from '../components/ui';
-import { BAND, PHASES, PHASE_MIN, bandLabel, conditioning, rapidChange, recentAverageKg } from '../logic/evolution';
+import { BAND, DAY_CAP, KCAL_PER_KG, PHASES, PHASE_MIN, REF_KG, conditioning, dayKcal, defaultGoalKg, rapidChange, recentAverageKg } from '../logic/evolution';
 import { ACHIEVEMENTS, countIn } from '../logic/progress';
 import { bestStreak, streakOf } from '../logic/streak';
-import { deletePhoto, isPremium, logWeight, minor, setGoal, setSync, todayKey, useApp } from '../lib/store';
-import { addDays, formatDay, fmtNum, weekStart } from '../lib/util';
-import { GOALS } from '../data/lines';
+import { deletePhoto, enableTracking, isPremium, journeyNow, logWeight, minor, setGoal, setMission, setSync, todayKey, useApp } from '../lib/store';
+import { addDays, formatDay, fmtNum, weekStart, WEEKDAYS } from '../lib/util';
+import { GOALS, JOURNEY_TEXT } from '../data/lines';
 import type { Photo } from '../types';
 
 export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: (p: Photo) => void }) {
@@ -19,12 +19,19 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
   const range = isPremium(s) ? 180 : 30;
   const [kg, setKg] = useState('');
   const [goalKg, setGoalKg] = useState(s.body.goalKg ? String(s.body.goalKg) : '');
-  const [goalWeeks, setGoalWeeks] = useState(s.body.goalWeeks ? String(s.body.goalWeeks) : '12');
   const [photo, setPhoto] = useState<Photo | null>(null);
   const streak = streakOf(s.days, today, s.createdAt);
   const best = bestStreak(s.days, today, s.createdAt);
   const totalDone = Object.values(s.days).reduce((n, d) => n + Object.keys(d.done).length, 0);
   const nextPhase = PHASE_MIN[s.pet.phase + 1];
+  const j = s.journey;
+  const jt = JOURNEY_TEXT[j.dir];
+  const jn = journeyNow(s, today);
+  const last7 = Array.from({ length: 7 }, (_, i) => {
+    const key = addDays(today, i - 6);
+    return { key, kcal: dayKcal(s.days[key], j.dir), label: WEEKDAYS[new Date(`${key}T12:00:00`).getDay()] };
+  });
+  const maxKcal = Math.max(1, ...last7.map((d) => d.kcal));
 
   const petPoints = s.pet.weighIns.filter((w) => w.date >= addDays(today, -range)).map((w) => ({ label: formatDay(w.date, { day: 'numeric', month: 'short' }), value: w.grams }));
   const userLogs = s.body.logs.filter((l) => l.date >= addDays(today, -range));
@@ -41,7 +48,8 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
       const a = ACHIEVEMENTS.find((x) => x.id === id);
       return { date, text: a ? `${a.emoji} ${a.title}` : id };
     }),
-    ...s.pet.weighIns.slice(1).map((w) => ({ date: w.date, text: hideNums ? 'Pesagem semanal do Hami' : `Pesagem do Hami: ${fmtNum(w.grams)} g` })),
+    ...(j.reachedAt ? [{ date: j.reachedAt, text: '🏆 Meta da jornada alcançada' }] : []),
+    { date: j.startedAt, text: `${jt.emoji} Missão: ${GOALS[s.profile.goal].label}` },
   ]
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 12);
@@ -85,23 +93,98 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
           </p>
         </section>
 
-        <section className="card grid gap-3 p-4" aria-label="Peso virtual do Hami">
-          <h2 className="font-display text-[20px] font-bold">{hideNums ? `Forma do ${s.pet.name}` : 'Peso virtual do Hami'}</h2>
+        <section className="card grid gap-3 p-4" aria-label="Nossa jornada">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="font-display text-[20px] font-bold">{isMinor ? 'Jornada de hábitos' : `${jt.emoji} ${jt.title}`}</h2>
+          </div>
           {isMinor ? (
-            <p className="text-[15px] text-muted">Para menores de 18, o {s.pet.name} fica sempre em equilíbrio. A evolução dele vem dos hábitos e do movimento.</p>
-          ) : hideNums ? (
-            <p className="text-[15px]">
-              {s.pet.name} está <b>{bandLabel(s.pet.grams).toLowerCase()}</b>. O modo sem números está ligado (Ajustes → Dados físicos).
-            </p>
+            <p className="text-[15px] text-muted">Para menores de 18, o {s.pet.name} não muda de peso e não existe contagem de calorias. A evolução dele vem dos hábitos e do movimento.</p>
           ) : (
             <>
-              <p className="text-[15px]">
-                <b className="font-display text-[24px]">{fmtNum(s.pet.grams)} g</b> · {bandLabel(s.pet.grams)} (faixa saudável {BAND.min}–{BAND.max} g)
-              </p>
-              <LineChart points={petPoints} label="Peso virtual do Hami" unit=" g" band={[BAND.min, BAND.max]} tone="var(--gold)" />
-              <p className="text-[13px] text-muted">
-                A pesagem é semanal. {s.body.sync ? 'Sincronizado com você: o Hami acompanha a sua variação, no máximo 3 g por semana.' : 'Com 3 ou mais dias ativos na semana, o Hami anda até 3 g em direção à faixa saudável. Exercício nunca muda o peso de uma vez.'}
-              </p>
+              <div className="flex items-end justify-around rounded-2xl bg-surface2 p-3">
+                <div className="grid justify-items-center">
+                  <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} size={90} idle={false} label={`${s.pet.name} agora`} />
+                  <span className="text-[13px] font-extrabold">Agora{hideNums ? '' : ` · ${fmtNum(s.pet.grams)} g`}</span>
+                </div>
+                {j.dir !== 'manter' && (
+                  <>
+                    <span className="pb-10 text-[26px]" aria-hidden="true">
+                      ➜
+                    </span>
+                    <div className="grid justify-items-center">
+                      <Hamster fur={s.pet.fur} grams={j.goalGrams} phase={s.pet.phase} outfit={s.pet.outfit} mood="animado" size={90} idle={false} label={`${s.pet.name} na meta`} />
+                      <span className="text-[13px] font-extrabold">Meta{hideNums ? '' : ` · ${fmtNum(j.goalGrams)} g`}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+              {j.dir !== 'manter' && (
+                <div className="grid gap-1">
+                  <div className="flex items-center gap-2 text-[14px]">
+                    <span className="font-bold">Progresso</span>
+                    <div className="flex-1">
+                      <Bar value={jn.progress * 100} tone="accent" label="Progresso da jornada" />
+                    </div>
+                    <span className="font-bold tabular-nums">{jn.progress > 0 && jn.progress < 0.1 ? fmtNum(jn.progress * 100, 1) : Math.round(jn.progress * 100)}%</span>
+                  </div>
+                  {!hideNums && (
+                    <p className="text-[14px]">
+                      Vocês já {jt.verb} <b>{fmtNum(jn.kcal, 0)} kcal</b> (≈ {fmtNum(jn.kcal / KCAL_PER_KG, jn.kcal < KCAL_PER_KG ? 2 : 1)} kg). Faltam <b>{fmtNum(Math.max(0, j.needKcal - jn.kcal), 0)} kcal</b>.
+                      {jn.byScale && ' O Hami está seguindo a sua balança.'}
+                    </p>
+                  )}
+                </div>
+              )}
+              {!hideNums && (
+                <>
+                  <div className="flex h-24 items-end gap-1.5" role="img" aria-label="Calorias da jornada nos últimos 7 dias">
+                    {last7.map((d) => (
+                      <div key={d.key} className="flex flex-1 flex-col items-center gap-1">
+                        <span className="text-[10px] font-bold tabular-nums text-muted">{d.kcal ? fmtNum(d.kcal, 0) : ''}</span>
+                        <div className={`w-full rounded-t-md ${j.dir === 'ganhar' ? 'bg-leaf' : 'bg-accent'}`} style={{ height: `${Math.max(4, (d.kcal / maxKcal) * 60)}px`, opacity: d.kcal ? 1 : 0.25 }} />
+                        <span className="text-[10px] font-extrabold uppercase text-muted">{d.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <LineChart points={petPoints} label="Peso do Hami" unit=" g" band={[BAND.min, BAND.max]} tone="var(--gold)" />
+                </>
+              )}
+              <details className="rounded-2xl bg-surface2 p-3 text-[14px]">
+                <summary className="cursor-pointer font-extrabold">Como as calorias funcionam?</summary>
+                <div className="mt-2 grid gap-1.5 text-muted">
+                  <p>Cada missão saudável tem uma estimativa: movimento pelo gasto acima do repouso, trocas saudáveis pelo que você deixou de comer ou beber{j.dir === 'ganhar' ? ' e lanches nutritivos pelo que somaram' : ''}.</p>
+                  <p>O {s.pet.name} recebe exatamente as mesmas calorias que você. Cerca de {fmtNum(KCAL_PER_KG)} kcal equivalem a 1 kg: quando você chegar na sua meta, ele chega na dele.</p>
+                  <p>Até {DAY_CAP[j.dir]} kcal contam por dia, para ninguém exagerar. Descanso nunca tira nada. São estimativas e não substituem um profissional de saúde.</p>
+                  {!s.body.tracking && <p>As contas usam {REF_KG} kg como estimativa. Informe seu peso para ficar sob medida.</p>}
+                </div>
+              </details>
+              {!s.body.tracking && j.dir !== 'manter' && (
+                <button className="btn btn-soft" onClick={() => confirm('Guardar seu peso só para você, para as calorias ficarem sob medida? Dá pra apagar tudo nos Ajustes.') && enableTracking(true)}>
+                  ⚖️ Informar meu peso e minha meta
+                </button>
+              )}
+              <div className="grid gap-2">
+                <p className="text-[14px] font-extrabold">Trocar a missão</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['emagrecer', 'ganhar', 'manter'] as const).map((g) => (
+                    <button
+                      key={g}
+                      className="opt !min-h-[64px] flex-col !items-center !gap-0.5 !px-2 !py-2 text-center text-[13px]"
+                      aria-pressed={s.profile.goal === g}
+                      onClick={() => {
+                        if (s.profile.goal === g) return;
+                        if (confirm(`Começar uma jornada nova: ${GOALS[g].label}? O ${s.pet.name} começa do peso de agora.`)) {
+                          setMission(g);
+                          toast('Missão nova começando!');
+                        }
+                      }}
+                    >
+                      <span className="text-[22px]">{GOALS[g].emoji}</span>
+                      {g === 'emagrecer' ? 'Emagrecer' : g === 'ganhar' ? 'Ganhar peso' : 'Manter'}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </>
           )}
         </section>
@@ -138,26 +221,25 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
             <label className="flex items-start gap-3 rounded-2xl bg-surface2 p-3 text-[14px]" htmlFor="ev-sync">
               <input id="ev-sync" type="checkbox" className="mt-1 h-5 w-5 accent-[var(--accent)]" checked={s.body.sync} onChange={(e) => setSync(e.target.checked)} />
               <span>
-                <b>Sincronizar o Hami comigo.</b> O peso virtual dele passa a acompanhar a sua variação (proporcional e devagar). Dá pra desligar quando quiser.
+                <b>O Hami segue a minha balança.</b> Em vez das missões, o peso dele acompanha o seu progresso real até a meta. Dá pra desligar quando quiser.
               </span>
             </label>
-            {s.profile.goal === 'peso' && (
+            {j.dir !== 'manter' && (
               <div className="grid gap-2 rounded-2xl bg-surface2 p-3">
-                <p className="text-[14px] font-extrabold">Meta pessoal (opcional)</p>
+                <p className="text-[14px] font-extrabold">Minha meta de peso</p>
                 <div className="flex gap-2">
-                  <input aria-label="Meta em kg" className="field min-w-0 flex-1" inputMode="decimal" placeholder="Meta (kg)" value={goalKg} onChange={(e) => setGoalKg(e.target.value)} />
-                  <input aria-label="Prazo em semanas" className="field w-28" inputMode="numeric" placeholder="Semanas" value={goalWeeks} onChange={(e) => setGoalWeeks(e.target.value)} />
+                  <input aria-label="Meta em kg" className="field min-w-0 flex-1" inputMode="decimal" placeholder={s.body.baselineKg ? `Sugestão: ${fmtNum(defaultGoalKg(s.body.baselineKg, j.dir))} kg` : 'Meta (kg)'} value={goalKg} onChange={(e) => setGoalKg(e.target.value)} />
+                  <button
+                    className="btn btn-soft shrink-0"
+                    onClick={() => {
+                      const r = setGoal(goalKg ? Number(goalKg.replace(',', '.')) : null);
+                      toast(r.ok ? 'Meta salva: a jornada do Hami se ajustou' : r.reason);
+                    }}
+                  >
+                    Salvar
+                  </button>
                 </div>
-                <button
-                  className="btn btn-soft btn-sm"
-                  onClick={() => {
-                    const r = setGoal(goalKg ? Number(goalKg.replace(',', '.')) : null, Number(goalWeeks) || null);
-                    toast(r.ok ? 'Meta salva' : r.reason);
-                  }}
-                >
-                  Salvar meta
-                </button>
-                <p className="text-[12px] text-muted">Metas precisam de 4 semanas ou mais e no máximo 1% do peso por semana. O HamiCare não faz recomendação médica.</p>
+                <p className="text-[12px] text-muted">Uma jornada vai até 20% do peso (emagrecer) ou 15% (ganhar), sem passar de um peso saudável para a sua altura. O HamiCare não faz recomendação médica.</p>
               </div>
             )}
           </section>

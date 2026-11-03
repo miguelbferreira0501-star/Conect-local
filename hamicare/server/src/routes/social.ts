@@ -32,7 +32,9 @@ const pid = (v: string) => {
   return r.data;
 };
 
-const PROFILE_COLS = `p.user_id AS id, p.name, p.code, p.pet, p.house, p.level, p.teen, p.accepts_requests AS "acceptsRequests", (extract(epoch from p.updated_at) * 1000)::bigint AS "updatedAt"`;
+const PROFILE_COLS = `p.user_id AS id, p.name, p.code, p.pet, p.house, p.level, p.teen, p.accepts_requests AS "acceptsRequests", p.bio, p.streak, p.badges, (extract(epoch from p.updated_at) * 1000)::bigint AS "updatedAt"`;
+const POST_COLS = `id, author_id AS "authorId", group_id AS "groupId", kind, text, pet, house, image, (extract(epoch from created_at) * 1000)::bigint AS "createdAt"`;
+const cleanPost = <T extends Record<string, unknown>>(p: T) => ({ ...p, pet: p.pet ?? undefined, house: p.house ?? undefined, image: p.image ?? undefined, groupId: p.groupId ?? undefined });
 
 const outfit = z.object({ chapeu: z.string().max(40).nullable(), oculos: z.string().max(40).nullable(), roupa: z.string().max(40).nullable(), acessorio: z.string().max(40).nullable() });
 const petSchema = z.object({ name: z.string().max(20), fur: z.string().max(20), phase: z.number().int().min(0).max(3), outfit });
@@ -59,11 +61,23 @@ social.get('/me', (c) =>
 
 social.put('/profile', (c) =>
   asMe(c, async (db, me) => {
-    const body = z.object({ name: z.string().trim().min(1).max(40), pet: petSchema, house: houseSchema, level: z.number().int().min(1).max(999), acceptsRequests: z.boolean() }).safeParse(await c.req.json().catch(() => ({})));
+    const body = z
+      .object({
+        name: z.string().trim().min(1).max(40),
+        pet: petSchema,
+        house: houseSchema,
+        level: z.number().int().min(1).max(999),
+        acceptsRequests: z.boolean(),
+        bio: z.string().max(120).default(''),
+        streak: z.number().int().min(0).max(9999).default(0),
+        badges: z.number().int().min(0).max(999).default(0),
+      })
+      .safeParse(await c.req.json().catch(() => ({})));
     if (!body.success) throw invalid('Perfil inválido.');
     const b = body.data;
     kind(b.name);
     kind(b.pet.name);
+    const bio = b.bio.trim() ? kind(b.bio) : '';
     const existing = (await db.query('SELECT code FROM profiles WHERE user_id = $1', [me.id])).rows[0];
     let code = existing?.code as string | undefined;
     for (let i = 0; !code && i < 5; i++) {
@@ -72,9 +86,9 @@ social.put('/profile', (c) =>
       if (!taken) code = candidate;
     }
     await db.query(
-      `INSERT INTO profiles (user_id, code, name, pet, house, level, teen, accepts_requests) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-       ON CONFLICT (user_id) DO UPDATE SET name = $3, pet = $4, house = $5, level = $6, teen = $7, accepts_requests = $8, updated_at = now()`,
-      [me.id, code, b.name, b.pet, b.house, b.level, me.ageGroup !== '18mais', b.acceptsRequests],
+      `INSERT INTO profiles (user_id, code, name, pet, house, level, teen, accepts_requests, bio, streak, badges) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+       ON CONFLICT (user_id) DO UPDATE SET name = $3, pet = $4, house = $5, level = $6, teen = $7, accepts_requests = $8, bio = $9, streak = $10, badges = $11, updated_at = now()`,
+      [me.id, code, b.name, b.pet, b.house, b.level, me.ageGroup !== '18mais', b.acceptsRequests, bio, b.streak, b.badges],
     );
     const p = (await db.query(`SELECT ${PROFILE_COLS} FROM profiles p WHERE p.user_id = $1`, [me.id])).rows[0];
     return c.json({ profile: p });
@@ -163,29 +177,118 @@ social.get('/friends', (c) =>
 
 // ---------- Feed ----------
 
-social.get('/feed', (c) =>
+/** Monta um feed (posts + reações + comentários + perfis) a partir de uma consulta de posts. */
+async function loadFeed(db: pg.PoolClient, me: Me, where: string, params: unknown[]) {
+  const posts = (await db.query(`SELECT ${POST_COLS} FROM posts WHERE NOT hidden AND ${where} ORDER BY created_at DESC LIMIT 60`, params)).rows.map((r: { id: string; authorId: string }) => cleanPost(r));
+  const ids = posts.map((p) => p.id);
+  const reactions = ids.length ? (await db.query('SELECT post_id, user_id, kind FROM reactions WHERE post_id = ANY($1)', [ids])).rows : [];
+  const comments = ids.length
+    ? (await db.query(`SELECT id, post_id, author_id, text, (extract(epoch from created_at) * 1000)::bigint AS created FROM comments WHERE post_id = ANY($1) AND NOT hidden ORDER BY created_at`, [ids])).rows
+    : [];
+  const author = new Map(posts.map((p) => [p.id, p.authorId]));
+  const key = (postId: string) => `${author.get(postId)}:${postId}`;
+  const people = [...new Set([me.id, ...posts.map((p) => p.authorId), ...comments.map((x) => x.author_id)])];
+  const profiles = Object.fromEntries((await db.query(`SELECT ${PROFILE_COLS} FROM profiles p WHERE p.user_id = ANY($1)`, [people])).rows.map((p) => [p.id, p]));
+  return {
+    posts,
+    profiles,
+    reactions: reactions.map((r) => ({ postKey: key(r.post_id), authorId: r.user_id, kind: r.kind })),
+    comments: comments.map((x) => ({ id: x.id, postKey: key(x.post_id), authorId: x.author_id, text: x.text, createdAt: x.created })),
+  };
+}
+
+social.get('/feed', (c) => asMe(c, async (db, me) => c.json(await loadFeed(db, me, 'group_id IS NULL', []))));
+
+// ---------- Perfil de outra pessoa (estilo rede social) ----------
+
+social.get('/profiles/:id', (c) =>
   asMe(c, async (db, me) => {
-    const posts = (
-      await db.query(
-        `SELECT id, author_id AS "authorId", kind, text, pet, house, image, (extract(epoch from created_at) * 1000)::bigint AS "createdAt"
-         FROM posts WHERE NOT hidden ORDER BY created_at DESC LIMIT 60`,
-      )
-    ).rows.map((p) => ({ ...p, pet: p.pet ?? undefined, house: p.house ?? undefined, image: p.image ?? undefined }));
-    const ids = posts.map((p) => p.id);
-    const reactions = ids.length ? (await db.query('SELECT post_id, user_id, kind FROM reactions WHERE post_id = ANY($1)', [ids])).rows : [];
-    const comments = ids.length
-      ? (await db.query(`SELECT id, post_id, author_id, text, (extract(epoch from created_at) * 1000)::bigint AS created FROM comments WHERE post_id = ANY($1) AND NOT hidden ORDER BY created_at`, [ids])).rows
-      : [];
-    const author = new Map(posts.map((p) => [p.id, p.authorId]));
-    const key = (postId: string) => `${author.get(postId)}:${postId}`;
-    const people = [...new Set([me.id, ...posts.map((p) => p.authorId), ...comments.map((x) => x.author_id)])];
-    const profiles = Object.fromEntries((await db.query(`SELECT ${PROFILE_COLS} FROM profiles p WHERE p.user_id = ANY($1)`, [people])).rows.map((p) => [p.id, p]));
-    return c.json({
-      posts,
-      profiles,
-      reactions: reactions.map((r) => ({ postKey: key(r.post_id), authorId: r.user_id, kind: r.kind })),
-      comments: comments.map((x) => ({ id: x.id, postKey: key(x.post_id), authorId: x.author_id, text: x.text, createdAt: x.created })),
-    });
+    const id = pid(c.req.param('id'));
+    const profile = (await db.query(`SELECT ${PROFILE_COLS} FROM profiles p WHERE p.user_id = $1`, [id])).rows[0];
+    if (!profile) throw notFound('Perfil não encontrado.');
+    const isFriend = id === me.id || (await db.query('SELECT app.are_friends(app.current_user_id(), $1) AS f', [id])).rows[0].f;
+    // Os posts seguem as regras do banco: só aparecem para amigos.
+    const posts = (await db.query(`SELECT ${POST_COLS} FROM posts WHERE author_id = $1 AND group_id IS NULL AND NOT hidden ORDER BY created_at DESC LIMIT 30`, [id])).rows.map(cleanPost);
+    const friendsCount = (await db.query('SELECT app.friend_count($1) AS n', [id])).rows[0].n;
+    return c.json({ profile, posts, friendsCount, isFriend });
+  }),
+);
+
+// ---------- Grupos ----------
+
+const GROUP_COLS = `g.id, g.owner_id AS "ownerId", g.name, g.emoji, g.color, (extract(epoch from g.created_at) * 1000)::bigint AS "createdAt"`;
+const MAX_MEMBERS = 30;
+
+async function groupsOf(db: pg.PoolClient, onlyId?: string) {
+  const groups = (await db.query(`SELECT ${GROUP_COLS} FROM groups g WHERE app.in_group(g.id) ${onlyId ? 'AND g.id = $1' : ''} ORDER BY g.created_at DESC`, onlyId ? [onlyId] : [])).rows;
+  if (!groups.length) return [];
+  const members = (await db.query('SELECT group_id, user_id FROM group_members WHERE group_id = ANY($1) ORDER BY joined_at', [groups.map((g) => g.id)])).rows;
+  return groups.map((g) => ({ ...g, members: members.filter((m) => m.group_id === g.id).map((m) => m.user_id) }));
+}
+
+social.get('/groups', (c) =>
+  asMe(c, async (db) => {
+    const groups = await groupsOf(db);
+    const people = [...new Set(groups.flatMap((g) => g.members))];
+    const profiles = people.length ? Object.fromEntries((await db.query(`SELECT ${PROFILE_COLS} FROM profiles p WHERE p.user_id = ANY($1)`, [people])).rows.map((p) => [p.id, p])) : {};
+    return c.json({ groups, profiles });
+  }),
+);
+
+social.post('/groups', (c) =>
+  asMe(c, async (db, me) => {
+    const body = z
+      .object({ name: z.string().trim().min(1).max(40), emoji: z.string().min(1).max(16), color: z.string().max(20).default('morango'), members: z.array(z.string().uuid()).max(MAX_MEMBERS - 1).default([]) })
+      .safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success) throw invalid('Grupo inválido.');
+    const b = body.data;
+    const name = kind(b.name);
+    const { rows } = await db.query('INSERT INTO groups (owner_id, name, emoji, color) VALUES ($1, $2, $3, $4) RETURNING id', [me.id, name, b.emoji, b.color]);
+    const id = rows[0].id as string;
+    await db.query('INSERT INTO group_members (group_id, user_id) VALUES ($1, $2)', [id, me.id]);
+    // Só amigos entram (a política do banco confere de novo).
+    for (const u of new Set(b.members)) {
+      const ok = (await db.query('SELECT app.are_friends(app.current_user_id(), $1) AS f', [u])).rows[0].f;
+      if (ok) await db.query('INSERT INTO group_members (group_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [id, u]);
+    }
+    return c.json({ group: (await groupsOf(db, id))[0] }, 201);
+  }),
+);
+
+social.post('/groups/:id/members', (c) =>
+  asMe(c, async (db) => {
+    const id = pid(c.req.param('id'));
+    const body = z.object({ userId: z.string().uuid() }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success) throw invalid('Pessoa inválida.');
+    const count = (await db.query('SELECT count(*)::int AS n FROM group_members WHERE group_id = $1', [id])).rows[0].n;
+    if (count >= MAX_MEMBERS) throw invalid(`Um grupo tem até ${MAX_MEMBERS} pessoas.`);
+    try {
+      await db.query('INSERT INTO group_members (group_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [id, body.data.userId]);
+    } catch (e) {
+      if ((e as { code?: string }).code === '42501' || (e as { code?: string }).code === '23503') throw forbidden('Só quem criou o grupo adiciona, e só amigos.');
+      throw e;
+    }
+    return c.json({ ok: true });
+  }),
+);
+
+social.delete('/groups/:id/members/:user', (c) =>
+  asMe(c, async (db, me) => {
+    const id = pid(c.req.param('id'));
+    const user = pid(c.req.param('user'));
+    const owner = (await db.query('SELECT app.group_owner($1) AS o', [id])).rows[0].o;
+    // Quem criou e sai: o grupo acaba (os posts do grupo vão junto).
+    if (owner === me.id && user === me.id) await db.query('DELETE FROM groups WHERE id = $1', [id]);
+    else await db.query('DELETE FROM group_members WHERE group_id = $1 AND user_id = $2', [id, user]);
+    return c.json({ ok: true });
+  }),
+);
+
+social.get('/groups/:id/feed', (c) =>
+  asMe(c, async (db, me) => {
+    const id = pid(c.req.param('id'));
+    if (!(await db.query('SELECT app.in_group($1) AS g', [id])).rows[0].g) throw notFound('Grupo não encontrado.');
+    return c.json(await loadFeed(db, me, 'group_id = $1', [id]));
   }),
 );
 
@@ -198,6 +301,7 @@ social.post('/posts', (c) =>
         pet: petSchema.extend({ mood: z.string().max(20) }).optional(),
         house: houseSchema.optional(),
         image: z.string().max(400_000).optional(),
+        groupId: z.string().uuid().optional(),
       })
       .safeParse(await c.req.json().catch(() => ({})));
     if (!body.success) throw invalid('Post inválido.');
@@ -205,8 +309,13 @@ social.post('/posts', (c) =>
     const text = b.text.trim() ? kind(b.text) : '';
     if (b.image && me.ageGroup !== '18mais') throw forbidden('Fotos reais ficam disponíveis a partir dos 18 anos.');
     if (b.image && !b.image.startsWith('data:image/jpeg;base64,')) throw invalid('Formato de foto inválido.');
-    const { rows } = await db.query('INSERT INTO posts (author_id, kind, text, pet, house, image) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id', [me.id, b.kind, text, b.pet ?? null, b.house ?? null, b.image ?? null]);
-    return c.json({ id: rows[0].id }, 201);
+    try {
+      const { rows } = await db.query('INSERT INTO posts (author_id, kind, text, pet, house, image, group_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id', [me.id, b.kind, text, b.pet ?? null, b.house ?? null, b.image ?? null, b.groupId ?? null]);
+      return c.json({ id: rows[0].id }, 201);
+    } catch (e) {
+      if ((e as { code?: string }).code === '42501' || (e as { code?: string }).code === '23503') throw forbidden('Você não está nesse grupo.');
+      throw e;
+    }
   }),
 );
 

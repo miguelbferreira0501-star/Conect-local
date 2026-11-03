@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { capability } from '../platform';
 import { levelOf } from '../../logic/progress';
 import { isMinor } from '../../logic/evolution';
+import { streakOf } from '../../logic/streak';
+import { dayKey } from '../util';
 import type { State } from '../../types';
 import { createArtifactSocial } from './artifact';
 import { createApiSocial, serverAvailable } from './api';
@@ -47,7 +49,7 @@ export function useSocial(): { api: SocialApi | null; loading: boolean } {
   return { api, loading };
 }
 
-/** O que vai para o perfil público: nunca peso, diário ou humor. */
+/** O que vai para o perfil público: nunca peso, calorias, diário ou humor. */
 export function publicProfileOf(s: State): Omit<Profile, 'id' | 'code' | 'updatedAt'> {
   return {
     name: s.profile.name || 'Alguém',
@@ -56,6 +58,9 @@ export function publicProfileOf(s: State): Omit<Profile, 'id' | 'code' | 'update
     level: levelOf(s.xp),
     teen: s.profile.ageGroup === '13a17',
     acceptsRequests: s.privacy.requests === 'todos',
+    bio: s.bio,
+    streak: streakOf(s.days, dayKey(new Date()), s.createdAt).count,
+    badges: Object.keys(s.achievements).length,
   };
 }
 

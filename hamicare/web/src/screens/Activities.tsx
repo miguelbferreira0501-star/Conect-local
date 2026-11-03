@@ -1,11 +1,16 @@
 import { useState } from 'react';
-import { BatteryFull, BatteryLow, BatteryMedium, Check, Flame, Pencil, Plus, Trash2 } from 'lucide-react';
-import { Bar, Seed, Seg, Sheet, toast } from '../components/ui';
+import { BatteryFull, BatteryLow, BatteryMedium, Flame, Plus, Trash2 } from 'lucide-react';
+import { Bar, Seg, Sheet, toast } from '../components/ui';
+import { KcalChip, useKcalPop } from '../components/Journey';
+import { TaskRow } from '../components/TaskRow';
+import { SeasonBanner } from '../components/Season';
 import { CAT_ORDER, CATEGORIES, LIBRARY, TASK_EMOJIS } from '../data/tasks';
-import { BATTERIES } from '../data/lines';
+import { BATTERIES, JOURNEY_TEXT } from '../data/lines';
+import { dayKcal, taskKcal } from '../logic/evolution';
 import { activeQuests, claimKey, questProgress, type Period } from '../logic/progress';
 import { REST_PER_WEEK, streakOf } from '../logic/streak';
-import { addLibraryTask, addTask, claimQuest, dayOf, deleteTask, setBattery, setRest, todayKey, todayTasks, toggleTask, updateTask, useApp, type TaskInput } from '../lib/store';
+import { addLibraryTask, addTask, claimQuest, dayOf, deleteTask, kcalOf, minor, personKg, setBattery, setRest, todayKey, todayTasks, toggleTask, updateTask, useApp, type TaskInput } from '../lib/store';
+import { fmtNum } from '../lib/util';
 import { WEEKDAYS } from '../lib/util';
 import type { Battery, Category, Freq, Task } from '../types';
 
@@ -20,30 +25,53 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
   const done = tasks.filter((t) => t.id in day.done).length;
   const streak = streakOf(s.days, today, s.createdAt);
   const [editing, setEditing] = useState<Task | 'new' | null>(null);
-  const [justDone, setJustDone] = useState<Task | null>(null);
+  const [justDone, setJustDone] = useState<{ task: Task; kcal: number } | null>(null);
   const quests = activeQuests(s.seed, today);
+  const dir = s.journey.dir;
+  const jt = JOURNEY_TEXT[dir];
+  const { pop, layer } = useKcalPop();
+  const showKcal = !minor(s) && !s.body.hideNumbers;
+  const todayK = dayKcal(day, dir);
 
-  function onToggle(t: Task) {
+  function onToggle(t: Task, el: HTMLElement) {
     const r = toggleTask(t.id);
-    if (r) {
-      toast(`+${r.reward} sementes · o ${s.pet.name} ficou feliz!`);
-      setJustDone(t);
-    }
+    if (!r) return;
+    const gain = dir === 'ganhar';
+    if (r.kcal > 0 && dir !== 'manter') pop(el, `${gain ? '+' : '−'}${r.kcal} kcal`, gain);
+    else pop(el, `+${r.reward} 🌻`);
+    // A ofensiva tem a própria comemoração; nos outros casos, oferece compartilhar.
+    if (!r.streak) setTimeout(() => setJustDone({ task: t, kcal: r.kcal }), 650);
   }
 
   return (
     <div className="grid gap-4">
+      {layer}
       <header className="flex items-end justify-between gap-3">
         <div>
           <p className="eyebrow">
             {done} de {tasks.length} hoje · sem pressa
           </p>
-          <h1 className="font-display text-[30px] font-bold leading-tight">Atividades</h1>
+          <h1 className="font-display text-[30px] font-bold leading-tight">Missões</h1>
         </div>
         <span className={`chip ${streak.today ? 'chip-accent' : 'chip-plain'}`}>
           <Flame size={16} className={streak.today ? 'text-accent' : 'text-muted'} /> {streak.count} {streak.count === 1 ? 'dia' : 'dias'}
         </span>
       </header>
+
+      {showKcal && dir !== 'manter' && (
+        <div className={`journey journey-${dir} !gap-1 !py-3`}>
+          <p className="text-[13px] font-extrabold uppercase tracking-wide opacity-90">
+            {jt.emoji} {jt.title}
+          </p>
+          <p className="font-display text-[22px] font-bold leading-tight">
+            Hoje: {jt.sign}
+            {fmtNum(todayK, 0)} kcal para você e o {s.pet.name}
+          </p>
+          <p className="text-[12.5px] font-bold opacity-85">Cada missão concluída {dir === 'perder' ? 'tira' : 'soma'} as mesmas calorias de vocês dois.</p>
+        </div>
+      )}
+
+      <SeasonBanner s={s} />
 
       <section className="card grid gap-3 p-4" aria-label="Como está sua bateria">
         <p className="text-[15px] font-extrabold">Como tá sua bateria hoje?</p>
@@ -80,30 +108,9 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
                 <span aria-hidden="true">{CATEGORIES[cat].emoji}</span> {CATEGORIES[cat].label}
               </h2>
               <ul className="grid gap-2">
-                {list.map((t) => {
-                  const isDone = t.id in day.done;
-                  return (
-                    <li key={t.id} className="task" data-done={isDone}>
-                      <button className="flex min-w-0 flex-1 items-center gap-3 text-left" onClick={() => onToggle(t)} aria-pressed={isDone}>
-                        <span className="task-check">
-                          <Check size={18} strokeWidth={3} />
-                        </span>
-                        <span className="text-[22px] leading-none" aria-hidden="true">
-                          {t.emoji}
-                        </span>
-                        <span className="min-w-0">
-                          <span className="task-title block text-[16px] font-bold leading-snug">{t.title}</span>
-                          <span className="flex items-center gap-1 text-[12px] font-bold text-muted">
-                            <Seed size={11} /> {t.reward} · {freqLabel(t.freq)}
-                          </span>
-                        </span>
-                      </button>
-                      <button className="icon-btn" onClick={() => setEditing(t)} aria-label={`Editar: ${t.title}`}>
-                        <Pencil size={16} />
-                      </button>
-                    </li>
-                  );
-                })}
+                {list.map((t) => (
+                  <TaskRow key={t.id} task={t} done={t.id in day.done} kcal={showKcal ? kcalOf(s, t) : 0} dir={dir} sub={freqLabel(t.freq)} onToggle={(el) => onToggle(t, el)} onEdit={() => setEditing(t)} />
+                ))}
               </ul>
             </div>
           );
@@ -156,13 +163,18 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
       <Sheet open={!!justDone} onClose={() => setJustDone(null)} title="Mandou bem!">
         {justDone && (
           <div className="grid gap-3 pt-1">
+            {showKcal && justDone.kcal > 0 && dir !== 'manter' && (
+              <p className="rounded-2xl bg-accent-soft p-3 text-[16px] font-bold">
+                {jt.emoji} Você e o {s.pet.name} {jt.verb} {fmtNum(justDone.kcal, 0)} kcal juntos!
+              </p>
+            )}
             <p className="text-[16px]">
-              Você concluiu <b>{justDone.title}</b>. Quer mostrar pros amigos? Dá pra tirar uma foto e compartilhar no feed (só aparecem comentários gentis).
+              Você concluiu <b>{justDone.task.title}</b>. Quer mostrar pros amigos? Dá pra tirar uma foto e compartilhar no feed (só aparecem comentários gentis).
             </p>
             <button
               className="btn btn-primary"
               onClick={() => {
-                onShareTask(justDone);
+                onShareTask(justDone.task);
                 setJustDone(null);
               }}
             >
@@ -202,10 +214,32 @@ function TaskSheet({ task, onClose }: { task: Task | 'new' | null; onClose: () =
 
   return (
     <Sheet open={!!task} onClose={close} title={isNew ? 'Nova atividade' : 'Editar atividade'}>
-      <div className="grid gap-4 pt-1">
+      <div className="grid min-w-0 gap-4 pt-1">
         {isNew && <Seg value={tab} onChange={setTab} label="Origem" options={[{ id: 'biblioteca', label: 'Sugestões' }, { id: 'minha', label: 'Criar a minha' }]} />}
         {isNew && tab === 'biblioteca' ? (
           <div className="grid gap-3">
+            {s.journey.dir !== 'manter' && !minor(s) && (
+              <div className="grid gap-1.5 rounded-2xl bg-accent-soft p-3">
+                <p className="text-[14px] font-extrabold">
+                  {JOURNEY_TEXT[s.journey.dir].emoji} Para a sua jornada
+                </p>
+                <div className="grid gap-1.5">
+                  {LIBRARY.filter((l) => l.for?.includes(s.journey.dir as 'perder' | 'ganhar')).map((l) => {
+                    const has = s.tasks.some((x) => x.id === l.id);
+                    return (
+                      <button key={l.id} className="flex items-center gap-2 rounded-2xl bg-surface px-3 py-2 text-left text-[14px] font-bold disabled:opacity-60" disabled={has} onClick={() => (addLibraryTask(l.id), toast(`${l.title}: adicionada`))}>
+                        <span className="text-[20px]">{l.emoji}</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block leading-tight">{l.title}</span>
+                          {l.why && <span className="block text-[12px] font-semibold text-muted">{l.why}</span>}
+                        </span>
+                        {has ? '✓' : <KcalChip kcal={taskKcal(l, s.journey.dir, personKg(s))} dir={s.journey.dir} small />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             {CAT_ORDER.map((cat) => (
               <div key={cat} className="grid gap-1.5">
                 <p className="text-[14px] font-extrabold">
@@ -215,7 +249,7 @@ function TaskSheet({ task, onClose }: { task: Task | 'new' | null; onClose: () =
                   {LIBRARY.filter((l) => l.cat === cat).map((l) => {
                     const has = s.tasks.some((x) => x.id === l.id);
                     return (
-                      <button key={l.id} className={`chip ${has ? 'chip-leaf' : 'chip-plain'}`} disabled={has} onClick={() => (addLibraryTask(l.id), toast(`${l.title}: adicionada`))}>
+                      <button key={l.id} className={`chip !whitespace-normal text-left ${has ? 'chip-leaf' : 'chip-plain'}`} disabled={has} onClick={() => (addLibraryTask(l.id), toast(`${l.title}: adicionada`))}>
                         {l.emoji} {l.title} {has && '✓'}
                       </button>
                     );

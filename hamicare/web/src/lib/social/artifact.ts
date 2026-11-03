@@ -6,12 +6,12 @@
 import { checkKindness, REASON_TEXT, type ReactionId } from '../../shared/moderation';
 import { addDays, hashStr, uid } from '../util';
 import { todayKey } from '../store';
-import type { Comment, Feed, FriendState, Gift, GroupChallenge, Post, Profile, Reaction, ReportTarget, SocialApi } from './types';
+import type { Comment, Feed, FriendState, Gift, Group, GroupChallenge, Post, Profile, Reaction, ReportTarget, SocialApi } from './types';
 import { postKey } from './types';
 
 /** Regras de acesso declaradas na publicação (ver scripts/artifact.mjs). */
 export const DB_RULES = [
-  ...['profiles', 'friends', 'posts', 'social', 'challenges'].flatMap((p) => [
+  ...['profiles', 'friends', 'posts', 'social', 'challenges', 'groups'].flatMap((p) => [
     { path: p, read: 'view', write: 'owner' },
     { path: `${p}/{self}`, write: 'interact' },
   ]),
@@ -39,6 +39,11 @@ interface SocialDoc {
   claimed: string[];
   joined: string[];
   checkins: Record<string, string[]>;
+  /** Grupos de que a pessoa saiu (id completo dono:grupo). */
+  leftGroups?: string[];
+}
+interface GroupsDoc {
+  items: { id: string; name: string; emoji: string; color: string; members: string[]; createdAt: number }[];
 }
 interface ChallengesDoc {
   items: Omit<GroupChallenge, 'members' | 'checkins'>[];
@@ -70,6 +75,49 @@ export function createArtifactSocial(db: Db, myId: string): SocialApi {
     const ok = (id: string) => profiles[id] && !mine.blocked?.includes(id) && !blockedMe(id);
     const friends = Object.keys(profiles).filter((id) => id !== myId && ok(id) && mine.list.includes(id) && listsMe(id));
     return { profiles, friendDocs, mine, friends, listsMe, ok };
+  }
+
+  /** Grupos visíveis: o dono guarda a lista de convidados; quem sai marca no próprio documento. */
+  async function groupState() {
+    const [st, groupDocs, socialDocs] = await Promise.all([state(), all<GroupsDoc>('groups'), all<SocialDoc>('social')]);
+    const left = (u: string, gid: string) => (socialDocs[u]?.leftGroups ?? []).includes(gid);
+    const groups: Group[] = [];
+    for (const [owner, doc] of Object.entries(groupDocs)) {
+      if (!st.profiles[owner]) continue;
+      const ownerFriends = st.friendDocs[owner]?.list ?? [];
+      for (const g of doc.items ?? []) {
+        const id = `${owner}:${g.id}`;
+        // Convidado conta como membro se for amigo de quem criou (pedido nos dois sentidos) e não saiu.
+        const members = [owner, ...g.members.filter((m) => m !== owner && st.profiles[m] && ownerFriends.includes(m) && (st.friendDocs[m]?.list ?? []).includes(owner) && !left(m, id))];
+        if (!members.includes(myId)) continue;
+        groups.push({ id, ownerId: owner, name: g.name, emoji: g.emoji, color: g.color, members, createdAt: g.createdAt });
+      }
+    }
+    return { ...st, groups, socialDocs };
+  }
+
+  /** Junta posts, reações e comentários de um conjunto de autores. */
+  function buildFeed(authors: Set<string>, postDocs: Record<string, PostsDoc>, socialDocs: Record<string, SocialDoc>, profiles: Record<string, Profile>, pick: (p: Post) => boolean): Feed {
+    const hidden = new Set<string>();
+    const posts: Post[] = [];
+    for (const [author, doc] of Object.entries(postDocs)) {
+      if (!authors.has(author)) continue;
+      (doc.hidden ?? []).forEach((h) => hidden.add(h));
+      for (const p of doc.items ?? []) if (pick(p)) posts.push({ ...p, authorId: author });
+    }
+    posts.sort((a, b) => b.createdAt - a.createdAt);
+    const keys = new Set(posts.map(postKey));
+    const reactions: Reaction[] = [];
+    const comments: Comment[] = [];
+    for (const [author, doc] of Object.entries(socialDocs)) {
+      if (!authors.has(author)) continue;
+      for (const [k, kind] of Object.entries(doc.reactions ?? {})) if (keys.has(k)) reactions.push({ postKey: k, authorId: author, kind });
+      for (const c of doc.comments ?? []) if (keys.has(c.postKey) && !hidden.has(c.id) && checkKindness(c.text).ok) comments.push({ ...c, authorId: author });
+    }
+    comments.sort((a, b) => a.createdAt - b.createdAt);
+    const prof: Record<string, Profile> = {};
+    for (const id of authors) if (profiles[id]) prof[id] = { ...profiles[id], id };
+    return { posts: posts.slice(0, 60), profiles: prof, reactions, comments };
   }
 
   const api: SocialApi = {
@@ -128,27 +176,58 @@ export function createArtifactSocial(db: Db, myId: string): SocialApi {
     },
     async feed(): Promise<Feed> {
       const [{ profiles, friends }, postDocs, socialDocs] = await Promise.all([state(), all<PostsDoc>('posts'), all<SocialDoc>('social')]);
-      const visible = new Set([myId, ...friends]);
-      const hidden = new Set<string>();
-      const posts: Post[] = [];
-      for (const [author, doc] of Object.entries(postDocs)) {
-        if (!visible.has(author)) continue;
-        (doc.hidden ?? []).forEach((h) => hidden.add(h));
-        for (const p of doc.items ?? []) posts.push({ ...p, authorId: author });
+      return buildFeed(new Set([myId, ...friends]), postDocs, socialDocs, profiles, (p) => !p.groupId);
+    },
+    async profile(userId) {
+      const [st, postDocs, groupInfo] = await Promise.all([state(), all<PostsDoc>('posts'), groupState()]);
+      const p = st.profiles[userId];
+      if (!p || (userId !== myId && !st.ok(userId))) return null;
+      const isFriend = userId === myId || st.friends.includes(userId);
+      const sharesGroup = groupInfo.groups.some((g) => g.members.includes(userId));
+      const connected = isFriend || st.listsMe(userId) || st.mine.list.includes(userId) || sharesGroup;
+      if (!connected) return null;
+      const mutual = (u: string) => Object.keys(st.profiles).filter((o) => o !== u && (st.friendDocs[u]?.list ?? []).includes(o) && (st.friendDocs[o]?.list ?? []).includes(u)).length;
+      const posts = isFriend ? (postDocs[userId]?.items ?? []).filter((x) => !x.groupId).map((x) => ({ ...x, authorId: userId })).sort((a, b) => b.createdAt - a.createdAt) : [];
+      return { profile: { ...p, id: userId }, posts, friendsCount: mutual(userId), isFriend };
+    },
+    async groups() {
+      const { groups, profiles } = await groupState();
+      const people = new Set(groups.flatMap((g) => g.members));
+      return { groups, profiles: Object.fromEntries([...people].filter((id) => profiles[id]).map((id) => [id, { ...profiles[id], id }])) };
+    },
+    async createGroup(g) {
+      const [{ friends }, doc] = await Promise.all([state(), read<GroupsDoc>(`groups/${myId}`, { items: [] })]);
+      const check = checkKindness(g.name);
+      if (!check.ok) throw new Error(REASON_TEXT[check.reason]);
+      const item = { id: uid(), name: check.text.slice(0, 40), emoji: g.emoji, color: g.color, members: g.members.filter((m) => friends.includes(m)).slice(0, 29), createdAt: Date.now() };
+      await write(`groups/${myId}`, { items: [...doc.items, item].slice(-20) });
+      return { id: `${myId}:${item.id}`, ownerId: myId, name: item.name, emoji: item.emoji, color: item.color, members: [myId, ...item.members], createdAt: item.createdAt };
+    },
+    async addToGroup(groupId, userId) {
+      const [owner, gid] = groupId.split(':');
+      if (owner !== myId) throw new Error('Só quem criou o grupo adiciona pessoas.');
+      const [{ friends }, doc] = await Promise.all([state(), read<GroupsDoc>(`groups/${myId}`, { items: [] })]);
+      if (!friends.includes(userId)) throw new Error('Só amigos podem entrar no grupo.');
+      await write(`groups/${myId}`, { items: doc.items.map((g) => (g.id === gid && !g.members.includes(userId) ? { ...g, members: [...g.members, userId].slice(0, 29) } : g)) });
+    },
+    async leaveGroup(groupId, userId) {
+      const [owner, gid] = groupId.split(':');
+      if (owner === myId) {
+        const doc = await read<GroupsDoc>(`groups/${myId}`, { items: [] });
+        const items = userId === myId ? doc.items.filter((g) => g.id !== gid) : doc.items.map((g) => (g.id === gid ? { ...g, members: g.members.filter((m) => m !== userId) } : g));
+        await write(`groups/${myId}`, { items });
+      } else if (userId === myId) {
+        const doc = await mySocial();
+        await write(`social/${myId}`, { ...doc, leftGroups: [...new Set([...(doc.leftGroups ?? []), groupId])].slice(-100) });
       }
-      posts.sort((a, b) => b.createdAt - a.createdAt);
-      const keys = new Set(posts.map(postKey));
-      const reactions: Reaction[] = [];
-      const comments: Comment[] = [];
-      for (const [author, doc] of Object.entries(socialDocs)) {
-        if (!visible.has(author)) continue;
-        for (const [k, kind] of Object.entries(doc.reactions ?? {})) if (keys.has(k)) reactions.push({ postKey: k, authorId: author, kind });
-        for (const c of doc.comments ?? []) if (keys.has(c.postKey) && !hidden.has(c.id) && checkKindness(c.text).ok) comments.push({ ...c, authorId: author });
-      }
-      comments.sort((a, b) => a.createdAt - b.createdAt);
-      const prof: Record<string, Profile> = {};
-      for (const id of visible) if (profiles[id]) prof[id] = { ...profiles[id], id };
-      return { posts: posts.slice(0, 60), profiles: prof, reactions, comments };
+    },
+    async groupFeed(groupId) {
+      const [{ groups, profiles, socialDocs, friendDocs, mine }, postDocs] = await Promise.all([groupState(), all<PostsDoc>('posts')]);
+      const g = groups.find((x) => x.id === groupId);
+      if (!g) throw new Error('Grupo não encontrado.');
+      // Quem eu bloqueei (ou quem me bloqueou) some do mural.
+      const members = g.members.filter((m) => m === myId || (!(mine.blocked ?? []).includes(m) && !(friendDocs[m]?.blocked ?? []).includes(myId)));
+      return buildFeed(new Set(members), postDocs, socialDocs, profiles, (p) => p.groupId === groupId);
     },
     async post(p) {
       const doc = await read<PostsDoc>(`posts/${myId}`, { items: [], hidden: [] });

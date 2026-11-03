@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowUpToLine, Gift, Heart, Lock, PackageOpen, Pencil, Sparkles } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
+import { Capivara } from '../components/Capivara';
 import { Room } from '../components/Room';
 import { Furniture, FLOOR_CSS, WALLPAPER_CSS } from '../components/Furniture';
 import { Coins, Seed, Seg, Sheet, toast } from '../components/ui';
@@ -8,6 +9,7 @@ import { HOUSE_KINDS, ITEMS, KIND_LABEL, SEASONS, STYLES, WEARABLE_KINDS, curren
 import { ALL_FINDS, PLACES, placeById } from '../data/world';
 import { periodOf } from '../data/lines';
 import { levelOf } from '../logic/progress';
+import { hashStr, mulberry32 } from '../lib/util';
 import {
   bringFront, buy, buyStyle, canBuy, claimDailyGift, finishAdventure, isPremium, moveItem, owned, placeItem, placeLocked, setFloor, setWallpaper, startAdventure, storeItem, todayKey, toggleWish, unwear, useApp, wear,
   type AdventureResult,
@@ -200,16 +202,43 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
           );
         })}
       </div>
-      <section className="grid gap-2" aria-label="Achadinhos">
-        <h2 className="font-display text-[19px] font-bold">
-          Achadinhos <span className="text-muted tabular-nums">{s.finds.length}/{ALL_FINDS.length}</span>
-        </h2>
-        <div className="grid grid-cols-6 gap-1.5">
-          {ALL_FINDS.map((f) => (
-            <span key={f.id} className={`grid aspect-square place-items-center rounded-xl text-[22px] ${s.finds.includes(f.id) ? 'bg-gold-soft' : 'bg-surface2 text-muted'}`} title={s.finds.includes(f.id) ? f.name : 'Ainda não encontrado'}>
-              {s.finds.includes(f.id) ? f.emoji : '?'}
-            </span>
-          ))}
+      <section className="album" aria-label="Álbum de achadinhos">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="font-display text-[21px] font-bold text-[#5b3a1e]">📒 Álbum de achadinhos</h2>
+          <span className="album-count">
+            {s.finds.length}/{ALL_FINDS.length}
+          </span>
+        </div>
+        <p className="text-[13px] font-semibold text-[#7a5a3a]">Cada aventura pode trazer uma figurinha nova. As que faltam aparecem só a sombrinha.</p>
+        <div className="grid gap-2.5">
+          {PLACES.map((pl) => {
+            const got = pl.finds.filter((f) => s.finds.includes(f.id)).length;
+            return (
+              <div key={pl.id} className="album-row">
+                <span className="album-place">
+                  <span className="text-[20px]" aria-hidden="true">
+                    {pl.emoji}
+                  </span>
+                  <span className="min-w-0 leading-tight">
+                    <span className="block truncate text-[13px] font-extrabold">{pl.name}</span>
+                    <span className="block text-[11px] font-bold opacity-70">
+                      {got}/{pl.finds.length}
+                    </span>
+                  </span>
+                </span>
+                <div className="grid flex-1 grid-cols-3 gap-1.5">
+                  {pl.finds.map((f, i) => {
+                    const has = s.finds.includes(f.id);
+                    return (
+                      <span key={f.id} className={`sticker ${has ? 'is-got' : ''}`} style={{ rotate: has ? `${(i - 1) * 4}deg` : undefined }} title={has ? f.name : 'Ainda não encontrado'} aria-label={has ? f.name : 'Figurinha que falta'}>
+                        <span className="sticker-art">{f.emoji}</span>
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -273,9 +302,35 @@ function ShopTab({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: stri
   const season = currentSeason();
   const giftReady = s.lastGift !== todayKey();
   const list = ITEMS.filter((i) => !i.souvenir && inSeason(i) && i.price > 0 && (kind === 'desejos' ? s.wishlist.includes(i.id) : i.kind === kind));
+  const today = todayKey();
+  const daily = dailyCollection(today);
+  const line = SELLER_LINES[hashStr(`${s.seed}:${today}:loja`) % SELLER_LINES.length];
+  const now = new Date();
+  const mins = 24 * 60 - (now.getHours() * 60 + now.getMinutes());
 
   return (
     <div className="grid gap-4">
+      <section className="shop-hero" aria-label="Vendinha da Dona Capivara">
+        <div className="flex items-end gap-2">
+          <div className="seller-bob shrink-0">
+            <Capivara size={98} />
+          </div>
+          <p className="seller-speech">
+            <b>Dona Capivara:</b> {line.replace('{pet}', s.pet.name)}
+          </p>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <p className="font-display text-[20px] font-bold leading-tight">✨ Coleção do dia</p>
+          <span className="rounded-full bg-white/25 px-3 py-1 text-[12px] font-black">
+            Renova em {Math.floor(mins / 60)}h{String(mins % 60).padStart(2, '0')}
+          </span>
+        </div>
+        <ul className="grid grid-cols-2 gap-2.5">
+          {daily.map((item) => (
+            <ShopCard key={item.id} item={item} onPlus={onPlus} onGift={onGift} />
+          ))}
+        </ul>
+      </section>
       <button
         className={`card flex items-center gap-3 p-4 text-left ${giftReady ? '' : 'opacity-60'}`}
         disabled={!giftReady}
@@ -311,13 +366,31 @@ function ShopTab({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: stri
   );
 }
 
+const SELLER_LINES = [
+  'Bem-vindo à minha vendinha! Tudo fresquinho hoje.',
+  'A coleção do dia vai embora à meia-noite, viu?',
+  'Semente bem gasta é semente feliz.',
+  'Psiu… o {pet} ia ficar lindo de chapéu novo.',
+  'Cuidar de si também merece um mimo.',
+  'Volte amanhã: sempre chega novidade.',
+];
+
+/** Quatro destaques que mudam todo dia (um deles do HamiCare+, quando houver). */
+function dailyCollection(today: string): Item[] {
+  const rnd = mulberry32(hashStr(`colecao:${today}`));
+  const pool = ITEMS.filter((i) => !i.souvenir && i.price > 0 && inSeason(i) && i.kind !== 'comida' && i.kind !== 'parede' && i.kind !== 'piso');
+  const free = pool.filter((i) => !i.plus).sort(() => rnd() - 0.5);
+  const plus = pool.filter((i) => i.plus).sort(() => rnd() - 0.5);
+  return [...free.slice(0, plus.length ? 3 : 4), ...plus.slice(0, 1)];
+}
+
 function ShopCard({ item, onPlus, onGift }: { item: Item; onPlus: () => void; onGift: (itemId: string) => void }) {
   const s = useApp();
   const res = canBuy(s, item.id);
   const wished = s.wishlist.includes(item.id);
   const isWear = WEARABLE_KINDS.includes(item.kind);
   return (
-    <li className="card relative grid gap-2 p-3">
+    <li className={`card shop-card relative grid gap-2 p-3 ${item.plus ? 'is-plus' : ''}`}>
       <button className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-surface2" aria-label={wished ? 'Tirar dos desejos' : 'Guardar nos desejos'} aria-pressed={wished} onClick={() => toggleWish(item.id)}>
         <Heart size={16} className={wished ? 'fill-[var(--accent)] text-accent' : 'text-muted'} />
       </button>

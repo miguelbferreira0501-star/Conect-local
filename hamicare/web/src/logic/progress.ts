@@ -60,7 +60,7 @@ export interface QuestDef {
 }
 
 export const QUESTS: QuestDef[] = [
-  { id: 'tarefas3', period: 'dia', title: 'Concluir 3 tarefas', target: 3, coins: 10, xp: 15, count: doneCount },
+  { id: 'tarefas3', period: 'dia', title: 'Concluir 3 missões', target: 3, coins: 10, xp: 15, count: doneCount },
   { id: 'mover1', period: 'dia', title: 'Fazer 1 atividade de movimento', target: 1, coins: 8, xp: 10, count: catCount('fitness') },
   { id: 'cuidar2', period: 'dia', title: 'Cuidar do Hami 2 vezes', target: 2, coins: 6, xp: 10, count: (d) => d.care.length },
   { id: 'humor', period: 'dia', title: 'Registrar como você está', target: 1, coins: 5, xp: 8, count: (d) => (d.mood ? 1 : 0) },
@@ -126,12 +126,12 @@ const anyDay = (s: State, f: (d: DayLog) => boolean) => Object.values(s.days).so
 const daysWith = (s: State, f: (d: DayLog) => boolean) => Object.values(s.days).filter(f).length;
 
 export const ACHIEVEMENTS: AchievementDef[] = [
-  { id: 'primeira-tarefa', title: 'Primeiro passo', desc: 'Concluiu a primeira tarefa', emoji: '🌱', coins: 10, check: (_s, c) => c.totalDone >= 1 },
+  { id: 'primeira-tarefa', title: 'Primeiro passo', desc: 'Concluiu a primeira missão', emoji: '🌱', coins: 10, check: (_s, c) => c.totalDone >= 1 },
   { id: 'primeira-caminhada', title: 'Pé na rua', desc: 'Primeira caminhada', emoji: '🚶', coins: 15, check: (s) => anyDay(s, (d) => 'caminhada' in d.done) },
   { id: 'primeiro-movimento', title: 'Corpo em movimento', desc: 'Primeira atividade física', emoji: '💪', coins: 10, check: (s) => anyDay(s, (d) => Object.values(d.done).includes('fitness')) },
   { id: 'semana-cuidado', title: 'Semana de autocuidado', desc: '7 dias cuidando de você', emoji: '🛁', coins: 30, check: (s) => daysWith(s, (d) => Object.values(d.done).includes('autocuidado')) >= 7 },
   { id: 'dez', title: 'Dez feitas', desc: '10 atividades concluídas', emoji: '🔟', coins: 20, check: (_s, c) => c.totalDone >= 10 },
-  { id: 'cem', title: 'Cem tarefas', desc: '100 tarefas concluídas', emoji: '💯', coins: 100, check: (_s, c) => c.totalDone >= 100 },
+  { id: 'cem', title: 'Cem missões', desc: '100 missões concluídas', emoji: '💯', coins: 100, check: (_s, c) => c.totalDone >= 100 },
   { id: 'ofensiva7', title: 'Uma semana seguida', desc: 'Ofensiva de 7 dias', emoji: '🔥', coins: 30, check: (_s, c) => c.best >= 7 },
   { id: 'ofensiva30', title: 'Primeiro mês de constância', desc: 'Ofensiva de 30 dias', emoji: '🏅', coins: 120, check: (_s, c) => c.best >= 30 },
   { id: 'primeira-aventura', title: 'Explorador', desc: 'Primeira aventura do Hami', emoji: '🗺️', coins: 20, check: (s) => Object.keys(s.placesDone).length > 0 },

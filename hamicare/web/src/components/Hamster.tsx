@@ -17,13 +17,17 @@ export interface HamsterProps {
   label?: string;
   /** Hamster de outra pessoa (feed, visitas): sempre no formato padrão, sem comparação de corpo. */
   neutral?: boolean;
+  /** Molhado no banho: pelo escurece e pinga. */
+  wet?: boolean;
+  /** Brilhando depois de escovar ou do banho. */
+  shine?: boolean;
 }
 
 /**
  * O Hami: hamster redondo com uma mancha de coração na barriga (a marca do HamiCare).
  * O peso virtual muda a "fofura" (largura e bochechas); as fases mudam postura e detalhes.
  */
-export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', outfit = NO_OUTFIT, size = 180, idle = true, label, neutral }: HamsterProps) {
+export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', outfit = NO_OUTFIT, size = 180, idle = true, label, neutral, wet, shine }: HamsterProps) {
   const fur = furById(furId);
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
   const f = fluffOf(neutral ? 135 : grams);
@@ -102,6 +106,23 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
             <ellipse cx={100 + s * (w - 6)} cy={top + h * 0.58} rx="8" ry="5" fill={fur.ear} opacity="0.5" />
           </g>
         ))}
+        {wet && (
+          <g>
+            <path d={body} fill="#5B8FD6" opacity="0.16" />
+            {[
+              [-0.5, 0.18], [0.35, 0.1], [0.62, 0.42], [-0.7, 0.5], [0.1, 0.02],
+            ].map(([dx, dy], i) => (
+              <path key={i} className="drip" style={{ animationDelay: `${i * 0.3}s` }} d={`M${100 + dx * w} ${top + dy * h} q-3.5 6 0 9 q3.5 -3 0 -9 Z`} fill="#8FD0FF" stroke="#5BA9E8" strokeWidth="0.8" />
+            ))}
+          </g>
+        )}
+        {shine && (
+          <g fill="#FFFFFF">
+            <ellipse cx={100 + w * 0.42} cy={top + h * 0.3} rx="7" ry="3.5" opacity="0.55" transform={`rotate(30 ${100 + w * 0.42} ${top + h * 0.3})`} />
+            <path className="sparkle" d={`M${100 - w - 2} ${top + 20} l2.5 6 6 2.5 -6 2.5 -2.5 6 -2.5 -6 -6 -2.5 6 -2.5 Z`} fill="#FFF3A6" />
+            <path className="sparkle" style={{ animationDelay: '0.5s' }} d={`M${100 + w + 4} ${top + h * 0.6} l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z`} fill="#FFF3A6" />
+          </g>
+        )}
         <Accessory id={outfit.acessorio} geo={geo} />
         <Glasses id={outfit.oculos} eyeY={eyeY} />
         <Hat id={outfit.chapeu} geo={geo} />
@@ -131,7 +152,8 @@ function Heart({ x, y, s, fill, opacity = 1 }: { x: number; y: number; s: number
 
 function Face({ mood, eyeY, noseY, cheek, whisker }: { mood: PetMood; eyeY: number; noseY: number; cheek: string; whisker: string }) {
   const closed = mood === 'calmo' || mood === 'sono' || mood === 'dormindo';
-  const happy = mood === 'animado' || mood === 'comendo';
+  const happy = mood === 'animado' || mood === 'comendo' || mood === 'risada';
+  const wide = mood === 'surpreso' || mood === 'boca';
   return (
     <g>
       {closed ? (
@@ -144,6 +166,15 @@ function Face({ mood, eyeY, noseY, cheek, whisker }: { mood: PetMood; eyeY: numb
           <path d={`M75 ${eyeY + 2} Q81 ${eyeY - 5} 87 ${eyeY + 2}`} />
           <path d={`M113 ${eyeY + 2} Q119 ${eyeY - 5} 125 ${eyeY + 2}`} />
         </g>
+      ) : wide ? (
+        <g>
+          <ellipse cx="81" cy={eyeY - 1} rx="7.6" ry="9.2" fill={INK} />
+          <ellipse cx="119" cy={eyeY - 1} rx="7.6" ry="9.2" fill={INK} />
+          <circle cx="84" cy={eyeY - 5} r="3" fill="#fff" />
+          <circle cx="122" cy={eyeY - 5} r="3" fill="#fff" />
+          <circle cx="79" cy={eyeY + 2} r="1.3" fill="#fff" />
+          <circle cx="117" cy={eyeY + 2} r="1.3" fill="#fff" />
+        </g>
       ) : (
         <g className="pet-eyes">
           <ellipse cx="81" cy={eyeY} rx="6.2" ry="7.6" fill={INK} />
@@ -152,11 +183,23 @@ function Face({ mood, eyeY, noseY, cheek, whisker }: { mood: PetMood; eyeY: numb
           <circle cx="121.3" cy={eyeY - 3} r="2.3" fill="#fff" />
         </g>
       )}
-      <ellipse cx="67" cy={eyeY + 15} rx="9" ry="5.5" fill={cheek} opacity="0.55" />
-      <ellipse cx="133" cy={eyeY + 15} rx="9" ry="5.5" fill={cheek} opacity="0.55" />
+      <ellipse cx="67" cy={eyeY + 15} rx="9" ry="5.5" fill={cheek} opacity={mood === 'risada' ? 0.95 : 0.55} />
+      <ellipse cx="133" cy={eyeY + 15} rx="9" ry="5.5" fill={cheek} opacity={mood === 'risada' ? 0.95 : 0.55} />
       <path d={`M96.5 ${noseY - 2} L103.5 ${noseY - 2} L100 ${noseY + 2.5} Z`} fill="#F07A93" stroke="#F07A93" strokeWidth="2" strokeLinejoin="round" />
       {mood === 'animado' ? (
         <ellipse cx="100" cy={noseY + 8} rx="4.5" ry="5" fill={INK} />
+      ) : mood === 'risada' ? (
+        <g>
+          <path d={`M91 ${noseY + 4} Q100 ${noseY + 18} 109 ${noseY + 4} Z`} fill={INK} />
+          <path d={`M95 ${noseY + 10} Q100 ${noseY + 15} 105 ${noseY + 10} Z`} fill="#FF8FA8" />
+        </g>
+      ) : mood === 'boca' ? (
+        <g>
+          <ellipse cx="100" cy={noseY + 10} rx="7" ry="8" fill={INK} />
+          <ellipse cx="100" cy={noseY + 13} rx="4" ry="3.5" fill="#FF8FA8" />
+        </g>
+      ) : mood === 'surpreso' ? (
+        <ellipse cx="100" cy={noseY + 8} rx="3" ry="3.6" fill={INK} />
       ) : (
         <path d={`M93 ${noseY + 4} q3.5 4 7 0 q3.5 4 7 0`} stroke={INK} strokeWidth="2.6" strokeLinecap="round" fill="none" />
       )}

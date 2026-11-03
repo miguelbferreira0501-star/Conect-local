@@ -70,6 +70,19 @@ export function createApiSocial(): SocialApi {
     sendGift: (to, itemId, note) => http('POST', '/social/gifts', { to, itemId, note }),
     claimGift: (giftId) => http<{ gift: Gift | null }>('POST', `/social/gifts/${giftId}/claim`).then((r) => r.gift),
     challenges: () => http<{ challenges: GroupChallenge[] }>('GET', '/social/challenges').then((r) => r.challenges),
+    profile: async (userId) => {
+      try {
+        return await http('GET', `/social/profiles/${userId}`);
+      } catch (e) {
+        if ((e as { status?: number }).status === 404) return null;
+        throw e;
+      }
+    },
+    groups: () => http('GET', '/social/groups'),
+    createGroup: async (g) => (await http('POST', '/social/groups', g)).group,
+    addToGroup: (groupId, userId) => http('POST', `/social/groups/${groupId}/members`, { userId }),
+    leaveGroup: (groupId, userId) => http('DELETE', `/social/groups/${groupId}/members/${userId}`),
+    groupFeed: (groupId) => http('GET', `/social/groups/${groupId}/feed`),
     createChallenge: (c) => http('POST', '/social/challenges', c),
     checkin: (cid) => http('POST', `/social/challenges/${cid}/checkin`),
     leaveChallenge: (cid) => http('DELETE', `/social/challenges/${cid}/membership`),
