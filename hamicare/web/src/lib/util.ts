@@ -1,10 +1,36 @@
-/** Data local no formato AAAA-MM-DD (o "dia" do usuário, não o UTC). */
+/** Data local no formato AAAA-MM-DD (o "dia" da pessoa, não o UTC). */
 export function dayKey(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 }
+
+export function parseKey(key: string): Date {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+export function addDays(key: string, n: number): string {
+  const d = parseKey(key);
+  d.setDate(d.getDate() + n);
+  return dayKey(d);
+}
+
+/** Diferença em dias entre duas datas AAAA-MM-DD (b - a). */
+export function dayDiff(a: string, b: string): number {
+  return Math.round((parseKey(b).getTime() - parseKey(a).getTime()) / 86_400_000);
+}
+
+/** Segunda-feira da semana da data. */
+export function weekStart(key: string): string {
+  const d = parseKey(key);
+  const dow = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - dow);
+  return dayKey(d);
+}
+
+export const monthKey = (key: string) => key.slice(0, 7);
 
 export function daysAgo(n: number, from = new Date()): Date {
   const d = new Date(from);
@@ -21,7 +47,7 @@ export function hashStr(s: string): number {
   return h >>> 0;
 }
 
-/** Gerador pseudoaleatório com semente: as sugestões do dia não mudam a cada abertura. */
+/** Gerador pseudoaleatório com semente: as escolhas do dia não mudam a cada abertura. */
 export function mulberry32(seed: number) {
   let a = seed;
   return () => {
@@ -35,12 +61,12 @@ export function mulberry32(seed: number) {
 
 export const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
+export const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+
 export const WEEKDAYS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
-export function formatDay(key: string): string {
-  const [y, m, d] = key.split('-').map(Number);
-  const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+export function formatDay(key: string, opts: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' }): string {
+  return parseKey(key).toLocaleDateString('pt-BR', opts);
 }
 
 export function prefersReducedMotion(): boolean {
@@ -51,7 +77,7 @@ export function prefersReducedMotion(): boolean {
   }
 }
 
-/** Copia texto; se o navegador recusar, o chamador mostra o texto para seleção manual. */
+/** Copia texto; se o navegador recusar, quem chamou mostra o texto para seleção manual. */
 export async function copyText(text: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text);
@@ -60,3 +86,6 @@ export async function copyText(text: string): Promise<boolean> {
     return false;
   }
 }
+
+export const fmtNum = (n: number, digits = 1) =>
+  n.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: digits });
