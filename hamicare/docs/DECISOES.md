@@ -96,3 +96,12 @@ Mantida: React + TypeScript + Vite (web app instalável; Capacitor depois, para 
 
 ### Fora desta entrega (próximos passos)
 Cobrança real (Google Play Billing, App Store ou Pix via Asaas na web: o teste grátis de 7 dias já funciona), envio de push em produção (precisa do app instalado e do servidor no ar), app nas lojas (Capacitor), moderação por IA (o filtro atual é por regras e fica no servidor).
+
+### Missões x Cardápio (atualização)
+
+Pedido do dono do produto: missões são hábitos saudáveis, sem alimentos; os alimentos ficam só no Cardápio, onde a pessoa monta o prato e vê as calorias.
+
+- Saíram das missões: comer fruta, refeição equilibrada, salada, trocar refrigerante, café sem açúcar, lanche, vitamina e castanhas. Quem já tinha essas missões na lista perde só elas (o histórico dos dias fica).
+- Entraram: dar 5 mil passos, yoga ou pilates, beber água ao acordar.
+- **Emagrecer:** o Hami muda com os hábitos (movimento, água, sono). O Cardápio é só para ver as calorias; ele não conta para emagrecer, para não premiar comer menos do que o corpo precisa nem registrar pela metade.
+- **Ganhar peso:** como ganhar peso depende de comer mais, o Hami cresce com o que a pessoa marcou que comeu acima da referência dela no Cardápio (até 700 kcal por dia). Sem referência, o app pede para colocar uma. As missões dessa jornada são hábitos que ajudam (força, sono, água).

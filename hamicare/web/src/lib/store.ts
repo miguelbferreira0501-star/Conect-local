@@ -116,6 +116,8 @@ export function buildJourney(dir: Direction, kg: number | null, goalKg: number |
 }
 
 const OLD_GOAL: Record<string, GoalId> = { peso: 'emagrecer', equilibrio: 'manter' };
+/** Missões de comida da versão anterior (agora a comida fica só no Cardápio). */
+const FOOD_TASKS = ['agua-refri', 'fruta', 'sem-acucar', 'salada', 'refeicao', 'lanche', 'vitamina', 'castanhas'];
 
 /** Completa estados antigos (antes da jornada de calorias) e de backups. */
 function normalize(raw: State): State {
@@ -125,6 +127,8 @@ function normalize(raw: State): State {
   // Identidade colorida: o tema claro passa a ser o padrão (uma vez; depois vale a escolha da pessoa).
   if (!raw.themeV) s.settings = { ...s.settings, theme: s.settings.theme === 'auto' ? 'claro' : s.settings.theme };
   s.themeV = 1;
+  // Missões são só hábitos: as antigas de comida saem da lista (o histórico dos dias fica).
+  if (s.tasks.some((t) => FOOD_TASKS.includes(t.id))) s.tasks = s.tasks.filter((t) => !FOOD_TASKS.includes(t.id));
   if (!raw.journey) {
     const dir = directionOf(goal, isMinor(s.profile.ageGroup));
     s.journey = buildJourney(dir, latestKg(s), s.body.goalKg, todayKey(), s.pet.grams);
@@ -303,7 +307,7 @@ export function maintain(input: State): State {
 /** Progresso atual da jornada (0 a 1) e calorias somadas. */
 export function journeyNow(s: State, today = todayKey()): { kcal: number; progress: number; byScale: boolean } {
   const j = s.journey;
-  const kcal = journeyKcal(s.days, j.startedAt, j.dir);
+  const kcal = journeyKcal(s.days, j.startedAt, j.dir, undefined, s.mealRef ?? null);
   if (j.dir !== 'manter' && s.body.sync && s.body.baselineKg && !minor(s)) {
     const recent = recentAverageKg(s.body.logs, today);
     if (recent) return { kcal, progress: scaleProgress(j.dir, s.body.baselineKg, s.body.goalKg ?? defaultGoalKg(s.body.baselineKg, j.dir), recent), byScale: true };
@@ -330,7 +334,7 @@ function applyJourney(input: State, today: string): State {
     const date = addDays(s.pet.lastWeighIn, weeks * WEIGH_EVERY_DAYS);
     const from = addDays(date, -WEIGH_EVERY_DAYS);
     const before = [...s.pet.weighIns].reverse().find((w) => w.date <= from)?.grams ?? s.journey.startGrams;
-    const kcal = journeyKcal(s.days, from > j.startedAt ? from : j.startedAt, j.dir, addDays(date, -1));
+    const kcal = journeyKcal(s.days, from > j.startedAt ? from : j.startedAt, j.dir, addDays(date, -1), s.mealRef ?? null);
     s = { ...s, pet: { ...s.pet, lastWeighIn: date } };
     if (!minor(s) && j.dir !== 'manter') setTimeout(() => celebrate({ type: 'weigh', grams: s.pet.grams, before, kcal }), 0);
   }
@@ -381,14 +385,14 @@ export function starterPlan(a: Pick<OnboardingAnswers, 'goal' | 'focus' | 'minut
   const dir = directionOf(a.goal, isMinor(a.ageGroup));
   const likedMoves = a.likes.map((id) => libById(id)).filter((t) => t && t.cat === 'fitness' && (!easy || t.energy <= 2));
   const move = (fallback: string) => (likedMoves.length ? likedMoves[0]!.id : fallback);
-  if (dir === 'perder') return ['agua-refri', 'fruta', move(easy ? 'escada' : 'caminhada'), 'salada', 'agua', 'respirar'];
-  if (dir === 'ganhar') return ['vitamina', 'lanche', 'refeicao', easy ? 'alongar' : 'forca', 'castanhas', 'respirar'];
+  if (dir === 'perder') return [move(easy ? 'escada' : 'caminhada'), 'passos', 'agua', 'garrafa', 'sono', 'respirar'];
+  if (dir === 'ganhar') return [easy ? 'alongar' : 'forca', 'sono', 'agua', 'descansar', 'respirar'];
   const ids = new Set<string>(['agua', 'respirar']);
   const moving = ['condicionamento', 'ativo', 'manter'].includes(a.goal) || a.focus.includes('fitness');
   if (moving) (likedMoves.length ? likedMoves.slice(0, 2).map((t) => t!.id) : [easy ? 'alongar' : 'caminhada']).forEach((id) => ids.add(id));
   else ids.add('alongar');
   if (a.goal === 'cuidar' || a.focus.includes('autocuidado')) ['dentes', 'pausa'].forEach((i) => ids.add(i));
-  if (a.goal === 'habitos' || a.goal === 'manter' || a.focus.includes('habitos')) ['sono', 'fruta'].forEach((i) => ids.add(i));
+  if (a.goal === 'habitos' || a.goal === 'manter' || a.focus.includes('habitos')) ['sono', 'garrafa'].forEach((i) => ids.add(i));
   if (a.focus.includes('emocional')) ids.add('gratidao');
   return [...ids].slice(0, 6);
 }

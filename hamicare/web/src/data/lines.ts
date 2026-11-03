@@ -21,10 +21,10 @@ export const TRAITS: Record<TraitId, { label: string; emoji: string; hello: stri
 };
 
 export const GOALS: Record<GoalId, { label: string; emoji: string; desc: string; weight?: boolean }> = {
-  emagrecer: { label: 'Emagrecer junto com o Hami', emoji: '🔥', desc: 'Cada missão saudável tira calorias de vocês dois', weight: true },
-  ganhar: { label: 'Ganhar peso junto com o Hami', emoji: '💪', desc: 'Lanches nutritivos e força para crescerem juntos', weight: true },
+  emagrecer: { label: 'Emagrecer junto com o Hami', emoji: '🔥', desc: 'Cada hábito saudável tira calorias de vocês dois', weight: true },
+  ganhar: { label: 'Ganhar peso junto com o Hami', emoji: '💪', desc: 'Cardápio no capricho e treino de força para crescerem juntos', weight: true },
   manter: { label: 'Manter o peso', emoji: '⚖️', desc: 'Equilíbrio: o Hami fica firme com você', weight: true },
-  habitos: { label: 'Criar hábitos saudáveis', emoji: '🌱', desc: 'Água, sono, comida e rotina' },
+  habitos: { label: 'Criar hábitos saudáveis', emoji: '🌱', desc: 'Água, sono, pausas e rotina' },
   condicionamento: { label: 'Melhorar o condicionamento', emoji: '🫁', desc: 'Ter mais fôlego e disposição' },
   ativo: { label: 'Ter uma rotina mais ativa', emoji: '🚶', desc: 'Se mexer mais no dia a dia' },
   cuidar: { label: 'Cuidar melhor de mim', emoji: '💛', desc: 'Autocuidado e saúde emocional' },

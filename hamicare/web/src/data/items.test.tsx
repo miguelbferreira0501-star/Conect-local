@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { Hamster } from '../components/Hamster';
 import { ITEMS, LOOKS, WEARABLE_KINDS } from './items';
 import { FURS } from './fur';
+import { LIBRARY } from './tasks';
 
 const empty = { chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null };
 
@@ -43,5 +44,11 @@ describe('catálogo', () => {
       expect(slots.every((k) => WEARABLE_KINDS.includes(k)), look.id).toBe(true);
       expect(new Set(slots).size, look.id).toBe(slots.length);
     }
+  });
+
+  it('missões são só hábitos: nenhuma comida na lista', () => {
+    const food = /comer|fruta|lanche|vitamina|castanha|refei|salada|açúcar|refrigerante/i;
+    expect(LIBRARY.filter((t) => food.test(t.title)).map((t) => t.id)).toEqual([]);
+    expect(LIBRARY.filter((t) => (t.gain ?? 0) > 0).map((t) => t.id)).toEqual([]);
   });
 });

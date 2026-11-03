@@ -1,4 +1,5 @@
-// Biblioteca de atividades. A pessoa monta a própria lista a partir daqui ou cria as suas.
+// Biblioteca de missões: só hábitos saudáveis (movimento, água, sono, pausas, cuidado).
+// Comida não entra aqui: fica no Cardápio de hoje, no Início.
 import type { Category } from '../types';
 
 export interface LibTask {
@@ -11,9 +12,9 @@ export interface LibTask {
   /** Movimento: intensidade (MET) e minutos, para estimar o gasto. */
   met?: number;
   min?: number;
-  /** Calorias economizadas na troca (jornada de emagrecer). */
+  /** Calorias ligadas ao hábito (água, sono) para quem quer emagrecer. */
   swap?: number;
-  /** Calorias a mais, nutritivas (jornada de ganhar peso). */
+  /** Não usado nas missões: comida fica no Cardápio. */
   gain?: number;
   /** De onde vem a estimativa, em palavras simples. */
   why?: string;
@@ -24,7 +25,7 @@ export interface LibTask {
 export const CATEGORIES: Record<Category, { label: string; emoji: string; desc: string }> = {
   fitness: { label: 'Movimento', emoji: '🏃', desc: 'Atividade física no seu ritmo' },
   autocuidado: { label: 'Autocuidado', emoji: '🛁', desc: 'Cuidar do corpo e do espaço' },
-  habitos: { label: 'Hábitos saudáveis', emoji: '💧', desc: 'Água, sono, comida e pausas' },
+  habitos: { label: 'Hábitos saudáveis', emoji: '💧', desc: 'Água, sono e pausas' },
   emocional: { label: 'Bem-estar emocional', emoji: '💛', desc: 'Cuidar da cabeça e do coração' },
 };
 
@@ -37,12 +38,14 @@ export const LIBRARY: LibTask[] = [
   { id: 'bike', title: 'Andar de bicicleta (20 min)', emoji: '🚲', cat: 'fitness', energy: 3, met: 6.8, min: 20, why: 'Pedal moderado', for: ['perder'] },
   { id: 'casa', title: 'Exercícios em casa (10 min)', emoji: '🤸', cat: 'fitness', energy: 2, met: 4.5, min: 10, why: 'Polichinelo, agachamento e afins' },
   { id: 'forca', title: 'Treino de força (20 min)', emoji: '🏋️', cat: 'fitness', energy: 3, met: 5, min: 20, why: 'Ajuda a ganhar massa magra', for: ['ganhar'] },
-  { id: 'academia', title: 'Ir à academia', emoji: '💪', cat: 'fitness', energy: 3, met: 5, min: 45, why: 'Treino de 45 minutos' },
+  { id: 'academia', title: 'Ir à academia', emoji: '💪', cat: 'fitness', energy: 3, met: 5, min: 45, why: 'Treino de 45 minutos', for: ['ganhar'] },
+  { id: 'passos', title: 'Dar 5 mil passos no dia', emoji: '👟', cat: 'fitness', energy: 2, met: 3.5, min: 50, why: 'Uns 50 minutos andando, somando o dia todo', for: ['perder'] },
+  { id: 'yoga', title: 'Yoga ou pilates (15 min)', emoji: '🧘\u200d♀️', cat: 'fitness', energy: 1, met: 2.8, min: 15, why: 'Alongamento com respiração' },
   { id: 'danca', title: 'Dançar 3 músicas (10 min)', emoji: '💃', cat: 'fitness', energy: 2, met: 5, min: 10, why: 'Dança animada' },
   { id: 'corda', title: 'Pular corda (5 min)', emoji: '🪢', cat: 'fitness', energy: 3, met: 11, min: 5, why: 'Intenso e rapidinho' },
   { id: 'mobilidade', title: 'Mobilidade e postura (5 min)', emoji: '🧘', cat: 'fitness', energy: 1, met: 2.5, min: 5, why: 'Movimentos leves' },
   { id: 'esporte', title: 'Jogar um esporte (40 min)', emoji: '⚽', cat: 'fitness', energy: 3, met: 7, min: 40, why: 'Futebol, vôlei, basquete…' },
-  { id: 'escada', title: 'Subir escadas em vez do elevador', emoji: '🪜', cat: 'fitness', energy: 2, met: 6, min: 4, why: 'Uns 4 minutos de escada' },
+  { id: 'escada', title: 'Subir escadas em vez do elevador', emoji: '🪜', cat: 'fitness', energy: 2, met: 6, min: 4, why: 'Uns 4 minutos de escada', for: ['perder'] },
   { id: 'banho', title: 'Tomar banho (banho rápido vale!)', emoji: '🚿', cat: 'autocuidado', energy: 2 },
   { id: 'pele', title: 'Cuidar da pele', emoji: '🧴', cat: 'autocuidado', energy: 1 },
   { id: 'dentes', title: 'Escovar os dentes', emoji: '🪥', cat: 'autocuidado', energy: 1 },
@@ -52,15 +55,8 @@ export const LIBRARY: LibTask[] = [
   { id: 'pausa', title: 'Fazer uma pausa longe da tela', emoji: '📵', cat: 'autocuidado', energy: 1 },
   { id: 'agua', title: 'Beber um copo d’água', emoji: '💧', cat: 'habitos', energy: 1, swap: 5, why: 'A água quase não queima calorias, mas ajuda o corpo e a fome' },
   { id: 'garrafa', title: 'Beber 1 garrafa de água no dia', emoji: '🥤', cat: 'habitos', energy: 2, swap: 15, why: 'Bem hidratado, o corpo funciona melhor' },
-  { id: 'agua-refri', title: 'Trocar o refrigerante por água', emoji: '🫗', cat: 'habitos', energy: 1, swap: 140, why: 'Uma lata de refrigerante tem cerca de 140 kcal', for: ['perder'] },
-  { id: 'fruta', title: 'Comer uma fruta', emoji: '🍎', cat: 'habitos', energy: 1, swap: 90, gain: 80, why: 'No lugar de um docinho, economiza ~90 kcal. Para ganhar peso, soma ~80 kcal', for: ['perder', 'ganhar'] },
-  { id: 'sem-acucar', title: 'Café ou suco sem açúcar', emoji: '☕', cat: 'habitos', energy: 1, swap: 40, why: 'Duas colheres de açúcar têm cerca de 40 kcal', for: ['perder'] },
-  { id: 'salada', title: 'Começar o almoço pela salada', emoji: '🥗', cat: 'habitos', energy: 1, swap: 80, why: 'Metade do prato com salada costuma diminuir o resto da porção', for: ['perder'] },
-  { id: 'refeicao', title: 'Fazer uma refeição equilibrada', emoji: '🍽️', cat: 'habitos', energy: 2, swap: 150, gain: 150, why: 'Comparado a um lanche rápido, economiza ~150 kcal. Para ganhar, é não pular refeição', for: ['perder', 'ganhar'] },
-  { id: 'lanche', title: 'Fazer um lanche nutritivo a mais', emoji: '🥪', cat: 'habitos', energy: 2, gain: 300, why: 'Ex.: pão integral com ovo e queijo', for: ['ganhar'] },
-  { id: 'vitamina', title: 'Tomar uma vitamina de banana com aveia', emoji: '🍌', cat: 'habitos', energy: 1, gain: 350, why: 'Leite, banana e aveia batidos', for: ['ganhar'] },
-  { id: 'castanhas', title: 'Comer um punhado de castanhas', emoji: '🥜', cat: 'habitos', energy: 1, gain: 180, why: 'Uns 30 g de castanhas ou amendoim', for: ['ganhar'] },
-  { id: 'sono', title: 'Ir dormir no horário', emoji: '🌙', cat: 'habitos', energy: 2, swap: 30, why: 'Dormir bem diminui a vontade de beliscar à noite' },
+  { id: 'sono', title: 'Ir dormir no horário', emoji: '🌙', cat: 'habitos', energy: 2, swap: 30, why: 'Quem dorme bem tem menos fome de noite. Para ganhar massa, o corpo cresce descansando', for: ['ganhar'] },
+  { id: 'agua-acordar', title: 'Beber água ao acordar', emoji: '🌅', cat: 'habitos', energy: 1, swap: 5, why: 'Começa o dia hidratado' },
   { id: 'levantar', title: 'Levantar e andar um pouco a cada hora', emoji: '⏰', cat: 'habitos', energy: 2, met: 3, min: 16, why: 'Umas 8 pausas de 2 minutos' },
   { id: 'sol', title: 'Pegar 10 minutos de sol', emoji: '☀️', cat: 'habitos', energy: 1 },
   { id: 'diario', title: 'Escrever no diário', emoji: '📔', cat: 'emocional', energy: 2 },

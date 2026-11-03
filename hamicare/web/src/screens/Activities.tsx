@@ -33,7 +33,7 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
   const jt = JOURNEY_TEXT[dir];
   const { pop, layer } = useKcalPop();
   const showKcal = !minor(s) && !s.body.hideNumbers;
-  const todayK = dayKcal(day, dir);
+  const todayK = dayKcal(day, dir, s.mealRef ?? null);
 
   function onToggle(t: Task, el: HTMLElement) {
     const r = toggleTask(t.id);
@@ -69,7 +69,9 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
             Hoje: {jt.sign}
             {fmtNum(todayK, 0)} kcal para você e o {s.pet.name}
           </p>
-          <p className="text-[12.5px] font-bold opacity-85">Cada missão concluída {dir === 'perder' ? 'tira' : 'soma'} as mesmas calorias de vocês dois.</p>
+          <p className="text-[12.5px] font-bold opacity-85">
+            {dir === 'perder' ? 'Cada missão concluída tira as mesmas calorias de vocês dois.' : `O ${s.pet.name} cresce com o que você come acima da referência no Cardápio do Início. As missões são hábitos que ajudam.`}
+          </p>
         </div>
       )}
 

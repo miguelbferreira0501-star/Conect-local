@@ -52,7 +52,7 @@ export function JourneyCard({ s, onOpen }: { s: State; onOpen: () => void }) {
   const isMinor = minor(s);
   const hide = s.body.hideNumbers;
   const { kcal, progress, byScale } = journeyNow(s, today);
-  const todayKcal = dayKcal(dayOf(s, today), j.dir);
+  const todayKcal = dayKcal(dayOf(s, today), j.dir, s.mealRef ?? null);
   const pct = Math.round(progress * 100);
   const pctLabel = progress > 0 && progress < 0.1 ? fmtNum(progress * 100, 1) : String(pct);
   const signed = (n: number) => (n > 0 ? `${t.sign}${fmtNum(n, 0)}` : '0');
@@ -123,7 +123,15 @@ export function JourneyCard({ s, onOpen }: { s: State; onOpen: () => void }) {
             </span>
           </div>
           <p className="text-[12.5px] font-bold opacity-85">
-            {hide ? 'Cada missão saudável aproxima vocês dois da meta.' : byScale ? 'O Hami está seguindo a sua balança.' : `Você e o ${s.pet.name} ${t.verb} as mesmas calorias.`}
+            {j.dir === 'ganhar' && !s.mealRef && !byScale
+              ? 'Coloque sua referência de calorias no Cardápio de hoje para o Hami crescer com você.'
+              : hide
+                ? 'Cada hábito saudável aproxima vocês dois da meta.'
+                : byScale
+                  ? 'O Hami está seguindo a sua balança.'
+                  : j.dir === 'ganhar'
+                    ? `O ${s.pet.name} cresce com o que você come acima da referência.`
+                    : `Você e o ${s.pet.name} ${t.verb} as mesmas calorias.`}
           </p>
         </div>
       </div>

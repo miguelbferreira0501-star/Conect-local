@@ -78,6 +78,11 @@ export function MealCard({ s }: { s: State }) {
                 );
               })}
             </div>
+            {s.journey.dir === 'ganhar' && ref && t.eaten > ref && (
+              <p className="rounded-2xl bg-leaf-soft p-3 text-[13px] font-bold">
+                💪 +{fmtNum(Math.min(700, t.eaten - ref), 0)} kcal acima da referência hoje: o {s.pet.name} cresce junto com você.
+              </p>
+            )}
             {tooLittle(t.planned, t.items) && <p className="rounded-2xl bg-gold-soft p-3 text-[13px] font-semibold">Seu cardápio de hoje está bem pequeninho. Comer pouco demais cansa o corpo e atrapalha a jornada. Se puder, inclua mais uma refeição.</p>}
           </>
         ) : (

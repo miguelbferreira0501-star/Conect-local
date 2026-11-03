@@ -72,3 +72,9 @@ Cobrança real, push num celular de verdade (precisa do app publicado em HTTPS) 
 - Testes novos de lógica (`web/src/logic/meals.test.ts`): totais planejado e comido, calorias de 0 a 3.000 por item, referência diária segura (1.200 a 5.000) e aviso de cardápio pequeno demais.
 - Navegador em 390, 360 e 320 px (as duas últimas com fonte 35% maior): montar café e almoço pelas sugestões, criar um alimento próprio, editar as calorias, salvar a referência, marcar o que comeu, recarregar e conferir que tudo ficou salvo. Nada passa da largura e sem erros de página.
 - 49 testes do app passando.
+
+## Rodada 8 (missões só com hábitos)
+
+- Teste novo: nenhuma missão da biblioteca é comida. Teste novo da jornada de ganhar peso pelo Cardápio (comido acima da referência, teto de 700, sem referência não conta, para emagrecer o Cardápio não conta).
+- Navegador: lista antiga com "Comer uma fruta" e "Trocar o refrigerante" é limpa ao abrir (água e caminhada ficam); biblioteca sem nenhum alimento; plano inicial de emagrecer só com hábitos; jornada de ganhar peso: comer 2.300 kcal com referência de 2.000 fez o Hami ir de 115 g para 115,3 g e o card mostrar +300 kcal.
+- 51 testes do app passando.

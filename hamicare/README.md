@@ -13,12 +13,12 @@
 
 | Área | Funções |
 |---|---|
-| **Jornada de peso** | Missão escolhida no começo: emagrecer, ganhar peso ou manter. Cada missão tem calorias estimadas (movimento pelo MET × seu peso; trocas saudáveis; lanches nutritivos para ganhar). O Hami recebe as mesmas calorias: quando você chega na sua meta, ele chega na dele. Número voando ao concluir, resumo semanal, meta alcançada, opção de seguir a balança |
+| **Jornada de peso** | Missão escolhida no começo: emagrecer, ganhar peso ou manter. **Missões são só hábitos saudáveis** (movimento, água, sono, pausas, cuidado): cada uma tem calorias estimadas (movimento pelo MET × seu peso) e o Hami recebe as mesmas. **Comida fica só no Cardápio de hoje**, para ver as calorias do prato. Para ganhar peso, o Hami cresce com o que a pessoa marcou que comeu acima da referência dela no Cardápio. Quando você chega na sua meta, ele chega na dele |
 | **Início** | Só o essencial: o Hami no jardim (céu muda com a hora), o card da jornada de peso, o **cardápio de hoje** (alimentos de cada refeição com quantidade e calorias editáveis, 39 sugestões por refeição, "meus alimentos", marcar o que comeu, total e referência do dia, repetir o de ontem) e as missões do dia com o botão de concluir |
 | **Cuidar** | Aba própria do Hami: ele na casinha dizendo do que precisa (com atalho para o cuidado certo), as 4 barrinhas e os 8 cuidados em botões grandes, com marquinha do que já foi feito hoje |
 | **Cuidados** | Cafuné (cócegas na barriga, cafuné na cabeça), lanchinho arrastando a comida até a boca, banho com chuveirinho/esponja/toalha/secador e espuma de verdade, Chuva de sementes e Busca a bolinha, escovar os nozinhos do pelo, hora de nanar (apagar a luz, cobrir, cantar) e acordar |
 | **Nossa evolução** | Jornada (agora → meta, progresso, calorias da semana, gráfico do peso do Hami, como as contas funcionam, trocar missão), 4 fases, condicionamento, seu peso (opcional, privado), meta segura, conquistas, fotos, linha do tempo |
-| **Missões** | 39 sugestões (com "Para a sua jornada" no topo) + as suas; selo de calorias em cada uma; bateria do dia e modo dia difícil; ofensiva com 2 descansos protegidos; temporada do mês com prêmio; desafios diários, semanais e mensais |
+| **Missões** | Só hábitos (sem alimentos): (com "Para a sua jornada" no topo) + as suas; selo de calorias em cada uma; bateria do dia e modo dia difícil; ofensiva com 2 descansos protegidos; temporada do mês com prêmio; desafios diários, semanais e mensais |
 | **Mundo** | Casa com móveis arrastáveis e 7 estilos; mapa com 10 lugares e álbum de figurinhas dos 30 achadinhos; loja da Dona Capivara com coleção do dia, **312 itens** (195 para vestir: 72 chapéus, 23 óculos, 54 roupas, 34 acessórios e 12 efeitos como aura, asas e brilhos; 76 de casa; 16 paredes; 12 pisos), **12 looks completos com 20% de desconto** e **provador** para experimentar antes de comprar; Armário com 24 pelagens (8 compradas com sementes e 4 do Plus) |
 | **Bem-estar** | Humor com emoções e gráfico, diário privado com reflexões guiadas e 9 ferramentas com cenário próprio e o Hami reagindo: respiração (anel que cresce e encolhe, Hami enche as bochechas e solta ventinho), 5-4-3-2-1, meditação (Hami flutuando sob a aurora), foco (Hami de óculos lendo), relaxar (luz passando pelo corpo), para dormir (cada passo acende uma estrela), afirmações, pote que enche de bilhetinhos e quizzes. CVV 188 |
 | **Amigos** | Perfil estilo rede social (Hami com anel, bio, posts, amigos, ofensiva, grade de posts, casa), "stories" dos amigos, feed com toque duplo para curtir, reações só positivas e comentários no filtro de gentileza; **grupos** com mural próprio; pedidos, bloquear, denunciar, vibes, presentes e desafios em grupo |
@@ -27,7 +27,7 @@
 
 ## Segurança e cuidado
 
-- Calorias são **estimativas honestas** (7.700 kcal ≈ 1 kg), explicadas na tela. Água e fruta contam como **trocas** (o que deixou de comer ou beber); a água sozinha vale só 5 kcal.
+- Calorias são **estimativas honestas** (7.700 kcal ≈ 1 kg), explicadas na tela. Um copo d'água vale só 5 kcal. Para emagrecer, o Cardápio não conta (só os hábitos), para não incentivar a comer menos do que precisa.
 - **Sem exagero**: até 800 kcal contam por dia (700 para ganhar). Exercício para quem quer ganhar peso nunca tira peso do Hami. Descanso nunca tira nada.
 - Meta segura: até 20% do peso por jornada (15% para ganhar), nunca abaixo de IMC 18,5. Aviso de cuidado se o peso real cai rápido.
 - **Menores de 18**: o Hami não muda de peso e não existe contagem de calorias. Comentários só com elogios prontos, sem foto real. **Até 12 anos**: sem amigos e feed, com autorização de um responsável.

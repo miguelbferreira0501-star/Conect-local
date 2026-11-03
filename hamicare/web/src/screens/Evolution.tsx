@@ -29,7 +29,7 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
   const jn = journeyNow(s, today);
   const last7 = Array.from({ length: 7 }, (_, i) => {
     const key = addDays(today, i - 6);
-    return { key, kcal: dayKcal(s.days[key], j.dir), label: WEEKDAYS[new Date(`${key}T12:00:00`).getDay()] };
+    return { key, kcal: dayKcal(s.days[key], j.dir, s.mealRef ?? null), label: WEEKDAYS[new Date(`${key}T12:00:00`).getDay()] };
   });
   const maxKcal = Math.max(1, ...last7.map((d) => d.kcal));
 
@@ -152,7 +152,11 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
               <details className="rounded-2xl bg-surface2 p-3 text-[14px]">
                 <summary className="cursor-pointer font-extrabold">Como as calorias funcionam?</summary>
                 <div className="mt-2 grid gap-1.5 text-muted">
-                  <p>Cada missão saudável tem uma estimativa: movimento pelo gasto acima do repouso, trocas saudáveis pelo que você deixou de comer ou beber{j.dir === 'ganhar' ? ' e lanches nutritivos pelo que somaram' : ''}.</p>
+                  {j.dir === 'ganhar' ? (
+                    <p>Para ganhar peso, contam as calorias que você comeu acima da sua referência, marcadas no Cardápio de hoje (no Início). As missões são hábitos que ajudam o corpo: força, sono e água.</p>
+                  ) : (
+                    <p>As missões são hábitos saudáveis, cada um com uma estimativa: movimento pelo gasto acima do repouso, e um pouquinho para água e sono. A comida fica no Cardápio de hoje, só para você ver as calorias do prato.</p>
+                  )}
                   <p>O {s.pet.name} recebe exatamente as mesmas calorias que você. Cerca de {fmtNum(KCAL_PER_KG)} kcal equivalem a 1 kg: quando você chegar na sua meta, ele chega na dele.</p>
                   <p>Até {DAY_CAP[j.dir]} kcal contam por dia, para ninguém exagerar. Descanso nunca tira nada. São estimativas e não substituem um profissional de saúde.</p>
                   {!s.body.tracking && <p>As contas usam {REF_KG} kg como estimativa. Informe seu peso para ficar sob medida.</p>}

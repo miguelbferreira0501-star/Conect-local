@@ -31,6 +31,18 @@ describe('calorias de cada missão', () => {
     expect(taskKcal({ cat: 'fitness', energy: 2 }, 'perder', 70)).toBe(58);
     expect(taskKcal({ cat: 'emocional', energy: 2 }, 'perder', 70)).toBe(0);
   });
+  it('ganhar peso vem do Cardápio: o que foi comido acima da referência', () => {
+    const d: DayLog = { done: {}, care: [], meals: [
+      { id: 'a', meal: 'almoco', name: 'Arroz', qty: '', kcal: 1500, eaten: true },
+      { id: 'b', meal: 'jantar', name: 'Macarrão', qty: '', kcal: 1000, eaten: true },
+      { id: 'c', meal: 'ceia', name: 'Vitamina', qty: '', kcal: 400, eaten: false },
+    ] };
+    expect(dayKcal(d, 'ganhar', 2200)).toBe(300);
+    expect(dayKcal(d, 'ganhar', null)).toBe(0);
+    expect(dayKcal(d, 'ganhar', 1000)).toBe(DAY_CAP.ganhar);
+    // Para emagrecer, o cardápio não conta (só os hábitos)
+    expect(dayKcal(d, 'perder', 2200)).toBe(0);
+  });
   it('o dia tem teto: exagerar não acelera a jornada', () => {
     const d: DayLog = { done: {}, care: [], kcal: { a: 600, b: 600 } };
     expect(dayKcal(d, 'perder')).toBe(DAY_CAP.perder);

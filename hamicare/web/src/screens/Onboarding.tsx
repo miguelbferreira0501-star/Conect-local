@@ -162,24 +162,30 @@ export function Onboarding() {
                 </div>
               </div>
               <p className="text-[15px] leading-snug">
-                Cada missão saudável {dir === 'perder' ? 'tira' : 'soma'} calorias de nós dois, do mesmo tanto. Quando você chegar {goalKg ? <>aos <b>{fmtNum(goalKg)} kg</b></> : 'na sua meta'}, eu chego aos <b>{JOURNEY_GRAMS[dir].goal} g</b>.
+                {dir === 'perder' ? (
+                  <>Cada missão de hábito saudável tira calorias de nós dois, do mesmo tanto.</>
+                ) : (
+                  <>Eu cresço com o que você come acima da sua referência no <b>Cardápio de hoje</b>. As missões são hábitos que ajudam o corpo a ganhar massa.</>
+                )}{' '}
+                Quando você chegar {goalKg ? <>aos <b>{fmtNum(goalKg)} kg</b></> : 'na sua meta'}, eu chego aos <b>{JOURNEY_GRAMS[dir].goal} g</b>.
               </p>
               <div className="grid gap-1.5">
-                {(dir === 'perder' ? ['agua-refri', 'fruta', 'caminhada'] : ['vitamina', 'lanche', 'fruta']).map((id) => {
+                {(dir === 'perder' ? ['caminhada', 'passos', 'escada'] : ['forca', 'sono', 'agua']).map((id) => {
                   const t = libById(id)!;
                   return (
                     <p key={id} className="flex items-center gap-2 rounded-2xl bg-surface2 px-3 py-2 text-[14px] font-bold">
                       <span className="text-[20px]">{t.emoji}</span>
                       <span className="min-w-0 flex-1">{t.title}</span>
-                      <span className={`kcal-chip ${dir === 'ganhar' ? 'kcal-gain' : ''}`}>
-                        {dir === 'perder' ? '−' : '+'}
-                        {taskKcal(t, dir, kg ?? REF_KG)} kcal
-                      </span>
+                      {dir === 'perder' ? (
+                        <span className="kcal-chip">−{taskKcal(t, dir, kg ?? REF_KG)} kcal</span>
+                      ) : (
+                        <span className="kcal-chip kcal-gain">hábito</span>
+                      )}
                     </p>
                   );
                 })}
               </div>
-              <p className="text-[12px] text-muted">São estimativas ({fmtNum(KCAL_PER_KG)} kcal ≈ 1 kg). Até {dir === 'perder' ? 800 : 700} kcal contam por dia: exagerar não acelera, e descanso não tira nada.</p>
+              <p className="text-[12px] text-muted">A comida fica no Cardápio de hoje, no Início. São estimativas ({fmtNum(KCAL_PER_KG)} kcal ≈ 1 kg). Até {dir === 'perder' ? 800 : 700} kcal contam por dia: exagerar não acelera, e descanso não tira nada.</p>
             </div>
             <button className="btn btn-primary" onClick={next}>
               Bora juntos!

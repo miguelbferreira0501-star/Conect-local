@@ -84,7 +84,7 @@ const CUSTOM_MOVE: Record<1 | 2 | 3, { met: number; min: number }> = { 1: { met:
 /**
  * Calorias estimadas de uma missão para a jornada.
  * Movimento: (MET − 1) × kg × horas (só o que passa do repouso).
- * Emagrecer: movimento + troca saudável. Ganhar: lanche nutritivo. Manter: movimento (só para ver).
+ * Emagrecer: movimento + hábito. Ganhar: missões não somam (vem do Cardápio). Manter: movimento (só para ver).
  */
 export function taskKcal(t: KcalSource, dir: Direction, kg: number): number {
   if (dir === 'ganhar') return Math.round(t.gain ?? 0);
@@ -93,17 +93,27 @@ export function taskKcal(t: KcalSource, dir: Direction, kg: number): number {
   return Math.round(burn + (dir === 'perder' ? t.swap ?? 0 : 0));
 }
 
-/** Calorias do dia que contam para a jornada (com teto diário). */
-export function dayKcal(d: DayLog | undefined, dir: Direction): number {
-  if (!d?.kcal) return 0;
+/**
+ * Calorias do dia que contam para a jornada (com teto diário).
+ * Emagrecer e manter: as missões (hábitos). Ganhar: o que a pessoa comeu acima da
+ * referência dela, marcado no Cardápio (sem referência, não conta).
+ */
+export function dayKcal(d: DayLog | undefined, dir: Direction, ref: number | null = null): number {
+  if (!d) return 0;
+  if (dir === 'ganhar') {
+    if (!ref) return 0;
+    const eaten = (d.meals ?? []).filter((m) => m.eaten).reduce((n, m) => n + m.kcal, 0);
+    return Math.min(DAY_CAP.ganhar, Math.max(0, eaten - ref));
+  }
+  if (!d.kcal) return 0;
   const sum = Object.values(d.kcal).reduce((a, b) => a + b, 0);
   return Math.min(DAY_CAP[dir], sum);
 }
 
 /** Soma da jornada desde `from` até `to` (inclusive). */
-export function journeyKcal(days: Record<string, DayLog>, from: string, dir: Direction, to?: string): number {
+export function journeyKcal(days: Record<string, DayLog>, from: string, dir: Direction, to?: string, ref: number | null = null): number {
   let total = 0;
-  for (const [k, d] of Object.entries(days)) if (k >= from && (!to || k <= to)) total += dayKcal(d, dir);
+  for (const [k, d] of Object.entries(days)) if (k >= from && (!to || k <= to)) total += dayKcal(d, dir, ref);
   return total;
 }
 
