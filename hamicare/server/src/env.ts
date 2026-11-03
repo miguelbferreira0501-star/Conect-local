@@ -18,9 +18,22 @@ const schema = z.object({
   VAPID_PUBLIC_KEY: z.string().optional(),
   VAPID_PRIVATE_KEY: z.string().optional(),
   VAPID_SUBJECT: z.string().default('mailto:contato@hamicare.app'),
-  /** E-mails (troca de senha) pelo Resend. Sem a chave, nada sai: em teste e no computador, o e-mail aparece no terminal. */
+  /**
+   * E-mails (troca de senha). Dois jeitos:
+   * - Resend (com domínio próprio): RESEND_API_KEY.
+   * - Brevo (sem domínio, funciona no plano grátis do Render): BREVO_API_KEY + MAIL_FROM com o e-mail verificado no Brevo.
+   * - SMTP, ex.: Gmail com "senha de app" (sem domínio; o plano grátis do Render bloqueia SMTP): SMTP_USER e SMTP_PASS.
+   * Sem nenhum, nada sai: em teste e no computador, o e-mail aparece no terminal.
+   */
   RESEND_API_KEY: z.string().optional(),
-  MAIL_FROM: z.string().default('HamiCare <nao-responda@hamicare.app>'),
+  BREVO_API_KEY: z.string().optional(),
+  SMTP_HOST: z.string().default('smtp.gmail.com'),
+  SMTP_PORT: z.coerce.number().int().default(465),
+  SMTP_USER: z.string().optional(),
+  /** A senha de app do Gmail vem em blocos com espaços ("abcd efgh ..."): os espaços são tirados. */
+  SMTP_PASS: z.string().optional().transform((v) => v?.replace(/\s+/g, '')),
+  /** Remetente. Em branco: "HamiCare <SMTP_USER>" ou o endereço padrão. */
+  MAIL_FROM: z.string().optional(),
   /** Endereço público do app, usado nos links dos e-mails. No Render, vem sozinho de RENDER_EXTERNAL_URL. */
   APP_URL: z.string().url().optional(),
   RENDER_EXTERNAL_URL: z.string().url().optional(),
@@ -46,4 +59,6 @@ function publicUrl(): string {
   return url.replace(/\/+$/, '');
 }
 
-export const env = { ...parsed, DATABASE_URL: appUrl(), APP_URL: publicUrl() };
+const mailFrom = parsed.MAIL_FROM ?? (parsed.SMTP_USER && !parsed.RESEND_API_KEY && !parsed.BREVO_API_KEY ? `HamiCare <${parsed.SMTP_USER}>` : 'HamiCare <nao-responda@hamicare.app>');
+
+export const env = { ...parsed, DATABASE_URL: appUrl(), APP_URL: publicUrl(), MAIL_FROM: mailFrom };

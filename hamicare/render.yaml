@@ -30,12 +30,10 @@ services:
       # Endereço público do app (ex.: https://hamicare.onrender.com), para a proteção contra CSRF:
       - key: APP_ORIGINS
         sync: false
-      # E-mail de "Esqueci minha senha" (Resend). A chave começa com re_
-      - key: RESEND_API_KEY
+      # E-mail de "Esqueci minha senha" sem domínio: Brevo (https://brevo.com). A chave começa com xkeysib-
+      - key: BREVO_API_KEY
         sync: false
-      # Remetente, com o domínio verificado no Resend. Ex.: HamiCare <nao-responda@hamicare.com.br>
+      # Remetente, com o e-mail verificado no Brevo. Ex.: HamiCare <seuemail@gmail.com>
       - key: MAIL_FROM
         sync: false
-      # Só se tiver domínio próprio (ex.: https://hamicare.com.br). Em branco, usa o endereço do Render.
-      - key: APP_URL
-        sync: false
+      # Com domínio próprio, troque pelo Resend em Environment: RESEND_API_KEY e APP_URL (veja docs/PUBLICAR.md).

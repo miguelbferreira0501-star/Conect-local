@@ -1,15 +1,17 @@
 # Colocar o HamiCare no ar
 
-Guia passo a passo, sem precisar programar. Leva umas 2 horas na primeira vez.
-No fim, o HamiCare fica num endereço público (ex.: `https://hamicare.com.br`), com contas,
+Guia passo a passo, sem precisar programar. Leva cerca de 1 hora na primeira vez.
+No fim, o HamiCare fica num endereço público (ex.: `https://hamicare.onrender.com`), com contas,
 backup na nuvem, amigos, troca de senha por e-mail e as páginas de privacidade e termos.
+
+**Dá para começar sem domínio e sem gastar nada.** O domínio próprio (ex.: `hamicare.com.br`)
+pode vir depois, quando for lançar de verdade (veja a seção 6).
 
 | Serviço | Para quê | Custo para começar |
 | --- | --- | --- |
 | [Neon](https://neon.com) | Banco de dados (contas, backup, amigos) | Grátis (0,5 GB) |
 | [Render](https://render.com) | Servidor que roda o app | Grátis (dorme sem uso) ou US$ 7/mês |
-| [Resend](https://resend.com) | E-mail de "Esqueci minha senha" | Grátis (3.000 e-mails/mês, 100/dia) |
-| [Registro.br](https://registro.br) | Domínio `.com.br` | ~R$ 40/ano |
+| [Brevo](https://brevo.com) | E-mail de "Esqueci minha senha", sem domínio | Grátis (300 e-mails/dia) |
 
 > **Plano grátis do Render:** o servidor dorme depois de 15 minutos sem visitas e leva cerca de
 > 1 minuto para acordar. Para testar com amigos, tudo bem. Para lançar de verdade, use o plano
@@ -23,32 +25,27 @@ backup na nuvem, amigos, troca de senha por e-mail e as páginas de privacidade 
 2. **Create project**:
    - Nome: `hamicare`
    - Postgres: a versão mais nova oferecida
-   - Região: **AWS São Paulo (sa-east-1)** — os dados ficam no Brasil e o app fica mais rápido.
+   - Região: **AWS São Paulo (sa-east-1)**. Assim os dados ficam no Brasil e o app fica mais rápido.
 3. Na tela do projeto, clique em **Connect** e copie o endereço de conexão (*connection string*).
    Ele começa com `postgresql://neondb_owner:...` e termina com `?sslmode=require`.
    Guarde: é o `DATABASE_OWNER_URL`.
 
 Não precisa criar tabelas: o servidor faz isso sozinho na primeira vez que liga.
 
-## 2. Domínio (recomendado)
+## 2. E-mail no Brevo (sem domínio)
 
-Sem domínio próprio o app funciona em `https://hamicare.onrender.com`, mas o e-mail de troca de
-senha precisa de um domínio verificado para chegar a qualquer pessoa.
+1. Crie a conta em [brevo.com](https://www.brevo.com) e complete o cadastro que ele pedir.
+2. Cadastre o remetente: menu **Senders, Domains & Dedicated IPs → Senders → Add a sender**.
+   - Nome: `HamiCare`
+   - E-mail: um e-mail seu (pode ser Gmail). Ele manda um código para esse e-mail; confirme.
+3. Crie a chave: menu **SMTP & API → API Keys → Generate a new API key**. Copie a chave,
+   que começa com `xkeysib-`. Guarde: é o `BREVO_API_KEY`.
 
-1. Em [registro.br](https://registro.br), procure e compre um nome (ex.: `hamicare.com.br`).
-   Para `.com.br` pede CPF ou CNPJ.
-2. Deixe a página de DNS aberta: você vai colar registros do Resend e do Render nela.
+Sem domínio próprio, o Brevo pode trocar o endereço que aparece como remetente por um endereço dele.
+O nome "HamiCare" continua aparecendo e o e-mail chega, mas cai no spam com mais facilidade.
+Avise quem for testar para olhar o spam na primeira vez.
 
-## 3. E-mail no Resend
-
-1. Crie a conta em [resend.com](https://resend.com).
-2. **Domains → Add domain** → escreva seu domínio (ex.: `hamicare.com.br`).
-3. O Resend mostra alguns registros (TXT e MX). Cadastre cada um no DNS do Registro.br
-   (*Editar zona*) e volte ao Resend para clicar em **Verify**. Pode levar de minutos a algumas horas.
-4. **API Keys → Create API key** (permissão *Sending access*). Copie a chave, que começa com `re_`.
-   Guarde: é o `RESEND_API_KEY`.
-
-## 4. Servidor no Render
+## 3. Servidor no Render
 
 1. Crie a conta em [render.com](https://render.com) entrando com o **GitHub** e libere o acesso
    ao repositório `conect-local`.
@@ -59,24 +56,17 @@ senha precisa de um domínio verificado para chegar a qualquer pessoa.
 | Campo | O que colocar |
 | --- | --- |
 | `DATABASE_OWNER_URL` | O endereço copiado do Neon (passo 1) |
-| `ADMIN_EMAILS` | O seu e-mail — o mesmo que você vai usar para criar sua conta no app |
-| `APP_ORIGINS` | `https://hamicare.onrender.com` (e, com domínio, também `,https://hamicare.com.br`) |
-| `RESEND_API_KEY` | A chave `re_...` do Resend (passo 3) |
-| `MAIL_FROM` | `HamiCare <nao-responda@hamicare.com.br>` (com o seu domínio) |
-| `APP_URL` | Com domínio: `https://hamicare.com.br`. Sem domínio: deixe em branco |
+| `ADMIN_EMAILS` | O seu e-mail, o mesmo que você vai usar para criar sua conta no app |
+| `APP_ORIGINS` | `https://hamicare.onrender.com` |
+| `BREVO_API_KEY` | A chave `xkeysib-...` do Brevo (passo 2) |
+| `MAIL_FROM` | `HamiCare <seuemail@gmail.com>`, com o e-mail que você confirmou no Brevo |
 
-   O nome exato do endereço `onrender.com` aparece no painel do serviço depois de criado.
-   Se for diferente de `hamicare.onrender.com`, corrija o `APP_ORIGINS` em **Environment**.
 5. **Apply**. A primeira publicação leva uns 5 minutos. Quando aparecer *Live*, abra o endereço.
+   O endereço exato `...onrender.com` aparece no topo do serviço. Se for diferente de
+   `hamicare.onrender.com`, corrija o `APP_ORIGINS` em **Environment** (e salve).
 6. Plano: em **Settings → Instance type**, troque para **Starter** quando for lançar.
 
-### Ligar o domínio no Render
-
-1. No serviço: **Settings → Custom Domains → Add** → `hamicare.com.br` (e `www.hamicare.com.br`).
-2. O Render mostra os registros de DNS; cadastre no Registro.br.
-3. O certificado HTTPS é feito sozinho em alguns minutos.
-
-## 5. Antes de chamar pessoas
+## 4. Antes de chamar pessoas
 
 - [ ] **Seus dados na política e nos termos.** Abra `web/src/shared/legal.ts` e troque os campos entre
       `[colchetes]` em `LEGAL_INFO`: nome da empresa (ou o seu), CNPJ/CPF, cidade e e-mail de contato.
@@ -89,15 +79,42 @@ senha precisa de um domínio verificado para chegar a qualquer pessoa.
 - [ ] **Criar sua conta** no app com o e-mail de `ADMIN_EMAILS`: o *Painel de administração*
       aparece em Ajustes → Conta e nuvem.
 - [ ] **Testar a troca de senha:** Ajustes → Conta e nuvem → Já tenho conta → Esqueci minha senha.
-      O e-mail deve chegar em 1 minuto (olhe o spam na primeira vez).
+      O e-mail deve chegar em 1 minuto (olhe o spam).
 - [ ] **Instalar no celular:** abra o endereço no Chrome (Android) ou Safari (iPhone) →
       *Adicionar à tela inicial*. Assim o app recebe lembretes.
 - [ ] **Páginas para as lojas:** `https://SEU-ENDERECO/privacidade` e `https://SEU-ENDERECO/termos`.
 
-## 6. Depois (lojas de apps)
+## 5. Outro jeito sem domínio: Gmail (só no plano pago do Render)
+
+O plano grátis do Render bloqueia envio de e-mail por SMTP (o jeito que o Gmail usa). No plano
+Starter, dá para mandar pelo seu Gmail em vez do Brevo:
+
+1. Na sua Conta Google, ligue a **Verificação em duas etapas**.
+2. Em [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords), crie uma
+   **senha de app** chamada `HamiCare`. Ela tem 16 letras.
+3. No Render, em **Environment**: apague `BREVO_API_KEY` e adicione `SMTP_USER` (seu Gmail) e
+   `SMTP_PASS` (a senha de app; pode colar com os espaços). O `MAIL_FROM` pode ficar em branco.
+
+O Gmail manda até cerca de 500 e-mails por dia.
+
+## 6. Depois: domínio próprio
+
+Com domínio, o e-mail sai como `nao-responda@hamicare.com.br` e quase não cai no spam.
+
+1. Em [registro.br](https://registro.br), compre o nome (ex.: `hamicare.com.br`, cerca de R$ 40/ano).
+2. **E-mail:** em [resend.com](https://resend.com) → **Domains → Add domain**. Cadastre os registros
+   que ele mostrar no DNS do Registro.br e clique em **Verify**. Depois, em **API Keys**, crie uma
+   chave (`re_...`). No Render, em **Environment**: adicione `RESEND_API_KEY`, troque o `MAIL_FROM` para
+   `HamiCare <nao-responda@hamicare.com.br>` e adicione `APP_URL` = `https://hamicare.com.br`.
+   O Resend passa a valer no lugar do Brevo.
+3. **Endereço do app:** no Render, **Settings → Custom Domains → Add** → `hamicare.com.br`.
+   Cadastre no Registro.br os registros que ele mostrar. Acrescente `,https://hamicare.com.br`
+   no fim do `APP_ORIGINS`.
+
+## 7. Depois: lojas de apps
 
 - **Google Play:** conta de desenvolvedor (US$ 25, uma vez). O app web vira app Android com
-  TWA (Trusted Web Activity). Precisa da URL da política de privacidade (passo 5) e do formulário
+  TWA (Trusted Web Activity). Precisa da URL da política de privacidade e do formulário
   *Segurança dos dados*, que pode ser preenchido com base na seção 2 da política.
 - **App Store:** conta Apple Developer (US$ 99/ano) e um Mac (ou serviço de build na nuvem).
 - **Assinatura HamiCare+ paga:** hoje o app tem só o teste grátis de 7 dias. Para cobrar, o caminho
@@ -109,5 +126,6 @@ senha precisa de um domínio verificado para chegar a qualquer pessoa.
 | --- | --- |
 | *Deploy failed* com `Falha na migração` | Confira se o `DATABASE_OWNER_URL` é o do papel `neondb_owner` |
 | "Requisição bloqueada por segurança" ao criar conta | O endereço aberto não está em `APP_ORIGINS` |
-| O e-mail de troca de senha não chega | Domínio ainda não verificado no Resend, ou `MAIL_FROM` com outro domínio. Veja *Logs* no Render |
+| O e-mail de troca de senha não chega | Olhe o spam. Nos *Logs* do Render, procure "Falha ao enviar e-mail": `401` é chave errada; erro de remetente é `MAIL_FROM` diferente do e-mail confirmado no Brevo |
+| "Falha ao enviar e-mail por SMTP" com tempo esgotado | O plano grátis bloqueia SMTP: use o Brevo ou o plano Starter |
 | App demora 1 minuto para abrir | Plano grátis dormindo. Troque para Starter |

@@ -1,5 +1,9 @@
-// Envio de e-mail pelo Resend (https://resend.com). Sem RESEND_API_KEY nada sai:
-// em teste o e-mail fica na caixa `outbox`; no computador, aparece no terminal.
+// Envio de e-mail, pelo primeiro serviço configurado:
+// 1. Resend (https://resend.com), com domínio próprio;
+// 2. Brevo (https://brevo.com), sem domínio, pela web (funciona no plano grátis do Render);
+// 3. SMTP, ex.: Gmail com senha de app (o plano grátis do Render bloqueia SMTP).
+// Sem nenhum, nada sai: em teste o e-mail fica na caixa `outbox`; no computador, aparece no terminal.
+import { createTransport, type Transporter } from 'nodemailer';
 import { env } from '../env';
 
 export interface Mail {
@@ -12,10 +16,61 @@ export interface Mail {
 export const outbox: Mail[] = [];
 let queue: Promise<unknown> = Promise.resolve();
 
+export type MailVia = 'resend' | 'brevo' | 'smtp' | 'nenhum';
+export const mailVia = (): MailVia => (env.RESEND_API_KEY ? 'resend' : env.BREVO_API_KEY ? 'brevo' : env.SMTP_USER && env.SMTP_PASS ? 'smtp' : 'nenhum');
+
+/** "HamiCare <a@b.com>" → { name: 'HamiCare', email: 'a@b.com' } */
+export function parseFrom(from: string): { name?: string; email: string } {
+  const m = from.match(/^\s*"?([^"<]*?)"?\s*<([^>]+)>\s*$/);
+  return m ? { name: m[1].trim() || undefined, email: m[2].trim() } : { email: from.trim() };
+}
+
+async function sendBrevo(m: Mail): Promise<boolean> {
+  try {
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: { 'api-key': env.BREVO_API_KEY!, 'content-type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify({ sender: parseFrom(env.MAIL_FROM), to: [{ email: m.to }], subject: m.subject, textContent: m.text, htmlContent: m.html }),
+    });
+    if (!res.ok) console.error(`Falha ao enviar e-mail pelo Brevo (${res.status}): ${(await res.text().catch(() => '')).slice(0, 300)}`);
+    return res.ok;
+  } catch (e) {
+    console.error('Falha ao enviar e-mail pelo Brevo:', (e as Error).message);
+    return false;
+  }
+}
+
+let smtp: Transporter | null = null;
+function smtpTransport() {
+  smtp ??= createTransport({
+    host: env.SMTP_HOST,
+    port: env.SMTP_PORT,
+    secure: env.SMTP_PORT === 465,
+    auth: { user: env.SMTP_USER!, pass: env.SMTP_PASS! },
+    connectionTimeout: 15_000,
+    greetingTimeout: 15_000,
+    socketTimeout: 20_000,
+  });
+  return smtp;
+}
+
+async function sendSmtp(m: Mail): Promise<boolean> {
+  try {
+    await smtpTransport().sendMail({ from: env.MAIL_FROM, to: m.to, subject: m.subject, text: m.text, html: m.html });
+    return true;
+  } catch (e) {
+    console.error('Falha ao enviar e-mail por SMTP:', (e as Error).message);
+    return false;
+  }
+}
+
 export async function sendMail(m: Mail): Promise<boolean> {
-  if (!env.RESEND_API_KEY) {
+  const via = mailVia();
+  if (via === 'brevo') return sendBrevo(m);
+  if (via === 'smtp') return sendSmtp(m);
+  if (via === 'nenhum') {
     if (env.NODE_ENV === 'production') {
-      console.error(`E-mail não enviado (falta RESEND_API_KEY): ${m.subject}`);
+      console.error(`E-mail não enviado (falta configurar Resend, Brevo ou SMTP): ${m.subject}`);
       return false;
     }
     outbox.push(m);

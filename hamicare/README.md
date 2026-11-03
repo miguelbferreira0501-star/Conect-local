@@ -58,9 +58,9 @@ Para a página de teste no Claude: `cd web && npm run build:artifact` gera `dist
 
 ## Publicar
 
-Passo a passo em [`docs/PUBLICAR.md`](docs/PUBLICAR.md) (Neon, Render, Resend e domínio).
+Passo a passo em [`docs/PUBLICAR.md`](docs/PUBLICAR.md): Neon, Render e Brevo, sem domínio e sem custo para começar; domínio e Resend depois.
 
-`render.yaml` (na pasta `hamicare/`; no Render, use *Blueprint Path* `hamicare/render.yaml`) sobe tudo: informe `DATABASE_OWNER_URL`, `ADMIN_EMAILS`, `APP_ORIGINS` e, para o e-mail de troca de senha, `RESEND_API_KEY` e `MAIL_FROM`. O deploy cria o papel da API, aplica as migrações e serve o app, a política de privacidade (`/privacidade`) e os termos (`/termos`). Instalado no celular (PWA), o HamiCare recebe lembretes push.
+`render.yaml` (na pasta `hamicare/`; no Render, use *Blueprint Path* `hamicare/render.yaml`) sobe tudo: informe `DATABASE_OWNER_URL`, `ADMIN_EMAILS`, `APP_ORIGINS` e, para o e-mail de troca de senha, `BREVO_API_KEY` e `MAIL_FROM` (sem domínio) ou `RESEND_API_KEY` (com domínio). O deploy cria o papel da API, aplica as migrações e serve o app, a política de privacidade (`/privacidade`) e os termos (`/termos`). Instalado no celular (PWA), o HamiCare recebe lembretes push.
 
 Antes de publicar, preencha os dados da empresa em `web/src/shared/legal.ts` (`LEGAL_INFO`).
 
