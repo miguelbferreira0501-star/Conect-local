@@ -227,6 +227,8 @@ export interface State {
   bio: string;
   /** Versão das preferências visuais (migração do tema padrão). */
   themeV?: number;
+  /** Lista de missões já completada até o mínimo do plano (migração única). */
+  missionsV?: number;
   /** Alimentos que a pessoa criou (para adicionar de novo rapidinho). */
   myFoods?: { name: string; qty: string; kcal: number }[];
   /** Referência diária de calorias escolhida pela pessoa (opcional). */

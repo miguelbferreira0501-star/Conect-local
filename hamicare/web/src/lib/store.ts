@@ -19,6 +19,10 @@ import { XP_TASK, activeQuests, claimKey, levelOf, newAchievements, questProgres
 const KEY = 'hamicare:v2';
 const OLD_KEY = 'xodo:v1';
 
+/** Quantas missões o plano monta (e o mínimo que a lista mantém ao atualizar o app). */
+export const PLAN_SIZE = 8;
+export const PLAN_MIN = 7;
+
 export const todayKey = () => dayKey(new Date());
 
 // ---------- Comemorações (a interface mostra uma de cada vez) ----------
@@ -87,6 +91,7 @@ export function fresh(): State {
     welcomed: null,
     bio: '',
     themeV: 1,
+    missionsV: 1,
     lastGift: null,
     updatedAt: Date.now(),
   };
@@ -129,6 +134,13 @@ function normalize(raw: State): State {
   s.themeV = 1;
   // Missões são só hábitos: as antigas de comida saem da lista (o histórico dos dias fica).
   if (s.tasks.some((t) => FOOD_TASKS.includes(t.id))) s.tasks = s.tasks.filter((t) => !FOOD_TASKS.includes(t.id));
+  // Uma vez: listas que ficaram curtas ganham hábitos do plano até ter pelo menos 7 missões.
+  if (!raw.missionsV && s.onboarded && s.tasks.length < PLAN_MIN) {
+    const have = new Set(s.tasks.map((t) => t.id));
+    const add = starterPlan(s.profile).filter((id) => !have.has(id)).slice(0, PLAN_MIN - s.tasks.length);
+    s.tasks = [...s.tasks, ...(add.map((id) => libTask(id, todayKey())).filter(Boolean) as Task[])];
+  }
+  s.missionsV = 1;
   if (!raw.journey) {
     const dir = directionOf(goal, isMinor(s.profile.ageGroup));
     s.journey = buildJourney(dir, latestKg(s), s.body.goalKg, todayKey(), s.pet.grams);
@@ -171,7 +183,14 @@ function load(): State {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed?.v === 2) return normalize(parsed);
+      if (parsed?.v === 2) {
+        // Se algo der errado ao atualizar o estado, abre com os dados como estão (nunca perde o progresso).
+        try {
+          return normalize(parsed);
+        } catch {
+          return { ...fresh(), ...parsed };
+        }
+      }
     }
     const old = localStorage.getItem(OLD_KEY);
     if (old) {
@@ -380,13 +399,17 @@ export interface OnboardingAnswers {
 }
 
 /** Plano inicial: 4 a 6 atividades escolhidas pelas respostas. */
+/** Plano inicial: 7 a 8 hábitos escolhidos pelas respostas (missões nunca têm comida). */
 export function starterPlan(a: Pick<OnboardingAnswers, 'goal' | 'focus' | 'minutes' | 'likes' | 'ageGroup'>): string[] {
   const easy = a.minutes <= 10;
   const dir = directionOf(a.goal, isMinor(a.ageGroup));
   const likedMoves = a.likes.map((id) => libById(id)).filter((t) => t && t.cat === 'fitness' && (!easy || t.energy <= 2));
   const move = (fallback: string) => (likedMoves.length ? likedMoves[0]!.id : fallback);
-  if (dir === 'perder') return [move(easy ? 'escada' : 'caminhada'), 'passos', 'agua', 'garrafa', 'sono', 'respirar'];
-  if (dir === 'ganhar') return [easy ? 'alongar' : 'forca', 'sono', 'agua', 'descansar', 'respirar'];
+  const pick = (list: string[]) => [...new Set(list)].filter((id) => libById(id)).slice(0, PLAN_SIZE);
+  // Completa com hábitos gerais até o tamanho do plano.
+  const fill = ['alongar', 'sono', 'garrafa', 'agua-acordar', 'pausa', 'caminhada', 'levantar', 'gratidao', 'dentes', 'respirar'];
+  if (dir === 'perder') return pick([move(easy ? 'escada' : 'caminhada'), 'passos', easy ? 'alongar' : 'escada', 'agua', 'garrafa', 'sono', 'levantar', 'respirar', ...fill]);
+  if (dir === 'ganhar') return pick([easy ? 'alongar' : 'forca', easy ? 'mobilidade' : 'casa', 'agua', 'garrafa', 'sono', 'descansar', 'alongar', 'respirar', ...fill]);
   const ids = new Set<string>(['agua', 'respirar']);
   const moving = ['condicionamento', 'ativo', 'manter'].includes(a.goal) || a.focus.includes('fitness');
   if (moving) (likedMoves.length ? likedMoves.slice(0, 2).map((t) => t!.id) : [easy ? 'alongar' : 'caminhada']).forEach((id) => ids.add(id));
@@ -394,7 +417,7 @@ export function starterPlan(a: Pick<OnboardingAnswers, 'goal' | 'focus' | 'minut
   if (a.goal === 'cuidar' || a.focus.includes('autocuidado')) ['dentes', 'pausa'].forEach((i) => ids.add(i));
   if (a.goal === 'habitos' || a.goal === 'manter' || a.focus.includes('habitos')) ['sono', 'garrafa'].forEach((i) => ids.add(i));
   if (a.focus.includes('emocional')) ids.add('gratidao');
-  return [...ids].slice(0, 6);
+  return pick([...ids, ...fill]);
 }
 
 function libTask(id: string, today: string): Task | null {
