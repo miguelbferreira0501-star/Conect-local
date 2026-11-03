@@ -1,7 +1,8 @@
 import { useState, type ReactNode } from 'react';
-import { ChevronRight, Copy, Download, Lock, Sparkles } from 'lucide-react';
+import { ChevronRight, Copy, Download, FileText, Lock, Sparkles } from 'lucide-react';
 import { Sheet, toast } from '../components/ui';
 import { Hamster } from '../components/Hamster';
+import { openLegal } from '../components/Legal';
 import { ACCENTS, FURS } from '../data/fur';
 import { TRAITS } from '../data/lines';
 import {
@@ -192,6 +193,19 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
             }}
           >
             Recuperar
+          </button>
+        </Group>
+
+        <Group title="Privacidade e termos">
+          <button className="opt" onClick={() => openLegal('privacidade')}>
+            <Lock size={20} className="text-accent" />
+            <span className="min-w-0 flex-1">Política de Privacidade</span>
+            <ChevronRight size={18} className="text-muted" />
+          </button>
+          <button className="opt" onClick={() => openLegal('termos')}>
+            <FileText size={20} className="text-accent" />
+            <span className="min-w-0 flex-1">Termos de Uso</span>
+            <ChevronRight size={18} className="text-muted" />
           </button>
         </Group>
 

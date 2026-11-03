@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Cloud, LogOut, Shield } from 'lucide-react';
 import { Modal, Seg, toast } from '../components/ui';
 import { Hamster } from '../components/Hamster';
-import { deleteAccount, login, logout, onSyncChoice, register, resolveChoice, useAccount, type SyncChoice, type User } from '../lib/account';
+import { LegalLinks } from '../components/Legal';
+import { deleteAccount, login, logout, onSyncChoice, register, requestReset, resolveChoice, useAccount, type SyncChoice, type User } from '../lib/account';
 import { ApiError } from '../lib/social/api';
 import { useApp } from '../lib/store';
 import { formatDay } from '../lib/util';
@@ -90,8 +91,11 @@ function AuthForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [terms, setTerms] = useState(false);
+  const [health, setHealth] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [forgot, setForgot] = useState(false);
   const isKid = s.profile.ageGroup === 'ate12';
+  if (forgot) return <ForgotForm initialEmail={email} onBack={() => setForgot(false)} />;
   return (
     <form
       className="grid gap-3"
@@ -108,7 +112,7 @@ function AuthForm() {
         }
       }}
     >
-      <p className="text-[14px] text-muted">Com conta, seu progresso é salvo na nuvem automaticamente e você pode adicionar amigos.</p>
+      <p className="text-[14px] text-muted">Com conta, seu progresso é salvo na nuvem automaticamente e você pode adicionar amigos. Sem conta, tudo fica só neste aparelho.</p>
       <Seg value={mode} onChange={setMode} label="Conta" options={[{ id: 'criar', label: 'Criar conta' }, { id: 'entrar', label: 'Já tenho conta' }]} />
       <label className="grid gap-1" htmlFor="acc-email">
         <span className="text-[14px] font-extrabold">E-mail</span>
@@ -119,21 +123,90 @@ function AuthForm() {
         <input id="acc-pass" type="password" autoComplete={mode === 'criar' ? 'new-password' : 'current-password'} minLength={8} className="field" value={password} onChange={(e) => setPassword(e.target.value)} />
       </label>
       {mode === 'criar' && (
-        <label className="flex items-start gap-3 text-[14px]" htmlFor="acc-terms">
-          <input id="acc-terms" type="checkbox" className="mt-1 h-5 w-5 accent-[var(--accent)]" checked={terms} onChange={(e) => setTerms(e.target.checked)} />
-          <span>
-            Li e aceito os termos e a política de privacidade.{isKid && ' Sou o responsável e autorizo o uso.'} Peso, diário e humor ficam só no meu backup privado.
-          </span>
-        </label>
+        <>
+          <div className="flex items-start gap-3 text-[14px]">
+            <input id="acc-terms" type="checkbox" className="mt-1 h-5 w-5 shrink-0 accent-[var(--accent)]" checked={terms} onChange={(e) => setTerms(e.target.checked)} />
+            <span className="min-w-0">
+              <label htmlFor="acc-terms">Li e aceito os </label>
+              <LegalLinks />.{isKid && <label htmlFor="acc-terms"> Sou o responsável e autorizo o uso.</label>}
+            </span>
+          </div>
+          <label className="flex items-start gap-3 text-[14px]" htmlFor="acc-health">
+            <input id="acc-health" type="checkbox" className="mt-1 h-5 w-5 shrink-0 accent-[var(--accent)]" checked={health} onChange={(e) => setHealth(e.target.checked)} />
+            <span className="min-w-0">
+              Autorizo guardar meus dados de saúde (peso, calorias, humor, sono e diário) no meu backup privado. Só eu vejo, e posso apagar quando quiser.
+            </span>
+          </label>
+        </>
       )}
-      <button className="btn btn-primary" type="submit" disabled={busy || !email || password.length < 8 || (mode === 'criar' && !terms)}>
+      <button className="btn btn-primary" type="submit" disabled={busy || !email || password.length < 8 || (mode === 'criar' && !(terms && health))}>
         {mode === 'criar' ? 'Criar conta' : 'Entrar'}
+      </button>
+      {mode === 'entrar' && (
+        <button type="button" className="justify-self-center text-[14px] font-extrabold text-muted underline underline-offset-4" onClick={() => setForgot(true)}>
+          Esqueci minha senha
+        </button>
+      )}
+    </form>
+  );
+}
+
+/** Pede o link de troca de senha por e-mail. */
+function ForgotForm({ initialEmail, onBack }: { initialEmail: string; onBack: () => void }) {
+  const [email, setEmail] = useState(initialEmail);
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
+  if (sent) {
+    return (
+      <div className="grid gap-3" role="status">
+        <div className="rounded-2xl bg-surface2 p-4 text-center">
+          <p className="text-[34px] leading-none" aria-hidden="true">
+            💌
+          </p>
+          <p className="mt-2 font-display text-[19px] font-bold">Confira seu e-mail</p>
+          <p className="mt-1 text-[14px] text-muted">
+            Se existir uma conta com <b className="break-all text-ink">{email}</b>, mandamos um link para criar uma senha nova. Ele vale por 1 hora. Olhe também a caixa de spam.
+          </p>
+        </div>
+        <button className="btn btn-ghost" onClick={onBack}>
+          Voltar para entrar
+        </button>
+      </div>
+    );
+  }
+  return (
+    <form
+      className="grid gap-3"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setBusy(true);
+        try {
+          await requestReset(email.trim());
+          setSent(true);
+        } catch (err) {
+          toast(err instanceof ApiError ? err.message : 'Não deu certo agora.');
+        } finally {
+          setBusy(false);
+        }
+      }}
+    >
+      <p className="font-display text-[19px] font-bold">Esqueci minha senha</p>
+      <p className="text-[14px] text-muted">Digite o e-mail da sua conta. Vamos mandar um link para você criar uma senha nova.</p>
+      <label className="grid gap-1" htmlFor="forgot-email">
+        <span className="text-[14px] font-extrabold">E-mail</span>
+        <input id="forgot-email" type="email" autoComplete="email" className="field" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </label>
+      <button className="btn btn-primary" type="submit" disabled={busy || !/^\S+@\S+\.\S+$/.test(email.trim())}>
+        {busy ? 'Enviando…' : 'Mandar link'}
+      </button>
+      <button type="button" className="btn btn-ghost" onClick={onBack}>
+        Voltar
       </button>
     </form>
   );
 }
 
-function SyncChoiceModal() {
+export function SyncChoiceModal() {
   const [choice, setChoice] = useState<SyncChoice>(null);
   useEffect(() => onSyncChoice(setChoice), []);
   if (!choice) return null;

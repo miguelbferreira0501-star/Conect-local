@@ -13,6 +13,8 @@ import { SettingsSheet } from './screens/Settings';
 import { Evolution } from './screens/Evolution';
 import { Paywall } from './screens/Paywall';
 import { AccountSection } from './screens/Account';
+import { ResetPassword } from './screens/ResetPassword';
+import { LegalHost } from './components/Legal';
 import { getState, markWelcomed, onCelebrate, tick, todayKey, useApp, type Celebration } from './lib/store';
 import { markReminded, pickReminder, reminderDue, showNotification } from './lib/notify';
 import { syncProfile } from './lib/social';
@@ -116,6 +118,8 @@ export default function App() {
     return (
       <>
         <Onboarding />
+        <ResetPassword />
+        <LegalHost />
         <Toaster />
       </>
     );
@@ -157,6 +161,8 @@ export default function App() {
       <CelebrationModal c={current} onClose={() => setQueue((q) => q.slice(1))} />
       {current?.type === 'streak' && <StreakScreen count={current.count} onClose={() => setQueue((q) => q.slice(1))} onShare={(photo) => (setQueue((q) => q.slice(1)), shareTo({ kind: 'foto', photo }))} />}
       {showWelcome && <DailyWelcome onClose={markWelcomed} />}
+      <ResetPassword />
+      <LegalHost />
       <Toaster />
     </>
   );

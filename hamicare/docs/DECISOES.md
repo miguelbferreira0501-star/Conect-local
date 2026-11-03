@@ -105,3 +105,10 @@ Pedido do dono do produto: missões são hábitos saudáveis, sem alimentos; os 
 - Entraram: dar 5 mil passos, yoga ou pilates, beber água ao acordar.
 - **Emagrecer:** o Hami muda com os hábitos (movimento, água, sono). O Cardápio é só para ver as calorias; ele não conta para emagrecer, para não premiar comer menos do que o corpo precisa nem registrar pela metade.
 - **Ganhar peso:** como ganhar peso depende de comer mais, o Hami cresce com o que a pessoa marcou que comeu acima da referência dela no Cardápio (até 700 kcal por dia). Sem referência, o app pede para colocar uma. As missões dessa jornada são hábitos que ajudam (força, sono, água).
+
+### Preparação para publicar
+
+- **Troca de senha:** link por e-mail (Resend) que vale 1 hora e uma vez só. O código do link fica guardado embaralhado no banco, vai depois do `#` (não chega a registros de servidor) e some da barra de endereço ao abrir. A resposta é a mesma exista a conta ou não. O endereço do link vem da configuração (`APP_URL` ou o endereço do Render), nunca do cabeçalho da requisição. Ao trocar, todas as sessões caem.
+- **Privacidade e termos:** um texto só (`web/src/shared/legal.ts`) para o app e para o site, porque as lojas pedem uma URL pública. Linguagem simples, com resumo no topo, seguindo LGPD (dados de saúde com consentimento destacado, direitos do art. 18, transferência internacional), CDC (arrependimento de 7 dias) e as regras para crianças e adolescentes. Os dados da empresa ficam em `LEGAL_INFO`, e o servidor avisa enquanto estiverem em branco.
+- **Consentimento registrado:** o cadastro grava a versão dos termos, a data do aceite e a data do consentimento de saúde, porque cabe ao app provar o consentimento (LGPD, art. 8º).
+- **Passo a passo de publicação:** `docs/PUBLICAR.md`.

@@ -68,7 +68,7 @@ describe('amigos e feed', () => {
     expect((await call('POST', '/social/comments', { postId: body.id, text: 'Arrasou! 👏' }, teen.cookie)).status).toBe(201);
     expect((await call('POST', '/social/posts', { kind: 'momento', text: '', image: 'data:image/jpeg;base64,AAAA' }, teen.cookie)).status).toBe(403);
     expect((await call('GET', '/social/me', undefined, teen.cookie)).body.profile.teen).toBe(true);
-    const kid = await call('POST', '/auth/register', { name: 'Kid', email: `kid${Date.now()}@teste.com`, password: 'Senha1234', ageGroup: 'ate12', acceptTerms: true, guardianConsent: true });
+    const kid = await call('POST', '/auth/register', { name: 'Kid', email: `kid${Date.now()}@teste.com`, password: 'Senha1234', ageGroup: 'ate12', acceptTerms: true, healthConsent: true, guardianConsent: true });
     expect((await call('GET', '/social/feed', undefined, kid.cookie)).status).toBe(403);
   });
 

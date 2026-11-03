@@ -18,7 +18,7 @@ let n = 0;
 export async function newUser(name = 'Teste', ageGroup = '18mais', email?: string) {
   resetLimits();
   const mail = email ?? `u${Date.now()}${n++}@teste.com`;
-  const r = await call('POST', '/auth/register', { name, email: mail, password: 'Senha1234', ageGroup, acceptTerms: true, guardianConsent: true });
+  const r = await call('POST', '/auth/register', { name, email: mail, password: 'Senha1234', ageGroup, acceptTerms: true, healthConsent: true, guardianConsent: true });
   expect(r.status).toBe(201);
   return { id: r.body.user.id as string, cookie: r.cookie as string, email: mail };
 }

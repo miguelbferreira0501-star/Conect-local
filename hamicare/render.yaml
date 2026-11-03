@@ -1,5 +1,6 @@
 # Publicação do HamiCare no Render (https://render.com) via "Blueprint".
-# Você só precisa informar DATABASE_OWNER_URL (endereço do banco, por exemplo do Neon ou do Supabase).
+# No Render: New → Blueprint → escolha o repositório e, em "Blueprint Path", escreva hamicare/render.yaml.
+# Passo a passo completo em docs/PUBLICAR.md.
 services:
   - type: web
     name: hamicare
@@ -28,4 +29,13 @@ services:
         sync: false
       # Endereço público do app (ex.: https://hamicare.onrender.com), para a proteção contra CSRF:
       - key: APP_ORIGINS
+        sync: false
+      # E-mail de "Esqueci minha senha" (Resend). A chave começa com re_
+      - key: RESEND_API_KEY
+        sync: false
+      # Remetente, com o domínio verificado no Resend. Ex.: HamiCare <nao-responda@hamicare.com.br>
+      - key: MAIL_FROM
+        sync: false
+      # Só se tiver domínio próprio (ex.: https://hamicare.com.br). Em branco, usa o endereço do Render.
+      - key: APP_URL
         sync: false

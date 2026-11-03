@@ -3,7 +3,10 @@ import { createApp } from './app';
 import { env } from './env';
 import { syncAdmins } from './db';
 import { sendDueReminders } from './push';
+import { warnLegalPlaceholders } from './routes/legal';
 
+warnLegalPlaceholders();
+if (env.NODE_ENV === 'production' && !env.RESEND_API_KEY) console.warn('⚠️  Sem RESEND_API_KEY: o e-mail de "Esqueci minha senha" não vai sair.');
 await syncAdmins().catch((e) => console.error('Admins:', e.message));
 serve({ fetch: createApp().fetch, port: env.PORT }, (info) => console.log(`HamiCare no ar: http://localhost:${info.port}`));
 

@@ -9,6 +9,7 @@ import { account } from './routes/account';
 import { social } from './routes/social';
 import { admin } from './routes/admin';
 import { push } from './routes/push';
+import { legal } from './routes/legal';
 
 export function createApp() {
   const app = new Hono<AppEnv>();
@@ -35,6 +36,9 @@ export function createApp() {
     console.error(err);
     return c.json({ error: 'erro_interno', message: 'Algo deu errado do nosso lado. Tente de novo.' }, 500);
   });
+
+  // Política de privacidade e termos (endereços para as lojas de apps).
+  app.route('/', legal);
 
   // App web compilado (um arquivo + service worker e ícones), servido pelo mesmo processo.
   if (existsSync(env.WEB_DIST)) {

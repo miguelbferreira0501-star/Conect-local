@@ -7,7 +7,7 @@ describe('conta e backup', () => {
   it('cadastra, entra, sai e recusa senha errada', async () => {
     const u = await newUser('Ana');
     expect((await call('GET', '/auth/me', undefined, u.cookie)).body.user.name).toBe('Ana');
-    expect((await call('POST', '/auth/register', { name: 'Ana', email: u.email, password: 'Senha1234', ageGroup: '18mais', acceptTerms: true })).status).toBe(409);
+    expect((await call('POST', '/auth/register', { name: 'Ana', email: u.email, password: 'Senha1234', ageGroup: '18mais', acceptTerms: true, healthConsent: true })).status).toBe(409);
     expect((await call('POST', '/auth/login', { email: u.email, password: 'errada123' })).status).toBe(401);
     const login = await call('POST', '/auth/login', { email: u.email.toUpperCase(), password: 'Senha1234' });
     expect(login.status).toBe(200);
@@ -16,7 +16,7 @@ describe('conta e backup', () => {
   });
 
   it('menor de 13 precisa de autorização de um responsável', async () => {
-    const r = await call('POST', '/auth/register', { name: 'Kid', email: 'kid@teste.com', password: 'Senha1234', ageGroup: 'ate12', acceptTerms: true });
+    const r = await call('POST', '/auth/register', { name: 'Kid', email: 'kid@teste.com', password: 'Senha1234', ageGroup: 'ate12', acceptTerms: true, healthConsent: true });
     expect(r.status).toBe(422);
   });
 

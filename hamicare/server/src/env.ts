@@ -18,9 +18,16 @@ const schema = z.object({
   VAPID_PUBLIC_KEY: z.string().optional(),
   VAPID_PRIVATE_KEY: z.string().optional(),
   VAPID_SUBJECT: z.string().default('mailto:contato@hamicare.app'),
+  /** E-mails (troca de senha) pelo Resend. Sem a chave, nada sai: em teste e no computador, o e-mail aparece no terminal. */
+  RESEND_API_KEY: z.string().optional(),
+  MAIL_FROM: z.string().default('HamiCare <nao-responda@hamicare.app>'),
+  /** Endereço público do app, usado nos links dos e-mails. No Render, vem sozinho de RENDER_EXTERNAL_URL. */
+  APP_URL: z.string().url().optional(),
+  RENDER_EXTERNAL_URL: z.string().url().optional(),
 });
 
-const parsed = schema.parse(process.env);
+// Campo deixado em branco no painel da hospedagem conta como "não informado".
+const parsed = schema.parse(Object.fromEntries(Object.entries(process.env).filter(([, v]) => v !== '')));
 
 function appUrl(): string {
   if (parsed.DATABASE_URL) return parsed.DATABASE_URL;
@@ -33,4 +40,10 @@ function appUrl(): string {
   return 'postgres://hamicare_app:hamicare_app@localhost:5432/hamicare';
 }
 
-export const env = { ...parsed, DATABASE_URL: appUrl() };
+/** Nunca vem do cabeçalho da requisição: um Host falso não pode desviar o link de troca de senha. */
+function publicUrl(): string {
+  const url = parsed.APP_URL ?? parsed.RENDER_EXTERNAL_URL ?? parsed.APP_ORIGINS.split(',')[0]?.trim() ?? 'http://localhost:5173';
+  return url.replace(/\/+$/, '');
+}
+
+export const env = { ...parsed, DATABASE_URL: appUrl(), APP_URL: publicUrl() };

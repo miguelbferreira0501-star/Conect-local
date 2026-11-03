@@ -6,6 +6,8 @@ import { z } from 'zod';
 import { pool, withUser } from '../db';
 import { env } from '../env';
 import { AppError, invalid, notFound } from '../lib/errors';
+import { LEGAL_INFO } from '../../../web/src/shared/legal';
+import { resetMail, sendLater } from '../lib/mail';
 import { allow } from '../lib/rateLimit';
 import { type AppEnv, clearSessionCookie, hashToken, newSessionToken, requireAuth, SESSION_COOKIE, setSessionCookie } from '../auth';
 
@@ -19,6 +21,9 @@ const registerSchema = z.object({
   password: z.string().min(8, 'A senha precisa de pelo menos 8 caracteres.').max(200),
   ageGroup: z.enum(['ate12', '13a17', '18mais']),
   acceptTerms: z.literal(true, { errorMap: () => ({ message: 'É preciso aceitar os termos e a política de privacidade.' }) }),
+  /** Consentimento destacado para dados de saúde (LGPD, art. 11): o backup guarda peso, calorias, humor e diário. */
+  healthConsent: z.literal(true, { errorMap: () => ({ message: 'Para guardar o backup na nuvem, é preciso autorizar os dados de saúde. Sem conta, tudo fica só no aparelho.' }) }),
+  termsVersion: z.string().max(20).optional(),
   guardianConsent: z.boolean().optional(),
 });
 
@@ -53,6 +58,7 @@ account.post('/auth/register', async (c) => {
     if ((e as { code?: string }).code === '23505') throw new AppError(409, 'email_em_uso', 'Já existe uma conta com esse e-mail. Tente entrar.');
     throw e;
   }
+  await withUser(id, (db) => db.query('SELECT app.record_consent($1, $2)', [b.termsVersion ?? LEGAL_INFO.atualizado, b.healthConsent]));
   const admins = (env.ADMIN_EMAILS ?? '').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean);
   if (admins.includes(b.email)) await pool.query('SELECT app.promote_admins($1)', [[b.email]]);
   await openSession(c, id);
@@ -69,6 +75,45 @@ account.post('/auth/login', async (c) => {
   if (row.banned) throw new AppError(403, 'banido', 'Esta conta foi suspensa por desrespeitar as regras da comunidade.');
   await openSession(c, row.id);
   return c.json({ user: await me(row.id) });
+});
+
+// ---------- Esqueci minha senha ----------
+
+const RESET_MINUTES = 60;
+const tokenSchema = z.string().regex(/^[\w-]{32,128}$/);
+
+/** Manda o link por e-mail. Responde igual exista a conta ou não, para ninguém descobrir quem usa o app. */
+account.post('/auth/forgot', async (c) => {
+  const body = z.object({ email: z.string().trim().toLowerCase().email().max(200) }).safeParse(await c.req.json().catch(() => ({})));
+  if (!body.success) throw invalid('Informe um e-mail válido.');
+  if (!allow(`forgot:${ip(c)}`, 6, 15 * 60_000)) throw new AppError(429, 'limite', 'Muitos pedidos. Espere alguns minutos.');
+  if (allow(`forgot:${body.data.email}`, 3, 3600_000)) {
+    const token = newSessionToken();
+    const row = (await pool.query('SELECT * FROM app.start_password_reset($1, $2, $3)', [body.data.email, hashToken(token), RESET_MINUTES])).rows[0];
+    if (row) sendLater(resetMail(row.email, row.name, `${env.APP_URL}/#redefinir=${token}`, RESET_MINUTES));
+  }
+  return c.json({ ok: true });
+});
+
+account.post('/auth/reset/check', async (c) => {
+  const body = z.object({ token: tokenSchema }).safeParse(await c.req.json().catch(() => ({})));
+  if (!allow(`reset:${ip(c)}`, 20, 15 * 60_000)) throw new AppError(429, 'limite', 'Muitas tentativas. Espere alguns minutos.');
+  const valid = body.success && (await pool.query('SELECT app.check_password_reset($1) AS ok', [hashToken(body.data.token)])).rows[0].ok;
+  return c.json({ valid: !!valid });
+});
+
+/** Troca a senha com o link do e-mail, derruba as outras sessões e já entra na conta. */
+account.post('/auth/reset', async (c) => {
+  const body = z
+    .object({ token: tokenSchema, password: z.string().min(8, 'A senha precisa de pelo menos 8 caracteres.').max(200) })
+    .safeParse(await c.req.json().catch(() => ({})));
+  if (!body.success) throw invalid(body.error.issues.find((i) => i.path[0] === 'password')?.message ?? 'Este link não é válido. Peça outro.');
+  if (!allow(`reset:${ip(c)}`, 20, 15 * 60_000)) throw new AppError(429, 'limite', 'Muitas tentativas. Espere alguns minutos.');
+  const hash = await bcrypt.hash(body.data.password, 10);
+  const id = (await pool.query('SELECT app.finish_password_reset($1, $2) AS id', [hashToken(body.data.token), hash])).rows[0].id as string | null;
+  if (!id) throw new AppError(410, 'link_vencido', 'Este link venceu ou já foi usado. Peça um novo em "Esqueci minha senha".');
+  await openSession(c, id);
+  return c.json({ user: await me(id) });
 });
 
 account.post('/auth/logout', async (c) => {

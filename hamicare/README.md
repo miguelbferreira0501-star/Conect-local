@@ -58,7 +58,11 @@ Para a página de teste no Claude: `cd web && npm run build:artifact` gera `dist
 
 ## Publicar
 
-`render.yaml` (na pasta `hamicare/`) sobe tudo no Render: informe `DATABASE_OWNER_URL` (Neon ou Supabase), `ADMIN_EMAILS` e `APP_ORIGINS`. O deploy cria o papel da API, aplica as migrações e serve o app. Instalado no celular (PWA), o HamiCare recebe lembretes push.
+Passo a passo em [`docs/PUBLICAR.md`](docs/PUBLICAR.md) (Neon, Render, Resend e domínio).
+
+`render.yaml` (na pasta `hamicare/`; no Render, use *Blueprint Path* `hamicare/render.yaml`) sobe tudo: informe `DATABASE_OWNER_URL`, `ADMIN_EMAILS`, `APP_ORIGINS` e, para o e-mail de troca de senha, `RESEND_API_KEY` e `MAIL_FROM`. O deploy cria o papel da API, aplica as migrações e serve o app, a política de privacidade (`/privacidade`) e os termos (`/termos`). Instalado no celular (PWA), o HamiCare recebe lembretes push.
+
+Antes de publicar, preencha os dados da empresa em `web/src/shared/legal.ts` (`LEGAL_INFO`).
 
 ## Estrutura
 
@@ -67,7 +71,7 @@ docs/      decisões, pesquisa do Finch e testes
 web/       app (React + TypeScript + Vite + Tailwind)
   src/data/      conteúdo: atividades, itens, mundo, falas, bem-estar, pelagens
   src/logic/     regras puras e testadas: calorias e jornada, condicionamento, ofensiva, níveis, desafios, conquistas
-  src/shared/    filtro de gentileza (usado também pelo servidor)
+  src/shared/    filtro de gentileza, política de privacidade e termos (usados também pelo servidor)
   src/lib/       estado salvo, conta e sincronização, social (página de teste e servidor), lembretes
   src/components o Hami (SVG), o jardim, a casa, a jornada, a vendedora e interface
   src/screens/   telas (social/ tem perfil, posts e grupos)

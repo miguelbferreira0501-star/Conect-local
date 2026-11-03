@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { http, resetServerCheck } from './social/api';
 import { resetSocial } from './social';
 import { getState, grantPremium, replaceState, setChangeHook } from './store';
+import { LEGAL_INFO } from '../shared/legal';
 import type { State } from '../types';
 
 export interface User {
@@ -58,13 +59,29 @@ export function useAccount() {
 }
 
 export async function register(input: { name: string; email: string; password: string; ageGroup: User['ageGroup']; guardianConsent: boolean }) {
-  const r = await http<{ user: User }>('POST', '/auth/register', { ...input, acceptTerms: true });
+  const r = await http<{ user: User }>('POST', '/auth/register', { ...input, acceptTerms: true, healthConsent: true, termsVersion: LEGAL_INFO.atualizado });
   setUser(r.user);
   return firstSync();
 }
 
 export async function login(email: string, password: string) {
   const r = await http<{ user: User }>('POST', '/auth/login', { email, password });
+  setUser(r.user);
+  return firstSync();
+}
+
+/** Esqueci minha senha: o servidor manda o link se a conta existir (a resposta é sempre igual). */
+export async function requestReset(email: string) {
+  await http('POST', '/auth/forgot', { email });
+}
+
+export async function checkReset(token: string): Promise<boolean> {
+  return http<{ valid: boolean }>('POST', '/auth/reset/check', { token }).then((r) => r.valid);
+}
+
+/** Troca a senha com o link do e-mail e já entra na conta. */
+export async function finishReset(token: string, password: string) {
+  const r = await http<{ user: User }>('POST', '/auth/reset', { token, password });
   setUser(r.user);
   return firstSync();
 }
@@ -108,13 +125,25 @@ async function firstSync(): Promise<'nuvem' | 'aparelho' | 'escolher'> {
     startSync();
     return 'nuvem';
   }
-  if (r.state && local.onboarded && JSON.stringify(r.state.pet) !== JSON.stringify(local.pet)) {
+  // Mesmo Hami (criado neste aparelho ou vindo do mesmo backup): fica a versão mais nova, sem perguntar.
+  if (r.state && local.onboarded && sameOrigin(r.state, local)) {
+    if ((r.state.updatedAt ?? 0) > (local.updatedAt ?? 0)) {
+      replaceState(r.state, { silent: true });
+      startSync();
+      return 'nuvem';
+    }
+  } else if (r.state && local.onboarded && JSON.stringify(r.state.pet) !== JSON.stringify(local.pet)) {
     pendingChoice?.({ server: r.state, local });
     return 'escolher';
   }
   startSync();
   await pushNow();
   return 'aparelho';
+}
+
+/** Os dois lados nasceram do mesmo começo (mesma semente e mesmo dia de criação)? */
+function sameOrigin(a: State, b: State) {
+  return a.seed === b.seed && a.createdAt === b.createdAt && a.pet?.name === b.pet?.name;
 }
 
 export async function resolveChoice(keep: 'nuvem' | 'aparelho', server: State) {

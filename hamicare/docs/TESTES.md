@@ -84,3 +84,11 @@ Cobrança real, push num celular de verdade (precisa do app publicado em HTTPS) 
 - O plano monta 8 hábitos (antes 5 a 6). Quem já usava o app e ficou com poucas missões (ex.: ganhar peso, depois que as de comida saíram) ganha hábitos do plano até ter 7, uma vez só: se depois apagar, não voltam.
 - Teste novo de abertura com dados antigos (`web/src/lib/load.test.ts`): o progresso fica intacto (moedas, nome, começo feito), as missões de comida saem e a lista chega a 7. Esse teste pegou um erro de ordem no código que faria o app abrir como novo; corrigido, e o carregamento agora nunca descarta dados salvos se algo falhar.
 - Navegador: lista com 2 hábitos virou 7; plano inicial de emagrecer com 8. 54 testes do app passando.
+
+## Rodada 10 (preparação para publicar)
+
+- **Esqueci minha senha (servidor, `server/test/reset.test.ts`):** o link chega por e-mail, troca a senha uma vez só, derruba as sessões antigas e já entra na conta; a senha antiga para de funcionar; link vencido, inventado ou malformado não troca nada; e-mail que não existe recebe a mesma resposta e nenhum e-mail sai; no máximo 3 pedidos por hora por conta; a API não consegue ler a tabela de pedidos (só pelas funções do banco).
+- **Consentimento:** o cadastro grava a versão dos termos aceita e o consentimento destacado para dados de saúde; sem esse consentimento, a conta não é criada. `/privacidade` e `/termos` respondem como páginas.
+- **Navegador (servidor local + app compilado, 390 px):** criar conta só libera com as duas caixas marcadas; os termos abrem dentro do app; sair, pedir o link, abrir o link do e-mail (o código some da barra de endereço), senhas diferentes avisam, salvar entra na conta; o mesmo link de novo mostra "Esse link não vale mais", inclusive colado com o app já aberto. A página `/privacidade` cabe em 390 px.
+- Esse teste achou um incômodo antigo: ao entrar na conta no mesmo aparelho, o app perguntava "Qual progresso manter?" mesmo sendo o mesmo Hami (a energia dele muda com o tempo). Agora, se é o mesmo Hami, fica a versão mais nova sem perguntar.
+- 31 testes do servidor e 54 do app passando.
