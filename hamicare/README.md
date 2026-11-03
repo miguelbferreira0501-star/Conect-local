@@ -1,10 +1,13 @@
 # HamiCare
 
+<img src="docs/logo/hamicare-logo-1024.png" alt="Logo do HamiCare: o Hami de pertinho com um girassol" width="160">
+
 **Sua jornada, seu mascote, sua evolução.** O **Hami**, um hamster, **emagrece ou ganha peso junto com você**: cada missão saudável (beber água no lugar do refrigerante, comer uma fruta, caminhar) tira ou soma as mesmas calorias de vocês dois. Em volta disso: cuidados animados, casa, aventuras, bem-estar e uma rede de amigos só de gentileza.
 
 - Decisões (auditoria, escolha do mascote, plano, mecânica de peso): [`docs/DECISOES.md`](docs/DECISOES.md)
 - O que veio do Finch e como ficou original: [`docs/FINCH.md`](docs/FINCH.md)
 - O que foi testado: [`docs/TESTES.md`](docs/TESTES.md)
+- Logo e ícones: [`docs/logo/`](docs/logo) (o SVG gera os ícones do app em `web/public/`)
 
 ## O que tem
 
