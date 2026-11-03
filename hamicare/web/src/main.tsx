@@ -4,6 +4,7 @@ import App from './App';
 import './index.css';
 import './live.css';
 import './theme.css';
+import './wellbeing.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

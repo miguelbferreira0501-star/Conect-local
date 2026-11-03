@@ -544,3 +544,52 @@ body {
   .tabbar-inner { gap: 0; padding: 6px 0; }
   .tab { font-size: 9.5px; letter-spacing: -0.02em; }
 }
+
+/* Efeitos do guarda-roupa (no desenho do Hami) */
+.fx-pulse { transform-box: fill-box; transform-origin: center; animation: fx-pulse 2.6s ease-in-out infinite; }
+.fx-spin { transform-box: fill-box; transform-origin: center; animation: fx-spin 18s linear infinite; }
+.fx-orbit { transform-box: fill-box; transform-origin: center; animation: fx-spin 10s linear infinite; }
+.fx-rise { transform-box: fill-box; transform-origin: center; animation: fx-rise 2.6s ease-in-out infinite; }
+.fx-fall { transform-box: fill-box; transform-origin: center; animation: fx-fall 3.2s ease-in-out infinite; }
+.wing-flutter { transform-box: fill-box; transform-origin: right center; animation: wing-flutter 1.4s ease-in-out infinite; }
+@keyframes fx-pulse { 50% { opacity: 0.65; transform: scale(1.06); } }
+@keyframes fx-spin { to { transform: rotate(360deg); } }
+@keyframes fx-rise { 0% { opacity: 0; transform: translateY(8px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-26px); } }
+@keyframes fx-fall { 0% { opacity: 0; transform: translate(0, -10px) rotate(0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(8px, 40px) rotate(120deg); } }
+@keyframes wing-flutter { 50% { transform: scaleX(0.86) rotate(-3deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .fx-pulse, .fx-spin, .fx-orbit, .fx-rise, .fx-fall, .wing-flutter { animation: none; }
+}
+
+/* Armário: cada peça num quadradinho com o Hami vestindo */
+.wardrobe-tile {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 6px 10px;
+  border-radius: 22px;
+  border: 2.5px solid transparent;
+  background: var(--surface);
+  box-shadow: 0 4px 0 rgba(43, 34, 64, 0.08);
+  text-align: center;
+  transition: transform 140ms var(--ease-out), box-shadow 140ms var(--ease-out);
+}
+.wardrobe-tile:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(43, 34, 64, 0.08);
+}
+.wardrobe-tile[aria-pressed='true'] {
+  border-color: var(--accent);
+}
+.wardrobe-price {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  font-size: 10.5px;
+  font-weight: 900;
+}

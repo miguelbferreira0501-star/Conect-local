@@ -112,6 +112,14 @@ export const WALLPAPER_CSS: Record<string, string> = {
   'p-lavanda': 'linear-gradient(180deg,#EFE6FF,#E2D5FA)',
   'p-cinza': 'repeating-linear-gradient(90deg,#E6E8EC 0 2px,#F2F3F6 2px 40px)',
   'p-estrelas': 'radial-gradient(circle at 20% 30%,#FFF6C2 1.5px,transparent 2px) 0 0/40px 40px,radial-gradient(circle at 70% 70%,#FFFFFF 1px,transparent 2px) 0 0/30px 30px,linear-gradient(180deg,#24295C,#423A7E)',
+  'p-xadrez': 'repeating-linear-gradient(0deg,rgba(255,120,150,.22) 0 14px,transparent 14px 28px),repeating-linear-gradient(90deg,rgba(255,120,150,.22) 0 14px,transparent 14px 28px),#FFF6F8',
+  'p-coracoes': `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M16 24 C6 17 6 10 11 9 C14 8 15.5 10 16 11.5 C16.5 10 18 8 21 9 C26 10 26 17 16 24 Z' fill='%23FFB3C7'/%3E%3C/svg%3E") 0 0/32px 32px,#FFF0F4`,
+  'p-arco-iris': 'linear-gradient(180deg,#FFD6E0 0 16%,#FFE7C7 16% 33%,#FFF7C2 33% 50%,#DDF6D8 50% 66%,#D6ECFF 66% 83%,#E9DDFF 83%)',
+  'p-tijolo': 'repeating-linear-gradient(0deg,#F3D2C2 0 2px,transparent 2px 20px),repeating-linear-gradient(90deg,#F3D2C2 0 2px,transparent 2px 40px),#E8A487',
+  'p-madeira': 'repeating-linear-gradient(90deg,#C8925E 0 34px,#B98251 34px 36px)',
+  'p-praia': 'linear-gradient(180deg,#9AD9F5 0 60%,#7CC9EE 60% 70%,#F7E2B0 70%)',
+  'p-girassois': `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cg fill='%23FFD34D'%3E%3Ccircle cx='20' cy='12' r='4'/%3E%3Ccircle cx='28' cy='20' r='4'/%3E%3Ccircle cx='20' cy='28' r='4'/%3E%3Ccircle cx='12' cy='20' r='4'/%3E%3Ccircle cx='26' cy='14' r='4'/%3E%3Ccircle cx='26' cy='26' r='4'/%3E%3Ccircle cx='14' cy='26' r='4'/%3E%3Ccircle cx='14' cy='14' r='4'/%3E%3C/g%3E%3Ccircle cx='20' cy='20' r='5' fill='%238A5A3B'/%3E%3C/svg%3E") 0 0/40px 40px,#FFF7D6`,
+  'p-galaxia': 'radial-gradient(circle at 30% 40%,rgba(255,120,200,.35),transparent 40%),radial-gradient(circle at 70% 60%,rgba(120,160,255,.35),transparent 45%),radial-gradient(circle at 20% 20%,#FFFFFF 1px,transparent 1.5px) 0 0/34px 34px,linear-gradient(180deg,#1E1A4A,#3B2C7A)',
 };
 
 export const FLOOR_CSS: Record<string, string> = {
@@ -121,4 +129,10 @@ export const FLOOR_CSS: Record<string, string> = {
   'f-azulejo': 'conic-gradient(#FFFFFF 25%,#D9E7F5 0 50%,#FFFFFF 0 75%,#D9E7F5 0) 0 0/36px 36px',
   'f-grama': 'repeating-linear-gradient(80deg,#8FD08A 0 6px,#7FC47A 6px 12px)',
   'f-marmore': 'linear-gradient(135deg,#F4F4F6 0%,#E3E4EA 40%,#F7F7F9 60%,#DCDDE4 100%)',
+  'f-areia': 'radial-gradient(circle at 3px 3px,#E9CF97 1px,transparent 1.5px) 0 0/9px 9px,#F5DFAE',
+  'f-tabuleiro': 'conic-gradient(#FFFFFF 25%,#E3DDF2 0 50%,#FFFFFF 0 75%,#E3DDF2 0) 0 0/40px 40px',
+  'f-hexagono': 'radial-gradient(circle at 50% 50%,#F6C445 0 9px,#E8B020 9px 11px,transparent 11px) 0 0/24px 24px,#FFE59A',
+  'f-azul': 'radial-gradient(circle at 3px 3px,#A9CBF2 1px,transparent 1.5px) 0 0/8px 8px,#BFD9F7',
+  'f-nuvem': 'radial-gradient(ellipse 40px 18px at 30% 40%,#FFFFFF 60%,transparent 62%),radial-gradient(ellipse 50px 20px at 75% 70%,#FFFFFF 60%,transparent 62%),linear-gradient(180deg,#DDEFFF,#C9E4FF)',
+  'f-ladrilho': 'conic-gradient(#FFB3C7 25%,#B9E6FF 0 50%,#FFF1A8 0 75%,#C9F0C9 0) 0 0/30px 30px',
 };

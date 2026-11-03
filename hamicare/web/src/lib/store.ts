@@ -2,9 +2,10 @@
 import { useSyncExternalStore } from 'react';
 import type { AgeGroup, Battery, BodyStart, CareId, Category, DayLog, Direction, Freq, GoalId, Incentive, Journey, Mood, Outfit, PetMood, Photo, State, Task, TraitId, WearSlot } from '../types';
 import { LIBRARY, libById, rewardFor } from '../data/tasks';
-import { ITEMS, RECIPES, STYLES, itemById, stylePrice } from '../data/items';
+import { ITEMS, LOOKS, RECIPES, STYLES, WEARABLE_KINDS, itemById, stylePrice } from '../data/items';
 import { PLACES, placeById } from '../data/world';
 import { FACTS } from '../data/lines';
+import { FURS } from '../data/fur';
 import { addDays, clamp, dayDiff, dayKey, hashStr, uid } from './util';
 import {
   BAND, JOURNEY_GRAMS, REF_KG, WEIGH_EVERY_DAYS, checkJourneyGoal, conditioning, defaultGoalKg, directionOf, isMinor, journeyGrams, journeyKcal,
@@ -646,10 +647,42 @@ export function buy(itemId: string): BuyResult {
   if (res !== 'ok') return res;
   const item = itemById(itemId)!;
   let next: State = { ...state, coins: state.coins - item.price, inventory: { ...state.inventory, [itemId]: (state.inventory[itemId] ?? 0) + 1 }, wishlist: state.wishlist.filter((w) => w !== itemId) };
-  if (['chapeu', 'oculos', 'roupa', 'acessorio'].includes(item.kind)) next = { ...next, pet: { ...next.pet, outfit: { ...next.pet.outfit, [item.kind]: itemId } } };
+  if (WEARABLE_KINDS.includes(item.kind)) next = { ...next, pet: { ...next.pet, outfit: { ...next.pet.outfit, [item.kind]: itemId } } };
   if (item.kind === 'parede') next = { ...next, house: { ...next.house, wallpaper: itemId } };
   if (item.kind === 'piso') next = { ...next, house: { ...next.house, floor: itemId } };
   commit(next);
+  return 'ok';
+}
+
+/** Preço de um look: só as peças que faltam, com 20% de desconto. */
+export function lookPrice(s: State, lookId: string): { price: number; missing: string[]; plus: boolean; level: number } {
+  const look = LOOKS.find((l) => l.id === lookId);
+  const items = (look?.items ?? []).map((id) => itemById(id)!).filter(Boolean);
+  const missing = items.filter((i) => !owned(s, i.id));
+  return {
+    price: Math.round(missing.reduce((n, i) => n + i.price, 0) * 0.8),
+    missing: missing.map((i) => i.id),
+    plus: items.some((i) => i.plus),
+    level: Math.max(1, ...items.map((i) => i.level ?? 1)),
+  };
+}
+
+/** Compra o look inteiro (só o que falta) e já veste tudo. */
+export function buyLook(lookId: string): BuyResult {
+  const look = LOOKS.find((l) => l.id === lookId);
+  if (!look) return 'ja-tem';
+  const lp = lookPrice(state, lookId);
+  if (lp.plus && !isPremium(state)) return 'plus';
+  if (lp.level > levelOf(state.xp)) return 'nivel';
+  if (state.coins < lp.price) return 'sem-sementes';
+  const inventory = { ...state.inventory };
+  for (const id of lp.missing) inventory[id] = 1;
+  const outfit = { ...state.pet.outfit };
+  for (const id of look.items) {
+    const it = itemById(id);
+    if (it) outfit[it.kind as WearSlot] = id;
+  }
+  commit({ ...state, coins: state.coins - lp.price, inventory, pet: { ...state.pet, outfit }, wishlist: state.wishlist.filter((w) => !look.items.includes(w)) });
   return 'ok';
 }
 
@@ -708,7 +741,7 @@ export function payGift(itemId: string): boolean {
 
 export function wear(itemId: string) {
   const item = itemById(itemId);
-  if (!item || !owned(state, itemId) || !['chapeu', 'oculos', 'roupa', 'acessorio'].includes(item.kind)) return;
+  if (!item || !owned(state, itemId) || !WEARABLE_KINDS.includes(item.kind)) return;
   commit({ ...state, pet: { ...state.pet, outfit: { ...state.pet.outfit, [item.kind]: itemId } } });
 }
 
@@ -896,7 +929,25 @@ export function updateProfile(patch: Partial<State['profile']>) {
   commit(next);
 }
 
+/** A pelagem pode ser usada agora? (as especiais são compradas; as do Plus pedem o Plus) */
+export function furAvailable(s: State, furId: string): boolean {
+  const f = FURS.find((x) => x.id === furId);
+  if (!f) return false;
+  if (f.plus && !isPremium(s)) return false;
+  return !f.price || owned(s, `fur:${furId}`);
+}
+
+export function buyFur(furId: string): BuyResult {
+  const f = FURS.find((x) => x.id === furId);
+  if (!f || !f.price) return 'ja-tem';
+  if (owned(state, `fur:${furId}`)) return 'ja-tem';
+  if (state.coins < f.price) return 'sem-sementes';
+  commit({ ...state, coins: state.coins - f.price, inventory: { ...state.inventory, [`fur:${furId}`]: 1 }, pet: { ...state.pet, fur: furId } });
+  return 'ok';
+}
+
 export function updatePet(patch: Partial<Pick<State['pet'], 'name' | 'fur' | 'trait'>>) {
+  if (patch.fur && !furAvailable(state, patch.fur)) return;
   commit({ ...state, pet: { ...state.pet, ...patch } });
 }
 

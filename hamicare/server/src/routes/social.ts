@@ -36,7 +36,7 @@ const PROFILE_COLS = `p.user_id AS id, p.name, p.code, p.pet, p.house, p.level, 
 const POST_COLS = `id, author_id AS "authorId", group_id AS "groupId", kind, text, pet, house, image, (extract(epoch from created_at) * 1000)::bigint AS "createdAt"`;
 const cleanPost = <T extends Record<string, unknown>>(p: T) => ({ ...p, pet: p.pet ?? undefined, house: p.house ?? undefined, image: p.image ?? undefined, groupId: p.groupId ?? undefined });
 
-const outfit = z.object({ chapeu: z.string().max(40).nullable(), oculos: z.string().max(40).nullable(), roupa: z.string().max(40).nullable(), acessorio: z.string().max(40).nullable() });
+const outfit = z.object({ chapeu: z.string().max(40).nullable(), oculos: z.string().max(40).nullable(), roupa: z.string().max(40).nullable(), acessorio: z.string().max(40).nullable(), efeito: z.string().max(40).nullable().optional() });
 const petSchema = z.object({ name: z.string().max(20), fur: z.string().max(20), phase: z.number().int().min(0).max(3), outfit });
 const houseSchema = z.object({
   wallpaper: z.string().max(30),

@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import { furById } from '../data/fur';
 import { fluffOf } from '../logic/evolution';
+import { Accessory, AccessoryBack, Cape, Clothes, EffectBack, EffectFront, Glasses, Hat, hidesHeart } from './Wear';
 import type { Outfit, PetMood } from '../types';
 
 const INK = '#2B2224';
@@ -55,9 +56,11 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
         </radialGradient>
       </defs>
       {phase >= 3 && <circle cx="100" cy={top + h * 0.55} r="92" fill={`url(#g${uid})`} />}
+      <EffectBack id={outfit.efeito} geo={geo} uid={uid} />
       <ellipse cx="100" cy="186" rx={w * 0.85} ry="6.5" fill="rgba(0,0,0,0.13)" />
       <g className={idle && !asleep ? 'pet-idle' : asleep ? 'pet-sleep' : undefined}>
-        {outfit.roupa === 'capa' && <path d={`M${100 - w * 0.7} ${top + h * 0.5} L${100 - w - 10} 182 L${100 + w + 10} 182 L${100 + w * 0.7} ${top + h * 0.5} Z`} fill="#D7263D" />}
+        <Cape id={outfit.roupa} geo={geo} />
+        <AccessoryBack id={outfit.acessorio} geo={geo} />
         {/* Orelhas */}
         {[-1, 1].map((s) => (
           <g key={s}>
@@ -88,7 +91,7 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
         <ellipse cx={100 - w * 0.36} cy={top + 18} rx="13" ry="7" fill="#fff" opacity="0.32" transform={`rotate(-22 ${100 - w * 0.36} ${top + 18})`} />
         {phase === 0 && <path d={`M94 ${top + 4} q3 -11 6 -1 q3 -11 6 0`} stroke={fur.shade} strokeWidth="3.5" strokeLinecap="round" fill="none" />}
         {/* Coração na barriga: a marca do HamiCare */}
-        {outfit.roupa !== 'moletom' && outfit.roupa !== 'pijama' && outfit.roupa !== 'regata' && (
+        {!hidesHeart(outfit.roupa) && (
           <Heart x={100} y={top + h * 0.74} s={phase >= 3 ? 15 : 12} fill={phase >= 3 ? '#F6C445' : fur.ear} opacity={phase >= 3 ? 1 : 0.5} />
         )}
         {/* Bracinhos e pezinhos */}
@@ -127,6 +130,7 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
         <Glasses id={outfit.oculos} eyeY={eyeY} />
         <Hat id={outfit.chapeu} geo={geo} />
         {phase >= 3 && <Sparkles top={top} w={w} />}
+        <EffectFront id={outfit.efeito} geo={geo} />
       </g>
       {asleep && (
         <text x={100 + w * 0.7} y={top - 2} className="zzz" fontSize="18" fontWeight="800" fill={INK} opacity="0.6">
@@ -137,7 +141,6 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
   );
 }
 
-type Geo = { top: number; w: number; h: number; eyeY: number };
 
 function Heart({ x, y, s, fill, opacity = 1 }: { x: number; y: number; s: number; fill: string; opacity?: number }) {
   const k = s / 12;
@@ -222,188 +225,4 @@ function Sparkles({ top, w }: { top: number; w: number }) {
       <path d={star(100 + w * 0.5, top - 8, 5)} />
     </g>
   );
-}
-
-function Hat({ id, geo }: { id: string | null; geo: Geo }) {
-  const { top, w, h } = geo;
-  switch (id) {
-    case 'laco':
-      return (
-        <g transform={`translate(${100 + w * 0.42} ${top + 8})`}>
-          <path d="M0 0 L-16 -11 L-14 12 Z" fill="#FF5E7E" />
-          <path d="M0 0 L16 -11 L14 12 Z" fill="#FF5E7E" />
-          <circle r="5.5" fill="#E2416A" />
-        </g>
-      );
-    case 'bone':
-      return (
-        <g>
-          <path d={`M${100 - w * 0.66} ${top + 18} C${100 - w * 0.6} ${top - 16} ${100 + w * 0.6} ${top - 16} ${100 + w * 0.66} ${top + 18} Z`} fill="#3D6FD8" />
-          <path d={`M${100 + w * 0.5} ${top + 14} C${100 + w * 0.9} ${top + 8} ${100 + w * 1.15} ${top + 14} ${100 + w * 1.15} ${top + 20} C${100 + w * 0.9} ${top + 22} ${100 + w * 0.6} ${top + 20} ${100 + w * 0.5} ${top + 18} Z`} fill="#2F59B3" />
-          <circle cx="100" cy={top - 6} r="3.5" fill="#2F59B3" />
-        </g>
-      );
-    case 'gorro':
-      return (
-        <g>
-          <path d={`M${100 - w * 0.7} ${top + 18} C${100 - w * 0.66} ${top - 22} ${100 + w * 0.66} ${top - 22} ${100 + w * 0.7} ${top + 18} Z`} fill="#4C9F9F" />
-          <rect x={100 - w * 0.74} y={top + 10} width={w * 1.48} height="11" rx="5.5" fill="#3B8686" />
-          <circle cx="100" cy={top - 15} r="9" fill="#F2C14E" />
-        </g>
-      );
-    case 'coroa':
-      return (
-        <g>
-          {[-0.6, -0.35, -0.12, 0.12, 0.35, 0.6].map((k, i) => (
-            <g key={k} transform={`translate(${100 + w * k} ${top + 6 + Math.abs(k) * 14})`}>
-              <circle r="7" fill={['#FF8FB4', '#FFD660', '#FFFFFF', '#B39AE6', '#FF8FB4', '#FFD660'][i]} />
-              <circle r="2.6" fill="#E8879E" />
-            </g>
-          ))}
-        </g>
-      );
-    case 'chef':
-      return (
-        <g>
-          <rect x={100 - w * 0.4} y={top - 6} width={w * 0.8} height="18" fill="#FFFFFF" stroke="#E6E6E6" />
-          {[-0.28, 0, 0.28].map((k) => <circle key={k} cx={100 + w * k} cy={top - 16} r="15" fill="#FFFFFF" stroke="#E6E6E6" />)}
-        </g>
-      );
-    case 'cartola':
-      return (
-        <g>
-          <ellipse cx="100" cy={top + 8} rx={w * 0.62} ry="7" fill="#2B2224" />
-          <rect x={100 - w * 0.38} y={top - 34} width={w * 0.76} height="42" rx="4" fill="#2B2224" />
-          <rect x={100 - w * 0.38} y={top - 2} width={w * 0.76} height="7" fill="#D1495B" />
-        </g>
-      );
-    case 'capacete':
-      return <circle cx="100" cy={top + h * 0.42} r={w * 1.02} fill="#BFE3FF" fillOpacity="0.25" stroke="#FFFFFF" strokeWidth="4" />;
-    case 'palha':
-      return (
-        <g>
-          <ellipse cx="100" cy={top + 10} rx={w * 1.02} ry="11" fill="#E3B65C" />
-          <path d={`M${100 - w * 0.5} ${top + 10} C${100 - w * 0.48} ${top - 20} ${100 + w * 0.48} ${top - 20} ${100 + w * 0.5} ${top + 10} Z`} fill="#F0CF7C" />
-          <rect x={100 - w * 0.5} y={top + 1} width={w} height="7" fill="#D1495B" />
-        </g>
-      );
-    case 'gorro-natal':
-      return (
-        <g>
-          <path d={`M${100 - w * 0.7} ${top + 16} C${100 - w * 0.6} ${top - 18} ${100 + w * 0.2} ${top - 34} ${100 + w * 0.95} ${top - 18} C${100 + w * 0.6} ${top - 8} ${100 + w * 0.55} ${top + 2} ${100 + w * 0.68} ${top + 16} Z`} fill="#D7263D" />
-          <rect x={100 - w * 0.76} y={top + 8} width={w * 1.5} height="13" rx="6.5" fill="#FFFFFF" />
-          <circle cx={100 + w * 0.98} cy={top - 18} r="8" fill="#FFFFFF" />
-        </g>
-      );
-    default:
-      return null;
-  }
-}
-
-function Glasses({ id, eyeY }: { id: string | null; eyeY: number }) {
-  if (id === 'redondos') {
-    return (
-      <g stroke={INK} strokeWidth="2.8" fill="#FFFFFF" fillOpacity="0.15">
-        <circle cx="81" cy={eyeY} r="11.5" />
-        <circle cx="119" cy={eyeY} r="11.5" />
-        <path d={`M92.5 ${eyeY - 1} Q100 ${eyeY - 5} 107.5 ${eyeY - 1}`} fill="none" />
-      </g>
-    );
-  }
-  if (id === 'sol') {
-    return (
-      <g>
-        <rect x="68" y={eyeY - 8} width="26" height="16" rx="7" fill="#2B2224" />
-        <rect x="106" y={eyeY - 8} width="26" height="16" rx="7" fill="#2B2224" />
-        <path d={`M94 ${eyeY - 2} L106 ${eyeY - 2}`} stroke="#2B2224" strokeWidth="3" />
-        <path d={`M72 ${eyeY - 4} l6 0`} stroke="#fff" strokeWidth="2" opacity="0.6" />
-      </g>
-    );
-  }
-  if (id === 'coracao') {
-    return (
-      <g>
-        <Heart x={81} y={eyeY - 1} s={15} fill="#FF5E7E" opacity={0.9} />
-        <Heart x={119} y={eyeY - 1} s={15} fill="#FF5E7E" opacity={0.9} />
-        <path d={`M93 ${eyeY - 3} L107 ${eyeY - 3}`} stroke="#E2416A" strokeWidth="2.5" />
-      </g>
-    );
-  }
-  return null;
-}
-
-function Clothes({ id, geo }: { id: string | null; geo: Geo }) {
-  const { top, h } = geo;
-  const y = top + h * 0.6;
-  switch (id) {
-    case 'moletom':
-      return (
-        <g>
-          <rect x="0" y={y} width="200" height="100" fill="#8FA8E8" />
-          <rect x="82" y={y + 22} width="36" height="16" rx="5" fill="#7A93D6" />
-          <path d={`M92 ${y} l0 14 M108 ${y} l0 14`} stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
-        </g>
-      );
-    case 'regata':
-      return (
-        <g>
-          <rect x="0" y={y + 2} width="200" height="100" fill="#FF6F91" />
-          <path d={`M78 ${y + 2} Q100 ${y + 16} 122 ${y + 2}`} fill="#FFFFFF" opacity="0.9" />
-          <text x="100" y={y + 34} textAnchor="middle" fontSize="16" fontWeight="900" fill="#FFFFFF">
-            1
-          </text>
-        </g>
-      );
-    case 'pijama':
-      return (
-        <g>
-          <rect x="0" y={y} width="200" height="100" fill="#3E4C8A" />
-          {[[78, 14], [112, 24], [92, 34], [126, 12], [70, 32]].map(([x, dy], i) => (
-            <circle key={i} cx={x} cy={y + dy} r="2.6" fill="#FFE07A" />
-          ))}
-        </g>
-      );
-    case 'tutu':
-      return <path d={`M30 ${y + 30} L45 ${y + 18} L58 ${y + 30} L72 ${y + 18} L86 ${y + 30} L100 ${y + 18} L114 ${y + 30} L128 ${y + 18} L142 ${y + 30} L156 ${y + 18} L170 ${y + 30} L170 ${y + 44} L30 ${y + 44} Z`} fill="#FFB3CF" opacity="0.9" />;
-    default:
-      return null;
-  }
-}
-
-function Accessory({ id, geo }: { id: string | null; geo: Geo }) {
-  const { top, w, h } = geo;
-  const y = top + h * 0.6;
-  switch (id) {
-    case 'cachecol':
-      return (
-        <g>
-          <path d={`M${100 - w * 0.86} ${y - 6} C${100 - w * 0.4} ${y + 8} ${100 + w * 0.4} ${y + 8} ${100 + w * 0.86} ${y - 6} L${100 + w * 0.88} ${y + 6} C${100 + w * 0.4} ${y + 20} ${100 - w * 0.4} ${y + 20} ${100 - w * 0.88} ${y + 6} Z`} fill="#D1495B" />
-          <path d={`M${100 + w * 0.3} ${y + 10} L${100 + w * 0.42} ${y + 42} L${100 + w * 0.22} ${y + 44} L${100 + w * 0.14} ${y + 12} Z`} fill="#B83A4B" />
-        </g>
-      );
-    case 'gravata':
-      return (
-        <g>
-          <path d={`M100 ${y} L86 ${y - 8} L86 ${y + 8} Z`} fill="#3D6FD8" />
-          <path d={`M100 ${y} L114 ${y - 8} L114 ${y + 8} Z`} fill="#3D6FD8" />
-          <circle cx="100" cy={y} r="4.5" fill="#2F59B3" />
-        </g>
-      );
-    case 'mochila':
-      return (
-        <g stroke="#E2894B" strokeWidth="5" strokeLinecap="round" fill="none">
-          <path d={`M${100 - w * 0.55} ${top + h * 0.3} Q${100 - w * 0.62} ${y} ${100 - w * 0.5} ${y + 22}`} />
-          <path d={`M${100 + w * 0.55} ${top + h * 0.3} Q${100 + w * 0.62} ${y} ${100 + w * 0.5} ${y + 22}`} />
-        </g>
-      );
-    case 'medalha':
-      return (
-        <g>
-          <path d={`M88 ${y - 8} L100 ${y + 10} L112 ${y - 8}`} stroke="#3D6FD8" strokeWidth="5" fill="none" />
-          <circle cx="100" cy={y + 16} r="9" fill="#F6C445" stroke="#E0A92A" strokeWidth="2" />
-        </g>
-      );
-    default:
-      return null;
-  }
 }

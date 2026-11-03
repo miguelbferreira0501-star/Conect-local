@@ -58,3 +58,11 @@ Cobrança real, push num celular de verdade (precisa do app publicado em HTTPS) 
 
 - Cuidados saíram do Início para a aba **Cuidar** (6 abas). O Início ficou com o Hami, a jornada de peso e as missões.
 - Varredura de largura refeita com os cuidados na aba nova: nada passa da tela em 390, 360 e 320 px, também com fonte 35% maior. Os 6 nomes das abas cabem inteiros nas três larguras.
+
+## Rodada 6 (guarda-roupa e bem-estar)
+
+- **Catálogo:** 312 itens. Teste novo (`web/src/data/items.test.tsx`) desenha o Hami com cada uma das 195 peças de vestir e confere que todas aparecem, que variações de cor mudam o desenho, que os ids são únicos e que os 12 looks têm peças existentes, uma por lugar.
+- **Prova visual:** folha com as 195 peças conferida peça a peça; prints da loja de looks, do provador e do Armário.
+- **Bem-estar:** prints das 9 ferramentas em uso (inspirar, soltar, 5-4-3-2-1, meditação, foco, relaxar, dormir, pote, quiz), sem erros de página.
+- **Largura:** varredura em 360 e 320 px com fonte 35% maior, agora incluindo as 9 ferramentas, a loja e o Armário: nada passa da tela.
+- 45 testes do app e 25 do servidor passando (o servidor aceita o espaço novo de efeito no perfil público).

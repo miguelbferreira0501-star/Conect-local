@@ -256,7 +256,7 @@ export function Onboarding() {
           <>
             {say('Agora me conhece direito! Qual pelagem é a minha?')}
             <div className="grid grid-cols-4 gap-2">
-              {FURS.map((f) => (
+              {FURS.filter((f) => !f.price).map((f) => (
                 <button key={f.id} className="color-opt relative !p-1" aria-pressed={a.fur === f.id} aria-label={f.plus ? `${f.label} (Plus)` : f.label} disabled={f.plus} onClick={() => up({ fur: f.id })}>
                   <Hamster fur={f.id} size={58} idle={false} />
                   {f.plus && <Lock size={14} className="absolute right-1.5 top-1.5 text-muted" />}

@@ -5,21 +5,21 @@ import { LineChart, toast } from '../components/ui';
 import { AFFIRMATIONS, EMOTIONS, MOODS, REFLECTIONS } from '../data/lines';
 import { BODY_SCAN, BREATHS, MEDITATION_CUES, QUIZZES, SLEEP_ROUTINE } from '../data/wellbeing';
 import { addJar, addJournal, dayOf, deleteJar, deleteJournal, isPremium, logEvent, setEmotions, setMood, todayKey, useApp } from '../lib/store';
-import { addDays, copyText, formatDay, hashStr } from '../lib/util';
-import type { Mood } from '../types';
+import { addDays, copyText, formatDay, hashStr, prefersReducedMotion } from '../lib/util';
+import type { Mood, PetMood } from '../types';
 
 type Tool = 'respirar' | 'meditar' | 'foco' | 'relaxar' | 'sono' | 'afirmacoes' | 'aterrar' | 'pote' | 'quiz' | null;
 
-const TOOLS: { id: Exclude<Tool, null>; emoji: string; title: string; desc: string }[] = [
-  { id: 'respirar', emoji: '🌬️', title: 'Respirar', desc: '3 ritmos guiados pelo Hami' },
-  { id: 'aterrar', emoji: '🖐️', title: '5-4-3-2-1', desc: 'Para crise de ansiedade' },
-  { id: 'meditar', emoji: '🧘', title: 'Meditação', desc: '3, 5 ou 10 minutos' },
-  { id: 'foco', emoji: '⏳', title: 'Foco', desc: 'Pomodoro com o Hami' },
-  { id: 'relaxar', emoji: '🛀', title: 'Relaxar', desc: 'Escaneamento do corpo' },
-  { id: 'sono', emoji: '🌙', title: 'Para dormir', desc: 'Rotina de desacelerar' },
-  { id: 'afirmacoes', emoji: '💐', title: 'Afirmações', desc: 'Frases para guardar' },
-  { id: 'pote', emoji: '🫙', title: 'Pote de coisas boas', desc: 'Momentos felizes' },
-  { id: 'quiz', emoji: '🧩', title: 'Quizzes', desc: 'Conhecer o seu jeito' },
+const TOOLS: { id: Exclude<Tool, null>; emoji: string; title: string; desc: string; tint: string }[] = [
+  { id: 'respirar', emoji: '🌬️', title: 'Respirar', desc: '3 ritmos guiados pelo Hami', tint: '#CFE8FF' },
+  { id: 'aterrar', emoji: '🖐️', title: '5-4-3-2-1', desc: 'Para crise de ansiedade', tint: '#FFE2C4' },
+  { id: 'meditar', emoji: '🧘', title: 'Meditação', desc: '3, 5 ou 10 minutos', tint: '#E3D7FF' },
+  { id: 'foco', emoji: '🍅', title: 'Foco', desc: 'Pomodoro com o Hami', tint: '#FFD6CC' },
+  { id: 'relaxar', emoji: '🛀', title: 'Relaxar', desc: 'A luz passa pelo corpo', tint: '#E9DDFF' },
+  { id: 'sono', emoji: '🌙', title: 'Para dormir', desc: 'Acenda as estrelas', tint: '#D6DBFF' },
+  { id: 'afirmacoes', emoji: '💐', title: 'Afirmações', desc: 'Frases para guardar', tint: '#FFD6E2' },
+  { id: 'pote', emoji: '🫙', title: 'Pote de coisas boas', desc: 'Momentos felizes', tint: '#DFF5D2' },
+  { id: 'quiz', emoji: '🧩', title: 'Quizzes', desc: 'Conhecer o seu jeito', tint: '#FFF1B8' },
 ];
 
 export function Wellbeing() {
@@ -68,10 +68,12 @@ export function Wellbeing() {
         <h2 className="font-display text-[21px] font-bold">Ferramentas</h2>
         <div className="grid grid-cols-2 gap-2">
           {TOOLS.map((t) => (
-            <button key={t.id} className="tile !justify-items-start !p-3 text-left" onClick={() => setTool(t.id)}>
-              <span className="text-[28px] leading-none">{t.emoji}</span>
+            <button key={t.id} className="tool-tile" onClick={() => setTool(t.id)}>
+              <span className="tool-tile-ico" style={{ background: t.tint }} aria-hidden="true">
+                {t.emoji}
+              </span>
               <span className="font-display text-[17px] font-bold leading-tight">{t.title}</span>
-              <span className="text-[12px] text-muted">{t.desc}</span>
+              <span className="text-[12px] font-semibold leading-tight text-muted">{t.desc}</span>
             </button>
           ))}
         </div>
@@ -83,7 +85,7 @@ export function Wellbeing() {
       {tool === 'aterrar' && <Grounding onClose={() => setTool(null)} />}
       {tool === 'meditar' && <Meditate onClose={() => setTool(null)} />}
       {tool === 'foco' && <Focus onClose={() => setTool(null)} />}
-      {tool === 'relaxar' && <Steps title="Relaxar" items={BODY_SCAN.map((b) => ({ t: b.part, d: b.text }))} onClose={() => setTool(null)} />}
+      {tool === 'relaxar' && <BodyScan onClose={() => setTool(null)} />}
       {tool === 'sono' && <SleepRoutine onClose={() => setTool(null)} onBreath={() => setTool('respirar')} />}
       {tool === 'afirmacoes' && <Affirmations onClose={() => setTool(null)} />}
       {tool === 'pote' && <Jar onClose={() => setTool(null)} />}
@@ -193,12 +195,75 @@ function HelpLine({ name, number }: { name: string; number: string }) {
   );
 }
 
-function Screen({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+// ---------- Ferramentas: cada uma com cenário próprio e o Hami reagindo ----------
+
+type Theme = 'ceu' | 'noite' | 'aurora' | 'foco' | 'jardim' | 'rosa' | 'lavanda';
+
+/** Cenário animado de fundo (nuvens, estrelas, pétalas, corações…). */
+function Ambient({ theme }: { theme: Theme }) {
+  const n = (i: number, m: number, k = 37) => (i * k) % m;
   return (
-    <div className="fullscreen" role="dialog" aria-modal="true" aria-label={title}>
-      <div className="mx-auto grid max-w-[440px] gap-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-[24px] font-bold">{title}</h2>
+    <div className="ambient" aria-hidden="true">
+      {(theme === 'noite' || theme === 'aurora') && (
+        <>
+          {Array.from({ length: 22 }, (_, i) => (
+            <span key={i} className="amb-star" style={{ left: `${n(i, 100)}%`, top: `${n(i, 60, 23)}%`, animationDelay: `${(i % 7) * 0.4}s`, width: i % 4 ? 3 : 5, height: i % 4 ? 3 : 5 }} />
+          ))}
+          <span className="amb-moon" />
+          <span className="amb-shooting" />
+        </>
+      )}
+      {theme === 'aurora' && (
+        <>
+          <span className="amb-aurora amb-aurora-1" />
+          <span className="amb-aurora amb-aurora-2" />
+        </>
+      )}
+      {theme === 'ceu' && (
+        <>
+          <span className="amb-cloud" style={{ top: '9%', animationDuration: '46s' }} />
+          <span className="amb-cloud" style={{ top: '26%', animationDuration: '62s', animationDelay: '-30s', transform: 'scale(0.7)' }} />
+          {Array.from({ length: 9 }, (_, i) => (
+            <span key={i} className="amb-bubble" style={{ left: `${n(i, 100, 29)}%`, animationDelay: `${i * 1.1}s`, width: 10 + (i % 3) * 8, height: 10 + (i % 3) * 8 }} />
+          ))}
+        </>
+      )}
+      {theme === 'jardim' &&
+        Array.from({ length: 12 }, (_, i) => (
+          <span key={i} className="amb-petal" style={{ left: `${n(i, 100, 31)}%`, animationDelay: `${i * 0.9}s`, background: i % 3 ? '#FFC2D4' : '#FFFFFF' }} />
+        ))}
+      {theme === 'rosa' &&
+        Array.from({ length: 10 }, (_, i) => (
+          <span key={i} className="amb-heart" style={{ left: `${n(i, 100, 41)}%`, animationDelay: `${i * 1.2}s`, fontSize: 14 + (i % 3) * 8 }}>
+            💗
+          </span>
+        ))}
+      {theme === 'lavanda' &&
+        Array.from({ length: 10 }, (_, i) => (
+          <span key={i} className="amb-bubble amb-bubble-lilac" style={{ left: `${n(i, 100, 33)}%`, animationDelay: `${i * 1.3}s`, width: 12 + (i % 3) * 10, height: 12 + (i % 3) * 10 }} />
+        ))}
+      {theme === 'foco' && (
+        <>
+          <span className="amb-sun" />
+          {Array.from({ length: 10 }, (_, i) => (
+            <span key={i} className="amb-dust" style={{ left: `${n(i, 100, 27)}%`, top: `${n(i, 90, 19)}%`, animationDelay: `${i * 0.7}s` }} />
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
+function ToolScreen({ title, sub, theme, onClose, children }: { title: string; sub?: string; theme: Theme; onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div className={`fullscreen tool-screen tool-${theme}`} role="dialog" aria-modal="true" aria-label={title}>
+      <Ambient theme={theme} />
+      <div className="relative z-[1] mx-auto grid max-w-[440px] gap-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h2 className="tool-title">{title}</h2>
+            {sub && <p className="tool-sub">{sub}</p>}
+          </div>
           <button className="icon-btn" onClick={onClose} aria-label="Sair">
             <X size={20} />
           </button>
@@ -209,100 +274,251 @@ function Screen({ title, onClose, children }: { title: string; onClose: () => vo
   );
 }
 
-function PetBig({ mood = 'calmo', size = 200 }: { mood?: 'calmo' | 'feliz' | 'animado' | 'dormindo'; size?: number }) {
+function PetBig({ mood = 'calmo', size = 200, oculos, className }: { mood?: PetMood; size?: number; oculos?: string; className?: string }) {
   const s = useApp();
-  return <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={mood} size={size} idle={false} label={s.pet.name} />;
+  const outfit = oculos && !s.pet.outfit.oculos ? { ...s.pet.outfit, oculos } : s.pet.outfit;
+  return (
+    <div className={className} style={{ transformOrigin: '50% 100%' }}>
+      <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={outfit} mood={mood} size={size} idle={false} label={s.pet.name} />
+    </div>
+  );
 }
+
+/** Pequena explosão de emojis (comemoração). */
+function Burst({ emoji, k }: { emoji: string; k: number }) {
+  if (!k) return null;
+  return (
+    <div className="burst" key={k} aria-hidden="true">
+      {Array.from({ length: 8 }, (_, i) => (
+        <span key={i} style={{ ['--a' as string]: `${i * 45}deg` }}>
+          {emoji}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function hop(el: HTMLElement | null) {
+  if (!el || prefersReducedMotion()) return;
+  el.animate(
+    [{ transform: 'translateY(0) scale(1,1)' }, { transform: 'translateY(0) scale(1.1,0.9)', offset: 0.15 }, { transform: 'translateY(-26px) scale(0.95,1.06)', offset: 0.45 }, { transform: 'translateY(0) scale(1.06,0.94)', offset: 0.8 }, { transform: 'translateY(0) scale(1,1)' }],
+    { duration: 600, easing: 'cubic-bezier(0.23,1,0.32,1)' },
+  );
+}
+
+// ---------- Respirar ----------
+
+type BreathKind = 'in' | 'hold' | 'out' | 'wait';
+const kindOf = (label: string): BreathKind => (/^puxa/i.test(label) ? 'in' : /^segura/i.test(label) ? 'hold' : /^solta/i.test(label) ? 'out' : 'wait');
+const BREATH_LOOK: Record<BreathKind, { word: string; color: string; ring: number; mood: PetMood }> = {
+  in: { word: 'Inspire', color: '#6FB7FF', ring: 1.3, mood: 'comendo' },
+  hold: { word: 'Segure', color: '#B48CFF', ring: 1.3, mood: 'calmo' },
+  out: { word: 'Solte', color: '#5FD3A2', ring: 0.9, mood: 'calmo' },
+  wait: { word: 'Espere', color: '#FFC75F', ring: 0.9, mood: 'feliz' },
+};
 
 function Breath({ onClose }: { onClose: () => void }) {
   const [pat, setPat] = useState(BREATHS[0]);
   const [step, setStep] = useState(-1);
   const [finished, setFinished] = useState(false);
+  const [now, setNow] = useState(Date.now());
+  const [felt, setFelt] = useState<string | null>(null);
+  const started = useRef(0);
   const timer = useRef<number>();
+  const pet = useRef<HTMLDivElement>(null);
   useEffect(() => () => window.clearTimeout(timer.current), []);
   useEffect(() => {
     if (step < 0 || finished) return;
+    started.current = Date.now();
     timer.current = window.setTimeout(() => {
       if (step + 1 >= pat.cycles * pat.phases.length) {
         setFinished(true);
         logEvent('respirar');
+        hop(pet.current);
       } else setStep(step + 1);
     }, pat.phases[step % pat.phases.length].ms);
   }, [step, finished, pat]);
+  useEffect(() => {
+    if (step < 0 || finished) return;
+    const id = setInterval(() => setNow(Date.now()), 200);
+    return () => clearInterval(id);
+  }, [step, finished]);
+
   const phase = step >= 0 && !finished ? pat.phases[step % pat.phases.length] : null;
+  const kind = phase ? kindOf(phase.label) : null;
+  const lk = kind ? BREATH_LOOK[kind] : null;
+  const secLeft = phase ? Math.max(1, Math.ceil((started.current + phase.ms - now) / 1000)) : 0;
+  const cycle = Math.floor(Math.max(0, step) / pat.phases.length);
+  const smooth = kind === 'in' || kind === 'out';
+  const theme: Theme = pat.id === 'sono' ? 'noite' : 'ceu';
+
   return (
-    <Screen title="Respirar" onClose={onClose}>
+    <ToolScreen title="Respirar" sub={phase ? `Respiração ${cycle + 1} de ${pat.cycles}` : 'Respire junto com o Hami'} theme={theme} onClose={onClose}>
       {step < 0 && (
         <div className="grid gap-2">
           {BREATHS.map((b) => (
             <button key={b.id} className="opt" aria-pressed={pat.id === b.id} onClick={() => setPat(b)}>
-              <span className="min-w-0">
+              <span className="tool-ico" style={{ background: b.id === 'sono' ? '#D6DBFF' : b.id === 'caixa' ? '#E6DBFF' : '#CFE8FF' }} aria-hidden="true">
+                {b.id === 'sono' ? '🌙' : b.id === 'caixa' ? '🟪' : '🌬️'}
+              </span>
+              <span className="min-w-0 flex-1">
                 <span className="block">{b.name}</span>
                 <span className="block text-[13px] font-semibold text-muted">{b.desc}</span>
               </span>
+              <span className="rhythm">{b.phases.map((p) => Math.round(p.ms / 1000)).join(' · ')}</span>
             </button>
           ))}
         </div>
       )}
-      <div className="grid justify-items-center gap-4 text-center">
-        <div className="breath-pet" style={{ transform: `scale(${phase ? phase.scale : 1})`, transitionDuration: `${phase ? phase.ms : 600}ms` }}>
-          <PetBig mood={finished ? 'feliz' : 'calmo'} />
+      <div className="breath-stage">
+        <span className="breath-ring" style={{ transform: `scale(${lk ? lk.ring : 1})`, transitionDuration: `${phase && smooth ? phase.ms : 500}ms`, borderColor: lk?.color ?? 'rgba(255,255,255,0.7)', boxShadow: `0 0 60px ${lk?.color ?? 'transparent'}` }} />
+        <span className="breath-ring breath-ring-2" style={{ transform: `scale(${lk ? lk.ring * 1.12 : 1.1})`, transitionDuration: `${phase && smooth ? phase.ms + 300 : 500}ms`, borderColor: lk?.color ?? 'rgba(255,255,255,0.4)' }} />
+        <div className="breath-pet" style={{ transform: `scale(${phase ? phase.scale : 1})`, transitionDuration: `${phase && smooth ? phase.ms : 500}ms` }}>
+          <div ref={pet}>
+            <PetBig mood={finished ? 'animado' : lk?.mood ?? 'feliz'} size={180} />
+          </div>
         </div>
-        <div className="grid min-h-[80px] gap-1" aria-live="polite">
-          <p className="font-display text-[26px] font-bold leading-tight">{finished ? 'Pronto. Como você tá agora?' : phase ? phase.label : `Siga o tamanho do Hami`}</p>
-          {phase && <p className="tabular-nums text-muted">Respiração {Math.floor(step / pat.phases.length) + 1} de {pat.cycles}</p>}
-        </div>
-        {(step < 0 || finished) && (
-          <button className="btn btn-primary w-full" onClick={() => (setFinished(false), setStep(0))}>
-            {finished ? 'De novo' : 'Começar'}
-          </button>
+        {kind === 'out' && (
+          <div className="breath-wind" aria-hidden="true">
+            {[0, 1, 2].map((i) => (
+              <span key={i} style={{ animationDelay: `${i * 0.5}s` }} />
+            ))}
+          </div>
+        )}
+        {kind === 'hold' && <span className="breath-sparkle" aria-hidden="true">✨</span>}
+        {finished && <Burst emoji="💙" k={1} />}
+      </div>
+      <div className="grid justify-items-center gap-2 text-center" aria-live="polite">
+        {phase && lk ? (
+          <>
+            <span className="breath-word" style={{ background: lk.color }}>
+              {lk.word} <b className="tabular-nums">{secLeft}</b>
+            </span>
+            <p className="tool-text font-display text-[24px] font-bold leading-tight">{phase.label}</p>
+            <div className="flex gap-1.5">
+              {Array.from({ length: pat.cycles }, (_, i) => (
+                <span key={i} className={`cycle-dot ${i < cycle ? 'is-done' : i === cycle ? 'is-now' : ''}`} />
+              ))}
+            </div>
+          </>
+        ) : finished ? (
+          <>
+            <p className="tool-text font-display text-[26px] font-bold leading-tight">Pronto. Como você tá agora?</p>
+            {felt ? (
+              <p className="tool-text text-[16px] font-semibold">{felt}</p>
+            ) : (
+              <div className="grid w-full grid-cols-3 gap-2">
+                {[
+                  ['😌', 'Melhor', 'Que bom! Seu corpo agradece.'],
+                  ['🙂', 'Igual', 'Tudo bem. Às vezes leva mais de uma vez.'],
+                  ['😣', 'Ainda tenso', 'Tá tudo bem. Que tal mais uma rodada, bem devagar?'],
+                ].map(([e, l, msg]) => (
+                  <button key={l} className="opt flex-col !items-center !gap-0.5 !px-2 !py-2 text-[13px]" onClick={() => setFelt(msg)}>
+                    <span className="text-[26px]">{e}</span>
+                    {l}
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <p className="tool-text font-display text-[22px] font-bold">O Hami enche as bochechas quando você puxa o ar</p>
         )}
       </div>
-    </Screen>
+      {(step < 0 || finished) && (
+        <button className="btn btn-primary w-full" onClick={() => (setFinished(false), setFelt(null), setStep(0))}>
+          {finished ? 'De novo' : 'Começar'}
+        </button>
+      )}
+    </ToolScreen>
   );
 }
 
-const SENSES = [
-  { n: 5, text: 'coisas que você consegue ver agora' },
-  { n: 4, text: 'coisas que você pode tocar' },
-  { n: 3, text: 'sons que você está ouvindo' },
-  { n: 2, text: 'cheiros que você sente (ou de que gosta)' },
-  { n: 1, text: 'gosto na boca, ou uma comida que você ama' },
+// ---------- 5-4-3-2-1 ----------
+
+const SENSES: { n: number; text: string; emoji: string; verb: string; mood: PetMood; color: string }[] = [
+  { n: 5, text: 'coisas que você consegue ver agora', emoji: '👀', verb: 'Olhe ao redor', mood: 'surpreso', color: '#6FB7FF' },
+  { n: 4, text: 'coisas que você pode tocar', emoji: '🖐️', verb: 'Toque em algo', mood: 'feliz', color: '#FF9A4D' },
+  { n: 3, text: 'sons que você está ouvindo', emoji: '👂', verb: 'Escute', mood: 'calmo', color: '#A57CF0' },
+  { n: 2, text: 'cheiros que você sente (ou de que gosta)', emoji: '👃', verb: 'Sinta o cheiro', mood: 'boca', color: '#FF6F91' },
+  { n: 1, text: 'gosto na boca, ou uma comida que você ama', emoji: '👅', verb: 'Sinta o gosto', mood: 'comendo', color: '#5FBF77' },
 ];
 
 function Grounding({ onClose }: { onClose: () => void }) {
   const [i, setI] = useState(0);
   const [count, setCount] = useState(0);
+  const [pop, setPop] = useState(0);
+  const pet = useRef<HTMLDivElement>(null);
+  const done = i >= SENSES.length;
   const sense = SENSES[Math.min(i, SENSES.length - 1)];
-  if (i >= SENSES.length) {
-    return (
-      <Screen title="5-4-3-2-1" onClose={onClose}>
+  const full = count >= sense.n;
+  return (
+    <ToolScreen title="5-4-3-2-1" sub="Volte para o agora, um sentido de cada vez" theme="jardim" onClose={onClose}>
+      <div className="sense-steps">
+        {SENSES.map((x, k) => (
+          <span key={x.n} className={k < i ? 'is-done' : k === i && !done ? 'is-now' : ''} style={{ ['--c' as string]: x.color }}>
+            {k < i || done ? '✓' : x.n}
+          </span>
+        ))}
+      </div>
+      {done ? (
         <div className="grid justify-items-center gap-4 text-center">
-          <PetBig mood="feliz" size={170} />
-          <p className="font-display text-[26px] font-bold leading-tight">Você tá aqui, agora. Isso já ajuda.</p>
+          <div className="relative">
+            <PetBig mood="animado" size={190} className="hop-loop" />
+            <Burst emoji="🌼" k={1} />
+          </div>
+          <p className="tool-text font-display text-[26px] font-bold leading-tight">Você tá aqui, agora. Isso já ajuda muito.</p>
           <button className="btn btn-primary w-full" onClick={onClose}>
             Voltar
           </button>
         </div>
-      </Screen>
-    );
-  }
-  return (
-    <Screen title="5-4-3-2-1" onClose={onClose}>
-      <div className="grid justify-items-center gap-5 text-center">
-        <p className="font-display text-[96px] font-extrabold leading-none text-accent tabular-nums">{sense.n}</p>
-        <p className="font-display text-[26px] font-bold leading-tight">{sense.text}</p>
-        <p className="text-muted">Toque numa bolinha a cada coisa que você encontrar.</p>
-        <div className="flex gap-3">
-          {Array.from({ length: sense.n }, (_, k) => (
-            <button key={k} className="sense-dot" aria-pressed={k < count} aria-label={`Item ${k + 1}`} onClick={() => setCount(Math.max(count, k + 1))} />
-          ))}
+      ) : (
+        <div className="grid justify-items-center gap-4 text-center">
+          <div className="sense-stage">
+            <span className="sense-num" style={{ background: sense.color }}>
+              {sense.n}
+            </span>
+            <div ref={pet} className="relative">
+              <PetBig mood={full ? 'animado' : sense.mood} size={170} />
+              <span className="sense-emoji" key={i}>
+                {sense.emoji}
+              </span>
+            </div>
+            {pop > 0 && (
+              <span className="sense-pop" key={pop}>
+                +1
+              </span>
+            )}
+          </div>
+          <p className="tool-text font-display text-[24px] font-bold leading-tight">
+            {sense.verb}: {sense.n} {sense.text}
+          </p>
+          <p className="tool-text text-[14px] opacity-80">Toque numa bolinha a cada coisa que você encontrar.</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {Array.from({ length: sense.n }, (_, k) => (
+              <button
+                key={k}
+                className="sense-ball"
+                aria-pressed={k < count}
+                style={{ ['--c' as string]: sense.color }}
+                aria-label={`Item ${k + 1}`}
+                onClick={() => {
+                  if (k < count) return;
+                  setCount(k + 1);
+                  setPop(Date.now());
+                  hop(pet.current);
+                }}
+              >
+                {k < count ? sense.emoji : ''}
+              </button>
+            ))}
+          </div>
+          <button className="btn btn-primary w-full" onClick={() => (setI(i + 1), setCount(0))}>
+            {full ? 'Próximo' : 'Pular'}
+          </button>
         </div>
-        <button className="btn btn-primary w-full" onClick={() => (setI(i + 1), setCount(0))}>
-          {count >= sense.n ? 'Próximo' : 'Pular'}
-        </button>
-      </div>
-    </Screen>
+      )}
+    </ToolScreen>
   );
 }
 
@@ -329,65 +545,115 @@ function useCountdown(totalSec: number | null, onEnd: () => void) {
 
 const mmss = (sec: number) => `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
 
+/** Anel de progresso em volta do Hami. */
+function Ring({ progress, color, size = 260, children }: { progress: number; color: string; size?: number; children: React.ReactNode }) {
+  const r = size / 2 - 10;
+  const c = 2 * Math.PI * r;
+  return (
+    <div className="relative grid place-items-center" style={{ width: size, height: size }}>
+      <svg className="absolute inset-0" width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="10" />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - progress)} transform={`rotate(-90 ${size / 2} ${size / 2})`} style={{ transition: 'stroke-dashoffset 600ms linear' }} />
+      </svg>
+      {children}
+    </div>
+  );
+}
+
+// ---------- Meditação ----------
+
 function Meditate({ onClose }: { onClose: () => void }) {
   const [mins, setMins] = useState<number | null>(null);
   const [done, setDone] = useState(false);
   const left = useCountdown(mins ? mins * 60 : null, () => (setDone(true), logEvent('respirar')));
-  const cue = mins ? MEDITATION_CUES[Math.min(MEDITATION_CUES.length - 1, Math.floor(((mins * 60 - left) / (mins * 60)) * MEDITATION_CUES.length))] : '';
+  const total = mins ? mins * 60 : 1;
+  const cueIdx = mins ? Math.min(MEDITATION_CUES.length - 1, Math.floor(((total - left) / total) * MEDITATION_CUES.length)) : 0;
   return (
-    <Screen title="Meditação" onClose={onClose}>
+    <ToolScreen title="Meditação" sub={mins && !done ? 'O Hami medita junto com você' : 'Um tempinho só seu'} theme="aurora" onClose={onClose}>
       <div className="grid justify-items-center gap-4 text-center">
-        <PetBig mood={done ? 'feliz' : 'calmo'} size={180} />
         {!mins ? (
           <>
-            <p className="text-[16px]">Escolha quanto tempo. O Hami medita junto com você.</p>
+            <PetBig mood="calmo" size={180} className="levitate" />
+            <p className="tool-text text-[16px]">Escolha quanto tempo. Feche os olhos se quiser: o Hami avisa quando acabar.</p>
             <div className="grid w-full grid-cols-3 gap-2">
-              {[3, 5, 10].map((m) => (
-                <button key={m} className="btn btn-soft" onClick={() => setMins(m)}>
-                  {m} min
+              {[
+                [3, '🌱', 'Rapidinho'],
+                [5, '🌿', 'Tranquilo'],
+                [10, '🌳', 'Profundo'],
+              ].map(([m, e, l]) => (
+                <button key={m} className="opt flex-col !items-center !gap-0.5 !px-2 !py-3" onClick={() => setMins(m as number)}>
+                  <span className="text-[28px]">{e}</span>
+                  <span className="font-display text-[20px] font-bold">{m} min</span>
+                  <span className="text-[12px] font-semibold text-muted">{l}</span>
                 </button>
               ))}
             </div>
           </>
         ) : done ? (
           <>
-            <p className="font-display text-[24px] font-bold">Que bom que você se deu esse tempo.</p>
+            <div className="relative">
+              <PetBig mood="animado" size={190} className="hop-loop" />
+              <Burst emoji="⭐" k={1} />
+            </div>
+            <p className="tool-text font-display text-[26px] font-bold">Que bom que você se deu esse tempo.</p>
             <button className="btn btn-primary w-full" onClick={onClose}>
               Voltar
             </button>
           </>
         ) : (
           <>
-            <p className="font-display text-[44px] font-bold tabular-nums">{mmss(left)}</p>
-            <p className="min-h-[56px] text-[18px] font-semibold" aria-live="polite">
-              {cue}
+            <Ring progress={(total - left) / total} color="#B9A6FF">
+              <div className="aura-glow" />
+              <PetBig mood="calmo" size={170} className="levitate" />
+            </Ring>
+            <p className="tool-text font-display text-[40px] font-bold tabular-nums">{mmss(left)}</p>
+            <p className="cue tool-text min-h-[56px] text-[19px] font-semibold" key={cueIdx} aria-live="polite">
+              {MEDITATION_CUES[cueIdx]}
             </p>
           </>
         )}
       </div>
-    </Screen>
+    </ToolScreen>
   );
 }
 
+// ---------- Foco ----------
+
 function Focus({ onClose }: { onClose: () => void }) {
   const [phase, setPhase] = useState<'pronto' | 'foco' | 'pausa' | 'fim'>('pronto');
-  const left = useCountdown(phase === 'foco' ? 25 * 60 : phase === 'pausa' ? 5 * 60 : null, () => setPhase((p) => (p === 'foco' ? 'pausa' : 'fim')));
+  const total = phase === 'foco' ? 25 * 60 : phase === 'pausa' ? 5 * 60 : null;
+  const left = useCountdown(total, () => setPhase((p) => (p === 'foco' ? 'pausa' : 'fim')));
   return (
-    <Screen title="Foco" onClose={onClose}>
+    <ToolScreen title="Foco" sub={phase === 'foco' ? 'Celular de lado. O Hami cuida do tempo.' : phase === 'pausa' ? 'Pausa: estica as pernas!' : 'Pomodoro com o Hami'} theme="foco" onClose={onClose}>
       <div className="grid justify-items-center gap-4 text-center">
-        <PetBig mood={phase === 'pausa' ? 'feliz' : phase === 'fim' ? 'animado' : 'calmo'} size={170} />
         {phase === 'pronto' && (
           <>
-            <p className="text-[16px]">25 minutos de foco e 5 de pausa. Deixe o celular de lado: o Hami cuida do tempo.</p>
+            <div className="relative">
+              <PetBig mood="feliz" size={180} oculos="redondos" />
+              <span className="focus-book" aria-hidden="true">
+                📖
+              </span>
+            </div>
+            <p className="tool-text text-[16px]">25 minutos de foco e 5 de pausa. O Hami estuda junto (de óculos e tudo).</p>
             <button className="btn btn-primary w-full" onClick={() => setPhase('foco')}>
               Começar foco
             </button>
           </>
         )}
-        {(phase === 'foco' || phase === 'pausa') && (
+        {(phase === 'foco' || phase === 'pausa') && total && (
           <>
-            <p className="eyebrow">{phase === 'foco' ? 'Foco' : 'Pausa: estica as pernas'}</p>
-            <p className="font-display text-[52px] font-bold tabular-nums">{mmss(left)}</p>
+            <Ring progress={(total - left) / total} color={phase === 'foco' ? '#FF6A3D' : '#5FBF77'}>
+              <div className="relative">
+                <PetBig mood={phase === 'foco' ? 'calmo' : 'animado'} size={160} oculos={phase === 'foco' ? 'redondos' : undefined} className={phase === 'foco' ? 'reading' : 'stretch-loop'} />
+                {phase === 'foco' && (
+                  <span className="focus-book" aria-hidden="true">
+                    📖
+                  </span>
+                )}
+              </div>
+            </Ring>
+            <p className="eyebrow !text-current">{phase === 'foco' ? '🍅 Foco' : '🌿 Pausa'}</p>
+            <p className="tool-text font-display text-[52px] font-bold leading-none tabular-nums">{mmss(left)}</p>
             <button className="btn btn-ghost w-full" onClick={() => setPhase('fim')}>
               Encerrar
             </button>
@@ -395,99 +661,191 @@ function Focus({ onClose }: { onClose: () => void }) {
         )}
         {phase === 'fim' && (
           <>
-            <p className="font-display text-[24px] font-bold">Bloco concluído. Orgulho!</p>
+            <div className="relative">
+              <PetBig mood="animado" size={180} className="hop-loop" />
+              <Burst emoji="🍅" k={1} />
+            </div>
+            <p className="tool-text font-display text-[26px] font-bold">Bloco concluído. Orgulho!</p>
             <button className="btn btn-primary w-full" onClick={onClose}>
               Voltar
             </button>
           </>
         )}
       </div>
-    </Screen>
+    </ToolScreen>
   );
 }
 
-function Steps({ title, items, onClose }: { title: string; items: { t: string; d: string }[]; onClose: () => void }) {
+// ---------- Relaxar (a luz desce pelo corpo do Hami) ----------
+
+const SCAN_Y: Record<string, number> = { Pés: 90, Pernas: 80, Barriga: 66, Mãos: 70, Ombros: 50, Rosto: 40, 'Corpo todo': 62 };
+
+function BodyScan({ onClose }: { onClose: () => void }) {
   const [i, setI] = useState(0);
-  const end = i >= items.length;
+  const end = i >= BODY_SCAN.length;
+  const part = BODY_SCAN[Math.min(i, BODY_SCAN.length - 1)];
+  const all = part.part === 'Corpo todo';
   return (
-    <Screen title={title} onClose={onClose}>
+    <ToolScreen title="Relaxar" sub={end ? 'Corpo mais leve' : `${i + 1} de ${BODY_SCAN.length} · ${part.part}`} theme="lavanda" onClose={onClose}>
       <div className="grid justify-items-center gap-4 text-center">
-        <PetBig mood={end ? 'feliz' : 'calmo'} size={170} />
+        <div className="scan-stage">
+          <PetBig mood={end ? 'feliz' : 'calmo'} size={220} />
+          {!end && <span className={`scan-band ${all ? 'scan-all' : ''}`} style={{ top: `${SCAN_Y[part.part] ?? 60}%` }} />}
+          {end && <Burst emoji="💜" k={1} />}
+        </div>
         {end ? (
           <>
-            <p className="font-display text-[24px] font-bold">Corpo mais leve. Fica um pouquinho aqui.</p>
+            <p className="tool-text font-display text-[26px] font-bold">Fica mais um pouquinho aqui, bem soltinho.</p>
             <button className="btn btn-primary w-full" onClick={onClose}>
               Voltar
             </button>
           </>
         ) : (
           <>
-            <p className="eyebrow">
-              {i + 1} de {items.length} · {items[i].t}
-            </p>
-            <p className="min-h-[80px] font-display text-[24px] font-bold leading-snug">{items[i].d}</p>
+            <span className="chip chip-plain">{part.part}</span>
+            <p className="tool-text min-h-[80px] font-display text-[24px] font-bold leading-snug">{part.text}</p>
+            <div className="flex gap-1.5">
+              {BODY_SCAN.map((_, k) => (
+                <span key={k} className={`cycle-dot ${k < i ? 'is-done' : k === i ? 'is-now' : ''}`} />
+              ))}
+            </div>
             <button className="btn btn-primary w-full" onClick={() => setI(i + 1)}>
               Próximo
             </button>
           </>
         )}
       </div>
-    </Screen>
+    </ToolScreen>
   );
 }
+
+// ---------- Para dormir (cada passo acende uma estrela) ----------
 
 function SleepRoutine({ onClose, onBreath }: { onClose: () => void; onBreath: () => void }) {
   const [done, setDone] = useState<string[]>([]);
+  const all = done.length === SLEEP_ROUTINE.length;
   return (
-    <Screen title="Para dormir" onClose={onClose}>
-      <div className="grid gap-3">
-        <div className="flex justify-center">
-          <PetBig mood="dormindo" size={150} />
-        </div>
+    <ToolScreen title="Para dormir" sub={all ? 'Prontinho pra dormir 🌙' : `${done.length} de ${SLEEP_ROUTINE.length} estrelas acesas`} theme="noite" onClose={onClose}>
+      <div className="sleep-sky" aria-hidden="true">
+        {SLEEP_ROUTINE.map((r, k) => (
+          <span key={r.id} className={`sleep-star ${done.includes(r.id) ? 'is-on' : ''}`} style={{ left: `${10 + k * 16}%`, top: `${k % 2 ? 14 : 44}%` }}>
+            ★
+          </span>
+        ))}
+      </div>
+      <div className="relative flex justify-center">
+        <PetBig mood="dormindo" size={170} className="sleep-breathe" />
+        <span className="blanket blanket-on !w-[150px] !h-[64px]" aria-hidden="true" />
+        <span className="zzz-rise" aria-hidden="true">
+          <span>z</span>
+          <span>z</span>
+          <span>Z</span>
+        </span>
+      </div>
+      <div className="grid gap-2">
         {SLEEP_ROUTINE.map((r) => (
           <button key={r.id} className="opt" aria-pressed={done.includes(r.id)} onClick={() => setDone(done.includes(r.id) ? done.filter((x) => x !== r.id) : [...done, r.id])}>
-            <span className="text-[22px]">{r.emoji}</span> {r.text}
+            <span className="tool-ico" style={{ background: done.includes(r.id) ? '#FFF1A8' : 'var(--soft-btn)' }} aria-hidden="true">
+              {done.includes(r.id) ? '⭐' : r.emoji}
+            </span>
+            <span className="min-w-0 flex-1">{r.text}</span>
           </button>
         ))}
-        <button className="btn btn-primary" onClick={onBreath}>
-          🌙 Respiração para dormir
-        </button>
       </div>
-    </Screen>
+      <button className="btn btn-primary" onClick={onBreath}>
+        🌙 Respiração para dormir
+      </button>
+    </ToolScreen>
   );
 }
 
+// ---------- Afirmações ----------
+
 function Affirmations({ onClose }: { onClose: () => void }) {
   const [i, setI] = useState(() => hashStr(todayKey()) % AFFIRMATIONS.length);
+  const [burst, setBurst] = useState(0);
+  const pet = useRef<HTMLDivElement>(null);
   return (
-    <Screen title="Afirmações" onClose={onClose}>
-      <div className="grid justify-items-center gap-4 text-center">
-        <PetBig mood="feliz" size={150} />
-        <p className="min-h-[110px] font-display text-[28px] font-bold leading-snug">“{AFFIRMATIONS[i]}”</p>
+    <ToolScreen title="Afirmações" sub="Leia em voz alta, se tiver coragem 💛" theme="rosa" onClose={onClose}>
+      <div className="grid justify-items-center gap-3 text-center">
+        <div ref={pet} className="relative">
+          <PetBig mood="animado" size={150} />
+          <Burst emoji="💖" k={burst} />
+        </div>
+        <figure className="affirm-card" key={i}>
+          <span className="affirm-quote" aria-hidden="true">
+            “
+          </span>
+          <p className="font-display text-[27px] font-bold leading-snug">{AFFIRMATIONS[i]}</p>
+        </figure>
         <div className="flex w-full gap-2">
-          <button className="btn btn-soft flex-1" onClick={() => setI((i + 1) % AFFIRMATIONS.length)}>
+          <button className="btn btn-soft flex-1" onClick={() => (setI((i + 1) % AFFIRMATIONS.length), hop(pet.current))}>
             Outra
           </button>
-          <button className="btn btn-primary flex-1" onClick={() => (addJar(AFFIRMATIONS[i]), toast('Guardada no pote'))}>
+          <button className="btn btn-primary flex-1" onClick={() => (addJar(AFFIRMATIONS[i]), setBurst(Date.now()), toast('Guardada no pote'))}>
             Guardar no pote
           </button>
         </div>
       </div>
-    </Screen>
+    </ToolScreen>
   );
 }
 
+// ---------- Pote de coisas boas (o pote enche de bilhetinhos) ----------
+
 const PAPER = ['#FFD660', '#FF9AB0', '#93CCF5', '#93D6A9', '#B39AE6', '#FFB38A'];
+
+function JarArt({ count, dropKey }: { count: number; dropKey: number }) {
+  const n = Math.min(count, 36);
+  return (
+    <svg viewBox="0 0 200 220" width="190" height="209" aria-hidden="true">
+      <rect x="62" y="12" width="76" height="20" rx="6" fill="#B07A52" />
+      <rect x="58" y="28" width="84" height="10" rx="5" fill="#8A5A3B" />
+      <path d="M50 44 Q48 38 58 38 L142 38 Q152 38 150 44 L158 190 Q160 208 140 208 L60 208 Q40 208 42 190 Z" fill="#E6F4FF" fillOpacity="0.55" stroke="#BFDDF2" strokeWidth="4" />
+      {Array.from({ length: n }, (_, k) => {
+        const row = Math.floor(k / 6);
+        const col = k % 6;
+        const x = 62 + col * 15 + (row % 2) * 7;
+        const y = 192 - row * 15;
+        const last = k === n - 1 && dropKey > 0;
+        return (
+          <g key={k} className={last ? 'jar-drop' : undefined} style={last ? { transformOrigin: `${x}px ${y}px` } : undefined}>
+            <rect x={x - 7} y={y - 6} width="14" height="11" rx="3" fill={PAPER[k % PAPER.length]} transform={`rotate(${((k * 37) % 50) - 25} ${x} ${y})`} />
+          </g>
+        );
+      })}
+      <path d="M62 60 Q58 120 64 180" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" fill="none" opacity="0.6" />
+    </svg>
+  );
+}
 
 function Jar({ onClose }: { onClose: () => void }) {
   const s = useApp();
   const [text, setText] = useState('');
   const [drawn, setDrawn] = useState<string | null>(null);
+  const [dropKey, setDropKey] = useState(0);
+  const [mood, setMoodPet] = useState<PetMood>('feliz');
   const note = s.jar.find((n) => n.id === drawn);
   return (
-    <Screen title="Pote de coisas boas" onClose={onClose}>
-      <p className="text-[15px] text-muted">Guarde uma coisa boa por dia, mesmo pequenininha. No dia ruim, tire um bilhete e lembre.</p>
-      <form className="flex gap-2" onSubmit={(e) => (e.preventDefault(), text.trim() && (addJar(text), setText(''), toast('No pote!')))}>
+    <ToolScreen title="Pote de coisas boas" sub={`${s.jar.length} ${s.jar.length === 1 ? 'bilhete' : 'bilhetes'} guardados`} theme="jardim" onClose={onClose}>
+      <div className="flex items-end justify-center gap-2">
+        <PetBig mood={mood} size={120} />
+        <JarArt count={s.jar.length} dropKey={dropKey} />
+      </div>
+      <p className="tool-text text-center text-[15px]">Guarde uma coisa boa por dia, mesmo pequenininha. No dia ruim, tire um bilhete e lembre.</p>
+      <form
+        className="flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!text.trim()) return;
+          addJar(text);
+          setText('');
+          setDropKey(Date.now());
+          setMoodPet('animado');
+          setTimeout(() => setMoodPet('feliz'), 1200);
+          toast('No pote!');
+        }}
+      >
         <label className="sr-only" htmlFor="jar-text">
           Uma coisa boa
         </label>
@@ -496,7 +854,6 @@ function Jar({ onClose }: { onClose: () => void }) {
           Guardar
         </button>
       </form>
-      <p className="font-display text-[20px] font-bold tabular-nums">{s.jar.length} bilhetes no pote</p>
       {s.jar.length > 0 && (
         <button className="btn btn-soft" onClick={() => setDrawn(s.jar[Math.floor(Math.random() * s.jar.length)].id)}>
           <Shuffle size={18} /> Tirar um bilhete
@@ -513,52 +870,78 @@ function Jar({ onClose }: { onClose: () => void }) {
           </figcaption>
         </figure>
       )}
-    </Screen>
+    </ToolScreen>
   );
 }
+
+// ---------- Quizzes ----------
 
 function Quiz({ onClose }: { onClose: () => void }) {
   const [quiz, setQuiz] = useState<(typeof QUIZZES)[number] | null>(null);
   const [answers, setAnswers] = useState<string[]>([]);
+  const pet = useRef<HTMLDivElement>(null);
   if (!quiz) {
     return (
-      <Screen title="Quizzes" onClose={onClose}>
-        <p className="text-[14px] text-muted">Para se conhecer melhor. Não são testes de saúde e não dão diagnóstico.</p>
-        {QUIZZES.map((q) => (
+      <ToolScreen title="Quizzes" sub="Para se conhecer melhor" theme="lavanda" onClose={onClose}>
+        <div className="flex justify-center">
+          <PetBig mood="surpreso" size={140} />
+        </div>
+        <p className="tool-text text-[14px]">Não são testes de saúde e não dão diagnóstico. São só para pensar com carinho.</p>
+        {QUIZZES.map((q, k) => (
           <button key={q.id} className="opt" onClick={() => (setQuiz(q), setAnswers([]))}>
+            <span className="tool-ico" style={{ background: ['#FFE39A', '#CFE8FF', '#FFD6E2', '#DFF5D2'][k % 4] }} aria-hidden="true">
+              {['🧩', '💭', '🌙', '🌻'][k % 4]}
+            </span>
             <span className="min-w-0 flex-1">{q.title}</span>
             <ChevronRight size={18} className="text-muted" />
           </button>
         ))}
-      </Screen>
+      </ToolScreen>
     );
   }
   const qi = answers.length;
   const done = qi >= quiz.questions.length;
   const top = done ? Object.entries(answers.reduce<Record<string, number>>((m, a) => ((m[a] = (m[a] ?? 0) + 1), m), {})).sort((a, b) => b[1] - a[1])[0][0] : null;
   return (
-    <Screen title={quiz.title} onClose={onClose}>
+    <ToolScreen title={quiz.title} sub={done ? 'Seu resultado' : `Pergunta ${qi + 1} de ${quiz.questions.length}`} theme="lavanda" onClose={onClose}>
+      <div className="quiz-bar">
+        {quiz.questions.map((_, k) => (
+          <span key={k} className={k < qi ? 'is-done' : k === qi ? 'is-now' : ''} />
+        ))}
+      </div>
       {done && top ? (
         <div className="grid justify-items-center gap-4 text-center">
-          <PetBig mood="animado" size={150} />
-          <p className="font-display text-[22px] font-bold leading-snug">{quiz.results[top]}</p>
+          <div className="relative">
+            <PetBig mood="animado" size={160} className="hop-loop" />
+            <Burst emoji="✨" k={1} />
+          </div>
+          <div className="affirm-card">
+            <p className="font-display text-[22px] font-bold leading-snug">{quiz.results[top]}</p>
+          </div>
           <button className="btn btn-primary w-full" onClick={() => setQuiz(null)}>
             Ver outros quizzes
           </button>
         </div>
       ) : (
         <div className="grid gap-3">
-          <p className="eyebrow">
-            Pergunta {qi + 1} de {quiz.questions.length}
-          </p>
-          <p className="bubble-pet text-[18px]">{quiz.questions[qi].q}</p>
+          <div className="flex items-end gap-2">
+            <div ref={pet} className="relative shrink-0">
+              <PetBig mood="surpreso" size={96} />
+              <span className="think" aria-hidden="true">
+                ?
+              </span>
+            </div>
+            <p className="bubble-pet min-w-0 flex-1 text-[18px]" key={qi}>
+              {quiz.questions[qi].q}
+            </p>
+          </div>
           {quiz.questions[qi].a.map(([label, key]) => (
-            <button key={label} className="opt" onClick={() => setAnswers([...answers, key])}>
+            <button key={label} className="opt" onClick={() => (setAnswers([...answers, key]), hop(pet.current))}>
               {label}
             </button>
           ))}
         </div>
       )}
-    </Screen>
+    </ToolScreen>
   );
 }

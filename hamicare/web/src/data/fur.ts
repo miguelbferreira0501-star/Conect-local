@@ -10,6 +10,8 @@ export interface Fur {
   pattern?: 'panda' | 'manchas';
   patch?: string;
   plus?: boolean;
+  /** Pelagem especial: comprada com sementes no Armário. */
+  price?: number;
 }
 
 export const FURS: Fur[] = [
@@ -27,6 +29,16 @@ export const FURS: Fur[] = [
   { id: 'limao', label: 'Limão', body: '#F2EC9B', shade: '#D9CF6A', belly: '#FFFDE8', ear: '#FFA8B4' },
   { id: 'arco-iris', label: 'Arco-íris', body: '#FFD3E8', shade: '#B9A6F2', belly: '#E9FFF6', ear: '#FF94C2', plus: true },
   { id: 'dourado', label: 'Dourado', body: '#F7CF5C', shade: '#E0A92A', belly: '#FFF6D6', ear: '#FF9EAA', plus: true },
+  { id: 'mel', label: 'Mel', body: '#E8A85C', shade: '#C98238', belly: '#FFEBD0', ear: '#FF9EAA', price: 60 },
+  { id: 'neve', label: 'Branquinho', body: '#FFFFFF', shade: '#E1E3EA', belly: '#FFFFFF', ear: '#FFB3C1', price: 60 },
+  { id: 'grafite', label: 'Grafite', body: '#8E8C97', shade: '#6E6C78', belly: '#E9E8EE', ear: '#F59AAA', price: 70 },
+  { id: 'cereja', label: 'Cereja', body: '#F79AA8', shade: '#E2707F', belly: '#FFEFF2', ear: '#FF6F91', price: 80 },
+  { id: 'oceano', label: 'Oceano', body: '#8FC9E8', shade: '#5FA6CF', belly: '#EEF8FF', ear: '#FFA6BC', price: 80 },
+  { id: 'pistache', label: 'Pistache', body: '#C8E29C', shade: '#A2C46E', belly: '#F7FFE9', ear: '#FFA8B4', price: 80 },
+  { id: 'cookies', label: 'Cookies', body: '#F3E7D6', shade: '#DCCDB8', belly: '#FFFFFF', ear: '#FFAAB5', pattern: 'manchas', patch: '#6B4A3A', price: 100 },
+  { id: 'sorvete', label: 'Sorvete', body: '#FFF1F6', shade: '#F4D5E1', belly: '#FFFFFF', ear: '#FF9FC2', pattern: 'manchas', patch: '#9FD8FF', price: 120 },
+  { id: 'galaxia', label: 'Galáxia', body: '#6F6AD8', shade: '#4B46B0', belly: '#DCD9FF', ear: '#FF9FC2', plus: true },
+  { id: 'vaquinha', label: 'Vaquinha', body: '#FFFFFF', shade: '#E4E2E8', belly: '#FFFFFF', ear: '#FFB3C1', pattern: 'manchas', patch: '#3A3440', plus: true },
 ];
 
 export const furById = (id: string) => FURS.find((f) => f.id === id) ?? FURS[0];

@@ -5,7 +5,7 @@ import { Hamster } from '../components/Hamster';
 import { ACCENTS, FURS } from '../data/fur';
 import { TRAITS } from '../data/lines';
 import {
-  deleteWeightData, enableTracking, exportCode, importCode, isPremium, minor, resetAll, setHeight, setHideNumbers, updatePet, updatePrivacy, updateProfile, updateSettings, useApp,
+  deleteWeightData, enableTracking, exportCode, importCode, isPremium, minor, owned, resetAll, setHeight, setHideNumbers, updatePet, updatePrivacy, updateProfile, updateSettings, useApp,
 } from '../lib/store';
 import { askPermission, permission, pickReminder, showNotification } from '../lib/notify';
 import { copyText, formatDay } from '../lib/util';
@@ -51,10 +51,11 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
           <div className="grid grid-cols-5 gap-1.5">
             {FURS.map((f) => {
               const locked = f.plus && !isPremium(s);
+              const toBuy = !!f.price && !owned(s, `fur:${f.id}`);
               return (
-                <button key={f.id} className="color-opt relative !p-0.5" aria-pressed={s.pet.fur === f.id} aria-label={locked ? `${f.label} (Plus)` : f.label} onClick={() => (locked ? onPlus() : updatePet({ fur: f.id }))}>
+                <button key={f.id} className="color-opt relative !p-0.5" aria-pressed={s.pet.fur === f.id} aria-label={locked ? `${f.label} (Plus)` : toBuy ? `${f.label} (no Armário)` : f.label} onClick={() => (locked ? onPlus() : toBuy ? toast(`A pelagem ${f.label} fica no Armário (aba Mundo).`) : updatePet({ fur: f.id }))}>
                   <Hamster fur={f.id} size={50} idle={false} />
-                  {locked && <Lock size={12} className="absolute right-1 top-1 text-muted" />}
+                  {(locked || toBuy) && <Lock size={12} className="absolute right-1 top-1 text-muted" />}
                 </button>
               );
             })}

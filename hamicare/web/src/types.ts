@@ -13,7 +13,7 @@ export type Incentive = 'carinho' | 'conquistas' | 'desafios' | 'calma';
 export type TraitId = 'curioso' | 'carinhoso' | 'brincalhao' | 'sonhador' | 'corajoso';
 export type ThemePref = 'auto' | 'claro' | 'escuro';
 export type CareId = 'carinho' | 'comida' | 'banho' | 'brincar' | 'escovar' | 'dormir' | 'conversar' | 'foto';
-export type WearSlot = 'chapeu' | 'oculos' | 'roupa' | 'acessorio';
+export type WearSlot = 'chapeu' | 'oculos' | 'roupa' | 'acessorio' | 'efeito';
 
 export type Freq = { kind: 'diaria' } | { kind: 'dias'; days: number[] } | { kind: 'hoje'; date: string };
 
@@ -68,6 +68,8 @@ export interface Outfit {
   oculos: string | null;
   roupa: string | null;
   acessorio: string | null;
+  /** Brilhos, corações, aura… em volta do Hami. */
+  efeito?: string | null;
 }
 
 export interface PetStats {
