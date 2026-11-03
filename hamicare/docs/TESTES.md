@@ -66,3 +66,9 @@ Cobrança real, push num celular de verdade (precisa do app publicado em HTTPS) 
 - **Bem-estar:** prints das 9 ferramentas em uso (inspirar, soltar, 5-4-3-2-1, meditação, foco, relaxar, dormir, pote, quiz), sem erros de página.
 - **Largura:** varredura em 360 e 320 px com fonte 35% maior, agora incluindo as 9 ferramentas, a loja e o Armário: nada passa da tela.
 - 45 testes do app e 25 do servidor passando (o servidor aceita o espaço novo de efeito no perfil público).
+
+## Rodada 7 (cardápio de hoje)
+
+- Testes novos de lógica (`web/src/logic/meals.test.ts`): totais planejado e comido, calorias de 0 a 3.000 por item, referência diária segura (1.200 a 5.000) e aviso de cardápio pequeno demais.
+- Navegador em 390, 360 e 320 px (as duas últimas com fonte 35% maior): montar café e almoço pelas sugestões, criar um alimento próprio, editar as calorias, salvar a referência, marcar o que comeu, recarregar e conferir que tudo ficou salvo. Nada passa da largura e sem erros de página.
+- 49 testes do app passando.

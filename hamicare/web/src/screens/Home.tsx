@@ -4,6 +4,7 @@ import { Hamster } from '../components/Hamster';
 import { Scene } from '../components/Scene';
 import { JourneyCard, useKcalPop } from '../components/Journey';
 import { TaskRow } from '../components/TaskRow';
+import { MealCard } from '../components/MealPlan';
 import { Coins, Modal, toast } from '../components/ui';
 import { GREETING, periodOf, petLine } from '../data/lines';
 import { placeById } from '../data/world';
@@ -168,6 +169,8 @@ export function Home({ onGo, onSettings, onEvolution }: { onGo: (tab: 'atividade
       </section>
 
       <JourneyCard s={s} onOpen={onEvolution} />
+
+      <MealCard s={s} />
 
       <section className="grid gap-3" aria-label="Missões de hoje">
         <div className="flex items-center justify-between gap-2 px-1">

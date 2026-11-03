@@ -593,3 +593,68 @@ body {
   font-size: 10.5px;
   font-weight: 900;
 }
+
+/* Cardápio de hoje */
+.meal-track {
+  position: relative;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--soft-btn);
+  overflow: hidden;
+}
+.meal-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+  transition: width 500ms var(--ease-out);
+}
+.meal-planned {
+  background: color-mix(in srgb, #ff9a4d 35%, transparent);
+}
+.meal-eaten {
+  background: linear-gradient(90deg, #ffc56b, #ff8a4d);
+}
+.meal-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 16px;
+  background: var(--soft-btn);
+  transition: transform 140ms var(--ease-out);
+}
+.meal-row:active {
+  transform: scale(0.98);
+}
+.meal-check {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 2.5px solid var(--line);
+  background: var(--surface);
+  color: transparent;
+}
+.meal-row[data-eaten='true'] .meal-check {
+  background: var(--check);
+  border-color: var(--check);
+  color: #ffffff;
+}
+.meal-row[data-eaten='true'] .text-left > span:first-child {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  opacity: 0.7;
+}
+.meal-edit {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 18px;
+  background: var(--soft-btn);
+}

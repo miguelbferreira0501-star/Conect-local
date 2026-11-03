@@ -49,6 +49,17 @@ export interface DayLog {
   events?: string[];
   /** id da tarefa → calorias da jornada que ela contou (para desfazer certinho). */
   kcal?: Record<string, number>;
+  /** Cardápio do dia: o que a pessoa vai comer (privado, nunca compartilhado). */
+  meals?: MealEntry[];
+}
+
+export interface MealEntry {
+  id: string;
+  meal: 'cafe' | 'almoco' | 'lanche' | 'jantar' | 'ceia';
+  name: string;
+  qty: string;
+  kcal: number;
+  eaten: boolean;
 }
 
 /** Jornada de peso do Hami: ele emagrece ou ganha peso junto com a pessoa. */
@@ -216,6 +227,10 @@ export interface State {
   bio: string;
   /** Versão das preferências visuais (migração do tema padrão). */
   themeV?: number;
+  /** Alimentos que a pessoa criou (para adicionar de novo rapidinho). */
+  myFoods?: { name: string; qty: string; kcal: number }[];
+  /** Referência diária de calorias escolhida pela pessoa (opcional). */
+  mealRef?: number | null;
   lastGift: string | null;
   updatedAt: number;
   /** Veio do app antigo (Xodó): o onboarding mostra uma mensagem de boas-vindas. */

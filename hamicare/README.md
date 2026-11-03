@@ -14,7 +14,7 @@
 | Área | Funções |
 |---|---|
 | **Jornada de peso** | Missão escolhida no começo: emagrecer, ganhar peso ou manter. Cada missão tem calorias estimadas (movimento pelo MET × seu peso; trocas saudáveis; lanches nutritivos para ganhar). O Hami recebe as mesmas calorias: quando você chega na sua meta, ele chega na dele. Número voando ao concluir, resumo semanal, meta alcançada, opção de seguir a balança |
-| **Início** | Só o essencial: o Hami no jardim (céu muda com a hora), o card da jornada de peso e as missões do dia com o botão de concluir. Boas-vindas do dia e tela de ofensiva com raios de sol |
+| **Início** | Só o essencial: o Hami no jardim (céu muda com a hora), o card da jornada de peso, o **cardápio de hoje** (alimentos de cada refeição com quantidade e calorias editáveis, 39 sugestões por refeição, "meus alimentos", marcar o que comeu, total e referência do dia, repetir o de ontem) e as missões do dia com o botão de concluir |
 | **Cuidar** | Aba própria do Hami: ele na casinha dizendo do que precisa (com atalho para o cuidado certo), as 4 barrinhas e os 8 cuidados em botões grandes, com marquinha do que já foi feito hoje |
 | **Cuidados** | Cafuné (cócegas na barriga, cafuné na cabeça), lanchinho arrastando a comida até a boca, banho com chuveirinho/esponja/toalha/secador e espuma de verdade, Chuva de sementes e Busca a bolinha, escovar os nozinhos do pelo, hora de nanar (apagar a luz, cobrir, cantar) e acordar |
 | **Nossa evolução** | Jornada (agora → meta, progresso, calorias da semana, gráfico do peso do Hami, como as contas funcionam, trocar missão), 4 fases, condicionamento, seu peso (opcional, privado), meta segura, conquistas, fotos, linha do tempo |
@@ -31,6 +31,7 @@
 - **Sem exagero**: até 800 kcal contam por dia (700 para ganhar). Exercício para quem quer ganhar peso nunca tira peso do Hami. Descanso nunca tira nada.
 - Meta segura: até 20% do peso por jornada (15% para ganhar), nunca abaixo de IMC 18,5. Aviso de cuidado se o peso real cai rápido.
 - **Menores de 18**: o Hami não muda de peso e não existe contagem de calorias. Comentários só com elogios prontos, sem foto real. **Até 12 anos**: sem amigos e feed, com autorização de um responsável.
+- Cardápio com calorias só para 18+ e só no aparelho e no backup privado. Referência diária abaixo de 1.200 kcal é recusada (só com nutricionista) e um cardápio pequeno demais ganha um aviso gentil.
 - Perfil público mostra só coisas boas (nome, Hami, nível, ofensiva, conquistas, bio): **nunca** peso, calorias, diário ou humor.
 - No feed e nas visitas, o Hami de todo mundo aparece no **formato padrão**: ninguém compara corpo.
 - Filtro de gentileza no app **e no servidor**: ofensas (inclusive disfarçadas), comentários sobre corpo, frases desanimadoras, telefone, redes e links são bloqueados. Duas denúncias de pessoas diferentes escondem o conteúdo na hora.

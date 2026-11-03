@@ -1,11 +1,13 @@
 // Estado do HamiCare: salvo no aparelho (localStorage) e, com conta, no backup privado do servidor.
 import { useSyncExternalStore } from 'react';
-import type { AgeGroup, Battery, BodyStart, CareId, Category, DayLog, Direction, Freq, GoalId, Incentive, Journey, Mood, Outfit, PetMood, Photo, State, Task, TraitId, WearSlot } from '../types';
+import type { AgeGroup, Battery, BodyStart, CareId, Category, DayLog, Direction, Freq, GoalId, Incentive, Journey, MealEntry, Mood, Outfit, PetMood, Photo, State, Task, TraitId, WearSlot } from '../types';
 import { LIBRARY, libById, rewardFor } from '../data/tasks';
 import { ITEMS, LOOKS, RECIPES, STYLES, WEARABLE_KINDS, itemById, stylePrice } from '../data/items';
 import { PLACES, placeById } from '../data/world';
 import { FACTS } from '../data/lines';
 import { FURS } from '../data/fur';
+import { presetByName } from '../data/foods';
+import { checkRef, cleanKcal } from '../logic/meals';
 import { addDays, clamp, dayDiff, dayKey, hashStr, uid } from './util';
 import {
   BAND, JOURNEY_GRAMS, REF_KG, WEIGH_EVERY_DAYS, checkJourneyGoal, conditioning, defaultGoalKg, directionOf, isMinor, journeyGrams, journeyKcal,
@@ -846,6 +848,50 @@ export function claimQuest(questId: string): boolean {
   if (state.claimed[k] || questProgress(q, state.days, today) < q.target) return false;
   commit(reward({ ...state, claimed: { ...state.claimed, [k]: true } }, q.coins, q.xp));
   return true;
+}
+
+// ---------- Cardápio do dia (privado) ----------
+
+export function addMeal(entry: Omit<MealEntry, 'id' | 'eaten'>, key = todayKey()) {
+  if (minor(state) || !entry.name.trim()) return;
+  const d = dayOf(state, key);
+  const item: MealEntry = { ...entry, id: uid(), name: entry.name.trim().slice(0, 40), qty: entry.qty.trim().slice(0, 30), kcal: cleanKcal(entry.kcal), eaten: false };
+  // Alimento novo (fora da lista pronta) fica salvo em "Meus alimentos".
+  let myFoods = state.myFoods ?? [];
+  if (!presetByName(item.name) && !myFoods.some((f) => f.name.toLowerCase() === item.name.toLowerCase())) myFoods = [{ name: item.name, qty: item.qty, kcal: item.kcal }, ...myFoods].slice(0, 40);
+  commit({ ...withDay(state, key, { ...d, meals: [...(d.meals ?? []), item] }), myFoods });
+}
+
+export function updateMeal(id: string, patch: Partial<Pick<MealEntry, 'name' | 'qty' | 'kcal' | 'meal' | 'eaten'>>, key = todayKey()) {
+  const d = dayOf(state, key);
+  const meals = (d.meals ?? []).map((m) => (m.id === id ? { ...m, ...patch, kcal: patch.kcal === undefined ? m.kcal : cleanKcal(patch.kcal), name: patch.name === undefined ? m.name : patch.name.slice(0, 40), qty: patch.qty === undefined ? m.qty : patch.qty.slice(0, 30) } : m));
+  commit(withDay(state, key, { ...d, meals }));
+}
+
+export function removeMeal(id: string, key = todayKey()) {
+  const d = dayOf(state, key);
+  commit(withDay(state, key, { ...d, meals: (d.meals ?? []).filter((m) => m.id !== id) }));
+}
+
+/** Repete o cardápio de ontem (tudo como "ainda não comi"). */
+export function copyYesterdayMeals(): number {
+  const today = todayKey();
+  const y = dayOf(state, addDays(today, -1)).meals ?? [];
+  if (!y.length) return 0;
+  const d = dayOf(state, today);
+  commit(withDay(state, today, { ...d, meals: [...(d.meals ?? []), ...y.map((m) => ({ ...m, id: uid(), eaten: false }))] }));
+  return y.length;
+}
+
+export function setMealRef(kcal: number | null): { ok: true } | { ok: false; reason: string } {
+  const r = checkRef(kcal);
+  if (!r.ok) return r;
+  commit({ ...state, mealRef: kcal === null ? null : Math.round(kcal) });
+  return { ok: true };
+}
+
+export function removeMyFood(name: string) {
+  commit({ ...state, myFoods: (state.myFoods ?? []).filter((f) => f.name !== name) });
 }
 
 // ---------- Temporada do mês ----------
