@@ -22,6 +22,8 @@ export interface Task {
   freq: Freq;
   reward: number;
   createdAt: string;
+  /** 1 = cabe num dia difícil. Tarefas 2 e 3 somem no modo dia difícil. */
+  energy: 1 | 2 | 3;
 }
 
 export interface DayLog {
@@ -183,4 +185,6 @@ export interface State {
   privacy: { requests: 'todos' | 'ninguem'; sharePhotos: boolean };
   lastGift: string | null;
   updatedAt: number;
+  /** Veio do app antigo (Xodó): o onboarding mostra uma mensagem de boas-vindas. */
+  from?: 'xodo';
 }

@@ -42,7 +42,7 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
   );
 }
 
-/** Janela central para momentos raros: cartão-postal, crescimento. */
+/** Janela central para momentos raros: comemorações e confirmações. */
 export function Modal({ open, onClose, label, children }: { open: boolean; onClose: () => void; label: string; children: ReactNode }) {
   const [shown, setShown] = useState(false);
   useEffect(() => {
@@ -61,31 +61,110 @@ export function Modal({ open, onClose, label, children }: { open: boolean; onClo
   );
 }
 
-// Nomes completos para o Tailwind não descartar as classes no build.
-const TONE_CLASS = { leaf: 'bar-leaf', gold: 'bar-gold', accent: 'bar-accent' } as const;
+const TONE_CLASS = { leaf: 'bar-leaf', gold: 'bar-gold', accent: 'bar-accent', sky: 'bar-sky' } as const;
 
-export function Bar({ value, max = 100, tone = 'leaf', label }: { value: number; max?: number; tone?: 'leaf' | 'gold' | 'accent'; label: string }) {
-  const pct = Math.max(0, Math.min(100, (value / max) * 100));
+export function Bar({ value, max = 100, tone = 'leaf', label, thin }: { value: number; max?: number; tone?: keyof typeof TONE_CLASS; label: string; thin?: boolean }) {
+  const pct = max > 0 ? Math.max(0, Math.min(100, (value / max) * 100)) : 0;
   return (
-    <div className="bar" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={max} aria-valuenow={Math.round(value)}>
+    <div className={`bar ${thin ? 'bar-thin' : ''}`} role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={max} aria-valuenow={Math.round(value)}>
       <div className={`bar-fill ${TONE_CLASS[tone]}`} style={{ transform: `scaleX(${pct / 100})` }} />
     </div>
   );
 }
 
-export function Seeds({ value }: { value: number }) {
+/** Semente de girassol: a moeda do HamiCare. */
+export function Seed({ size = 14 }: { size?: number }) {
   return (
-    <span className="chip chip-gold tabular-nums" aria-label={`${value} sementinhas`}>
+    <svg width={size} height={size} viewBox="0 0 16 16" aria-hidden="true" className="shrink-0">
+      <path d="M8 1 C12.6 3.6 13.2 10.4 8 15 C2.8 10.4 3.4 3.6 8 1 Z" fill="#3B3330" />
+      <path d="M8 3.2 L8 13" stroke="#F4EBD8" strokeWidth="1.3" strokeLinecap="round" />
+      <path d="M5.6 5 L6.2 11 M10.4 5 L9.8 11" stroke="#F4EBD8" strokeWidth="0.9" strokeLinecap="round" opacity="0.7" />
+    </svg>
+  );
+}
+
+export function Coins({ value }: { value: number }) {
+  return (
+    <span className="chip chip-gold tabular-nums" aria-label={`${value} sementes de girassol`}>
       <Seed /> {value}
     </span>
   );
 }
 
-export function Seed({ size = 14 }: { size?: number }) {
+export function Seg<T extends string>({ value, options, onChange, label }: { value: T; options: { id: T; label: string }[]; onChange: (v: T) => void; label: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" aria-hidden="true" className="shrink-0">
-      <path d="M8 1.5 C12.5 4 13 10.5 8 14.5 C3 10.5 3.5 4 8 1.5 Z" fill="var(--gold)" />
-      <path d="M8 4 L8 12" stroke="var(--surface)" strokeWidth="1.2" strokeLinecap="round" opacity="0.7" />
+    <div className="seg" role="group" aria-label={label}>
+      {options.map((o) => (
+        <button key={o.id} type="button" aria-pressed={value === o.id} onClick={() => onChange(o.id)}>
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
+  return (
+    <div className="flex items-end justify-between gap-3">
+      <h2 className="font-display text-[21px] font-bold leading-tight">{children}</h2>
+      {action}
+    </div>
+  );
+}
+
+/** Gráfico de linha simples (área suave, grade leve, ponto final em destaque). */
+export function LineChart({
+  points,
+  height = 140,
+  label,
+  unit = '',
+  min,
+  max,
+  tone = 'var(--accent)',
+  band,
+}: {
+  points: { label: string; value: number }[];
+  height?: number;
+  label: string;
+  unit?: string;
+  min?: number;
+  max?: number;
+  tone?: string;
+  band?: [number, number];
+}) {
+  if (points.length < 2) return <p className="rounded-2xl bg-surface2 p-4 text-[14px] text-muted">Ainda não há registros suficientes para o gráfico.</p>;
+  const W = 320;
+  const H = height;
+  const pad = { l: 34, r: 12, t: 12, b: 22 };
+  const vals = points.map((p) => p.value);
+  const lo = min ?? Math.floor(Math.min(...vals, ...(band ?? [])) - 1);
+  const hi = max ?? Math.ceil(Math.max(...vals, ...(band ?? [])) + 1);
+  const x = (i: number) => pad.l + (i / (points.length - 1)) * (W - pad.l - pad.r);
+  const y = (v: number) => pad.t + (1 - (v - lo) / (hi - lo || 1)) * (H - pad.t - pad.b);
+  const line = points.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(p.value).toFixed(1)}`).join(' ');
+  const area = `${line} L${x(points.length - 1)} ${H - pad.b} L${x(0)} ${H - pad.b} Z`;
+  const ticks = [lo, (lo + hi) / 2, hi];
+  const last = points[points.length - 1];
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full" role="img" aria-label={`${label}: último valor ${last.value}${unit}`}>
+      {band && <rect x={pad.l} y={y(band[1])} width={W - pad.l - pad.r} height={Math.max(0, y(band[0]) - y(band[1]))} fill="var(--leaf-soft)" />}
+      {ticks.map((t) => (
+        <g key={t}>
+          <line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} stroke="var(--line)" strokeWidth="1" />
+          <text x={pad.l - 6} y={y(t) + 4} textAnchor="end" fontSize="10" fill="var(--muted)" className="tabular-nums">
+            {Math.round(t)}
+          </text>
+        </g>
+      ))}
+      <path d={area} fill={tone} opacity="0.12" />
+      <path d={line} fill="none" stroke={tone} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={x(points.length - 1)} cy={y(last.value)} r="4.5" fill={tone} stroke="var(--surface)" strokeWidth="2" />
+      <text x={pad.l} y={H - 6} fontSize="10" fill="var(--muted)">
+        {points[0].label}
+      </text>
+      <text x={W - pad.r} y={H - 6} fontSize="10" fill="var(--muted)" textAnchor="end">
+        {last.label}
+      </text>
     </svg>
   );
 }
@@ -105,7 +184,7 @@ export function Toaster() {
     pushToast = (text) => {
       const id = Date.now() + Math.random();
       setItems((list) => [...list.slice(-2), { id, text }]);
-      setTimeout(() => setItems((list) => list.filter((t) => t.id !== id)), 2200);
+      setTimeout(() => setItems((list) => list.filter((t) => t.id !== id)), 2400);
     };
     return () => {
       pushToast = null;
@@ -120,4 +199,8 @@ export function Toaster() {
       ))}
     </div>
   );
+}
+
+export function Empty({ children }: { children: ReactNode }) {
+  return <p className="rounded-2xl border-2 border-dashed border-line p-5 text-center text-[15px] text-muted">{children}</p>;
 }

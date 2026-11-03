@@ -14,5 +14,5 @@ const headRest = head
 const bodyRest = body.replace(/<script[\s\S]*?<\/script>/g, (s) => (scripts.push(s), ''));
 
 const out = `${headRest.trim()}\n${bodyRest.trim()}\n${scripts.join('\n')}\n`;
-writeFileSync(new URL('../dist/xodo.html', import.meta.url), out);
-console.log(`dist/xodo.html: ${(out.length / 1024).toFixed(0)} KB`);
+writeFileSync(new URL('../dist/hamicare.html', import.meta.url), out);
+console.log(`dist/hamicare.html: ${(out.length / 1024).toFixed(0)} KB`);

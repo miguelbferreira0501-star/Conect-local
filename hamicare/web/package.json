@@ -1,15 +1,16 @@
 {
-  "name": "xodo",
+  "name": "@hamicare/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Xodó: app de autocuidado com um bichinho virtual, em português.",
+  "description": "HamiCare: autocuidado, hábitos e evolução junto com o Hami.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -p tsconfig.json && vite build",
     "build:artifact": "tsc -p tsconfig.json && vite build && node scripts/artifact.mjs",
     "preview": "vite preview",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
