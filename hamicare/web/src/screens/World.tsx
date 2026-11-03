@@ -321,7 +321,7 @@ function ShopTab({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: stri
         </div>
         <div className="flex items-center justify-between gap-2">
           <p className="font-display text-[20px] font-bold leading-tight">✨ Coleção do dia</p>
-          <span className="rounded-full bg-white/25 px-3 py-1 text-[12px] font-black">
+          <span className="renew rounded-full px-3 py-1 text-[12px] font-black">
             Renova em {Math.floor(mins / 60)}h{String(mins % 60).padStart(2, '0')}
           </span>
         </div>

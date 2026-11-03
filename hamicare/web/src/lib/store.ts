@@ -77,12 +77,13 @@ export function fresh(): State {
     achievements: {},
     claimed: {},
     photos: [],
-    settings: { theme: 'auto', accent: 'morango', notif: { enabled: false, time: '19:00', kinds: { tarefas: true, hami: true, missoes: true, aventura: true, amigos: true } }, sound: true },
+    settings: { theme: 'claro', accent: 'morango', notif: { enabled: false, time: '19:00', kinds: { tarefas: true, hami: true, missoes: true, aventura: true, amigos: true } }, sound: true },
     premium: { trialStart: null, until: null },
     privacy: { requests: 'todos', sharePhotos: true },
     journey: { dir: 'manter', startedAt: today, startGrams: BAND.center, goalGrams: BAND.center, needKcal: 0, reachedAt: null },
     welcomed: null,
     bio: '',
+    themeV: 1,
     lastGift: null,
     updatedAt: Date.now(),
   };
@@ -118,6 +119,9 @@ function normalize(raw: State): State {
   const s: State = { ...fresh(), ...raw, v: 2 };
   const goal = OLD_GOAL[s.profile.goal as string] ?? s.profile.goal;
   if (goal !== s.profile.goal) s.profile = { ...s.profile, goal };
+  // Identidade colorida: o tema claro passa a ser o padrão (uma vez; depois vale a escolha da pessoa).
+  if (!raw.themeV) s.settings = { ...s.settings, theme: s.settings.theme === 'auto' ? 'claro' : s.settings.theme };
+  s.themeV = 1;
   if (!raw.journey) {
     const dir = directionOf(goal, isMinor(s.profile.ageGroup));
     s.journey = buildJourney(dir, latestKg(s), s.body.goalKg, todayKey(), s.pet.grams);

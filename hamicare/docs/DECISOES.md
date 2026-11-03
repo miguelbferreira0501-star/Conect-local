@@ -75,6 +75,7 @@ Pedido do dono do produto: o foco principal é o Hami **emagrecer ou engordar co
 - **Fofura** (largura do corpo e das bochechas) vem do peso do Hami: muda um pouquinho a cada missão e fica fofa em qualquer valor.
 - **Visual vivo** (arte própria): jardim com céu da hora do dia, botões com volume, abas ilustradas, boas-vindas do dia, tela de ofensiva com raios, álbum de figurinhas, loja da Dona Capivara com coleção do dia e temporada do mês.
 - **Cuidados interativos:** cada cuidado é um minijogo com ferramenta que segue o dedo, partículas e reação do Hami (risada, boca aberta, molhado, brilhando).
+- **Identidade de cor única:** cada aba tem uma cor de fundo só (Início menta, Missões céu, Mundo pêssego, Bem-estar rosa, Amigos lavanda, começo damasco), usada também na barra de abas e nas telas cheias. Conteúdo em cartões brancos; botões "quadradinhos" arredondados com volume embaixo; botão de concluir branco com check verde; desafios numa linha do tempo com barrinha "0 / 1". O tema claro passou a ser o padrão (o escuro continua nos Ajustes, também com cores por aba).
 - **Rede social gentil:** perfil com bio e contadores só positivos, stories, toque duplo para curtir e grupos com mural próprio (só amigos de quem criou entram; bloqueio esconde a pessoa no grupo).
 - **Condicionamento** (0 a 100) vem dos últimos 28 dias de movimento. Conta no máximo 1 ponto cheio por dia, então constância vale mais que intensidade.
 - **4 fases**, que nunca regridem (descansar não tira nada):

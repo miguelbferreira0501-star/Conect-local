@@ -212,6 +212,8 @@ export interface State {
   welcomed: string | null;
   /** Bio do perfil público (passa pelo filtro de gentileza). */
   bio: string;
+  /** Versão das preferências visuais (migração do tema padrão). */
+  themeV?: number;
   lastGift: string | null;
   updatedAt: number;
   /** Veio do app antigo (Xodó): o onboarding mostra uma mensagem de boas-vindas. */

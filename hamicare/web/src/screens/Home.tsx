@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronRight, Flame, Mail, Settings, Map as MapIcon } from 'lucide-react';
+import { ChevronRight, Flame, Mail, Plus, Settings } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { Room } from '../components/Room';
 import { Scene } from '../components/Scene';
 import { JourneyCard, useKcalPop } from '../components/Journey';
 import { TaskRow } from '../components/TaskRow';
+import { QuestList } from '../components/QuestList';
 import { Bar, Coins, Modal, toast } from '../components/ui';
 import { GREETING, periodOf, petLine } from '../data/lines';
 import { placeById, PLACES } from '../data/world';
-import { activeQuests, claimKey, levelProgress, questProgress } from '../logic/progress';
+import { activeQuests, levelProgress } from '../logic/progress';
 import { streakOf } from '../logic/streak';
-import { claimQuest, dayOf, finishAdventure, getState, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
+import { dayOf, finishAdventure, getState, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
 import { addDays, prefersReducedMotion, weekStart, WEEKDAYS, fmtNum } from '../lib/util';
 import { isActive } from '../logic/evolution';
 import { CareLayer, type CareMode } from './Care';
@@ -162,85 +163,89 @@ export function Home({ onGo, onSettings, onEvolution, onShare }: { onGo: (tab: '
   return (
     <div className="grid gap-4">
       {layer}
-      <header className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="eyebrow">
-            Nível {lv.level} · {s.pet.name}
-          </p>
-          <h1 className="truncate font-display text-[27px] font-bold leading-tight">
-            {GREETING[period]}
-            {s.profile.name ? `, ${s.profile.name}` : ''}
-          </h1>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <Coins value={s.coins} />
-          <button className="icon-btn" onClick={onSettings} aria-label="Ajustes">
-            <Settings size={20} />
-          </button>
-        </div>
-      </header>
-
-      <section className="grid gap-3" aria-label={inside ? `Casa do ${s.pet.name}` : `Jardim do ${s.pet.name}`}>
-        <div className="relative">
-          {inside ? (
+      <section className="relative" aria-label={inside ? `Casa do ${s.pet.name}` : `Jardim do ${s.pet.name}`}>
+        {inside ? (
+          <div className="scene-bleed relative overflow-hidden pt-[64px]" style={{ background: 'var(--page)' }}>
             <Room house={s.house} period={period} height={300}>
               {hami}
             </Room>
-          ) : (
-            <Scene height={300} overlay={bubble}>
+          </div>
+        ) : (
+          <div className="scene-bleed relative overflow-hidden">
+            <Scene height={380} fade>
               {hami}
             </Scene>
-          )}
-          {inside && bubble && <div className="absolute inset-x-3 top-3 z-[2]">{bubble}</div>}
-          <button className="scene-toggle" onClick={() => setInside(!inside)} aria-label={inside ? 'Ir para o jardim' : 'Entrar na casa'}>
+          </div>
+        )}
+        <div className="scene-top">
+          <span className="pill min-w-0 flex-1">
+            <span className="truncate font-display text-[17px]">
+              {GREETING[period]}
+              {s.profile.name ? `, ${s.profile.name}` : ''}
+            </span>
+          </span>
+          <span className="pill shrink-0">
+            <Coins value={s.coins} />
+          </span>
+          <button className="pill pill-round shrink-0" onClick={onSettings} aria-label="Ajustes">
+            <Settings size={19} />
+          </button>
+        </div>
+        {bubble && <div className="absolute inset-x-4 top-[68px] z-[3]">{bubble}</div>}
+        <div className="absolute bottom-4 left-4 z-[3] flex gap-2">
+          <span className="pill !min-h-[34px] text-[13px]">
+            ⭐ Nível {lv.level}
+          </span>
+          <button className="pill !min-h-[34px] text-[13px]" onClick={() => setInside(!inside)} aria-label={inside ? 'Ir para o jardim' : 'Entrar na casa'}>
             {inside ? '🌳 Jardim' : '🏡 Casa'}
           </button>
         </div>
-        <div className="care-row" role="group" aria-label="Cuidar do Hami">
-          {CARES.map((c) => (
-            <button
-              key={c.label}
-              className="care-btn"
-              style={{ ['--tone' as string]: c.tone }}
-              disabled={!!adv || (s.pet.sleeping && !['dormir', 'conversar'].includes(c.id as string))}
-              onClick={() => (c.id === 'carinho' ? setMode('carinho') : c.id === 'dormir' ? setMode('dormir') : setMode(c.id as CareMode))}
-            >
-              <span className="care-ico" aria-hidden="true">
-                {c.emoji}
-              </span>
-              <span>{c.label}</span>
-            </button>
-          ))}
-        </div>
-        <div className="card grid grid-cols-4 gap-2 p-3">
-          {(
-            [
-              ['felicidade', 'Feliz', 'accent', '💗'],
-              ['energia', 'Energia', 'sky', '⚡'],
-              ['saciedade', 'Barriga', 'gold', '🥕'],
-              ['limpeza', 'Limpeza', 'leaf', '🫧'],
-            ] as const
-          ).map(([k, label, tone, em]) => (
-            <div key={k} className="grid gap-1 text-center">
-              <span className="text-[12px] font-extrabold">
-                {em} {label}
-              </span>
-              <Bar value={s.pet.stats[k]} tone={tone} label={label} thin />
-            </div>
-          ))}
-        </div>
       </section>
+
+      <div className="care-row" role="group" aria-label="Cuidar do Hami">
+        {CARES.map((c) => (
+          <button
+            key={c.label}
+            className="care-btn"
+            style={{ ['--tone' as string]: c.tone }}
+            disabled={!!adv || (s.pet.sleeping && !['dormir', 'conversar'].includes(c.id as string))}
+            onClick={() => (c.id === 'carinho' ? setMode('carinho') : c.id === 'dormir' ? setMode('dormir') : setMode(c.id as CareMode))}
+          >
+            <span className="care-ico" aria-hidden="true">
+              {c.emoji}
+            </span>
+            <span>{c.label}</span>
+          </button>
+        ))}
+      </div>
+      <div className="card grid grid-cols-4 gap-2 p-3">
+        {(
+          [
+            ['felicidade', 'Feliz', 'accent', '💗'],
+            ['energia', 'Energia', 'sky', '⚡'],
+            ['saciedade', 'Barriga', 'gold', '🥕'],
+            ['limpeza', 'Limpeza', 'leaf', '🫧'],
+          ] as const
+        ).map(([k, label, tone, em]) => (
+          <div key={k} className="grid min-w-0 gap-1 text-center">
+            <span className="truncate text-[12px] font-extrabold">
+              {em} {label}
+            </span>
+            <Bar value={s.pet.stats[k]} tone={tone} label={label} thin />
+          </div>
+        ))}
+      </div>
 
       <JourneyCard s={s} onOpen={onEvolution} />
 
-      <section className="card grid gap-3 p-4" aria-label="Missões de hoje">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="font-display text-[21px] font-bold">Missões de hoje</h2>
+      <section className="grid gap-3" aria-label="Missões de hoje">
+        <div className="flex items-center justify-between gap-2 px-1">
+          <h2 className="section-label">Missões de hoje</h2>
           <span className={`chip ${streak.today ? 'chip-fire' : 'chip-plain'}`}>
             <Flame size={15} /> {streak.count} {streak.count === 1 ? 'dia' : 'dias'}
           </span>
         </div>
-        <div className="grid grid-cols-7 gap-1">
+        <div className="card grid grid-cols-7 gap-1 px-3 py-2.5">
           {week.map((k) => (
             <div key={k} className="grid justify-items-center gap-0.5 text-[11px] font-extrabold uppercase text-muted">
               {WEEKDAYS[new Date(`${k}T12:00:00`).getDay()]}
@@ -250,52 +255,37 @@ export function Home({ onGo, onSettings, onEvolution, onShare }: { onGo: (tab: '
             </div>
           ))}
         </div>
-        <ul className="grid gap-2">
+        <ul className="grid gap-3">
           {tasks.map((t) => (
             <TaskRow key={t.id} task={t} done={t.id in day.done} kcal={kcalOf(s, t)} dir={dir} onToggle={(el) => onToggle(t, el)} />
           ))}
         </ul>
-        {!tasks.length && <p className="rounded-2xl border-2 border-dashed border-line p-4 text-center text-muted">Nenhuma missão para hoje. Que tal uma bem pequena?</p>}
-        <button className="btn btn-ghost btn-sm" onClick={() => onGo('atividades')}>
-          {done}/{tasks.length} feitas · Ver e editar missões <ChevronRight size={16} />
+        {!tasks.length && <p className="card p-4 text-center text-muted">Nenhuma missão para hoje. Que tal uma bem pequena?</p>}
+        <button className="btn-page" onClick={() => onGo('atividades')}>
+          <span className="btn-page-ico" aria-hidden="true">
+            <Plus size={26} strokeWidth={3} />
+          </span>
+          <span className="min-w-0 flex-1">
+            Adicionar ou editar missões
+            <span className="block text-[13px] font-bold opacity-80">
+              {done} de {tasks.length} feitas hoje
+            </span>
+          </span>
         </button>
       </section>
 
       <EventsBanner />
 
-      <section className="card grid gap-3 p-4" aria-label="Desafios de hoje">
-        <h2 className="font-display text-[20px] font-bold">Desafios de hoje</h2>
-        {quests.map((q) => {
-          const p = questProgress(q, s.days, today);
-          const claimed = !!s.claimed[claimKey(q, today)];
-          return (
-            <div key={q.id} className="flex items-center gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="text-[15px] font-bold leading-tight">{q.title}</p>
-                <div className="mt-1 flex items-center gap-2">
-                  <div className="flex-1">
-                    <Bar value={p} max={q.target} tone="gold" label={q.title} thin />
-                  </div>
-                  <span className="text-[12px] font-bold tabular-nums text-muted">
-                    {p}/{q.target}
-                  </span>
-                </div>
-              </div>
-              {claimed ? (
-                <span className="chip chip-leaf">Feita ✓</span>
-              ) : (
-                <button className="btn btn-soft btn-sm" disabled={p < q.target} onClick={() => claimQuest(q.id) && toast(`+${q.coins} sementes!`)}>
-                  +{q.coins} 🌻
-                </button>
-              )}
-            </div>
-          );
-        })}
+      <section className="grid gap-3" aria-label="Desafios de hoje">
+        <h2 className="section-label px-1">Desafios de hoje</h2>
+        <QuestList quests={quests} s={s} today={today} />
       </section>
 
       {!adv && (
         <button className="card flex items-center gap-3 p-4 text-left" onClick={() => onGo('mundo')}>
-          <MapIcon className="shrink-0 text-accent" />
+          <span className="quest-ico !h-12 !w-12 !text-[26px]" style={{ background: '#D3EAFF' }} aria-hidden="true">
+            🗺️
+          </span>
           <span className="min-w-0 flex-1">
             <span className="block font-bold">Levar o {s.pet.name} numa aventura</span>
             <span className="block text-[13px] text-muted">{PLACES.length} lugares no mapa, com achadinhos para o álbum</span>

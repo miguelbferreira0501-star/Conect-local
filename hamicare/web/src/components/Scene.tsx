@@ -25,9 +25,11 @@ interface Props {
   children?: ReactNode;
   /** Algo por cima de tudo (fala do Hami, avisos). */
   overlay?: ReactNode;
+  /** O chão se funde com a cor da tela (Início). */
+  fade?: boolean;
 }
 
-export function Scene({ time = skyOf(), height = 300, children, overlay }: Props) {
+export function Scene({ time = skyOf(), height = 300, children, overlay, fade }: Props) {
   const c = SKY[time];
   const night = time === 'noite';
   return (
@@ -140,6 +142,7 @@ export function Scene({ time = skyOf(), height = 300, children, overlay }: Props
               </g>
             ))}
       </svg>
+      {fade && <div className="scene-fade" aria-hidden="true" />}
       <div className="relative z-[1] flex h-full items-end justify-center pb-3">{children}</div>
       {overlay && <div className="absolute inset-x-3 top-3 z-[2]">{overlay}</div>}
     </div>

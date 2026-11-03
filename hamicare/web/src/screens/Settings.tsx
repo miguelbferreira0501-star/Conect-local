@@ -79,9 +79,9 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
           <p className="text-[14px] font-extrabold">Cor do app</p>
           <div className="grid grid-cols-6 gap-2">
             {ACCENTS.map((a) => (
-              <button key={a.id} className="grid justify-items-center gap-1" aria-pressed={s.settings.accent === a.id} onClick={() => updateSettings({ accent: a.id })}>
+              <button key={a.id} className="grid min-w-0 justify-items-center gap-1" aria-pressed={s.settings.accent === a.id} onClick={() => updateSettings({ accent: a.id })}>
                 <span className={`accent-swatch accent-${a.id} ${s.settings.accent === a.id ? 'is-on' : ''}`} />
-                <span className="text-[11px] font-bold">{a.label}</span>
+                <span className="w-full truncate text-center text-[11px] font-bold">{a.label}</span>
               </button>
             ))}
           </div>

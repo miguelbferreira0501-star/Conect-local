@@ -1,21 +1,22 @@
 import { useState } from 'react';
 import { BatteryFull, BatteryLow, BatteryMedium, Flame, Plus, Trash2 } from 'lucide-react';
-import { Bar, Seg, Sheet, toast } from '../components/ui';
+import { Seg, Sheet, toast } from '../components/ui';
 import { KcalChip, useKcalPop } from '../components/Journey';
 import { TaskRow } from '../components/TaskRow';
 import { SeasonBanner } from '../components/Season';
+import { QuestList } from '../components/QuestList';
 import { CAT_ORDER, CATEGORIES, LIBRARY, TASK_EMOJIS } from '../data/tasks';
 import { BATTERIES, JOURNEY_TEXT } from '../data/lines';
 import { dayKcal, taskKcal } from '../logic/evolution';
-import { activeQuests, claimKey, questProgress, type Period } from '../logic/progress';
+import { activeQuests, type Period } from '../logic/progress';
 import { REST_PER_WEEK, streakOf } from '../logic/streak';
-import { addLibraryTask, addTask, claimQuest, dayOf, deleteTask, kcalOf, minor, personKg, setBattery, setRest, todayKey, todayTasks, toggleTask, updateTask, useApp, type TaskInput } from '../lib/store';
+import { addLibraryTask, addTask, dayOf, deleteTask, kcalOf, minor, personKg, setBattery, setRest, todayKey, todayTasks, toggleTask, updateTask, useApp, type TaskInput } from '../lib/store';
 import { fmtNum } from '../lib/util';
 import { WEEKDAYS } from '../lib/util';
 import type { Battery, Category, Freq, Task } from '../types';
 
 const BATTERY_ICON = { 1: BatteryLow, 2: BatteryMedium, 3: BatteryFull } as const;
-const PERIOD_LABEL: Record<Period, string> = { dia: 'Diários', semana: 'Da semana', mes: 'Do mês' };
+const PERIOD_LABEL: Record<Period, string> = { dia: 'de hoje', semana: 'da semana', mes: 'do mês' };
 
 export function Activities({ onShareTask }: { onShareTask: (task: Task) => void }) {
   const s = useApp();
@@ -104,10 +105,10 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
           if (!list.length) return null;
           return (
             <div key={cat} className="grid gap-2">
-              <h2 className="flex items-center gap-2 font-display text-[19px] font-bold">
+              <h2 className="section-label flex items-center gap-2 px-1">
                 <span aria-hidden="true">{CATEGORIES[cat].emoji}</span> {CATEGORIES[cat].label}
               </h2>
-              <ul className="grid gap-2">
+              <ul className="grid gap-3">
                 {list.map((t) => (
                   <TaskRow key={t.id} task={t} done={t.id in day.done} kcal={showKcal ? kcalOf(s, t) : 0} dir={dir} sub={freqLabel(t.freq)} onToggle={(el) => onToggle(t, el)} onEdit={() => setEditing(t)} />
                 ))}
@@ -116,47 +117,22 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
           );
         })}
         {!tasks.length && <p className="rounded-2xl border-2 border-dashed border-line p-5 text-center text-muted">Nenhuma atividade para hoje. Que tal adicionar uma bem pequena?</p>}
-        <button className="btn btn-ghost" onClick={() => setEditing('new')}>
-          <Plus size={18} /> Nova atividade
+        <button className="btn-page" onClick={() => setEditing('new')} aria-label="Nova atividade">
+          <span className="btn-page-ico" aria-hidden="true">
+            <Plus size={26} strokeWidth={3} />
+          </span>
+          Adicionar uma missão
         </button>
       </section>
 
-      <section className="grid gap-3" aria-label="Desafios">
-        <h2 className="font-display text-[22px] font-bold">Desafios</h2>
+      <section className="grid gap-4" aria-label="Desafios">
         {(['dia', 'semana', 'mes'] as Period[]).map((period) => (
-          <div key={period} className="card grid gap-3 p-4">
-            <p className="eyebrow">{PERIOD_LABEL[period]}</p>
-            {quests
-              .filter((q) => q.period === period)
-              .map((q) => {
-                const p = questProgress(q, s.days, today);
-                const claimed = !!s.claimed[claimKey(q, today)];
-                return (
-                  <div key={q.id} className="flex items-center gap-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[15px] font-bold leading-tight">{q.title}</p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <div className="flex-1">
-                          <Bar value={p} max={q.target} tone="gold" label={q.title} thin />
-                        </div>
-                        <span className="text-[12px] font-bold tabular-nums text-muted">
-                          {p}/{q.target}
-                        </span>
-                      </div>
-                    </div>
-                    {claimed ? (
-                      <span className="chip chip-leaf">Feito ✓</span>
-                    ) : (
-                      <button className="btn btn-soft btn-sm" disabled={p < q.target} onClick={() => claimQuest(q.id) && toast(`+${q.coins} sementes e +${q.xp} XP!`)}>
-                        +{q.coins} 🌻
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
+          <div key={period} className="grid gap-3">
+            <h2 className="section-label px-1">Desafios {PERIOD_LABEL[period]}</h2>
+            <QuestList quests={quests.filter((q) => q.period === period)} s={s} today={today} />
           </div>
         ))}
-        <p className="text-[13px] text-muted">Constância vale mais que intensidade: os desafios contam dias, não quantidade.</p>
+        <p className="px-1 text-[13px] text-muted">Constância vale mais que intensidade: os desafios contam dias, não quantidade.</p>
       </section>
 
       <TaskSheet task={editing} onClose={() => setEditing(null)} />

@@ -47,3 +47,9 @@ Cobrança real, push num celular de verdade (precisa do app publicado em HTTPS) 
 - **Servidor:** 25 testes (`cd server && npm test`). Novos: bio com filtro de gentileza, contadores no perfil, perfil invisível para estranhos, grupo só com amigos, mural só para membros, post de grupo fora do feed geral, só o dono adiciona, dono saindo apaga, bloqueio esconde posts no grupo.
 - **Navegador (Playwright, 390 px):** onboarding novo (idade → missão → peso e meta → prévia da jornada), concluir missão no Início (número de calorias voando, Hami 165 → 164,9 g, tela de ofensiva), cafuné, lanchinho, banho nas 6 etapas, Chuva de sementes, Busca a bolinha, escovar, nanar, Missões com temporada, sugestões da jornada, Evolução, álbum, loja e modo escuro. Sem erros de página e sem rolagem lateral.
 - **Três pessoas com servidor real:** pedidos por código, bio, post, toque duplo para curtir, comentário ofensivo bloqueado, perfil da amiga com bio e grade, grupo criado com duas amigas, post no mural visto por quem não é amigo da autora, post do grupo fora do feed geral, estado antigo migrado para a jornada nova.
+
+## Rodada 4 (cor única por tela e celular)
+
+- **Começo duplicado:** 5 perguntas e a tela de peso antiga apareciam duas vezes. Removido, e a varredura agora acusa qualquer fala repetida em cada passo do começo.
+- **Rolagem para o lado:** varredura automática em todas as telas (começo, Início, cuidados, Evolução, Ajustes, Missões, sugestões, Mundo, Bem-estar, Amigos) em 390, 360 e 320 px, também com texto 35% maior (como a fonte grande do Android). Corrigidos: gaveta de Ajustes (nomes das cores), passos do banho, prévia da jornada (grades de uma coluna agora nunca passam da tela) e o número de calorias perto da borda. Gavetas e telas cheias não rolam mais para o lado.
+- 40 testes do app passando; servidor sem mudanças nesta rodada.

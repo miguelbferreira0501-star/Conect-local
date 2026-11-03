@@ -56,6 +56,16 @@ export default function App() {
     root.setAttribute('data-accent', s.settings.accent);
   }, [s.settings.theme, s.settings.accent]);
 
+  // Cada aba tem a sua cor de fundo (o começo também).
+  useEffect(() => {
+    document.documentElement.setAttribute('data-screen', s.onboarded ? tab : 'onboarding');
+  }, [tab, s.onboarded]);
+
+  // Ao terminar o começo, o Início abre do topo.
+  useEffect(() => {
+    if (s.onboarded) window.scrollTo({ top: 0 });
+  }, [s.onboarded]);
+
   // O tempo passa para o Hami (fome, sono, pesagem semanal) e os lembretes chegam no horário.
   useEffect(() => {
     tick();

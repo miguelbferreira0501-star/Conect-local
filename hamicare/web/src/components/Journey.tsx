@@ -27,7 +27,9 @@ export function useKcalPop() {
     if (!el || prefersReducedMotion()) return;
     const r = el.getBoundingClientRect();
     const id = Date.now() + Math.random();
-    setPops((p) => [...p, { id, x: r.left + r.width / 2, y: r.top, text, gain }]);
+    // Fica sempre dentro da tela, mesmo saindo do botão da direita.
+    const x = Math.min(window.innerWidth - 70, Math.max(70, r.left + r.width / 2));
+    setPops((p) => [...p, { id, x, y: r.top, text, gain }]);
     setTimeout(() => setPops((p) => p.filter((x) => x.id !== id)), 1300);
   }, []);
   const layer = (
@@ -142,7 +144,7 @@ export function JourneyCard({ s, onOpen }: { s: State; onOpen: () => void }) {
 
 function Stat({ value, label }: { value: string; label: string }) {
   return (
-    <div className="rounded-2xl bg-white/25 px-2 py-1.5 text-center">
+    <div className="journey-stat rounded-2xl px-2 py-1.5 text-center">
       <p className="font-display text-[17px] font-bold leading-none tabular-nums">{value}</p>
       <p className="text-[10.5px] font-extrabold uppercase leading-tight opacity-85">{label}</p>
     </div>
