@@ -1,0 +1,31 @@
+# Publicação do HamiCare no Render (https://render.com) via "Blueprint".
+# Você só precisa informar DATABASE_OWNER_URL (endereço do banco, por exemplo do Neon ou do Supabase).
+services:
+  - type: web
+    name: hamicare
+    runtime: node
+    plan: free
+    rootDir: hamicare
+    buildCommand: cd web && npm ci && npm run build && cd ../server && npm ci
+    # Na inicialização: cria o papel da API no banco e aplica as migrações.
+    startCommand: cd server && npm run deploy && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: WEB_DIST
+        value: ../web/dist
+      - key: DB_APP_PASSWORD
+        generateValue: true
+      - key: DATABASE_OWNER_URL
+        sync: false
+      # Seu e-mail (o mesmo da conta criada no app) para abrir o painel de administração:
+      - key: ADMIN_EMAILS
+        sync: false
+      # Endereço público do app (ex.: https://hamicare.onrender.com), para a proteção contra CSRF:
+      - key: APP_ORIGINS
+        sync: false

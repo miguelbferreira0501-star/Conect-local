@@ -135,7 +135,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: 'ofensiva7', title: 'Uma semana seguida', desc: 'Ofensiva de 7 dias', emoji: '🔥', coins: 30, check: (_s, c) => c.best >= 7 },
   { id: 'ofensiva30', title: 'Primeiro mês de constância', desc: 'Ofensiva de 30 dias', emoji: '🏅', coins: 120, check: (_s, c) => c.best >= 30 },
   { id: 'primeira-aventura', title: 'Explorador', desc: 'Primeira aventura do Hami', emoji: '🗺️', coins: 20, check: (s) => Object.keys(s.placesDone).length > 0 },
-  { id: 'primeira-decoracao', title: 'Lar doce lar', desc: 'Colocou o primeiro móvel na casa', emoji: '🛋️', coins: 15, check: (s) => s.house.items.length > 0 },
+  { id: 'primeira-decoracao', title: 'Lar doce lar', desc: 'Decorou a casa pela primeira vez', emoji: '🛋️', coins: 15, check: (s) => s.house.items.some((i) => !i.uid.startsWith('inicial-')) || s.house.wallpaper !== 'p-creme' || s.house.floor !== 'f-madeira' },
   { id: 'primeiro-banho', title: 'Cheirosinho', desc: 'Deu o primeiro banho no Hami', emoji: '🫧', coins: 10, check: (s) => anyDay(s, (d) => d.care.includes('banho')) },
   { id: 'pote10', title: 'Pote cheinho', desc: '10 coisas boas guardadas', emoji: '🫙', coins: 25, check: (s) => s.jar.length >= 10 },
   { id: 'diario7', title: 'Querido diário', desc: '7 textos no diário', emoji: '📔', coins: 25, check: (s) => s.journal.length >= 7 },

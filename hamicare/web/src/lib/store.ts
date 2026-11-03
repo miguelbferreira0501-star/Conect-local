@@ -53,9 +53,18 @@ export function fresh(): State {
     days: {},
     journal: [],
     jar: [],
-    inventory: { 'p-creme': 1, 'f-madeira': 1, cenoura: 3, maca: 2, semente: 3 },
+    inventory: { 'p-creme': 1, 'f-madeira': 1, cenoura: 3, maca: 2, semente: 3, rodinha: 1, caminha: 1, planta: 1 },
     wishlist: [],
-    house: { wallpaper: 'p-creme', floor: 'f-madeira', items: [] },
+    // Casa inicial: já vem com o básico de todo hamster.
+    house: {
+      wallpaper: 'p-creme',
+      floor: 'f-madeira',
+      items: [
+        { uid: 'inicial-rodinha', itemId: 'rodinha', x: 20, y: 74, z: 1 },
+        { uid: 'inicial-caminha', itemId: 'caminha', x: 79, y: 86, z: 2 },
+        { uid: 'inicial-planta', itemId: 'planta', x: 88, y: 62, z: 3 },
+      ],
+    },
     adventure: null,
     finds: [],
     placesDone: {},

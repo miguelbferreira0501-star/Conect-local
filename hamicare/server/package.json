@@ -9,6 +9,7 @@
     "start": "tsx --env-file-if-exists=.env src/index.ts",
     "migrate": "tsx --env-file-if-exists=.env src/cli.ts migrate",
     "reset": "tsx --env-file-if-exists=.env src/cli.ts reset",
+    "deploy": "tsx --env-file-if-exists=.env src/cli.ts deploy",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json"
   },
