@@ -10,7 +10,9 @@ const scripts = [];
 const headRest = head
   .replace(/<script[\s\S]*?<\/script>/g, (s) => (scripts.push(s), ''))
   .replace(/<meta charset[^>]*>/i, '')
-  .replace(/<meta name="viewport"[^>]*>/i, '');
+  .replace(/<meta name="viewport"[^>]*>/i, '')
+  // Manifesto e ícones são do app instalado; a página publicada não tem esses arquivos.
+  .replace(/<link rel="(manifest|icon|apple-touch-icon)"[^>]*>/gi, '');
 const bodyRest = body.replace(/<script[\s\S]*?<\/script>/g, (s) => (scripts.push(s), ''));
 
 const out = `${headRest.trim()}\n${bodyRest.trim()}\n${scripts.join('\n')}\n`;

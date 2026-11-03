@@ -558,6 +558,11 @@ export function receiveGift(itemId: string) {
   commit({ ...state, inventory: { ...state.inventory, [itemId]: (state.inventory[itemId] ?? 0) + 1 } });
 }
 
+/** Recompensa de evento (validada pelo servidor). */
+export function addCoins(n: number) {
+  if (n > 0) commit({ ...state, coins: state.coins + n });
+}
+
 /** Paga um presente para um amigo (desconta as sementes). */
 export function payGift(itemId: string): boolean {
   const item = itemById(itemId);

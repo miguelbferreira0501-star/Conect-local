@@ -12,6 +12,7 @@ import { claimQuest, dayOf, finishAdventure, minor, toggleSleep, care as doCare,
 import { addDays, prefersReducedMotion, weekStart, WEEKDAYS, fmtNum } from '../lib/util';
 import { isActive } from '../logic/evolution';
 import { CareLayer, type CareMode } from './Care';
+import { EventsBanner } from './Events';
 import type { Photo, PetMood } from '../types';
 
 function useNow(ms: number) {
@@ -165,6 +166,8 @@ export function Home({ onGo, onSettings, onEvolution, onShare }: { onGo: (tab: '
           ))}
         </div>
       </section>
+
+      <EventsBanner />
 
       <button className="card grid gap-3 p-4 text-left" onClick={() => onGo('atividades')}>
         <div className="flex items-center justify-between gap-2">

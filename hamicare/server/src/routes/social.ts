@@ -1,0 +1,378 @@
+// Amigos, feed só de gentileza, presentes e desafios em grupo. Toda leitura passa pelas
+// políticas RLS (só amigos veem posts; bloqueio corta tudo). Peso, diário e humor nunca entram aqui.
+import { randomBytes } from 'node:crypto';
+import { Hono } from 'hono';
+import { z } from 'zod';
+import type pg from 'pg';
+import { withUser } from '../db';
+import { AppError, forbidden, invalid, notFound } from '../lib/errors';
+import { type AppEnv, requireAuth } from '../auth';
+import { checkKindness, PRESET_COMMENTS, REACTION_IDS, REASON_TEXT } from '../../../web/src/shared/moderation';
+import { ITEMS } from '../../../web/src/data/items';
+
+export const social = new Hono<AppEnv>();
+social.use('*', requireAuth);
+
+type Me = { id: string; ageGroup: 'ate12' | '13a17' | '18mais' };
+
+/** Roda com a identidade da pessoa e aplica as regras de idade da parte social. */
+async function asMe<T>(c: { get: (k: 'userId') => string | null }, fn: (db: pg.PoolClient, me: Me) => Promise<T>): Promise<T> {
+  return withUser(c.get('userId'), async (db) => {
+    const u = (await db.query('SELECT id, age_group FROM users WHERE id = app.current_user_id()')).rows[0];
+    if (!u) throw forbidden();
+    if (u.age_group === 'ate12') throw forbidden('Amigos e feed ficam desligados para menores de 13 anos.');
+    return fn(db, { id: u.id, ageGroup: u.age_group });
+  });
+}
+
+const uuid = z.string().uuid();
+const pid = (v: string) => {
+  const r = uuid.safeParse(v);
+  if (!r.success) throw notFound();
+  return r.data;
+};
+
+const PROFILE_COLS = `p.user_id AS id, p.name, p.code, p.pet, p.house, p.level, p.teen, p.accepts_requests AS "acceptsRequests", (extract(epoch from p.updated_at) * 1000)::bigint AS "updatedAt"`;
+
+const outfit = z.object({ chapeu: z.string().max(40).nullable(), oculos: z.string().max(40).nullable(), roupa: z.string().max(40).nullable(), acessorio: z.string().max(40).nullable() });
+const petSchema = z.object({ name: z.string().max(20), fur: z.string().max(20), phase: z.number().int().min(0).max(3), outfit });
+const houseSchema = z.object({
+  wallpaper: z.string().max(30),
+  floor: z.string().max(30),
+  items: z.array(z.object({ uid: z.string().max(30), itemId: z.string().max(40), x: z.number(), y: z.number(), z: z.number() })).max(80),
+});
+
+function kind(text: string) {
+  const r = checkKindness(text);
+  if (!r.ok) throw invalid(REASON_TEXT[r.reason]);
+  return r.text;
+}
+
+// ---------- Perfil ----------
+
+social.get('/me', (c) =>
+  asMe(c, async (db) => {
+    const p = (await db.query(`SELECT ${PROFILE_COLS} FROM profiles p WHERE p.user_id = app.current_user_id()`)).rows[0];
+    return c.json({ profile: p ?? null });
+  }),
+);
+
+social.put('/profile', (c) =>
+  asMe(c, async (db, me) => {
+    const body = z.object({ name: z.string().trim().min(1).max(40), pet: petSchema, house: houseSchema, level: z.number().int().min(1).max(999), acceptsRequests: z.boolean() }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success) throw invalid('Perfil inválido.');
+    const b = body.data;
+    kind(b.name);
+    kind(b.pet.name);
+    const existing = (await db.query('SELECT code FROM profiles WHERE user_id = $1', [me.id])).rows[0];
+    let code = existing?.code as string | undefined;
+    for (let i = 0; !code && i < 5; i++) {
+      const candidate = `HAMI-${randomBytes(4).toString('hex').toUpperCase().slice(0, 6)}`;
+      const taken = (await db.query('SELECT 1 FROM app.find_by_code($1)', [candidate])).rowCount;
+      if (!taken) code = candidate;
+    }
+    await db.query(
+      `INSERT INTO profiles (user_id, code, name, pet, house, level, teen, accepts_requests) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       ON CONFLICT (user_id) DO UPDATE SET name = $3, pet = $4, house = $5, level = $6, teen = $7, accepts_requests = $8, updated_at = now()`,
+      [me.id, code, b.name, b.pet, b.house, b.level, me.ageGroup !== '18mais', b.acceptsRequests],
+    );
+    const p = (await db.query(`SELECT ${PROFILE_COLS} FROM profiles p WHERE p.user_id = $1`, [me.id])).rows[0];
+    return c.json({ profile: p });
+  }),
+);
+
+social.get('/code/:code', (c) =>
+  asMe(c, async (db) => {
+    const p = (await db.query(`SELECT ${PROFILE_COLS} FROM app.find_by_code($1) p`, [c.req.param('code').trim().toUpperCase()])).rows[0];
+    return c.json({ profile: p ?? null });
+  }),
+);
+
+// ---------- Amizades e bloqueios ----------
+
+social.post('/friends/:id/request', (c) =>
+  asMe(c, async (db) => {
+    const result = (await db.query('SELECT app.request_friend($1) AS r', [pid(c.req.param('id'))])).rows[0].r;
+    return c.json({ result });
+  }),
+);
+social.post('/friends/:id/accept', (c) =>
+  asMe(c, async (db) => {
+    const r = await db.query(`UPDATE friendships SET status = 'aceita' WHERE requester = $1 AND addressee = app.current_user_id()`, [pid(c.req.param('id'))]);
+    if (!r.rowCount) throw notFound('Pedido não encontrado.');
+    return c.json({ ok: true });
+  }),
+);
+social.post('/friends/:id/decline', (c) =>
+  asMe(c, async (db) => {
+    await db.query('DELETE FROM friendships WHERE requester = $1 AND addressee = app.current_user_id()', [pid(c.req.param('id'))]);
+    return c.json({ ok: true });
+  }),
+);
+social.delete('/friends/:id', (c) =>
+  asMe(c, async (db) => {
+    const other = pid(c.req.param('id'));
+    await db.query('DELETE FROM friendships WHERE (requester = $1 AND addressee = app.current_user_id()) OR (addressee = $1 AND requester = app.current_user_id())', [other]);
+    return c.json({ ok: true });
+  }),
+);
+social.post('/blocks/:id', (c) =>
+  asMe(c, async (db) => {
+    const other = pid(c.req.param('id'));
+    await db.query('INSERT INTO blocks (blocker, blocked) VALUES (app.current_user_id(), $1) ON CONFLICT DO NOTHING', [other]);
+    await db.query('DELETE FROM friendships WHERE (requester = $1 AND addressee = app.current_user_id()) OR (addressee = $1 AND requester = app.current_user_id())', [other]);
+    return c.json({ ok: true });
+  }),
+);
+social.delete('/blocks/:id', (c) =>
+  asMe(c, async (db) => {
+    await db.query('DELETE FROM blocks WHERE blocker = app.current_user_id() AND blocked = $1', [pid(c.req.param('id'))]);
+    return c.json({ ok: true });
+  }),
+);
+
+social.get('/friends', (c) =>
+  asMe(c, async (db, me) => {
+    const rows = (
+      await db.query(
+        `SELECT f.requester, f.addressee, f.status, ${PROFILE_COLS} FROM friendships f
+         JOIN profiles p ON p.user_id = CASE WHEN f.requester = $1 THEN f.addressee ELSE f.requester END`,
+        [me.id],
+      )
+    ).rows;
+    const strip = ({ requester: _r, addressee: _a, status: _s, ...p }: Record<string, unknown>) => p;
+    const blocked = (await db.query('SELECT blocked AS id FROM blocks WHERE blocker = app.current_user_id()')).rows.map((b) => ({
+      id: b.id,
+      name: 'Pessoa bloqueada',
+      code: '',
+      pet: { name: 'Hami', fur: 'nuvem', phase: 0, outfit: { chapeu: null, oculos: null, roupa: null, acessorio: null } },
+      house: { wallpaper: 'p-creme', floor: 'f-madeira', items: [] },
+      level: 1,
+      teen: false,
+      acceptsRequests: false,
+      updatedAt: 0,
+    }));
+    return c.json({
+      friends: rows.filter((r) => r.status === 'aceita').map(strip),
+      incoming: rows.filter((r) => r.status === 'pendente' && r.addressee === me.id).map(strip),
+      outgoing: rows.filter((r) => r.status === 'pendente' && r.requester === me.id).map(strip),
+      blocked,
+    });
+  }),
+);
+
+// ---------- Feed ----------
+
+social.get('/feed', (c) =>
+  asMe(c, async (db, me) => {
+    const posts = (
+      await db.query(
+        `SELECT id, author_id AS "authorId", kind, text, pet, house, image, (extract(epoch from created_at) * 1000)::bigint AS "createdAt"
+         FROM posts WHERE NOT hidden ORDER BY created_at DESC LIMIT 60`,
+      )
+    ).rows.map((p) => ({ ...p, pet: p.pet ?? undefined, house: p.house ?? undefined, image: p.image ?? undefined }));
+    const ids = posts.map((p) => p.id);
+    const reactions = ids.length ? (await db.query('SELECT post_id, user_id, kind FROM reactions WHERE post_id = ANY($1)', [ids])).rows : [];
+    const comments = ids.length
+      ? (await db.query(`SELECT id, post_id, author_id, text, (extract(epoch from created_at) * 1000)::bigint AS created FROM comments WHERE post_id = ANY($1) AND NOT hidden ORDER BY created_at`, [ids])).rows
+      : [];
+    const author = new Map(posts.map((p) => [p.id, p.authorId]));
+    const key = (postId: string) => `${author.get(postId)}:${postId}`;
+    const people = [...new Set([me.id, ...posts.map((p) => p.authorId), ...comments.map((x) => x.author_id)])];
+    const profiles = Object.fromEntries((await db.query(`SELECT ${PROFILE_COLS} FROM profiles p WHERE p.user_id = ANY($1)`, [people])).rows.map((p) => [p.id, p]));
+    return c.json({
+      posts,
+      profiles,
+      reactions: reactions.map((r) => ({ postKey: key(r.post_id), authorId: r.user_id, kind: r.kind })),
+      comments: comments.map((x) => ({ id: x.id, postKey: key(x.post_id), authorId: x.author_id, text: x.text, createdAt: x.created })),
+    });
+  }),
+);
+
+social.post('/posts', (c) =>
+  asMe(c, async (db, me) => {
+    const body = z
+      .object({
+        kind: z.enum(['foto', 'atividade', 'conquista', 'decoracao', 'momento']),
+        text: z.string().max(200).default(''),
+        pet: petSchema.extend({ mood: z.string().max(20) }).optional(),
+        house: houseSchema.optional(),
+        image: z.string().max(400_000).optional(),
+      })
+      .safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success) throw invalid('Post inválido.');
+    const b = body.data;
+    const text = b.text.trim() ? kind(b.text) : '';
+    if (b.image && me.ageGroup !== '18mais') throw forbidden('Fotos reais ficam disponíveis a partir dos 18 anos.');
+    if (b.image && !b.image.startsWith('data:image/jpeg;base64,')) throw invalid('Formato de foto inválido.');
+    const { rows } = await db.query('INSERT INTO posts (author_id, kind, text, pet, house, image) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id', [me.id, b.kind, text, b.pet ?? null, b.house ?? null, b.image ?? null]);
+    return c.json({ id: rows[0].id }, 201);
+  }),
+);
+
+social.delete('/posts/:id', (c) =>
+  asMe(c, async (db) => {
+    await db.query('DELETE FROM posts WHERE id = $1 AND author_id = app.current_user_id()', [pid(c.req.param('id'))]);
+    return c.json({ ok: true });
+  }),
+);
+
+social.put('/reactions', (c) =>
+  asMe(c, async (db, me) => {
+    const body = z.object({ postId: z.string().uuid(), kind: z.string().nullable() }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success || (body.data.kind && !REACTION_IDS.includes(body.data.kind))) throw invalid('Reação inválida.');
+    const { postId, kind: k } = body.data;
+    if (!k) await db.query('DELETE FROM reactions WHERE post_id = $1 AND user_id = $2', [postId, me.id]);
+    else {
+      try {
+        await db.query('INSERT INTO reactions (post_id, user_id, kind) VALUES ($1, $2, $3) ON CONFLICT (post_id, user_id) DO UPDATE SET kind = EXCLUDED.kind', [postId, me.id, k]);
+      } catch (e) {
+        if ((e as { code?: string }).code === '42501') throw notFound('Post não encontrado.');
+        throw e;
+      }
+    }
+    return c.json({ ok: true });
+  }),
+);
+
+social.post('/comments', (c) =>
+  asMe(c, async (db, me) => {
+    const body = z.object({ postId: z.string().uuid(), text: z.string() }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success) throw invalid('Comentário inválido.');
+    // Menores de 18 comentam só com elogios prontos.
+    if (me.ageGroup !== '18mais' && !PRESET_COMMENTS.includes(body.data.text)) throw invalid('Para menores de 18, os comentários são os elogios prontos.');
+    const text = kind(body.data.text);
+    try {
+      const { rows } = await db.query('INSERT INTO comments (post_id, author_id, text) VALUES ($1, $2, $3) RETURNING id', [body.data.postId, me.id, text]);
+      return c.json({ id: rows[0].id }, 201);
+    } catch (e) {
+      if ((e as { code?: string }).code === '42501' || (e as { code?: string }).code === '23503') throw notFound('Post não encontrado.');
+      throw e;
+    }
+  }),
+);
+
+social.delete('/comments/:id', (c) =>
+  asMe(c, async (db) => {
+    await db.query('DELETE FROM comments WHERE id = $1 AND author_id = app.current_user_id()', [pid(c.req.param('id'))]);
+    return c.json({ ok: true });
+  }),
+);
+
+social.post('/comments/:id/hide', (c) =>
+  asMe(c, async (db) => {
+    const r = (await db.query('SELECT app.hide_comment($1) AS ok', [pid(c.req.param('id'))])).rows[0];
+    if (!r?.ok) throw forbidden('Só quem postou pode esconder comentários.');
+    return c.json({ ok: true });
+  }),
+);
+
+// ---------- Denúncias ----------
+
+social.post('/reports', (c) =>
+  asMe(c, async (db, me) => {
+    const body = z.object({ type: z.enum(['post', 'comment', 'user']), id: z.string().uuid(), userId: z.string().uuid().optional(), reason: z.string().max(200).default('') }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success) throw invalid('Denúncia inválida.');
+    const b = body.data;
+    await db.query(
+      `INSERT INTO reports (reporter_id, target_type, target_id, target_user, reason) VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (reporter_id, target_type, target_id) DO NOTHING`,
+      [me.id, b.type, b.id, b.userId ?? null, b.reason || 'sem motivo'],
+    );
+    if (b.type !== 'user') await db.query('SELECT app.auto_hide($1, $2)', [b.type, b.id]);
+    return c.json({ ok: true }, 201);
+  }),
+);
+
+// ---------- Presentes ----------
+
+const GIFTABLE = new Set(['vibe', ...ITEMS.filter((i) => !i.souvenir && i.price > 0).map((i) => i.id)]);
+
+social.get('/gifts', (c) =>
+  asMe(c, async (db) => {
+    const gifts = (
+      await db.query(
+        `SELECT id, from_id AS "from", to_id AS "to", item_id AS "itemId", note, claimed_at IS NOT NULL AS claimed, (extract(epoch from created_at) * 1000)::bigint AS "createdAt"
+         FROM gifts WHERE to_id = app.current_user_id() ORDER BY created_at DESC LIMIT 100`,
+      )
+    ).rows;
+    return c.json({ gifts });
+  }),
+);
+
+social.post('/gifts', (c) =>
+  asMe(c, async (db, me) => {
+    const body = z.object({ to: z.string().uuid(), itemId: z.string(), note: z.string().max(80).default('') }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success || !GIFTABLE.has(body.data.itemId)) throw invalid('Presente inválido.');
+    const note = body.data.note.trim() ? kind(body.data.note) : '';
+    try {
+      await db.query('INSERT INTO gifts (from_id, to_id, item_id, note) VALUES ($1, $2, $3, $4)', [me.id, body.data.to, body.data.itemId, note]);
+    } catch (e) {
+      if ((e as { code?: string }).code === '42501') throw forbidden('Presentes só para amigos.');
+      throw e;
+    }
+    return c.json({ ok: true }, 201);
+  }),
+);
+
+social.post('/gifts/:id/claim', (c) =>
+  asMe(c, async (db) => {
+    const g = (
+      await db.query(
+        `UPDATE gifts SET claimed_at = now() WHERE id = $1 AND to_id = app.current_user_id() AND claimed_at IS NULL
+         RETURNING id, from_id AS "from", to_id AS "to", item_id AS "itemId", note, true AS claimed, (extract(epoch from created_at) * 1000)::bigint AS "createdAt"`,
+        [pid(c.req.param('id'))],
+      )
+    ).rows[0];
+    return c.json({ gift: g ?? null });
+  }),
+);
+
+// ---------- Desafios em grupo ----------
+
+social.get('/challenges', (c) =>
+  asMe(c, async (db) => {
+    const list = (await db.query(`SELECT id, owner_id AS "ownerId", title, emoji, target, ends_at AS "endsAt" FROM challenges WHERE ends_at >= current_date - 7 ORDER BY created_at DESC LIMIT 30`)).rows;
+    const ids = list.map((x) => x.id);
+    const members = ids.length ? (await db.query('SELECT challenge_id, user_id FROM challenge_members WHERE challenge_id = ANY($1)', [ids])).rows : [];
+    const checks = ids.length ? (await db.query(`SELECT challenge_id, user_id, to_char(day, 'YYYY-MM-DD') AS day FROM challenge_checkins WHERE challenge_id = ANY($1)`, [ids])).rows : [];
+    return c.json({
+      challenges: list.map((ch) => {
+        const m = members.filter((x) => x.challenge_id === ch.id).map((x) => x.user_id);
+        const checkins: Record<string, string[]> = {};
+        for (const u of m) checkins[u] = checks.filter((x) => x.challenge_id === ch.id && x.user_id === u).map((x) => x.day);
+        return { ...ch, members: m, checkins };
+      }),
+    });
+  }),
+);
+
+social.post('/challenges', (c) =>
+  asMe(c, async (db, me) => {
+    const body = z.object({ title: z.string().trim().min(1).max(50), emoji: z.string().max(8), target: z.number().int().min(1).max(30), days: z.number().int().min(1).max(60) }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success || body.data.target > body.data.days) throw invalid('Desafio inválido.');
+    const title = kind(body.data.title);
+    const { rows } = await db.query(`INSERT INTO challenges (owner_id, title, emoji, target, ends_at) VALUES ($1, $2, $3, $4, current_date + $5::int) RETURNING id`, [me.id, title, body.data.emoji, body.data.target, body.data.days]);
+    await db.query('INSERT INTO challenge_members (challenge_id, user_id) VALUES ($1, $2)', [rows[0].id, me.id]);
+    return c.json({ id: rows[0].id }, 201);
+  }),
+);
+
+social.post('/challenges/:id/checkin', (c) =>
+  asMe(c, async (db, me) => {
+    const id = pid(c.req.param('id'));
+    const visible = (await db.query('SELECT ends_at >= current_date AS open FROM challenges WHERE id = $1', [id])).rows[0];
+    if (!visible) throw notFound('Desafio não encontrado.');
+    if (!visible.open) throw new AppError(409, 'encerrado', 'Esse desafio já terminou.');
+    await db.query('INSERT INTO challenge_members (challenge_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [id, me.id]);
+    await db.query('INSERT INTO challenge_checkins (challenge_id, user_id, day) VALUES ($1, $2, current_date) ON CONFLICT DO NOTHING', [id, me.id]);
+    return c.json({ ok: true });
+  }),
+);
+
+social.delete('/challenges/:id/membership', (c) =>
+  asMe(c, async (db, me) => {
+    await db.query('DELETE FROM challenge_members WHERE challenge_id = $1 AND user_id = $2', [pid(c.req.param('id')), me.id]);
+    return c.json({ ok: true });
+  }),
+);

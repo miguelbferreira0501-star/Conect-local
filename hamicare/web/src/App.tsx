@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Compass, Heart, Home as HomeIcon, ListChecks, Users } from 'lucide-react';
 import { Modal, Sheet, Toaster, toast } from './components/ui';
 import { Hamster } from './components/Hamster';
@@ -11,6 +11,7 @@ import { Onboarding } from './screens/Onboarding';
 import { SettingsSheet } from './screens/Settings';
 import { Evolution } from './screens/Evolution';
 import { Paywall } from './screens/Paywall';
+import { AccountSection } from './screens/Account';
 import { getState, minor, onCelebrate, tick, useApp, type Celebration } from './lib/store';
 import { markReminded, pickReminder, reminderDue, showNotification } from './lib/notify';
 import { syncProfile } from './lib/social';
@@ -32,8 +33,9 @@ function initialTab(): Tab {
   return TABS.some((t) => t.id === h) ? (h as Tab) : 'inicio';
 }
 
-export default function App({ account }: { account?: ReactNode }) {
+export default function App() {
   const s = useApp();
+  const account = <AccountSection />;
   const [tab, setTab] = useState<Tab>(initialTab);
   const [settings, setSettings] = useState(false);
   const [plus, setPlus] = useState(false);

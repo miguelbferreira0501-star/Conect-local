@@ -9,6 +9,8 @@ import {
 } from '../lib/store';
 import { askPermission, permission, pickReminder, showNotification } from '../lib/notify';
 import { copyText, formatDay } from '../lib/util';
+import { syncPush } from '../lib/account';
+import { getState } from '../lib/store';
 import type { AgeGroup, NotifKind, ThemePref, TraitId } from '../types';
 
 const NOTIF_LABEL: Record<NotifKind, string> = {
@@ -92,6 +94,7 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
             onChange={async (on) => {
               if (on && permission() === 'default') await askPermission();
               updateSettings({ notif: { ...s.settings.notif, enabled: on } });
+              syncPush(getState());
             }}
             label="Receber lembretes gentis"
             sub="Sem culpa e sem pressão. Um por dia, no horário que você escolher."
@@ -99,7 +102,7 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
           {s.settings.notif.enabled && (
             <>
               <Field id="set-time" label="Horário">
-                <input id="set-time" type="time" className="field" value={s.settings.notif.time} onChange={(e) => updateSettings({ notif: { ...s.settings.notif, time: e.target.value || '19:00' } })} />
+                <input id="set-time" type="time" className="field" value={s.settings.notif.time} onChange={(e) => updateSettings({ notif: { ...s.settings.notif, time: e.target.value || '19:00' } })} onBlur={() => syncPush(getState())} />
               </Field>
               {(Object.keys(NOTIF_LABEL) as NotifKind[]).map((k) => (
                 <Toggle key={k} id={`set-n-${k}`} checked={s.settings.notif.kinds[k]} onChange={(on) => updateSettings({ notif: { ...s.settings.notif, kinds: { ...s.settings.notif.kinds, [k]: on } } })} label={NOTIF_LABEL[k]} />

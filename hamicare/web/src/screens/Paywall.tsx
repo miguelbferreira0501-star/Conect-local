@@ -2,6 +2,8 @@ import { Check, Sparkles } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { toast } from '../components/ui';
 import { isPremium, startTrial, useApp } from '../lib/store';
+import { startTrialOnServer, useAccount } from '../lib/account';
+import { ApiError } from '../lib/social/api';
 import { formatDay } from '../lib/util';
 
 export const PLUS_PRICE = { month: 'R$ 12,90', year: 'R$ 79,90', yearMonthly: 'R$ 6,66' };
@@ -12,6 +14,7 @@ const PLUS = ['Roupas, pelagens e decorações especiais', 'Castelo e Espaço si
 /** HamiCare+: o essencial de autocuidado é sempre grátis. */
 export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () => void; fromOnboarding?: boolean; fur?: string; name?: string }) {
   const s = useApp();
+  const { user } = useAccount();
   const premium = isPremium(s);
   return (
     <div className="grid gap-4">
@@ -62,8 +65,15 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
           ) : (
             <button
               className="btn btn-primary"
-              onClick={() => {
-                if (startTrial()) toast('7 dias de Plus liberados!');
+              onClick={async () => {
+                if (user) {
+                  try {
+                    await startTrialOnServer();
+                    toast('7 dias de Plus liberados!');
+                  } catch (e) {
+                    toast(e instanceof ApiError ? e.message : 'Não deu certo agora.');
+                  }
+                } else if (startTrial()) toast('7 dias de Plus liberados!');
                 onClose();
               }}
             >
