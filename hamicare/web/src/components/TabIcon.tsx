@@ -1,5 +1,5 @@
 // Ícones ilustrados e coloridos da barra de abas (desenho próprio).
-export type TabId = 'inicio' | 'atividades' | 'mundo' | 'bem-estar' | 'amigos';
+export type TabId = 'inicio' | 'atividades' | 'cuidar' | 'mundo' | 'bem-estar' | 'amigos';
 
 export function TabIcon({ id }: { id: TabId }) {
   return (
@@ -18,6 +18,20 @@ export function TabIcon({ id }: { id: TabId }) {
             <rect x="6" y="5" width="20" height="23" rx="5" fill="#7BD389" stroke="#3FA45E" strokeWidth="1.5" />
             <rect x="11" y="3" width="10" height="5" rx="2.5" fill="#FFFFFF" stroke="#3FA45E" strokeWidth="1.5" />
             <path d="M11 17 l3.5 3.5 L21.5 13" stroke="#FFFFFF" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+        )}
+        {id === 'cuidar' && (
+          <g>
+            <circle cx="9" cy="9" r="4.5" fill="#E8955A" />
+            <circle cx="23" cy="9" r="4.5" fill="#E8955A" />
+            <circle cx="9" cy="9.5" r="2.2" fill="#FFB3C1" />
+            <circle cx="23" cy="9.5" r="2.2" fill="#FFB3C1" />
+            <ellipse cx="16" cy="18" rx="12" ry="10.5" fill="#F4B26B" stroke="#D98C45" strokeWidth="1.5" />
+            <ellipse cx="16" cy="22" rx="7" ry="5" fill="#FFE9D2" />
+            <circle cx="11.5" cy="16" r="1.5" fill="#2B2224" />
+            <circle cx="20.5" cy="16" r="1.5" fill="#2B2224" />
+            <path d="M14.6 19 h2.8 l-1.4 1.6 Z" fill="#F07A93" />
+            <path d="M16 27.5 C11.5 24.5 11 22 13 21 C14.2 20.5 15.4 21.2 16 22.2 C16.6 21.2 17.8 20.5 19 21 C21 22 20.5 24.5 16 27.5 Z" fill="#FF6F91" />
           </g>
         )}
         {id === 'mundo' && (

@@ -4,6 +4,7 @@ import { Seg, Sheet, toast } from '../components/ui';
 import { KcalChip, useKcalPop } from '../components/Journey';
 import { TaskRow } from '../components/TaskRow';
 import { SeasonBanner } from '../components/Season';
+import { EventsBanner } from './Events';
 import { QuestList } from '../components/QuestList';
 import { CAT_ORDER, CATEGORIES, LIBRARY, TASK_EMOJIS } from '../data/tasks';
 import { BATTERIES, JOURNEY_TEXT } from '../data/lines';
@@ -73,6 +74,8 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
       )}
 
       <SeasonBanner s={s} />
+
+      <EventsBanner />
 
       <section className="card grid gap-3 p-4" aria-label="Como está sua bateria">
         <p className="text-[15px] font-extrabold">Como tá sua bateria hoje?</p>

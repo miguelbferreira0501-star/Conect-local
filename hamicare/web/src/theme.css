@@ -12,6 +12,7 @@
 }
 :root[data-screen='inicio'] { --page: #82d2bf; --tab-active: rgba(255, 255, 255, 0.45); }
 :root[data-screen='atividades'] { --page: #c6e0f1; }
+:root[data-screen='cuidar'] { --page: #ffe6a1; }
 :root[data-screen='mundo'] { --page: #ffd6a6; }
 :root[data-screen='bem-estar'] { --page: #f9c8d7; }
 :root[data-screen='amigos'] { --page: #d2c5f6; }
@@ -21,6 +22,7 @@
   :root:not([data-theme='light']) { --soft-btn: #2c2638; --soft-edge: #1a1622; --soft-ink: #d9d3e6; --tab-active: rgba(255, 255, 255, 0.1); }
   :root:not([data-theme='light'])[data-screen='inicio'] { --page: #1d4741; }
   :root:not([data-theme='light'])[data-screen='atividades'] { --page: #1c3346; }
+  :root:not([data-theme='light'])[data-screen='cuidar'] { --page: #463a17; }
   :root:not([data-theme='light'])[data-screen='mundo'] { --page: #47321f; }
   :root:not([data-theme='light'])[data-screen='bem-estar'] { --page: #482536; }
   :root:not([data-theme='light'])[data-screen='amigos'] { --page: #2f2757; }
@@ -29,6 +31,7 @@
 :root[data-theme='dark'] { --soft-btn: #2c2638; --soft-edge: #1a1622; --soft-ink: #d9d3e6; --tab-active: rgba(255, 255, 255, 0.1); }
 :root[data-theme='dark'][data-screen='inicio'] { --page: #1d4741; }
 :root[data-theme='dark'][data-screen='atividades'] { --page: #1c3346; }
+:root[data-theme='dark'][data-screen='cuidar'] { --page: #463a17; }
 :root[data-theme='dark'][data-screen='mundo'] { --page: #47321f; }
 :root[data-theme='dark'][data-screen='bem-estar'] { --page: #482536; }
 :root[data-theme='dark'][data-screen='amigos'] { --page: #2f2757; }
@@ -433,4 +436,111 @@ body {
 /* Grades de uma coluna nunca passam da largura da tela (palavras longas quebram dentro). */
 .grid:not([class*='grid-cols']):not([class*='grid-flow']) {
   grid-template-columns: minmax(0, 1fr);
+}
+
+/* Seis abas: tudo cabe, até em telas estreitas */
+.tabbar-inner {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 2px;
+  padding: 6px 4px;
+}
+.tab {
+  min-width: 0;
+  font-size: 11.5px;
+}
+.tab .tab-ico,
+.tab[aria-current='page'] .tab-ico {
+  width: 36px;
+  height: 34px;
+}
+.tab-label {
+  display: block;
+  max-width: 100%;
+  padding: 0 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Botões grandes da aba Cuidar */
+.care-tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 26px;
+  background: var(--surface);
+  box-shadow: 0 4px 0 rgba(43, 34, 64, 0.09);
+  transition: transform 140ms var(--ease-out), box-shadow 140ms var(--ease-out);
+}
+.care-tile:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(43, 34, 64, 0.09);
+}
+.care-tile:disabled {
+  opacity: 0.45;
+}
+.care-tile-ico {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  font-size: 28px;
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.06);
+}
+.care-tile-done {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--check);
+  color: #ffffff;
+}
+
+.journey-tag {
+  max-width: 100%;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.journey-pct {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px 4px 12px;
+  border-radius: 999px;
+  background: var(--soft-btn);
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+/* Cartões em grade do próprio app também nunca passam da largura. */
+.journey,
+.done-card,
+.profile-head,
+.group-banner,
+.shop-hero,
+.album,
+.welcome-card {
+  grid-template-columns: minmax(0, 1fr);
+}
+.tab {
+  font-size: clamp(10px, 2.85vw, 11.5px);
+  letter-spacing: -0.01em;
+}
+.tab-label {
+  padding: 0;
+}
+@media (max-width: 340px) {
+  .tabbar-inner { gap: 0; padding: 6px 0; }
+  .tab { font-size: 9.5px; letter-spacing: -0.02em; }
 }

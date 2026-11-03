@@ -98,11 +98,12 @@ export function JourneyCard({ s, onOpen }: { s: State; onOpen: () => void }) {
   return (
     <button className={`journey journey-${j.dir} text-left`} onClick={onOpen} aria-label={`${t.title}: ${pct}% da meta. Abrir evolução`}>
       <div className="flex items-center justify-between gap-2">
-        <span className="journey-tag">
-          {t.emoji} {t.title}
+        <span className="journey-tag min-w-0">
+          <span aria-hidden="true">{t.emoji}</span>
+          <span className="truncate">{t.title}</span>
         </span>
-        <span className="flex items-center gap-1 text-[13px] font-extrabold">
-          {pctLabel}% da meta <ChevronRight size={18} />
+        <span className="journey-pct">
+          {pctLabel}% <ChevronRight size={16} />
         </span>
       </div>
       <div className="flex items-end gap-2">

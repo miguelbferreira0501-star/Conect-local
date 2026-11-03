@@ -11,7 +11,8 @@
 | Área | Funções |
 |---|---|
 | **Jornada de peso** | Missão escolhida no começo: emagrecer, ganhar peso ou manter. Cada missão tem calorias estimadas (movimento pelo MET × seu peso; trocas saudáveis; lanches nutritivos para ganhar). O Hami recebe as mesmas calorias: quando você chega na sua meta, ele chega na dele. Número voando ao concluir, resumo semanal, meta alcançada, opção de seguir a balança |
-| **Início** | Jardim vivo (céu muda com a hora, nuvens, borboletas, vaga-lumes) ou a casa; card grande da jornada; missões do dia com botão de concluir; 8 cuidados; boas-vindas do dia; tela de ofensiva com raios de sol |
+| **Início** | Só o essencial: o Hami no jardim (céu muda com a hora), o card da jornada de peso e as missões do dia com o botão de concluir. Boas-vindas do dia e tela de ofensiva com raios de sol |
+| **Cuidar** | Aba própria do Hami: ele na casinha dizendo do que precisa (com atalho para o cuidado certo), as 4 barrinhas e os 8 cuidados em botões grandes, com marquinha do que já foi feito hoje |
 | **Cuidados** | Cafuné (cócegas na barriga, cafuné na cabeça), lanchinho arrastando a comida até a boca, banho com chuveirinho/esponja/toalha/secador e espuma de verdade, Chuva de sementes e Busca a bolinha, escovar os nozinhos do pelo, hora de nanar (apagar a luz, cobrir, cantar) e acordar |
 | **Nossa evolução** | Jornada (agora → meta, progresso, calorias da semana, gráfico do peso do Hami, como as contas funcionam, trocar missão), 4 fases, condicionamento, seu peso (opcional, privado), meta segura, conquistas, fotos, linha do tempo |
 | **Missões** | 39 sugestões (com "Para a sua jornada" no topo) + as suas; selo de calorias em cada uma; bateria do dia e modo dia difícil; ofensiva com 2 descansos protegidos; temporada do mês com prêmio; desafios diários, semanais e mensais |

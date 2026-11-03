@@ -1,24 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronRight, Flame, Mail, Plus, Settings } from 'lucide-react';
+import { Flame, Mail, Plus, Settings } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
-import { Room } from '../components/Room';
 import { Scene } from '../components/Scene';
 import { JourneyCard, useKcalPop } from '../components/Journey';
 import { TaskRow } from '../components/TaskRow';
-import { QuestList } from '../components/QuestList';
-import { Bar, Coins, Modal, toast } from '../components/ui';
+import { Coins, Modal, toast } from '../components/ui';
 import { GREETING, periodOf, petLine } from '../data/lines';
-import { placeById, PLACES } from '../data/world';
-import { activeQuests, levelProgress } from '../logic/progress';
+import { placeById } from '../data/world';
 import { streakOf } from '../logic/streak';
 import { dayOf, finishAdventure, getState, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
 import { addDays, prefersReducedMotion, weekStart, WEEKDAYS, fmtNum } from '../lib/util';
 import { isActive } from '../logic/evolution';
-import { CareLayer, type CareMode } from './Care';
-import { EventsBanner } from './Events';
-import type { Photo, PetMood, Task } from '../types';
+import type { PetMood, Task } from '../types';
 
-function useNow(ms: number) {
+export function useNow(ms: number) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), ms);
@@ -27,7 +22,7 @@ function useNow(ms: number) {
   return now;
 }
 
-export function Home({ onGo, onSettings, onEvolution, onShare }: { onGo: (tab: 'atividades' | 'mundo' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onShare: (p: Photo) => void }) {
+export function Home({ onGo, onSettings, onEvolution }: { onGo: (tab: 'atividades' | 'cuidar') => void; onSettings: () => void; onEvolution: () => void }) {
   const s = useApp();
   const now = useNow(20_000);
   const today = todayKey();
@@ -35,12 +30,9 @@ export function Home({ onGo, onSettings, onEvolution, onShare }: { onGo: (tab: '
   const tasks = todayTasks(s, today);
   const done = tasks.filter((t) => t.id in day.done).length;
   const period = periodOf(new Date(now));
-  const lv = levelProgress(s.xp);
   const streak = streakOf(s.days, today, s.createdAt);
-  const [mode, setMode] = useState<CareMode>(null);
   const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
   const [result, setResult] = useState<AdventureResult | null>(null);
-  const [inside, setInside] = useState(false);
   const petRef = useRef<HTMLDivElement>(null);
   const [mood, setMoodAnim] = useState<PetMood | null>(null);
   const [puff, setPuff] = useState<{ id: number; text: string } | null>(null);
@@ -66,6 +58,7 @@ export function Home({ onGo, onSettings, onEvolution, onShare }: { onGo: (tab: '
     );
   }
 
+  // Tocar no Hami: só um carinho rápido (os cuidados completos ficam na aba Cuidar).
   function pet(e?: React.PointerEvent) {
     if (s.pet.sleeping) return toast(`${s.pet.name} está dormindo. Shhh…`);
     doCare('carinho');
@@ -103,19 +96,7 @@ export function Home({ onGo, onSettings, onEvolution, onShare }: { onGo: (tab: '
   }
 
   const petMood: PetMood = mood ?? (s.pet.sleeping ? 'dormindo' : s.pet.stats.energia < 20 ? 'sono' : day.battery === 1 && done === 0 ? 'calmo' : 'feliz');
-  const quests = activeQuests(s.seed, today).filter((q) => q.period === 'dia');
   const week = Array.from({ length: 7 }, (_, i) => addDays(weekStart(today), i));
-
-  const CARES: { id: CareMode | 'dormir'; emoji: string; label: string; tone: string }[] = [
-    { id: 'carinho', emoji: '🤲', label: 'Carinho', tone: '#FFD3DF' },
-    { id: 'comida', emoji: '🥕', label: 'Comida', tone: '#FFE2B8' },
-    { id: 'banho', emoji: '🛁', label: 'Banho', tone: '#CDEBFF' },
-    { id: 'brincar', emoji: '🎾', label: 'Brincar', tone: '#D9F5C8' },
-    { id: 'escovar', emoji: '🪮', label: 'Escovar', tone: '#E9DDFF' },
-    { id: 'dormir', emoji: s.pet.sleeping ? '☀️' : '🌙', label: s.pet.sleeping ? 'Acordar' : 'Dormir', tone: '#D6DBFF' },
-    { id: 'conversar', emoji: '💬', label: 'Conversar', tone: '#FFF1B8' },
-    { id: 'foto', emoji: '📸', label: 'Foto', tone: '#FFD9C9' },
-  ];
 
   const hami = adv ? (
     <div className="mb-6 grid justify-items-center gap-1 rounded-3xl bg-surface/95 px-4 py-3 text-center shadow-[var(--shadow)]">
@@ -124,7 +105,7 @@ export function Home({ onGo, onSettings, onEvolution, onShare }: { onGo: (tab: '
         {s.pet.name} foi para {advPlace?.name}
       </p>
       {advLeft > 0 ? (
-        <p className="text-[13px] text-muted">Volta em ~{advLeft} min. Cada atividade traz ele 5 min mais cedo.</p>
+        <p className="text-[13px] text-muted">Volta em ~{advLeft} min. Cada missão traz ele 5 min mais cedo.</p>
       ) : (
         <button className="btn btn-primary btn-sm" onClick={() => setResult(finishAdventure())}>
           <Mail size={16} /> Ver o que ele trouxe
@@ -151,32 +132,15 @@ export function Home({ onGo, onSettings, onEvolution, onShare }: { onGo: (tab: '
     </div>
   );
 
-  const bubble = !adv && (
-    <div className="speech-float">
-      <p className="text-[15px] font-semibold leading-snug">
-        <span className="font-display font-bold text-accent">{s.pet.name}: </span>
-        {line}
-      </p>
-    </div>
-  );
-
   return (
     <div className="grid gap-4">
       {layer}
-      <section className="relative" aria-label={inside ? `Casa do ${s.pet.name}` : `Jardim do ${s.pet.name}`}>
-        {inside ? (
-          <div className="scene-bleed relative overflow-hidden pt-[64px]" style={{ background: 'var(--page)' }}>
-            <Room house={s.house} period={period} height={300}>
-              {hami}
-            </Room>
-          </div>
-        ) : (
-          <div className="scene-bleed relative overflow-hidden">
-            <Scene height={380} fade>
-              {hami}
-            </Scene>
-          </div>
-        )}
+      <section className="relative" aria-label={`Jardim do ${s.pet.name}`}>
+        <div className="scene-bleed relative overflow-hidden">
+          <Scene height={340} fade>
+            {hami}
+          </Scene>
+        </div>
         <div className="scene-top">
           <span className="pill min-w-0 flex-1">
             <span className="truncate font-display text-[17px]">
@@ -191,50 +155,17 @@ export function Home({ onGo, onSettings, onEvolution, onShare }: { onGo: (tab: '
             <Settings size={19} />
           </button>
         </div>
-        {bubble && <div className="absolute inset-x-4 top-[68px] z-[3]">{bubble}</div>}
-        <div className="absolute bottom-4 left-4 z-[3] flex gap-2">
-          <span className="pill !min-h-[34px] text-[13px]">
-            ⭐ Nível {lv.level}
-          </span>
-          <button className="pill !min-h-[34px] text-[13px]" onClick={() => setInside(!inside)} aria-label={inside ? 'Ir para o jardim' : 'Entrar na casa'}>
-            {inside ? '🌳 Jardim' : '🏡 Casa'}
-          </button>
-        </div>
-      </section>
-
-      <div className="care-row" role="group" aria-label="Cuidar do Hami">
-        {CARES.map((c) => (
-          <button
-            key={c.label}
-            className="care-btn"
-            style={{ ['--tone' as string]: c.tone }}
-            disabled={!!adv || (s.pet.sleeping && !['dormir', 'conversar'].includes(c.id as string))}
-            onClick={() => (c.id === 'carinho' ? setMode('carinho') : c.id === 'dormir' ? setMode('dormir') : setMode(c.id as CareMode))}
-          >
-            <span className="care-ico" aria-hidden="true">
-              {c.emoji}
-            </span>
-            <span>{c.label}</span>
-          </button>
-        ))}
-      </div>
-      <div className="card grid grid-cols-4 gap-2 p-3">
-        {(
-          [
-            ['felicidade', 'Feliz', 'accent', '💗'],
-            ['energia', 'Energia', 'sky', '⚡'],
-            ['saciedade', 'Barriga', 'gold', '🥕'],
-            ['limpeza', 'Limpeza', 'leaf', '🫧'],
-          ] as const
-        ).map(([k, label, tone, em]) => (
-          <div key={k} className="grid min-w-0 gap-1 text-center">
-            <span className="truncate text-[12px] font-extrabold">
-              {em} {label}
-            </span>
-            <Bar value={s.pet.stats[k]} tone={tone} label={label} thin />
+        {!adv && (
+          <div className="absolute inset-x-4 top-[68px] z-[3]">
+            <div className="speech-float">
+              <p className="text-[15px] font-semibold leading-snug">
+                <span className="font-display font-bold text-accent">{s.pet.name}: </span>
+                {line}
+              </p>
+            </div>
           </div>
-        ))}
-      </div>
+        )}
+      </section>
 
       <JourneyCard s={s} onOpen={onEvolution} />
 
@@ -274,27 +205,6 @@ export function Home({ onGo, onSettings, onEvolution, onShare }: { onGo: (tab: '
         </button>
       </section>
 
-      <EventsBanner />
-
-      <section className="grid gap-3" aria-label="Desafios de hoje">
-        <h2 className="section-label px-1">Desafios de hoje</h2>
-        <QuestList quests={quests} s={s} today={today} />
-      </section>
-
-      {!adv && (
-        <button className="card flex items-center gap-3 p-4 text-left" onClick={() => onGo('mundo')}>
-          <span className="quest-ico !h-12 !w-12 !text-[26px]" style={{ background: '#D3EAFF' }} aria-hidden="true">
-            🗺️
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block font-bold">Levar o {s.pet.name} numa aventura</span>
-            <span className="block text-[13px] text-muted">{PLACES.length} lugares no mapa, com achadinhos para o álbum</span>
-          </span>
-          <ChevronRight size={18} className="text-muted" />
-        </button>
-      )}
-
-      <CareLayer mode={mode} onClose={() => setMode(null)} onShare={onShare} />
       <AdventureModal result={result} onClose={() => setResult(null)} />
     </div>
   );

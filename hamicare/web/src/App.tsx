@@ -3,6 +3,7 @@ import { Sheet, Toaster, toast } from './components/ui';
 import { CelebrationModal, DailyWelcome, StreakScreen } from './components/Celebrate';
 import { TabIcon, type TabId } from './components/TabIcon';
 import { Home } from './screens/Home';
+import { CareArea } from './screens/CareArea';
 import { Activities } from './screens/Activities';
 import { World } from './screens/World';
 import { Wellbeing } from './screens/Wellbeing';
@@ -21,6 +22,7 @@ type Tab = TabId;
 const TABS: { id: Tab; label: string }[] = [
   { id: 'inicio', label: 'Início' },
   { id: 'atividades', label: 'Missões' },
+  { id: 'cuidar', label: 'Cuidar' },
   { id: 'mundo', label: 'Mundo' },
   { id: 'bem-estar', label: 'Bem-estar' },
   { id: 'amigos', label: 'Amigos' },
@@ -130,7 +132,8 @@ export default function App() {
   return (
     <>
       <main className="shell">
-        {tab === 'inicio' && <Home onGo={go} onSettings={() => setSettings(true)} onEvolution={() => setEvolution(true)} onShare={(photo) => shareTo({ kind: 'foto', photo })} />}
+        {tab === 'inicio' && <Home onGo={go} onSettings={() => setSettings(true)} onEvolution={() => setEvolution(true)} />}
+        {tab === 'cuidar' && <CareArea onShare={(photo) => shareTo({ kind: 'foto', photo })} />}
         {tab === 'atividades' && <Activities onShareTask={(task) => shareTo({ kind: 'atividade', task })} />}
         {tab === 'mundo' && <World onPlus={() => setPlus(true)} onGift={(id) => (setGift(id), go('amigos'))} />}
         {tab === 'bem-estar' && <Wellbeing />}
@@ -141,7 +144,7 @@ export default function App() {
           {TABS.map(({ id, label }) => (
             <button key={id} className="tab" aria-current={tab === id ? 'page' : undefined} onClick={() => go(id)}>
               <TabIcon id={id} />
-              {label}
+              <span className="tab-label">{label}</span>
             </button>
           ))}
         </div>
