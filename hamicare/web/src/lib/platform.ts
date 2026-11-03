@@ -89,7 +89,7 @@ export async function snapshotPng(svg: SVGSVGElement, opts: { bg: [string, strin
 }
 
 /** Reduz uma foto escolhida pela pessoa para caber no feed (JPEG, lado maior até `max`). */
-export async function shrinkPhoto(file: File, max = 900, quality = 0.72): Promise<string> {
+export async function shrinkPhoto(file: File, max = 720, quality = 0.62): Promise<string> {
   const url = URL.createObjectURL(file);
   try {
     const img = new Image();

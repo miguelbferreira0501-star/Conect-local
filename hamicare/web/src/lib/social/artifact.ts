@@ -153,10 +153,12 @@ export function createArtifactSocial(db: Db, myId: string): SocialApi {
     async post(p) {
       const doc = await read<PostsDoc>(`posts/${myId}`, { items: [], hidden: [] });
       const item: Post = { ...p, id: uid(), authorId: myId, createdAt: Date.now() };
-      // Mantém o documento abaixo de 256 KB: no máximo 2 fotos reais guardadas.
-      let items = [item, ...doc.items].slice(0, 40);
-      let withImage = 0;
-      items = items.map((x) => (x.image && ++withImage > 2 ? { ...x, image: undefined } : x));
+      // Mantém o documento abaixo do limite de 256 KB: tira as fotos reais mais antigas primeiro.
+      const items = [item, ...doc.items].slice(0, 40);
+      for (let i = items.length - 1; i >= 0 && JSON.stringify(items).length > 230_000; i--) {
+        if (items[i].image) items[i] = { ...items[i], image: undefined };
+      }
+      if (JSON.stringify(items).length > 240_000) throw new Error('grande demais');
       await write(`posts/${myId}`, { ...doc, items });
     },
     async deletePost(id) {
