@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react';
 import { Check, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Sheet, toast } from './ui';
-import { FOOD_PRESETS, MEALS, type MealId } from '../data/foods';
+import { FOOD_PRESETS, MEALS, presetByName, type MealId } from '../data/foods';
 import { mealTotals, tooLittle } from '../logic/meals';
 import { addMeal, copyYesterdayMeals, dayOf, minor, removeMeal, removeMyFood, setMealRef, todayKey, updateMeal, useApp } from '../lib/store';
 import { addDays, fmtNum } from '../lib/util';
 import type { State } from '../types';
+import { Glyph } from './art';
 
 function mealNow(d = new Date()): MealId {
   const h = d.getHours();
@@ -57,8 +58,8 @@ export function MealCard({ s }: { s: State }) {
                 return (
                   <div key={m.id} className="grid gap-1">
                     <p className="flex items-center justify-between text-[13px] font-extrabold text-muted">
-                      <span>
-                        {m.emoji} {m.label}
+                      <span className="flex items-center gap-1.5">
+                        <Glyph e={m.emoji} size={20} /> {m.label}
                       </span>
                       <span className="tabular-nums">{fmtNum(list.reduce((n, x) => n + x.kcal, 0), 0)} kcal</span>
                     </p>
@@ -67,6 +68,7 @@ export function MealCard({ s }: { s: State }) {
                         <span className="meal-check" aria-hidden="true">
                           <Check size={14} strokeWidth={3.5} />
                         </span>
+                        <Glyph e={presetByName(x.name)?.emoji ?? m.emoji} size={30} />
                         <span className="min-w-0 flex-1 text-left">
                           <span className="block truncate text-[15px] font-bold leading-tight">{x.name}</span>
                           {x.qty && <span className="block truncate text-[12px] font-semibold text-muted">{x.qty}</span>}
@@ -80,16 +82,14 @@ export function MealCard({ s }: { s: State }) {
             </div>
             {s.journey.dir === 'ganhar' && ref && t.eaten > ref && (
               <p className="rounded-2xl bg-leaf-soft p-3 text-[13px] font-bold">
-                💪 +{fmtNum(Math.min(700, t.eaten - ref), 0)} kcal acima da referência hoje: o {s.pet.name} cresce junto com você.
+                <Glyph e="💪" size={18} className="gi" /> +{fmtNum(Math.min(700, t.eaten - ref), 0)} kcal acima da referência hoje: o {s.pet.name} cresce junto com você.
               </p>
             )}
             {tooLittle(t.planned, t.items) && <p className="rounded-2xl bg-gold-soft p-3 text-[13px] font-semibold">Seu cardápio de hoje está bem pequeninho. Comer pouco demais cansa o corpo e atrapalha a jornada. Se puder, inclua mais uma refeição.</p>}
           </>
         ) : (
           <div className="grid justify-items-center gap-2 py-1 text-center">
-            <span className="text-[36px]" aria-hidden="true">
-              🍽️
-            </span>
+            <Glyph e="🍽️" size={52} />
             <p className="text-[15px] font-semibold">Monte o que você vai comer hoje e veja as calorias de cada alimento.</p>
             <button className="btn btn-primary w-full" onClick={() => setOpen(true)}>
               <Plus size={18} /> Montar meu cardápio
@@ -143,7 +143,7 @@ function MealSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
           <div className="tabs-scroll">
             {MEALS.map((m) => (
               <button key={m.id} className={`chip ${meal === m.id ? 'chip-accent' : 'chip-plain'}`} onClick={() => setMeal(m.id)} aria-pressed={meal === m.id}>
-                {m.emoji} {m.label}
+                <Glyph e={m.emoji} size={18} /> {m.label}
               </button>
             ))}
           </div>
@@ -170,7 +170,7 @@ function MealSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
             {suggestions.map((f) => (
               <span key={`${f.mine ? 'm' : 'p'}-${f.name}`} className="chip chip-plain !whitespace-normal !pr-1.5">
                 <button type="button" className="text-left" onClick={() => (setName(f.name), setQty(f.qty), setKcal(String(f.kcal)))}>
-                  {f.emoji} {f.name} · {f.kcal}
+                  <Glyph e={f.emoji} size={20} className="gi" /> {f.name} · {f.kcal}
                 </button>
                 {f.mine && (
                   <button type="button" className="ml-1 text-muted" aria-label={`Tirar ${f.name} dos meus alimentos`} onClick={() => removeMyFood(f.name)}>
@@ -194,8 +194,8 @@ function MealSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
               if (!list.length) return null;
               return (
                 <div key={m.id} className="grid gap-1.5">
-                  <p className="text-[13px] font-extrabold text-muted">
-                    {m.emoji} {m.label}
+                  <p className="flex items-center gap-1.5 text-[13px] font-extrabold text-muted">
+                    <Glyph e={m.emoji} size={20} /> {m.label}
                   </p>
                   {list.map((x) => (
                     <div key={x.id} className="meal-edit">

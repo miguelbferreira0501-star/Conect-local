@@ -113,3 +113,11 @@ Pedido do dono do produto: missões são hábitos saudáveis, sem alimentos; os 
 - **Consentimento registrado:** o cadastro grava a versão dos termos, a data do aceite e a data do consentimento de saúde, porque cabe ao app provar o consentimento (LGPD, art. 8º).
 - **Passo a passo de publicação:** `docs/PUBLICAR.md`.
 - **E-mail sem domínio para começar:** o Resend só entrega para o próprio dono da conta enquanto não há domínio verificado, e o plano grátis do Render bloqueia SMTP. Por isso o servidor aceita três caminhos, nesta ordem: Resend (com domínio), Brevo (pela web, com um e-mail verificado como remetente, funciona no plano grátis) e SMTP (Gmail com senha de app, no plano pago).
+
+### Ilustrações próprias
+
+Pedido do dono do produto: tirar os emojis e usar desenhos como os de apps de bichinho (sem copiar nenhum). O HamiCare ganhou um conjunto próprio de cerca de 230 ilustrações em SVG (`web/src/components/art/`), num estilo só: formas chapadas e arredondadas, uma sombra suave e um brilho. Os dados continuam usando o emoji como chave, então nada salvo pelas pessoas precisou mudar; a tela desenha a ilustração no lugar (`<Glyph e="🪥" />`). Os móveis da casa também passaram a ser desenhados.
+
+### Foto real
+
+A foto real do feed agora abre uma câmera dentro do app (tirar, refazer, usar, virar a câmera), com a galeria como segunda opção. O botão antigo dependia do seletor de arquivos do navegador, que alguns visualizadores ignoram.

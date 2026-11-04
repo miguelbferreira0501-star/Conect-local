@@ -28,13 +28,24 @@ export function getSocial(): Promise<SocialApi | null> {
 }
 
 /** Reinicia a escolha (por exemplo, depois de entrar na conta). */
+const resetListeners = new Set<() => void>();
+/** Entrou ou saiu da conta: quem usa a parte social pergunta de novo. */
 export function resetSocial() {
   pending = null;
+  resetListeners.forEach((l) => l());
 }
 
 export function useSocial(): { api: SocialApi | null; loading: boolean } {
   const [api, setApi] = useState<SocialApi | null>(null);
   const [loading, setLoading] = useState(true);
+  const [version, setVersion] = useState(0);
+  useEffect(() => {
+    const bump = () => setVersion((v) => v + 1);
+    resetListeners.add(bump);
+    return () => {
+      resetListeners.delete(bump);
+    };
+  }, []);
   useEffect(() => {
     let alive = true;
     getSocial().then((a) => {
@@ -45,7 +56,7 @@ export function useSocial(): { api: SocialApi | null; loading: boolean } {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [version]);
   return { api, loading };
 }
 

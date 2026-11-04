@@ -5,6 +5,7 @@ import { KcalChip } from './Journey';
 import { Seed } from './ui';
 import { prefersReducedMotion } from '../lib/util';
 import type { Direction, Task } from '../types';
+import { Glyph } from './art';
 
 export function TaskRow({ task, done, kcal, dir, sub, onToggle, onEdit }: {
   task: Task;
@@ -19,7 +20,7 @@ export function TaskRow({ task, done, kcal, dir, sub, onToggle, onEdit }: {
   return (
     <li className="task" data-done={done}>
       <span className="task-emoji" aria-hidden="true">
-        {task.emoji}
+        <Glyph e={task.emoji} size={40} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="task-title block text-[15.5px] font-bold leading-snug">{task.title}</span>

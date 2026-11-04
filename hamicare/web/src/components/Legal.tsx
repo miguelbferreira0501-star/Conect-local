@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Sheet } from './ui';
 import { LEGAL, LEGAL_INFO, formatLegalDate, type LegalBlock, type LegalId } from '../shared/legal';
+import { Glyph } from './art';
 
 let show: ((id: LegalId) => void) | null = null;
 export function openLegal(id: LegalId) {
@@ -27,7 +28,7 @@ export function LegalHost() {
           <ul className="grid gap-1.5">
             {doc.summary.map((t) => (
               <li key={t} className="flex gap-2 text-[14.5px] font-semibold leading-snug">
-                <span aria-hidden="true">🐹</span>
+                <Glyph e="🐹" size={20} />
                 <span className="min-w-0">{t}</span>
               </li>
             ))}

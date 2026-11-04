@@ -13,6 +13,7 @@ import { dayOf, finishAdventure, getState, kcalOf, care as doCare, todayKey, tod
 import { addDays, prefersReducedMotion, weekStart, WEEKDAYS, fmtNum } from '../lib/util';
 import { isActive } from '../logic/evolution';
 import type { PetMood, Task } from '../types';
+import { Glyph } from '../components/art';
 
 export function useNow(ms: number) {
   const [now, setNow] = useState(Date.now());
@@ -81,7 +82,7 @@ export function Home({ onGo, onSettings, onEvolution }: { onGo: (tab: 'atividade
     if (!r || wasDone) return;
     const gain = dir === 'ganhar';
     if (r.kcal > 0 && dir !== 'manter') pop(el, `${gain ? '+' : '−'}${r.kcal} kcal`, gain);
-    else pop(el, `+${r.reward} 🌻`);
+    else pop(el, `+${r.reward} sementes`);
     setMoodAnim('animado');
     setTimeout(() => setMoodAnim(null), 1400);
     bounce('hop');
@@ -101,7 +102,7 @@ export function Home({ onGo, onSettings, onEvolution }: { onGo: (tab: 'atividade
 
   const hami = adv ? (
     <div className="mb-6 grid justify-items-center gap-1 rounded-3xl bg-surface/95 px-4 py-3 text-center shadow-[var(--shadow)]">
-      <span className="text-[30px]">{advPlace?.emoji}</span>
+      <Glyph e={advPlace?.emoji} size={40} />
       <p className="font-display text-[17px] font-bold leading-tight">
         {s.pet.name} foi para {advPlace?.name}
       </p>
@@ -121,7 +122,7 @@ export function Home({ onGo, onSettings, onEvolution }: { onGo: (tab: 'atividade
         </div>
         {hearts.map((h) => (
           <span key={h.id} className="heart-pop pointer-events-none absolute text-[26px]" style={{ left: h.x - 13, top: h.y - 20 }}>
-            💗
+            <Glyph e="💗" size={28} />
           </span>
         ))}
       </button>
@@ -184,7 +185,7 @@ export function Home({ onGo, onSettings, onEvolution }: { onGo: (tab: 'atividade
             <div key={k} className="grid justify-items-center gap-0.5 text-[11px] font-extrabold uppercase text-muted">
               {WEEKDAYS[new Date(`${k}T12:00:00`).getDay()]}
               <span className={`week-dot ${isActive(s.days[k]) ? 'is-done' : streak.rested.includes(k) ? 'is-rest' : k === today ? 'is-today' : ''}`}>
-                {isActive(s.days[k]) ? '🔥' : streak.rested.includes(k) ? '💤' : ''}
+                {isActive(s.days[k]) ? <Glyph e="🔥" size={18} /> : streak.rested.includes(k) ? <Glyph e="💤" size={16} /> : ''}
               </span>
             </div>
           ))}
@@ -223,7 +224,7 @@ export function AdventureModal({ result, onClose }: { result: AdventureResult | 
         <div>
           <div className="flex h-40 items-end justify-between rounded-t-[28px] p-5" style={{ background: `linear-gradient(160deg, ${place.colors[0]}, ${place.colors[1]})` }}>
             <p className="font-display text-[26px] font-bold leading-tight text-[#2B2240]">{place.name}</p>
-            <span className="text-[58px] leading-none">{place.emoji}</span>
+            <Glyph e={place.emoji} size={72} />
           </div>
           <div className="grid gap-3 p-5">
             <p className="text-[17px] leading-relaxed">
@@ -236,7 +237,7 @@ export function AdventureModal({ result, onClose }: { result: AdventureResult | 
               <span className="chip chip-plain">+{result.xp} XP</span>
               {find && (
                 <span className="chip chip-leaf">
-                  {find.emoji} Achadinho novo: {find.name}
+                  <Glyph e={find.emoji} size={18} /> Achadinho novo: {find.name}
                 </span>
               )}
             </div>

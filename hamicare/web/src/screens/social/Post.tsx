@@ -8,10 +8,11 @@ import { periodOf } from '../../data/lines';
 import { PRESET_COMMENTS, REACTIONS, checkKindness, REASON_TEXT, type ReactionId } from '../../shared/moderation';
 import { logEvent, useApp } from '../../lib/store';
 import { hashStr, prefersReducedMotion } from '../../lib/util';
-import { shrinkPhoto } from '../../lib/platform';
 import { publicProfileOf, teenMode } from '../../lib/social';
 import { postKey, type Feed, type Post, type PublicPet, type SocialApi } from '../../lib/social/types';
 import type { Photo, Task } from '../../types';
+import { Glyph } from '../../components/art';
+import { CameraSheet } from '../../components/Camera';
 
 export type ShareDraft = { kind: 'foto'; photo: Photo } | { kind: 'atividade'; task: Task } | null;
 
@@ -48,7 +49,7 @@ export function PostMedia({ post, square }: { post: Post; square?: boolean }) {
   return (
     <div className={`post-media post-pet ${square ? 'aspect-square' : 'aspect-[5/4]'}`} style={{ background: `linear-gradient(160deg, ${pastelOf(post.id)}, #ffffff)` }}>
       <span className="post-sticker" aria-hidden="true">
-        {KIND_STICKER[post.kind]}
+        <Glyph e={KIND_STICKER[post.kind]} size={36} />
       </span>
       {post.pet && <Hamster fur={post.pet.fur} phase={post.pet.phase} outfit={post.pet.outfit} mood={post.pet.mood} size={square ? 90 : 190} idle={false} neutral />}
     </div>
@@ -121,7 +122,7 @@ export function PostCard({ post, feed, api, reload, myId, onOpenProfile }: { pos
         <PostMedia post={post} />
         {burst > 0 && (
           <span key={burst} className="like-burst" aria-hidden="true">
-            💛
+            <Glyph e="💛" size={96} />
           </span>
         )}
       </div>
@@ -131,7 +132,7 @@ export function PostCard({ post, feed, api, reload, myId, onOpenProfile }: { pos
             const n = reactions.filter((x) => x.kind === r.id).length;
             return (
               <button key={r.id} className={`react-btn ${myReaction === r.id ? 'is-on' : ''}`} aria-pressed={myReaction === r.id} aria-label={r.label} onClick={() => react(myReaction === r.id ? null : r.id)}>
-                {r.emoji}
+                <Glyph e={r.emoji} size={24} />
                 {n > 0 && <span className="tabular-nums">{n}</span>}
               </button>
             );
@@ -234,11 +235,11 @@ export function Composer({ open, api, draft, onClose, onPosted, groupId, groupNa
   const [withHouse, setWithHouse] = useState(false);
   const [image, setImage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const file = useRef<HTMLInputElement>(null);
+  const [cam, setCam] = useState(false);
 
   useEffect(() => {
     if (!open) return;
-    setText(draft?.kind === 'atividade' ? `Concluí: ${draft.task.emoji} ${draft.task.title}` : draft?.kind === 'foto' ? draft.photo.caption : '');
+    setText(draft?.kind === 'atividade' ? `Concluí: ${draft.task.title}` : draft?.kind === 'foto' ? draft.photo.caption : '');
     setImage(null);
     setWithHouse(false);
   }, [open, draft]);
@@ -290,25 +291,10 @@ export function Composer({ open, api, draft, onClose, onPosted, groupId, groupNa
             <HomeIcon size={14} /> Mostrar minha casa
           </button>
           {!teen && s.privacy.sharePhotos && (
-            <button className="chip chip-plain" onClick={() => file.current?.click()}>
+            <button className={`chip ${image ? 'chip-accent' : 'chip-plain'}`} onClick={() => setCam(true)}>
               <Camera size={14} /> Foto real
             </button>
           )}
-          <input
-            ref={file}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={async (e) => {
-              const f = e.target.files?.[0];
-              if (!f) return;
-              const data = await shrinkPhoto(f).catch(() => null);
-              if (data) setImage(data);
-              else toast('Não deu pra usar essa foto.');
-              e.target.value = '';
-            }}
-          />
         </div>
         {teen && <p className="text-[12px] text-muted">Para menores de 18, o feed mostra só o Hami e a casa, sem fotos reais.</p>}
         <p className="text-[12px] text-muted">{groupName ? 'Só quem está no grupo vê.' : 'Só seus amigos veem.'} Peso, calorias, diário e humor nunca são compartilhados.</p>
@@ -316,6 +302,7 @@ export function Composer({ open, api, draft, onClose, onPosted, groupId, groupNa
           Publicar
         </button>
       </div>
+      <CameraSheet open={cam} onClose={() => setCam(false)} onPhoto={(data) => (setImage(data), setWithHouse(false))} />
     </Sheet>
   );
 }

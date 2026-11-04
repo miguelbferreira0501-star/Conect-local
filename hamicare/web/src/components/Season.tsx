@@ -2,6 +2,7 @@
 import { claimSeason, seasonProgress, SEASON_GOAL } from '../lib/store';
 import { toast } from './ui';
 import type { State } from '../types';
+import { Glyph } from './art';
 
 export const SEASONS = [
   { name: 'Verão das Ondas', emoji: '🌊', c: ['#7FD3FF', '#3F9BEA'] },
@@ -29,7 +30,7 @@ export function SeasonBanner({ s }: { s: State }) {
     <section className="season" style={{ ['--s1' as string]: season.c[0], ['--s2' as string]: season.c[1] }} aria-label={`Temporada: ${season.name}`}>
       <div className="season-rays" aria-hidden="true" />
       <span className="season-emoji" aria-hidden="true">
-        {season.emoji}
+        <Glyph e={season.emoji} size={64} />
       </span>
       <div className="relative grid gap-1">
         <p className="text-[12px] font-black uppercase tracking-[0.12em] opacity-90">Temporada de {MONTHS[m]}</p>
@@ -39,7 +40,7 @@ export function SeasonBanner({ s }: { s: State }) {
         </div>
         <div className="flex items-center justify-between gap-2">
           <p className="text-[13px] font-bold opacity-90">
-            {days}/{SEASON_GOAL} dias ativos · prêmio: 120 🌻
+            {days}/{SEASON_GOAL} dias ativos · prêmio: 120 sementes
           </p>
           {claimed ? (
             <span className="rounded-full bg-white/30 px-3 py-1 text-[13px] font-black">Selo ganho ✓</span>

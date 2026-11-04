@@ -54,7 +54,7 @@ export const LIBRARY: LibTask[] = [
   { id: 'descansar', title: 'Descansar sem culpa (15 min)', emoji: '🛋️', cat: 'autocuidado', energy: 1 },
   { id: 'pausa', title: 'Fazer uma pausa longe da tela', emoji: '📵', cat: 'autocuidado', energy: 1 },
   { id: 'agua', title: 'Beber um copo d’água', emoji: '💧', cat: 'habitos', energy: 1, swap: 5, why: 'A água quase não queima calorias, mas ajuda o corpo e a fome' },
-  { id: 'garrafa', title: 'Beber 1 garrafa de água no dia', emoji: '🥤', cat: 'habitos', energy: 2, swap: 15, why: 'Bem hidratado, o corpo funciona melhor' },
+  { id: 'garrafa', title: 'Beber 1 garrafa de água no dia', emoji: '🚰', cat: 'habitos', energy: 2, swap: 15, why: 'Bem hidratado, o corpo funciona melhor' },
   { id: 'sono', title: 'Ir dormir no horário', emoji: '🌙', cat: 'habitos', energy: 2, swap: 30, why: 'Quem dorme bem tem menos fome de noite. Para ganhar massa, o corpo cresce descansando', for: ['ganhar'] },
   { id: 'agua-acordar', title: 'Beber água ao acordar', emoji: '🌅', cat: 'habitos', energy: 1, swap: 5, why: 'Começa o dia hidratado' },
   { id: 'levantar', title: 'Levantar e andar um pouco a cada hora', emoji: '⏰', cat: 'habitos', energy: 2, met: 3, min: 16, why: 'Umas 8 pausas de 2 minutos' },

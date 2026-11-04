@@ -13,6 +13,7 @@ import { copyText, formatDay } from '../lib/util';
 import { syncPush } from '../lib/account';
 import { getState } from '../lib/store';
 import type { AgeGroup, NotifKind, ThemePref, TraitId } from '../types';
+import { Glyph } from '../components/art';
 
 const NOTIF_LABEL: Record<NotifKind, string> = {
   tarefas: 'Lembrete das atividades',
@@ -64,7 +65,7 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
           <div className="flex flex-wrap gap-2">
             {(Object.keys(TRAITS) as TraitId[]).map((t) => (
               <button key={t} className={`chip ${s.pet.trait === t ? 'chip-accent' : 'chip-plain'}`} onClick={() => updatePet({ trait: t })}>
-                {TRAITS[t].emoji} {TRAITS[t].label}
+                <Glyph e={TRAITS[t].emoji} size={22} /> {TRAITS[t].label}
               </button>
             ))}
           </div>

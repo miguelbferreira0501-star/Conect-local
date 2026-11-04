@@ -7,6 +7,7 @@ import { BODY_SCAN, BREATHS, MEDITATION_CUES, QUIZZES, SLEEP_ROUTINE } from '../
 import { addJar, addJournal, dayOf, deleteJar, deleteJournal, isPremium, logEvent, setEmotions, setMood, todayKey, useApp } from '../lib/store';
 import { addDays, copyText, formatDay, hashStr, prefersReducedMotion } from '../lib/util';
 import type { Mood, PetMood } from '../types';
+import { Glyph } from '../components/art';
 
 type Tool = 'respirar' | 'meditar' | 'foco' | 'relaxar' | 'sono' | 'afirmacoes' | 'aterrar' | 'pote' | 'quiz' | null;
 
@@ -44,7 +45,7 @@ export function Wellbeing() {
         <div className="flex justify-between gap-1">
           {MOODS.map((m) => (
             <button key={m.value} className="mood-opt" aria-pressed={day.mood === m.value} aria-label={m.label} onClick={() => setMood(m.value as Mood)}>
-              <span className="text-[28px] leading-none">{m.emoji}</span>
+              <Glyph e={m.emoji} size={36} label={m.label} />
             </button>
           ))}
         </div>
@@ -70,7 +71,7 @@ export function Wellbeing() {
           {TOOLS.map((t) => (
             <button key={t.id} className="tool-tile" onClick={() => setTool(t.id)}>
               <span className="tool-tile-ico" style={{ background: t.tint }} aria-hidden="true">
-                {t.emoji}
+                <Glyph e={t.emoji} size={44} />
               </span>
               <span className="font-display text-[17px] font-bold leading-tight">{t.title}</span>
               <span className="text-[12px] font-semibold leading-tight text-muted">{t.desc}</span>
@@ -235,7 +236,7 @@ function Ambient({ theme }: { theme: Theme }) {
       {theme === 'rosa' &&
         Array.from({ length: 10 }, (_, i) => (
           <span key={i} className="amb-heart" style={{ left: `${n(i, 100, 41)}%`, animationDelay: `${i * 1.2}s`, fontSize: 14 + (i % 3) * 8 }}>
-            💗
+            <Glyph e="💗" size={16 + (i % 3) * 9} />
           </span>
         ))}
       {theme === 'lavanda' &&
@@ -291,7 +292,7 @@ function Burst({ emoji, k }: { emoji: string; k: number }) {
     <div className="burst" key={k} aria-hidden="true">
       {Array.from({ length: 8 }, (_, i) => (
         <span key={i} style={{ ['--a' as string]: `${i * 45}deg` }}>
-          {emoji}
+          <Glyph e={emoji} size={26} />
         </span>
       ))}
     </div>
@@ -359,7 +360,7 @@ function Breath({ onClose }: { onClose: () => void }) {
           {BREATHS.map((b) => (
             <button key={b.id} className="opt" aria-pressed={pat.id === b.id} onClick={() => setPat(b)}>
               <span className="tool-ico" style={{ background: b.id === 'sono' ? '#D6DBFF' : b.id === 'caixa' ? '#E6DBFF' : '#CFE8FF' }} aria-hidden="true">
-                {b.id === 'sono' ? '🌙' : b.id === 'caixa' ? '🟪' : '🌬️'}
+                <Glyph e={b.id === 'sono' ? '🌙' : b.id === 'caixa' ? '🟪' : '🌬️'} size={30} />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block">{b.name}</span>
@@ -385,7 +386,7 @@ function Breath({ onClose }: { onClose: () => void }) {
             ))}
           </div>
         )}
-        {kind === 'hold' && <span className="breath-sparkle" aria-hidden="true">✨</span>}
+        {kind === 'hold' && <span className="breath-sparkle" aria-hidden="true"><Glyph e="✨" size={34} /></span>}
         {finished && <Burst emoji="💙" k={1} />}
       </div>
       <div className="grid justify-items-center gap-2 text-center" aria-live="polite">
@@ -414,7 +415,7 @@ function Breath({ onClose }: { onClose: () => void }) {
                   ['😣', 'Ainda tenso', 'Tá tudo bem. Que tal mais uma rodada, bem devagar?'],
                 ].map(([e, l, msg]) => (
                   <button key={l} className="opt flex-col !items-center !gap-0.5 !px-2 !py-2 text-[13px]" onClick={() => setFelt(msg)}>
-                    <span className="text-[26px]">{e}</span>
+                    <Glyph e={e} size={32} />
                     {l}
                   </button>
                 ))}
@@ -481,7 +482,7 @@ function Grounding({ onClose }: { onClose: () => void }) {
             <div ref={pet} className="relative">
               <PetBig mood={full ? 'animado' : sense.mood} size={170} />
               <span className="sense-emoji" key={i}>
-                {sense.emoji}
+                <Glyph e={sense.emoji} size={52} />
               </span>
             </div>
             {pop > 0 && (
@@ -509,7 +510,7 @@ function Grounding({ onClose }: { onClose: () => void }) {
                   hop(pet.current);
                 }}
               >
-                {k < count ? sense.emoji : ''}
+                {k < count ? <Glyph e={sense.emoji} size={26} /> : ''}
               </button>
             ))}
           </div>
@@ -582,7 +583,7 @@ function Meditate({ onClose }: { onClose: () => void }) {
                 [10, '🌳', 'Profundo'],
               ].map(([m, e, l]) => (
                 <button key={m} className="opt flex-col !items-center !gap-0.5 !px-2 !py-3" onClick={() => setMins(m as number)}>
-                  <span className="text-[28px]">{e}</span>
+                  <Glyph e={e as string} size={34} />
                   <span className="font-display text-[20px] font-bold">{m} min</span>
                   <span className="text-[12px] font-semibold text-muted">{l}</span>
                 </button>
@@ -631,7 +632,7 @@ function Focus({ onClose }: { onClose: () => void }) {
             <div className="relative">
               <PetBig mood="feliz" size={180} oculos="redondos" />
               <span className="focus-book" aria-hidden="true">
-                📖
+                <Glyph e="📖" size={44} />
               </span>
             </div>
             <p className="tool-text text-[16px]">25 minutos de foco e 5 de pausa. O Hami estuda junto (de óculos e tudo).</p>
@@ -647,12 +648,12 @@ function Focus({ onClose }: { onClose: () => void }) {
                 <PetBig mood={phase === 'foco' ? 'calmo' : 'animado'} size={160} oculos={phase === 'foco' ? 'redondos' : undefined} className={phase === 'foco' ? 'reading' : 'stretch-loop'} />
                 {phase === 'foco' && (
                   <span className="focus-book" aria-hidden="true">
-                    📖
+                    <Glyph e="📖" size={44} />
                   </span>
                 )}
               </div>
             </Ring>
-            <p className="eyebrow !text-current">{phase === 'foco' ? '🍅 Foco' : '🌿 Pausa'}</p>
+            <p className="eyebrow !text-current"><Glyph e={phase === 'foco' ? '🍅' : '🌿'} size={18} className="gi" /> {phase === 'foco' ? 'Foco' : 'Pausa'}</p>
             <p className="tool-text font-display text-[52px] font-bold leading-none tabular-nums">{mmss(left)}</p>
             <button className="btn btn-ghost w-full" onClick={() => setPhase('fim')}>
               Encerrar
@@ -725,7 +726,7 @@ function SleepRoutine({ onClose, onBreath }: { onClose: () => void; onBreath: ()
   const [done, setDone] = useState<string[]>([]);
   const all = done.length === SLEEP_ROUTINE.length;
   return (
-    <ToolScreen title="Para dormir" sub={all ? 'Prontinho pra dormir 🌙' : `${done.length} de ${SLEEP_ROUTINE.length} estrelas acesas`} theme="noite" onClose={onClose}>
+    <ToolScreen title="Para dormir" sub={all ? 'Prontinho pra dormir' : `${done.length} de ${SLEEP_ROUTINE.length} estrelas acesas`} theme="noite" onClose={onClose}>
       <div className="sleep-sky" aria-hidden="true">
         {SLEEP_ROUTINE.map((r, k) => (
           <span key={r.id} className={`sleep-star ${done.includes(r.id) ? 'is-on' : ''}`} style={{ left: `${10 + k * 16}%`, top: `${k % 2 ? 14 : 44}%` }}>
@@ -746,14 +747,14 @@ function SleepRoutine({ onClose, onBreath }: { onClose: () => void; onBreath: ()
         {SLEEP_ROUTINE.map((r) => (
           <button key={r.id} className="opt" aria-pressed={done.includes(r.id)} onClick={() => setDone(done.includes(r.id) ? done.filter((x) => x !== r.id) : [...done, r.id])}>
             <span className="tool-ico" style={{ background: done.includes(r.id) ? '#FFF1A8' : 'var(--soft-btn)' }} aria-hidden="true">
-              {done.includes(r.id) ? '⭐' : r.emoji}
+              <Glyph e={done.includes(r.id) ? '⭐' : r.emoji} size={30} />
             </span>
             <span className="min-w-0 flex-1">{r.text}</span>
           </button>
         ))}
       </div>
       <button className="btn btn-primary" onClick={onBreath}>
-        🌙 Respiração para dormir
+        <Glyph e="🌙" size={22} /> Respiração para dormir
       </button>
     </ToolScreen>
   );
@@ -890,7 +891,7 @@ function Quiz({ onClose }: { onClose: () => void }) {
         {QUIZZES.map((q, k) => (
           <button key={q.id} className="opt" onClick={() => (setQuiz(q), setAnswers([]))}>
             <span className="tool-ico" style={{ background: ['#FFE39A', '#CFE8FF', '#FFD6E2', '#DFF5D2'][k % 4] }} aria-hidden="true">
-              {['🧩', '💭', '🌙', '🌻'][k % 4]}
+              <Glyph e={['🧩', '💭', '🌙', '🌻'][k % 4]} size={30} />
             </span>
             <span className="min-w-0 flex-1">{q.title}</span>
             <ChevronRight size={18} className="text-muted" />

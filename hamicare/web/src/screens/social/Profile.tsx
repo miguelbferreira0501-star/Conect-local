@@ -11,11 +11,15 @@ import { copyText } from '../../lib/util';
 import { syncProfile } from '../../lib/social';
 import { postKey, type Feed, type Post, type Profile, type SocialApi, type UserPage } from '../../lib/social/types';
 import { Avatar, PostCard, PostMedia } from './Post';
+import { Glyph } from '../../components/art';
 
-function Counter({ value, label }: { value: number | string; label: string }) {
+function Counter({ value, label, icon }: { value: number | string; label: string; icon?: string }) {
   return (
     <div className="grid justify-items-center">
-      <span className="font-display text-[21px] font-bold leading-none tabular-nums">{value}</span>
+      <span className="flex items-center gap-0.5 font-display text-[21px] font-bold leading-none tabular-nums">
+        {icon && <Glyph e={icon} size={20} />}
+        {value}
+      </span>
       <span className="text-[12px] font-bold text-muted">{label}</span>
     </div>
   );
@@ -35,7 +39,7 @@ export function MyHeader({ me, api, postsCount, friendsCount, onAdd }: { me: Pro
         <div className="grid flex-1 grid-cols-3 gap-1">
           <Counter value={postsCount} label="posts" />
           <Counter value={friendsCount} label="amigos" />
-          <Counter value={`🔥${me.streak ?? 0}`} label="ofensiva" />
+          <Counter value={me.streak ?? 0} icon="🔥" label="ofensiva" />
         </div>
       </div>
       <div className="grid gap-0.5">
@@ -70,7 +74,7 @@ export function MyHeader({ me, api, postsCount, friendsCount, onAdd }: { me: Pro
         >
           <label className="grid gap-1" htmlFor="bio">
             <span className="text-[14px] font-extrabold">Bio</span>
-            <textarea id="bio" className="field min-h-[80px] resize-none" maxLength={120} placeholder="Ex.: Um dia de cada vez 🌻" value={bio} onChange={(e) => setBioText(e.target.value)} />
+            <textarea id="bio" className="field min-h-[80px] resize-none" maxLength={120} placeholder="Ex.: Um dia de cada vez" value={bio} onChange={(e) => setBioText(e.target.value)} />
           </label>
           {!check.ok && <p className="text-[13px] text-danger">{REASON_TEXT[check.reason]}</p>}
           <p className="text-[12px] text-muted">
@@ -132,13 +136,13 @@ export function ProfilePage({ userId, api, myId, onClose, onChanged }: { userId:
                 <div className="grid flex-1 grid-cols-3 gap-1">
                   <Counter value={page.isFriend ? page.posts.length : '–'} label="posts" />
                   <Counter value={page.friendsCount} label="amigos" />
-                  <Counter value={`🔥${p.streak ?? 0}`} label="ofensiva" />
+                  <Counter value={p.streak ?? 0} icon="🔥" label="ofensiva" />
                 </div>
               </div>
               <div className="grid gap-0.5">
                 <p className="font-display text-[20px] font-bold leading-tight">{p.name}</p>
                 <p className="text-[13px] font-bold text-muted">
-                  {p.pet.name} · nível {p.level} · 🏅 {p.badges ?? 0} conquistas
+                  {p.pet.name} · nível {p.level} · <Glyph e="🏅" size={16} className="gi" /> {p.badges ?? 0} conquistas
                 </p>
                 {p.bio && <p className="whitespace-pre-wrap text-[14.5px]">{p.bio}</p>}
               </div>
@@ -148,12 +152,12 @@ export function ProfilePage({ userId, api, myId, onClose, onChanged }: { userId:
                     <button
                       className="btn btn-primary btn-sm"
                       onClick={async () => {
-                        await api.sendGift(p.id, 'vibe', 'Mandei uma vibe boa pra você 💛');
+                        await api.sendGift(p.id, 'vibe', 'Mandei uma vibe boa pra você!');
                         logEvent('vibe');
                         toast(`Vibe boa enviada para ${p.name}!`);
                       }}
                     >
-                      💛 Mandar vibe
+                      <Glyph e="💛" size={20} /> Mandar vibe
                     </button>
                     <button className="btn btn-ghost btn-sm" onClick={() => setTab('casa')}>
                       <HomeIcon size={15} /> Visitar casa

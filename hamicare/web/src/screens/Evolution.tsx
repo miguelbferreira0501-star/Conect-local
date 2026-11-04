@@ -9,6 +9,7 @@ import { deletePhoto, enableTracking, isPremium, journeyNow, logWeight, minor, s
 import { addDays, formatDay, fmtNum, weekStart, WEEKDAYS } from '../lib/util';
 import { GOALS, JOURNEY_TEXT } from '../data/lines';
 import type { Photo } from '../types';
+import { Glyph } from '../components/art';
 
 export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: (p: Photo) => void }) {
   const s = useApp();
@@ -43,13 +44,13 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
   const maxWeek = Math.max(1, ...weeks.map((w) => w.n));
 
   const timeline = [
-    { date: s.createdAt, text: `A jornada com o ${s.pet.name} começou` },
+    { date: s.createdAt, icon: '🐹', text: `A jornada com o ${s.pet.name} começou` },
     ...Object.entries(s.achievements).map(([id, date]) => {
       const a = ACHIEVEMENTS.find((x) => x.id === id);
-      return { date, text: a ? `${a.emoji} ${a.title}` : id };
+      return { date, icon: a?.emoji ?? '⭐', text: a ? a.title : id };
     }),
-    ...(j.reachedAt ? [{ date: j.reachedAt, text: '🏆 Meta da jornada alcançada' }] : []),
-    { date: j.startedAt, text: `${jt.emoji} Missão: ${GOALS[s.profile.goal].label}` },
+    ...(j.reachedAt ? [{ date: j.reachedAt, icon: '🏆', text: 'Meta da jornada alcançada' }] : []),
+    { date: j.startedAt, icon: jt.emoji, text: `Missão: ${GOALS[s.profile.goal].label}` },
   ]
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 12);
@@ -95,7 +96,11 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
 
         <section className="card grid gap-3 p-4" aria-label="Nossa jornada">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="font-display text-[20px] font-bold">{isMinor ? 'Jornada de hábitos' : `${jt.emoji} ${jt.title}`}</h2>
+            <h2 className="font-display text-[20px] font-bold">{isMinor ? 'Jornada de hábitos' : (
+              <span className="flex items-center gap-2">
+                <Glyph e={jt.emoji} size={26} /> {jt.title}
+              </span>
+            )}</h2>
           </div>
           {isMinor ? (
             <p className="text-[15px] text-muted">Para menores de 18, o {s.pet.name} não muda de peso e não existe contagem de calorias. A evolução dele vem dos hábitos e do movimento.</p>
@@ -164,7 +169,7 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
               </details>
               {!s.body.tracking && j.dir !== 'manter' && (
                 <button className="btn btn-soft" onClick={() => confirm('Guardar seu peso só para você, para as calorias ficarem sob medida? Dá pra apagar tudo nos Ajustes.') && enableTracking(true)}>
-                  ⚖️ Informar meu peso e minha meta
+                  <Glyph e="⚖️" size={22} /> Informar meu peso e minha meta
                 </button>
               )}
               <div className="grid gap-2">
@@ -183,7 +188,7 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
                         }
                       }}
                     >
-                      <span className="text-[22px]">{GOALS[g].emoji}</span>
+                      <Glyph e={GOALS[g].emoji} size={30} />
                       {g === 'emagrecer' ? 'Emagrecer' : g === 'ganhar' ? 'Ganhar peso' : 'Manter'}
                     </button>
                   ))}
@@ -197,7 +202,9 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
           <section className="card grid gap-3 p-4" aria-label="Sua evolução">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-[20px] font-bold">Sua evolução</h2>
-              <span className="chip chip-plain">🔒 Só você vê</span>
+              <span className="chip chip-plain">
+                <Glyph e="🔒" size={16} /> Só você vê
+              </span>
             </div>
             {!hideNums && <LineChart points={userPoints} label="Seu peso" unit=" kg" tone="var(--accent)" />}
             {rapidChange(s.body.logs, today) && (
@@ -276,7 +283,9 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
               const got = !!s.achievements[a.id];
               return (
                 <div key={a.id} className="grid justify-items-center gap-1 text-center" title={a.desc}>
-                  <span className={`grid h-12 w-12 place-items-center rounded-2xl text-[24px] ${got ? 'bg-gold-soft' : 'bg-surface2 grayscale opacity-40'}`}>{a.emoji}</span>
+                  <span className={`grid h-12 w-12 place-items-center rounded-2xl ${got ? 'bg-gold-soft' : 'bg-surface2 grayscale opacity-40'}`}>
+                    <Glyph e={a.emoji} size={34} />
+                  </span>
                   <span className="text-[11px] font-bold leading-tight">{a.title}</span>
                 </div>
               );
@@ -296,7 +305,7 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
               ))}
             </div>
           ) : (
-            <p className="text-[14px] text-muted">Tire fotos no botão 📸 do Início. Elas mostram como o {s.pet.name} estava em cada fase.</p>
+            <p className="text-[14px] text-muted">Tire fotos no botão de câmera da aba Cuidar. Elas mostram como o {s.pet.name} estava em cada fase.</p>
           )}
         </section>
 
@@ -306,7 +315,9 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
             {timeline.map((t, i) => (
               <li key={i} className="text-[14px]">
                 <span className="block text-[12px] font-bold text-muted">{formatDay(t.date, { day: 'numeric', month: 'long' })}</span>
-                {t.text}
+                <span className="flex items-center gap-2">
+                  <Glyph e={t.icon} size={22} /> {t.text}
+                </span>
               </li>
             ))}
           </ol>

@@ -10,6 +10,7 @@ import { dayOf, todayKey, useApp } from '../lib/store';
 import { CareLayer, type CareMode } from './Care';
 import { useNow } from './Home';
 import type { CareId, PetMood, Photo } from '../types';
+import { Glyph } from '../components/art';
 
 type StatKey = 'felicidade' | 'energia' | 'saciedade' | 'limpeza';
 
@@ -50,7 +51,7 @@ function needOf(stats: Record<StatKey, number>, sleeping: boolean): { text: stri
     ['felicidade', 50, 'Brinca comigo um pouquinho?', 'brincar', 'calmo'],
   ];
   const low = order.filter(([k, min]) => stats[k] < min).sort((a, b) => stats[a[0]] - stats[b[0]])[0];
-  if (!low) return { text: 'Tô bem cuidado! Obrigado por cuidar de mim 💛', care: null, mood: 'feliz' };
+  if (!low) return { text: 'Tô bem cuidado! Obrigado por cuidar de mim!', care: null, mood: 'feliz' };
   return { text: low[2], care: CARES.find((c) => c.id === low[3])!, mood: low[4] };
 }
 
@@ -81,7 +82,7 @@ export function CareArea({ onShare }: { onShare: (p: Photo) => void }) {
         <Room house={s.house} period={periodOf()} height={230}>
           {adv ? (
             <div className="mb-6 grid justify-items-center gap-1 rounded-3xl bg-surface/95 px-4 py-3 text-center">
-              <span className="text-[30px]">{place?.emoji}</span>
+              <Glyph e={place?.emoji} size={40} />
               <p className="font-display text-[17px] font-bold leading-tight">
                 {s.pet.name} foi para {place?.name}
               </p>
@@ -99,7 +100,7 @@ export function CareArea({ onShare }: { onShare: (p: Photo) => void }) {
             </p>
             {need.care && (
               <button className="btn btn-primary btn-sm shrink-0" onClick={() => setMode(need.care!.id)}>
-                {need.care.emoji} {sleeping ? 'Acordar' : need.care.label}
+                <Glyph e={sleeping ? '☀️' : need.care.emoji} size={22} /> {sleeping ? 'Acordar' : need.care.label}
               </button>
             )}
           </div>
@@ -110,8 +111,9 @@ export function CareArea({ onShare }: { onShare: (p: Photo) => void }) {
         {STATS.map((st) => (
           <div key={st.key} className="grid min-w-0 gap-1">
             <span className="flex items-center justify-between gap-1 text-[13px] font-extrabold">
-              <span className="truncate">
-                {st.emoji} {st.label}
+              <span className="flex min-w-0 items-center gap-1.5">
+                <Glyph e={st.emoji} size={20} />
+                <span className="truncate">{st.label}</span>
               </span>
               <span className="tabular-nums text-muted">{Math.round(s.pet.stats[st.key])}%</span>
             </span>
@@ -135,7 +137,7 @@ export function CareArea({ onShare }: { onShare: (p: Photo) => void }) {
             return (
               <button key={c.id} className="care-tile" disabled={blocked(c)} onClick={() => setMode(c.id)} aria-label={`${label}: ${c.desc}`}>
                 <span className="care-tile-ico" style={{ background: c.tone }} aria-hidden="true">
-                  {emoji}
+                  <Glyph e={emoji} size={40} />
                 </span>
                 <span className="min-w-0 text-left">
                   <span className="block truncate font-display text-[18px] font-bold leading-tight">{label}</span>

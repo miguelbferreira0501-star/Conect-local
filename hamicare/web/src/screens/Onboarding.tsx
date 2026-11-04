@@ -9,6 +9,7 @@ import { completeOnboarding, getState, starterPlan, useApp, type OnboardingAnswe
 import type { AgeGroup, Category, GoalId, Incentive, Mood, TraitId } from '../types';
 import { fmtNum } from '../lib/util';
 import { Paywall } from './Paywall';
+import { Glyph } from '../components/art';
 
 type StepId = 'intro' | 'age' | 'goal' | 'body-data' | 'journey' | 'focus' | 'minutes' | 'likes' | 'incentive' | 'feeling' | 'pet' | 'name' | 'you' | 'plan' | 'plus';
 
@@ -174,7 +175,7 @@ export function Onboarding() {
                   const t = libById(id)!;
                   return (
                     <p key={id} className="flex items-center gap-2 rounded-2xl bg-surface2 px-3 py-2 text-[14px] font-bold">
-                      <span className="text-[20px]">{t.emoji}</span>
+                      <Glyph e={t.emoji} size={28} />
                       <span className="min-w-0 flex-1">{t.title}</span>
                       {dir === 'perder' ? (
                         <span className="kcal-chip">−{taskKcal(t, dir, kg ?? REF_KG)} kcal</span>
@@ -225,7 +226,7 @@ export function Onboarding() {
             <div className="grid grid-cols-2 gap-2">
               {LIKES.map((l) => (
                 <button key={l.id} className="opt !min-h-[52px] !px-3" aria-pressed={a.likes.includes(l.id)} onClick={() => up({ likes: a.likes.includes(l.id) ? a.likes.filter((x) => x !== l.id) : [...a.likes, l.id] })}>
-                  <span className="text-[22px]">{l.emoji}</span> {l.label}
+                  <Glyph e={l.emoji} size={30} /> {l.label}
                 </button>
               ))}
             </div>
@@ -250,7 +251,7 @@ export function Onboarding() {
             <div className="flex justify-between gap-1">
               {MOODS.map((m) => (
                 <button key={m.value} className="mood-opt" aria-pressed={a.feeling === m.value} aria-label={m.label} onClick={() => (up({ feeling: m.value as Mood }), next())}>
-                  <span className="text-[30px] leading-none">{m.emoji}</span>
+                  <Glyph e={m.emoji} size={38} label={m.label} />
                 </button>
               ))}
             </div>
@@ -274,7 +275,7 @@ export function Onboarding() {
             <div className="grid grid-cols-2 gap-2">
               {(Object.keys(TRAITS) as TraitId[]).map((t) => (
                 <button key={t} className="opt !min-h-[52px] !px-3" aria-pressed={a.trait === t} onClick={() => up({ trait: t })}>
-                  <span className="text-[20px]">{TRAITS[t].emoji}</span> {TRAITS[t].label}
+                  <Glyph e={TRAITS[t].emoji} size={28} /> {TRAITS[t].label}
                 </button>
               ))}
             </div>
@@ -323,7 +324,7 @@ export function Onboarding() {
             <div className="card grid gap-2 p-4">
               {(migrated && s.tasks.length ? s.tasks.map((t) => ({ id: t.id, emoji: t.emoji, title: t.title })) : starterPlan(a).map((id) => libById(id)!)).map((t) => (
                 <p key={t.id} className="flex items-center gap-3 font-bold">
-                  <span className="text-[22px]">{t.emoji}</span> {t.title}
+                  <Glyph e={t.emoji} size={32} /> {t.title}
                 </p>
               ))}
             </div>
@@ -343,7 +344,7 @@ export function Onboarding() {
 function Opt({ on, onClick, emoji, title, sub, big }: { on: boolean; onClick: () => void; emoji: string; title: string; sub?: string; big?: boolean }) {
   return (
     <button className={`opt ${big ? 'opt-big' : ''}`} aria-pressed={on} onClick={onClick}>
-      <span className={`${big ? 'text-[32px]' : 'text-[24px]'} leading-none`}>{emoji}</span>
+      <Glyph e={emoji} size={big ? 44 : 34} />
       <span className="min-w-0">
         <span className="block leading-tight">{title}</span>
         {sub && <span className="block text-[13px] font-semibold text-muted">{sub}</span>}

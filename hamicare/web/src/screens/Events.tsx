@@ -4,6 +4,7 @@ import { toast } from '../components/ui';
 import { http, ApiError } from '../lib/social/api';
 import { useAccount } from '../lib/account';
 import { addCoins, receiveGift } from '../lib/store';
+import { Glyph } from '../components/art';
 
 interface EventRow {
   id: string;
@@ -48,7 +49,7 @@ export function EventsBanner() {
               }
             }}
           >
-            🌻 {ev.rewardCoins}
+            <Glyph e="🌻" size={18} /> {ev.rewardCoins}
           </button>
         </div>
       ))}

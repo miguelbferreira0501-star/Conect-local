@@ -3,6 +3,7 @@ import type { House } from '../types';
 import { itemById } from '../data/items';
 import type { Period } from '../data/lines';
 import { FLOOR_CSS, Furniture, Garland, WALLPAPER_CSS } from './Furniture';
+import { Glyph } from './art';
 
 interface Props {
   house: House;
@@ -42,7 +43,9 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
       <div className="absolute inset-x-0 top-0 h-[72%]" style={{ background: WALLPAPER_CSS[house.wallpaper] ?? WALLPAPER_CSS['p-creme'] }} />
       <div className="absolute inset-x-0 bottom-0 h-[28%]" style={{ background: FLOOR_CSS[house.floor] ?? FLOOR_CSS['f-madeira'] }} />
       <div className={`room-window room-window-${period}`} aria-hidden="true">
-        <span>{period === 'noite' ? '🌙' : '☀️'}</span>
+        <span>
+          <Glyph e={period === 'noite' ? '🌙' : '☀️'} size={26} />
+        </span>
       </div>
       {items.map((it) => {
         const item = itemById(it.itemId);
@@ -79,7 +82,7 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
               setDrag(null);
             }}
           >
-            {item.svg ? <Furniture id={item.svg} /> : <span className="block select-none text-center leading-none">{item.emoji}</span>}
+            {item.svg ? <Furniture id={item.svg} /> : <Glyph e={item.emoji} size="fill" />}
           </div>
         );
       })}

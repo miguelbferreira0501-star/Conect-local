@@ -15,6 +15,7 @@ import { addLibraryTask, addTask, dayOf, deleteTask, kcalOf, minor, personKg, se
 import { fmtNum } from '../lib/util';
 import { WEEKDAYS } from '../lib/util';
 import type { Battery, Category, Freq, Task } from '../types';
+import { Glyph } from '../components/art';
 
 const BATTERY_ICON = { 1: BatteryLow, 2: BatteryMedium, 3: BatteryFull } as const;
 const PERIOD_LABEL: Record<Period, string> = { dia: 'de hoje', semana: 'da semana', mes: 'do mês' };
@@ -40,7 +41,7 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
     if (!r) return;
     const gain = dir === 'ganhar';
     if (r.kcal > 0 && dir !== 'manter') pop(el, `${gain ? '+' : '−'}${r.kcal} kcal`, gain);
-    else pop(el, `+${r.reward} 🌻`);
+    else pop(el, `+${r.reward} sementes`);
     // A ofensiva tem a própria comemoração; nos outros casos, oferece compartilhar.
     if (!r.streak) setTimeout(() => setJustDone({ task: t, kcal: r.kcal }), 650);
   }
@@ -62,8 +63,8 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
 
       {showKcal && dir !== 'manter' && (
         <div className={`journey journey-${dir} !gap-1 !py-3`}>
-          <p className="text-[13px] font-extrabold uppercase tracking-wide opacity-90">
-            {jt.emoji} {jt.title}
+          <p className="flex items-center gap-1.5 text-[13px] font-extrabold uppercase tracking-wide opacity-90">
+            <Glyph e={jt.emoji} size={20} /> {jt.title}
           </p>
           <p className="font-display text-[22px] font-bold leading-tight">
             Hoje: {jt.sign}
@@ -96,10 +97,16 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
         {day.battery === 1 && <p className="rounded-2xl bg-accent-soft px-3 py-2 text-[14px] font-semibold">Modo dia difícil: só ficaram as atividades leves. Fazer uma já vale.</p>}
         <div className="flex items-center justify-between gap-2 border-t border-line pt-3">
           <p className="text-[14px] text-muted">
-            🔥 Ofensiva protegida: até {REST_PER_WEEK} dias de descanso por semana não quebram a sequência. Restam <b className="text-ink">{streak.restLeft}</b> nesta semana.
+            <Glyph e="🔥" size={18} className="gi" /> Ofensiva protegida: até {REST_PER_WEEK} dias de descanso por semana não quebram a sequência. Restam <b className="text-ink">{streak.restLeft}</b> nesta semana.
           </p>
           <button className={`btn btn-sm shrink-0 ${day.rest ? 'btn-soft' : 'btn-ghost'}`} onClick={() => setRest(!day.rest)} aria-pressed={!!day.rest}>
-            {day.rest ? '💤 Descansando' : 'Descansar hoje'}
+            {day.rest ? (
+              <>
+                <Glyph e="💤" size={18} /> Descansando
+              </>
+            ) : (
+              'Descansar hoje'
+            )}
           </button>
         </div>
       </section>
@@ -111,7 +118,7 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
           return (
             <div key={cat} className="grid gap-2">
               <h2 className="section-label flex items-center gap-2 px-1">
-                <span aria-hidden="true">{CATEGORIES[cat].emoji}</span> {CATEGORIES[cat].label}
+                <Glyph e={CATEGORIES[cat].emoji} size={24} /> {CATEGORIES[cat].label}
               </h2>
               <ul className="grid gap-3">
                 {list.map((t) => (
@@ -146,7 +153,7 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
           <div className="grid gap-3 pt-1">
             {showKcal && justDone.kcal > 0 && dir !== 'manter' && (
               <p className="rounded-2xl bg-accent-soft p-3 text-[16px] font-bold">
-                {jt.emoji} Você e o {s.pet.name} {jt.verb} {fmtNum(justDone.kcal, 0)} kcal juntos!
+                <Glyph e={jt.emoji} size={22} className="gi" /> Você e o {s.pet.name} {jt.verb} {fmtNum(justDone.kcal, 0)} kcal juntos!
               </p>
             )}
             <p className="text-[16px]">
@@ -159,7 +166,7 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
                 setJustDone(null);
               }}
             >
-              📸 Compartilhar com amigos
+              <Glyph e="📸" size={22} /> Compartilhar com amigos
             </button>
             <button className="btn btn-ghost" onClick={() => setJustDone(null)}>
               Agora não
@@ -201,15 +208,15 @@ function TaskSheet({ task, onClose }: { task: Task | 'new' | null; onClose: () =
           <div className="grid gap-3">
             {s.journey.dir !== 'manter' && !minor(s) && (
               <div className="grid gap-1.5 rounded-2xl bg-accent-soft p-3">
-                <p className="text-[14px] font-extrabold">
-                  {JOURNEY_TEXT[s.journey.dir].emoji} Para a sua jornada
+                <p className="flex items-center gap-1.5 text-[14px] font-extrabold">
+                  <Glyph e={JOURNEY_TEXT[s.journey.dir].emoji} size={20} /> Para a sua jornada
                 </p>
                 <div className="grid gap-1.5">
                   {LIBRARY.filter((l) => l.for?.includes(s.journey.dir as 'perder' | 'ganhar')).map((l) => {
                     const has = s.tasks.some((x) => x.id === l.id);
                     return (
                       <button key={l.id} className="flex items-center gap-2 rounded-2xl bg-surface px-3 py-2 text-left text-[14px] font-bold disabled:opacity-60" disabled={has} onClick={() => (addLibraryTask(l.id), toast(`${l.title}: adicionada`))}>
-                        <span className="text-[20px]">{l.emoji}</span>
+                        <Glyph e={l.emoji} size={30} />
                         <span className="min-w-0 flex-1">
                           <span className="block leading-tight">{l.title}</span>
                           {l.why && <span className="block text-[12px] font-semibold text-muted">{l.why}</span>}
@@ -223,15 +230,15 @@ function TaskSheet({ task, onClose }: { task: Task | 'new' | null; onClose: () =
             )}
             {CAT_ORDER.map((cat) => (
               <div key={cat} className="grid gap-1.5">
-                <p className="text-[14px] font-extrabold">
-                  {CATEGORIES[cat].emoji} {CATEGORIES[cat].label}
+                <p className="flex items-center gap-1.5 text-[14px] font-extrabold">
+                  <Glyph e={CATEGORIES[cat].emoji} size={20} /> {CATEGORIES[cat].label}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {LIBRARY.filter((l) => l.cat === cat).map((l) => {
                     const has = s.tasks.some((x) => x.id === l.id);
                     return (
                       <button key={l.id} className={`chip !whitespace-normal text-left ${has ? 'chip-leaf' : 'chip-plain'}`} disabled={has} onClick={() => (addLibraryTask(l.id), toast(`${l.title}: adicionada`))}>
-                        {l.emoji} {l.title} {has && '✓'}
+                        <Glyph e={l.emoji} size={20} /> {l.title} {has && '✓'}
                       </button>
                     );
                   })}
@@ -260,7 +267,7 @@ function TaskSheet({ task, onClose }: { task: Task | 'new' | null; onClose: () =
               <div className="grid grid-cols-8 gap-1.5">
                 {TASK_EMOJIS.map((em) => (
                   <button type="button" key={em} className="mood-opt !min-h-[40px] !min-w-0" aria-pressed={current.emoji === em} aria-label={`Ícone ${em}`} onClick={() => up({ emoji: em })}>
-                    <span className="text-[20px]">{em}</span>
+                    <Glyph e={em} size={28} />
                   </button>
                 ))}
               </div>
@@ -270,7 +277,7 @@ function TaskSheet({ task, onClose }: { task: Task | 'new' | null; onClose: () =
               <div className="grid grid-cols-2 gap-2">
                 {CAT_ORDER.map((c: Category) => (
                   <button type="button" key={c} className="opt !min-h-[44px] !px-3 !py-2 text-[14px]" aria-pressed={current.cat === c} onClick={() => up({ cat: c })}>
-                    {CATEGORIES[c].emoji} {CATEGORIES[c].label}
+                    <Glyph e={CATEGORIES[c].emoji} size={20} /> {CATEGORIES[c].label}
                   </button>
                 ))}
               </div>

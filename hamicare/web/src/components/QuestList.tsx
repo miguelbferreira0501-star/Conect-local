@@ -3,6 +3,7 @@ import { claimKey, questProgress, type QuestDef } from '../logic/progress';
 import { claimQuest } from '../lib/store';
 import { toast } from './ui';
 import type { State } from '../types';
+import { Glyph } from './art';
 
 const LOOK: Record<string, { emoji: string; tint: string }> = {
   tarefas3: { emoji: '🏁', tint: '#FFE39A' },
@@ -34,7 +35,7 @@ export function QuestList({ quests, s, today }: { quests: QuestDef[]; s: State; 
             </span>
             <div className="quest-card">
               <span className="quest-ico" style={{ background: look.tint }} aria-hidden="true">
-                {look.emoji}
+                <Glyph e={look.emoji} size={34} />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-[16px] font-extrabold leading-tight">{q.title}</p>
@@ -50,7 +51,7 @@ export function QuestList({ quests, s, today }: { quests: QuestDef[]; s: State; 
               ) : (
                 p >= q.target && (
                   <button className="check3d quest-claim" onClick={() => claimQuest(q.id) && toast(`+${q.coins} sementes e +${q.xp} XP!`)} aria-label={`Pegar prêmio: ${q.title}`}>
-                    +{q.coins} 🌻
+                    +{q.coins} <Glyph e="🌻" size={18} />
                   </button>
                 )
               )}

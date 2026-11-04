@@ -17,6 +17,7 @@ import {
 } from '../lib/store';
 import { AdventureModal } from './Home';
 import type { WearSlot } from '../types';
+import { Glyph } from '../components/art';
 
 type Tab = 'casa' | 'mapa' | 'loja' | 'armario';
 
@@ -152,7 +153,7 @@ export function ItemIcon({ item, size = 34 }: { item: Item; size?: number }) {
       </span>
     );
   }
-  if (item.emoji) return <span style={{ fontSize: size, lineHeight: 1 }}>{item.emoji}</span>;
+  if (item.emoji) return <Glyph e={item.emoji} size={Math.round(size * 1.25)} />;
   if (item.kind === 'parede') return <span className="block rounded-xl" style={{ width: size * 1.3, height: size * 1.3, background: WALLPAPER_CSS[item.id] }} />;
   if (item.kind === 'piso') return <span className="block rounded-xl" style={{ width: size * 1.3, height: size * 1.3, background: FLOOR_CSS[item.id] }} />;
   return null;
@@ -178,7 +179,7 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
     <div className="grid gap-4">
       {adv && advPlace && (
         <div className="card flex items-center gap-3 p-4">
-          <span className="text-[30px]">{advPlace.emoji}</span>
+          <Glyph e={advPlace.emoji} size={40} />
           <div className="min-w-0 flex-1">
             <p className="font-bold leading-tight">
               {s.pet.name} está em {advPlace.name}
@@ -197,7 +198,7 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
           const lock = placeLocked(s, p.id);
           return (
             <button key={p.id} className="map-pin" style={{ left: `${p.pos[0]}%`, top: `${p.pos[1]}%` }} data-locked={!!lock} onClick={() => setOpen(p.id)} aria-label={`${p.name}${lock ? ' (bloqueado)' : ''}`}>
-              <span className="pin-bubble">{lock ? '🔒' : p.emoji}</span>
+              <span className="pin-bubble"><Glyph e={lock ? '🔒' : p.emoji} size={30} /></span>
               <span className="pin-label">{p.name}</span>
             </button>
           );
@@ -205,7 +206,9 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
       </div>
       <section className="album" aria-label="Álbum de achadinhos">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="font-display text-[21px] font-bold text-[#5b3a1e]">📒 Álbum de achadinhos</h2>
+          <h2 className="font-display text-[21px] font-bold text-[#5b3a1e]">
+            <Glyph e="📒" size={26} className="gi" /> Álbum de achadinhos
+          </h2>
           <span className="album-count">
             {s.finds.length}/{ALL_FINDS.length}
           </span>
@@ -217,9 +220,7 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
             return (
               <div key={pl.id} className="album-row">
                 <span className="album-place">
-                  <span className="text-[20px]" aria-hidden="true">
-                    {pl.emoji}
-                  </span>
+                  <Glyph e={pl.emoji} size={28} />
                   <span className="min-w-0 leading-tight">
                     <span className="block truncate text-[13px] font-extrabold">{pl.name}</span>
                     <span className="block text-[11px] font-bold opacity-70">
@@ -232,7 +233,7 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
                     const has = s.finds.includes(f.id);
                     return (
                       <span key={f.id} className={`sticker ${has ? 'is-got' : ''}`} style={{ rotate: has ? `${(i - 1) * 4}deg` : undefined }} title={has ? f.name : 'Ainda não encontrado'} aria-label={has ? f.name : 'Figurinha que falta'}>
-                        <span className="sticker-art">{f.emoji}</span>
+                        <span className="sticker-art"><Glyph e={f.emoji} size={36} /></span>
                       </span>
                     );
                   })}
@@ -243,7 +244,7 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
         </div>
       </section>
 
-      <Sheet open={!!place} onClose={() => setOpen(null)} title={place ? `${place.emoji} ${place.name}` : ''}>
+      <Sheet open={!!place} onClose={() => setOpen(null)} title={place ? place.name : ''}>
         {place && (
           <div className="grid gap-3 pt-1">
             <div className="h-24 rounded-2xl" style={{ background: `linear-gradient(160deg, ${place.colors[0]}, ${place.colors[1]})` }} />
@@ -260,7 +261,7 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
                   <div className="min-w-0 flex-1">
                     <p className="font-bold leading-tight">{m.title}</p>
                     <p className="text-[12px] font-bold text-muted">
-                      {m.minutes >= 60 ? `${m.minutes / 60} h` : `${m.minutes} min`} · ⚡ {m.energy} de energia · 🌻 {m.coins}
+                      {m.minutes >= 60 ? `${m.minutes / 60} h` : `${m.minutes} min`} · <Glyph e="⚡" size={14} className="gi" /> {m.energy} de energia · <Glyph e="🌻" size={14} className="gi" /> {m.coins}
                     </p>
                   </div>
                   <button
@@ -280,7 +281,13 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
             <div className="flex gap-2">
               {place.finds.map((f) => (
                 <span key={f.id} className={`chip ${s.finds.includes(f.id) ? 'chip-gold' : 'chip-plain'}`}>
-                  {s.finds.includes(f.id) ? `${f.emoji} ${f.name}` : '? Achadinho'}
+                  {s.finds.includes(f.id) ? (
+                    <>
+                      <Glyph e={f.emoji} size={18} /> {f.name}
+                    </>
+                  ) : (
+                    '? Achadinho'
+                  )}
                 </span>
               ))}
             </div>
@@ -323,7 +330,9 @@ function ShopTab({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: stri
           </p>
         </div>
         <div className="flex items-center justify-between gap-2">
-          <p className="font-display text-[20px] font-bold leading-tight">✨ Coleção do dia</p>
+          <p className="font-display text-[20px] font-bold leading-tight">
+            <Glyph e="✨" size={22} className="gi" /> Coleção do dia
+          </p>
           <span className="renew rounded-full px-3 py-1 text-[12px] font-black">
             Renova em {Math.floor(mins / 60)}h{String(mins % 60).padStart(2, '0')}
           </span>
@@ -339,7 +348,7 @@ function ShopTab({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: stri
         disabled={!giftReady}
         onClick={() => {
           const g = claimDailyGift();
-          if (g) toast(g.food ? `Presente: ${itemById(g.food)?.emoji} ${itemById(g.food)?.name}!` : `Presente: +${g.coins} sementes!`);
+          if (g) toast(g.food ? `Presente: ${itemById(g.food)?.name}!` : `Presente: +${g.coins} sementes!`);
         }}
       >
         <Gift className="shrink-0 text-accent" />
@@ -348,11 +357,12 @@ function ShopTab({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: stri
           <span className="block text-[13px] text-muted">{giftReady ? 'Toque para abrir: sementes ou uma comidinha' : 'Volte amanhã para outro'}</span>
         </span>
       </button>
-      {season && <p className="rounded-2xl bg-gold-soft px-4 py-2 text-[14px] font-bold">✨ {SEASONS[season].label}: itens especiais {SEASONS[season].until}</p>}
+      {season && <p className="rounded-2xl bg-gold-soft px-4 py-2 text-[14px] font-bold">
+          <Glyph e="✨" size={18} className="gi" /> {SEASONS[season].label}: itens especiais {SEASONS[season].until}</p>}
       <div className="tabs-scroll">
         {(['looks', ...SHOP_KINDS, 'desejos'] as const).map((k) => (
           <button key={k} className={`chip ${kind === k ? 'chip-accent' : 'chip-plain'}`} onClick={() => setKind(k)}>
-            {k === 'desejos' ? `💗 Desejos (${s.wishlist.length})` : k === 'looks' ? `✨ Looks (${LOOKS.length})` : `${KIND_LABEL[k]} (${forSale.filter((i) => i.kind === k).length})`}
+            {k === 'desejos' ? <><Glyph e="💗" size={16} /> Desejos ({s.wishlist.length})</> : k === 'looks' ? <><Glyph e="✨" size={16} /> Looks ({LOOKS.length})</> : `${KIND_LABEL[k]} (${forSale.filter((i) => i.kind === k).length})`}
           </button>
         ))}
       </div>
@@ -436,7 +446,7 @@ function LooksGrid({ onPlus }: { onPlus: () => void }) {
             </div>
             <div className="grid min-w-0 flex-1 gap-1">
               <p className="font-display text-[18px] font-bold leading-tight">
-                {look.emoji} {look.name} {lp.plus && <Sparkles size={14} className="inline text-accent" />}
+                <Glyph e={look.emoji} size={22} className="gi" /> {look.name} {lp.plus && <Sparkles size={14} className="inline text-accent" />}
               </p>
               <p className="text-[12px] leading-snug text-muted">{items.map((i) => i.name).join(' · ')}</p>
               {all ? (

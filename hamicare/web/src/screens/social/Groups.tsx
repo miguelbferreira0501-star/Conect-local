@@ -5,6 +5,7 @@ import { Empty, Sheet, toast } from '../../components/ui';
 import { checkKindness, REASON_TEXT } from '../../shared/moderation';
 import { postKey, type Feed, type Group, type Profile, type SocialApi } from '../../lib/social/types';
 import { Avatar, Composer, PostCard } from './Post';
+import { Glyph } from '../../components/art';
 
 const GROUP_EMOJIS = ['🌻', '🚶', '💧', '🧘', '📚', '🍎', '🏃', '💪', '🎨', '🌙', '🐹', '💛'];
 export const GROUP_COLORS: Record<string, [string, string]> = {
@@ -55,7 +56,7 @@ export function GroupsTab({ api, friends, myId, onOpenProfile }: { api: SocialAp
           return (
             <button key={g.id} className="group-card" style={{ ['--g1' as string]: a, ['--g2' as string]: b }} onClick={() => setOpen(g.id)}>
               <span className="group-emoji" aria-hidden="true">
-                {g.emoji}
+                <Glyph e={g.emoji} size={34} />
               </span>
               <span className="min-w-0 flex-1 text-left">
                 <span className="block truncate font-display text-[19px] font-bold leading-tight">{g.name}</span>
@@ -113,7 +114,7 @@ function CreateGroup({ open, api, friends, onClose, onCreated }: { open: boolean
           <div className="grid grid-cols-6 gap-1.5">
             {GROUP_EMOJIS.map((em) => (
               <button type="button" key={em} className="mood-opt !min-w-0" aria-pressed={emoji === em} aria-label={em} onClick={() => setEmoji(em)}>
-                <span className="text-[22px]">{em}</span>
+                <Glyph e={em} size={30} />
               </button>
             ))}
           </div>
@@ -178,9 +179,7 @@ function GroupPage({ group, profiles, api, myId, friends, onClose, onChanged, on
               <LogOut size={18} />
             </button>
           </div>
-          <span className="text-[54px] leading-none" aria-hidden="true">
-            {group.emoji}
-          </span>
+          <Glyph e={group.emoji} size={64} />
           <p className="font-display text-[26px] font-bold leading-tight">{group.name}</p>
           <div className="flex flex-wrap gap-2">
             {group.members.map((m) =>

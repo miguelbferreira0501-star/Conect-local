@@ -134,6 +134,8 @@ function normalize(raw: State): State {
   s.themeV = 1;
   // Missões são só hábitos: as antigas de comida saem da lista (o histórico dos dias fica).
   if (s.tasks.some((t) => FOOD_TASKS.includes(t.id))) s.tasks = s.tasks.filter((t) => !FOOD_TASKS.includes(t.id));
+  // A garrafa de água ganhou desenho de garrafa (antes era um copo de refrigerante).
+  if (s.tasks.some((t) => t.id === 'garrafa' && t.emoji === '🥤')) s.tasks = s.tasks.map((t) => (t.id === 'garrafa' && t.emoji === '🥤' ? { ...t, emoji: '🚰' } : t));
   // Uma vez: listas que ficaram curtas ganham hábitos do plano até ter pelo menos 7 missões.
   if (!raw.missionsV && s.onboarded && s.tasks.length < PLAN_MIN) {
     const have = new Set(s.tasks.map((t) => t.id));

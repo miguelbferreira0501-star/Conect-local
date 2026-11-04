@@ -9,6 +9,7 @@ import { minor, sinceStart, todayKey, useApp, type Celebration } from '../lib/st
 import { addDays, fmtNum, hashStr, weekStart, WEEKDAYS } from '../lib/util';
 import { isActive } from '../logic/evolution';
 import type { Photo } from '../types';
+import { Glyph } from './art';
 
 const DAY_NAMES = ['Domingo Doce', 'Segunda Serena', 'Terça Tranquila', 'Quarta Querida', 'Quinta Quentinha', 'Sexta Sorridente', 'Sábado Sossegado'];
 const DAY_COLORS: [string, string][] = [
@@ -66,7 +67,7 @@ export function StreakScreen({ count, onClose, onShare }: { count: number; onClo
           <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="animado" size={200} />
         </div>
         <p className="streak-num">
-          <span aria-hidden="true">🔥</span> {count}
+          <Glyph e="🔥" size={54} /> {count}
         </p>
         <p className="font-display text-[28px] font-bold leading-tight text-white">{count === 1 ? 'Primeiro dia da ofensiva!' : `${count} dias seguidos!`}</p>
         <p className="max-w-[300px] text-[15px] font-bold text-white/90">Você apareceu por você hoje. O {s.pet.name} está orgulhoso (e pulando de alegria).</p>
@@ -74,7 +75,7 @@ export function StreakScreen({ count, onClose, onShare }: { count: number; onClo
           {week.map((k) => (
             <div key={k} className="grid justify-items-center gap-1 text-[11px] font-black uppercase text-white">
               {WEEKDAYS[new Date(`${k}T12:00:00`).getDay()]}
-              <span className={`streak-dot ${isActive(s.days[k]) ? 'is-on' : st.rested.includes(k) ? 'is-rest' : ''}`}>{isActive(s.days[k]) ? '✓' : st.rested.includes(k) ? '💤' : ''}</span>
+              <span className={`streak-dot ${isActive(s.days[k]) ? 'is-on' : st.rested.includes(k) ? 'is-rest' : ''}`}>{isActive(s.days[k]) ? '✓' : st.rested.includes(k) ? <Glyph e="💤" size={16} /> : ''}</span>
             </div>
           ))}
         </div>
@@ -97,15 +98,15 @@ export function CelebrationModal({ c, onClose }: { c: Celebration | undefined; o
   if (!c || c.type === 'streak') return null;
   const hide = minor(s) || s.body.hideNumbers;
   const t = JOURNEY_TEXT[s.journey.dir];
-  const content =
+  const content: { title: string; text: string; tone: string; icon?: string } =
     c.type === 'level'
       ? { title: `Nível ${c.level}!`, text: 'Cada cuidado seu fez isso acontecer. Confira o mapa: pode ter lugar novo liberado.', tone: 'gold' }
       : c.type === 'phase'
         ? { title: `Fase ${PHASES[c.phase]}!`, text: `O ${s.pet.name} evoluiu junto com você. Constância é tudo!`, tone: 'leaf' }
         : c.type === 'achievement'
-          ? { title: `${c.emoji} ${c.title}`, text: `Conquista nova! +${c.coins} sementes de girassol.`, tone: 'accent' }
+          ? { title: c.title, icon: c.emoji, text: `Conquista nova! +${c.coins} sementes de girassol.`, tone: 'accent' }
           : c.type === 'goal'
-            ? { title: '🏆 Meta alcançada!', text: `Vocês conseguiram! O ${s.pet.name} chegou na meta dele junto com você. Escolha a próxima missão em Nossa evolução: manter o peso também é uma vitória.`, tone: 'gold' }
+            ? { title: 'Meta alcançada!', icon: '🏆', text: `Vocês conseguiram! O ${s.pet.name} chegou na meta dele junto com você. Escolha a próxima missão em Nossa evolução: manter o peso também é uma vitória.`, tone: 'gold' }
             : {
                 title: 'Resumo da semana',
                 text: hide
@@ -121,6 +122,7 @@ export function CelebrationModal({ c, onClose }: { c: Celebration | undefined; o
           <div className="evolve-pop">
             <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="animado" size={170} />
           </div>
+          {content.icon && <Glyph e={content.icon} size={48} />}
           <h2 className="font-display text-[27px] font-bold leading-tight">{content.title}</h2>
           <p className="text-[15px] font-semibold">{content.text}</p>
           <button className="btn btn-primary mt-2 w-full" onClick={onClose}>

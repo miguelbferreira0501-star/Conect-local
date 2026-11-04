@@ -12,6 +12,7 @@ import { care, cook, feed, owned, setMood, takePhoto, toggleSleep, useApp } from
 import { snapshotPng, saveFile } from '../lib/platform';
 import { prefersReducedMotion } from '../lib/util';
 import type { Mood, Photo, PetMood } from '../types';
+import { Glyph, hasArt } from '../components/art';
 
 export type CareMode = 'carinho' | 'comida' | 'banho' | 'brincar' | 'escovar' | 'dormir' | 'conversar' | 'foto' | null;
 
@@ -65,7 +66,7 @@ function useParticles(max = 60) {
     <div className="pointer-events-none absolute inset-0 z-[5] overflow-hidden" aria-hidden="true">
       {list.map((p) => (
         <span key={p.id} className={`pt pt-${p.kind}`} style={{ left: p.x, top: p.y, ['--dx' as string]: `${p.dx ?? 0}px`, ['--dy' as string]: `${p.dy ?? 0}px` }}>
-          {p.text ?? CHAR[p.kind] ?? ''}
+          {p.text ?? (CHAR[p.kind] && hasArt(CHAR[p.kind]) ? <Glyph e={CHAR[p.kind]} size={22} /> : CHAR[p.kind]) ?? ''}
         </span>
       ))}
     </div>
@@ -142,9 +143,7 @@ function CareShell({ title, step, onClose, children }: { title: string; step?: R
 function Meter({ value, tone = 'accent', icon, label }: { value: number; tone?: 'accent' | 'sky' | 'gold' | 'leaf'; icon: string; label: string }) {
   return (
     <div className="flex items-center gap-2" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value)}>
-      <span className="text-[22px]" aria-hidden="true">
-        {icon}
-      </span>
+      <Glyph e={icon} size={28} />
       <div className="meter flex-1">
         <div className={`meter-fill meter-${tone}`} style={{ width: `${Math.min(100, value)}%` }} />
       </div>
@@ -348,7 +347,7 @@ function FeedGame({ onClose }: { onClose: () => void }) {
               }}
               onPointerCancel={() => setDrag(null)}
             >
-              <span className="text-[34px] leading-none">{f.emoji}</span>
+              <Glyph e={f.emoji} size={42} />
               <span className="text-[12px] font-bold leading-tight">{f.name}</span>
               <span className="food-count">{s.inventory[f.id]}</span>
             </button>
@@ -359,13 +358,13 @@ function FeedGame({ onClose }: { onClose: () => void }) {
       )}
       {drag?.moved && (
         <span className="food-ghost" style={{ left: drag.x, top: drag.y }} aria-hidden="true">
-          {itemById(drag.id)?.emoji}
+          <Glyph e={itemById(drag.id)?.emoji} size={48} />
         </span>
       )}
       {fly && <FlyingFood emoji={itemById(fly.id)?.emoji ?? ''} from={fly.from} to={fly.to} />}
       <p className="text-center text-[13px] text-muted">Comida deixa o {s.pet.name} feliz e com energia. O peso dele muda só com as suas missões saudáveis.</p>
       <button className="btn btn-ghost btn-sm" onClick={() => setKitchen(!kitchen)} aria-expanded={kitchen}>
-        👩‍🍳 {kitchen ? 'Fechar a cozinha' : 'Abrir a cozinha'}
+        <Glyph e="👩‍🍳" size={22} /> {kitchen ? 'Fechar a cozinha' : 'Abrir a cozinha'}
       </button>
       {kitchen && (
         <div className="grid gap-2">
@@ -373,10 +372,10 @@ function FeedGame({ onClose }: { onClose: () => void }) {
             const ok = r.needs.every((id) => owned(s, id));
             return (
               <div key={r.result} className="flex items-center gap-3 rounded-2xl bg-surface2 p-3">
-                <span className="text-[28px]">{itemById(r.result)?.emoji}</span>
+                <Glyph e={itemById(r.result)?.emoji} size={36} />
                 <div className="min-w-0 flex-1">
                   <p className="font-bold leading-tight">{r.name}</p>
-                  <p className="text-[13px] text-muted">{r.needs.map((id) => `${itemById(id)?.emoji} ${itemById(id)?.name}`).join(' + ')}</p>
+                  <p className="text-[13px] text-muted">{r.needs.map((id) => itemById(id)?.name).join(' + ')}</p>
                 </div>
                 <button className="btn btn-soft btn-sm" disabled={!ok} onClick={() => cook(r.result) && toast(`${r.name} pronta!`)}>
                   Preparar
@@ -408,7 +407,7 @@ function FlyingFood({ emoji, from, to }: { emoji: string; from: { x: number; y: 
   }, [from, to]);
   return (
     <span ref={ref} className="food-ghost" style={{ left: from.x, top: from.y }} aria-hidden="true">
-      {emoji}
+      <Glyph e={emoji} size={48} />
     </span>
   );
 }
@@ -542,14 +541,14 @@ function BathGame({ onClose }: { onClose: () => void }) {
     }
   }
 
-  const toolIcon = cur.id === 'molhar' || cur.id === 'enxaguar' ? '🚿' : cur.id === 'esfregar' ? '🧽' : cur.id === 'secar' ? <span className="towel" /> : null;
+  const toolIcon = cur.id === 'molhar' || cur.id === 'enxaguar' ? <Glyph e="🚿" size={56} /> : cur.id === 'esfregar' ? <Glyph e="🧽" size={56} /> : cur.id === 'secar' ? <span className="towel" /> : null;
 
   return (
     <CareShell title="Hora do banho" step={done ? 'Cheirosinho!' : `${step + 1}/6 · ${cur.hint}`} onClose={onClose}>
       <ol className="bath-steps" aria-label="Passos do banho">
         {BATH.map((b, i) => (
           <li key={b.id} data-state={done || i < step ? 'done' : i === step ? 'now' : 'next'}>
-            <span aria-hidden="true">{done || i < step ? '✓' : b.icon}</span>
+            <span aria-hidden="true">{done || i < step ? '✓' : <Glyph e={b.icon} size={22} />}</span>
             {b.label}
           </li>
         ))}
@@ -596,7 +595,7 @@ function BathGame({ onClose }: { onClose: () => void }) {
         </div>
         {cur.id === 'shampoo' && !done && (
           <button className="bottle" onClick={squeeze} aria-label="Apertar o shampoo">
-            🧴
+            <Glyph e="🧴" size={60} />
           </button>
         )}
         {tool && toolIcon && (
@@ -622,11 +621,11 @@ function BathGame({ onClose }: { onClose: () => void }) {
           onPointerLeave={() => setHolding(false)}
           onPointerCancel={() => setHolding(false)}
         >
-          💨 {holding ? 'Secando…' : 'Segurar o secador'}
+          <Glyph e="💨" size={24} /> {holding ? 'Secando…' : 'Segurar o secador'}
         </button>
       )}
       {done && (
-        <DoneCard title="Cheirosinho! ✨" text={<>O {s.pet.name} está limpinho e fofo. Curiosidade: hamster de verdade toma banho de <b>areia</b>, não de água. O banho de espuma é só aqui no HamiCare.</>} onClose={onClose} />
+        <DoneCard title="Cheirosinho!" text={<>O {s.pet.name} está limpinho e fofo. Curiosidade: hamster de verdade toma banho de <b>areia</b>, não de água. O banho de espuma é só aqui no HamiCare.</>} onClose={onClose} />
       )}
     </CareShell>
   );
@@ -642,18 +641,14 @@ function PlayHub({ onClose }: { onClose: () => void }) {
   return (
     <CareShell title="Hora de brincar" step={`Escolha uma brincadeira com o ${s.pet.name}`} onClose={onClose}>
       <button className="game-card game-rain" onClick={() => setGame('chuva')}>
-        <span className="text-[44px]" aria-hidden="true">
-          🌻
-        </span>
+        <Glyph e="🌻" size={56} />
         <span className="min-w-0 text-left">
           <span className="block font-display text-[21px] font-bold">Chuva de sementes</span>
           <span className="block text-[14px] font-semibold opacity-80">Arraste o {s.pet.name} para pegar as sementes que caem</span>
         </span>
       </button>
       <button className="game-card game-ball" onClick={() => setGame('bola')}>
-        <span className="text-[44px]" aria-hidden="true">
-          🎾
-        </span>
+        <Glyph e="🎾" size={56} />
         <span className="min-w-0 text-left">
           <span className="block font-display text-[21px] font-bold">Busca a bolinha!</span>
           <span className="block text-[14px] font-semibold opacity-80">Toque no campo para jogar e veja ele correr atrás</span>
@@ -761,9 +756,13 @@ function SeedRain({ onClose, onBack }: { onClose: () => void; onBack: () => void
   return (
     <CareShell title="Chuva de sementes" step={over ? 'Fim de jogo!' : 'Arraste para o lado para pegar'} onClose={onClose}>
       <div className="flex items-center justify-between font-display text-[21px] font-bold tabular-nums">
-        <span>🌻 {score}</span>
+        <span className="flex items-center gap-1">
+          <Glyph e="🌻" size={26} /> {score}
+        </span>
         {combo >= 3 && !over && <span className="combo">Combo ×{combo}!</span>}
-        <span>⏱️ {Math.max(0, left)}s</span>
+        <span className="flex items-center gap-1">
+          <Glyph e="⏱️" size={24} /> {Math.max(0, left)}s
+        </span>
       </div>
       <div
         ref={stage}
@@ -773,7 +772,7 @@ function SeedRain({ onClose, onBack }: { onClose: () => void; onBack: () => void
       >
         {items.current.map((it) => (
           <span key={it.id} className="falling" style={{ left: `${it.x * 100}%`, top: it.y }} aria-hidden="true">
-            {FALL[it.kind].emoji}
+            <Glyph e={FALL[it.kind].emoji} size={34} />
           </span>
         ))}
         <div className="absolute bottom-2" style={{ left: `${hamiX.current * 100}%`, transform: `translateX(-50%) scaleX(${face.current})` }}>
@@ -985,7 +984,7 @@ function BrushGame({ onClose }: { onClose: () => void }) {
         {done && <Confetti />}
       </div>
       <Meter value={((KNOTS.length - left) / KNOTS.length) * 100} tone="accent" icon="🪮" label="Nós desfeitos" />
-      {done && <DoneCard title="Pelinho de comercial ✨" text={<>Sem nenhum nozinho. O {s.pet.name} não para de se olhar no espelho.</>} onClose={onClose} />}
+      {done && <DoneCard title="Pelinho de comercial" text={<>Sem nenhum nozinho. O {s.pet.name} não para de se olhar no espelho.</>} onClose={onClose} />}
     </CareShell>
   );
 }
@@ -1115,7 +1114,7 @@ function SleepGame({ onClose }: { onClose: () => void }) {
       </div>
       {!waking && covered && !finished && (
         <button className="btn btn-primary" onClick={sing}>
-          🎵 Cantar ({songs}/3)
+          <Glyph e="🎵" size={22} /> Cantar ({songs}/3)
         </button>
       )}
       {!waking && light && <p className="text-center text-[14px] font-bold text-muted">Toque no abajur para apagar a luz.</p>}
@@ -1255,7 +1254,7 @@ function PhotoSheet({ open, onClose, onShare }: { open: boolean; onClose: () => 
             </label>
             <input id="photo-caption" className="field" maxLength={40} placeholder="Legenda (opcional)" value={caption} onChange={(e) => setCaption(e.target.value)} />
             <button className="btn btn-primary" onClick={() => (setTaken(takePhoto(caption, scene, pose)), toast('Foto guardada no álbum!'))}>
-              📸 Tirar foto
+              <Glyph e="📸" size={22} /> Tirar foto
             </button>
           </>
         ) : (

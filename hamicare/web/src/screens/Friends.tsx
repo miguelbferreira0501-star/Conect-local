@@ -13,6 +13,7 @@ import { postKey, type Feed, type FriendState, type Gift, type GroupChallenge, t
 import { Avatar, Composer, PostCard, type ShareDraft } from './social/Post';
 import { MyHeader, ProfilePage } from './social/Profile';
 import { GroupsTab } from './social/Groups';
+import { Glyph } from '../components/art';
 
 export type { ShareDraft };
 
@@ -71,12 +72,12 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account }: {
   }
 
   const myId = me?.id ?? '';
-  const TABS: { id: Tab; label: string }[] = [
-    { id: 'feed', label: '🏠 Feed' },
-    { id: 'grupos', label: '👥 Grupos' },
-    { id: 'amigos', label: `🐹 Amigos${fs?.incoming.length ? ` (${fs.incoming.length})` : ''}` },
-    { id: 'desafios', label: '🎯 Desafios' },
-    { id: 'presentes', label: '🎁 Presentes' },
+  const TABS: { id: Tab; label: string; icon: string }[] = [
+    { id: 'feed', icon: '🏡', label: 'Feed' },
+    { id: 'grupos', icon: '👥', label: 'Grupos' },
+    { id: 'amigos', icon: '🐹', label: `Amigos${fs?.incoming.length ? ` (${fs.incoming.length})` : ''}` },
+    { id: 'desafios', icon: '🎯', label: 'Desafios' },
+    { id: 'presentes', icon: '🎁', label: 'Presentes' },
   ];
   return (
     <Shell>
@@ -84,7 +85,7 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account }: {
       <div className="tabs-scroll" role="tablist" aria-label="Seções">
         {TABS.map((t) => (
           <button key={t.id} role="tab" aria-selected={tab === t.id} className={`chip ${tab === t.id ? 'chip-accent' : 'chip-plain'}`} onClick={() => setTab(t.id)}>
-            {t.label}
+            <Glyph e={t.icon} size={20} /> {t.label}
           </button>
         ))}
       </div>
@@ -268,12 +269,12 @@ function FriendsTab({ api, fs, refresh, onOpenProfile }: { api: SocialApi; fs: F
                 className="icon-btn"
                 aria-label={`Mandar vibe boa para ${p.name}`}
                 onClick={async () => {
-                  await api.sendGift(p.id, 'vibe', 'Mandei uma vibe boa pra você 💛');
+                  await api.sendGift(p.id, 'vibe', 'Mandei uma vibe boa pra você!');
                   logEvent('vibe');
                   toast(`Vibe boa enviada para ${p.name}!`);
                 }}
               >
-                💛
+                <Glyph e="💛" size={24} />
               </button>
             </PersonRow>
           ))
@@ -378,7 +379,7 @@ function ChallengesTab({ api, profiles, myId }: { api: SocialApi; profiles: Reco
           return (
             <article key={c.id} className="card grid gap-3 p-4">
               <div className="flex items-center gap-3">
-                <span className="text-[30px]">{c.emoji}</span>
+                <Glyph e={c.emoji} size={40} />
                 <div className="min-w-0 flex-1">
                   <p className="font-bold leading-tight">{c.title}</p>
                   <p className="text-[13px] text-muted">
@@ -439,7 +440,7 @@ function ChallengesTab({ api, profiles, myId }: { api: SocialApi; profiles: Reco
           <div className="flex flex-wrap gap-2">
             {['🚶', '💧', '🧘', '📚', '🛏️', '🍎', '🚲', '💃'].map((em) => (
               <button type="button" key={em} className="mood-opt" aria-pressed={form.emoji === em} aria-label={em} onClick={() => setForm({ ...form, emoji: em })}>
-                <span className="text-[22px]">{em}</span>
+                <Glyph e={em} size={30} />
               </button>
             ))}
           </div>
@@ -487,7 +488,7 @@ function GiftsTab({ api }: { api: SocialApi }) {
         const item = itemById(g.itemId);
         return (
           <li key={g.id} className="card flex items-center gap-3 p-3">
-            <span className="text-[30px]">{g.itemId === 'vibe' ? '💛' : item?.emoji ?? '🎁'}</span>
+            <Glyph e={g.itemId === 'vibe' ? '💛' : item?.emoji ?? '🎁'} size={40} />
             <div className="min-w-0 flex-1">
               <p className="font-bold leading-tight">{g.itemId === 'vibe' ? 'Vibe boa' : item?.name ?? 'Presente'}</p>
               <p className="text-[13px] text-muted">
@@ -545,7 +546,7 @@ function GiftSheet({ api, itemId, friends, onClose }: { api: SocialApi; itemId: 
             onClick={async () => {
               if (!to || !payGift(item.id)) return toast('Faltam sementes.');
               try {
-                await api.sendGift(to, item.id, 'Um presentinho pra você 🎁');
+                await api.sendGift(to, item.id, 'Um presentinho pra você!');
                 logEvent('vibe');
                 toast('Presente enviado!');
               } catch {

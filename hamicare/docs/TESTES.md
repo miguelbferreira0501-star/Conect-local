@@ -93,3 +93,11 @@ Cobrança real, push num celular de verdade (precisa do app publicado em HTTPS) 
 - Esse teste achou um incômodo antigo: ao entrar na conta no mesmo aparelho, o app perguntava "Qual progresso manter?" mesmo sendo o mesmo Hami (a energia dele muda com o tempo). Agora, se é o mesmo Hami, fica a versão mais nova sem perguntar.
 - 31 testes do servidor e 54 do app passando.
 - **E-mail sem domínio (`server/test/mail.test.ts`):** envio pelo Gmail contra um servidor de e-mail local (login com a senha de app, remetente "HamiCare <seu Gmail>", link no corpo) e envio pelo Brevo (endereço da API, chave, remetente e destinatário certos; erro do Brevo vira registro e não derruba nada). 34 testes do servidor passando.
+
+## Rodada 11 (ilustrações próprias e foto real)
+
+- **Ilustrações no lugar dos emojis (`web/src/components/art/art.test.tsx`):** todo emoji que o app mostra (missões, bem-estar, móveis e decoração, brinquedos, comidas do Cardápio e do Hami, lugares e achados do Mundo, conquistas, reações, temporadas, humor) tem desenho próprio; cada desenho vira um SVG válido; se algum faltar, o emoji aparece no lugar (nada some).
+- **Navegador (390 px):** Início, Missões, Bem-estar (ferramentas e rotina de dormir), Cuidar (casa com sofá, TV, aquário, relógio e planta desenhados), lanchinho do Hami, loja (móveis e decoração), biblioteca de missões e Cardápio. Nada passa da largura e sem erros de página.
+- **Foto real (servidor local + Chromium com câmera de teste):** criar conta pela aba Amigos (a tela agora atualiza sozinha depois de entrar; antes ficava pedindo para entrar), abrir "Compartilhar", tocar em "Foto real", ver a câmera em tela cheia, tirar a foto, "Usar esta foto", publicar: o post aparece no feed com a foto e a câmera é desligada ao sair.
+- Achado: dentro da página de teste no app do Claude, o celular não abre câmera nem galeria (o próprio visualizador bloqueia). Agora o app explica isso e oferece a galeria, em vez de não fazer nada.
+- 57 testes do app passando.

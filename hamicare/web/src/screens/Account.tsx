@@ -9,6 +9,7 @@ import { useApp } from '../lib/store';
 import { formatDay } from '../lib/util';
 import { Group } from './Settings';
 import { Admin } from './Admin';
+import { Glyph } from '../components/art';
 
 /** Conta e backup na nuvem. Fora do app instalado (página de teste), explica o que muda com a conta. */
 export function AccountSection() {
@@ -160,9 +161,7 @@ function ForgotForm({ initialEmail, onBack }: { initialEmail: string; onBack: ()
     return (
       <div className="grid gap-3" role="status">
         <div className="rounded-2xl bg-surface2 p-4 text-center">
-          <p className="text-[34px] leading-none" aria-hidden="true">
-            💌
-          </p>
+          <Glyph e="💌" size={48} />
           <p className="mt-2 font-display text-[19px] font-bold">Confira seu e-mail</p>
           <p className="mt-1 text-[14px] text-muted">
             Se existir uma conta com <b className="break-all text-ink">{email}</b>, mandamos um link para criar uma senha nova. Ele vale por 1 hora. Olhe também a caixa de spam.

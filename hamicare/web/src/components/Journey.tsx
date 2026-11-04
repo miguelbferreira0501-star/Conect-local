@@ -7,6 +7,7 @@ import { KCAL_PER_KG, conditioning, dayKcal, minDaysLeft } from '../logic/evolut
 import { dayOf, journeyNow, minor, todayKey } from '../lib/store';
 import { fmtNum, prefersReducedMotion } from '../lib/util';
 import type { Direction, State } from '../types';
+import { Glyph } from './art';
 
 /** Selo de calorias de uma missão: −44 kcal (emagrecer), +300 kcal (ganhar). */
 export function KcalChip({ kcal, dir, small }: { kcal: number; dir: Direction; small?: boolean }) {
@@ -14,7 +15,7 @@ export function KcalChip({ kcal, dir, small }: { kcal: number; dir: Direction; s
   const sign = dir === 'perder' ? '−' : dir === 'ganhar' ? '+' : '';
   return (
     <span className={`kcal-chip ${dir === 'ganhar' ? 'kcal-gain' : dir === 'manter' ? 'kcal-neutral' : ''} ${small ? 'kcal-sm' : ''}`}>
-      {dir === 'ganhar' ? '🍞' : '🔥'} {sign}
+      <Glyph e={dir === 'ganhar' ? '🍞' : '🔥'} size={small ? 13 : 16} /> {sign}
       {fmtNum(kcal, 0)} kcal
     </span>
   );
@@ -64,7 +65,9 @@ export function JourneyCard({ s, onOpen }: { s: State; onOpen: () => void }) {
     return (
       <button className="journey journey-manter text-left" onClick={onOpen}>
         <div className="flex items-center justify-between gap-2">
-          <span className="journey-tag">🌱 Jornada de hábitos</span>
+          <span className="journey-tag">
+            <Glyph e="🌱" size={20} /> Jornada de hábitos
+          </span>
           <ChevronRight size={20} />
         </div>
         <p className="font-display text-[20px] font-bold leading-tight">O {s.pet.name} fica forte junto com você</p>
@@ -80,7 +83,9 @@ export function JourneyCard({ s, onOpen }: { s: State; onOpen: () => void }) {
     return (
       <button className="journey journey-manter text-left" onClick={onOpen}>
         <div className="flex items-center justify-between gap-2">
-          <span className="journey-tag">⚖️ {t.title}</span>
+          <span className="journey-tag">
+            <Glyph e="⚖️" size={20} /> {t.title}
+          </span>
           <ChevronRight size={20} />
         </div>
         <div className="flex items-center gap-3">
@@ -99,7 +104,7 @@ export function JourneyCard({ s, onOpen }: { s: State; onOpen: () => void }) {
     <button className={`journey journey-${j.dir} text-left`} onClick={onOpen} aria-label={`${t.title}: ${pct}% da meta. Abrir evolução`}>
       <div className="flex items-center justify-between gap-2">
         <span className="journey-tag min-w-0">
-          <span aria-hidden="true">{t.emoji}</span>
+          <Glyph e={t.emoji} size={20} />
           <span className="truncate">{t.title}</span>
         </span>
         <span className="journey-pct">
@@ -119,7 +124,7 @@ export function JourneyCard({ s, onOpen }: { s: State; onOpen: () => void }) {
           <div className="journey-track" role="progressbar" aria-label="Progresso da jornada" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
             <div className="journey-fill" style={{ width: `${Math.max(4, pct)}%` }} />
             <span className="journey-flag" aria-hidden="true">
-              🏁
+              <Glyph e="🏁" size={22} />
             </span>
           </div>
           <p className="text-[12.5px] font-bold opacity-85">
@@ -143,7 +148,8 @@ export function JourneyCard({ s, onOpen }: { s: State; onOpen: () => void }) {
         </div>
       )}
       {j.reachedAt ? (
-        <p className="journey-note">🏆 Vocês chegaram na meta! Toque para escolher a próxima missão.</p>
+        <p className="journey-note">
+          <Glyph e="🏆" size={20} className="gi" /> Vocês chegaram na meta! Toque para escolher a próxima missão.</p>
       ) : (
         !hide && <p className="journey-note">No ritmo mais rápido que o app permite: uns {minDaysLeft(j, kcal)} dias. Devagar também chega.</p>
       )}
