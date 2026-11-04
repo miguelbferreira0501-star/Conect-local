@@ -4,6 +4,7 @@ import { http, resetServerCheck } from './social/api';
 import { resetSocial } from './social';
 import { getState, grantPremium, replaceState, setChangeHook } from './store';
 import { LEGAL_INFO } from '../shared/legal';
+import { startGameSync, stopGameSync } from './gameSync';
 import type { State } from '../types';
 
 export interface User {
@@ -47,6 +48,7 @@ export function useAccount() {
         if (r.user) {
           setUser(r.user);
           startSync();
+          startGameSync();
         }
       }
       setReady(true);
@@ -88,6 +90,7 @@ export async function finishReset(token: string, password: string) {
 
 export async function logout() {
   stopSync();
+  stopGameSync();
   await http('POST', '/auth/logout').catch(() => {});
   setUser(null);
 }
@@ -95,6 +98,7 @@ export async function logout() {
 export async function deleteAccount(password: string) {
   await http('DELETE', '/account', { password });
   stopSync();
+  stopGameSync();
   setUser(null);
 }
 
@@ -118,6 +122,12 @@ export function onSyncChoice(fn: (c: SyncChoice) => void) {
 
 /** Na primeira entrada: se a nuvem e o aparelho têm progresso, a pessoa escolhe qual manter. */
 async function firstSync(): Promise<'nuvem' | 'aparelho' | 'escolher'> {
+  const r = await firstSyncInner();
+  if (r !== 'escolher') startGameSync();
+  return r;
+}
+
+async function firstSyncInner(): Promise<'nuvem' | 'aparelho' | 'escolher'> {
   const r = await http<{ state: State | null }>('GET', '/state');
   const local = getState();
   if (r.state && !local.onboarded) {
@@ -150,6 +160,7 @@ export async function resolveChoice(keep: 'nuvem' | 'aparelho', server: State) {
   if (keep === 'nuvem') replaceState(server, { silent: true });
   startSync();
   await pushNow();
+  startGameSync();
 }
 
 let timer: number | undefined;

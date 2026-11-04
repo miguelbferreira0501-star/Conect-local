@@ -10,6 +10,7 @@ import { addDays, fmtNum, hashStr, weekStart, WEEKDAYS } from '../lib/util';
 import { isActive } from '../logic/evolution';
 import type { Photo } from '../types';
 import { Glyph } from './art';
+import { gameCfg } from '../lib/game';
 
 const DAY_NAMES = ['Domingo Doce', 'Segunda Serena', 'Terça Tranquila', 'Quarta Querida', 'Quinta Quentinha', 'Sexta Sorridente', 'Sábado Sossegado'];
 const DAY_COLORS: [string, string][] = [
@@ -100,7 +101,14 @@ export function CelebrationModal({ c, onClose }: { c: Celebration | undefined; o
   const t = JOURNEY_TEXT[s.journey.dir];
   const content: { title: string; text: string; tone: string; icon?: string } =
     c.type === 'level'
-      ? { title: `Nível ${c.level}!`, text: 'Cada cuidado seu fez isso acontecer. Confira o mapa: pode ter lugar novo liberado.', tone: 'gold' }
+      ? {
+          title: `Nível ${c.level}!`,
+          icon: c.arena ? '🏡' : '⭐',
+          text: c.arena
+            ? `Arena nova: ${c.arena.name}! Você ganhou ${c.coins ?? 0} sementes${c.arena.chest ? ` e um ${gameCfg().chests[c.arena.chest].name} grátis` : ''}.`
+            : `Cada cuidado seu fez isso acontecer. Você ganhou ${c.coins ?? 0} sementes.`,
+          tone: 'gold',
+        }
       : c.type === 'phase'
         ? { title: `Fase ${PHASES[c.phase]}!`, text: `O ${s.pet.name} evoluiu junto com você. Constância é tudo!`, tone: 'leaf' }
         : c.type === 'achievement'

@@ -8,6 +8,7 @@ const saved = {
   onboarded: true,
   createdAt: day,
   coins: 123,
+  xp: 300,
   tasks: [T('forca', 'fitness'), T('respirar', 'emocional'), T('vitamina', 'habitos'), T('lanche', 'habitos')],
   profile: { name: 'Miguel', ageGroup: '18mais', goal: 'ganhar', focus: [], minutes: 15, likes: [], incentive: 'carinho', feeling: 3 },
 };
@@ -31,5 +32,11 @@ describe('abrir o app com dados antigos', () => {
     expect(s.tasks.some((t) => t.id === 'vitamina' || t.id === 'lanche')).toBe(false);
     expect(s.tasks.length).toBeGreaterThanOrEqual(PLAN_MIN);
     expect(s.missionsV).toBe(1);
+    // Curva nova: quem estava no nível 4 (300 XP na curva antiga) continua no nível 4.
+    const { levelOf } = await import('../logic/progress');
+    expect(levelOf(s.xp)).toBe(4);
+    expect(s.xpV).toBe(2);
+    expect(s.game.maxLevel).toBe(4);
+    expect(s.game.ledger).toEqual([]);
   });
 });

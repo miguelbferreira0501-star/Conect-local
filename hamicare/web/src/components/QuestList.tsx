@@ -1,5 +1,5 @@
 // Desafios em linha do tempo: ícone colorido, barrinha com "0 / 1" e o botão de pegar o prêmio.
-import { claimKey, questProgress, type QuestDef } from '../logic/progress';
+import { claimKey, questProgress, questReward, type QuestDef } from '../logic/progress';
 import { claimQuest } from '../lib/store';
 import { toast } from './ui';
 import type { State } from '../types';
@@ -50,8 +50,8 @@ export function QuestList({ quests, s, today }: { quests: QuestDef[]; s: State; 
                 <span className="text-[13px] font-extrabold text-leaf">Feito ✓</span>
               ) : (
                 p >= q.target && (
-                  <button className="check3d quest-claim" onClick={() => claimQuest(q.id) && toast(`+${q.coins} sementes e +${q.xp} XP!`)} aria-label={`Pegar prêmio: ${q.title}`}>
-                    +{q.coins} <Glyph e="🌻" size={18} />
+                  <button className="check3d quest-claim" onClick={() => claimQuest(q.id) && toast(`+${questReward(q).coins} sementes e +${questReward(q).xp} XP!`)} aria-label={`Pegar prêmio: ${q.title}`}>
+                    +{questReward(q).coins} <Glyph e="🌻" size={18} />
                   </button>
                 )
               )}

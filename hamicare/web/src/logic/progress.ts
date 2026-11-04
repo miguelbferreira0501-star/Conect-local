@@ -3,25 +3,22 @@ import type { DayLog, State } from '../types';
 import { addDays, dayDiff, hashStr, monthKey, mulberry32, weekStart } from '../lib/util';
 import { isActive } from './evolution';
 import { bestStreak } from './streak';
+import { levelOf as engineLevelOf, levelProgress as engineLevelProgress } from '../shared/game/levels';
+import { gameCfg } from '../lib/game';
 
 // ---------- Nível ----------
-
-/** XP total para chegar ao nível n: 0, 50, 150, 300, 500, 750… */
-export const xpForLevel = (n: number) => 25 * (n - 1) * n;
+// A curva fica no motor do jogo (shared/game), com a configuração em uso.
 
 export function levelOf(xp: number): number {
-  let n = 1;
-  while (xpForLevel(n + 1) <= xp) n++;
-  return n;
+  return engineLevelOf(xp, gameCfg());
 }
 
 export function levelProgress(xp: number): { level: number; current: number; needed: number } {
-  const level = levelOf(xp);
-  const base = xpForLevel(level);
-  return { level, current: xp - base, needed: xpForLevel(level + 1) - base };
+  return engineLevelProgress(xp, gameCfg());
 }
 
-export const XP_TASK = 10;
+/** Prêmio de um desafio (vem da configuração do jogo). */
+export const questReward = (q: { period: Period }) => gameCfg().quest[q.period];
 
 // ---------- Contagens de um período ----------
 

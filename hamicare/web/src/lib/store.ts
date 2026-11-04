@@ -15,7 +15,10 @@ import {
   journeyProgress, needKcalFor, phaseFor, PHASES, recentAverageKg, scaleProgress, taskKcal,
 } from '../logic/evolution';
 import { streakOf } from '../logic/streak';
-import { XP_TASK, activeQuests, claimKey, levelOf, newAchievements, questProgress, QUESTS } from '../logic/progress';
+import { activeQuests, claimKey, levelOf, newAchievements, periodStart, questProgress, QUESTS } from '../logic/progress';
+import { addUsage, baseGrant, capGrant, emptyPity, emptyUsage, levelUps, migrateXp, xpAt, type ChestId, type DayUsage, type Pity, type Source } from '../shared/game';
+import { gameCfg } from './game';
+import type { GameState } from '../types';
 
 const KEY = 'hamicare:v2';
 const OLD_KEY = 'xodo:v1';
@@ -29,7 +32,7 @@ export const todayKey = () => dayKey(new Date());
 // ---------- Comemorações (a interface mostra uma de cada vez) ----------
 
 export type Celebration =
-  | { type: 'level'; level: number }
+  | { type: 'level'; level: number; coins?: number; arena?: { n: number; name: string; chest?: ChestId } }
   | { type: 'achievement'; title: string; emoji: string; coins: number }
   | { type: 'phase'; phase: number }
   | { type: 'weigh'; grams: number; before: number; kcal: number }
@@ -47,6 +50,8 @@ const celebrate = (c: Celebration) => celebrationListeners.forEach((l) => l(c));
 
 // ---------- Estado inicial e migração ----------
 
+export const emptyGame = (): GameState => ({ usage: {}, paid: {}, ledger: [], fragments: 0, pity: emptyPity(), pendingChests: [], maxLevel: 1 });
+
 export function fresh(): State {
   const today = todayKey();
   return {
@@ -63,6 +68,8 @@ export function fresh(): State {
     body: { tracking: false, sync: false, consentAt: null, heightCm: null, logs: [], baselineKg: null, goalKg: null, goalWeeks: null, hideNumbers: false },
     coins: 30,
     xp: 0,
+    xpV: 2,
+    game: emptyGame(),
     tasks: [],
     days: {},
     journal: [],
@@ -144,6 +151,13 @@ function normalize(raw: State): State {
     s.tasks = [...s.tasks, ...(add.map((id) => libTask(id, todayKey())).filter(Boolean) as Task[])];
   }
   s.missionsV = 1;
+  // Curva de níveis nova: converte o XP antigo sem ninguém perder nível (uma vez).
+  if (raw.xpV !== 2) {
+    s.xp = migrateXp(Number(raw.xp) || 0, gameCfg());
+    s.xpV = 2;
+  }
+  s.game = { ...emptyGame(), ...(raw.game ?? {}) };
+  s.game.maxLevel = Math.max(s.game.maxLevel || 1, levelOf(s.xp));
   if (!raw.journey) {
     const dir = directionOf(goal, isMinor(s.profile.ageGroup));
     s.journey = buildJourney(dir, latestKg(s), s.body.goalKg, todayKey(), s.pet.grams);
@@ -264,12 +278,111 @@ const withDay = (s: State, key: string, d: DayLog): State => ({ ...s, days: { ..
 export const owned = (s: State, id: string) => (s.inventory[id] ?? 0) > 0;
 export const level = (s: State) => levelOf(s.xp);
 
-function reward(s: State, coins: number, xp: number): State {
-  const before = levelOf(s.xp);
-  const next = { ...s, coins: s.coins + coins, xp: Math.max(0, s.xp + xp) };
-  const after = levelOf(next.xp);
-  if (after > before) setTimeout(() => celebrate({ type: 'level', level: after }), 0);
-  return next;
+// ---------- Economia: ganhos, devoluções e gastos (todos passam por aqui) ----------
+
+export type GameOp =
+  | { op: 'grant'; src: Source }
+  | { op: 'revoke'; ref: string }
+  | { op: 'spend'; ref: string; label: string; coins: number; itemId?: string };
+
+let gameHook: ((op: GameOp) => void) | null = null;
+/** Com conta, cada ganho e gasto também vai para o servidor (que confere e manda o saldo certo). */
+export function setGameHook(fn: ((op: GameOp) => void) | null) {
+  gameHook = fn;
+}
+
+const LEDGER_MAX = 200;
+
+function pushLedger(g: GameState, entry: { ref: string; label: string; coins: number; xp: number }): GameState {
+  if (!entry.coins && !entry.xp) return g;
+  return { ...g, ledger: [{ at: Date.now(), ...entry }, ...g.ledger].slice(0, LEDGER_MAX) };
+}
+
+/** Guarda só os dias recentes de uso e de pagamentos de rotina. */
+function prune(g: GameState, today: string): GameState {
+  const keepFrom = addDays(today, -3);
+  const oldDated = addDays(today, -45);
+  const usage = Object.fromEntries(Object.entries(g.usage).filter(([d]) => d >= keepFrom));
+  const paid = Object.fromEntries(
+    Object.entries(g.paid).filter(([ref]) => {
+      const m = ref.match(/^(tarefa|cuidado|diario|pote|humor|bemestar|aventura|presente):(\d{4}-\d{2}-\d{2})/);
+      return !m || m[2] >= oldDated;
+    }),
+  );
+  return { ...g, usage, paid };
+}
+
+/**
+ * Paga um ganho com os limites do dia, sem pagar a mesma coisa duas vezes.
+ * Subir de nível paga o prêmio do nível; arena nova paga sementes e um baú grátis.
+ */
+function grant(s: State, src: Source): State {
+  const cfg = gameCfg();
+  const g = baseGrant(src, cfg);
+  if (s.game.paid[g.ref]) return s;
+  const day = g.date ?? todayKey();
+  const usage: DayUsage = s.game.usage[day] ?? emptyUsage();
+  const paid = capGrant(g, usage, cfg);
+  let game: GameState = { ...s.game, paid: { ...s.game.paid, [g.ref]: { xp: paid.xp, coins: paid.coins } }, usage: { ...s.game.usage, [day]: addUsage(usage, g, paid) } };
+  game = pushLedger(game, { ref: g.ref, label: g.label, coins: paid.coins, xp: paid.xp });
+  let next: State = { ...s, coins: s.coins + paid.coins, xp: s.xp + paid.xp, game };
+  gameHook?.({ op: 'grant', src });
+  // Níveis e arenas novos (só os que nunca foram alcançados).
+  const ups = levelUps(s.xp, next.xp, cfg);
+  const fresh = ups.levels.filter((l) => l > s.game.maxLevel);
+  for (const level of fresh) {
+    const lg = baseGrant({ kind: 'nivel', level }, cfg);
+    let coins = next.game.paid[lg.ref] ? 0 : lg.coins;
+    let g2 = coins ? pushLedger({ ...next.game, paid: { ...next.game.paid, [lg.ref]: { xp: 0, coins } } }, { ref: lg.ref, label: lg.label, coins, xp: 0 }) : next.game;
+    const arena = ups.arenas.includes(cfg.arenas.find((a) => a.level === level)?.n ?? -1) ? cfg.arenas.find((a) => a.level === level) : undefined;
+    if (arena) {
+      const ag = baseGrant({ kind: 'arena', arena: arena.n }, cfg);
+      if (!g2.paid[ag.ref]) {
+        g2 = pushLedger({ ...g2, paid: { ...g2.paid, [ag.ref]: { xp: 0, coins: ag.coins } }, pendingChests: arena.reward.chest ? [...g2.pendingChests, arena.reward.chest] : g2.pendingChests }, { ref: ag.ref, label: ag.label, coins: ag.coins, xp: 0 });
+        coins += ag.coins;
+      }
+    }
+    next = { ...next, coins: next.coins + coins, game: { ...g2, maxLevel: Math.max(g2.maxLevel, level) } };
+    const celebrated = { level, coins, arena: arena ? { n: arena.n, name: arena.name, chest: arena.reward.chest } : undefined };
+    setTimeout(() => celebrate({ type: 'level', ...celebrated }), 0);
+  }
+  return { ...next, game: prune(next.game, todayKey()) };
+}
+
+/** Desfaz um ganho (ex.: desmarcou a missão). O nível já alcançado nunca cai. */
+function revoke(s: State, ref: string): State {
+  const p = s.game.paid[ref];
+  if (!p) return s;
+  const cfg = gameCfg();
+  const paidMap = { ...s.game.paid };
+  delete paidMap[ref];
+  const m = ref.match(/^[a-z]+:(\d{4}-\d{2}-\d{2})/);
+  let usage = s.game.usage;
+  if (m && usage[m[1]]) {
+    const parts = ref.split(':');
+    const kind = parts[0];
+    const routine = ['tarefa', 'cuidado', 'diario', 'pote', 'humor', 'bemestar'].includes(kind);
+    const task = s.tasks.find((t) => t.id === parts[2]);
+    const g = { ref, label: '', xp: p.xp, coins: p.coins, routine, bucket: kind === 'tarefa' && task ? `cat:${task.cat}` : undefined };
+    usage = { ...usage, [m[1]]: addUsage(usage[m[1]], g, { xp: p.xp, coins: p.coins }, -1) };
+  }
+  const floor = xpAt(s.game.maxLevel, cfg);
+  const game = pushLedger({ ...s.game, paid: paidMap, usage }, { ref: `estorno:${ref}`, label: 'Desfeito', coins: -p.coins, xp: -p.xp });
+  gameHook?.({ op: 'revoke', ref });
+  return { ...s, coins: Math.max(0, s.coins - p.coins), xp: Math.max(floor, s.xp - p.xp), game };
+}
+
+/** Gasta sementes (loja, presentes) e registra na carteira. */
+function spend(s: State, coins: number, label: string, ref: string, itemId?: string): State {
+  if (coins <= 0) return s;
+  gameHook?.({ op: 'spend', ref, label, coins, itemId });
+  return { ...s, coins: s.coins - coins, game: pushLedger(s.game, { ref, label, coins: -coins, xp: 0 }) };
+}
+
+/** Com conta: o servidor manda o saldo certo (sementes, XP, fragmentos e proteção contra azar). */
+export function applyServerWallet(w: { coins: number; xp: number; fragments: number; pity: Pity; maxLevel: number }) {
+  const s = getState();
+  set({ ...s, coins: w.coins, xp: w.xp, game: { ...s.game, fragments: w.fragments, pity: w.pity, maxLevel: Math.max(s.game.maxLevel, w.maxLevel) } }, { silent: true });
 }
 
 function logEventIn(s: State, name: string, key = todayKey()): State {
@@ -277,8 +390,12 @@ function logEventIn(s: State, name: string, key = todayKey()): State {
   return withDay(s, key, { ...d, events: [...(d.events ?? []), name] });
 }
 
+/** Ferramentas de bem-estar que valem XP (uma vez por dia cada). */
+const TOOL_EVENTS = ['respirar', 'aterrar', 'meditar', 'relaxar', 'dormir', 'foco', 'sos'];
+
 export function logEvent(name: string) {
-  commit(logEventIn(state, name));
+  const next = logEventIn(state, name);
+  commit(TOOL_EVENTS.includes(name) ? grant(next, { kind: 'bemestar', tool: name, date: todayKey() }) : next);
 }
 
 /** Aplica efeitos de tempo, pesagens, fases e conquistas, depois salva. */
@@ -319,13 +436,12 @@ export function maintain(input: State): State {
   const won = newAchievements(s, today);
   if (won.length) {
     const achievements = { ...s.achievements };
-    let coins = 0;
+    for (const a of won) achievements[a.id] = today;
+    s = { ...s, achievements };
     for (const a of won) {
-      achievements[a.id] = today;
-      coins += a.coins;
+      s = grant(s, { kind: 'conquista', id: a.id, coins: a.coins });
       setTimeout(() => celebrate({ type: 'achievement', title: a.title, emoji: a.emoji, coins: a.coins }), 0);
     }
-    s = { ...s, achievements, coins: s.coins + coins };
   }
   return s;
 }
@@ -527,12 +643,13 @@ export function toggleTask(id: string): ToggleResult | null {
     delete done[id];
     const kcal = { ...(d.kcal ?? {}) };
     delete kcal[id];
-    commit(reward(withDay(state, key, { ...d, done, kcal }), -task.reward, -XP_TASK));
+    commit(revoke(withDay(state, key, { ...d, done, kcal }), `tarefa:${key}:${id}`));
     return null;
   }
   const kcal = kcalOf(state, task);
   let next = withDay(state, key, { ...d, done: { ...d.done, [id]: task.cat }, kcal: kcal > 0 ? { ...(d.kcal ?? {}), [id]: kcal } : d.kcal });
-  next = reward(next, task.reward, XP_TASK);
+  next = grant(next, { kind: 'tarefa', id, energy: task.energy, cat: task.cat, date: key });
+  const got = next.game.paid[`tarefa:${key}:${id}`]?.coins ?? 0;
   // Durante uma aventura, cada atividade traz o Hami 5 minutos mais cedo.
   if (next.adventure) next = { ...next, adventure: { ...next.adventure, endsAt: next.adventure.endsAt - 5 * 60_000 } };
   const firstToday = Object.keys(d.done).length === 0;
@@ -545,7 +662,7 @@ export function toggleTask(id: string): ToggleResult | null {
   commit(next);
   const streak = firstToday ? streakOf(state.days, key, state.createdAt).count : null;
   if (streak) setTimeout(() => celebrate({ type: 'streak', count: streak }), 0);
-  return { reward: task.reward, kcal, streak };
+  return { reward: got, kcal, streak };
 }
 
 export interface TaskInput {
@@ -594,7 +711,8 @@ export function setRest(rest: boolean) {
 // ---------- Humor, diário e pote ----------
 
 export function setMood(m: Mood, key = todayKey()) {
-  commit(withDay(state, key, { ...dayOf(state, key), mood: m }));
+  const next = withDay(state, key, { ...dayOf(state, key), mood: m });
+  commit(key === todayKey() ? grant(next, { kind: 'humor', date: key }) : next);
 }
 
 export function setEmotions(emotions: string[], key = todayKey()) {
@@ -605,7 +723,7 @@ export function addJournal(text: string, prompt?: string) {
   const clean = text.trim();
   if (!clean) return;
   const next = logEventIn({ ...state, journal: [...state.journal, { id: uid(), date: todayKey(), text: clean, prompt }] }, 'diario');
-  commit(reward(next, 3, 5));
+  commit(grant(next, { kind: 'diario', date: todayKey() }));
 }
 
 export function deleteJournal(id: string) {
@@ -615,7 +733,7 @@ export function deleteJournal(id: string) {
 export function addJar(text: string) {
   const clean = text.trim();
   if (!clean) return;
-  commit(reward(logEventIn({ ...state, jar: [...state.jar, { id: uid(), text: clean, date: todayKey() }] }, 'pote'), 3, 5));
+  commit(grant(logEventIn({ ...state, jar: [...state.jar, { id: uid(), text: clean, date: todayKey() }] }, 'pote'), { kind: 'pote', date: todayKey() }));
 }
 
 export function deleteJar(id: string) {
@@ -640,7 +758,7 @@ function applyCare(s: State, kind: CareId, effect: Partial<Record<keyof State['p
   const d = dayOf(s, key);
   const first = !d.care.includes(kind);
   let next = withDay({ ...s, pet: { ...s.pet, stats: st } }, key, { ...d, care: first ? [...d.care, kind] : d.care });
-  if (first) next = reward(next, 2, 3);
+  if (first) next = grant(next, { kind: 'cuidado', care: kind, date: key });
   return next;
 }
 
@@ -701,7 +819,7 @@ export function buy(itemId: string): BuyResult {
   const res = canBuy(state, itemId);
   if (res !== 'ok') return res;
   const item = itemById(itemId)!;
-  let next: State = { ...state, coins: state.coins - item.price, inventory: { ...state.inventory, [itemId]: (state.inventory[itemId] ?? 0) + 1 }, wishlist: state.wishlist.filter((w) => w !== itemId) };
+  let next: State = { ...spend(state, item.price, `Comprou: ${item.name}`, `loja:${itemId}:${Date.now()}`, itemId), inventory: { ...state.inventory, [itemId]: (state.inventory[itemId] ?? 0) + 1 }, wishlist: state.wishlist.filter((w) => w !== itemId) };
   if (WEARABLE_KINDS.includes(item.kind)) next = { ...next, pet: { ...next.pet, outfit: { ...next.pet.outfit, [item.kind]: itemId } } };
   if (item.kind === 'parede') next = { ...next, house: { ...next.house, wallpaper: itemId } };
   if (item.kind === 'piso') next = { ...next, house: { ...next.house, floor: itemId } };
@@ -737,7 +855,7 @@ export function buyLook(lookId: string): BuyResult {
     const it = itemById(id);
     if (it) outfit[it.kind as WearSlot] = id;
   }
-  commit({ ...state, coins: state.coins - lp.price, inventory, pet: { ...state.pet, outfit }, wishlist: state.wishlist.filter((w) => !look.items.includes(w)) });
+  commit({ ...spend(state, lp.price, `Comprou o look ${look.name}`, `look:${lookId}:${Date.now()}`), inventory, pet: { ...state.pet, outfit }, wishlist: state.wishlist.filter((w) => !look.items.includes(w)) });
   return 'ok';
 }
 
@@ -750,7 +868,7 @@ export function buyStyle(styleId: string): BuyResult {
   const inventory = { ...state.inventory };
   for (const id of [style.wallpaper, style.floor, ...style.items.map((i) => i.itemId)]) inventory[id] = Math.max(1, inventory[id] ?? 0);
   const items = style.items.map((it, i) => ({ uid: uid(), itemId: it.itemId, x: it.x, y: it.y, z: i + 1 }));
-  commit({ ...state, coins: state.coins - price, inventory, house: { wallpaper: style.wallpaper, floor: style.floor, items } });
+  commit({ ...spend(state, price, `Comprou o estilo ${style.name}`, `estilo:${styleId}:${Date.now()}`), inventory, house: { wallpaper: style.wallpaper, floor: style.floor, items } });
   return 'ok';
 }
 
@@ -770,8 +888,8 @@ export function claimDailyGift(): { coins: number; food?: string } | null {
     commit({ ...state, lastGift: today, inventory: { ...state.inventory, [food]: (state.inventory[food] ?? 0) + 1 } });
     return { coins: 0, food };
   }
-  const coins = 5 + roll * 2;
-  commit({ ...state, lastGift: today, coins: state.coins + coins });
+  const coins = 3 + (roll - 4);
+  commit(grant({ ...state, lastGift: today }, { kind: 'presente', coins, date: today }));
   return { coins };
 }
 
@@ -782,15 +900,15 @@ export function receiveGift(itemId: string) {
 }
 
 /** Recompensa de evento (validada pelo servidor). */
-export function addCoins(n: number) {
-  if (n > 0) commit({ ...state, coins: state.coins + n });
+export function addCoins(n: number, eventId = `evento-${Date.now()}`) {
+  if (n > 0) commit(grant(state, { kind: 'evento', id: eventId, coins: n }));
 }
 
 /** Paga um presente para um amigo (desconta as sementes). */
 export function payGift(itemId: string): boolean {
   const item = itemById(itemId);
   if (!item || item.souvenir || state.coins < item.price) return false;
-  commit({ ...state, coins: state.coins - item.price });
+  commit(spend(state, item.price, `Presente: ${item.name}`, `presente-amigo:${itemId}:${Date.now()}`, itemId));
   return true;
 }
 
@@ -882,7 +1000,8 @@ export function finishAdventure(now = Date.now()): AdventureResult | null {
     finds: find ? [...state.finds, find] : state.finds,
     placesDone: { ...state.placesDone, [place.id]: (state.placesDone[place.id] ?? 0) + 1 },
   };
-  next = logEventIn(reward(next, mission.coins, mission.xp), 'aventura');
+  const advN = (dayOf(next, todayKey()).events ?? []).filter((e) => e === 'aventura').length + 1;
+  next = logEventIn(grant(next, { kind: 'aventura', place: place.id, xp: mission.xp, coins: mission.coins, date: todayKey(), n: advN }), 'aventura');
   commit(next);
   return { placeId: place.id, story: mission.story, coins: mission.coins, xp: mission.xp, find };
 }
@@ -899,7 +1018,7 @@ export function claimQuest(questId: string): boolean {
   if (!q || !activeQuests(state.seed, today).some((a) => a.id === q.id)) return false;
   const k = claimKey(q, today);
   if (state.claimed[k] || questProgress(q, state.days, today) < q.target) return false;
-  commit(reward({ ...state, claimed: { ...state.claimed, [k]: true } }, q.coins, q.xp));
+  commit(grant({ ...state, claimed: { ...state.claimed, [k]: true } }, { kind: 'desafio', period: q.period, id: q.id, key: periodStart(q.period, todayKey()) }));
   return true;
 }
 
@@ -961,7 +1080,7 @@ export function claimSeason(): boolean {
   const today = todayKey();
   const p = seasonProgress(state, today);
   if (p.claimed || p.days < SEASON_GOAL) return false;
-  commit(reward({ ...state, claimed: { ...state.claimed, [`temporada:${today.slice(0, 7)}`]: true } }, 120, 150));
+  commit(grant({ ...state, claimed: { ...state.claimed, [`temporada:${today.slice(0, 7)}`]: true } }, { kind: 'temporada', month: today.slice(0, 7), xp: 150, coins: 120 }));
   return true;
 }
 
@@ -1041,7 +1160,7 @@ export function buyFur(furId: string): BuyResult {
   if (!f || !f.price) return 'ja-tem';
   if (owned(state, `fur:${furId}`)) return 'ja-tem';
   if (state.coins < f.price) return 'sem-sementes';
-  commit({ ...state, coins: state.coins - f.price, inventory: { ...state.inventory, [`fur:${furId}`]: 1 }, pet: { ...state.pet, fur: furId } });
+  commit({ ...spend(state, f.price, `Pelagem ${f.label}`, `pelagem:${furId}`), inventory: { ...state.inventory, [`fur:${furId}`]: 1 }, pet: { ...state.pet, fur: furId } });
   return 'ok';
 }
 

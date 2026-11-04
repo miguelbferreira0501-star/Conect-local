@@ -9,6 +9,7 @@ import { account } from './routes/account';
 import { social } from './routes/social';
 import { admin } from './routes/admin';
 import { push } from './routes/push';
+import { game } from './routes/game';
 import { legal } from './routes/legal';
 
 export function createApp() {
@@ -28,6 +29,7 @@ export function createApp() {
   api.route('/social', social);
   api.route('/admin', admin);
   api.route('/push', push);
+  api.route('/game', game);
   api.notFound((c) => c.json({ error: 'nao_encontrado', message: 'Rota não encontrada.' }, 404));
   app.route('/api', api);
 

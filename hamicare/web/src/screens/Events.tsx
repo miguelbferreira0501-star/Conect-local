@@ -40,7 +40,7 @@ export function EventsBanner() {
             onClick={async () => {
               try {
                 const r = await http<{ reward: { coins: number; itemId: string | null } }>('POST', `/events/${ev.id}/claim`);
-                addCoins(r.reward.coins);
+                addCoins(r.reward.coins, ev.id);
                 if (r.reward.itemId) receiveGift(r.reward.itemId);
                 toast(`+${r.reward.coins} sementes!`);
                 setEvents((list) => list.map((x) => (x.id === ev.id ? { ...x, claimed: true } : x)));

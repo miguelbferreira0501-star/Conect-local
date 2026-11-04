@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { activeQuests, levelOf, questProgress, QUESTS, xpForLevel } from './progress';
+import { activeQuests, levelOf, questProgress, QUESTS } from './progress';
 import type { DayLog } from '../types';
 
 describe('níveis', () => {
   it('curva de XP', () => {
-    expect([1, 2, 3, 4, 5].map(xpForLevel)).toEqual([0, 50, 150, 300, 500]);
     expect(levelOf(0)).toBe(1);
-    expect(levelOf(149)).toBe(2);
-    expect(levelOf(150)).toBe(3);
+    expect(levelOf(99)).toBe(1);
+    expect(levelOf(100)).toBe(2);
+    expect(levelOf(250)).toBe(3);
   });
 });
 

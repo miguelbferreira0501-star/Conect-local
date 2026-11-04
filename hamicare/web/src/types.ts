@@ -193,6 +193,22 @@ export interface Settings {
   sound: boolean;
 }
 
+/** Economia do jogo guardada no aparelho (com conta, o servidor confere e manda os valores certos). */
+export interface GameState {
+  /** Uso de cada dia (limites de XP e sementes); só os últimos dias. */
+  usage: Record<string, import('./shared/game').DayUsage>;
+  /** Ganhos já pagos (referência → quanto), para não pagar duas vezes e devolver certinho. */
+  paid: Record<string, { xp: number; coins: number }>;
+  /** Carteira: últimos movimentos de sementes e XP. */
+  ledger: import('./shared/game').LedgerEntry[];
+  fragments: number;
+  pity: import('./shared/game').Pity;
+  /** Baús grátis esperando para abrir (prêmio de arena). */
+  pendingChests: import('./shared/game').ChestId[];
+  /** Maior nível já alcançado (nível nunca cai). */
+  maxLevel: number;
+}
+
 export interface State {
   v: 2;
   seed: number;
@@ -234,6 +250,10 @@ export interface State {
   /** Referência diária de calorias escolhida pela pessoa (opcional). */
   mealRef?: number | null;
   lastGift: string | null;
+  /** Economia do jogo (níveis, carteira, baús). */
+  game: GameState;
+  /** Curva de níveis nova aplicada (o XP antigo foi convertido sem perder nível). */
+  xpV?: number;
   updatedAt: number;
   /** Veio do app antigo (Xodó): o onboarding mostra uma mensagem de boas-vindas. */
   from?: 'xodo';

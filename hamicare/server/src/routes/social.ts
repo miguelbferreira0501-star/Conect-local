@@ -433,6 +433,13 @@ social.post('/gifts/:id/claim', (c) =>
         [pid(c.req.param('id'))],
       )
     ).rows[0];
+    // O presente entra também no inventário do jogo (para baús e coleções).
+    if (g && GIFTABLE.has(g.itemId)) {
+      await db.query(
+        "INSERT INTO game_inventory (user_id, item_id, qty, origin) VALUES (app.current_user_id(), $1, 1, 'presente') ON CONFLICT (user_id, item_id) DO UPDATE SET qty = game_inventory.qty + 1",
+        [g.itemId],
+      );
+    }
     return c.json({ gift: g ?? null });
   }),
 );

@@ -130,3 +130,12 @@ Pedido do dono do produto: no começo, escolher a área (só perder ou ganhar pe
 - **Hábitos e calma não falam de peso:** sem cartão de peso, sem Cardápio e sem selos de calorias. O Hami evolui com os hábitos e o movimento.
 - **Calma:** cantinho no Início com o SOS (respirar → 5-4-3-2-1 → como você está → CVV 188 e SAMU 192 se ainda estiver mal), atalhos para respirar, 5-4-3-2-1 e dormir, e missões próprias (respirar, 5-4-3-2-1, meditar, anotar as preocupações, música calma, ar livre). O SOS também fica no topo do Bem-estar para todo mundo. Não é tratamento: o app sempre aponta para o CVV e para o SAMU.
 - **Mudar de área:** pílula "Área: … · Mudar" no Início, nos Ajustes e em Nossa evolução. A pessoa escolhe se troca as missões do dia pelas da nova área ou só muda a área; as missões que ela criou nunca somem.
+
+### Jogo (fase 1): motor único, servidor e economia
+
+- **Um motor só** (`web/src/shared/game`) para o app e para o servidor: curva de níveis, XP por atividade, limites do dia, arenas, raridades, baús, proteção contra azar e repetidos. Os números ficam numa configuração que o administrador poderá editar.
+- **Com conta, o servidor decide.** Cada ganho vai para o servidor com uma referência única; ele recalcula o valor com os dados dele, aplica os limites do dia, paga nível e arena, cobra compras pelo preço do catálogo e sorteia os baús. O saldo do servidor vale e o app só mostra. Sem internet, os pedidos ficam guardados e saem depois.
+- **Sem conta**, o mesmo motor roda no aparelho (não há ranking nem troca com outras pessoas para trapacear).
+- **Ninguém perdeu nível** com a curva nova: o XP antigo foi convertido mantendo nível e progresso. Desmarcar uma missão devolve o XP, mas nunca faz cair de nível.
+- **Economia ajustada por simulação** de 4 perfis (`docs/ECONOMIA.md`): primeiras conquistas rápidas, última arena em cerca de 3,5 meses para quem usa quase todo dia e cerca de 2 meses para quem faz tudo todo dia. As sementes por missão continuam as de antes (3, 5 e 8).
+- **Baús:** só com sementes ganhas no app; chances visíveis; para menores de 18, baú revelado (o item aparece antes da compra), por causa do ECA Digital.

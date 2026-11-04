@@ -19,6 +19,8 @@ export interface Item {
   /** Só vem de aventura: não está à venda. */
   souvenir?: boolean;
   food?: { saciedade: number; felicidade: number };
+  /** Raridade definida à mão (se faltar, é estimada pelo preço). */
+  rarity?: 'comum' | 'incomum' | 'raro' | 'epico' | 'lendario';
   /** Peça desenhada no Hami: o modelo e as cores (as variações de cor usam o mesmo desenho). */
   base?: string;
   c1?: string;
