@@ -25,6 +25,17 @@ export interface ArenaDef {
   reward: { coins: number; chest?: ChestId; items?: string[] };
 }
 
+/** Coleção do álbum: juntar todas as peças dá um prêmio (uma vez). */
+export interface CollectionDef {
+  id: string;
+  name: string;
+  desc: string;
+  /** Desenho do selo da coleção (chave de ilustração ou emoji). */
+  art: string;
+  items: string[];
+  reward: { coins: number; xp: number };
+}
+
 export interface ChestDef {
   name: string;
   price: number;
@@ -62,6 +73,7 @@ export interface GameConfig {
     adventureXp: number;
   };
   arenas: ArenaDef[];
+  collections: CollectionDef[];
   rarities: Record<Rarity, { label: string; color: string; fragments: number; craft: number }>;
   chests: Record<ChestId, ChestDef>;
   pity: {
@@ -113,6 +125,18 @@ export const DEFAULT_GAME: GameConfig = {
     { n: 10, level: 10, id: 'castelo', name: 'Castelo Encantado', desc: 'Um castelo só seu, com salões e jardins reais.', place: 'castelo', colors: ['#E9DDFF', '#A98DDF'], reward: { coins: 160, chest: 'magico' } },
     { n: 11, level: 11, id: 'espaco', name: 'Estação Espacial', desc: 'Uma casa entre planetas, com vista para as estrelas.', place: 'espaco', colors: ['#2A2F6B', '#6B4FA8'], reward: { coins: 180, chest: 'magico' } },
     { n: 12, level: 12, id: 'celeste', name: 'Ilha Celestial', desc: 'Uma ilha flutuando acima das nuvens. O topo da jornada.', colors: ['#FFF3C9', '#BFE6FF'], reward: { coins: 250, chest: 'lendario' } },
+  ],
+  collections: [
+    { id: 'praia', name: 'Verão na praia', desc: 'Sol, areia e água fresquinha.', art: '🏖️', items: ['chapeu-sol-amarelo', 'sol', 'regata-azul', 'bolinha-praia', 'palmeira', 'concha', 'p-praia', 'f-areia'], reward: { coins: 120, xp: 40 } },
+    { id: 'inverno', name: 'Inverno quentinho', desc: 'Tudo para um dia frio debaixo da coberta.', art: '❄️', items: ['gorro', 'cachecol', 'moletom', 'pijama', 'caminha', 'vela', 'f-carpete'], reward: { coins: 100, xp: 40 } },
+    { id: 'estrelas', name: 'Céu estrelado', desc: 'Para quem gosta de olhar para o alto.', art: '⭐', items: ['estrela-oculos', 'fx-estrelas', 'lua', 'estrela', 'globo', 'p-ceu', 'nuvem'], reward: { coins: 160, xp: 50 } },
+    { id: 'realeza', name: 'Realeza', desc: 'Coroa, brilho e um trono de respeito.', art: '👑', items: ['coroa', 'tiara', 'smoking', 'colar-perolas', 'medalha', 'trofeu', 'espelho'], reward: { coins: 250, xp: 60 } },
+    { id: 'jardim', name: 'Jardim florido', desc: 'Flores por todo lado.', art: '🌷', items: ['flor-rosa', 'florida-rosa', 'colar-flores', 'fx-flores', 'flores', 'girassol-vaso', 'hibisco', 'p-girassois', 'f-grama'], reward: { coins: 140, xp: 50 } },
+    { id: 'arte', name: 'Música e arte', desc: 'Um cantinho para criar e tocar.', art: '🎸', items: ['fone-rosa', 'fx-notas', 'violao', 'piano', 'radio', 'cavalete', 'camera'], reward: { coins: 220, xp: 60 } },
+    { id: 'fofura', name: 'Fofura total', desc: 'Orelhinhas, laços e corações.', art: '💗', items: ['orelhas-coelho-rosa', 'touca-urso-rosa', 'tutu', 'ursinho', 'laco-gigante', 'p-coracoes', 'fx-coracoes'], reward: { coins: 150, xp: 50 } },
+    { id: 'aventura', name: 'Aventureiro', desc: 'Mochila nas costas e mapa na mão.', art: '🗺️', items: ['mochila', 'lanterna', 'mapa', 'barraca', 'pipa', 'skate', 'bone'], reward: { coins: 160, xp: 50 } },
+    { id: 'festa', name: 'Dia de festa', desc: 'Balões, bolo e muita alegria.', art: '🎈', items: ['festa-rosa', 'balao', 'bolo', 'cupcake', 'presente', 'sininho', 'fx-brilhos'], reward: { coins: 100, xp: 40 } },
+    { id: 'brincadeiras', name: 'Hora de brincar', desc: 'Do novelo ao fliperama.', art: '🎮', items: ['bola', 'novelo', 'ioio', 'dado', 'quebra-cabeca', 'videogame', 'fliperama'], reward: { coins: 180, xp: 50 } },
   ],
   rarities: {
     comum: { label: 'Comum', color: '#9AA6B5', fragments: 5, craft: 25 },

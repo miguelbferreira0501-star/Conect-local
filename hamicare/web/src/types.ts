@@ -207,6 +207,17 @@ export interface GameState {
   pendingChests: import('./shared/game').ChestId[];
   /** Maior nível já alcançado (nível nunca cai). */
   maxLevel: number;
+  /** Baú revelado (menores de 18, sem conta): o item que cada baú vai dar, mostrado antes da compra. */
+  offers?: Partial<Record<import('./shared/game').ChestId, { itemId: string; rarity: import('./shared/game').Rarity; pity: import('./shared/game').Pity }>>;
+}
+
+/** De onde veio um item (para o inventário). */
+export type ItemOrigin = 'loja' | 'bau' | 'arena' | 'oficina' | 'presente' | 'inicio';
+export interface ItemMeta {
+  at: number;
+  from: ItemOrigin;
+  /** Já foi visto no inventário (some o selo "Novo"). */
+  seen?: boolean;
 }
 
 export interface State {
@@ -256,6 +267,8 @@ export interface State {
   homeArena?: number;
   /** As casas das outras arenas (a de agora fica em `house`). */
   houses?: Record<string, House>;
+  /** Quando e de onde veio cada item. */
+  itemMeta?: Record<string, ItemMeta>;
   /** Curva de níveis nova aplicada (o XP antigo foi convertido sem perder nível). */
   xpV?: number;
   updatedAt: number;

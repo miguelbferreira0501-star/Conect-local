@@ -3,6 +3,7 @@ import { Flame, Mail, Plus, Settings } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { ArenaScene } from '../components/ArenaScene';
 import { ArenaPin, arenaByN } from './Arenas';
+import { WalletSheet } from './Collection';
 import { JourneyCard, useKcalPop } from '../components/Journey';
 import { TaskRow } from '../components/TaskRow';
 import { MealCard } from '../components/MealPlan';
@@ -29,6 +30,7 @@ export function useNow(ms: number) {
 
 export function Home({ onGo, onSettings, onEvolution, onArenas }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onArenas: () => void }) {
   const [areaOpen, setAreaOpen] = useState(false);
+  const [wallet, setWallet] = useState(false);
   const s = useApp();
   const now = useNow(20_000);
   const today = todayKey();
@@ -155,9 +157,9 @@ export function Home({ onGo, onSettings, onEvolution, onArenas }: { onGo: (tab: 
               {s.profile.name ? `, ${s.profile.name}` : ''}
             </span>
           </span>
-          <span className="pill shrink-0">
+          <button className="pill shrink-0" onClick={() => setWallet(true)} aria-label={`Carteira: ${s.coins} sementes`}>
             <Coins value={s.coins} />
-          </span>
+          </button>
           <button className="pill pill-round shrink-0" onClick={onSettings} aria-label="Ajustes">
             <Settings size={19} />
           </button>
@@ -177,6 +179,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas }: { onGo: (tab: 
       <AreaPill onClick={() => setAreaOpen(true)} />
       <JourneyCard s={s} onOpen={onEvolution} onCalm={(a) => (requestTool(a), onGo('bem-estar'))} />
       <AreaSheet open={areaOpen} onClose={() => setAreaOpen(false)} />
+      <WalletSheet open={wallet} onClose={() => setWallet(false)} />
 
       <MealCard s={s} />
 

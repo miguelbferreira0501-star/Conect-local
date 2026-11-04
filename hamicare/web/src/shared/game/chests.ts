@@ -106,6 +106,27 @@ export function openChest(args: { chest: ChestId; pity: Pity; owned: Set<string>
   return { chest, rarity, itemId: item.id, duplicate, fragments: duplicate ? cfg.rarities[rarity].fragments : 0, pity: next };
 }
 
+/** Oficina: quantos fragmentos custa fabricar um item (pela raridade dele). */
+export function craftCost(rarity: Rarity, cfg: GameConfig): number {
+  return cfg.rarities[rarity].craft;
+}
+
+/** Pode fabricar? Só itens que saem de baú, que a pessoa ainda não tem, com fragmentos suficientes. */
+export function canCraft(itemId: string, args: { pool: PoolItem[]; owned: Set<string>; fragments: number; cfg: GameConfig }): { ok: true; cost: number; rarity: Rarity } | { ok: false; error: 'invalido' | 'ja-tem' | 'sem-fragmentos'; cost?: number } {
+  const p = args.pool.find((x) => x.id === itemId);
+  if (!p) return { ok: false, error: 'invalido' };
+  if (args.owned.has(itemId)) return { ok: false, error: 'ja-tem' };
+  const cost = craftCost(p.rarity, args.cfg);
+  if (args.fragments < cost) return { ok: false, error: 'sem-fragmentos', cost };
+  return { ok: true, cost, rarity: p.rarity };
+}
+
+/** Quantas peças de uma coleção a pessoa já tem. */
+export function collectionProgress(items: string[], owned: Set<string>): { have: number; total: number; done: boolean } {
+  const have = items.filter((id) => owned.has(id)).length;
+  return { have, total: items.length, done: have === items.length && items.length > 0 };
+}
+
 export const isChest = (x: string): x is ChestId => (CHEST_ORDER as string[]).includes(x);
 
 /** Gerador de números aleatórios previsível (para testes e simulação). */

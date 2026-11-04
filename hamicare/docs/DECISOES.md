@@ -147,3 +147,14 @@ Pedido do dono do produto: no começo, escolher a área (só perder ou ganhar pe
 - **Mapa das Arenas** (Mundo › Arenas, ou o botão "Mapa" no Início): trilha das 12 arenas com a atual marcada, as abertas com selo e as próximas em silhueta com o nível e os prêmios. A aba de aventuras passou a se chamar "Passeios" para não confundir.
 - **Arena nova é um momento:** tela de nível (número grande, prêmio, partículas) → o Hami brilha → a arena aparece → a casa nova com os presentes (sementes, baú grátis e os itens exclusivos). Tudo pode ser pulado e respeita "reduzir movimento".
 - **A progressão nunca exige o Plus:** o Castelo e o Espaço sideral (passeios) deixaram de ser do Plus, e os passeios ligados a uma arena abrem até o nível dela.
+
+### Jogo (fase 3): baús, Oficina, coleções e carteira
+
+- **Onde fica cada coisa (sem criar abas novas):** Mundo › Loja tem "Vendinha" e "Baús"; Mundo › Armário tem "Vestir", "Itens", "Álbum" e "Oficina"; tocar nas sementes (no Início ou no Mundo) abre a Carteira.
+- **Baús:** 5 baús com o desenho próprio de cada um, preço em sementes, barra e tabela de chances (já com a proteção contra azar) e o aviso "raro garantido em até N". Abertura em tela cheia: o baú treme, a tampa abre com a luz da cor da raridade (épico e lendário têm brilho maior) e o item aparece; dá para pular. Repetido vira fragmentos.
+- **Com conta, o servidor sorteia** (e registra cada abertura); sem conta, o aparelho sorteia com números aleatórios do sistema. Sem conexão, o baú não abre e nada é cobrado.
+- **Menores de 18:** baú revelado. A loja mostra o item de cada baú antes e é ele que vem (ECA Digital: nada de sorteio pago para menores).
+- **Oficina:** fragmentos viram o item que a pessoa escolher (só itens que saem em baú; exclusivos de arena não). Custo por raridade: 25, 60, 150, 375 e 1.000.
+- **Álbum de Coleções:** 10 coleções temáticas (praia, inverno, céu estrelado, realeza, jardim, música e arte, fofura, aventureiro, festa, brincadeiras) com prêmio em sementes e XP, pago uma vez; o servidor só paga se todas as peças estiverem na conta. Mostra também quantos looks estão completos.
+- **Itens:** tudo o que a pessoa tem, com raridade, origem (Vendinha, Baú, Arena, Oficina, Presente) e o selo "Novo"; filtros por tipo, raridade e origem; dá para vestir ou levar para a casa direto da ficha.
+- **Termos** (seção 7) explicam baús, chances, proteção, fragmentos e o baú revelado para menores, e que não existe compra de sementes ou baús com dinheiro.

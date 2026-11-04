@@ -16,7 +16,7 @@ export const LEGAL_INFO = {
   /** E-mail para dúvidas e pedidos de privacidade. */
   email: '[E-MAIL DE CONTATO]',
   /** Data desta versão (AAAA-MM-DD). */
-  atualizado: '2026-11-03',
+  atualizado: '2026-11-04',
 };
 
 export type LegalId = 'privacidade' | 'termos';
@@ -255,6 +255,9 @@ export const TERMS: LegalDoc = {
           'Presentes entre amigos são permitidos dentro do app.',
           'Podemos ajustar preços em sementes, itens e temporadas para manter o jogo equilibrado.',
         ],
+        'Baús: abrem só com sementes ganhas no app. Não existe compra de sementes, baús ou chances com dinheiro, e a assinatura HamiCare+ não dá baús nem sementes. Os itens dos baús são só enfeites (roupas e decoração): não mudam missões, saúde, nível nem progresso.',
+        'As chances de cada raridade aparecem na loja antes de abrir e já contam a proteção contra azar: depois de alguns baús sem item raro, a chance de raro sobe, e há um limite garantido. Item repetido vira fragmentos, que podem ser trocados na Oficina pelo item que você escolher.',
+        'Para menores de 18 anos, o baú é revelado: o item aparece antes da compra e é exatamente ele que vem. Nada é sorteado na hora da compra.',
       ],
     },
     {

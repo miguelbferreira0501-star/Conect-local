@@ -9,7 +9,7 @@ import { pool, withUser } from '../db';
 import { AppError, invalid } from '../lib/errors';
 import { type AppEnv, requireAuth } from '../auth';
 import {
-  CHEST_ORDER, DEFAULT_GAME, addUsage, arenaItemsOf, arenaOf, baseGrant, capGrant, chestOdds, chestPool, emptyPity, emptyUsage, isChest, levelOf, levelUps, openChest, pityInfo, rarityOf, xpAt,
+  CHEST_ORDER, DEFAULT_GAME, addUsage, arenaItemsOf, canCraft, arenaOf, baseGrant, capGrant, chestOdds, chestPool, emptyPity, emptyUsage, isChest, levelOf, levelUps, openChest, pityInfo, rarityOf, xpAt,
   type ChestId, type DayUsage, type GameConfig, type Pity, type Rarity, type Source,
 } from '../../../web/src/shared/game';
 import { ITEMS, LOOKS, STYLES, itemById, stylePrice } from '../../../web/src/data/items';
@@ -142,6 +142,7 @@ const sourceSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('presente'), coins: z.number().int(), date: day }),
   z.object({ kind: z.literal('temporada'), month: z.string().regex(/^\d{4}-\d{2}$/), xp: z.number().int(), coins: z.number().int() }),
   z.object({ kind: z.literal('evento'), id: z.string().max(60), coins: z.number().int() }),
+  z.object({ kind: z.literal('colecao'), id: z.string().max(40) }),
 ]);
 const opSchema = z.discriminatedUnion('op', [
   z.object({ op: z.literal('grant'), src: sourceSchema }),
@@ -152,7 +153,7 @@ const opSchema = z.discriminatedUnion('op', [
 const nearToday = (d: string) => [utcDay(-1), utcDay(0), utcDay(1)].includes(d);
 
 /** Confere e corrige a fonte do ganho com os dados do servidor. Devolve null se não vale. */
-async function trusted(db: pg.PoolClient, userId: string, src: Source): Promise<Source | null> {
+async function trusted(db: pg.PoolClient, userId: string, src: Source, cfg: GameConfig): Promise<Source | null> {
   if ('date' in src && !nearToday(src.date)) return null;
   switch (src.kind) {
     case 'tarefa': {
@@ -178,6 +179,13 @@ async function trusted(db: pg.PoolClient, userId: string, src: Source): Promise<
     case 'evento': {
       const ev = (await db.query('SELECT e.reward_coins FROM event_claims x JOIN events e ON e.id = x.event_id WHERE x.user_id = $1 AND x.event_id::text = $2', [userId, src.id])).rows[0];
       return ev ? { ...src, coins: ev.reward_coins } : null;
+    }
+    case 'colecao': {
+      // Só paga a coleção se todas as peças estiverem no inventário do servidor.
+      const col = cfg.collections.find((x) => x.id === src.id);
+      if (!col) return null;
+      const owned = await ownedSet(db, userId);
+      return col.items.every((id) => owned.has(id)) ? src : null;
     }
     case 'nivel':
     case 'arena':
@@ -224,7 +232,7 @@ async function payLevels(db: pg.PoolClient, userId: string, w: WalletRow, before
 }
 
 async function applyGrant(db: pg.PoolClient, userId: string, w: WalletRow, raw: Source, cfg: GameConfig): Promise<{ w: WalletRow; ok: boolean; error?: string }> {
-  const src = await trusted(db, userId, raw);
+  const src = await trusted(db, userId, raw, cfg);
   if (!src) return { w, ok: false, error: 'invalido' };
   const g = baseGrant(src, cfg);
   const old = (await db.query('SELECT active FROM game_ledger WHERE user_id = $1 AND ref = $2', [userId, g.ref])).rows[0];
@@ -421,6 +429,30 @@ game.post('/chest/open', async (c) => {
         result: { chest, rarity: result.rarity, itemId: result.itemId, duplicate, fragments, revealed: minor },
         wallet: walletView(next, cfg),
       };
+    }),
+  );
+});
+
+// ---------- Oficina ----------
+
+/** Troca fragmentos por um item que sai de baú e que a pessoa ainda não tem. */
+game.post('/craft', async (c) => {
+  const userId = c.get('userId')!;
+  const body = z.object({ itemId: z.string().max(80) }).safeParse(await c.req.json().catch(() => ({})));
+  if (!body.success) throw invalid('Item inválido.');
+  const cfg = await gameConfig();
+  return c.json(
+    await withUser(userId, async (db) => {
+      const w = await lockWallet(db, userId);
+      const check = canCraft(body.data.itemId, { pool: POOL, owned: await ownedSet(db, userId), fragments: w.fragments, cfg });
+      if (!check.ok) {
+        const code = check.error === 'sem-fragmentos' ? 'sem_fragmentos' : check.error === 'ja-tem' ? 'ja_tem' : 'invalido';
+        throw new AppError(409, code, check.error === 'sem-fragmentos' ? 'Fragmentos insuficientes.' : check.error === 'ja-tem' ? 'Você já tem este item.' : 'Este item não sai na Oficina.');
+      }
+      await addItem(db, userId, body.data.itemId, 'oficina');
+      const next: WalletRow = { ...w, fragments: w.fragments - check.cost };
+      await saveWallet(db, userId, next);
+      return { itemId: body.data.itemId, cost: check.cost, wallet: walletView(next, cfg) };
     }),
   );
 });

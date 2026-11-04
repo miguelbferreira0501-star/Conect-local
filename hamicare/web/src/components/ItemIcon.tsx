@@ -18,7 +18,7 @@ export function ItemIcon({ item, size = 34, fur = 'caramelo' }: { item: Item; si
   if (item.kind === 'parede') return <span className="block rounded-xl" style={{ width: size * 1.3, height: size * 1.3, background: WALLPAPER_CSS[item.id] }} />;
   if (item.kind === 'piso') return <span className="block rounded-xl" style={{ width: size * 1.3, height: size * 1.3, background: FLOOR_CSS[item.id] }} />;
   if (WEARABLE_KINDS.includes(item.kind)) {
-    return <Hamster fur={fur} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null, [item.kind]: item.id }} size={Math.round(size * 1.3)} idle={false} label={item.name} />;
+    return <Hamster fur={fur} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null, [item.kind]: item.id }} size={Math.round(size * 1.65)} idle={false} label={item.name} />;
   }
   return null;
 }

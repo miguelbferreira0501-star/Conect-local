@@ -16,10 +16,10 @@ import {
 } from '../logic/evolution';
 import { streakOf } from '../logic/streak';
 import { activeQuests, claimKey, levelOf, newAchievements, periodStart, questProgress, QUESTS } from '../logic/progress';
-import { addUsage, arenaItemsOf, arenaOf, baseGrant, capGrant, emptyPity, emptyUsage, levelUps, migrateXp, xpAt, type ChestId, type DayUsage, type Pity, type Source } from '../shared/game';
+import { addUsage, arenaItemsOf, arenaOf, baseGrant, canCraft, capGrant, chestPool, collectionProgress, emptyPity, emptyUsage, levelUps, migrateXp, openChest, xpAt, type ChestId, type DayUsage, type Pity, type Rarity, type Source } from '../shared/game';
 import { arenaHouse } from '../data/arenas';
 import { gameCfg } from './game';
-import type { GameState } from '../types';
+import type { GameState, ItemOrigin } from '../types';
 
 const KEY = 'hamicare:v2';
 const OLD_KEY = 'xodo:v1';
@@ -348,11 +348,9 @@ function grant(s: State, src: Source): State {
     let gifts: string[] = [];
     if (arena) {
       gifts = arenaItemsOf(arena.n, arena.reward.items).filter((id) => !next.inventory[id]);
-      const inventory = { ...next.inventory };
-      for (const id of gifts) inventory[id] = 1;
       const houses: Record<string, State['house']> = { ...(next.houses ?? {}) };
       if (!houses[arena.n] && (next.homeArena ?? 1) !== arena.n) houses[arena.n] = arenaHouse(arena.n);
-      next = { ...next, inventory, houses };
+      next = { ...gainItems(next, gifts, 'arena'), houses };
     }
     const celebrated = { level, coins, arena: arena ? { n: arena.n, name: arena.name, chest: arena.reward.chest, items: gifts } : undefined };
     setTimeout(() => celebrate({ type: 'level', ...celebrated }), 0);
@@ -391,9 +389,125 @@ function spend(s: State, coins: number, label: string, ref: string, itemId?: str
 }
 
 /** Com conta: o servidor manda o saldo certo (sementes, XP, fragmentos e proteção contra azar). */
-export function applyServerWallet(w: { coins: number; xp: number; fragments: number; pity: Pity; maxLevel: number }) {
+export function applyServerWallet(w: { coins: number; xp: number; fragments: number; pity: Pity; maxLevel: number; pending?: string[] }) {
   const s = getState();
-  set({ ...s, coins: w.coins, xp: w.xp, game: { ...s.game, fragments: w.fragments, pity: w.pity, maxLevel: Math.max(s.game.maxLevel, w.maxLevel) } }, { silent: true });
+  const pendingChests = w.pending ? (w.pending.filter((c) => c in gameCfg().chests) as ChestId[]) : s.game.pendingChests;
+  set({ ...s, coins: w.coins, xp: w.xp, game: { ...s.game, fragments: w.fragments, pity: w.pity, pendingChests, maxLevel: Math.max(s.game.maxLevel, w.maxLevel) } }, { silent: true });
+}
+
+/** Itens novos: entram no inventário com a origem e o selo "Novo". */
+function gainItems(s: State, ids: string[], from: ItemOrigin, opts: { stack?: boolean } = {}): State {
+  if (!ids.length) return s;
+  const inventory = { ...s.inventory };
+  const itemMeta = { ...(s.itemMeta ?? {}) };
+  for (const id of ids) {
+    const had = (inventory[id] ?? 0) > 0;
+    inventory[id] = opts.stack ? (inventory[id] ?? 0) + 1 : Math.max(1, inventory[id] ?? 0);
+    if (!had) itemMeta[id] = { at: Date.now(), from };
+  }
+  return { ...s, inventory, itemMeta };
+}
+
+/** Tira o selo "Novo" dos itens vistos. */
+export function markSeen(ids: string[]) {
+  const meta = state.itemMeta ?? {};
+  if (!ids.some((id) => meta[id] && !meta[id].seen)) return;
+  const itemMeta = { ...meta };
+  for (const id of ids) if (itemMeta[id]) itemMeta[id] = { ...itemMeta[id], seen: true };
+  commit({ ...state, itemMeta });
+}
+
+// ---------- Baús, Oficina e coleções ----------
+
+export interface ChestOutcome {
+  chest: ChestId;
+  rarity: Rarity;
+  itemId: string;
+  duplicate: boolean;
+  fragments: number;
+  revealed: boolean;
+}
+
+const POOL = chestPool();
+const cryptoRng = () => {
+  try {
+    return crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
+  } catch {
+    return Math.random();
+  }
+};
+const ownedSet = (s: State) => new Set(Object.keys(s.inventory).filter((id) => s.inventory[id] > 0));
+
+/** Baú revelado (menores, sem conta): o item que este baú vai dar, sorteado antes e mostrado. */
+export function chestOffer(chest: ChestId): { itemId: string; rarity: Rarity; pity: Pity } {
+  const have = state.game.offers?.[chest];
+  if (have) return have;
+  const r = openChest({ chest, pity: state.game.pity, owned: ownedSet(state), pool: POOL, rng: cryptoRng, cfg: gameCfg() });
+  const offer = { itemId: r.itemId, rarity: r.rarity, pity: r.pity };
+  set({ ...state, game: { ...state.game, offers: { ...(state.game.offers ?? {}), [chest]: offer } } }, { silent: true });
+  return offer;
+}
+
+/** Abre um baú no aparelho (sem conta). Com conta quem abre é o servidor. */
+export function openChestLocal(chest: ChestId, free = false): ChestOutcome | 'sem-sementes' | 'sem-bau' {
+  const cfg = gameCfg();
+  const def = cfg.chests[chest];
+  let s = state;
+  let pending = s.game.pendingChests;
+  if (free) {
+    const i = pending.indexOf(chest);
+    if (i < 0) return 'sem-bau';
+    pending = [...pending.slice(0, i), ...pending.slice(i + 1)];
+  } else if (s.coins < def.price) return 'sem-sementes';
+  const owned = ownedSet(s);
+  const revealed = minor(s);
+  let r: { rarity: Rarity; itemId: string; pity: Pity };
+  if (revealed) {
+    r = chestOffer(chest);
+    s = state;
+  } else {
+    r = openChest({ chest, pity: s.game.pity, owned, pool: POOL, rng: cryptoRng, cfg });
+  }
+  const duplicate = owned.has(r.itemId);
+  const fragments = duplicate ? cfg.rarities[r.rarity].fragments : 0;
+  if (!free) s = spend(s, def.price, def.name, `bau:${uid()}`);
+  if (!duplicate) s = gainItems(s, [r.itemId], 'bau');
+  const offers = { ...(s.game.offers ?? {}) };
+  delete offers[chest];
+  commit({ ...s, game: { ...s.game, pity: r.pity, fragments: s.game.fragments + fragments, pendingChests: pending, offers } });
+  return { chest, rarity: r.rarity, itemId: r.itemId, duplicate, fragments, revealed };
+}
+
+/** Com conta: o servidor abriu o baú; o item entra no inventário do aparelho. */
+export function applyChestResult(r: ChestOutcome) {
+  if (!r.duplicate) commit(gainItems(state, [r.itemId], 'bau'));
+}
+
+/** Oficina: troca fragmentos por um item que falta (sem conta). */
+export function craftLocal(itemId: string): 'ok' | 'invalido' | 'ja-tem' | 'sem-fragmentos' {
+  const c = canCraft(itemId, { pool: POOL, owned: ownedSet(state), fragments: state.game.fragments, cfg: gameCfg() });
+  if (!c.ok) return c.error;
+  const s = gainItems(state, [itemId], 'oficina');
+  commit({ ...s, game: { ...s.game, fragments: s.game.fragments - c.cost } });
+  return 'ok';
+}
+
+/** Com conta: o servidor fabricou; o item entra no inventário do aparelho. */
+export function applyCraftResult(itemId: string) {
+  commit(gainItems(state, [itemId], 'oficina'));
+}
+
+export const collectionDone = (s: State, id: string) => {
+  const c = gameCfg().collections.find((x) => x.id === id);
+  return !!c && collectionProgress(c.items, ownedSet(s)).done;
+};
+export const collectionClaimed = (s: State, id: string) => !!s.game.paid[`colecao:${id}`];
+
+/** Coleção completa: paga o prêmio uma vez (com conta, o servidor confere as peças). */
+export function claimCollection(id: string): boolean {
+  if (!collectionDone(state, id) || collectionClaimed(state, id)) return false;
+  commit(grant(state, { kind: 'colecao', id }));
+  return true;
 }
 
 function logEventIn(s: State, name: string, key = todayKey()): State {
@@ -830,7 +944,7 @@ export function buy(itemId: string): BuyResult {
   const res = canBuy(state, itemId);
   if (res !== 'ok') return res;
   const item = itemById(itemId)!;
-  let next: State = { ...spend(state, item.price, `Comprou: ${item.name}`, `loja:${itemId}:${Date.now()}`, itemId), inventory: { ...state.inventory, [itemId]: (state.inventory[itemId] ?? 0) + 1 }, wishlist: state.wishlist.filter((w) => w !== itemId) };
+  let next: State = { ...gainItems(spend(state, item.price, `Comprou: ${item.name}`, `loja:${itemId}:${Date.now()}`, itemId), [itemId], 'loja', { stack: true }), wishlist: state.wishlist.filter((w) => w !== itemId) };
   if (WEARABLE_KINDS.includes(item.kind)) next = { ...next, pet: { ...next.pet, outfit: { ...next.pet.outfit, [item.kind]: itemId } } };
   if (item.kind === 'parede') next = { ...next, house: { ...next.house, wallpaper: itemId } };
   if (item.kind === 'piso') next = { ...next, house: { ...next.house, floor: itemId } };
@@ -859,14 +973,13 @@ export function buyLook(lookId: string): BuyResult {
   if (lp.plus && !isPremium(state)) return 'plus';
   if (lp.level > levelOf(state.xp)) return 'nivel';
   if (state.coins < lp.price) return 'sem-sementes';
-  const inventory = { ...state.inventory };
-  for (const id of lp.missing) inventory[id] = 1;
+  const { inventory, itemMeta } = gainItems(state, lp.missing, 'loja');
   const outfit = { ...state.pet.outfit };
   for (const id of look.items) {
     const it = itemById(id);
     if (it) outfit[it.kind as WearSlot] = id;
   }
-  commit({ ...spend(state, lp.price, `Comprou o look ${look.name}`, `look:${lookId}:${Date.now()}`), inventory, pet: { ...state.pet, outfit }, wishlist: state.wishlist.filter((w) => !look.items.includes(w)) });
+  commit({ ...spend(state, lp.price, `Comprou o look ${look.name}`, `look:${lookId}:${Date.now()}`), inventory, itemMeta, pet: { ...state.pet, outfit }, wishlist: state.wishlist.filter((w) => !look.items.includes(w)) });
   return 'ok';
 }
 
@@ -876,10 +989,9 @@ export function buyStyle(styleId: string): BuyResult {
   if (style.plus && !isPremium(state)) return 'plus';
   const price = stylePrice(style, (id) => owned(state, id));
   if (state.coins < price) return 'sem-sementes';
-  const inventory = { ...state.inventory };
-  for (const id of [style.wallpaper, style.floor, ...style.items.map((i) => i.itemId)]) inventory[id] = Math.max(1, inventory[id] ?? 0);
+  const { inventory, itemMeta } = gainItems(state, [style.wallpaper, style.floor, ...style.items.map((i) => i.itemId)], 'loja');
   const items = style.items.map((it, i) => ({ uid: uid(), itemId: it.itemId, x: it.x, y: it.y, z: i + 1 }));
-  commit({ ...spend(state, price, `Comprou o estilo ${style.name}`, `estilo:${styleId}:${Date.now()}`), inventory, house: { wallpaper: style.wallpaper, floor: style.floor, items } });
+  commit({ ...spend(state, price, `Comprou o estilo ${style.name}`, `estilo:${styleId}:${Date.now()}`), inventory, itemMeta, house: { wallpaper: style.wallpaper, floor: style.floor, items } });
   return 'ok';
 }
 
@@ -907,7 +1019,7 @@ export function claimDailyGift(): { coins: number; food?: string } | null {
 /** Recebe um presente de um amigo (item já validado pelo servidor ou pela página). */
 export function receiveGift(itemId: string) {
   if (!itemById(itemId)) return;
-  commit({ ...state, inventory: { ...state.inventory, [itemId]: (state.inventory[itemId] ?? 0) + 1 } });
+  commit(gainItems(state, [itemId], 'presente', { stack: true }));
 }
 
 /** Recompensa de evento (validada pelo servidor). */

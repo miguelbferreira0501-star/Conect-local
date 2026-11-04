@@ -4,7 +4,7 @@ import { http } from './social/api';
 import { applyServerWallet, getState, setGameHook, type GameOp } from './store';
 import type { Pity } from '../shared/game';
 
-interface ServerWallet {
+export interface ServerWallet {
   coins: number;
   xp: number;
   maxLevel: number;
@@ -35,8 +35,17 @@ function save() {
   }
 }
 
-function apply(w: ServerWallet) {
-  applyServerWallet({ coins: w.coins, xp: w.xp, fragments: w.fragments, pity: w.pity, maxLevel: w.maxLevel });
+export function applyWallet(w: ServerWallet) {
+  applyServerWallet({ coins: w.coins, xp: w.xp, fragments: w.fragments, pity: w.pity, maxLevel: w.maxLevel, pending: w.pending });
+}
+const apply = applyWallet;
+
+/** Com conta e sincronizando: baús, Oficina e carteira vão pelo servidor. */
+export const gameSyncOn = () => active;
+
+/** Manda os pedidos guardados agora (antes de abrir um baú, por exemplo). */
+export async function flushNow() {
+  if (queue.length) await flush();
 }
 
 async function flush() {

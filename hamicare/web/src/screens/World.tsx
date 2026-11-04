@@ -20,6 +20,8 @@ import type { WearSlot } from '../types';
 import { Glyph } from '../components/art';
 import { ArenasTab, arenaByN } from './Arenas';
 import { ItemIcon } from '../components/ItemIcon';
+import { ChestShopView } from './Chests';
+import { AlbumView, InventoryView, WalletSheet, WorkshopView } from './Collection';
 
 export type WorldTab = 'arenas' | 'casa' | 'mapa' | 'loja' | 'armario';
 type Tab = WorldTab;
@@ -27,6 +29,7 @@ type Tab = WorldTab;
 export function World({ onPlus, onGift, initialTab }: { onPlus: () => void; onGift: (itemId: string) => void; initialTab?: Tab }) {
   const s = useApp();
   const [tab, setTab] = useState<Tab>(initialTab ?? 'casa');
+  const [wallet, setWallet] = useState(false);
   return (
     <div className="grid gap-4">
       <header className="flex items-end justify-between gap-3">
@@ -34,8 +37,11 @@ export function World({ onPlus, onGift, initialTab }: { onPlus: () => void; onGi
           <p className="eyebrow">Nível {levelOf(s.xp)}</p>
           <h1 className="font-display text-[30px] font-bold leading-tight">Mundo</h1>
         </div>
-        <Coins value={s.coins} />
+        <button className="coins-btn" onClick={() => setWallet(true)} aria-label={`Carteira: ${s.coins} sementes`}>
+          <Coins value={s.coins} />
+        </button>
       </header>
+      <WalletSheet open={wallet} onClose={() => setWallet(false)} />
       <Seg value={tab} onChange={setTab} label="Seções do mundo" options={[{ id: 'arenas', label: 'Arenas' }, { id: 'casa', label: 'Casa' }, { id: 'mapa', label: 'Passeios' }, { id: 'loja', label: 'Loja' }, { id: 'armario', label: 'Armário' }]} />
       {tab === 'arenas' && <ArenasTab onHouse={() => setTab('casa')} />}
       {tab === 'casa' && <HouseTab onArenas={() => setTab('arenas')} />}
@@ -302,6 +308,17 @@ const SHOP_KINDS: ItemKind[] = ['chapeu', 'oculos', 'roupa', 'acessorio', 'efeit
 
 function ShopTab({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: string) => void }) {
   const s = useApp();
+  const [sec, setSec] = useState<'baus' | 'vendinha'>(s.game.pendingChests.length ? 'baus' : 'vendinha');
+  return (
+    <div className="grid gap-4">
+      <Seg value={sec} onChange={setSec} label="Seções da loja" options={[{ id: 'vendinha', label: 'Vendinha' }, { id: 'baus', label: s.game.pendingChests.length ? `Baús (${s.game.pendingChests.length})` : 'Baús' }]} />
+      {sec === 'baus' ? <ChestShopView /> : <Vendinha onPlus={onPlus} onGift={onGift} />}
+    </div>
+  );
+}
+
+function Vendinha({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: string) => void }) {
+  const s = useApp();
   const [kind, setKind] = useState<ItemKind | 'desejos' | 'looks'>('looks');
   const [tryOn, setTryOn] = useState<Item | null>(null);
   const season = currentSeason();
@@ -532,6 +549,21 @@ function ShopCard({ item, onPlus, onGift, onTry }: { item: Item; onPlus: () => v
 // ---------- Armário ----------
 
 function WardrobeTab() {
+  const s = useApp();
+  const fresh = Object.values(s.itemMeta ?? {}).filter((m) => !m.seen).length;
+  const [sec, setSec] = useState<'vestir' | 'itens' | 'album' | 'oficina'>('vestir');
+  return (
+    <div className="grid gap-4">
+      <Seg value={sec} onChange={setSec} label="Seções do armário" options={[{ id: 'vestir', label: 'Vestir' }, { id: 'itens', label: fresh ? `Itens (${fresh})` : 'Itens' }, { id: 'album', label: 'Álbum' }, { id: 'oficina', label: 'Oficina' }]} />
+      {sec === 'vestir' && <DressUp />}
+      {sec === 'itens' && <InventoryView />}
+      {sec === 'album' && <AlbumView onWorkshop={() => setSec('oficina')} />}
+      {sec === 'oficina' && <WorkshopView />}
+    </div>
+  );
+}
+
+function DressUp() {
   const s = useApp();
   const mine = ITEMS.filter((i) => WEARABLE_KINDS.includes(i.kind) && owned(s, i.id));
   const premium = isPremium(s);

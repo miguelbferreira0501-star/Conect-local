@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import pg from 'pg';
 import { call, newUser, setupDatabase } from './helpers';
 import { pool } from '../src/db';
-import { DEFAULT_GAME as G, arenaItemsOf, rarityRank, xpAt } from '../../web/src/shared/game';
+import { DEFAULT_GAME as G, arenaItemsOf, chestPool, rarityRank, xpAt } from '../../web/src/shared/game';
 
 setupDatabase();
 
@@ -203,5 +203,47 @@ describe('baús no servidor', () => {
 
   it('sem conta não acessa', async () => {
     expect((await call('GET', '/game/wallet')).status).toBe(401);
+  });
+});
+
+describe('Oficina e coleções no servidor', () => {
+  it('fabricar cobra fragmentos, entrega o item e não fabrica de novo', async () => {
+    const u = await newUser('Oli');
+    await wallet(u.cookie);
+    const target = chestPool().find((p) => p.rarity === 'incomum')!;
+    const cost = G.rarities.incomum.craft;
+    const poor = await call('POST', '/game/craft', { itemId: target.id }, u.cookie);
+    expect(poor.status).toBe(409);
+    expect(poor.body.error).toBe('sem_fragmentos');
+    await owner((c) => c.query('UPDATE game_wallet SET fragments = $2 WHERE user_id = $1', [u.id, cost + 7]));
+    const ok = await call('POST', '/game/craft', { itemId: target.id }, u.cookie);
+    expect(ok.status).toBe(200);
+    expect(ok.body.wallet.fragments).toBe(7);
+    const inv = await call('GET', '/game/inventory', undefined, u.cookie);
+    expect(inv.body.items).toContainEqual(expect.objectContaining({ itemId: target.id, origin: 'oficina' }));
+    await owner((c) => c.query('UPDATE game_wallet SET fragments = 5000 WHERE user_id = $1', [u.id]));
+    expect((await call('POST', '/game/craft', { itemId: target.id }, u.cookie)).body.error).toBe('ja_tem');
+    // Exclusivo de arena e item que não existe não saem na Oficina.
+    expect((await call('POST', '/game/craft', { itemId: 'banco-galho' }, u.cookie)).body.error).toBe('invalido');
+    expect((await call('POST', '/game/craft', { itemId: 'nao-existe' }, u.cookie)).body.error).toBe('invalido');
+  });
+
+  it('coleção só paga com todas as peças no inventário do servidor, e uma vez', async () => {
+    const u = await newUser('Pia');
+    await wallet(u.cookie);
+    const col = G.collections[0];
+    const claim = { op: 'grant', src: { kind: 'colecao', id: col.id } };
+    const early = await call('POST', '/game/ops', { ops: [claim] }, u.cookie);
+    expect(early.body.results[0]).toEqual({ ok: false, error: 'invalido' });
+    await owner(async (c) => {
+      for (const id of col.items) await c.query("INSERT INTO game_inventory (user_id, item_id, qty, origin) VALUES ($1, $2, 1, 'bau') ON CONFLICT DO NOTHING", [u.id, id]);
+    });
+    const before = (await call('GET', '/game/wallet', undefined, u.cookie)).body.wallet.coins;
+    const r = await call('POST', '/game/ops', { ops: [claim, claim] }, u.cookie);
+    expect(r.body.results[0].ok).toBe(true);
+    expect(r.body.wallet.coins).toBe(before + col.reward.coins);
+    const again = await call('POST', '/game/ops', { ops: [claim] }, u.cookie);
+    expect(again.body.wallet.coins).toBe(before + col.reward.coins);
+    expect((await call('POST', '/game/ops', { ops: [{ op: 'grant', src: { kind: 'colecao', id: 'inventada' } }] }, u.cookie)).body.results[0].ok).toBe(false);
   });
 });

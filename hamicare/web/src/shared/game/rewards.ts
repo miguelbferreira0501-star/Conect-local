@@ -16,7 +16,8 @@ export type Source =
   | { kind: 'temporada'; month: string; xp: number; coins: number }
   | { kind: 'evento'; id: string; coins: number }
   | { kind: 'nivel'; level: number }
-  | { kind: 'arena'; arena: number };
+  | { kind: 'arena'; arena: number }
+  | { kind: 'colecao'; id: string };
 
 export interface Grant {
   ref: string;
@@ -74,6 +75,10 @@ export function baseGrant(src: Source, cfg: GameConfig): Grant {
     case 'arena': {
       const a = cfg.arenas.find((x) => x.n === src.arena);
       return { ref: `arena:${src.arena}`, label: `Arena ${src.arena} liberada`, xp: 0, coins: a?.reward.coins ?? 0, routine: false };
+    }
+    case 'colecao': {
+      const c = cfg.collections.find((x) => x.id === src.id);
+      return { ref: `colecao:${src.id}`, label: `Coleção completa: ${c?.name ?? src.id}`, xp: c?.reward.xp ?? 0, coins: c?.reward.coins ?? 0, routine: false };
     }
   }
 }
