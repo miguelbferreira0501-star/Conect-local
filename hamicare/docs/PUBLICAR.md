@@ -111,12 +111,11 @@ Com domínio, o e-mail sai como `nao-responda@hamicare.com.br` e quase não cai 
    Cadastre no Registro.br os registros que ele mostrar. Acrescente `,https://hamicare.com.br`
    no fim do `APP_ORIGINS`.
 
-## 7. Depois: lojas de apps
+## 7. Lojas de apps
 
-- **Google Play:** conta de desenvolvedor (US$ 25, uma vez). O app web vira app Android com
-  TWA (Trusted Web Activity). Precisa da URL da política de privacidade e do formulário
-  *Segurança dos dados*, que pode ser preenchido com base na seção 2 da política.
-- **App Store:** conta Apple Developer (US$ 99/ano) e um Mac (ou serviço de build na nuvem).
+O passo a passo completo da Google Play e da App Store, com os textos e as imagens prontas, está em
+[`LOJAS.md`](LOJAS.md).
+
 - **Assinatura HamiCare+ paga:** hoje o app tem só o teste grátis de 7 dias. Para cobrar, o caminho
   é a cobrança da própria loja (Google Play Billing / App Store), que também resolve nota e reembolso.
 

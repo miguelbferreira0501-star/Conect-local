@@ -37,6 +37,13 @@ const schema = z.object({
   /** Endereço público do app, usado nos links dos e-mails. No Render, vem sozinho de RENDER_EXTERNAL_URL. */
   APP_URL: z.string().url().optional(),
   RENDER_EXTERNAL_URL: z.string().url().optional(),
+  /**
+   * App Android na Google Play (Trusted Web Activity): o nome do pacote (ex.: com.hamicare.app) e as
+   * impressões digitais SHA-256 das chaves que assinam o app (a do Play App Signing e a de envio),
+   * separadas por vírgula. Com elas, o app abre em tela cheia, sem a barra do navegador.
+   */
+  ANDROID_PACKAGE_NAME: z.string().regex(/^[a-zA-Z][\w]*(\.[a-zA-Z][\w]*)+$/).optional(),
+  ANDROID_CERT_SHA256: z.string().optional(),
 });
 
 // Campo deixado em branco no painel da hospedagem conta como "não informado".

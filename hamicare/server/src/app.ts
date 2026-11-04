@@ -11,6 +11,7 @@ import { admin } from './routes/admin';
 import { push } from './routes/push';
 import { game } from './routes/game';
 import { legal } from './routes/legal';
+import { stores } from './routes/stores';
 
 export function createApp() {
   const app = new Hono<AppEnv>();
@@ -41,6 +42,8 @@ export function createApp() {
 
   // Política de privacidade e termos (endereços para as lojas de apps).
   app.route('/', legal);
+  // Vínculo do app Android com o site e a página para excluir a conta (pedidos das lojas).
+  app.route('/', stores);
 
   // App web compilado (um arquivo + service worker e ícones), servido pelo mesmo processo.
   if (existsSync(env.WEB_DIST)) {

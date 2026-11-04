@@ -38,3 +38,9 @@ services:
       - key: MAIL_FROM
         sync: false
       # Com domínio próprio, troque pelo Resend em Environment: RESEND_API_KEY e APP_URL (veja docs/PUBLICAR.md).
+      # App Android na Google Play (preencha depois de gerar o app; veja docs/LOJAS.md):
+      # nome do pacote (ex.: com.hamicare.app) e as impressões SHA-256 das chaves, separadas por vírgula.
+      - key: ANDROID_PACKAGE_NAME
+        sync: false
+      - key: ANDROID_CERT_SHA256
+        sync: false
