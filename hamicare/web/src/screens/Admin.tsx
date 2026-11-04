@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { Empty, Seg, toast } from '../components/ui';
 import { http, ApiError } from '../lib/social/api';
@@ -25,8 +26,9 @@ const STAT_LABEL: Record<string, string> = {
 /** Painel de administração (só aparece para quem tem papel de admin no servidor). */
 export function Admin({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('resumo');
-  return (
-    <div className="fullscreen" role="dialog" aria-modal="true" aria-label="Administração">
+  // Fora da gaveta de Ajustes (uma gaveta com animação prende o "fixed" dentro dela).
+  return createPortal(
+    <div className="fullscreen admin-screen" role="dialog" aria-modal="true" aria-label="Administração">
       <div className="mx-auto grid max-w-[560px] gap-4">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-[26px] font-bold">Administração</h1>
@@ -41,7 +43,8 @@ export function Admin({ onClose }: { onClose: () => void }) {
         {tab === 'eventos' && <Events />}
         {tab === 'jogo' && <AdminGame />}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

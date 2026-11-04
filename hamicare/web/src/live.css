@@ -2359,3 +2359,6 @@
   border-bottom: 1px solid var(--line);
   white-space: nowrap;
 }
+.admin-screen {
+  z-index: 95;
+}

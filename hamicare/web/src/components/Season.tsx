@@ -76,7 +76,7 @@ export function SeasonBanner({ s }: { s: State }) {
           </p>
         </div>
       </div>
-      <ol ref={railRef} className="season-rail relative" aria-label="Trilha da temporada">
+      <ol ref={railRef} className="season-rail overflow-x-auto relative" aria-label="Trilha da temporada">
         {tiers.map((t, i) => {
           const got = seasonTierClaimed(s, i);
           const open = days >= t.days;

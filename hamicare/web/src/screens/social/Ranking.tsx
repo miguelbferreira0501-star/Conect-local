@@ -7,7 +7,7 @@ import { ArenaScene } from '../../components/ArenaScene';
 import { Hamster } from '../../components/Hamster';
 import { Room } from '../../components/Room';
 import { Glyph } from '../../components/art';
-import { Empty, Seg, toast } from '../../components/ui';
+import { Empty, toast } from '../../components/ui';
 import { periodOf } from '../../data/lines';
 import { gameCfg } from '../../lib/game';
 import { useApp } from '../../lib/store';
@@ -153,7 +153,13 @@ export function RankingTab({ api, onOpenProfile }: { api: SocialApi; onOpenProfi
   });
   return (
     <div className="grid gap-3">
-      <Seg value={cat} onChange={setCat} label="Categoria do ranking" options={CATS.map((x) => ({ id: x.id, label: x.label }))} />
+      <div className="tabs-scroll" role="group" aria-label="Categoria do ranking">
+        {CATS.map((x) => (
+          <button key={x.id} className={`chip ${cat === x.id ? 'chip-accent' : 'chip-plain'}`} aria-pressed={cat === x.id} onClick={() => setCat(x.id)}>
+            {x.label}
+          </button>
+        ))}
+      </div>
       <p className="text-[13px] text-muted">{c.hint}</p>
       {rows.length <= 1 ? (
         <Empty>Quando seus amigos entrarem, o ranking aparece aqui. Só amigos veem.</Empty>
