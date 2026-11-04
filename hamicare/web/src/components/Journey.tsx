@@ -4,7 +4,9 @@ import { ChevronRight } from 'lucide-react';
 import { Hamster } from './Hamster';
 import { JOURNEY_TEXT } from '../data/lines';
 import { KCAL_PER_KG, conditioning, dayKcal, minDaysLeft } from '../logic/evolution';
-import { dayOf, journeyNow, minor, todayKey } from '../lib/store';
+import { areaNow, dayOf, journeyNow, todayKey, todayTasks, weightOn } from '../lib/store';
+import { CALM_TASKS } from '../logic/areas';
+import { addDays } from '../lib/util';
 import { fmtNum, prefersReducedMotion } from '../lib/util';
 import type { Direction, State } from '../types';
 import { Glyph } from './art';
@@ -46,11 +48,12 @@ export function useKcalPop() {
 }
 
 /** Card principal do Início: deixa claro que o Hami emagrece ou ganha peso junto com a pessoa. */
-export function JourneyCard({ s, onOpen }: { s: State; onOpen: () => void }) {
+export type CalmAction = 'sos' | 'respirar' | 'aterrar' | 'sono';
+
+export function JourneyCard({ s, onOpen, onCalm }: { s: State; onOpen: () => void; onCalm?: (a: CalmAction) => void }) {
   const today = todayKey();
   const j = s.journey;
   const t = JOURNEY_TEXT[j.dir];
-  const isMinor = minor(s);
   const hide = s.body.hideNumbers;
   const { kcal, progress, byScale } = journeyNow(s, today);
   const todayKcal = dayKcal(dayOf(s, today), j.dir, s.mealRef ?? null);
@@ -60,21 +63,32 @@ export function JourneyCard({ s, onOpen }: { s: State; onOpen: () => void }) {
   const left = Math.max(0, j.needKcal - kcal);
   const realData = s.body.tracking && !!s.body.baselineKg;
 
-  if (isMinor) {
+  if (!weightOn(s)) {
+    if (areaNow(s) === 'calma') return <CalmCard s={s} onCalm={onCalm} />;
     const cond = conditioning(s.days, today);
+    const list = todayTasks(s, today);
+    const doneToday = list.filter((t) => t.id in dayOf(s, today).done).length;
+    const week = Array.from({ length: 7 }, (_, i) => Object.keys(dayOf(s, addDays(today, -i)).done).length).reduce((n, x) => n + x, 0);
     return (
-      <button className="journey journey-manter text-left" onClick={onOpen}>
+      <button className="journey journey-habitos text-left" onClick={onOpen}>
         <div className="flex items-center justify-between gap-2">
           <span className="journey-tag">
-            <Glyph e="🌱" size={20} /> Jornada de hábitos
+            <Glyph e="🌱" size={20} /> Hábitos saudáveis
           </span>
           <ChevronRight size={20} />
         </div>
-        <p className="font-display text-[20px] font-bold leading-tight">O {s.pet.name} fica forte junto com você</p>
-        <div className="journey-track">
-          <div className="journey-fill" style={{ width: `${cond}%` }} />
+        <div className="flex items-center gap-3">
+          <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} size={70} idle={false} />
+          <p className="font-display text-[19px] font-bold leading-tight">O {s.pet.name} fica forte junto com você</p>
         </div>
-        <p className="text-[13px] font-bold opacity-80">Condicionamento {cond}/100 · vem dos seus dias de movimento</p>
+        <div className="journey-track">
+          <div className="journey-fill" style={{ width: `${Math.max(4, cond)}%` }} />
+        </div>
+        <div className="grid grid-cols-3 gap-1.5">
+          <Stat value={`${doneToday}/${list.length}`} label="hábitos hoje" />
+          <Stat value={String(week)} label="na semana" />
+          <Stat value={`${cond}`} label="força" />
+        </div>
       </button>
     );
   }
@@ -163,5 +177,46 @@ function Stat({ value, label }: { value: string; label: string }) {
       <p className="font-display text-[17px] font-bold leading-none tabular-nums">{value}</p>
       <p className="text-[10.5px] font-extrabold uppercase leading-tight opacity-85">{label}</p>
     </div>
+  );
+}
+
+/** Cantinho da calma: SOS para a crise e atalhos para respirar, se acalmar e dormir. */
+function CalmCard({ s, onCalm }: { s: State; onCalm?: (a: CalmAction) => void }) {
+  const today = todayKey();
+  const week = Array.from({ length: 7 }, (_, i) => Object.keys(dayOf(s, addDays(today, -i)).done).filter((id) => CALM_TASKS.includes(id)).length).reduce((n, x) => n + x, 0);
+  const quick: [CalmAction, string, string][] = [
+    ['respirar', '🌬️', 'Respirar'],
+    ['aterrar', '🖐️', '5-4-3-2-1'],
+    ['sono', '🌙', 'Dormir'],
+  ];
+  return (
+    <section className="journey journey-calma" aria-label="Cantinho da calma">
+      <span className="journey-tag justify-self-start">
+        <Glyph e="🍃" size={20} /> Calma para a ansiedade
+      </span>
+      <div className="flex items-center gap-3">
+        <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="calmo" size={70} idle={false} />
+        <p className="font-display text-[19px] font-bold leading-tight">Respira comigo? Um passo de cada vez.</p>
+      </div>
+      <button className="sos-btn" onClick={() => onCalm?.('sos')}>
+        <Glyph e="🫶" size={30} />
+        <span className="min-w-0 text-left">
+          <span className="block text-[17px] font-extrabold leading-tight">A ansiedade apertou?</span>
+          <span className="block text-[13px] font-semibold opacity-80">SOS com o Hami: 3 passos, uns 3 minutos</span>
+        </span>
+        <ChevronRight size={20} className="ml-auto shrink-0" />
+      </button>
+      <div className="grid grid-cols-3 gap-1.5">
+        {quick.map(([id, e, label]) => (
+          <button key={id} className="calm-quick" onClick={() => onCalm?.(id)}>
+            <Glyph e={e} size={30} />
+            {label}
+          </button>
+        ))}
+      </div>
+      <p className="text-[12.5px] font-bold text-muted">
+        {week === 0 ? 'Cada respiração conta. As práticas de calma aparecem nas suas missões.' : `${week} ${week === 1 ? 'prática' : 'práticas'} de calma nos últimos 7 dias`}
+      </p>
+    </section>
   );
 }

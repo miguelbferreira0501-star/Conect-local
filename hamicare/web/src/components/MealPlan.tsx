@@ -5,7 +5,7 @@ import { Check, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Sheet, toast } from './ui';
 import { FOOD_PRESETS, MEALS, presetByName, type MealId } from '../data/foods';
 import { mealTotals, tooLittle } from '../logic/meals';
-import { addMeal, copyYesterdayMeals, dayOf, minor, removeMeal, removeMyFood, setMealRef, todayKey, updateMeal, useApp } from '../lib/store';
+import { addMeal, copyYesterdayMeals, dayOf, removeMeal, weightOn, removeMyFood, setMealRef, todayKey, updateMeal, useApp } from '../lib/store';
 import { addDays, fmtNum } from '../lib/util';
 import type { State } from '../types';
 import { Glyph } from './art';
@@ -17,7 +17,7 @@ function mealNow(d = new Date()): MealId {
 
 export function MealCard({ s }: { s: State }) {
   const [open, setOpen] = useState(false);
-  if (minor(s)) return null;
+  if (!weightOn(s)) return null;
   const today = todayKey();
   const meals = dayOf(s, today).meals ?? [];
   const t = mealTotals(meals);

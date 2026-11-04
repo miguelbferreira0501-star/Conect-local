@@ -4,12 +4,18 @@ import { Hamster } from '../components/Hamster';
 import { LineChart, toast } from '../components/ui';
 import { AFFIRMATIONS, EMOTIONS, MOODS, REFLECTIONS } from '../data/lines';
 import { BODY_SCAN, BREATHS, MEDITATION_CUES, QUIZZES, SLEEP_ROUTINE } from '../data/wellbeing';
-import { addJar, addJournal, dayOf, deleteJar, deleteJournal, isPremium, logEvent, setEmotions, setMood, todayKey, useApp } from '../lib/store';
+import { addJar, addJournal, dayOf, deleteJar, deleteJournal, getState, isPremium, logEvent, setEmotions, setMood, todayKey, todayTasks, toggleTask, useApp } from '../lib/store';
 import { addDays, copyText, formatDay, hashStr, prefersReducedMotion } from '../lib/util';
 import type { Mood, PetMood } from '../types';
 import { Glyph } from '../components/art';
 
-type Tool = 'respirar' | 'meditar' | 'foco' | 'relaxar' | 'sono' | 'afirmacoes' | 'aterrar' | 'pote' | 'quiz' | null;
+type Tool = 'sos' | 'respirar' | 'meditar' | 'foco' | 'relaxar' | 'sono' | 'afirmacoes' | 'aterrar' | 'pote' | 'quiz' | null;
+
+/** Abrir uma ferramenta vindo de outra aba (ex.: o SOS do cantinho da calma, no Início). */
+let requested: Tool = null;
+export function requestTool(t: Exclude<Tool, null>) {
+  requested = t;
+}
 
 const TOOLS: { id: Exclude<Tool, null>; emoji: string; title: string; desc: string; tint: string }[] = [
   { id: 'respirar', emoji: '🌬️', title: 'Respirar', desc: '3 ritmos guiados pelo Hami', tint: '#CFE8FF' },
@@ -27,7 +33,11 @@ export function Wellbeing() {
   const s = useApp();
   const today = todayKey();
   const day = dayOf(s, today);
-  const [tool, setTool] = useState<Tool>(null);
+  const [tool, setTool] = useState<Tool>(() => {
+    const t = requested;
+    requested = null;
+    return t;
+  });
   const range = isPremium(s) ? 180 : 30;
   const moodPoints = Array.from({ length: range }, (_, i) => addDays(today, -(range - 1 - i)))
     .filter((k) => s.days[k]?.mood)
@@ -39,6 +49,15 @@ export function Wellbeing() {
         <p className="eyebrow">Só você vê o que escreve aqui</p>
         <h1 className="font-display text-[30px] font-bold leading-tight">Bem-estar</h1>
       </header>
+
+      <button className="sos-btn" onClick={() => setTool('sos')}>
+        <Glyph e="🫶" size={34} />
+        <span className="min-w-0 text-left">
+          <span className="block text-[18px] font-extrabold leading-tight">A ansiedade apertou?</span>
+          <span className="block text-[13px] font-semibold opacity-85">SOS com o Hami: respirar, voltar para o agora e pedir ajuda se precisar</span>
+        </span>
+        <ChevronRight size={20} className="ml-auto shrink-0" />
+      </button>
 
       <section className="card grid gap-3 p-4" aria-label="Humor de hoje">
         <h2 className="font-display text-[20px] font-bold">Como você está agora?</h2>
@@ -82,6 +101,7 @@ export function Wellbeing() {
 
       <SosCard />
 
+      {tool === 'sos' && <Sos onClose={() => setTool(null)} />}
       {tool === 'respirar' && <Breath onClose={() => setTool(null)} />}
       {tool === 'aterrar' && <Grounding onClose={() => setTool(null)} />}
       {tool === 'meditar' && <Meditate onClose={() => setTool(null)} />}
@@ -318,9 +338,9 @@ const BREATH_LOOK: Record<BreathKind, { word: string; color: string; ring: numbe
   wait: { word: 'Espere', color: '#FFC75F', ring: 0.9, mood: 'feliz' },
 };
 
-function Breath({ onClose }: { onClose: () => void }) {
+function Breath({ onClose, auto, next }: { onClose: () => void; auto?: boolean; next?: { label: string; go: () => void } }) {
   const [pat, setPat] = useState(BREATHS[0]);
-  const [step, setStep] = useState(-1);
+  const [step, setStep] = useState(auto ? 0 : -1);
   const [finished, setFinished] = useState(false);
   const [now, setNow] = useState(Date.now());
   const [felt, setFelt] = useState<string | null>(null);
@@ -426,11 +446,105 @@ function Breath({ onClose }: { onClose: () => void }) {
           <p className="tool-text font-display text-[22px] font-bold">O Hami enche as bochechas quando você puxa o ar</p>
         )}
       </div>
+      {finished && next && (
+        <button className="btn btn-primary w-full" onClick={next.go}>
+          {next.label}
+        </button>
+      )}
       {(step < 0 || finished) && (
-        <button className="btn btn-primary w-full" onClick={() => (setFinished(false), setFelt(null), setStep(0))}>
+        <button className={`btn w-full ${finished && next ? 'btn-ghost' : 'btn-primary'}`} onClick={() => (setFinished(false), setFelt(null), setStep(0))}>
           {finished ? 'De novo' : 'Começar'}
         </button>
       )}
+    </ToolScreen>
+  );
+}
+
+// ---------- SOS da ansiedade: respirar → 5-4-3-2-1 → como está agora → ajuda ----------
+
+function Sos({ onClose }: { onClose: () => void }) {
+  const s = useApp();
+  const [stage, setStage] = useState<0 | 1 | 2 | 3>(0);
+  const [felt, setFelt] = useState<'melhor' | 'ainda' | null>(null);
+  const [marked, setMarked] = useState<string[]>([]);
+
+  // Conta como missão feita (se a pessoa tiver "Respirar" ou "5-4-3-2-1" no dia).
+  function markMissions() {
+    const day = dayOf(getState(), todayKey());
+    const ids = todayTasks(getState()).filter((t) => ['respirar', 'aterrar'].includes(t.id) && !(t.id in day.done)).map((t) => t.id);
+    ids.forEach((id) => toggleTask(id));
+    setMarked(ids);
+  }
+
+  if (stage === 1) return <Breath auto onClose={onClose} next={{ label: 'Próximo: 5-4-3-2-1', go: () => setStage(2) }} />;
+  if (stage === 2) return <Grounding onClose={onClose} next={{ label: 'Último passo', go: () => (markMissions(), setStage(3)) }} />;
+  if (stage === 3) {
+    return (
+      <ToolScreen title="SOS com o Hami" sub="Passo 3 de 3" theme="lavanda" onClose={onClose}>
+        <div className="grid justify-items-center gap-3 text-center">
+          <PetBig mood={felt === 'melhor' ? 'animado' : 'calmo'} size={160} className={felt === 'melhor' ? 'hop-loop' : ''} />
+          {!felt ? (
+            <>
+              <p className="tool-text font-display text-[24px] font-bold leading-tight">E agora, como você está?</p>
+              <div className="grid w-full grid-cols-2 gap-2">
+                <button className="opt flex-col !items-center !gap-1 !py-3" onClick={() => setFelt('melhor')}>
+                  <Glyph e="😌" size={36} /> Mais calmo
+                </button>
+                <button className="opt flex-col !items-center !gap-1 !py-3" onClick={() => setFelt('ainda')}>
+                  <Glyph e="😣" size={36} /> Ainda ansioso
+                </button>
+              </div>
+            </>
+          ) : felt === 'melhor' ? (
+            <>
+              <p className="tool-text font-display text-[24px] font-bold leading-tight">Que bom. Você atravessou isso.</p>
+              <p className="tool-text text-[15px] opacity-90">Fique um pouquinho aqui antes de voltar. Se der, beba um copo d'água devagar.</p>
+            </>
+          ) : (
+            <div className="grid w-full gap-2 text-left">
+              <p className="tool-text text-center font-display text-[22px] font-bold leading-tight">Tudo bem. Às vezes leva mais tempo.</p>
+              <ul className="grid gap-1.5 rounded-3xl bg-white/85 p-4 text-[14.5px] font-semibold text-ink">
+                <li>• Lave o rosto com água fria ou segure algo gelado.</li>
+                <li>• Mande uma mensagem para alguém de confiança.</li>
+                <li>• Fique num lugar seguro e repita a respiração.</li>
+              </ul>
+              <HelpLine name="CVV: conversar com alguém agora, grátis, 24h" number="188" />
+              <HelpLine name="SAMU: emergência médica" number="192" />
+              <button className="btn btn-primary w-full" onClick={() => (setFelt(null), setStage(1))}>
+                Respirar de novo
+              </button>
+            </div>
+          )}
+          {marked.length > 0 && <p className="tool-text text-[13px] font-bold opacity-80">Missão feita: {marked.length === 2 ? 'Respirar e 5-4-3-2-1' : marked[0] === 'respirar' ? 'Respirar com o Hami' : '5-4-3-2-1'}</p>}
+          <button className={`btn w-full ${felt === 'ainda' ? 'btn-ghost' : 'btn-primary'}`} onClick={onClose}>
+            Voltar
+          </button>
+        </div>
+      </ToolScreen>
+    );
+  }
+  return (
+    <ToolScreen title="SOS com o Hami" sub="3 passos, uns 3 minutos" theme="lavanda" onClose={onClose}>
+      <div className="grid justify-items-center gap-4 text-center">
+        <PetBig mood="calmo" size={170} />
+        <p className="tool-text font-display text-[24px] font-bold leading-tight">Ei{s.profile.name ? `, ${s.profile.name}` : ''}. Eu tô aqui com você.</p>
+        <p className="tool-text text-[16px] opacity-90">O que você está sentindo é forte, mas passa. Vamos juntos: primeiro respirar, depois voltar para o agora.</p>
+        <ol className="grid w-full gap-1.5 text-left">
+          {[
+            ['🌬️', 'Respirar devagar com o Hami'],
+            ['🖐️', '5-4-3-2-1: voltar para o agora'],
+            ['🫶', 'Ver como você está e pedir ajuda se precisar'],
+          ].map(([e, t], k) => (
+            <li key={t} className="flex items-center gap-3 rounded-2xl bg-white/80 px-3 py-2 text-[15px] font-bold text-ink">
+              <Glyph e={e} size={28} /> {k + 1}. {t}
+            </li>
+          ))}
+        </ol>
+        <button className="btn btn-primary w-full" onClick={() => setStage(1)}>
+          Começar
+        </button>
+        <p className="tool-text text-[13px] opacity-80">Em perigo agora? Ligue 192 (SAMU). Para conversar com alguém, 188 (CVV).</p>
+      </div>
     </ToolScreen>
   );
 }
@@ -445,7 +559,7 @@ const SENSES: { n: number; text: string; emoji: string; verb: string; mood: PetM
   { n: 1, text: 'gosto na boca, ou uma comida que você ama', emoji: '👅', verb: 'Sinta o gosto', mood: 'comendo', color: '#5FBF77' },
 ];
 
-function Grounding({ onClose }: { onClose: () => void }) {
+function Grounding({ onClose, next }: { onClose: () => void; next?: { label: string; go: () => void } }) {
   const [i, setI] = useState(0);
   const [count, setCount] = useState(0);
   const [pop, setPop] = useState(0);
@@ -469,8 +583,8 @@ function Grounding({ onClose }: { onClose: () => void }) {
             <Burst emoji="🌼" k={1} />
           </div>
           <p className="tool-text font-display text-[26px] font-bold leading-tight">Você tá aqui, agora. Isso já ajuda muito.</p>
-          <button className="btn btn-primary w-full" onClick={onClose}>
-            Voltar
+          <button className="btn btn-primary w-full" onClick={next ? next.go : onClose}>
+            {next ? next.label : 'Voltar'}
           </button>
         </div>
       ) : (

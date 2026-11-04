@@ -769,3 +769,61 @@ body {
 .cam-shutter:disabled {
   opacity: 0.45;
 }
+
+/* Áreas: hábitos e calma */
+.journey-habitos { --j: #4caf50; --j2: #9fd88a; --j-edge: #3b8a3f; }
+.journey-calma { --j: #2fa594; --j2: #8fd8c5; --j-edge: #1f7a6d; }
+.sos-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #5fc9b4, #57a8e0);
+  color: #ffffff;
+  box-shadow: 0 4px 0 #3a86a0;
+  transition: transform 120ms var(--ease-out), box-shadow 120ms var(--ease-out);
+}
+.sos-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #3a86a0;
+}
+.calm-quick {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 4px;
+  border-radius: 18px;
+  background: var(--soft-btn);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+.calm-quick:active {
+  transform: scale(0.97);
+}
+.area-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 7px 8px 7px 12px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  box-shadow: 0 3px 0 rgba(43, 34, 64, 0.07);
+}
+.area-pill-cta {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 800;
+}

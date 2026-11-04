@@ -121,3 +121,12 @@ Pedido do dono do produto: tirar os emojis e usar desenhos como os de apps de bi
 ### Foto real
 
 A foto real do feed agora abre uma câmera dentro do app (tirar, refazer, usar, virar a câmera), com a galeria como segunda opção. O botão antigo dependia do seletor de arquivos do navegador, que alguns visualizadores ignoram.
+
+### Áreas
+
+Pedido do dono do produto: no começo, escolher a área (só perder ou ganhar peso, ou só hábitos saudáveis), algo para quem tem ansiedade, e poder trocar de área depois.
+
+- **Quatro áreas no começo:** Perder peso, Ganhar peso, Só hábitos saudáveis e Calma para a ansiedade. Dentro do app também aparece Manter o peso, que faz sentido depois da meta. Menores de 18 só veem hábitos e calma.
+- **Hábitos e calma não falam de peso:** sem cartão de peso, sem Cardápio e sem selos de calorias. O Hami evolui com os hábitos e o movimento.
+- **Calma:** cantinho no Início com o SOS (respirar → 5-4-3-2-1 → como você está → CVV 188 e SAMU 192 se ainda estiver mal), atalhos para respirar, 5-4-3-2-1 e dormir, e missões próprias (respirar, 5-4-3-2-1, meditar, anotar as preocupações, música calma, ar livre). O SOS também fica no topo do Bem-estar para todo mundo. Não é tratamento: o app sempre aponta para o CVV e para o SAMU.
+- **Mudar de área:** pílula "Área: … · Mudar" no Início, nos Ajustes e em Nossa evolução. A pessoa escolhe se troca as missões do dia pelas da nova área ou só muda a área; as missões que ela criou nunca somem.

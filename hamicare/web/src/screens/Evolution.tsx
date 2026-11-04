@@ -5,18 +5,23 @@ import { Bar, LineChart, Modal, toast } from '../components/ui';
 import { BAND, DAY_CAP, KCAL_PER_KG, PHASES, PHASE_MIN, REF_KG, conditioning, dayKcal, defaultGoalKg, rapidChange, recentAverageKg } from '../logic/evolution';
 import { ACHIEVEMENTS, countIn } from '../logic/progress';
 import { bestStreak, streakOf } from '../logic/streak';
-import { deletePhoto, enableTracking, isPremium, journeyNow, logWeight, minor, setGoal, setMission, setSync, todayKey, useApp } from '../lib/store';
+import { areaNow, deletePhoto, enableTracking, isPremium, journeyNow, logWeight, minor, setGoal, setSync, todayKey, useApp, weightOn } from '../lib/store';
 import { addDays, formatDay, fmtNum, weekStart, WEEKDAYS } from '../lib/util';
 import { GOALS, JOURNEY_TEXT } from '../data/lines';
 import type { Photo } from '../types';
 import { Glyph } from '../components/art';
+import { AreaSheet } from '../components/AreaSheet';
+import { AREAS } from '../logic/areas';
 
 export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: (p: Photo) => void }) {
   const s = useApp();
   const today = todayKey();
   const cond = conditioning(s.days, today);
   const isMinor = minor(s);
-  const hideNums = isMinor || s.body.hideNumbers;
+  const area = areaNow(s);
+  const noWeight = !weightOn(s);
+  const hideNums = noWeight || s.body.hideNumbers;
+  const [areaOpen, setAreaOpen] = useState(false);
   const range = isPremium(s) ? 180 : 30;
   const [kg, setKg] = useState('');
   const [goalKg, setGoalKg] = useState(s.body.goalKg ? String(s.body.goalKg) : '');
@@ -96,14 +101,25 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
 
         <section className="card grid gap-3 p-4" aria-label="Nossa jornada">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="font-display text-[20px] font-bold">{isMinor ? 'Jornada de hábitos' : (
+            <h2 className="font-display text-[20px] font-bold">{noWeight ? (area === 'calma' ? 'Jornada da calma' : 'Jornada de hábitos') : (
               <span className="flex items-center gap-2">
                 <Glyph e={jt.emoji} size={26} /> {jt.title}
               </span>
             )}</h2>
           </div>
-          {isMinor ? (
-            <p className="text-[15px] text-muted">Para menores de 18, o {s.pet.name} não muda de peso e não existe contagem de calorias. A evolução dele vem dos hábitos e do movimento.</p>
+          {noWeight ? (
+            <>
+              <p className="text-[15px] text-muted">
+                {isMinor
+                  ? `Para menores de 18, o ${s.pet.name} não muda de peso e não existe contagem de calorias. A evolução dele vem dos hábitos e do movimento.`
+                  : area === 'calma'
+                    ? `Na área Calma ninguém fala de peso. O ${s.pet.name} evolui com as suas práticas de calma, o sono e o movimento.`
+                    : `Na área de hábitos ninguém fala de peso nem de calorias. O ${s.pet.name} evolui com os seus hábitos e o movimento.`}
+              </p>
+              <button className="btn btn-soft" onClick={() => setAreaOpen(true)}>
+                <Glyph e={AREAS[area].emoji} size={22} /> Mudar de área
+              </button>
+            </>
           ) : (
             <>
               <div className="flex items-end justify-around rounded-2xl bg-surface2 p-3">
@@ -172,33 +188,14 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
                   <Glyph e="⚖️" size={22} /> Informar meu peso e minha meta
                 </button>
               )}
-              <div className="grid gap-2">
-                <p className="text-[14px] font-extrabold">Trocar a missão</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['emagrecer', 'ganhar', 'manter'] as const).map((g) => (
-                    <button
-                      key={g}
-                      className="opt !min-h-[64px] flex-col !items-center !gap-0.5 !px-2 !py-2 text-center text-[13px]"
-                      aria-pressed={s.profile.goal === g}
-                      onClick={() => {
-                        if (s.profile.goal === g) return;
-                        if (confirm(`Começar uma jornada nova: ${GOALS[g].label}? O ${s.pet.name} começa do peso de agora.`)) {
-                          setMission(g);
-                          toast('Missão nova começando!');
-                        }
-                      }}
-                    >
-                      <Glyph e={GOALS[g].emoji} size={30} />
-                      {g === 'emagrecer' ? 'Emagrecer' : g === 'ganhar' ? 'Ganhar peso' : 'Manter'}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <button className="btn btn-soft" onClick={() => setAreaOpen(true)}>
+                <Glyph e={AREAS[area].emoji} size={22} /> Mudar de área
+              </button>
             </>
           )}
         </section>
 
-        {!isMinor && s.body.tracking && (
+        {!noWeight && s.body.tracking && (
           <section className="card grid gap-3 p-4" aria-label="Sua evolução">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-[20px] font-bold">Sua evolução</h2>
@@ -342,6 +339,7 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
           </div>
         )}
       </Modal>
+      <AreaSheet open={areaOpen} onClose={() => setAreaOpen(false)} />
     </div>
   );
 }

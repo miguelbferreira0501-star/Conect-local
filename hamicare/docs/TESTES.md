@@ -101,3 +101,9 @@ Cobrança real, push num celular de verdade (precisa do app publicado em HTTPS) 
 - **Foto real (servidor local + Chromium com câmera de teste):** criar conta pela aba Amigos (a tela agora atualiza sozinha depois de entrar; antes ficava pedindo para entrar), abrir "Compartilhar", tocar em "Foto real", ver a câmera em tela cheia, tirar a foto, "Usar esta foto", publicar: o post aparece no feed com a foto e a câmera é desligada ao sair.
 - Achado: dentro da página de teste no app do Claude, o celular não abre câmera nem galeria (o próprio visualizador bloqueia). Agora o app explica isso e oferece a galeria, em vez de não fazer nada.
 - 57 testes do app passando.
+
+## Rodada 12 (áreas e calma para a ansiedade)
+
+- **Lógica (`web/src/logic/areas.test.ts`, `web/src/lib/plan.test.ts`):** cada objetivo cai numa área (os antigos viram hábitos); menores de 18 nunca entram em área de peso, nem trocando pelo app; no começo aparecem perder, ganhar, hábitos e calma, e no app também manter; os planos de hábitos (cama, dentes, caminhada…) e de calma (respirar, 5-4-3-2-1, sono…) têm 8 missões da biblioteca; trocar de hábitos para perder peso liga o peso e as calorias e mantém as missões criadas pela pessoa; "só mudar a área" não mexe nas missões.
+- **Navegador (390 px e 320 px com fonte 35% maior):** começo escolhendo "Calma para a ansiedade": Início com o cantinho da calma, sem Cardápio e sem calorias, missões da calma; SOS completo (respirar → 5-4-3-2-1 → "Ainda ansioso" mostra CVV 188 e SAMU 192) e as missões "Respirar" e "5-4-3-2-1" ficam feitas sozinhas; "Mudar" no Início → "Perder peso" → "Sim, trocar as missões": volta o cartão de peso, o Cardápio e os selos de calorias. Começo em "Só hábitos saudáveis": cartão de hábitos, sem Cardápio, sem calorias, missões de cama, dentes, caminhada. Nada passa da largura e sem erros.
+- 64 testes do app passando.

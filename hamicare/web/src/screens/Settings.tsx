@@ -3,6 +3,7 @@ import { ChevronRight, Copy, Download, FileText, Lock, Sparkles } from 'lucide-r
 import { Sheet, toast } from '../components/ui';
 import { Hamster } from '../components/Hamster';
 import { openLegal } from '../components/Legal';
+import { AreaPill, AreaSheet } from '../components/AreaSheet';
 import { ACCENTS, FURS } from '../data/fur';
 import { TRAITS } from '../data/lines';
 import {
@@ -28,6 +29,7 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
   const [code, setCode] = useState('');
   const [importText, setImportText] = useState('');
   const [confirm, setConfirm] = useState<'reset' | 'peso' | null>(null);
+  const [areaOpen, setAreaOpen] = useState(false);
   const isMinor = minor(s);
 
   return (
@@ -69,6 +71,12 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
               </button>
             ))}
           </div>
+        </Group>
+
+        <Group title="Sua área">
+          <AreaPill onClick={() => setAreaOpen(true)} />
+          <p className="text-[13px] text-muted">Perder ou ganhar peso, só hábitos saudáveis ou calma para a ansiedade. Dá pra trocar quando quiser.</p>
+          <AreaSheet open={areaOpen} onClose={() => setAreaOpen(false)} />
         </Group>
 
         <Group title="Aparência">

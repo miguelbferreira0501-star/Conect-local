@@ -14,6 +14,8 @@ import { addDays, prefersReducedMotion, weekStart, WEEKDAYS, fmtNum } from '../l
 import { isActive } from '../logic/evolution';
 import type { PetMood, Task } from '../types';
 import { Glyph } from '../components/art';
+import { AreaPill, AreaSheet } from '../components/AreaSheet';
+import { requestTool } from './Wellbeing';
 
 export function useNow(ms: number) {
   const [now, setNow] = useState(Date.now());
@@ -24,7 +26,8 @@ export function useNow(ms: number) {
   return now;
 }
 
-export function Home({ onGo, onSettings, onEvolution }: { onGo: (tab: 'atividades' | 'cuidar') => void; onSettings: () => void; onEvolution: () => void }) {
+export function Home({ onGo, onSettings, onEvolution }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void }) {
+  const [areaOpen, setAreaOpen] = useState(false);
   const s = useApp();
   const now = useNow(20_000);
   const today = todayKey();
@@ -169,7 +172,9 @@ export function Home({ onGo, onSettings, onEvolution }: { onGo: (tab: 'atividade
         )}
       </section>
 
-      <JourneyCard s={s} onOpen={onEvolution} />
+      <AreaPill onClick={() => setAreaOpen(true)} />
+      <JourneyCard s={s} onOpen={onEvolution} onCalm={(a) => (requestTool(a), onGo('bem-estar'))} />
+      <AreaSheet open={areaOpen} onClose={() => setAreaOpen(false)} />
 
       <MealCard s={s} />
 

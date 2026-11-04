@@ -2,7 +2,7 @@
 
 export type AgeGroup = 'ate12' | '13a17' | '18mais';
 /** Missão principal. emagrecer/ganhar/manter mexem no peso do Hami (só 18+). */
-export type GoalId = 'emagrecer' | 'ganhar' | 'manter' | 'habitos' | 'condicionamento' | 'ativo' | 'cuidar';
+export type GoalId = 'emagrecer' | 'ganhar' | 'manter' | 'habitos' | 'calma' | 'condicionamento' | 'ativo' | 'cuidar';
 /** Para onde o peso do Hami vai na jornada. */
 export type Direction = 'perder' | 'ganhar' | 'manter';
 export type BodyStart = 'fofinho' | 'equilibrado' | 'mignon';

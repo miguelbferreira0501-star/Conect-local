@@ -1,5 +1,6 @@
 // Estado do HamiCare: salvo no aparelho (localStorage) e, com conta, no backup privado do servidor.
 import { useSyncExternalStore } from 'react';
+import { AREA_GOAL, AREA_PLAN, areaOf, isWeightArea, type Area } from '../logic/areas';
 import type { AgeGroup, Battery, BodyStart, CareId, Category, DayLog, Direction, Freq, GoalId, Incentive, Journey, MealEntry, Mood, Outfit, PetMood, Photo, State, Task, TraitId, WearSlot } from '../types';
 import { LIBRARY, libById, rewardFor } from '../data/tasks';
 import { ITEMS, LOOKS, RECIPES, STYLES, WEARABLE_KINDS, itemById, stylePrice } from '../data/items';
@@ -253,6 +254,10 @@ export function resetAll() {
 // ---------- Ajudantes ----------
 
 export const minor = (s: State) => isMinor(s.profile.ageGroup);
+/** A área atual (perder, ganhar, manter, hábitos ou calma). */
+export const areaNow = (s: State): Area => areaOf(s.profile.goal, minor(s));
+/** Mostra peso, calorias e Cardápio? Só nas áreas de peso (e nunca para menores). */
+export const weightOn = (s: State) => isWeightArea(areaNow(s));
 export const isPremium = (s: State, today = todayKey()) => !!s.premium.until && s.premium.until >= today;
 export const dayOf = (s: State, key = todayKey()): DayLog => s.days[key] ?? { done: {}, care: [] };
 const withDay = (s: State, key: string, d: DayLog): State => ({ ...s, days: { ...s.days, [key]: d } });
@@ -371,6 +376,23 @@ export function setMission(goal: GoalId, goalKg: number | null = null) {
   commit({ ...state, profile: { ...state.profile, goal }, journey, body: { ...state.body, goalKg: goalKg ?? (dir === state.journey.dir ? state.body.goalKg : null), baselineKg: kg ?? state.body.baselineKg }, pet: { ...state.pet, lastWeighIn: today } });
 }
 
+/**
+ * Troca de área (ex.: de hábitos para perder peso). Com `trocarMissoes`, as missões da biblioteca
+ * viram as da nova área; as missões criadas pela pessoa ficam.
+ */
+export function changeArea(area: Area, trocarMissoes: boolean) {
+  if (minor(state) && isWeightArea(area)) return;
+  const goal = AREA_GOAL[area];
+  setMission(goal);
+  if (!trocarMissoes) return;
+  const today = todayKey();
+  const p = state.profile;
+  const plan = starterPlan({ goal, focus: p.focus, minutes: p.minutes, likes: p.likes, ageGroup: p.ageGroup });
+  const custom = state.tasks.filter((t) => !libById(t.id));
+  const tasks = [...(plan.map((id) => libTask(id, today)).filter(Boolean) as Task[]), ...custom];
+  commit({ ...state, tasks });
+}
+
 /** Chamado pelo app a cada minuto e ao voltar para a tela. */
 export function tick() {
   if (!state.onboarded) return;
@@ -410,6 +432,8 @@ export function starterPlan(a: Pick<OnboardingAnswers, 'goal' | 'focus' | 'minut
   const pick = (list: string[]) => [...new Set(list)].filter((id) => libById(id)).slice(0, PLAN_SIZE);
   // Completa com hábitos gerais até o tamanho do plano.
   const fill = ['alongar', 'sono', 'garrafa', 'agua-acordar', 'pausa', 'caminhada', 'levantar', 'gratidao', 'dentes', 'respirar'];
+  if (a.goal === 'habitos') return pick([...(easy ? AREA_PLAN.habitos.map((id) => (id === 'caminhada' ? 'levantar' : id)) : AREA_PLAN.habitos), ...fill]);
+  if (a.goal === 'calma') return pick([...AREA_PLAN.calma, 'musica', 'natureza', ...fill]);
   if (dir === 'perder') return pick([move(easy ? 'escada' : 'caminhada'), 'passos', easy ? 'alongar' : 'escada', 'agua', 'garrafa', 'sono', 'levantar', 'respirar', ...fill]);
   if (dir === 'ganhar') return pick([easy ? 'alongar' : 'forca', easy ? 'mobilidade' : 'casa', 'agua', 'garrafa', 'sono', 'descansar', 'alongar', 'respirar', ...fill]);
   const ids = new Set<string>(['agua', 'respirar']);
@@ -417,7 +441,7 @@ export function starterPlan(a: Pick<OnboardingAnswers, 'goal' | 'focus' | 'minut
   if (moving) (likedMoves.length ? likedMoves.slice(0, 2).map((t) => t!.id) : [easy ? 'alongar' : 'caminhada']).forEach((id) => ids.add(id));
   else ids.add('alongar');
   if (a.goal === 'cuidar' || a.focus.includes('autocuidado')) ['dentes', 'pausa'].forEach((i) => ids.add(i));
-  if (a.goal === 'habitos' || a.goal === 'manter' || a.focus.includes('habitos')) ['sono', 'garrafa'].forEach((i) => ids.add(i));
+  if (a.goal === 'manter' || a.focus.includes('habitos')) ['sono', 'garrafa'].forEach((i) => ids.add(i));
   if (a.focus.includes('emocional')) ids.add('gratidao');
   return pick([...ids, ...fill]);
 }
@@ -433,7 +457,7 @@ export function completeOnboarding(a: OnboardingAnswers) {
   const today = todayKey();
   const base = state.from ? state : fresh();
   const isMinorAge = isMinor(a.ageGroup);
-  const goal: GoalId = isMinorAge && (a.goal === 'emagrecer' || a.goal === 'ganhar') ? 'ativo' : a.goal;
+  const goal: GoalId = isMinorAge && (a.goal === 'emagrecer' || a.goal === 'ganhar' || a.goal === 'manter') ? 'habitos' : a.goal;
   const dir = directionOf(goal, isMinorAge);
   const bodyStart: BodyStart = dir === 'perder' ? 'fofinho' : dir === 'ganhar' ? 'mignon' : 'equilibrado';
   const tasks = state.from && state.tasks.length ? state.tasks : (starterPlan(a).map((id) => libTask(id, today)).filter(Boolean) as Task[]);
@@ -480,7 +504,7 @@ export function todayTasks(s: State, key = todayKey()): Task[] {
 
 /** Calorias que esta tarefa conta na jornada (0 para menores: sem contagem de calorias). */
 export function kcalOf(s: State, task: Task): number {
-  if (minor(s)) return 0;
+  if (!weightOn(s)) return 0;
   return taskKcal({ ...libById(task.id), ...stripUndefined(task) }, s.journey.dir, personKg(s));
 }
 

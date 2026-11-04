@@ -11,7 +11,8 @@ import { BATTERIES, JOURNEY_TEXT } from '../data/lines';
 import { dayKcal, taskKcal } from '../logic/evolution';
 import { activeQuests, type Period } from '../logic/progress';
 import { REST_PER_WEEK, streakOf } from '../logic/streak';
-import { addLibraryTask, addTask, dayOf, deleteTask, kcalOf, minor, personKg, setBattery, setRest, todayKey, todayTasks, toggleTask, updateTask, useApp, type TaskInput } from '../lib/store';
+import { addLibraryTask, addTask, areaNow, dayOf, deleteTask, kcalOf, personKg, weightOn, setBattery, setRest, todayKey, todayTasks, toggleTask, updateTask, useApp, type TaskInput } from '../lib/store';
+import { AREAS } from '../logic/areas';
 import { fmtNum } from '../lib/util';
 import { WEEKDAYS } from '../lib/util';
 import type { Battery, Category, Freq, Task } from '../types';
@@ -33,7 +34,7 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
   const dir = s.journey.dir;
   const jt = JOURNEY_TEXT[dir];
   const { pop, layer } = useKcalPop();
-  const showKcal = !minor(s) && !s.body.hideNumbers;
+  const showKcal = weightOn(s) && !s.body.hideNumbers;
   const todayK = dayKcal(day, dir, s.mealRef ?? null);
 
   function onToggle(t: Task, el: HTMLElement) {
@@ -190,6 +191,7 @@ function TaskSheet({ task, onClose }: { task: Task | 'new' | null; onClose: () =
   const [tab, setTab] = useState<'biblioteca' | 'minha'>('biblioteca');
   const [form, setForm] = useState<TaskInput | null>(null);
   const s = useApp();
+  const area = areaNow(s);
   const current: TaskInput = form ?? (t ? { title: t.title, emoji: t.emoji, cat: t.cat, freq: t.freq, energy: t.energy } : { title: '', emoji: '⭐', cat: 'autocuidado', freq: { kind: 'diaria' }, energy: 2 });
   const up = (p: Partial<TaskInput>) => setForm({ ...current, ...p });
   const close = () => {
@@ -206,13 +208,13 @@ function TaskSheet({ task, onClose }: { task: Task | 'new' | null; onClose: () =
         {isNew && <Seg value={tab} onChange={setTab} label="Origem" options={[{ id: 'biblioteca', label: 'Sugestões' }, { id: 'minha', label: 'Criar a minha' }]} />}
         {isNew && tab === 'biblioteca' ? (
           <div className="grid gap-3">
-            {s.journey.dir !== 'manter' && !minor(s) && (
+            {area !== 'manter' && (
               <div className="grid gap-1.5 rounded-2xl bg-accent-soft p-3">
                 <p className="flex items-center gap-1.5 text-[14px] font-extrabold">
-                  <Glyph e={JOURNEY_TEXT[s.journey.dir].emoji} size={20} /> Para a sua jornada
+                  <Glyph e={AREAS[area].emoji} size={20} /> Para a sua área: {AREAS[area].short}
                 </p>
                 <div className="grid gap-1.5">
-                  {LIBRARY.filter((l) => l.for?.includes(s.journey.dir as 'perder' | 'ganhar')).map((l) => {
+                  {LIBRARY.filter((l) => l.for?.includes(area as 'perder' | 'ganhar' | 'habitos' | 'calma')).map((l) => {
                     const has = s.tasks.some((x) => x.id === l.id);
                     return (
                       <button key={l.id} className="flex items-center gap-2 rounded-2xl bg-surface px-3 py-2 text-left text-[14px] font-bold disabled:opacity-60" disabled={has} onClick={() => (addLibraryTask(l.id), toast(`${l.title}: adicionada`))}>
@@ -221,7 +223,7 @@ function TaskSheet({ task, onClose }: { task: Task | 'new' | null; onClose: () =
                           <span className="block leading-tight">{l.title}</span>
                           {l.why && <span className="block text-[12px] font-semibold text-muted">{l.why}</span>}
                         </span>
-                        {has ? '✓' : <KcalChip kcal={taskKcal(l, s.journey.dir, personKg(s))} dir={s.journey.dir} small />}
+                        {has ? '✓' : weightOn(s) ? <KcalChip kcal={taskKcal(l, s.journey.dir, personKg(s))} dir={s.journey.dir} small /> : null}
                       </button>
                     );
                   })}

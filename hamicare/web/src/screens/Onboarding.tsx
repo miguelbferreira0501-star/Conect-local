@@ -2,14 +2,15 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { ChevronLeft, Lock } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { FURS } from '../data/fur';
-import { GOALS, INCENTIVES, LIKES, MOODS, PET_NAME_IDEAS, TRAITS } from '../data/lines';
+import { INCENTIVES, LIKES, MOODS, PET_NAME_IDEAS, TRAITS } from '../data/lines';
 import { CAT_ORDER, CATEGORIES, libById } from '../data/tasks';
 import { JOURNEY_GRAMS, KCAL_PER_KG, REF_KG, checkJourneyGoal, defaultGoalKg, directionOf, isMinor, taskKcal } from '../logic/evolution';
 import { completeOnboarding, getState, starterPlan, useApp, type OnboardingAnswers } from '../lib/store';
-import type { AgeGroup, Category, GoalId, Incentive, Mood, TraitId } from '../types';
+import type { AgeGroup, Category, Incentive, Mood, TraitId } from '../types';
 import { fmtNum } from '../lib/util';
 import { Paywall } from './Paywall';
 import { Glyph } from '../components/art';
+import { AREA_GOAL, AREAS, areaOf, areasFor } from '../logic/areas';
 
 type StepId = 'intro' | 'age' | 'goal' | 'body-data' | 'journey' | 'focus' | 'minutes' | 'likes' | 'incentive' | 'feeling' | 'pet' | 'name' | 'you' | 'plan' | 'plus';
 
@@ -43,7 +44,8 @@ export function Onboarding() {
   const kg = a.tracking && consent && a.weightKg ? a.weightKg : null;
   const goalKg = kg ? a.goalKg ?? defaultGoalKg(kg, dir) : null;
   const goalCheck = kg && goalKg ? checkJourneyGoal(kg, goalKg, dir, a.heightCm, minor) : { ok: true as const };
-  const goals = (Object.keys(GOALS) as GoalId[]).filter((g) => !minor || !GOALS[g].weight);
+  const areas = areasFor(a.ageGroup, 'comeco');
+  const chosenArea = areaOf(a.goal, minor);
 
   function finish() {
     completeOnboarding({ ...a, goalKg, tracking: a.tracking && consent && !minor });
@@ -72,7 +74,7 @@ export function Onboarding() {
       <div className="grid gap-3" key={step}>
         {step === 'intro' && (
           <>
-            {say(migrated ? <>Oi de novo! O {s.pet.name || 'Xodó'} virou um hamster: o <b>Hami</b>. Seus pontos, itens e diário vieram junto. Me responde umas perguntinhas?</> : <>Zzz… Oi! Eu sou o <b>Hami</b>. Eu <b>emagreço ou ganho peso junto com você</b>: cada missão saudável que você faz tira (ou soma) calorias de nós dois.</>)}
+            {say(migrated ? <>Oi de novo! O {s.pet.name || 'Xodó'} virou um hamster: o <b>Hami</b>. Seus pontos, itens e diário vieram junto. Me responde umas perguntinhas?</> : <>Zzz… Oi! Eu sou o <b>Hami</b>. A gente cuida um do outro: posso <b>emagrecer ou ganhar peso junto com você</b>, te ajudar com <b>hábitos saudáveis</b> ou com a <b>ansiedade</b>. Você escolhe.</>)}
             <p className="text-center text-[14px] text-muted">São perguntas rápidas. Dá pra mudar tudo depois.</p>
             <button className="btn btn-primary" onClick={next}>
               {migrated ? 'Vamos lá' : 'Acordar o Hami'}
@@ -88,7 +90,7 @@ export function Onboarding() {
               ['13a17', '13 a 17 anos'],
               ['18mais', '18 anos ou mais'],
             ] as [AgeGroup, string][]).map(([g, t]) => (
-              <Opt key={g} on={ageSet && a.ageGroup === g} onClick={() => (up({ ageGroup: g, goal: isMinor(g) ? 'ativo' : 'emagrecer' }), setAgeSet(true), setGuardianOk(false))} emoji={g === '18mais' ? '🧑' : g === '13a17' ? '🧒' : '👶'} title={t} />
+              <Opt key={g} on={ageSet && a.ageGroup === g} onClick={() => (up({ ageGroup: g, goal: isMinor(g) ? 'habitos' : 'emagrecer' }), setAgeSet(true), setGuardianOk(false))} emoji={g === '18mais' ? '🧑' : g === '13a17' ? '🧒' : '👶'} title={t} />
             ))}
             {ageSet && a.ageGroup === 'ate12' && (
               <label className="flex items-start gap-3 rounded-2xl bg-gold-soft p-4 text-[15px]" htmlFor="guardian">
@@ -105,9 +107,17 @@ export function Onboarding() {
 
         {step === 'goal' && (
           <>
-            {say(minor ? 'Qual é a sua missão comigo?' : <>Qual é a sua missão comigo? <b>Eu mudo de peso junto com você.</b></>)}
-            {goals.map((g) => (
-              <Opt key={g} on={a.goal === g} onClick={() => (up({ goal: g, goalKg: null }), next())} emoji={GOALS[g].emoji} title={GOALS[g].label} sub={GOALS[g].desc} big={GOALS[g].weight} />
+            {say(<>Em que área você quer que eu te ajude? <b>Dá pra trocar depois</b>, quando quiser.</>)}
+            {areas.map((ar) => (
+              <Opt
+                key={ar}
+                on={chosenArea === ar}
+                onClick={() => (up({ goal: AREA_GOAL[ar], goalKg: null, focus: ar === 'calma' ? ['emocional'] : ar === 'habitos' ? ['autocuidado', 'habitos'] : a.focus }), next())}
+                emoji={AREAS[ar].emoji}
+                title={AREAS[ar].label}
+                sub={AREAS[ar].desc}
+                big
+              />
             ))}
           </>
         )}
