@@ -125,6 +125,8 @@ Com domínio, o e-mail sai como `nao-responda@hamicare.com.br` e quase não cai 
 | O que aparece | O que fazer |
 | --- | --- |
 | *Deploy failed* com `Falha na migração` | Confira se o `DATABASE_OWNER_URL` é o do papel `neondb_owner` |
+| *Deploy failed* no build com `Cannot find module 'vitest'` ou `vite: not found` | O comando de build precisa do `npm ci --include=dev` (já está no `hamicare/render.yaml`). Faça **Manual sync** no Blueprint para pegar a versão nova |
+| O Render pede `ASAAS_API_KEY` e `ANDROID_...` | É o arquivo de outro projeto: cancele e escreva `hamicare/render.yaml` em **Blueprint Path** |
 | "Requisição bloqueada por segurança" ao criar conta | O endereço aberto não está em `APP_ORIGINS` |
 | O e-mail de troca de senha não chega | Olhe o spam. Nos *Logs* do Render, procure "Falha ao enviar e-mail": `401` é chave errada; erro de remetente é `MAIL_FROM` diferente do e-mail confirmado no Brevo |
 | "Falha ao enviar e-mail por SMTP" com tempo esgotado | O plano grátis bloqueia SMTP: use o Brevo ou o plano Starter |
