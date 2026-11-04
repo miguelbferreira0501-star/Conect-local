@@ -6,11 +6,12 @@ import { HABITS } from './habits';
 import { HOME } from './home';
 import { FOOD } from './food';
 import { WORLD } from './world';
+import { ARENA_DECOR } from './arenaDecor';
 
 const norm = (e: string) => e.replace(/️/g, '');
 
 export const ART: Record<string, Draw> = {};
-for (const set of [HABITS, HOME, FOOD, WORLD]) for (const [k, v] of Object.entries(set)) ART[norm(k)] = v;
+for (const set of [HABITS, HOME, FOOD, WORLD, ARENA_DECOR]) for (const [k, v] of Object.entries(set)) ART[norm(k)] = v;
 
 export const hasArt = (e?: string | null) => !!e && !!ART[norm(e)];
 

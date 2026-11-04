@@ -9,7 +9,7 @@ import { pool, withUser } from '../db';
 import { AppError, invalid } from '../lib/errors';
 import { type AppEnv, requireAuth } from '../auth';
 import {
-  CHEST_ORDER, DEFAULT_GAME, addUsage, arenaOf, baseGrant, capGrant, chestOdds, chestPool, emptyPity, emptyUsage, isChest, levelOf, levelUps, openChest, pityInfo, rarityOf, xpAt,
+  CHEST_ORDER, DEFAULT_GAME, addUsage, arenaItemsOf, arenaOf, baseGrant, capGrant, chestOdds, chestPool, emptyPity, emptyUsage, isChest, levelOf, levelUps, openChest, pityInfo, rarityOf, xpAt,
   type ChestId, type DayUsage, type GameConfig, type Pity, type Rarity, type Source,
 } from '../../../web/src/shared/game';
 import { ITEMS, LOOKS, STYLES, itemById, stylePrice } from '../../../web/src/data/items';
@@ -212,6 +212,10 @@ async function payLevels(db: pg.PoolClient, userId: string, w: WalletRow, before
       if (ai.rowCount) {
         next.coins += ag.coins;
         if (arena.reward.chest) next.pending_chests = [...next.pending_chests, arena.reward.chest];
+        // Itens exclusivos da arena vão para o inventário.
+        for (const id of arenaItemsOf(arena.n, arena.reward.items)) {
+          await db.query("INSERT INTO game_inventory (user_id, item_id, qty, origin) VALUES ($1, $2, 1, 'arena') ON CONFLICT DO NOTHING", [userId, id]);
+        }
       }
     }
     next.max_level = level;

@@ -10,7 +10,6 @@ import { addDays, fmtNum, hashStr, weekStart, WEEKDAYS } from '../lib/util';
 import { isActive } from '../logic/evolution';
 import type { Photo } from '../types';
 import { Glyph } from './art';
-import { gameCfg } from '../lib/game';
 
 const DAY_NAMES = ['Domingo Doce', 'Segunda Serena', 'Terça Tranquila', 'Quarta Querida', 'Quinta Quentinha', 'Sexta Sorridente', 'Sábado Sossegado'];
 const DAY_COLORS: [string, string][] = [
@@ -96,32 +95,23 @@ export function StreakScreen({ count, onClose, onShare }: { count: number; onClo
 /** As outras comemorações, numa janela central com raios suaves. */
 export function CelebrationModal({ c, onClose }: { c: Celebration | undefined; onClose: () => void }) {
   const s = useApp();
-  if (!c || c.type === 'streak') return null;
+  if (!c || c.type === 'streak' || c.type === 'level') return null;
   const hide = minor(s) || s.body.hideNumbers;
   const t = JOURNEY_TEXT[s.journey.dir];
   const content: { title: string; text: string; tone: string; icon?: string } =
-    c.type === 'level'
-      ? {
-          title: `Nível ${c.level}!`,
-          icon: c.arena ? '🏡' : '⭐',
-          text: c.arena
-            ? `Arena nova: ${c.arena.name}! Você ganhou ${c.coins ?? 0} sementes${c.arena.chest ? ` e um ${gameCfg().chests[c.arena.chest].name} grátis` : ''}.`
-            : `Cada cuidado seu fez isso acontecer. Você ganhou ${c.coins ?? 0} sementes.`,
-          tone: 'gold',
-        }
-      : c.type === 'phase'
-        ? { title: `Fase ${PHASES[c.phase]}!`, text: `O ${s.pet.name} evoluiu junto com você. Constância é tudo!`, tone: 'leaf' }
-        : c.type === 'achievement'
-          ? { title: c.title, icon: c.emoji, text: `Conquista nova! +${c.coins} sementes de girassol.`, tone: 'accent' }
-          : c.type === 'goal'
-            ? { title: 'Meta alcançada!', icon: '🏆', text: `Vocês conseguiram! O ${s.pet.name} chegou na meta dele junto com você. Escolha a próxima missão em Nossa evolução: manter o peso também é uma vitória.`, tone: 'gold' }
-            : {
-                title: 'Resumo da semana',
-                text: hide
-                  ? `Mais uma semana de jornada com o ${s.pet.name}. Vocês seguem juntos!`
-                  : `${t.sign}${fmtNum(c.kcal, 0)} kcal nesta semana. O ${s.pet.name} foi de ${fmtNum(c.before)} g para ${fmtNum(c.grams)} g. Devagar e sempre, junto com você.`,
-                tone: 'accent',
-              };
+    c.type === 'phase'
+      ? { title: `Fase ${PHASES[c.phase]}!`, text: `O ${s.pet.name} evoluiu junto com você. Constância é tudo!`, tone: 'leaf' }
+      : c.type === 'achievement'
+        ? { title: c.title, icon: c.emoji, text: `Conquista nova! +${c.coins} sementes de girassol.`, tone: 'accent' }
+        : c.type === 'goal'
+          ? { title: 'Meta alcançada!', icon: '🏆', text: `Vocês conseguiram! O ${s.pet.name} chegou na meta dele junto com você. Escolha a próxima missão em Nossa evolução: manter o peso também é uma vitória.`, tone: 'gold' }
+          : {
+              title: 'Resumo da semana',
+              text: hide
+                ? `Mais uma semana de jornada com o ${s.pet.name}. Vocês seguem juntos!`
+                : `${t.sign}${fmtNum(c.kcal, 0)} kcal nesta semana. O ${s.pet.name} foi de ${fmtNum(c.before)} g para ${fmtNum(c.grams)} g. Devagar e sempre, junto com você.`,
+              tone: 'accent',
+            };
   return (
     <Modal open onClose={onClose} label={content.title}>
       <div className={`celebrate celebrate-${content.tone}`}>

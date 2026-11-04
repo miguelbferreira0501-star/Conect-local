@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import pg from 'pg';
 import { call, newUser, setupDatabase } from './helpers';
 import { pool } from '../src/db';
-import { DEFAULT_GAME as G, rarityRank, xpAt } from '../../web/src/shared/game';
+import { DEFAULT_GAME as G, arenaItemsOf, rarityRank, xpAt } from '../../web/src/shared/game';
 
 setupDatabase();
 
@@ -66,6 +66,11 @@ describe('carteira e ganhos no servidor', () => {
     expect(r.body.wallet.arena).toBe(2);
     expect(r.body.wallet.coins).toBe(30 + 3 + G.levelUp.base + G.levelUp.perLevel * 2 + arena.reward.coins);
     expect(r.body.wallet.pending).toEqual([arena.reward.chest]);
+    // Os itens exclusivos da arena entram no inventário, com origem "arena".
+    const inv = await call('GET', '/game/inventory', undefined, u.cookie);
+    const gifts = arenaItemsOf(2);
+    expect(gifts.length).toBeGreaterThan(0);
+    for (const id of gifts) expect(inv.body.items).toContainEqual(expect.objectContaining({ itemId: id, origin: 'arena' }));
     // Desmarcar não faz cair de nível nem paga o nível de novo depois.
     await call('POST', '/game/ops', { ops: [{ op: 'revoke', ref: `tarefa:${today()}:agua` }] }, u.cookie);
     const again = await call('POST', '/game/ops', { ops: [task('agua')] }, u.cookie);

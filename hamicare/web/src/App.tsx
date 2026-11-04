@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Sheet, Toaster, toast } from './components/ui';
 import { CelebrationModal, DailyWelcome, StreakScreen } from './components/Celebrate';
+import { LevelUpScreen } from './components/LevelUp';
 import { TabIcon, type TabId } from './components/TabIcon';
 import { Home } from './screens/Home';
 import { CareArea } from './screens/CareArea';
 import { Activities } from './screens/Activities';
-import { World } from './screens/World';
+import { World, type WorldTab } from './screens/World';
 import { Wellbeing } from './screens/Wellbeing';
 import { Friends, type ShareDraft } from './screens/Friends';
 import { Onboarding } from './screens/Onboarding';
@@ -44,6 +45,7 @@ export default function App() {
   const [evolution, setEvolution] = useState(false);
   const [share, setShare] = useState<ShareDraft>(null);
   const [gift, setGift] = useState<string | null>(null);
+  const [worldTab, setWorldTab] = useState<WorldTab | undefined>();
   const [queue, setQueue] = useState<Celebration[]>([]);
   const themeSet = useRef(false);
 
@@ -104,8 +106,9 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
-  function go(next: Tab) {
+  function go(next: Tab, sub?: WorldTab) {
     setTab(next);
+    setWorldTab(sub);
     try {
       history.replaceState(null, '', `#${next}`);
     } catch {
@@ -136,10 +139,10 @@ export default function App() {
   return (
     <>
       <main className="shell">
-        {tab === 'inicio' && <Home onGo={go} onSettings={() => setSettings(true)} onEvolution={() => setEvolution(true)} />}
+        {tab === 'inicio' && <Home onGo={go} onSettings={() => setSettings(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} />}
         {tab === 'cuidar' && <CareArea onShare={(photo) => shareTo({ kind: 'foto', photo })} />}
         {tab === 'atividades' && <Activities onShareTask={(task) => shareTo({ kind: 'atividade', task })} />}
-        {tab === 'mundo' && <World onPlus={() => setPlus(true)} onGift={(id) => (setGift(id), go('amigos'))} />}
+        {tab === 'mundo' && <World key={worldTab ?? 'mundo'} initialTab={worldTab} onPlus={() => setPlus(true)} onGift={(id) => (setGift(id), go('amigos'))} />}
         {tab === 'bem-estar' && <Wellbeing />}
         {tab === 'amigos' && <Friends share={share} onShareDone={() => setShare(null)} giftItem={gift} onGiftDone={() => setGift(null)} account={account} />}
       </main>
@@ -158,7 +161,7 @@ export default function App() {
       <Sheet open={plus} onClose={() => setPlus(false)} title="HamiCare+">
         <Paywall onClose={() => setPlus(false)} />
       </Sheet>
-      <CelebrationModal c={current} onClose={() => setQueue((q) => q.slice(1))} />
+      {current?.type === 'level' ? <LevelUpScreen c={current} onClose={() => setQueue((q) => q.slice(1))} /> : <CelebrationModal c={current} onClose={() => setQueue((q) => q.slice(1))} />}
       {current?.type === 'streak' && <StreakScreen count={current.count} onClose={() => setQueue((q) => q.slice(1))} onShare={(photo) => (setQueue((q) => q.slice(1)), shareTo({ kind: 'foto', photo }))} />}
       {showWelcome && <DailyWelcome onClose={markWelcomed} />}
       <ResetPassword />

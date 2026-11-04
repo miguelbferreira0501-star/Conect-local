@@ -139,3 +139,11 @@ Pedido do dono do produto: no começo, escolher a área (só perder ou ganhar pe
 - **Ninguém perdeu nível** com a curva nova: o XP antigo foi convertido mantendo nível e progresso. Desmarcar uma missão devolve o XP, mas nunca faz cair de nível.
 - **Economia ajustada por simulação** de 4 perfis (`docs/ECONOMIA.md`): primeiras conquistas rápidas, última arena em cerca de 3,5 meses para quem usa quase todo dia e cerca de 2 meses para quem faz tudo todo dia. As sementes por missão continuam as de antes (3, 5 e 8).
 - **Baús:** só com sementes ganhas no app; chances visíveis; para menores de 18, baú revelado (o item aparece antes da compra), por causa do ECA Digital.
+
+### Jogo (fase 2): as 12 arenas
+
+- **Cada arena tem cenário próprio** (casinha, jardim, vila, floresta, praia tropical, montanhas nevadas, cidade, fundo do mar, reino dos sonhos, castelo, estação espacial e ilha celestial), todos desenhados em SVG para o HamiCare, com clima animado (borboletas, folhas, neve, bolhas, estrelas) e coisas que reagem ao toque. O céu acompanha a hora do dia.
+- **O Início mostra a arena onde o Hami mora.** Abrir uma arena nova não muda o Hami de lugar sozinho: a pessoa escolhe "Morar aqui agora" ou "Explorar depois". A casa antiga fica guardada com os móveis, e dá pra voltar quando quiser pelo Mapa das Arenas, de graça.
+- **Mapa das Arenas** (Mundo › Arenas, ou o botão "Mapa" no Início): trilha das 12 arenas com a atual marcada, as abertas com selo e as próximas em silhueta com o nível e os prêmios. A aba de aventuras passou a se chamar "Passeios" para não confundir.
+- **Arena nova é um momento:** tela de nível (número grande, prêmio, partículas) → o Hami brilha → a arena aparece → a casa nova com os presentes (sementes, baú grátis e os itens exclusivos). Tudo pode ser pulado e respeita "reduzir movimento".
+- **A progressão nunca exige o Plus:** o Castelo e o Espaço sideral (passeios) deixaram de ser do Plus, e os passeios ligados a uma arena abrem até o nível dela.

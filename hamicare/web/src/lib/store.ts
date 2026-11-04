@@ -16,7 +16,8 @@ import {
 } from '../logic/evolution';
 import { streakOf } from '../logic/streak';
 import { activeQuests, claimKey, levelOf, newAchievements, periodStart, questProgress, QUESTS } from '../logic/progress';
-import { addUsage, baseGrant, capGrant, emptyPity, emptyUsage, levelUps, migrateXp, xpAt, type ChestId, type DayUsage, type Pity, type Source } from '../shared/game';
+import { addUsage, arenaItemsOf, arenaOf, baseGrant, capGrant, emptyPity, emptyUsage, levelUps, migrateXp, xpAt, type ChestId, type DayUsage, type Pity, type Source } from '../shared/game';
+import { arenaHouse } from '../data/arenas';
 import { gameCfg } from './game';
 import type { GameState } from '../types';
 
@@ -32,7 +33,7 @@ export const todayKey = () => dayKey(new Date());
 // ---------- Comemorações (a interface mostra uma de cada vez) ----------
 
 export type Celebration =
-  | { type: 'level'; level: number; coins?: number; arena?: { n: number; name: string; chest?: ChestId } }
+  | { type: 'level'; level: number; coins?: number; arena?: { n: number; name: string; chest?: ChestId; items?: string[] } }
   | { type: 'achievement'; title: string; emoji: string; coins: number }
   | { type: 'phase'; phase: number }
   | { type: 'weigh'; grams: number; before: number; kcal: number }
@@ -343,7 +344,17 @@ function grant(s: State, src: Source): State {
       }
     }
     next = { ...next, coins: next.coins + coins, game: { ...g2, maxLevel: Math.max(g2.maxLevel, level) } };
-    const celebrated = { level, coins, arena: arena ? { n: arena.n, name: arena.name, chest: arena.reward.chest } : undefined };
+    // Arena nova: os itens exclusivos vão para o inventário e a casa da arena fica pronta.
+    let gifts: string[] = [];
+    if (arena) {
+      gifts = arenaItemsOf(arena.n, arena.reward.items).filter((id) => !next.inventory[id]);
+      const inventory = { ...next.inventory };
+      for (const id of gifts) inventory[id] = 1;
+      const houses: Record<string, State['house']> = { ...(next.houses ?? {}) };
+      if (!houses[arena.n] && (next.homeArena ?? 1) !== arena.n) houses[arena.n] = arenaHouse(arena.n);
+      next = { ...next, inventory, houses };
+    }
+    const celebrated = { level, coins, arena: arena ? { n: arena.n, name: arena.name, chest: arena.reward.chest, items: gifts } : undefined };
     setTimeout(() => celebrate({ type: 'level', ...celebrated }), 0);
   }
   return { ...next, game: prune(next.game, todayKey()) };
@@ -931,10 +942,32 @@ export function setFloor(id: string) {
 }
 
 export function placeItem(itemId: string) {
-  const placedCount = state.house.items.filter((i) => i.itemId === itemId).length;
+  // O mesmo móvel não fica em duas casas ao mesmo tempo.
+  const placedCount = [state.house, ...Object.values(state.houses ?? {})].reduce((n, h) => n + h.items.filter((i) => i.itemId === itemId).length, 0);
   if (placedCount >= (state.inventory[itemId] ?? 0)) return;
   const z = Math.max(0, ...state.house.items.map((i) => i.z)) + 1;
   commit({ ...state, house: { ...state.house, items: [...state.house.items, { uid: uid(), itemId, x: 30 + (z % 5) * 10, y: 72, z }] } });
+}
+
+/** Arena atual (a mais alta já aberta). */
+export const currentArena = (s: State) => arenaOf(Math.max(levelOf(s.xp), s.game.maxLevel), gameCfg()).n;
+/** Arena onde o Hami mora. */
+export const homeArenaOf = (s: State) => Math.min(s.homeArena ?? 1, currentArena(s));
+/** Casa de uma arena (a de agora ou uma guardada). */
+export function houseOf(s: State, n: number) {
+  return n === homeArenaOf(s) ? s.house : s.houses?.[n] ?? arenaHouse(n);
+}
+
+/** Muda a casa principal do Hami para outra arena já aberta (as casas antigas ficam guardadas). */
+export function moveHome(n: number): boolean {
+  if (n < 1 || n > currentArena(state)) return false;
+  const from = homeArenaOf(state);
+  if (n === from) return true;
+  const houses: Record<string, State['house']> = { ...(state.houses ?? {}), [from]: state.house };
+  const house = houses[n] ?? arenaHouse(n);
+  delete houses[n];
+  commit({ ...state, homeArena: n, house, houses });
+  return true;
 }
 
 export function moveItem(itemUid: string, x: number, y: number) {

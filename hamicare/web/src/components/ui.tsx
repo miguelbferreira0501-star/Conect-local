@@ -93,7 +93,7 @@ export function Coins({ value }: { value: number }) {
 
 export function Seg<T extends string>({ value, options, onChange, label }: { value: T; options: { id: T; label: string }[]; onChange: (v: T) => void; label: string }) {
   return (
-    <div className="seg" role="group" aria-label={label}>
+    <div className={`seg ${options.length > 4 ? 'seg-many' : ''}`} role="group" aria-label={label}>
       {options.map((o) => (
         <button key={o.id} type="button" aria-pressed={value === o.id} onClick={() => onChange(o.id)}>
           {o.label}

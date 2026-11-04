@@ -25,3 +25,8 @@ export function rarityOf(item: Item): Rarity {
 export function chestPool(items: Item[] = ITEMS): PoolItem[] {
   return items.filter((i) => CHEST_KINDS.includes(i.kind) && !i.souvenir && !i.plus && !i.season && i.price > 0).map((i) => ({ id: i.id, rarity: rarityOf(i) }));
 }
+
+/** Itens exclusivos que a arena dá de presente (a configuração pode trocar a lista). */
+export function arenaItemsOf(n: number, cfgItems?: string[], items: Item[] = ITEMS): string[] {
+  return cfgItems ?? items.filter((i) => i.arena === n).map((i) => i.id);
+}

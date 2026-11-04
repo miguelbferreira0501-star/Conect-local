@@ -488,7 +488,7 @@ function GiftsTab({ api }: { api: SocialApi }) {
         const item = itemById(g.itemId);
         return (
           <li key={g.id} className="card flex items-center gap-3 p-3">
-            <Glyph e={g.itemId === 'vibe' ? '💛' : item?.emoji ?? '🎁'} size={40} />
+            <Glyph e={g.itemId === 'vibe' ? '💛' : item?.art ?? item?.emoji ?? '🎁'} size={40} />
             <div className="min-w-0 flex-1">
               <p className="font-bold leading-tight">{g.itemId === 'vibe' ? 'Vibe boa' : item?.name ?? 'Presente'}</p>
               <p className="text-[13px] text-muted">

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Flame, Mail, Plus, Settings } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
-import { Scene } from '../components/Scene';
+import { ArenaScene } from '../components/ArenaScene';
+import { ArenaPin, arenaByN } from './Arenas';
 import { JourneyCard, useKcalPop } from '../components/Journey';
 import { TaskRow } from '../components/TaskRow';
 import { MealCard } from '../components/MealPlan';
@@ -9,7 +10,7 @@ import { Coins, Modal, toast } from '../components/ui';
 import { GREETING, periodOf, petLine } from '../data/lines';
 import { placeById } from '../data/world';
 import { streakOf } from '../logic/streak';
-import { dayOf, finishAdventure, getState, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
+import { dayOf, finishAdventure, homeArenaOf, getState, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
 import { addDays, prefersReducedMotion, weekStart, WEEKDAYS, fmtNum } from '../lib/util';
 import { isActive } from '../logic/evolution';
 import type { PetMood, Task } from '../types';
@@ -26,7 +27,7 @@ export function useNow(ms: number) {
   return now;
 }
 
-export function Home({ onGo, onSettings, onEvolution }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void }) {
+export function Home({ onGo, onSettings, onEvolution, onArenas }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onArenas: () => void }) {
   const [areaOpen, setAreaOpen] = useState(false);
   const s = useApp();
   const now = useNow(20_000);
@@ -142,9 +143,10 @@ export function Home({ onGo, onSettings, onEvolution }: { onGo: (tab: 'atividade
       {layer}
       <section className="relative" aria-label={`Jardim do ${s.pet.name}`}>
         <div className="scene-bleed relative overflow-hidden">
-          <Scene height={340} fade>
+          <ArenaScene arena={arenaByN(homeArenaOf(s)).id} height={340} fade>
             {hami}
-          </Scene>
+          </ArenaScene>
+          <ArenaPin s={s} onClick={onArenas} />
         </div>
         <div className="scene-top">
           <span className="pill min-w-0 flex-1">

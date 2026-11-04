@@ -19,6 +19,10 @@ export interface Item {
   /** Só vem de aventura: não está à venda. */
   souvenir?: boolean;
   food?: { saciedade: number; felicidade: number };
+  /** Desenho próprio (chave do conjunto de ilustrações) quando não há emoji. */
+  art?: string;
+  /** Exclusivo de arena: vem de presente ao abrir a arena (não está à venda). */
+  arena?: number;
   /** Raridade definida à mão (se faltar, é estimada pelo preço). */
   rarity?: 'comum' | 'incomum' | 'raro' | 'epico' | 'lendario';
   /** Peça desenhada no Hami: o modelo e as cores (as variações de cor usam o mesmo desenho). */
@@ -28,6 +32,12 @@ export interface Item {
 }
 
 const W = (id: string, name: string, kind: ItemKind, price: number, extra: Partial<Item> = {}): Item => ({ id, name, kind, price, ...extra });
+
+type Rar = NonNullable<Item['rarity']>;
+/** Itens exclusivos de uma arena: não estão à venda (vêm de presente ao abrir a arena). */
+function arenaItems(arena: number, rarity: Rar, list: [string, string, ItemKind, Partial<Item>][]): Item[] {
+  return list.map(([id, name, kind, extra]) => W(id, name, kind, 0, { rarity, ...extra, arena, souvenir: true }));
+}
 
 /** Cores das variações. [cor principal, cor de detalhe, nome no masculino, nome no feminino] */
 const COR: Record<string, [string, string, string, string]> = {
@@ -245,6 +255,90 @@ export const ITEMS: Item[] = [
   W('dado', 'Dadão', 'brinquedo', 15, { emoji: '🎲', size: 9 }),
   W('bolinha-praia', 'Bola de praia', 'brinquedo', 20, { emoji: '🏐', size: 10 }),
   W('alvo', 'Alvo de dardos', 'brinquedo', 20, { emoji: '🎯', size: 10 }),
+  // Exclusivos das arenas (vêm de presente ao abrir cada arena; não estão à venda)
+  ...arenaItems(2, 'raro', [
+    ['flor-encantada', 'Flor encantada', 'chapeu', { base: 'flor', c1: '#FF8FC7', c2: '#FFD34D' }],
+    ['banco-galho', 'Banco de galhos', 'movel', { art: 'art:banco-galho', size: 24 }],
+    ['casa-passaro', 'Casinha de passarinho', 'decor', { art: 'art:casa-passaro', size: 12 }],
+    ['p-jardim', 'Parede do jardim', 'parede', {}],
+    ['f-musgo', 'Piso de musgo', 'piso', {}],
+  ]),
+  ...arenaItems(3, 'raro', [
+    ['boina-vila', 'Boina da vila', 'chapeu', { base: 'boina', c1: '#B07A52', c2: '#7A4E32' }],
+    ['balcao-cafe', 'Balcão de café', 'movel', { art: 'art:balcao-cafe', size: 26 }],
+    ['lampiao', 'Lampião da vila', 'decor', { art: 'art:lampiao', size: 10 }],
+    ['p-vila', 'Parede de casa de vila', 'parede', {}],
+    ['f-tacos', 'Piso de tacos', 'piso', {}],
+  ]),
+  ...arenaItems(4, 'raro', [
+    ['chapeu-folhas', 'Chapéu de folhas', 'chapeu', { base: 'chapeu-sol', c1: '#5FBF77', c2: '#3E9C55' }],
+    ['luminaria-cogumelo', 'Luminária de cogumelo', 'decor', { art: 'art:luminaria-cogumelo', size: 12, rarity: 'epico' }],
+    ['cama-tronco', 'Cama de tronco', 'movel', { art: 'art:cama-tronco', size: 28 }],
+    ['p-floresta', 'Parede da floresta', 'parede', {}],
+    ['f-folhas', 'Piso de folhas secas', 'piso', {}],
+  ]),
+  ...arenaItems(5, 'raro', [
+    ['oculos-tropical', 'Óculos de sol tropical', 'oculos', { base: 'sol', c1: '#FF6F91', c2: '#FFD34D' }],
+    ['camisa-tropical', 'Camisa tropical', 'roupa', { base: 'florida', c1: '#FF9A4D', c2: '#5FBF77', rarity: 'epico' }],
+    ['guarda-sol', 'Guarda-sol', 'decor', { art: 'art:guarda-sol', size: 22 }],
+    ['cadeira-praia', 'Cadeira de praia', 'movel', { art: 'art:cadeira-praia', size: 20 }],
+    ['tapete-tropical', 'Tapete tropical', 'decor', { art: 'art:tapete-tropical', size: 36 }],
+    ['p-tropical', 'Parede tropical', 'parede', {}],
+  ]),
+  ...arenaItems(6, 'epico', [
+    ['gorro-neve', 'Gorro de neve', 'chapeu', { base: 'gorro', c1: '#FFFFFF', c2: '#5B8DEF', rarity: 'raro' }],
+    ['casaco-neve', 'Casaco de inverno', 'roupa', { base: 'jaqueta', c1: '#5B8DEF', c2: '#FFFFFF' }],
+    ['lareira', 'Lareira', 'movel', { art: 'art:lareira', size: 26 }],
+    ['tapete-neve', 'Tapete de neve', 'decor', { art: 'art:tapete-neve', size: 36, rarity: 'raro' }],
+    ['p-chale', 'Parede de chalé', 'parede', { rarity: 'raro' }],
+    ['f-chale', 'Piso de chalé', 'piso', { rarity: 'raro' }],
+  ]),
+  ...arenaItems(7, 'epico', [
+    ['fone-neon', 'Fone neon', 'chapeu', { base: 'fone', c1: '#A57CF0', c2: '#3AE0D0' }],
+    ['luminaria-neon', 'Luminária neon', 'decor', { art: 'art:luminaria-neon', size: 12 }],
+    ['poltrona-moderna', 'Poltrona moderna', 'movel', { art: 'art:poltrona-moderna', size: 22 }],
+    ['p-cidade', 'Parede da cidade', 'parede', { rarity: 'raro' }],
+    ['f-concreto', 'Piso de concreto', 'piso', { rarity: 'raro' }],
+  ]),
+  ...arenaItems(8, 'epico', [
+    ['oculos-mergulho', 'Óculos de mergulho', 'oculos', { base: 'natacao', c1: '#3FC6C0', c2: '#2F7FB8' }],
+    ['cama-concha', 'Cama de concha', 'movel', { art: 'art:cama-concha', size: 28 }],
+    ['coral', 'Coral', 'decor', { art: 'art:coral', size: 12, rarity: 'raro' }],
+    ['p-mar', 'Parede do fundo do mar', 'parede', { rarity: 'raro' }],
+    ['f-areia-mar', 'Areia do fundo do mar', 'piso', { rarity: 'raro' }],
+  ]),
+  ...arenaItems(9, 'epico', [
+    ['tiara-sonhos', 'Tiara dos sonhos', 'chapeu', { base: 'tiara', c1: '#D7C2FF', c2: '#FF9FC2' }],
+    ['cama-nuvem', 'Cama de nuvem', 'movel', { art: 'art:cama-nuvem', size: 28 }],
+    ['luminaria-lua', 'Luminária de lua', 'decor', { art: 'art:luminaria-lua', size: 12 }],
+    ['p-sonhos', 'Parede dos sonhos', 'parede', { rarity: 'raro' }],
+    ['f-algodao', 'Piso de algodão-doce', 'piso', { rarity: 'raro' }],
+  ]),
+  ...arenaItems(10, 'epico', [
+    ['coroa-castelo', 'Coroa do castelo', 'chapeu', { base: 'coroa-rei', c1: '#F6C445', c2: '#5B8DEF', rarity: 'lendario' }],
+    ['manto-real', 'Manto real', 'roupa', { base: 'capa', c1: '#D7263D', c2: '#F6C445' }],
+    ['trono', 'Trono', 'movel', { art: 'art:trono', size: 22, rarity: 'lendario' }],
+    ['tapete-vermelho', 'Tapete vermelho', 'decor', { art: 'art:tapete-vermelho', size: 40 }],
+    ['p-castelo', 'Parede de castelo', 'parede', {}],
+    ['f-real', 'Piso real', 'piso', {}],
+  ]),
+  ...arenaItems(11, 'epico', [
+    ['capacete-estelar', 'Capacete estelar', 'chapeu', { base: 'capacete', c1: '#E9EEF8', c2: '#A57CF0' }],
+    ['traje-estelar', 'Traje espacial estelar', 'roupa', { base: 'astronauta', c1: '#F4F6FA', c2: '#A57CF0', rarity: 'lendario' }],
+    ['cama-estrelas', 'Cama de estrelas', 'movel', { art: 'art:cama-estrelas', size: 28, rarity: 'lendario' }],
+    ['luminaria-estrelas', 'Luminária de estrelas', 'decor', { art: 'art:luminaria-estrelas', size: 12 }],
+    ['mobile-planetas', 'Planetas de pendurar', 'decor', { art: 'art:mobile-planetas', size: 16 }],
+    ['p-espaco', 'Parede espacial', 'parede', {}],
+    ['f-metal', 'Piso de nave', 'piso', {}],
+  ]),
+  ...arenaItems(12, 'lendario', [
+    ['aureola-celeste', 'Auréola celeste', 'chapeu', { base: 'aureola', c1: '#FFF3B0', c2: '#F2A516' }],
+    ['asas-celestes', 'Asas celestes', 'acessorio', { base: 'asas-anjo', c1: '#FFF7DA', c2: '#F2C94C' }],
+    ['fonte-celeste', 'Fonte celeste', 'decor', { art: 'art:fonte-celeste', size: 18 }],
+    ['portal-celeste', 'Portal celeste', 'decor', { art: 'art:portal-celeste', size: 22 }],
+    ['p-celeste', 'Parede celeste', 'parede', { rarity: 'epico' }],
+    ['f-ouro', 'Piso de ouro', 'piso', { rarity: 'epico' }],
+  ]),
   // Comidas (consumíveis)
   W('semente', 'Semente de girassol extra', 'comida', 3, { emoji: '🌻', food: { saciedade: 8, felicidade: 6 } }),
   W('cenoura', 'Cenourinha', 'comida', 4, { emoji: '🥕', food: { saciedade: 15, felicidade: 4 } }),

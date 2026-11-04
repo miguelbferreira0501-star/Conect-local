@@ -81,7 +81,7 @@ export const PLACES: Place[] = [
     finds: [{ id: 'cogumelo', name: 'Cogumelo de bolinha', emoji: '🍄' }, { id: 'pinha', name: 'Pinha', emoji: '🌲' }, { id: 'ourico', name: 'Ouriço amigo', emoji: '🦔' }],
   },
   {
-    id: 'cafeteria', name: 'Cafeteria', emoji: '☕', level: 4, colors: ['#F3DCC2', '#B07A52'], pos: [46, 60],
+    id: 'cafeteria', name: 'Cafeteria', emoji: '☕', level: 3, colors: ['#F3DCC2', '#B07A52'], pos: [46, 60],
     desc: 'Cheiro de bolo saindo do forno e música baixinha.',
     missions: [
       m('cha', 'Tomar um chazinho', 15, 'Pedi um chá de camomila. Esquentou a barriga e o coração.'),
@@ -111,7 +111,7 @@ export const PLACES: Place[] = [
     finds: [{ id: 'cristal', name: 'Cristal', emoji: '💎' }, { id: 'edelvais', name: 'Florzinha da serra', emoji: '🌼' }, { id: 'cabrita', name: 'Cabritinha', emoji: '🐐' }],
   },
   {
-    id: 'vila-inverno', name: 'Vila de inverno', emoji: '❄️', level: 8, colors: ['#EAF4FF', '#9CC3E8'], pos: [82, 20],
+    id: 'vila-inverno', name: 'Vila de inverno', emoji: '❄️', level: 6, colors: ['#EAF4FF', '#9CC3E8'], pos: [82, 20],
     desc: 'Casinhas com chaminé, neve fofinha e luzes amarelas.',
     missions: [
       m('boneco', 'Fazer um boneco de neve', 15, 'Fiz um boneco de neve do meu tamanho. Dei o nome de Neve-Hami.'),
@@ -121,7 +121,7 @@ export const PLACES: Place[] = [
     finds: [{ id: 'floco', name: 'Floco de neve', emoji: '❄️' }, { id: 'luva', name: 'Luvinha perdida', emoji: '🧤' }, { id: 'pinguim', name: 'Pinguim', emoji: '🐧' }],
   },
   {
-    id: 'castelo', name: 'Castelo', emoji: '🏰', level: 10, plus: true, colors: ['#F1E1FF', '#A98DDF'], pos: [16, 14],
+    id: 'castelo', name: 'Castelo', emoji: '🏰', level: 10, colors: ['#F1E1FF', '#A98DDF'], pos: [16, 14],
     desc: 'Torres altas, jardins secretos e um baile toda noite.',
     missions: [
       m('jardim-secreto', 'Achar o jardim secreto', 15, 'Atrás de uma porta de hera tinha um jardim cheio de vagalumes.'),
@@ -131,7 +131,7 @@ export const PLACES: Place[] = [
     finds: [{ id: 'chave', name: 'Chave antiga', emoji: '🗝️' }, { id: 'coroa-mini', name: 'Coroinha', emoji: '👑' }, { id: 'dragao', name: 'Dragãozinho', emoji: '🐉' }],
   },
   {
-    id: 'espaco', name: 'Espaço sideral', emoji: '🚀', level: 12, plus: true, colors: ['#2A2F6B', '#6B4FA8'], pos: [52, 8],
+    id: 'espaco', name: 'Espaço sideral', emoji: '🚀', level: 11, colors: ['#2A2F6B', '#6B4FA8'], pos: [52, 8],
     desc: 'Flutuar entre estrelas e dar tchau pra Terra.',
     missions: [
       m('flutuar', 'Flutuar sem gravidade', 15, 'Dei cambalhotas no ar! Minhas bochechas flutuaram junto.'),

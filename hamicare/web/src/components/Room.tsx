@@ -20,6 +20,9 @@ interface Props {
 const GARLANDS = new Set(['pisca', 'bandeirinhas']);
 
 /** A casa do Hami: parede, piso e móveis posicionados em % (arrastáveis no modo de edição). */
+/** Tapetes ficam no chão, sempre embaixo do Hami e dos móveis. */
+const FLAT = /^tapete/;
+
 export function Room({ house, period = 'tarde', height = 260, children, editing, selected, onSelect, onMove }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<{ uid: string; x: number; y: number } | null>(null);
@@ -66,7 +69,7 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
             aria-label={item.name}
             tabIndex={editing ? 0 : -1}
             className={`room-item ${editing ? 'is-editable' : ''} ${selected === it.uid ? 'is-selected' : ''}`}
-            style={{ left: `${live.x}%`, top: `${live.y}%`, width: `${item.size ?? 12}%`, zIndex: Math.round(live.y), fontSize: `${(item.size ?? 12) * 0.82}cqw` }}
+            style={{ left: `${live.x}%`, top: `${live.y}%`, width: `${item.size ?? 12}%`, zIndex: FLAT.test(it.itemId) ? 2 : Math.round(live.y), fontSize: `${(item.size ?? 12) * 0.82}cqw` }}
             onPointerDown={(e) => {
               if (!editing) return;
               e.preventDefault();
@@ -82,7 +85,7 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
               setDrag(null);
             }}
           >
-            {item.svg ? <Furniture id={item.svg} /> : <Glyph e={item.emoji} size="fill" />}
+            {item.svg ? <Furniture id={item.svg} /> : <Glyph e={item.art ?? item.emoji} size="fill" />}
           </div>
         );
       })}

@@ -3,7 +3,7 @@ import { ArrowUpToLine, Gift, Heart, Lock, PackageOpen, Pencil, Sparkles } from 
 import { Hamster } from '../components/Hamster';
 import { Capivara } from '../components/Capivara';
 import { Room } from '../components/Room';
-import { Furniture, FLOOR_CSS, WALLPAPER_CSS } from '../components/Furniture';
+import { FLOOR_CSS, WALLPAPER_CSS } from '../components/Furniture';
 import { Coins, Seed, Seg, Sheet, toast } from '../components/ui';
 import { HOUSE_KINDS, ITEMS, KIND_LABEL, LOOKS, SEASONS, STYLES, WEARABLE_KINDS, currentSeason, inSeason, itemById, stylePrice, type Item, type ItemKind } from '../data/items';
 import { FURS } from '../data/fur';
@@ -12,14 +12,17 @@ import { periodOf } from '../data/lines';
 import { levelOf } from '../logic/progress';
 import { hashStr, mulberry32 } from '../lib/util';
 import {
-  bringFront, buy, buyFur, buyLook, buyStyle, canBuy, claimDailyGift, finishAdventure, isPremium, lookPrice, moveItem, owned, placeItem, placeLocked, setFloor, setWallpaper, startAdventure, storeItem, todayKey, toggleWish, unwear, updatePet, useApp, wear, wear as wearItem,
+  bringFront, buy, buyFur, homeArenaOf, buyLook, buyStyle, canBuy, claimDailyGift, finishAdventure, isPremium, lookPrice, moveItem, owned, placeItem, placeLocked, setFloor, setWallpaper, startAdventure, storeItem, todayKey, toggleWish, unwear, updatePet, useApp, wear, wear as wearItem,
   type AdventureResult,
 } from '../lib/store';
 import { AdventureModal } from './Home';
 import type { WearSlot } from '../types';
 import { Glyph } from '../components/art';
+import { ArenasTab, arenaByN } from './Arenas';
+import { ItemIcon } from '../components/ItemIcon';
 
-type Tab = 'casa' | 'mapa' | 'loja' | 'armario';
+export type WorldTab = 'arenas' | 'casa' | 'mapa' | 'loja' | 'armario';
+type Tab = WorldTab;
 
 export function World({ onPlus, onGift, initialTab }: { onPlus: () => void; onGift: (itemId: string) => void; initialTab?: Tab }) {
   const s = useApp();
@@ -33,8 +36,9 @@ export function World({ onPlus, onGift, initialTab }: { onPlus: () => void; onGi
         </div>
         <Coins value={s.coins} />
       </header>
-      <Seg value={tab} onChange={setTab} label="Seções do mundo" options={[{ id: 'casa', label: 'Casa' }, { id: 'mapa', label: 'Mapa' }, { id: 'loja', label: 'Loja' }, { id: 'armario', label: 'Armário' }]} />
-      {tab === 'casa' && <HouseTab />}
+      <Seg value={tab} onChange={setTab} label="Seções do mundo" options={[{ id: 'arenas', label: 'Arenas' }, { id: 'casa', label: 'Casa' }, { id: 'mapa', label: 'Passeios' }, { id: 'loja', label: 'Loja' }, { id: 'armario', label: 'Armário' }]} />
+      {tab === 'arenas' && <ArenasTab onHouse={() => setTab('casa')} />}
+      {tab === 'casa' && <HouseTab onArenas={() => setTab('arenas')} />}
       {tab === 'mapa' && <MapTab onPlus={onPlus} />}
       {tab === 'loja' && <ShopTab onPlus={onPlus} onGift={onGift} />}
       {tab === 'armario' && <WardrobeTab />}
@@ -44,7 +48,7 @@ export function World({ onPlus, onGift, initialTab }: { onPlus: () => void; onGi
 
 // ---------- Casa ----------
 
-function HouseTab() {
+function HouseTab({ onArenas }: { onArenas: () => void }) {
   const s = useApp();
   const [editing, setEditing] = useState(false);
   const [sel, setSel] = useState<string | null>(null);
@@ -56,6 +60,14 @@ function HouseTab() {
 
   return (
     <div className="grid gap-4">
+      <div className="flex items-center gap-2">
+        <p className="min-w-0 flex-1 truncate font-bold">
+          Casa em <span className="font-display text-[17px]">{arenaByN(homeArenaOf(s)).name}</span>
+        </p>
+        <button className="btn btn-soft btn-sm shrink-0" onClick={onArenas}>
+          Trocar de casa
+        </button>
+      </div>
       <Room house={s.house} period={periodOf()} height={300} editing={editing} selected={sel} onSelect={setSel} onMove={moveItem}>
         {!s.adventure && <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={s.pet.sleeping ? 'dormindo' : 'feliz'} size={130} label={s.pet.name} />}
       </Room>
@@ -141,22 +153,6 @@ function HouseTab() {
       </section>
     </div>
   );
-}
-
-export function ItemIcon({ item, size = 34 }: { item: Item; size?: number }) {
-  if (item.svg) {
-    return (
-      <span className="grid place-items-center" style={{ width: size * 1.3, height: size * 1.3 }}>
-        <span style={{ width: size * 1.2 }}>
-          <Furniture id={item.svg} />
-        </span>
-      </span>
-    );
-  }
-  if (item.emoji) return <Glyph e={item.emoji} size={Math.round(size * 1.25)} />;
-  if (item.kind === 'parede') return <span className="block rounded-xl" style={{ width: size * 1.3, height: size * 1.3, background: WALLPAPER_CSS[item.id] }} />;
-  if (item.kind === 'piso') return <span className="block rounded-xl" style={{ width: size * 1.3, height: size * 1.3, background: FLOOR_CSS[item.id] }} />;
-  return null;
 }
 
 // ---------- Mapa ----------

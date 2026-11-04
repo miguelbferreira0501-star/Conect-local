@@ -120,6 +120,18 @@ export const WALLPAPER_CSS: Record<string, string> = {
   'p-praia': 'linear-gradient(180deg,#9AD9F5 0 60%,#7CC9EE 60% 70%,#F7E2B0 70%)',
   'p-girassois': `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cg fill='%23FFD34D'%3E%3Ccircle cx='20' cy='12' r='4'/%3E%3Ccircle cx='28' cy='20' r='4'/%3E%3Ccircle cx='20' cy='28' r='4'/%3E%3Ccircle cx='12' cy='20' r='4'/%3E%3Ccircle cx='26' cy='14' r='4'/%3E%3Ccircle cx='26' cy='26' r='4'/%3E%3Ccircle cx='14' cy='26' r='4'/%3E%3Ccircle cx='14' cy='14' r='4'/%3E%3C/g%3E%3Ccircle cx='20' cy='20' r='5' fill='%238A5A3B'/%3E%3C/svg%3E") 0 0/40px 40px,#FFF7D6`,
   'p-galaxia': 'radial-gradient(circle at 30% 40%,rgba(255,120,200,.35),transparent 40%),radial-gradient(circle at 70% 60%,rgba(120,160,255,.35),transparent 45%),radial-gradient(circle at 20% 20%,#FFFFFF 1px,transparent 1.5px) 0 0/34px 34px,linear-gradient(180deg,#1E1A4A,#3B2C7A)',
+  // Arenas
+  'p-jardim': 'radial-gradient(circle at 10px 12px,#FF9FC2 3px,transparent 4px) 0 0/34px 34px,radial-gradient(circle at 26px 26px,#FFE27A 3px,transparent 4px) 0 0/34px 34px,linear-gradient(180deg,#E6F7DA,#D2EFC2)',
+  'p-vila': 'repeating-linear-gradient(0deg,rgba(176,122,82,.25) 0 2px,transparent 2px 26px),linear-gradient(180deg,#FFE9CF,#F7D9B5)',
+  'p-floresta': 'radial-gradient(ellipse 14px 30px at 15% 60%,#4F9A63 60%,transparent 62%) 0 0/60px 80px,radial-gradient(ellipse 12px 26px at 65% 40%,#6DB97A 60%,transparent 62%) 0 0/60px 80px,linear-gradient(180deg,#CFEBD2,#A9D8B2)',
+  'p-tropical': 'radial-gradient(ellipse 16px 34px at 20% 40%,#3FB27F 60%,transparent 62%) 0 0/70px 90px,radial-gradient(circle at 60% 70%,#FF8FB1 6px,transparent 7px) 0 0/70px 90px,linear-gradient(180deg,#BFF0E6,#FFE9B8)',
+  'p-chale': 'repeating-linear-gradient(90deg,#A86E44 0 30px,#94603A 30px 32px),linear-gradient(180deg,#A86E44,#8A5A36)',
+  'p-cidade': 'linear-gradient(180deg,transparent 55%,#2E3654 55% 58%,transparent 58%),repeating-linear-gradient(90deg,#3B4470 0 28px,#4A548A 28px 46px),linear-gradient(180deg,#2A2F55,#4B4C9A)',
+  'p-mar': 'radial-gradient(circle at 20% 70%,rgba(255,255,255,.5) 4px,transparent 5px) 0 0/50px 60px,radial-gradient(circle at 70% 30%,rgba(255,255,255,.4) 3px,transparent 4px) 0 0/50px 60px,linear-gradient(180deg,#7FD3E8,#2F7FB8)',
+  'p-sonhos': 'radial-gradient(ellipse 40px 18px at 30% 40%,#FFFFFF 60%,transparent 62%) 0 0/120px 80px,radial-gradient(circle at 80% 20%,#FFF3B0 3px,transparent 4px) 0 0/60px 60px,linear-gradient(180deg,#F2D9FF,#FFC9E8)',
+  'p-castelo': 'repeating-linear-gradient(0deg,#C9C2DA 0 2px,transparent 2px 22px),repeating-linear-gradient(90deg,#C9C2DA 0 2px,transparent 2px 44px),linear-gradient(180deg,#E9E4F5,#D8D0EC)',
+  'p-espaco': 'radial-gradient(circle at 20% 30%,#FFFFFF 1.5px,transparent 2px) 0 0/46px 46px,radial-gradient(circle at 70% 70%,#FFE27A 1.5px,transparent 2px) 0 0/58px 58px,radial-gradient(circle at 80% 20%,rgba(169,139,242,.6) 18px,transparent 19px),linear-gradient(180deg,#1E2350,#3E2F7A)',
+  'p-celeste': 'radial-gradient(circle at 50% 0%,rgba(255,233,160,.9),transparent 60%),radial-gradient(ellipse 50px 20px at 20% 80%,#FFFFFF 60%,transparent 62%) 0 0/140px 90px,linear-gradient(180deg,#FFF3C9,#BFE6FF)',
 };
 
 export const FLOOR_CSS: Record<string, string> = {
@@ -135,4 +147,15 @@ export const FLOOR_CSS: Record<string, string> = {
   'f-azul': 'radial-gradient(circle at 3px 3px,#A9CBF2 1px,transparent 1.5px) 0 0/8px 8px,#BFD9F7',
   'f-nuvem': 'radial-gradient(ellipse 40px 18px at 30% 40%,#FFFFFF 60%,transparent 62%),radial-gradient(ellipse 50px 20px at 75% 70%,#FFFFFF 60%,transparent 62%),linear-gradient(180deg,#DDEFFF,#C9E4FF)',
   'f-ladrilho': 'conic-gradient(#FFB3C7 25%,#B9E6FF 0 50%,#FFF1A8 0 75%,#C9F0C9 0) 0 0/30px 30px',
+  // Arenas
+  'f-musgo': 'radial-gradient(circle at 4px 4px,#6FBF5E 2px,transparent 3px) 0 0/10px 10px,#8FD08A',
+  'f-tacos': 'repeating-linear-gradient(45deg,#C99560 0 14px,#B98251 14px 28px)',
+  'f-folhas': 'radial-gradient(ellipse 6px 3px at 30% 40%,#E27E2C 60%,transparent 62%) 0 0/18px 14px,radial-gradient(ellipse 5px 3px at 70% 70%,#C9A227 60%,transparent 62%) 0 0/18px 14px,#B9824F',
+  'f-chale': 'repeating-linear-gradient(90deg,#7A4E32 0 40px,#6A4229 40px 42px)',
+  'f-concreto': 'radial-gradient(circle at 2px 2px,#B8BDC9 1px,transparent 1.5px) 0 0/7px 7px,#9AA2B4',
+  'f-areia-mar': 'radial-gradient(circle at 3px 3px,#E9D7A6 1px,transparent 1.5px) 0 0/9px 9px,linear-gradient(180deg,#E3CF96,#CDB57A)',
+  'f-algodao': 'radial-gradient(ellipse 30px 14px at 30% 40%,#FFE3F1 60%,transparent 62%) 0 0/80px 30px,#F7D2E8',
+  'f-real': 'conic-gradient(#F4E7C6 25%,#E9D19A 0 50%,#F4E7C6 0 75%,#E9D19A 0) 0 0/34px 34px',
+  'f-metal': 'repeating-linear-gradient(90deg,#8C95AE 0 2px,transparent 2px 36px),linear-gradient(180deg,#B9C1D6,#9AA3BC)',
+  'f-ouro': 'linear-gradient(135deg,#FFE9A3 0%,#F2C94C 40%,#FFF3C4 60%,#E8B020 100%)',
 };

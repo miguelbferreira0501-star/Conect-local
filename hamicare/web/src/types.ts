@@ -252,6 +252,10 @@ export interface State {
   lastGift: string | null;
   /** Economia do jogo (níveis, carteira, baús). */
   game: GameState;
+  /** Arena onde o Hami mora (a casa principal). */
+  homeArena?: number;
+  /** As casas das outras arenas (a de agora fica em `house`). */
+  houses?: Record<string, House>;
   /** Curva de níveis nova aplicada (o XP antigo foi convertido sem perder nível). */
   xpV?: number;
   updatedAt: number;
