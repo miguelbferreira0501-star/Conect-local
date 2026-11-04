@@ -8,8 +8,8 @@ import { formatDay } from '../lib/util';
 
 export const PLUS_PRICE = { month: 'R$ 12,90', year: 'R$ 79,90', yearMonthly: 'R$ 6,66' };
 
-const FREE = ['Hami, tarefas e evolução', 'Cuidados (banho, comida, carinho)', 'Casa básica e 8 lugares do mapa', 'Diário, humor, respiração e todas as ferramentas de calma', 'Amigos e feed'];
-const PLUS = ['Roupas, pelagens e decorações especiais', 'Castelo e Espaço sideral (aventuras extras)', 'Coleções de casa completas', 'Estatísticas de 6 meses na Nossa Evolução', 'Temporadas com itens exclusivos'];
+const FREE = ['Hami, missões, arenas e evolução', 'Cuidados (banho, comida, carinho)', 'Todos os lugares do mapa, baús e a trilha da temporada', 'Diário, humor, respiração e todas as ferramentas de calma', 'Amigos e feed'];
+const PLUS = ['Roupas, pelagens e decorações especiais', 'Estilos de casa prontos completos', 'Estatísticas de 6 meses (evolução e humor)'];
 
 /** HamiCare+: o essencial de autocuidado é sempre grátis. */
 export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () => void; fromOnboarding?: boolean; fur?: string; name?: string }) {
