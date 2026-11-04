@@ -1,0 +1,13 @@
+{
+  "id": "P005",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Já tenho o Yuka de graça e escaneio de vez em quando, então 10 produtos por mês grátis já me sobram. Pagar R$ 9,90 todo mês por mais um app de nota não entra no orçamento de casa.",
+  "objection": "Quem garante que essa nota é confiável e não é paga por marca? E esse preço nos mercados perto de mim, vai estar certo aqui em Joinville ou vai ser desatualizado?",
+  "would_change_my_mind": "Se mostrasse, com prova, que a lista de compras com os mercados daqui me faz economizar bem mais que R$ 9,90 no mês, aí eu pagaria.",
+  "price_too_cheap": 1,
+  "price_cheap": 3,
+  "price_expensive": 7,
+  "price_too_expensive": 12
+}

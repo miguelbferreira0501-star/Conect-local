@@ -1,0 +1,13 @@
+{
+  "id": "P020",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Eu até baixaria pra testar os 10 scans grátis, mas pagar R$ 9,90 todo mês por app não cabe no meu orçamento; preço de mercado eu já comparo de graça nos folhetos e nos grupos de WhatsApp.",
+  "objection": "Quem garante que essa nota é confiável e que as marcas não pagam pra aparecer bem ou pra serem sugeridas? E será que os preços dos mercados aqui de Joinville estão mesmo atualizados?",
+  "would_change_my_mind": "Ver na prática, no primeiro mês grátis, que a lista de compras mais barata me fez economizar bem mais que R$ 9,90 nos mercados daqui.",
+  "price_too_cheap": 1,
+  "price_cheap": 3,
+  "price_expensive": 6,
+  "price_too_expensive": 10
+}

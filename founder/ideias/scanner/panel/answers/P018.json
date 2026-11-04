@@ -1,0 +1,13 @@
+{
+  "id": "P018",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Assinatura de app eu não pago, só streaming. Até baixo o grátis pra ver os preços, mas com as crianças puxando o carrinho e eu com pressa, não vou ficar escaneando produto, e o folheto e o grupo do WhatsApp já me dão as ofertas de graça.",
+  "objection": "Pagar R$ 9,90 todo mês pra um app me dizer preço que eu já acho no folheto. E será que o preço do mercado aparece certo e atualizado? Se não bater na hora do caixa, é dinheiro jogado fora.",
+  "would_change_my_mind": "Se mostrasse com prova que eu economizo bem mais que os R$ 9,90 no mês, tipo uns R$ 50 a menos na compra, ou se fosse um pagamento único em vez de mensalidade.",
+  "price_too_cheap": 1,
+  "price_cheap": 3,
+  "price_expensive": 6,
+  "price_too_expensive": 10
+}

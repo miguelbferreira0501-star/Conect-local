@@ -1,0 +1,13 @@
+{
+  "id": "P010",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "Eu já leio rótulo e olho a lupa de alto em açúcar/sódio, então a nota de 0 a 100 não me diz muito que eu não veja sozinho. Até baixaria pra testar no grátis, mas 10 scans por mês dá e sobra pra mim, não vou pagar R$ 9,90 por isso.",
+  "objection": "Não sei de onde vem essa nota nem se o preço dos mercados aqui de Joinville vai estar certo; se a lupa e a tabela já resolvem, pagar mensalidade parece desperdício com o meu dinheiro apertado.",
+  "would_change_my_mind": "Se a lista de compras realmente mostrasse o mercado mais barato perto de mim com preço atualizado e eu visse que economizo mais que os R$ 9,90 no mês.",
+  "price_too_cheap": 1.99,
+  "price_cheap": 3.9,
+  "price_expensive": 7.9,
+  "price_too_expensive": 12.9
+}

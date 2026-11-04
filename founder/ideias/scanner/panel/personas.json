@@ -1,0 +1,222 @@
+[
+ {
+  "id": "P001",
+  "name": "Liam",
+  "age": 27,
+  "segment": "Classe C (renda familiar mensal em R$)",
+  "income": 7000,
+  "behaviour": "Lê rótulo (saúde)",
+  "behaviour_how": "Olha a lupa e a tabela, evita ultraprocessados, segue perfis de nutrição no Instagram.",
+  "objection": "O Yuka já faz isso de graça, e o Premium dele custa uns R$ 30 por ano",
+  "habit": "você faz a compra grande do mês num atacarejo e completa durante a semana no mercado do bairro"
+ },
+ {
+  "id": "P002",
+  "name": "Wes",
+  "age": 40,
+  "segment": "Classe B (renda familiar mensal em R$)",
+  "income": 16000,
+  "behaviour": "Fitness / dieta",
+  "behaviour_how": "Conta proteína e calorias, já usa app de dieta.",
+  "objection": "Posso tirar foto do rótulo e perguntar ao ChatGPT",
+  "habit": "você faz as compras com os filhos junto e com pressa"
+ },
+ {
+  "id": "P003",
+  "name": "Ivy",
+  "age": 47,
+  "segment": "Classe A (renda familiar mensal em R$)",
+  "income": 30000,
+  "behaviour": "Compra no automático",
+  "behaviour_how": "Compra sempre as mesmas marcas, quer entrar e sair rápido do mercado.",
+  "objection": "O Yuka já faz isso de graça, e o Premium dele custa uns R$ 30 por ano",
+  "habit": "você recebe ofertas de mercado em grupo de WhatsApp"
+ },
+ {
+  "id": "P004",
+  "name": "Owen",
+  "age": 37,
+  "segment": "Classe B (renda familiar mensal em R$)",
+  "income": 12000,
+  "behaviour": "Lê rótulo (saúde)",
+  "behaviour_how": "Olha a lupa e a tabela, evita ultraprocessados, segue perfis de nutrição no Instagram.",
+  "objection": "Não pago assinatura de app, só streaming",
+  "habit": "você faz as compras pelo app do mercado de vez em quando"
+ },
+ {
+  "id": "P005",
+  "name": "Marco",
+  "age": 37,
+  "segment": "Classe C (renda familiar mensal em R$)",
+  "income": 3000,
+  "behaviour": "Já usa o Yuka",
+  "behaviour_how": "Baixou o Yuka grátis depois que chegou ao Brasil em 2026 e escaneia de vez em quando.",
+  "objection": "Quem garante que a nota é confiável e não paga por marca?",
+  "habit": "você recebe ofertas de mercado em grupo de WhatsApp"
+ },
+ {
+  "id": "P006",
+  "name": "Aria",
+  "age": 20,
+  "segment": "Classe B (renda familiar mensal em R$)",
+  "income": 14000,
+  "behaviour": "Compra no automático",
+  "behaviour_how": "Compra sempre as mesmas marcas, quer entrar e sair rápido do mercado.",
+  "objection": "Quem garante que a nota é confiável e não paga por marca?",
+  "habit": "você faz as compras com os filhos junto e com pressa"
+ },
+ {
+  "id": "P007",
+  "name": "Kira",
+  "age": 34,
+  "segment": "Classe C (renda familiar mensal em R$)",
+  "income": 3000,
+  "behaviour": "Skincare / cosméticos",
+  "behaviour_how": "Pesquisa ingredientes de cremes e shampoos no TikTok antes de comprar.",
+  "objection": "O Yuka já faz isso de graça, e o Premium dele custa uns R$ 30 por ano",
+  "habit": "você assina Netflix ou Spotify e acha que já paga assinatura demais"
+ },
+ {
+  "id": "P008",
+  "name": "Harper",
+  "age": 34,
+  "segment": "Classe B (renda familiar mensal em R$)",
+  "income": 12000,
+  "behaviour": "Pai ou mãe com restrição na família",
+  "behaviour_how": "Tem filho ou alguém em casa com alergia alimentar, doença celíaca ou diabetes; lê cada ingrediente.",
+  "objection": "O app do governo Menor Preço Brasil já compara preço de graça",
+  "habit": "você assina Netflix ou Spotify e acha que já paga assinatura demais"
+ },
+ {
+  "id": "P009",
+  "name": "Aisha",
+  "age": 28,
+  "segment": "Classe A (renda familiar mensal em R$)",
+  "income": 29000,
+  "behaviour": "Compra no automático",
+  "behaviour_how": "Compra sempre as mesmas marcas, quer entrar e sair rápido do mercado.",
+  "objection": "Posso tirar foto do rótulo e perguntar ao ChatGPT",
+  "habit": "você recebe ofertas de mercado em grupo de WhatsApp"
+ },
+ {
+  "id": "P010",
+  "name": "Andre",
+  "age": 23,
+  "segment": "Classe B (renda familiar mensal em R$)",
+  "income": 7000,
+  "behaviour": "Lê rótulo (saúde)",
+  "behaviour_how": "Olha a lupa e a tabela, evita ultraprocessados, segue perfis de nutrição no Instagram.",
+  "objection": "Já tem a lupa de alto em açúcar/sódio na embalagem",
+  "habit": "você faz as compras com os filhos junto e com pressa"
+ },
+ {
+  "id": "P011",
+  "name": "Grace",
+  "age": 31,
+  "segment": "Classe B (renda familiar mensal em R$)",
+  "income": 16000,
+  "behaviour": "Skincare / cosméticos",
+  "behaviour_how": "Pesquisa ingredientes de cremes e shampoos no TikTok antes de comprar.",
+  "objection": "Será que vai ter os produtos do meu mercado cadastrados?",
+  "habit": "você assina Netflix ou Spotify e acha que já paga assinatura demais"
+ },
+ {
+  "id": "P012",
+  "name": "Tomas",
+  "age": 47,
+  "segment": "Classe C (renda familiar mensal em R$)",
+  "income": 3000,
+  "behaviour": "Já usa o Yuka",
+  "behaviour_how": "Baixou o Yuka grátis depois que chegou ao Brasil em 2026 e escaneia de vez em quando.",
+  "objection": "Quem garante que a nota é confiável e não paga por marca?",
+  "habit": "você faz a compra grande do mês num atacarejo e completa durante a semana no mercado do bairro"
+ },
+ {
+  "id": "P013",
+  "name": "Kofi",
+  "age": 35,
+  "segment": "Classe C (renda familiar mensal em R$)",
+  "income": 5000,
+  "behaviour": "Lê rótulo (saúde)",
+  "behaviour_how": "Olha a lupa e a tabela, evita ultraprocessados, segue perfis de nutrição no Instagram.",
+  "objection": "Será que vai ter os produtos do meu mercado cadastrados?",
+  "habit": "você recebe ofertas de mercado em grupo de WhatsApp"
+ },
+ {
+  "id": "P014",
+  "name": "Dev",
+  "age": 55,
+  "segment": "Classe C (renda familiar mensal em R$)",
+  "income": 6000,
+  "behaviour": "Caçador de promoção",
+  "behaviour_how": "Compara folhetos e ofertas no WhatsApp, troca de mercado pelo preço.",
+  "objection": "O app do governo Menor Preço Brasil já compara preço de graça",
+  "habit": "você faz as compras com os filhos junto e com pressa"
+ },
+ {
+  "id": "P015",
+  "name": "Keisha",
+  "age": 41,
+  "segment": "Classe C (renda familiar mensal em R$)",
+  "income": 7000,
+  "behaviour": "Fitness / dieta",
+  "behaviour_how": "Conta proteína e calorias, já usa app de dieta.",
+  "objection": "Vou usar duas vezes e esquecer",
+  "habit": "você faz as compras pelo app do mercado de vez em quando"
+ },
+ {
+  "id": "P016",
+  "name": "Noor",
+  "age": 27,
+  "segment": "Classe B (renda familiar mensal em R$)",
+  "income": 10000,
+  "behaviour": "Pai ou mãe com restrição na família",
+  "behaviour_how": "Tem filho ou alguém em casa com alergia alimentar, doença celíaca ou diabetes; lê cada ingrediente.",
+  "objection": "Será que vai ter os produtos do meu mercado cadastrados?",
+  "habit": "você faz as compras pelo app do mercado de vez em quando"
+ },
+ {
+  "id": "P017",
+  "name": "Farah",
+  "age": 49,
+  "segment": "Classe C (renda familiar mensal em R$)",
+  "income": 4000,
+  "behaviour": "Caçador de promoção",
+  "behaviour_how": "Compara folhetos e ofertas no WhatsApp, troca de mercado pelo preço.",
+  "objection": "Posso tirar foto do rótulo e perguntar ao ChatGPT",
+  "habit": "você faz as compras pelo app do mercado de vez em quando"
+ },
+ {
+  "id": "P018",
+  "name": "Leah",
+  "age": 54,
+  "segment": "Classe A (renda familiar mensal em R$)",
+  "income": 19000,
+  "behaviour": "Caçador de promoção",
+  "behaviour_how": "Compara folhetos e ofertas no WhatsApp, troca de mercado pelo preço.",
+  "objection": "Não pago assinatura de app, só streaming",
+  "habit": "você faz as compras com os filhos junto e com pressa"
+ },
+ {
+  "id": "P019",
+  "name": "Eli",
+  "age": 26,
+  "segment": "Classe C (renda familiar mensal em R$)",
+  "income": 5000,
+  "behaviour": "Compra no automático",
+  "behaviour_how": "Compra sempre as mesmas marcas, quer entrar e sair rápido do mercado.",
+  "objection": "Quem garante que a nota é confiável e não paga por marca?",
+  "habit": "você recebe ofertas de mercado em grupo de WhatsApp"
+ },
+ {
+  "id": "P020",
+  "name": "Ines",
+  "age": 29,
+  "segment": "Classe C (renda familiar mensal em R$)",
+  "income": 3000,
+  "behaviour": "Caçador de promoção",
+  "behaviour_how": "Compara folhetos e ofertas no WhatsApp, troca de mercado pelo preço.",
+  "objection": "Quem garante que a nota é confiável e não paga por marca?",
+  "habit": "você faz as compras pelo app do mercado de vez em quando"
+ }
+]

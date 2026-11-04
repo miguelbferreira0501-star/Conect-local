@@ -1,0 +1,13 @@
+{
+  "id": "P015",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Eu já uso meu app de dieta, que já lê código de barras e me dá proteína e caloria, que é o que eu conto de verdade. Ia baixar, usar os 10 scans grátis e esquecer, não vou pagar R$ 9,90 todo mês por mais um app.",
+  "objection": "Vou usar duas vezes e esquecer. E nota de 0 a 100 não me diz quanta proteína tem, isso meu app já faz.",
+  "would_change_my_mind": "Se ele substituísse meu app de dieta, contando proteína e caloria junto, ou se o preço mais barato no mercado aqui de Joinville me fizesse economizar mais que os R$ 9,90 todo mês.",
+  "price_too_cheap": 1.99,
+  "price_cheap": 4.90,
+  "price_expensive": 7.90,
+  "price_too_expensive": 12.90
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P006",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Eu compro sempre as mesmas coisas e vou ao mercado com as crianças correndo, não vou ficar parada escaneando código de barras. Talvez eu baixe a versão grátis por curiosidade, mas pagar R$ 9,90 todo mês por algo que não vou usar, não.",
+  "objection": "Quem garante que essa nota é confiável e não é paga por marca? Se o app manda trocar meu produto por outro, parece propaganda.",
+  "would_change_my_mind": "Se alguém da família tivesse alergia e o aviso de alergênico me poupasse tempo de ler rótulo, ou se a lista com os mais baratos me fizesse economizar mais do que os R$ 9,90 todo mês, comprovado.",
+  "price_too_cheap": 1.99,
+  "price_cheap": 3.90,
+  "price_expensive": 7.90,
+  "price_too_expensive": 12.90
+}

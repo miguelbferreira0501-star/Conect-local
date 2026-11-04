@@ -1,0 +1,829 @@
+/* Identidade do HamiCare: cada tela tem UMA cor de fundo (o fundo, a barra de abas e as telas
+   cheias usam a mesma), os conteúdos ficam em cartões brancos e os botões são "quadradinhos"
+   arredondados com volume embaixo. Arte e cores próprias. */
+
+:root {
+  --page: #f6f3ff;
+  --tab-active: rgba(43, 34, 64, 0.08);
+  --soft-btn: #f1f0f4;
+  --soft-edge: #d9d7df;
+  --soft-ink: #5b5866;
+  --check: #4caf62;
+}
+:root[data-screen='inicio'] { --page: #82d2bf; --tab-active: rgba(255, 255, 255, 0.45); }
+:root[data-screen='atividades'] { --page: #c6e0f1; }
+:root[data-screen='cuidar'] { --page: #ffe6a1; }
+:root[data-screen='mundo'] { --page: #ffd6a6; }
+:root[data-screen='bem-estar'] { --page: #f9c8d7; }
+:root[data-screen='amigos'] { --page: #d2c5f6; }
+:root[data-screen='onboarding'] { --page: #ffdfc5; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) { --soft-btn: #2c2638; --soft-edge: #1a1622; --soft-ink: #d9d3e6; --tab-active: rgba(255, 255, 255, 0.1); }
+  :root:not([data-theme='light'])[data-screen='inicio'] { --page: #1d4741; }
+  :root:not([data-theme='light'])[data-screen='atividades'] { --page: #1c3346; }
+  :root:not([data-theme='light'])[data-screen='cuidar'] { --page: #463a17; }
+  :root:not([data-theme='light'])[data-screen='mundo'] { --page: #47321f; }
+  :root:not([data-theme='light'])[data-screen='bem-estar'] { --page: #482536; }
+  :root:not([data-theme='light'])[data-screen='amigos'] { --page: #2f2757; }
+  :root:not([data-theme='light'])[data-screen='onboarding'] { --page: #3d2b25; }
+}
+:root[data-theme='dark'] { --soft-btn: #2c2638; --soft-edge: #1a1622; --soft-ink: #d9d3e6; --tab-active: rgba(255, 255, 255, 0.1); }
+:root[data-theme='dark'][data-screen='inicio'] { --page: #1d4741; }
+:root[data-theme='dark'][data-screen='atividades'] { --page: #1c3346; }
+:root[data-theme='dark'][data-screen='cuidar'] { --page: #463a17; }
+:root[data-theme='dark'][data-screen='mundo'] { --page: #47321f; }
+:root[data-theme='dark'][data-screen='bem-estar'] { --page: #482536; }
+:root[data-theme='dark'][data-screen='amigos'] { --page: #2f2757; }
+:root[data-theme='dark'][data-screen='onboarding'] { --page: #3d2b25; }
+
+/* Uma tela só: nada passa para os lados e o fundo é sempre a cor da tela. */
+html,
+body {
+  background: var(--page);
+  overflow-x: clip;
+}
+body {
+  transition: background-color 350ms ease;
+}
+#root {
+  max-width: 100vw;
+}
+.shell,
+.fullscreen,
+.care-shell {
+  background: var(--page);
+}
+.shell > *,
+.fullscreen > div > * {
+  min-width: 0;
+}
+.eyebrow {
+  color: color-mix(in srgb, var(--ink) 66%, var(--page));
+}
+
+/* Cartões brancos, sem sombra pesada */
+.card,
+.post,
+.profile-head,
+.done-card,
+.task,
+.shop-card {
+  border-radius: 28px;
+  box-shadow: 0 3px 0 rgba(43, 34, 64, 0.07);
+}
+
+/* Barra de abas da mesma cor da tela, com ícones coloridos e destaque em bloco */
+.tabbar {
+  background: var(--page);
+  box-shadow: none;
+  border-radius: 0;
+  border-top: 1px solid rgba(43, 34, 64, 0.06);
+  transition: background-color 350ms ease;
+}
+.tabbar-inner {
+  gap: 4px;
+  padding: 6px 8px;
+}
+.tab {
+  gap: 2px;
+  padding: 6px 0 5px;
+  border-radius: 18px;
+  font-size: 12px;
+  color: var(--ink);
+}
+.tab[aria-current='page'] {
+  background: var(--tab-active);
+}
+.tab .tab-ico,
+.tab[aria-current='page'] .tab-ico {
+  width: 40px;
+  height: 36px;
+  background: none;
+  filter: none;
+  transform: none;
+}
+.tab[aria-current='page'] .tab-ico {
+  animation: tab-pop 360ms var(--ease-out);
+}
+@keyframes tab-pop {
+  40% { transform: scale(1.15) translateY(-2px); }
+}
+
+/* Botões: quadradinhos arredondados com volume embaixo */
+.btn {
+  border-radius: 20px;
+  min-height: 52px;
+}
+.btn-sm {
+  border-radius: 14px;
+  min-height: 40px;
+}
+.btn-ghost {
+  background: var(--soft-btn);
+  color: var(--soft-ink);
+  --btn-edge: var(--soft-edge);
+}
+.btn-soft {
+  background: var(--soft-btn);
+  color: var(--ink);
+  --btn-edge: var(--soft-edge);
+}
+.opt {
+  border: 2.5px solid transparent;
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: 0 4px 0 rgba(43, 34, 64, 0.09);
+}
+.opt[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--accent) 55%, #000);
+}
+.seg {
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+}
+.icon-btn {
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+}
+.bubble-pet {
+  border-radius: 24px 24px 24px 8px;
+  box-shadow: 0 3px 0 rgba(43, 34, 64, 0.07);
+}
+
+/* "Adicionar": botão translúcido da cor da tela */
+.btn-page {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 72px;
+  padding: 0 14px;
+  border-radius: 28px;
+  background: rgba(43, 34, 64, 0.07);
+  color: color-mix(in srgb, var(--ink) 75%, var(--page));
+  font-size: 18px;
+  font-weight: 900;
+  text-align: left;
+  transition: transform 140ms var(--ease-out);
+}
+.btn-page:active {
+  transform: scale(0.98);
+}
+.btn-page .btn-page-ico {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.35);
+}
+.section-label {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink) 80%, var(--page));
+}
+
+/* Missões: cartão branco, emoji num "bloquinho" cinza e o botão de concluir com volume */
+.task {
+  gap: 12px;
+  padding: 12px 12px 12px 12px;
+  border: none;
+  background: var(--surface);
+}
+.task-emoji {
+  width: 56px;
+  height: 56px;
+  border-radius: 40% 44% 42% 46%;
+  background: var(--soft-btn);
+  font-size: 29px;
+}
+.task-title {
+  font-size: 16.5px !important;
+  font-weight: 800 !important;
+}
+.check3d {
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  color: var(--check);
+  box-shadow: 0 4px 0 var(--soft-edge);
+}
+.check3d:active {
+  box-shadow: 0 1px 0 var(--soft-edge);
+}
+.task[data-done='true'] {
+  background: var(--surface);
+}
+.task[data-done='true'] .task-emoji {
+  opacity: 0.6;
+}
+.task[data-done='true'] .check3d {
+  background: var(--check);
+  border-color: var(--check);
+  color: #ffffff;
+  box-shadow: 0 4px 0 #357a45;
+}
+
+/* Desafios em linha do tempo */
+.quest-list {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  padding-left: 40px;
+}
+.quest-list::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 30px;
+  bottom: 30px;
+  border-left: 3px dashed rgba(255, 255, 255, 0.85);
+}
+.quest {
+  position: relative;
+}
+.quest-dot {
+  position: absolute;
+  left: -40px;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 3px solid #ffffff;
+  background: var(--page);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 900;
+}
+.quest[data-done='true'] .quest-dot {
+  background: var(--check);
+  border-color: var(--check);
+}
+.quest-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: 0 3px 0 rgba(43, 34, 64, 0.07);
+}
+.quest-ico {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 58px;
+  height: 58px;
+  border-radius: 20px;
+  font-size: 30px;
+}
+.quest-bar {
+  position: relative;
+  height: 30px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: var(--soft-btn);
+  overflow: hidden;
+}
+.quest-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffd66b, #f4b73a);
+  transition: width 600ms var(--ease-out);
+}
+.quest-bar span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  font-weight: 900;
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+}
+.quest-claim {
+  width: auto;
+  min-width: 52px;
+  padding: 0 10px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+/* Jornada em cartão branco com destaques coloridos */
+.journey {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 3px 0 rgba(43, 34, 64, 0.07);
+}
+.journey:active {
+  transform: scale(0.99);
+  box-shadow: 0 3px 0 rgba(43, 34, 64, 0.07);
+}
+.journey-perder { --j: #ff6a3d; --j2: #ffb347; }
+.journey-ganhar { --j: #2e9d5b; --j2: #7bd389; }
+.journey-manter { --j: #8a63d2; --j2: #b9a2f2; }
+.journey-tag {
+  background: color-mix(in srgb, var(--j) 14%, var(--surface));
+  color: color-mix(in srgb, var(--j) 80%, var(--ink));
+}
+.journey-track {
+  background: var(--soft-btn);
+}
+.journey-fill {
+  background: linear-gradient(90deg, var(--j2), var(--j));
+  box-shadow: none;
+}
+.journey-stat {
+  background: var(--soft-btn);
+}
+.journey-note {
+  color: var(--muted);
+  opacity: 1;
+}
+
+/* Loja e outros painéis também em branco */
+.shop-hero {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 3px 0 rgba(43, 34, 64, 0.07);
+}
+.shop-hero .renew {
+  background: var(--soft-btn);
+}
+.seller-speech {
+  background: var(--soft-btn);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+/* Cenário do Início: ocupa a largura toda e se funde com a cor da tela */
+.scene-bleed {
+  margin: -16px calc(-1 * max(16px, env(safe-area-inset-left, 0px))) 0;
+  border-radius: 0 0 36px 36px;
+  box-shadow: none;
+}
+.scene-bleed .scene,
+.scene-bleed .room {
+  border-radius: 0;
+  box-shadow: none;
+}
+.scene-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 90px;
+  background: linear-gradient(rgba(0, 0, 0, 0), var(--page));
+  pointer-events: none;
+}
+.scene-top {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #2b2240;
+  font-weight: 800;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.1);
+}
+.pill-round {
+  justify-content: center;
+  width: 40px;
+  padding: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab[aria-current='page'] .tab-ico { animation: none; }
+}
+
+/* Nada rola para o lado dentro de gavetas e telas cheias */
+.fullscreen,
+.sheet-body,
+.sheet {
+  overflow-x: hidden;
+}
+.bath-steps li {
+  min-width: 0;
+  overflow: hidden;
+  font-size: clamp(9px, 2.7vw, 10.5px);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bath-steps li span {
+  font-size: clamp(15px, 4.8vw, 19px);
+}
+
+/* Grades de uma coluna nunca passam da largura da tela (palavras longas quebram dentro). */
+.grid:not([class*='grid-cols']):not([class*='grid-flow']) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Seis abas: tudo cabe, até em telas estreitas */
+.tabbar-inner {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 2px;
+  padding: 6px 4px;
+}
+.tab {
+  min-width: 0;
+  font-size: 11.5px;
+}
+.tab .tab-ico,
+.tab[aria-current='page'] .tab-ico {
+  width: 36px;
+  height: 34px;
+}
+.tab-label {
+  display: block;
+  max-width: 100%;
+  padding: 0 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Botões grandes da aba Cuidar */
+.care-tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 26px;
+  background: var(--surface);
+  box-shadow: 0 4px 0 rgba(43, 34, 64, 0.09);
+  transition: transform 140ms var(--ease-out), box-shadow 140ms var(--ease-out);
+}
+.care-tile:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(43, 34, 64, 0.09);
+}
+.care-tile:disabled {
+  opacity: 0.45;
+}
+.care-tile-ico {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  font-size: 28px;
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.06);
+}
+.care-tile-done {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--check);
+  color: #ffffff;
+}
+
+.journey-tag {
+  max-width: 100%;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.journey-pct {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px 4px 12px;
+  border-radius: 999px;
+  background: var(--soft-btn);
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+/* Cartões em grade do próprio app também nunca passam da largura. */
+.journey,
+.done-card,
+.profile-head,
+.group-banner,
+.shop-hero,
+.album,
+.welcome-card {
+  grid-template-columns: minmax(0, 1fr);
+}
+.tab {
+  font-size: clamp(10px, 2.85vw, 11.5px);
+  letter-spacing: -0.01em;
+}
+.tab-label {
+  padding: 0;
+}
+@media (max-width: 340px) {
+  .tabbar-inner { gap: 0; padding: 6px 0; }
+  .tab { font-size: 9.5px; letter-spacing: -0.02em; }
+}
+
+/* Efeitos do guarda-roupa (no desenho do Hami) */
+.fx-pulse { transform-box: fill-box; transform-origin: center; animation: fx-pulse 2.6s ease-in-out infinite; }
+.fx-spin { transform-box: fill-box; transform-origin: center; animation: fx-spin 18s linear infinite; }
+.fx-orbit { transform-box: fill-box; transform-origin: center; animation: fx-spin 10s linear infinite; }
+.fx-rise { transform-box: fill-box; transform-origin: center; animation: fx-rise 2.6s ease-in-out infinite; }
+.fx-fall { transform-box: fill-box; transform-origin: center; animation: fx-fall 3.2s ease-in-out infinite; }
+.wing-flutter { transform-box: fill-box; transform-origin: right center; animation: wing-flutter 1.4s ease-in-out infinite; }
+@keyframes fx-pulse { 50% { opacity: 0.65; transform: scale(1.06); } }
+@keyframes fx-spin { to { transform: rotate(360deg); } }
+@keyframes fx-rise { 0% { opacity: 0; transform: translateY(8px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-26px); } }
+@keyframes fx-fall { 0% { opacity: 0; transform: translate(0, -10px) rotate(0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(8px, 40px) rotate(120deg); } }
+@keyframes wing-flutter { 50% { transform: scaleX(0.86) rotate(-3deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .fx-pulse, .fx-spin, .fx-orbit, .fx-rise, .fx-fall, .wing-flutter { animation: none; }
+}
+
+/* Armário: cada peça num quadradinho com o Hami vestindo */
+.wardrobe-tile {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 6px 10px;
+  border-radius: 22px;
+  border: 2.5px solid transparent;
+  background: var(--surface);
+  box-shadow: 0 4px 0 rgba(43, 34, 64, 0.08);
+  text-align: center;
+  transition: transform 140ms var(--ease-out), box-shadow 140ms var(--ease-out);
+}
+.wardrobe-tile:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(43, 34, 64, 0.08);
+}
+.wardrobe-tile[aria-pressed='true'] {
+  border-color: var(--accent);
+}
+.wardrobe-price {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  font-size: 10.5px;
+  font-weight: 900;
+}
+
+/* Cardápio de hoje */
+.meal-track {
+  position: relative;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--soft-btn);
+  overflow: hidden;
+}
+.meal-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+  transition: width 500ms var(--ease-out);
+}
+.meal-planned {
+  background: color-mix(in srgb, #ff9a4d 35%, transparent);
+}
+.meal-eaten {
+  background: linear-gradient(90deg, #ffc56b, #ff8a4d);
+}
+.meal-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 16px;
+  background: var(--soft-btn);
+  transition: transform 140ms var(--ease-out);
+}
+.meal-row:active {
+  transform: scale(0.98);
+}
+.meal-check {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 2.5px solid var(--line);
+  background: var(--surface);
+  color: transparent;
+}
+.meal-row[data-eaten='true'] .meal-check {
+  background: var(--check);
+  border-color: var(--check);
+  color: #ffffff;
+}
+.meal-row[data-eaten='true'] .text-left > span:first-child {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  opacity: 0.7;
+}
+.meal-edit {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 18px;
+  background: var(--soft-btn);
+}
+
+/* Ilustrações no lugar dos emojis */
+.glyph {
+  pointer-events: none;
+}
+.gi {
+  display: inline-block;
+  vertical-align: -0.22em;
+}
+.chip .glyph,
+.btn .glyph,
+.opt .glyph {
+  flex-shrink: 0;
+}
+
+/* Câmera da foto real */
+.camera {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: #14121a;
+  color: #fff;
+  padding: max(10px, env(safe-area-inset-top)) 0 max(14px, env(safe-area-inset-bottom));
+}
+.camera-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px 10px;
+}
+.camera-view {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  min-height: 0;
+  margin: 0 12px;
+  border-radius: 28px;
+  background: #000;
+}
+.camera-media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.camera-media.is-mirror {
+  transform: scaleX(-1);
+}
+.camera-msg {
+  position: absolute;
+  inset: auto 16px 50% 16px;
+  translate: 0 50%;
+  padding: 18px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.12);
+  text-align: center;
+}
+.camera-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  animation: cam-flash 380ms ease-out forwards;
+  pointer-events: none;
+}
+@keyframes cam-flash {
+  from {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.camera-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 12px;
+  padding: 16px 20px 0;
+}
+.cam-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  cursor: pointer;
+}
+.cam-btn:disabled {
+  opacity: 0.4;
+}
+.cam-shutter {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  border-radius: 999px;
+  background: #fff;
+  color: #14121a;
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.3);
+  transition: transform 120ms var(--ease-out);
+}
+.cam-shutter:active {
+  transform: scale(0.92);
+}
+.cam-shutter:disabled {
+  opacity: 0.45;
+}
+
+/* Áreas: hábitos e calma */
+.journey-habitos { --j: #4caf50; --j2: #9fd88a; --j-edge: #3b8a3f; }
+.journey-calma { --j: #2fa594; --j2: #8fd8c5; --j-edge: #1f7a6d; }
+.sos-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #5fc9b4, #57a8e0);
+  color: #ffffff;
+  box-shadow: 0 4px 0 #3a86a0;
+  transition: transform 120ms var(--ease-out), box-shadow 120ms var(--ease-out);
+}
+.sos-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #3a86a0;
+}
+.calm-quick {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 4px;
+  border-radius: 18px;
+  background: var(--soft-btn);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+.calm-quick:active {
+  transform: scale(0.97);
+}
+.area-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 7px 8px 7px 12px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  box-shadow: 0 3px 0 rgba(43, 34, 64, 0.07);
+}
+.area-pill-cta {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 800;
+}

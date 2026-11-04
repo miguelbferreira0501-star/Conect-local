@@ -1,0 +1,13 @@
+{
+  "id": "P001",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Eu já leio rótulo e olho a lupa sozinho, e o Yuka me dá nota de graça. R$ 9,90 por mês dá uns R$ 120 por ano, quatro vezes o Premium do Yuka, e com meu orçamento apertado eu baixaria só pra usar os 10 scans grátis.",
+  "objection": "Pagar todo mês por uma coisa que o Yuka já faz quase igual por R$ 30 o ano, e eu nem sei se esse preço dos mercados perto de mim funciona de verdade aqui em Joinville, ainda mais no atacarejo.",
+  "would_change_my_mind": "Se a comparação de preço provar que me faz economizar mais de R$ 10 por mês na compra do atacarejo e do mercado do bairro, com preço atualizado de verdade.",
+  "price_too_cheap": 1.99,
+  "price_cheap": 3.90,
+  "price_expensive": 6.90,
+  "price_too_expensive": 9.90
+}

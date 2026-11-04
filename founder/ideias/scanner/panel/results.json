@@ -1,0 +1,154 @@
+{
+ "business": "Scanner (nome provisório): app brasileiro que lê o código de barras de alimentos e cosméticos e mostra nota de saúde, ingredientes, alergênicos, alternativas, preço nos mercados próximos e lista de compras",
+ "seed": 102986,
+ "dealt": 20,
+ "answered": 20,
+ "skipped": [],
+ "buys": 0,
+ "passes": 20,
+ "buy_rate": 0.0,
+ "by_segment": [
+  [
+   "Classe C (renda familiar mensal em R$)",
+   10,
+   0.0
+  ],
+  [
+   "Classe B (renda familiar mensal em R$)",
+   7,
+   0.0
+  ],
+  [
+   "Classe A (renda familiar mensal em R$)",
+   3,
+   0.0
+  ]
+ ],
+ "by_behaviour": [
+  [
+   "Lê rótulo (saúde)",
+   4,
+   0.0
+  ],
+  [
+   "Fitness / dieta",
+   2,
+   0.0
+  ],
+  [
+   "Compra no automático",
+   4,
+   0.0
+  ],
+  [
+   "Já usa o Yuka",
+   2,
+   0.0
+  ],
+  [
+   "Skincare / cosméticos",
+   2,
+   0.0
+  ],
+  [
+   "Pai ou mãe com restrição na família",
+   2,
+   0.0
+  ],
+  [
+   "Caçador de promoção",
+   4,
+   0.0
+  ]
+ ],
+ "by_income": [
+  [
+   "$5,000 to $12,000",
+   7,
+   0.0
+  ],
+  [
+   "$12,000 and up",
+   8,
+   0.0
+  ],
+  [
+   "under $5,000",
+   5,
+   0.0
+  ]
+ ],
+ "why_not": [
+  [
+   "habit",
+   9,
+   [
+    "Eu já escaneio código de barras no meu app de dieta pra ver proteína e caloria, e o que ele não mostra eu tiro foto do rótulo e pergunto ao ChatGPT. Com os filhos puxando o carrinho eu não vou parar pra escanear produto por produto, então no máximo uso os 10 grátis e pronto.",
+    "Eu compro sempre as mesmas marcas e quero entrar e sair rápido do mercado, não vou ficar escaneando produto por produto. E se um dia der curiosidade, o Yuka já faz isso de graça."
+   ],
+   [
+    "P002",
+    "P003"
+   ]
+  ],
+  [
+   "price",
+   7,
+   [
+    "Eu já leio rótulo e olho a lupa sozinho, e o Yuka me dá nota de graça. R$ 9,90 por mês dá uns R$ 120 por ano, quatro vezes o Premium do Yuka, e com meu orçamento apertado eu baixaria só pra usar os 10 scans grátis.",
+    "Eu já uso o Yuka de graça pra ver ingrediente de creme e shampoo, e o Premium dele sai uns R$ 30 por ano. R$ 9,90 por mês dá quase R$ 120 por ano, e eu já pago assinatura demais. No máximo eu baixava e ficava nos 10 scans grátis."
+   ],
+   [
+    "P001",
+    "P007"
+   ]
+  ],
+  [
+   "trust",
+   3,
+   [
+    "O aviso de alergênico é o que me interessa de verdade, mas eu já leio cada rótulo e não vou confiar a saúde do meu filho a um app sem saber de onde vêm os dados. Uso os 10 scans grátis pra testar e, pra preço, já tenho o Menor Preço de graça; mais uma assinatura eu não pago agora.",
+    "Eu já leio rótulo e olho a lupa sozinho, então a nota eu até testaria nos 10 scans grátis. Mas pagar R$ 9,90 só faz sentido se o preço dos mercados daqui de Joinville estiver certo, e disso eu duvido no começo."
+   ],
+   [
+    "P008",
+    "P013"
+   ]
+  ],
+  [
+   "need",
+   1,
+   [
+    "Eu já leio rótulo e olho a lupa de alto em açúcar/sódio, então a nota de 0 a 100 não me diz muito que eu não veja sozinho. Até baixaria pra testar no grátis, mas 10 scans por mês dá e sobra pra mim, não vou pagar R$ 9,90 por isso."
+   ],
+   [
+    "P010"
+   ]
+  ]
+ ],
+ "why_yes": [],
+ "flip": [
+  "Se a comparação de preço provar que me faz economizar mais de R$ 10 por mês na compra do atacarejo e do mercado do bairro, com preço atualizado de verdade.",
+  "Se a lista de compras com o preço mais barato perto de casa funcionasse de verdade e me mostrasse que eu economizo bem mais que R$ 9,90 por mês no rancho.",
+  "Se alguém da família tivesse uma alergia séria e eu precisasse checar rótulo com urgência.",
+  "Se a comparação de preço nos mercados perto de mim funcionasse de verdade e me fizesse economizar mais do que a mensalidade na compra do mês.",
+  "Se mostrasse, com prova, que a lista de compras com os mercados daqui me faz economizar bem mais que R$ 9,90 no mês, aí eu pagaria.",
+  "Se alguém da família tivesse alergia e o aviso de alergênico me poupasse tempo de ler rótulo, ou se a lista com os mais baratos me fizesse economizar mais do que os R$ 9,90 todo mês, comprovado.",
+  "Se a comparação de preço nos mercados daqui funcionasse mesmo e me fizesse economizar mais que a mensalidade no rancho do mês, ou se tivesse um plano anual na faixa do Yuka.",
+  "Ver que os dados de alergênicos são conferidos e atualizados (por exemplo, recomendação de uma associação de celíacos ou alérgicos, ou de um médico) e o app acertar em todos os produtos que eu já conheço nos testes grátis.",
+  "Se alguém da família tivesse uma alergia ou restrição séria e o app me avisasse sozinho, sem eu ter que conferir rótulo por rótulo.",
+  "Se a lista de compras realmente mostrasse o mercado mais barato perto de mim com preço atualizado e eu visse que economizo mais que os R$ 9,90 no mês.",
+  "Se nos scans grátis ele achasse todos os meus produtos e me mostrasse uma economia real no mercado maior que os R$ 9,90 do mês, ou um plano anual bem mais barato.",
+  "Se a comparação de preço mostrasse de verdade, com preço atualizado do atacarejo e do mercado aqui de Joinville, que eu economizo mais de R$ 9,90 no mês, e deixasse claro que nenhuma marca paga pela nota.",
+  "Usar o grátis por um mês e ver que os preços do Giassi e dos mercados do meu bairro batem com a prateleira, e que a lista me fez economizar mais que os R$ 9,90.",
+  "Se mostrasse que eu economizo bem mais que R$ 9,90 por mês nas compras, com preço de verdade dos mercados do meu bairro, ou se fosse grátis.",
+  "Se ele substituísse meu app de dieta, contando proteína e caloria junto, ou se o preço mais barato no mercado aqui de Joinville me fizesse economizar mais que os R$ 9,90 todo mês.",
+  "Ver no plano grátis que ele acerta os alergênicos dos produtos que eu já compro e reconhece as marcas do meu mercado; aí eu pagaria no mês seguinte.",
+  "Se eu visse na prática que o app me faz economizar bem mais do que R$ 9,90 no mês com as ofertas dos mercados aqui de Joinville, aí talvez eu pagasse.",
+  "Se mostrasse com prova que eu economizo bem mais que os R$ 9,90 no mês, tipo uns R$ 50 a menos na compra, ou se fosse um pagamento único em vez de mensalidade.",
+  "Mostrar de onde vem a nota e provar que dá pra economizar de verdade no mercado aqui de Joinville, mais do que os R$ 9,90 que eu pago.",
+  "Ver na prática, no primeiro mês grátis, que a lista de compras mais barata me fez economizar bem mais que R$ 9,90 nos mercados daqui."
+ ],
+ "purchases_first_month_per_buyer": null,
+ "price_answers": 20
+}

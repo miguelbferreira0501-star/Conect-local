@@ -1,0 +1,13 @@
+{
+  "id": "P014",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Eu já comparo preço nos folhetos e no grupo do WhatsApp, e o Menor Preço Brasil faz isso de graça. Pagar R$ 9,90 todo mês pra saber se o biscoito é saudável não cabe no meu orçamento; no máximo uso os 10 scans grátis.",
+  "objection": "Não acredito que o preço dos mercados daqui de perto vai estar certo e atualizado, e com as crianças puxando o carrinho eu não tenho tempo de ficar escaneando produto por produto.",
+  "would_change_my_mind": "Se mostrasse que eu economizo bem mais que R$ 9,90 por mês nas compras, com preço de verdade dos mercados do meu bairro, ou se fosse grátis.",
+  "price_too_cheap": 1,
+  "price_cheap": 3,
+  "price_expensive": 6,
+  "price_too_expensive": 10
+}
