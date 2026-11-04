@@ -67,9 +67,12 @@ export function Onboarding() {
         </span>
       </div>
 
-      <div className="flex justify-center">
-        <Hamster fur={a.fur} grams={grams} phase={0} mood={step === 'intro' ? 'dormindo' : step === 'plus' || step === 'plan' ? 'animado' : 'feliz'} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null }} size={step === 'intro' ? 200 : 150} label={petName} />
-      </div>
+      {/* Na tela do Plus o Hami aparece lá dentro, de cartola: aqui em cima ficaria repetido. */}
+      {step !== 'plus' && (
+        <div className="flex justify-center">
+          <Hamster fur={a.fur} grams={grams} phase={0} mood={step === 'intro' ? 'dormindo' : step === 'plan' ? 'animado' : 'feliz'} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null }} size={step === 'intro' ? 200 : 150} label={petName} />
+        </div>
+      )}
 
       <div className="grid gap-3" key={step}>
         {step === 'intro' && (

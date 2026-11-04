@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react';
 import { Sheet, toast } from './ui';
 import { Glyph } from './art';
 import { AREA_GOAL, AREAS, areasFor, isWeightArea, type Area } from '../logic/areas';
+import { isMinor } from '../logic/evolution';
 import { libById } from '../data/tasks';
 import { areaNow, changeArea, starterPlan, useApp } from '../lib/store';
 
@@ -40,6 +41,11 @@ export function AreaSheet({ open, onClose }: { open: boolean; onClose: () => voi
               {current === a ? <span className="chip chip-leaf shrink-0">Atual</span> : <ChevronRight size={18} className="shrink-0 text-muted" />}
             </button>
           ))}
+          {isMinor(s.profile.ageGroup) && (
+            <p className="rounded-2xl bg-surface2 p-3 text-[13px] font-semibold text-muted">
+              Perder, ganhar e manter o peso só aparecem para quem tem 18 anos ou mais. Se a sua idade estiver errada, troque em Ajustes › Faixa de idade.
+            </p>
+          )}
         </div>
       ) : (
         <div className="grid gap-3 pb-2">
