@@ -5,6 +5,9 @@ import type pg from 'pg';
 import { withUser } from '../db';
 import { forbidden, invalid, notFound } from '../lib/errors';
 import { type AppEnv, requireAuth } from '../auth';
+import { gameConfig, resetGameConfigCache } from './game';
+import { DEFAULT_GAME, chestPool, validateGameConfig, type GameConfig } from '../../../web/src/shared/game';
+import { itemById } from '../../../web/src/data/items';
 
 export const admin = new Hono<AppEnv>();
 admin.use('*', requireAuth);
@@ -115,5 +118,50 @@ admin.delete('/events/:id', (c) =>
   asAdmin(c, async (db) => {
     await db.query('DELETE FROM events WHERE id = $1', [c.req.param('id')]);
     return c.json({ ok: true });
+  }),
+);
+
+// ---------- Configuração do jogo (versões) ----------
+
+const POOL = chestPool();
+
+/** Versão em uso, a configuração padrão e o histórico de versões. */
+admin.get('/game-config', (c) =>
+  asAdmin(c, async (db) => {
+    const versions = (
+      await db.query(`SELECT g.version, (extract(epoch from g.created_at) * 1000)::bigint AS at, COALESCE(p.name, u.name) AS author, g.config->>'note' AS note
+        FROM game_config g LEFT JOIN users u ON u.id = g.created_by LEFT JOIN profiles p ON p.user_id = g.created_by ORDER BY g.version DESC LIMIT 30`)
+    ).rows.map((r) => ({ ...r, at: Number(r.at) }));
+    return c.json({ current: await gameConfig(), defaults: DEFAULT_GAME, versions });
+  }),
+);
+
+/** Salva uma versão nova (o servidor confere tudo antes; nada muda se houver erro). */
+admin.post('/game-config', (c) =>
+  asAdmin(c, async (db) => {
+    const body = z.object({ config: z.record(z.unknown()), note: z.string().max(120).default('') }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success) throw invalid('Configuração inválida.');
+    const cfg = { ...DEFAULT_GAME, ...body.data.config } as GameConfig;
+    const errors = validateGameConfig(cfg, POOL, (id) => !!itemById(id));
+    if (errors.length) return c.json({ error: 'invalido', message: 'A configuração tem problemas.', errors }, 422);
+    const next = (await db.query('SELECT COALESCE(max(version), 1) + 1 AS v FROM game_config')).rows[0].v;
+    await db.query('INSERT INTO game_config (version, config, created_by) VALUES ($1, $2, app.current_user_id())', [next, { ...cfg, version: next, note: body.data.note }]);
+    await db.query('INSERT INTO moderation_log (actor, action, target) VALUES (app.current_user_id(), $1, $2)', ['jogo:config', `versao:${next}`]);
+    resetGameConfigCache();
+    return c.json({ version: next }, 201);
+  }),
+);
+
+/** Volta para uma versão antiga (vira uma versão nova, para ficar no histórico). */
+admin.post('/game-config/:version/restore', (c) =>
+  asAdmin(c, async (db) => {
+    const v = Number(c.req.param('version'));
+    const row = Number.isInteger(v) ? (await db.query('SELECT config FROM game_config WHERE version = $1', [v])).rows[0] : null;
+    if (!row) throw notFound('Versão não encontrada.');
+    const next = (await db.query('SELECT COALESCE(max(version), 1) + 1 AS n FROM game_config')).rows[0].n;
+    await db.query('INSERT INTO game_config (version, config, created_by) VALUES ($1, $2, app.current_user_id())', [next, { ...row.config, version: next, note: `Volta para a versão ${v}` }]);
+    await db.query('INSERT INTO moderation_log (actor, action, target) VALUES (app.current_user_id(), $1, $2)', ['jogo:voltar', `versao:${v}`]);
+    resetGameConfigCache();
+    return c.json({ version: next }, 201);
   }),
 );

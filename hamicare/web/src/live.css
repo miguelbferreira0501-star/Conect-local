@@ -2238,3 +2238,124 @@
 .coins-btn:active {
   transform: translateY(2px);
 }
+
+/* Trilha da temporada */
+.season.season-pass {
+  display: grid;
+  gap: 12px;
+}
+.season-rail {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding: 4px 2px 8px;
+  margin: 0 -4px;
+  scrollbar-width: none;
+}
+.season-rail::-webkit-scrollbar {
+  display: none;
+}
+.season-node {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+.season-node + .season-node::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 52px;
+  width: 12px;
+  border-top: 3px dotted rgba(255, 255, 255, 0.6);
+}
+.season-day {
+  font-size: 11px;
+  font-weight: 900;
+  opacity: 0.9;
+}
+.season-prize {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 66px;
+  padding-top: 2px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-weight: 900;
+}
+.season-prize small {
+  font-size: 11px;
+  line-height: 1;
+}
+.season-node.is-ready .season-prize {
+  background: #ffffff;
+  color: #2b2240;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
+  animation: fx-pulse 1.8s ease-in-out infinite;
+}
+.season-node.is-got .season-prize {
+  background: rgba(255, 255, 255, 0.45);
+  opacity: 0.85;
+}
+.season-node:not(.is-ready):not(.is-got) .season-prize > :first-child {
+  filter: grayscale(0.6);
+  opacity: 0.7;
+}
+.season-check {
+  position: absolute;
+  right: -4px;
+  top: -4px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #2e8a5a;
+  color: #fff;
+  font-size: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .season-node.is-ready .season-prize { animation: none; }
+}
+
+/* Ranking entre amigos */
+.rank-row.is-me {
+  box-shadow: 0 0 0 3px var(--accent), var(--shadow);
+}
+.rank-place {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-weight: 900;
+}
+.rank-place.place-1 { background: #ffd25a; color: #4a2a00; }
+.rank-place.place-2 { background: #dfe6ef; color: #2b2240; }
+.rank-place.place-3 { background: #f1b98a; color: #4a2a00; }
+
+/* Administração › Jogo */
+.admin-part summary {
+  list-style: none;
+}
+.admin-part summary::-webkit-details-marker {
+  display: none;
+}
+.admin-part[open] summary {
+  padding-bottom: 8px;
+}
+.admin-sim th,
+.admin-sim td {
+  padding: 6px 4px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}

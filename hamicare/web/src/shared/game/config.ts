@@ -36,6 +36,15 @@ export interface CollectionDef {
   reward: { coins: number; xp: number };
 }
 
+/** Degrau da trilha da temporada (grátis): abre com dias ativos no mês. */
+export interface SeasonTier {
+  days: number;
+  coins?: number;
+  xp?: number;
+  fragments?: number;
+  chest?: ChestId;
+}
+
 export interface ChestDef {
   name: string;
   price: number;
@@ -74,6 +83,8 @@ export interface GameConfig {
   };
   arenas: ArenaDef[];
   collections: CollectionDef[];
+  /** Trilha grátis da temporada do mês. */
+  season: { tiers: SeasonTier[] };
   rarities: Record<Rarity, { label: string; color: string; fragments: number; craft: number }>;
   chests: Record<ChestId, ChestDef>;
   pity: {
@@ -138,6 +149,20 @@ export const DEFAULT_GAME: GameConfig = {
     { id: 'festa', name: 'Dia de festa', desc: 'Balões, bolo e muita alegria.', art: '🎈', items: ['festa-rosa', 'balao', 'bolo', 'cupcake', 'presente', 'sininho', 'fx-brilhos'], reward: { coins: 100, xp: 40 } },
     { id: 'brincadeiras', name: 'Hora de brincar', desc: 'Do novelo ao fliperama.', art: '🎮', items: ['bola', 'novelo', 'ioio', 'dado', 'quebra-cabeca', 'videogame', 'fliperama'], reward: { coins: 180, xp: 50 } },
   ],
+  season: {
+    tiers: [
+      { days: 1, coins: 10 },
+      { days: 2, fragments: 15 },
+      { days: 4, coins: 20 },
+      { days: 6, chest: 'madeira' },
+      { days: 8, coins: 30 },
+      { days: 10, fragments: 30 },
+      { days: 13, coins: 40 },
+      { days: 16, chest: 'madeira' },
+      { days: 18, fragments: 50 },
+      { days: 20, coins: 120, xp: 150, chest: 'prata' },
+    ],
+  },
   rarities: {
     comum: { label: 'Comum', color: '#9AA6B5', fragments: 5, craft: 25 },
     incomum: { label: 'Incomum', color: '#4CB86A', fragments: 12, craft: 60 },

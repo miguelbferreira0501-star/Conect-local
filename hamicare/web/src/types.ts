@@ -246,7 +246,8 @@ export interface State {
   photos: Photo[];
   settings: Settings;
   premium: { trialStart: string | null; until: string | null };
-  privacy: { requests: 'todos' | 'ninguem'; sharePhotos: boolean };
+  /** ranking: aparecer no ranking dos amigos (padrão sim; dá para sair). */
+  privacy: { requests: 'todos' | 'ninguem'; sharePhotos: boolean; ranking?: boolean };
   journey: Journey;
   /** Último dia em que a pessoa viu o cartão de boas-vindas. */
   welcomed: string | null;

@@ -9,6 +9,8 @@ import { AppError, forbidden, invalid, notFound } from '../lib/errors';
 import { type AppEnv, requireAuth } from '../auth';
 import { checkKindness, PRESET_COMMENTS, REACTION_IDS, REASON_TEXT } from '../../../web/src/shared/moderation';
 import { ITEMS } from '../../../web/src/data/items';
+import { arenaOf } from '../../../web/src/shared/game';
+import { gameConfig } from './game';
 
 export const social = new Hono<AppEnv>();
 social.use('*', requireAuth);
@@ -32,7 +34,7 @@ const pid = (v: string) => {
   return r.data;
 };
 
-const PROFILE_COLS = `p.user_id AS id, p.name, p.code, p.pet, p.house, p.level, p.teen, p.accepts_requests AS "acceptsRequests", p.bio, p.streak, p.badges, (extract(epoch from p.updated_at) * 1000)::bigint AS "updatedAt"`;
+const PROFILE_COLS = `p.user_id AS id, p.name, p.code, p.pet, p.house, p.level, p.teen, p.accepts_requests AS "acceptsRequests", p.bio, p.streak, p.badges, p.arena, p.ranked, (extract(epoch from p.updated_at) * 1000)::bigint AS "updatedAt"`;
 const POST_COLS = `id, author_id AS "authorId", group_id AS "groupId", kind, text, pet, house, image, (extract(epoch from created_at) * 1000)::bigint AS "createdAt"`;
 const cleanPost = <T extends Record<string, unknown>>(p: T) => ({ ...p, pet: p.pet ?? undefined, house: p.house ?? undefined, image: p.image ?? undefined, groupId: p.groupId ?? undefined });
 
@@ -71,6 +73,8 @@ social.put('/profile', (c) =>
         bio: z.string().max(120).default(''),
         streak: z.number().int().min(0).max(9999).default(0),
         badges: z.number().int().min(0).max(999).default(0),
+        arena: z.number().int().min(1).max(99).default(1),
+        ranked: z.boolean().default(true),
       })
       .safeParse(await c.req.json().catch(() => ({})));
     if (!body.success) throw invalid('Perfil inválido.');
@@ -86,9 +90,9 @@ social.put('/profile', (c) =>
       if (!taken) code = candidate;
     }
     await db.query(
-      `INSERT INTO profiles (user_id, code, name, pet, house, level, teen, accepts_requests, bio, streak, badges) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-       ON CONFLICT (user_id) DO UPDATE SET name = $3, pet = $4, house = $5, level = $6, teen = $7, accepts_requests = $8, bio = $9, streak = $10, badges = $11, updated_at = now()`,
-      [me.id, code, b.name, b.pet, b.house, b.level, me.ageGroup !== '18mais', b.acceptsRequests, bio, b.streak, b.badges],
+      `INSERT INTO profiles (user_id, code, name, pet, house, level, teen, accepts_requests, bio, streak, badges, arena, ranked) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+       ON CONFLICT (user_id) DO UPDATE SET name = $3, pet = $4, house = $5, level = $6, teen = $7, accepts_requests = $8, bio = $9, streak = $10, badges = $11, arena = $12, ranked = $13, updated_at = now()`,
+      [me.id, code, b.name, b.pet, b.house, b.level, me.ageGroup !== '18mais', b.acceptsRequests, bio, b.streak, b.badges, b.arena, b.ranked],
     );
     const p = (await db.query(`SELECT ${PROFILE_COLS} FROM profiles p WHERE p.user_id = $1`, [me.id])).rows[0];
     return c.json({ profile: p });
@@ -211,6 +215,51 @@ social.get('/profiles/:id', (c) =>
     const posts = (await db.query(`SELECT ${POST_COLS} FROM posts WHERE author_id = $1 AND group_id IS NULL AND NOT hidden ORDER BY created_at DESC LIMIT 30`, [id])).rows.map(cleanPost);
     const friendsCount = (await db.query('SELECT app.friend_count($1) AS n', [id])).rows[0].n;
     return c.json({ profile, posts, friendsCount, isFriend });
+  }),
+);
+
+// ---------- Visitas com reação ----------
+
+/** Deixa uma reação na casa de um amigo (uma por dia; as regras do banco só deixam entre amigos). */
+social.post('/visits/:id', (c) =>
+  asMe(c, async (db) => {
+    const body = z.object({ reaction: z.string().refine((x) => REACTION_IDS.includes(x)) }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success) throw invalid('Reação inválida.');
+    const host = pid(c.req.param('id'));
+    if (!(await db.query('SELECT app.are_friends(app.current_user_id(), $1) AS f', [host])).rows[0].f) throw forbidden('Só dá para reagir na casa de amigos.');
+    const r = await db.query('INSERT INTO visits (visitor, host, reaction) VALUES (app.current_user_id(), $1, $2) ON CONFLICT DO NOTHING', [host, body.data.reaction]);
+    return c.json({ result: r.rowCount ? 'ok' : 'limite' });
+  }),
+);
+
+/** Quem visitou a sua casa (as mais recentes). */
+social.get('/visits', (c) =>
+  asMe(c, async (db) => {
+    const rows = (await db.query('SELECT visitor AS "userId", name, pet, reaction, (extract(epoch from created_at) * 1000)::bigint AS at FROM app.my_visits(30)')).rows;
+    return c.json({ visits: rows.map((r) => ({ ...r, at: Number(r.at) })) });
+  }),
+);
+
+// ---------- Ranking só entre amigos ----------
+
+social.get('/ranking', (c) =>
+  asMe(c, async (db, me) => {
+    if (me.ageGroup === 'ate12') return c.json({ rows: [], optedOut: false });
+    const mine = (await db.query('SELECT ranked FROM profiles WHERE user_id = app.current_user_id()')).rows[0];
+    if (mine && !mine.ranked) return c.json({ rows: [], optedOut: true });
+    const cfg = await gameConfig();
+    const rows = (await db.query('SELECT * FROM app.friend_ranking()')).rows.map((r) => ({
+      userId: r.user_id,
+      name: r.name,
+      pet: r.pet,
+      dias: r.dias,
+      missoes: r.missoes,
+      conquistas: r.conquistas,
+      colecoes: r.colecoes,
+      arenas: arenaOf(r.max_level, cfg).n,
+      me: r.user_id === me.id,
+    }));
+    return c.json({ rows, optedOut: false });
   }),
 );
 

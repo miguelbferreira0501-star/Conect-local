@@ -4,8 +4,9 @@ import { Empty, Seg, toast } from '../components/ui';
 import { http, ApiError } from '../lib/social/api';
 import { addDays } from '../lib/util';
 import { todayKey } from '../lib/store';
+import { AdminGame } from './AdminGame';
 
-type Tab = 'resumo' | 'denuncias' | 'usuarios' | 'eventos';
+type Tab = 'resumo' | 'denuncias' | 'usuarios' | 'eventos' | 'jogo';
 
 const STAT_LABEL: Record<string, string> = {
   usuarios: 'Usuários',
@@ -33,11 +34,12 @@ export function Admin({ onClose }: { onClose: () => void }) {
             <X size={20} />
           </button>
         </div>
-        <Seg value={tab} onChange={setTab} label="Seções" options={[{ id: 'resumo', label: 'Resumo' }, { id: 'denuncias', label: 'Denúncias' }, { id: 'usuarios', label: 'Usuários' }, { id: 'eventos', label: 'Eventos' }]} />
+        <Seg value={tab} onChange={setTab} label="Seções" options={[{ id: 'resumo', label: 'Resumo' }, { id: 'denuncias', label: 'Denúncias' }, { id: 'usuarios', label: 'Usuários' }, { id: 'eventos', label: 'Eventos' }, { id: 'jogo', label: 'Jogo' }]} />
         {tab === 'resumo' && <Stats />}
         {tab === 'denuncias' && <Reports />}
         {tab === 'usuarios' && <Users />}
         {tab === 'eventos' && <Events />}
+        {tab === 'jogo' && <AdminGame />}
       </div>
     </div>
   );

@@ -98,7 +98,7 @@ export default function App() {
   useEffect(() => {
     const t = setTimeout(() => syncProfile(s), 1500);
     return () => clearTimeout(t);
-  }, [s.profile.name, s.pet.name, s.pet.fur, s.pet.phase, s.pet.outfit, s.house, s.xp, s.privacy.requests, s.bio, s.days, s.achievements]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [s.profile.name, s.pet.name, s.pet.fur, s.pet.phase, s.pet.outfit, s.house, s.xp, s.privacy.requests, s.privacy.ranking, s.homeArena, s.game.maxLevel, s.bio, s.days, s.achievements]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const onHash = () => setTab(initialTab());

@@ -26,7 +26,36 @@ export interface Profile {
   /** Contadores públicos: só coisas boas. */
   streak?: number;
   badges?: number;
+  /** Arena onde o Hami mora (para a visita mostrar o cenário). */
+  arena?: number;
+  /** Aparece no ranking dos amigos (dá para sair). */
+  ranked?: boolean;
+  /** Números do ranking (só na página de teste; no servidor quem calcula é ele). Nunca peso. */
+  stats?: RankStats;
   updatedAt: number;
+}
+
+export interface RankStats {
+  /** Dias com missão nos últimos 30. */
+  dias: number;
+  /** Missões feitas nos últimos 7 dias. */
+  missoes: number;
+  conquistas: number;
+  colecoes: number;
+  arenas: number;
+}
+export interface RankRow extends RankStats {
+  userId: string;
+  name: string;
+  pet: PublicPet;
+  me: boolean;
+}
+export interface Visit {
+  userId: string;
+  name: string;
+  pet: PublicPet;
+  reaction: ReactionId;
+  at: number;
 }
 
 /** Perfil aberto de alguém, no estilo rede social. */
@@ -156,4 +185,10 @@ export interface SocialApi {
   createChallenge(c: { title: string; emoji: string; target: number; days: number }): Promise<void>;
   checkin(id: string): Promise<void>;
   leaveChallenge(id: string): Promise<void>;
+  /** Deixa uma reação na casa de um amigo (uma por dia por amigo). */
+  visit(userId: string, reaction: ReactionId): Promise<'ok' | 'limite'>;
+  /** Quem visitou a sua casa. */
+  visits(): Promise<Visit[]>;
+  /** Ranking só entre amigos (vazio se você saiu do ranking). */
+  ranking(): Promise<{ rows: RankRow[]; optedOut: boolean }>;
 }

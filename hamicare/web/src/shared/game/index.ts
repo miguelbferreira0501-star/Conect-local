@@ -4,3 +4,4 @@ export * from './levels';
 export * from './rewards';
 export * from './chests';
 export * from './catalog';
+export * from './validate';

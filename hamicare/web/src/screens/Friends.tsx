@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Flag, Gift as GiftIcon, Plus, ShieldBan, UserPlus, X } from 'lucide-react';
+import { Gift as GiftIcon, Plus, UserPlus, X } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
-import { Room } from '../components/Room';
-import { Empty, Modal, Sheet, toast } from '../components/ui';
+import { Empty, Sheet, toast } from '../components/ui';
 import { itemById } from '../data/items';
-import { periodOf } from '../data/lines';
 import { checkKindness, REASON_TEXT } from '../shared/moderation';
 import { logEvent, payGift, receiveGift, todayKey, useApp } from '../lib/store';
 import { formatDay } from '../lib/util';
 import { socialBlocked, syncProfile, useSocial } from '../lib/social';
+import { RankingTab, VisitsCard } from './social/Ranking';
 import { postKey, type Feed, type FriendState, type Gift, type GroupChallenge, type Profile, type SocialApi } from '../lib/social/types';
 import { Avatar, Composer, PostCard, type ShareDraft } from './social/Post';
 import { MyHeader, ProfilePage } from './social/Profile';
@@ -17,7 +16,7 @@ import { Glyph } from '../components/art';
 
 export type { ShareDraft };
 
-type Tab = 'feed' | 'grupos' | 'amigos' | 'desafios' | 'presentes';
+type Tab = 'feed' | 'grupos' | 'amigos' | 'desafios' | 'ranking' | 'presentes';
 
 export function Friends({ share, onShareDone, giftItem, onGiftDone, account }: { share: ShareDraft; onShareDone: () => void; giftItem: string | null; onGiftDone: () => void; account: React.ReactNode }) {
   const s = useApp();
@@ -77,6 +76,7 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account }: {
     { id: 'grupos', icon: '👥', label: 'Grupos' },
     { id: 'amigos', icon: '🐹', label: `Amigos${fs?.incoming.length ? ` (${fs.incoming.length})` : ''}` },
     { id: 'desafios', icon: '🎯', label: 'Desafios' },
+    { id: 'ranking', icon: '🏆', label: 'Ranking' },
     { id: 'presentes', icon: '🎁', label: 'Presentes' },
   ];
   return (
@@ -94,6 +94,7 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account }: {
       {tab === 'amigos' && <FriendsTab api={api} fs={fs} refresh={refreshFriends} onOpenProfile={setProfile} />}
       {tab === 'desafios' && <ChallengesTab api={api} profiles={fs ? Object.fromEntries([...fs.friends, ...(me ? [me] : [])].map((p) => [p.id, p])) : {}} myId={myId} />}
       {tab === 'presentes' && <GiftsTab api={api} />}
+      {tab === 'ranking' && <RankingTab api={api} onOpenProfile={setProfile} />}
       <GiftSheet api={api} itemId={giftItem} friends={fs?.friends ?? []} onClose={onGiftDone} />
       <AddFriend open={adding} api={api} onClose={() => setAdding(false)} onAdded={refreshFriends} onOpenProfile={setProfile} />
       {profile && <ProfilePage userId={profile} api={api} myId={myId} onClose={() => setProfile(null)} onChanged={refreshFriends} />}
@@ -233,7 +234,6 @@ function FeedTab({ api, share, onShareDone, friends, myId, onOpenProfile, onAdd 
 // ---------- Amigos ----------
 
 function FriendsTab({ api, fs, refresh, onOpenProfile }: { api: SocialApi; fs: FriendState | null; refresh: () => void; onOpenProfile: (id: string) => void }) {
-  const [visit, setVisit] = useState<Profile | null>(null);
   if (!fs) return <p className="text-center text-muted">Carregando…</p>;
   const act = async (fn: () => Promise<unknown>, msg: string) => {
     await fn();
@@ -242,6 +242,7 @@ function FriendsTab({ api, fs, refresh, onOpenProfile }: { api: SocialApi; fs: F
   };
   return (
     <div className="grid gap-4">
+      <VisitsCard api={api} onOpenProfile={onOpenProfile} />
       {fs.incoming.length > 0 && (
         <section className="grid gap-2">
           <h2 className="font-display text-[19px] font-bold">Pedidos de amizade</h2>
@@ -306,35 +307,6 @@ function FriendsTab({ api, fs, refresh, onOpenProfile }: { api: SocialApi; fs: F
           ))}
         </section>
       )}
-      <Modal open={!!visit} onClose={() => setVisit(null)} label="Visita">
-        {visit && (
-          <div className="grid gap-3 p-4">
-            <p className="font-display text-[22px] font-bold">Casa de {visit.name}</p>
-            <Room house={visit.house} period={periodOf()} height={240}>
-              <Hamster fur={visit.pet.fur} phase={visit.pet.phase} outfit={visit.pet.outfit} size={120} neutral label={visit.pet.name} />
-            </Room>
-            <p className="text-[14px] text-muted">
-              {visit.pet.name} · nível {visit.level}
-            </p>
-            <div className="flex gap-2">
-              <button className="btn btn-primary flex-1" onClick={() => setVisit(null)}>
-                Que casa linda!
-              </button>
-              <button className="btn btn-ghost" onClick={() => (act(() => api.remove(visit.id), 'Amizade desfeita'), setVisit(null))}>
-                Desfazer amizade
-              </button>
-            </div>
-            <div className="flex gap-2">
-              <button className="btn btn-ghost btn-sm flex-1" onClick={() => (api.report({ type: 'user', id: visit.id, userId: visit.id }, 'perfil'), toast('Denúncia enviada.'))}>
-                <Flag size={14} /> Denunciar
-              </button>
-              <button className="btn btn-ghost btn-sm flex-1" onClick={() => (act(() => api.block(visit.id), 'Pessoa bloqueada'), setVisit(null))}>
-                <ShieldBan size={14} /> Bloquear
-              </button>
-            </div>
-          </div>
-        )}
-      </Modal>
     </div>
   );
 }

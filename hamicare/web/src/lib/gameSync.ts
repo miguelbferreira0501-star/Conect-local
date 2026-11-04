@@ -2,7 +2,8 @@
 // Sem internet, os pedidos ficam guardados e saem quando a conexão voltar.
 import { http } from './social/api';
 import { applyServerWallet, getState, setGameHook, type GameOp } from './store';
-import type { Pity } from '../shared/game';
+import { DEFAULT_GAME, type GameConfig, type Pity } from '../shared/game';
+import { setGameCfg } from './game';
 
 export interface ServerWallet {
   coins: number;
@@ -81,6 +82,10 @@ export async function startGameSync() {
     schedule();
   });
   try {
+    // Os mesmos números do servidor (o administrador pode ajustar).
+    http<{ config: GameConfig }>('GET', '/game/config')
+      .then((r) => r.config && setGameCfg({ ...DEFAULT_GAME, ...r.config }))
+      .catch(() => {});
     let { wallet } = await http<{ wallet: ServerWallet }>('GET', '/game/wallet');
     if (!wallet.imported) {
       const s = getState();
@@ -98,6 +103,7 @@ export async function startGameSync() {
 
 export function stopGameSync() {
   active = false;
+  setGameCfg(DEFAULT_GAME);
   setGameHook(null);
   window.clearTimeout(timer);
 }

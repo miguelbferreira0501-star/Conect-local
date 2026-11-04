@@ -1,9 +1,9 @@
 // Parte social e conta usando o servidor do HamiCare (hamicare/server).
 import type { ReactionId } from '../../shared/moderation';
-import type { CommentResult, Feed, FriendState, Gift, GroupChallenge, Profile, ReportTarget, SocialApi } from './types';
+import type { CommentResult, Feed, FriendState, Gift, GroupChallenge, Profile, RankRow, ReportTarget, SocialApi, Visit } from './types';
 
 export class ApiError extends Error {
-  constructor(public status: number, public code: string, message: string) {
+  constructor(public status: number, public code: string, message: string, public details?: unknown) {
     super(message);
   }
 }
@@ -16,7 +16,7 @@ export async function http<T = any>(method: string, path: string, body?: unknown
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const data = res.headers.get('content-type')?.includes('json') ? await res.json() : null;
-  if (!res.ok) throw new ApiError(res.status, data?.error ?? 'erro', data?.message ?? 'Não deu certo agora. Tente de novo.');
+  if (!res.ok) throw new ApiError(res.status, data?.error ?? 'erro', data?.message ?? 'Não deu certo agora. Tente de novo.', data);
   return data as T;
 }
 
@@ -86,5 +86,8 @@ export function createApiSocial(): SocialApi {
     createChallenge: (c) => http('POST', '/social/challenges', c),
     checkin: (cid) => http('POST', `/social/challenges/${cid}/checkin`),
     leaveChallenge: (cid) => http('DELETE', `/social/challenges/${cid}/membership`),
+    visit: (userId, reaction) => http<{ result: 'ok' | 'limite' }>('POST', `/social/visits/${userId}`, { reaction }).then((r) => r.result),
+    visits: () => http<{ visits: Visit[] }>('GET', '/social/visits').then((r) => r.visits),
+    ranking: () => http<{ rows: RankRow[]; optedOut: boolean }>('GET', '/social/ranking'),
   };
 }

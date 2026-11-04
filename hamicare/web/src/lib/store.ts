@@ -1221,6 +1221,23 @@ export function seasonProgress(s: State, today = todayKey()): { days: number; cl
   return { days, claimed: !!s.claimed[`temporada:${today.slice(0, 7)}`] };
 }
 
+/** Dias ativos no mês (com pelo menos uma missão feita). Com conta, o app usa o número do servidor. */
+export function seasonDays(s: State, today = todayKey()): number {
+  return seasonProgress(s, today).days;
+}
+export const seasonTierClaimed = (s: State, tier: number, month = todayKey().slice(0, 7)) => !!s.game.paid[`temporada:${month}:d${tier}`];
+
+/** Pega o prêmio de um degrau da trilha da temporada (grátis). */
+export function claimSeasonTier(tier: number, days = seasonDays(state)): boolean {
+  const t = gameCfg().season.tiers[tier];
+  const month = todayKey().slice(0, 7);
+  if (!t || days < t.days || seasonTierClaimed(state, tier, month)) return false;
+  let next = grant(state, { kind: 'temporada-degrau', month, tier });
+  next = { ...next, game: { ...next.game, fragments: next.game.fragments + (t.fragments ?? 0), pendingChests: t.chest ? [...next.game.pendingChests, t.chest] : next.game.pendingChests } };
+  commit(next);
+  return true;
+}
+
 export function claimSeason(): boolean {
   const today = todayKey();
   const p = seasonProgress(state, today);

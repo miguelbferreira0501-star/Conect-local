@@ -150,3 +150,32 @@ describe('perfis e grupos na página publicada', () => {
     await expect(ana.createGroup({ name: 'grupo dos idiotas', emoji: '😀', color: 'ceu', members: [] })).rejects.toThrow();
   });
 });
+
+describe('visitas e ranking na página publicada', () => {
+  it('reação só entre amigos, uma por dia; ranking só de quem aceita aparecer', async () => {
+    const db = fakeDb();
+    const ana = createArtifactSocial(db, 'u_ana');
+    const bia = createArtifactSocial(db, 'u_bia');
+    const cris = createArtifactSocial(db, 'u_cris');
+    const stats = (dias: number) => ({ dias, missoes: dias * 2, conquistas: 3, colecoes: 0, arenas: 2 });
+    await ana.saveProfile({ ...profile('Ana'), arena: 3, ranked: true, stats: stats(5) });
+    await bia.saveProfile({ ...profile('Bia'), ranked: true, stats: stats(9) });
+    await cris.saveProfile({ ...profile('Cris'), ranked: true, stats: stats(20) });
+    await expect(ana.visit('u_bia', 'carinho')).rejects.toThrow();
+    await ana.request('u_bia');
+    await bia.accept('u_ana');
+    expect(await ana.visit('u_bia', 'abraco')).toBe('ok');
+    expect(await ana.visit('u_bia', 'carinho')).toBe('limite');
+    const v = await bia.visits();
+    expect(v).toHaveLength(1);
+    expect(v[0]).toMatchObject({ userId: 'u_ana', name: 'Ana', reaction: 'abraco' });
+    // Cris não é amiga: fica fora do ranking da Ana.
+    const r = await ana.ranking();
+    expect(r.rows.map((x) => x.name).sort()).toEqual(['Ana', 'Bia']);
+    expect(r.rows.find((x) => x.me)?.dias).toBe(5);
+    // Bia sai do ranking: some para a Ana e não vê o dela.
+    await bia.saveProfile({ ...profile('Bia'), ranked: false, stats: stats(9) });
+    expect((await ana.ranking()).rows.map((x) => x.name)).toEqual(['Ana']);
+    expect(await bia.ranking()).toEqual({ rows: [], optedOut: true });
+  });
+});

@@ -1,16 +1,14 @@
 // Perfis no estilo rede social: o meu (com bio editável) e o de amigos (grade de posts, casa e ações).
 import { useCallback, useEffect, useState } from 'react';
 import { ChevronLeft, Copy, Flag, Grid3x3, Home as HomeIcon, Lock, Pencil, ShieldBan, UserPlus } from 'lucide-react';
-import { Hamster } from '../../components/Hamster';
-import { Room } from '../../components/Room';
 import { Modal, Sheet, toast } from '../../components/ui';
-import { periodOf } from '../../data/lines';
 import { checkKindness, REASON_TEXT } from '../../shared/moderation';
 import { logEvent, setBio, useApp } from '../../lib/store';
 import { copyText } from '../../lib/util';
 import { syncProfile } from '../../lib/social';
 import { postKey, type Feed, type Post, type Profile, type SocialApi, type UserPage } from '../../lib/social/types';
 import { Avatar, PostCard, PostMedia } from './Post';
+import { VisitView } from './Ranking';
 import { Glyph } from '../../components/art';
 
 function Counter({ value, label, icon }: { value: number | string; label: string; icon?: string }) {
@@ -185,9 +183,7 @@ export function ProfilePage({ userId, api, myId, onClose, onChanged }: { userId:
               </button>
             </div>
             {tab === 'casa' ? (
-              <Room house={p.house} period={periodOf()} height={260}>
-                <Hamster fur={p.pet.fur} phase={p.pet.phase} outfit={p.pet.outfit} size={120} neutral label={p.pet.name} />
-              </Room>
+              <VisitView p={p} api={api} canReact={page.isFriend && !me} />
             ) : !page.isFriend && !me ? (
               <div className="grid justify-items-center gap-2 rounded-3xl bg-surface2 p-6 text-center">
                 <Lock className="text-muted" />

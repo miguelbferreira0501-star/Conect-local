@@ -6,7 +6,7 @@
 import { checkKindness, REASON_TEXT, type ReactionId } from '../../shared/moderation';
 import { addDays, hashStr, uid } from '../util';
 import { todayKey } from '../store';
-import type { Comment, Feed, FriendState, Gift, Group, GroupChallenge, Post, Profile, Reaction, ReportTarget, SocialApi } from './types';
+import type { Comment, Feed, FriendState, Gift, Group, GroupChallenge, Post, Profile, RankRow, Reaction, ReportTarget, SocialApi, Visit } from './types';
 import { postKey } from './types';
 
 /** Regras de acesso declaradas na publicação (ver scripts/artifact.mjs). */
@@ -41,6 +41,8 @@ interface SocialDoc {
   checkins: Record<string, string[]>;
   /** Grupos de que a pessoa saiu (id completo dono:grupo). */
   leftGroups?: string[];
+  /** Reações deixadas nas casas dos amigos. */
+  visits?: { to: string; reaction: ReactionId; at: number; day: string }[];
 }
 interface GroupsDoc {
   items: { id: string; name: string; emoji: string; color: string; members: string[]; createdAt: number }[];
@@ -288,6 +290,35 @@ export function createArtifactSocial(db: Db, myId: string): SocialApi {
       const doc = await mySocial();
       await write(`social/${myId}`, { ...doc, claimed: [...doc.claimed, id].slice(-300) });
       return gift;
+    },
+    async visit(userId, reaction) {
+      const { friends } = await state();
+      if (!friends.includes(userId)) throw new Error('Só dá para reagir na casa de amigos.');
+      const doc = await mySocial();
+      const day = todayKey();
+      if ((doc.visits ?? []).some((v) => v.to === userId && v.day === day)) return 'limite';
+      await write(`social/${myId}`, { ...doc, visits: [...(doc.visits ?? []), { to: userId, reaction, at: Date.now(), day }].slice(-200) });
+      return 'ok';
+    },
+    async visits() {
+      const [st, socialDocs] = await Promise.all([state(), all<SocialDoc>('social')]);
+      const out: Visit[] = [];
+      for (const [from, doc] of Object.entries(socialDocs)) {
+        const p = st.profiles[from];
+        if (!p || from === myId || !st.ok(from)) continue;
+        for (const v of doc.visits ?? []) if (v.to === myId) out.push({ userId: from, name: p.name, pet: p.pet, reaction: v.reaction, at: v.at });
+      }
+      return out.sort((a, b) => b.at - a.at).slice(0, 30);
+    },
+    async ranking() {
+      const st = await state();
+      const me = st.profiles[myId];
+      if (me && me.ranked === false) return { rows: [], optedOut: true };
+      const rows: RankRow[] = [myId, ...st.friends]
+        .map((id) => ({ id, p: st.profiles[id] }))
+        .filter(({ p }) => p && p.ranked !== false && p.stats)
+        .map(({ id, p }) => ({ userId: id, name: p.name, pet: p.pet, me: id === myId, ...p.stats! }));
+      return { rows, optedOut: false };
     },
     async challenges() {
       const [{ friends }, chDocs, socialDocs] = await Promise.all([state(), all<ChallengesDoc>('challenges'), all<SocialDoc>('social')]);

@@ -129,6 +129,7 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
         <Group title="Privacidade">
           <Toggle id="set-req" checked={s.privacy.requests === 'todos'} onChange={(on) => updatePrivacy({ requests: on ? 'todos' : 'ninguem' })} label="Aceitar pedidos de amizade pelo código" sub="Só quem tem o seu código consegue pedir." />
           <Toggle id="set-photos" checked={s.privacy.sharePhotos} onChange={(on) => updatePrivacy({ sharePhotos: on })} label="Permitir que eu compartilhe fotos no feed" />
+          <Toggle id="set-rank" checked={s.privacy.ranking !== false} onChange={(on) => updatePrivacy({ ranking: on })} label="Aparecer no ranking dos amigos" sub="Só entre amigos: dias ativos, missões, conquistas, coleções e arenas. Peso nunca aparece. Desligado, você também não vê o ranking." />
           <p className="text-[13px] text-muted">Peso, diário e humor nunca vão para o feed nem para amigos. No feed e nas visitas, o Hami de todo mundo aparece no formato padrão: ninguém compara corpo.</p>
         </Group>
 

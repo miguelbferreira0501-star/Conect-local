@@ -39,6 +39,10 @@ const POOL = chestPool();
 const rng = () => randomInt(0, 2 ** 32) / 2 ** 32;
 const utcDay = (offset = 0) => new Date(Date.now() + offset * 86_400_000).toISOString().slice(0, 10);
 
+// ---------- Configuração em uso (o app usa os mesmos números do servidor) ----------
+
+game.get('/config', async (c) => c.json({ config: await gameConfig() }));
+
 // ---------- Carteira ----------
 
 interface WalletRow {
@@ -143,6 +147,7 @@ const sourceSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('temporada'), month: z.string().regex(/^\d{4}-\d{2}$/), xp: z.number().int(), coins: z.number().int() }),
   z.object({ kind: z.literal('evento'), id: z.string().max(60), coins: z.number().int() }),
   z.object({ kind: z.literal('colecao'), id: z.string().max(40) }),
+  z.object({ kind: z.literal('temporada-degrau'), month: z.string().regex(/^\d{4}-\d{2}$/), tier: z.number().int().min(0).max(50) }),
 ]);
 const opSchema = z.discriminatedUnion('op', [
   z.object({ op: z.literal('grant'), src: sourceSchema }),
@@ -180,6 +185,13 @@ async function trusted(db: pg.PoolClient, userId: string, src: Source, cfg: Game
       const ev = (await db.query('SELECT e.reward_coins FROM event_claims x JOIN events e ON e.id = x.event_id WHERE x.user_id = $1 AND x.event_id::text = $2', [userId, src.id])).rows[0];
       return ev ? { ...src, coins: ev.reward_coins } : null;
     }
+    case 'temporada-degrau': {
+      // Mês de agora (ou o anterior, na virada) e dias ativos contados pelo servidor.
+      if (src.month !== utcDay(0).slice(0, 7) && src.month !== utcDay(-1).slice(0, 7)) return null;
+      const t = cfg.season.tiers[src.tier];
+      if (!t) return null;
+      return (await activeDays(db, userId, src.month)) >= t.days ? src : null;
+    }
     case 'colecao': {
       // Só paga a coleção se todas as peças estiverem no inventário do servidor.
       const col = cfg.collections.find((x) => x.id === src.id);
@@ -193,6 +205,12 @@ async function trusted(db: pg.PoolClient, userId: string, src: Source, cfg: Game
     default:
       return src;
   }
+}
+
+/** Dias do mês com pelo menos uma missão paga (e não desmarcada). */
+async function activeDays(db: pg.PoolClient, userId: string, month: string): Promise<number> {
+  const r = await db.query("SELECT count(DISTINCT day)::int AS n FROM game_ledger WHERE user_id = $1 AND active AND ref LIKE 'tarefa:%' AND to_char(day, 'YYYY-MM') = $2", [userId, month]);
+  return r.rows[0]?.n ?? 0;
 }
 
 async function dayUsage(db: pg.PoolClient, userId: string, d: string): Promise<DayUsage> {
@@ -249,9 +267,28 @@ async function applyGrant(db: pg.PoolClient, userId: string, w: WalletRow, raw: 
     if (!ins.rowCount) return { w, ok: true };
   }
   const before = w.xp;
-  const next = { ...w, coins: w.coins + paid.coins, xp: w.xp + paid.xp };
+  let next = { ...w, coins: w.coins + paid.coins, xp: w.xp + paid.xp };
+  // Degrau da temporada também pode dar fragmentos e um baú grátis.
+  if (src.kind === 'temporada-degrau') {
+    const t = cfg.season.tiers[src.tier];
+    next = { ...next, fragments: next.fragments + (t.fragments ?? 0), pending_chests: t.chest ? [...next.pending_chests, t.chest] : next.pending_chests };
+  }
   return { w: await payLevels(db, userId, next, before, cfg), ok: true };
 }
+
+/** Temporada do mês: dias ativos contados pelo servidor e degraus já pegos. */
+game.get('/season', async (c) => {
+  const userId = c.get('userId')!;
+  const cfg = await gameConfig();
+  const month = utcDay(0).slice(0, 7);
+  return c.json(
+    await withUser(userId, async (db) => {
+      const days = await activeDays(db, userId, month);
+      const claimed = (await db.query("SELECT ref FROM game_ledger WHERE user_id = $1 AND ref LIKE $2", [userId, `temporada:${month}:d%`])).rows.map((r) => Number(r.ref.split(':d')[1]));
+      return { month, days, claimed, tiers: cfg.season.tiers };
+    }),
+  );
+});
 
 const REVOCABLE = /^(tarefa|cuidado|diario|pote|humor|bemestar):\d{4}-\d{2}-\d{2}/;
 

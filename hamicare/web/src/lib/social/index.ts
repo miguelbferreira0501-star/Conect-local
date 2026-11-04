@@ -4,11 +4,12 @@ import { capability } from '../platform';
 import { levelOf } from '../../logic/progress';
 import { isMinor } from '../../logic/evolution';
 import { streakOf } from '../../logic/streak';
-import { dayKey } from '../util';
+import { addDays, dayKey } from '../util';
+import { currentArena, homeArenaOf } from '../store';
 import type { State } from '../../types';
 import { createArtifactSocial } from './artifact';
 import { createApiSocial, serverAvailable } from './api';
-import type { Profile, SocialApi } from './types';
+import type { Profile, RankStats, SocialApi } from './types';
 
 let pending: Promise<SocialApi | null> | null = null;
 
@@ -72,6 +73,23 @@ export function publicProfileOf(s: State): Omit<Profile, 'id' | 'code' | 'update
     bio: s.bio,
     streak: streakOf(s.days, dayKey(new Date()), s.createdAt).count,
     badges: Object.keys(s.achievements).length,
+    arena: homeArenaOf(s),
+    ranked: s.privacy.ranking !== false,
+    stats: rankStatsOf(s),
+  };
+}
+
+/** Números do ranking entre amigos: constância, missões, conquistas, coleções e arenas. Nunca peso. */
+export function rankStatsOf(s: State, today = dayKey(new Date())): RankStats {
+  const from30 = addDays(today, -29);
+  const from7 = addDays(today, -6);
+  const entries = Object.entries(s.days).filter(([k]) => k <= today);
+  return {
+    dias: entries.filter(([k, d]) => k >= from30 && Object.keys(d.done).length > 0).length,
+    missoes: entries.filter(([k]) => k >= from7).reduce((n, [, d]) => n + Object.keys(d.done).length, 0),
+    conquistas: Object.keys(s.achievements).length,
+    colecoes: Object.keys(s.game.paid).filter((r) => r.startsWith('colecao:')).length,
+    arenas: currentArena(s),
   };
 }
 
