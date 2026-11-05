@@ -181,3 +181,36 @@ export function dueReminder(args: { prefs: ReminderPrefs; state: any; sent: Sent
 
   return { reminder: null, sent };
 }
+
+// ---------- Planejamento do dia (app da loja: notificações agendadas no próprio celular) ----------
+
+export interface PlannedReminder {
+  at: string;
+  kind: Exclude<ReminderKind, 'amigos' | 'aventura'>;
+  body: string;
+}
+
+/**
+ * Os lembretes de um dia inteiro, para agendar no celular: missões no horário escolhido, hora de dormir,
+ * o Hami depois do almoço, os copos d'água, a pausa e os desafios de segunda. Fora do silêncio da noite,
+ * com pelo menos 1 hora entre eles e no máximo DAILY_MAX, escolhidos por importância.
+ */
+export function planDay(args: { prefs: ReminderPrefs; pet: string; weekday: number; minor: boolean; seed: number; skipTasks?: boolean }): PlannedReminder[] {
+  const { prefs, pet, weekday, minor, seed } = args;
+  if (!prefs.enabled) return [];
+  const on = (k: ReminderKind) => prefs.kinds[k] ?? REMINDER_DEFAULTS[k];
+  const cands: { at: string; kind: PlannedReminder['kind']; prio: number }[] = [];
+  if (on('tarefas') && !args.skipTasks) cands.push({ at: prefs.time, kind: 'tarefas', prio: 1 });
+  if (on('missoes') && weekday === 1) cands.push({ at: WEEKLY_TIME, kind: 'missoes', prio: 2 });
+  if (on('dormir')) cands.push({ at: prefs.bedtime, kind: 'dormir', prio: 2 });
+  if (on('hami')) cands.push({ at: '12:30', kind: 'hami', prio: 3 });
+  if (on('agua')) for (const at of WATER_SLOTS[prefs.water] ?? WATER_SLOTS.normal) cands.push({ at, kind: 'agua', prio: 4 });
+  if (on('pausa')) cands.push({ at: PAUSE_TIME, kind: 'pausa', prio: 5 });
+  const chosen: typeof cands = [];
+  for (const c of cands.filter((x) => !isQuiet(x.at, minor)).sort((a, b) => a.prio - b.prio || toMin(a.at) - toMin(b.at))) {
+    if (chosen.length >= DAILY_MAX) break;
+    if (chosen.some((x) => Math.abs(toMin(x.at) - toMin(c.at)) < MIN_GAP_MS / 60_000)) continue;
+    chosen.push(c);
+  }
+  return chosen.sort((a, b) => toMin(a.at) - toMin(b.at)).map((c, i) => ({ at: c.at, kind: c.kind, body: reminderText(c.kind, pet, seed + i) }));
+}

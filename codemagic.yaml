@@ -1,0 +1,41 @@
+# Compila o app do HamiCare para iPhone na nuvem (Mac do Codemagic) e manda para o TestFlight.
+# Passo a passo (contas, chave da Apple e primeira compilação): hamicare/docs/LOJAS.md, parte "App Store".
+workflows:
+  hamicare-ios:
+    name: HamiCare iOS (TestFlight)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      # Nome da chave de API do App Store Connect cadastrada no Codemagic (Integrations → Developer Portal).
+      app_store_connect: HamiCare ASC
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.hamicare.app
+      node: 22
+      xcode: latest
+    scripts:
+      - name: Instalar e compilar o app web
+        working_directory: hamicare/web
+        script: |
+          npm ci --include=dev
+          npm run build
+      - name: Copiar o app web para o projeto do iPhone
+        working_directory: hamicare/web
+        script: npx cap sync ios
+      - name: Certificados e perfis de assinatura
+        script: xcode-project use-profiles
+      - name: Número da versão (cada envio ao TestFlight precisa de um número maior)
+        working_directory: hamicare/web/ios/App
+        script: |
+          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = $BUILD_NUMBER;/g" App.xcodeproj/project.pbxproj
+      - name: Gerar o app assinado (.ipa)
+        working_directory: hamicare/web/ios/App
+        script: xcode-project build-ipa --project App.xcodeproj --scheme App
+    artifacts:
+      - hamicare/web/ios/App/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true

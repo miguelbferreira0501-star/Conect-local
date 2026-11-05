@@ -1,6 +1,7 @@
 // Convite por link (#amigo=HAMI-XXXXXX): quem abre o link cai em Amigos com o código já procurado.
 // Fica guardado até a pessoa terminar o começo do app e entrar na conta.
 import { copyText } from '../util';
+import { isNativeApp, SITE_URL } from '../native';
 
 const KEY = 'hamicare:convite';
 const WEEK = 7 * 24 * 3600 * 1000;
@@ -35,7 +36,7 @@ export function clearInvite() {
   }
 }
 
-export const inviteLink = (code: string) => `${location.origin}/#amigo=${code}`;
+export const inviteLink = (code: string) => `${isNativeApp() ? SITE_URL : location.origin}/#amigo=${code}`;
 
 /** Manda o convite pelo menu de compartilhar do celular; sem ele, copia. Devolve o aviso para mostrar ('' = nenhum). */
 export async function shareInvite(code: string, withLink: boolean): Promise<string> {

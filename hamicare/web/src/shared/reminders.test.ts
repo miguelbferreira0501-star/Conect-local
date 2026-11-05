@@ -85,3 +85,24 @@ describe('lembretes ao longo do dia', () => {
     expect(l).toMatchObject({ date: '2026-11-04', hm: '10:05', weekday: 3 });
   });
 });
+
+describe('lembretes agendados no celular (app da loja)', () => {
+  const prefs = { enabled: true, time: '19:00', bedtime: '22:00', water: 'normal' as const, kinds: {} };
+  it('no máximo 5 por dia, com 1 hora entre eles e fora do silêncio', async () => {
+    const { planDay, DAILY_MAX } = await import('./reminders');
+    const day = planDay({ prefs: { ...prefs, water: 'muito', kinds: { pausa: true, dormir: true } }, pet: 'Pudim', weekday: 1, minor: false, seed: 1 });
+    expect(day.length).toBeLessThanOrEqual(DAILY_MAX);
+    const mins = day.map((d) => Number(d.at.slice(0, 2)) * 60 + Number(d.at.slice(3)));
+    for (let i = 1; i < mins.length; i++) expect(mins[i] - mins[i - 1]).toBeGreaterThanOrEqual(60);
+    expect(day.map((d) => d.kind)).toContain('tarefas');
+    expect(day.map((d) => d.kind)).toContain('missoes');
+    expect(day.every((d) => d.body.length > 5)).toBe(true);
+  });
+  it('menor de idade: nada depois das 21h30; desligado: nada; missões feitas: sem lembrete de missões', async () => {
+    const { planDay } = await import('./reminders');
+    const late = planDay({ prefs: { ...prefs, time: '21:45', kinds: { dormir: true } }, pet: 'Pudim', weekday: 3, minor: true, seed: 1 });
+    expect(late.some((d) => d.at >= '21:30')).toBe(false);
+    expect(planDay({ prefs: { ...prefs, enabled: false }, pet: 'Pudim', weekday: 3, minor: false, seed: 1 })).toEqual([]);
+    expect(planDay({ prefs, pet: 'Pudim', weekday: 3, minor: false, seed: 1, skipTasks: true }).some((d) => d.kind === 'tarefas')).toBe(false);
+  });
+});

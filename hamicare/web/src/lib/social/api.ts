@@ -1,5 +1,6 @@
 // Parte social e conta usando o servidor do HamiCare (hamicare/server).
 import type { ReactionId } from '../../shared/moderation';
+import { apiBase } from '../native';
 import type { CommentResult, Feed, FriendState, Gift, GroupChallenge, Profile, RankRow, ReportTarget, SocialApi, Team, Visit } from './types';
 
 export class ApiError extends Error {
@@ -9,7 +10,7 @@ export class ApiError extends Error {
 }
 
 export async function http<T = any>(method: string, path: string, body?: unknown): Promise<T> {
-  const res = await fetch(`/api${path}`, {
+  const res = await fetch(`${apiBase()}/api${path}`, {
     method,
     credentials: 'include',
     headers: { 'content-type': 'application/json', 'x-requested-with': 'hamicare' },

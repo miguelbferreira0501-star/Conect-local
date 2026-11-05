@@ -9,6 +9,7 @@ import { isPremium, startTrial, useApp } from '../lib/store';
 import { startTrialOnServer, useAccount } from '../lib/account';
 import { ApiError } from '../lib/social/api';
 import { formatDay } from '../lib/util';
+import { storeWord } from '../lib/native';
 
 export { PLUS_PRICE };
 
@@ -180,7 +181,7 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
           </button>
         </>
       ) : (
-        <p className="rounded-2xl bg-white/15 p-4 text-center text-[14px]">Seu teste grátis já foi usado. A assinatura do plano {plan} chega em breve pela Google Play, pela App Store e no Pix.</p>
+        <p className="rounded-2xl bg-white/15 p-4 text-center text-[14px]">Seu teste grátis já foi usado. A assinatura do plano {plan} chega em breve {storeWord()}.</p>
       )}
       <button className="pw-later" onClick={onClose}>
         {later}

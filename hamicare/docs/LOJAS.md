@@ -113,21 +113,64 @@ A primeira revisão costuma levar de alguns dias a 1 semana.
 
 ## 2. App Store (iPhone)
 
-A Apple não aceita só um site dentro de um app: o HamiCare precisa de um projeto nativo (feito com
-Capacitor) com recursos do iPhone, como as notificações. Esse projeto o Claude prepara no repositório.
+O projeto do iPhone já está no repositório (`hamicare/web/ios`, feito com Capacitor 8): o app web vai dentro
+do app, conversa com o servidor (`hamicare.onrender.com`) e os lembretes viram **notificações do próprio
+iPhone** (chegam com o app fechado e sem internet). Ícone, tela de abertura, textos de permissão da câmera e
+das fotos, só iPhone e só em pé: tudo pronto. As capturas no tamanho da App Store (iPhone 6,9", 1320 × 2868)
+estão em `docs/lojas/iphone/`.
 
-1. **Conta Apple Developer:** [developer.apple.com/programs](https://developer.apple.com/programs),
-   **US$ 99 por ano**, com o seu Apple ID (com verificação em duas etapas). A aprovação leva de 1 a 2 dias.
-2. **Compilar sem Mac:** com o [Codemagic](https://codemagic.io) (grátis até 500 minutos por mês), ligado
-   ao GitHub e à sua conta Apple por uma *chave de API do App Store Connect*. O Codemagic gera e assina o app
-   e manda para o TestFlight.
-3. **App Store Connect:** criar o app (`HamiCare`, pacote `com.hamicare.app`), preencher as
-   *Informações de privacidade* (iguais à Segurança dos dados da Google), a classificação etária e as capturas.
-4. **TestFlight → revisão.** A Apple costuma responder em 1 a 3 dias.
+### Antes de tudo: a conta tem que ser de um adulto
 
-Diferenças da Apple:
-- Assinaturas dentro do app têm que usar a compra da Apple (o Plus pago vem depois, junto com o da Google).
-- Excluir conta pelo app: já existe.
+A Apple só aceita quem tem 18 anos ou mais, com o **nome civil verdadeiro** e documento da própria pessoa.
+Por isso a conta precisa ser **de um adulto responsável (pai, mãe ou responsável), no nome e no Apple ID
+dele**, pago com o cartão dele. O nome desse adulto aparece na App Store como desenvolvedor (ou o nome da
+empresa, se for feito com CNPJ: aí precisa também de um número D-U-N-S, que é grátis e sai em alguns dias).
+Não use documento de outra pessoa numa conta que não está no nome dela: foi o que travou a Google Play.
+
+### Passo a passo
+
+1. **Conta Apple Developer (o adulto faz):** [developer.apple.com/programs/enroll](https://developer.apple.com/programs/enroll)
+   → entrar com o Apple ID dele (com verificação em duas etapas ligada) → **Pessoa física** → nome igual ao
+   documento → pagar a anuidade (**US$ 99 por ano**, cobrada em reais no cartão). A aprovação leva de 1 a 2 dias.
+2. **Criar o app no App Store Connect** ([appstoreconnect.apple.com](https://appstoreconnect.apple.com)) →
+   Apps → **+** → Novo app: plataforma iOS, nome `HamiCare: hábitos e calma`, idioma **Português (Brasil)**,
+   ID do pacote **`com.hamicare.app`** (se não aparecer na lista, criar antes em developer.apple.com →
+   Certificates, IDs & Profiles → Identifiers → **+** → App IDs, com esse mesmo pacote), SKU `hamicare-ios`.
+3. **Chave de API para o Codemagic:** App Store Connect → Usuários e acesso → **Integrações** → App Store
+   Connect API → gerar chave com acesso **App Manager**. Baixar o arquivo `.p8` (só dá para baixar uma vez)
+   e anotar o **Issuer ID** e o **Key ID**.
+4. **Codemagic** (compila no Mac da nuvem, grátis até 500 minutos por mês): [codemagic.io](https://codemagic.io)
+   → entrar com o GitHub → adicionar o repositório. Em **Team settings → Integrations → Developer Portal**,
+   conectar a chave do passo 3 com o nome **`HamiCare ASC`** (tem que ser exatamente esse, é o que o
+   `codemagic.yaml` usa). Depois, no app, rodar o workflow **HamiCare iOS (TestFlight)**. O Codemagic cria
+   os certificados, gera o app assinado e manda para o TestFlight. A primeira compilação leva uns 20 minutos.
+5. **Testar no seu iPhone (TestFlight):** App Store Connect → Usuários e acesso → **+** → adicionar o seu
+   e-mail do Apple ID (a função *Marketing* basta). No app → TestFlight → Testes internos → adicionar você.
+   Instale o app **TestFlight** no iPhone e aceite o convite. O teste interno não passa pela revisão da Apple.
+6. **Antes de mandar para a revisão da Apple** (para aparecer na App Store):
+   - **Assinatura do Plus pela compra da Apple.** A Apple exige que assinaturas vendidas no iPhone usem a
+     compra dela. O adulto assina o *Contrato de apps pagos* (App Store Connect → Negócios: dados bancários e
+     fiscais dele) e cria um grupo de assinaturas **HamiCare+** com dois produtos:
+     `com.hamicare.app.plus.anual` (R$ 329,90, oferta de 7 dias grátis) e `com.hamicare.app.plus.mensal`
+     (R$ 49,90, 3 dias grátis). Com isso pronto, o Claude liga a compra no app e no servidor.
+   - **Preencher os dados de quem publica** em `web/src/shared/legal.ts` (`LEGAL_INFO`: nome do responsável
+     ou da empresa, CPF/CNPJ, cidade e e-mail de contato). A política de privacidade e os termos usam esses dados.
+   - **Privacidade do app** (App Store Connect → Privacidade do app): coleta *e-mail e nome* (conta),
+     *saúde e condicionamento* (peso, só se a pessoa ligar), *conteúdo do usuário* (fotos, posts, diário no
+     backup), *identificador do usuário*. Tudo **ligado à conta**, **nada usado para rastreamento**, sem anúncios.
+   - **Classificação etária:** responder o questionário com sinceridade (tem conteúdo de usuários com
+     moderação, denúncia e bloqueio, e acompanhamento de peso só para maiores de 18).
+   - **URLs:** política de privacidade `https://hamicare.onrender.com/privacidade`, termos
+     `https://hamicare.onrender.com/termos`, suporte e exclusão de conta `https://hamicare.onrender.com/excluir-conta`.
+   - **Capturas:** as 6 de `docs/lojas/iphone/` (1320 × 2868). Como o app é só para iPhone, não precisa de iPad.
+   - **Notas para a revisão:** criar uma conta de teste (e-mail e senha) e informar no campo *Informações
+     para revisão*; contar que os amigos precisam de duas contas e que o peso só aparece para maiores de 18.
+7. **Revisão:** a Apple costuma responder em 1 a 3 dias. Se pedir alguma mudança, é só mandar o print.
+
+### Versões novas
+
+Mudou algo no app? Rodar de novo o workflow no Codemagic: ele aumenta o número da versão sozinho e manda
+para o TestFlight. Para a App Store, escolher a compilação nova na página da versão e mandar para revisão.
 
 ---
 
