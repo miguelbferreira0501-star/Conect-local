@@ -33,6 +33,7 @@ const resetListeners = new Set<() => void>();
 /** Entrou ou saiu da conta: quem usa a parte social pergunta de novo. */
 export function resetSocial() {
   pending = null;
+  lastSent = '';
   resetListeners.forEach((l) => l());
 }
 
@@ -65,7 +66,7 @@ export function useSocial(): { api: SocialApi | null; loading: boolean } {
 export function publicProfileOf(s: State): Omit<Profile, 'id' | 'code' | 'updatedAt'> {
   return {
     name: s.profile.name || 'Alguém',
-    pet: { name: s.pet.name, fur: s.pet.fur, phase: s.pet.phase, outfit: s.pet.outfit },
+    pet: { name: s.pet.name.trim() || 'Hami', fur: s.pet.fur, phase: s.pet.phase, outfit: s.pet.outfit },
     house: s.house,
     level: levelOf(s.xp),
     teen: s.profile.ageGroup === '13a17',
@@ -97,18 +98,21 @@ export const socialBlocked = (s: State) => s.profile.ageGroup === 'ate12';
 export const teenMode = (s: State) => isMinor(s.profile.ageGroup);
 
 let lastSent = '';
-/** Atualiza o perfil público quando algo visível muda (nome, roupa, casa, nível). */
-export async function syncProfile(s: State) {
-  if (!s.onboarded || socialBlocked(s)) return;
+/** Atualiza o perfil público quando algo visível muda (nome, roupa, casa, nível).
+ *  Se o servidor recusar (por exemplo, um nome que não passa no filtro), devolve o motivo. */
+export async function syncProfile(s: State): Promise<string | null> {
+  if (!s.onboarded || socialBlocked(s)) return null;
   const api = await getSocial();
-  if (!api) return;
+  if (!api) return null;
   const p = publicProfileOf(s);
   const sig = JSON.stringify(p);
-  if (sig === lastSent) return;
+  if (sig === lastSent) return null;
   lastSent = sig;
   try {
     await api.saveProfile(p);
-  } catch {
+    return null;
+  } catch (e) {
     lastSent = '';
+    return e instanceof Error && e.message ? e.message : 'Não deu certo agora.';
   }
 }

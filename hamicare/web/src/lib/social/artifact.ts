@@ -4,6 +4,7 @@
 // Limite assumido: na página de teste, quem tem acesso ao link consegue ler os dados
 // compartilhados. Peso, diário e humor nunca entram aqui.
 import { checkKindness, REASON_TEXT, type ReactionId } from '../../shared/moderation';
+import { codeKey } from '../../shared/friendCode';
 import { addDays, hashStr, uid } from '../util';
 import { todayKey } from '../store';
 import type { Comment, Feed, FriendState, Gift, Group, GroupChallenge, Post, Profile, RankRow, Reaction, ReportTarget, SocialApi, Team, Visit } from './types';
@@ -191,9 +192,11 @@ export function createArtifactSocial(db: Db, myId: string): SocialApi {
       return profile;
     },
     async findByCode(code) {
-      const clean = code.trim().toUpperCase().replace(/^HAMI-?/, '');
+      // Aceita do jeito que a pessoa digitar (sem "HAMI-", minúsculo, com espaço, O no lugar de 0).
+      const key = codeKey(code);
+      if (key.length < 6) return null;
       const profiles = await all<Profile>('profiles');
-      const hit = Object.entries(profiles).find(([id]) => codeFor(id).endsWith(clean) && clean.length >= 4);
+      const hit = Object.entries(profiles).find(([id]) => codeKey(codeFor(id)) === key);
       return hit && hit[0] !== myId ? { ...hit[1], id: hit[0] } : null;
     },
     async request(userId) {

@@ -1,10 +1,10 @@
 // Perfis no estilo rede social: o meu (com bio editável) e o de amigos (grade de posts, casa e ações).
 import { useCallback, useEffect, useState } from 'react';
-import { ChevronLeft, Copy, Flag, Grid3x3, Home as HomeIcon, Lock, Pencil, ShieldBan, UserPlus } from 'lucide-react';
+import { ChevronLeft, Flag, Grid3x3, Home as HomeIcon, Lock, Pencil, Share2, ShieldBan, UserPlus } from 'lucide-react';
 import { Modal, Sheet, toast } from '../../components/ui';
 import { checkKindness, REASON_TEXT } from '../../shared/moderation';
 import { logEvent, setBio, useApp } from '../../lib/store';
-import { copyText } from '../../lib/util';
+import { shareInvite } from '../../lib/social/invite';
 import { syncProfile } from '../../lib/social';
 import { postKey, type Feed, type Post, type Profile, type SocialApi, type UserPage } from '../../lib/social/types';
 import { Avatar, PostCard, PostMedia } from './Post';
@@ -24,11 +24,23 @@ function Counter({ value, label, icon }: { value: number | string; label: string
 }
 
 /** Topo da aba Amigos: o meu perfil, com código, bio e contadores. */
-export function MyHeader({ me, api, postsCount, friendsCount, onAdd }: { me: Profile | null; api: SocialApi; postsCount: number; friendsCount: number; onAdd: () => void }) {
+export function MyHeader({ me, api, postsCount, friendsCount, onAdd, error, onRetry }: { me: Profile | null; api: SocialApi; postsCount: number; friendsCount: number; onAdd: () => void; error?: string | null; onRetry?: () => void }) {
   const s = useApp();
   const [edit, setEdit] = useState(false);
   const [bio, setBioText] = useState(s.bio);
   const check = bio.trim() ? checkKindness(bio) : ({ ok: true } as const);
+  if (!me && error) {
+    // O perfil (com o código de amigo) não foi criado: mostra o motivo em vez de ficar carregando para sempre.
+    return (
+      <div className="card grid gap-2 p-4 text-center">
+        <p className="font-display text-[18px] font-bold">Não deu para criar seu perfil</p>
+        <p className="text-[14px] text-muted">{error} Se for o nome, troque em Ajustes (o seu ou o do Hami).</p>
+        <button className="btn btn-primary btn-sm justify-self-center" onClick={onRetry}>
+          Tentar de novo
+        </button>
+      </div>
+    );
+  }
   if (!me) return <div className="card h-40 animate-pulse" />;
   return (
     <section className="profile-head" aria-label="Seu perfil">
@@ -51,8 +63,14 @@ export function MyHeader({ me, api, postsCount, friendsCount, onAdd }: { me: Pro
         <button className="btn btn-ghost btn-sm" onClick={() => (setBioText(s.bio), setEdit(true))}>
           <Pencil size={15} /> Editar
         </button>
-        <button className="btn btn-ghost btn-sm" onClick={async () => toast((await copyText(me.code)) ? 'Código copiado' : `Seu código é ${me.code}`)}>
-          <Copy size={15} /> Código
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={async () => {
+            const msg = await shareInvite(me.code, api.kind === 'servidor');
+            if (msg) toast(msg);
+          }}
+        >
+          <Share2 size={15} /> Convidar
         </button>
         <button className="btn btn-primary btn-sm" onClick={onAdd}>
           <UserPlus size={15} /> Adicionar

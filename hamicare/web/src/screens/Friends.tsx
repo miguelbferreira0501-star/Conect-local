@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Gift as GiftIcon, Plus, UserPlus, X } from 'lucide-react';
+import { Gift as GiftIcon, Plus, Share2, UserPlus, X } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { Empty, Sheet, toast } from '../components/ui';
 import { itemById } from '../data/items';
@@ -7,6 +7,8 @@ import { checkKindness, REASON_TEXT } from '../shared/moderation';
 import { logEvent, payGift, receiveGift, todayKey, useApp } from '../lib/store';
 import { formatDay } from '../lib/util';
 import { socialBlocked, syncProfile, useSocial } from '../lib/social';
+import { clearInvite, pendingInvite, shareInvite } from '../lib/social/invite';
+import { codeKey, isServerKey } from '../shared/friendCode';
 import { RankingTab, VisitsCard } from './social/Ranking';
 import { TeamTab } from './social/Team';
 import { postKey, type Feed, type FriendState, type Gift, type GroupChallenge, type Profile, type SocialApi } from '../lib/social/types';
@@ -29,12 +31,16 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account, ini
   const [myPosts, setMyPosts] = useState(0);
   const [adding, setAdding] = useState(false);
   const [profile, setProfile] = useState<string | null>(null);
+  const [profileErr, setProfileErr] = useState<string | null>(null);
+  // Convite por link (#amigo=…): abre "Adicionar amigo" com o código já procurado.
+  const [invite, setInvite] = useState(() => pendingInvite());
 
   const refreshFriends = useCallback(async () => {
     if (!api) return;
     try {
-      await syncProfile(s);
+      const err = await syncProfile(s);
       const [p, f] = await Promise.all([api.me(), api.friends()]);
+      setProfileErr(p ? null : err);
       setMe(p);
       setFs(f);
       if (p) api.profile(p.id).then((pg) => setMyPosts(pg?.posts.length ?? 0)).catch(() => {});
@@ -51,6 +57,17 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account, ini
     if (share) setTab('feed');
   }, [share]);
 
+  useEffect(() => {
+    if (invite && fs) setAdding(true);
+  }, [invite, fs]);
+
+  // Link de convite aberto com o app já nesta aba (o App guarda o código primeiro).
+  useEffect(() => {
+    const onHash = () => setTimeout(() => setInvite(pendingInvite()), 0);
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
   if (socialBlocked(s)) {
     return (
       <Shell>
@@ -66,6 +83,7 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account, ini
           <Hamster fur={s.pet.fur} phase={s.pet.phase} outfit={s.pet.outfit} size={120} neutral />
           <p className="font-display text-[20px] font-bold">Entre na sua conta para ter amigos</p>
           <p className="text-[15px] text-muted">Com conta, você ganha um perfil, um código para adicionar amigos, grupos, visitas, presentes e o feed só de gentileza. Seu progresso também fica salvo na nuvem.</p>
+          {invite && <p className="rounded-2xl bg-surface2 px-3 py-2 text-[14px] font-bold">Você recebeu um convite de amizade (<span className="whitespace-nowrap">{invite}</span>)! Crie sua conta aqui embaixo para ver quem é.</p>}
         </div>
         {account}
       </Shell>
@@ -84,7 +102,7 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account, ini
   ];
   return (
     <Shell>
-      <MyHeader me={me} api={api} postsCount={myPosts} friendsCount={fs?.friends.length ?? 0} onAdd={() => setAdding(true)} />
+      <MyHeader me={me} api={api} postsCount={myPosts} friendsCount={fs?.friends.length ?? 0} onAdd={() => setAdding(true)} error={profileErr} onRetry={refreshFriends} />
       <div className="tabs-scroll" role="tablist" aria-label="Seções">
         {TABS.map((t) => (
           <button key={t.id} role="tab" aria-selected={tab === t.id} className={`chip ${tab === t.id ? 'chip-accent' : 'chip-plain'}`} onClick={() => setTab(t.id)}>
@@ -100,7 +118,18 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account, ini
       {tab === 'ranking' && <RankingTab api={api} onOpenProfile={setProfile} />}
       {tab === 'turma' && <TeamTab api={api} friends={fs?.friends ?? []} onOpenProfile={setProfile} />}
       <GiftSheet api={api} itemId={giftItem} friends={fs?.friends ?? []} onClose={onGiftDone} />
-      <AddFriend open={adding} api={api} onClose={() => setAdding(false)} onAdded={refreshFriends} onOpenProfile={setProfile} />
+      <AddFriend
+        open={adding}
+        api={api}
+        me={me}
+        initialCode={invite}
+        onClose={() => {
+          setAdding(false);
+          if (invite) (clearInvite(), setInvite(null));
+        }}
+        onAdded={refreshFriends}
+        onOpenProfile={setProfile}
+      />
       {profile && <ProfilePage userId={profile} api={api} myId={myId} onClose={() => setProfile(null)} onChanged={refreshFriends} />}
     </Shell>
   );
@@ -118,33 +147,101 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function AddFriend({ open, api, onClose, onAdded, onOpenProfile }: { open: boolean; api: SocialApi; onClose: () => void; onAdded: () => void; onOpenProfile: (id: string) => void }) {
+type Search = Profile | 'nada' | 'proprio' | 'outro_app' | 'tamanho' | null;
+
+function AddFriend({ open, api, me, initialCode, onClose, onAdded, onOpenProfile }: { open: boolean; api: SocialApi; me: Profile | null; initialCode: string | null; onClose: () => void; onAdded: () => void; onOpenProfile: (id: string) => void }) {
   const [code, setCode] = useState('');
-  const [found, setFound] = useState<Profile | null | 'nada'>(null);
+  const [found, setFound] = useState<Search>(null);
+  const [busy, setBusy] = useState(false);
+  const server = api.kind === 'servidor';
+  const where = server ? location.host : 'o mesmo link do HamiCare';
+
+  async function search(raw: string) {
+    // Aceita do jeito que a pessoa digitar: sem "HAMI-", minúsculo, com espaço, O no lugar de 0.
+    const key = codeKey(raw);
+    if (key.length !== 6) return setFound('tamanho');
+    if (me && codeKey(me.code) === key) return setFound('proprio');
+    if (server && !isServerKey(key)) return setFound('outro_app');
+    setBusy(true);
+    try {
+      setFound((await api.findByCode(raw)) ?? 'nada');
+    } catch {
+      toast('Não deu pra procurar agora. Confira a internet e tente de novo.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   useEffect(() => {
     if (!open) (setCode(''), setFound(null));
-  }, [open]);
+    else if (initialCode) (setCode(initialCode), search(initialCode));
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <Sheet open={open} onClose={onClose} title="Adicionar amigo">
       <div className="grid gap-3 pt-1">
+        {me && (
+          <div className="flex items-center gap-3 rounded-2xl bg-surface2 p-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-[12px] font-extrabold uppercase tracking-wide text-muted">Seu código</p>
+              <p className="font-display text-[21px] font-bold tracking-wide" data-testid="my-code">
+                {me.code}
+              </p>
+            </div>
+            <button
+              className="btn btn-primary btn-sm shrink-0"
+              onClick={async () => {
+                const msg = await shareInvite(me.code, server);
+                if (msg) toast(msg);
+              }}
+            >
+              <Share2 size={15} /> Convidar
+            </button>
+          </div>
+        )}
         <form
           className="flex gap-2"
-          onSubmit={async (e) => {
+          onSubmit={(e) => {
             e.preventDefault();
-            const p = await api.findByCode(code);
-            setFound(p ?? 'nada');
+            search(code);
           }}
         >
           <label className="sr-only" htmlFor="friend-code">
             Código do amigo
           </label>
-          <input id="friend-code" className="field min-w-0 flex-1 uppercase" placeholder="Código do amigo (HAMI-…)" value={code} onChange={(e) => setCode(e.target.value)} />
-          <button className="btn btn-primary shrink-0" type="submit" disabled={code.trim().length < 4} aria-label="Procurar">
+          <input
+            id="friend-code"
+            className="field min-w-0 flex-1 uppercase"
+            placeholder="Código do amigo (HAMI-…)"
+            value={code}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="characters"
+            spellCheck={false}
+            onChange={(e) => (setCode(e.target.value), setFound(null))}
+          />
+          <button className="btn btn-primary shrink-0" type="submit" disabled={busy || !codeKey(code)} aria-label="Procurar">
             <UserPlus size={18} />
           </button>
         </form>
-        {found === 'nada' && <p className="text-[14px] text-muted">Não achamos ninguém com esse código. Confira as letras.</p>}
-        {found && found !== 'nada' && (
+        {found === 'tamanho' && <p className="text-[14px] text-muted">O código tem 6 letras e números depois de HAMI- (por exemplo, HAMI-3F9A2C). Confira se faltou ou sobrou algum.</p>}
+        {found === 'proprio' && <p className="text-[14px] font-bold">Esse é o seu código! 😊 Mande ele para um amigo e peça o código dele.</p>}
+        {found === 'outro_app' && (
+          <p className="text-[14px] text-muted">
+            Os códigos daqui só usam números e as letras de A a F. Confira as letras. Se o seu amigo usa a versão de teste do HamiCare (o link do Claude), vocês dois precisam usar o mesmo app: <b>{where}</b>.
+          </p>
+        )}
+        {found === 'nada' && (
+          <div className="grid gap-1 text-[14px] text-muted">
+            <p className="font-bold text-[var(--ink)]">Não achamos ninguém com esse código.</p>
+            <p>• Confira as letras e os números.</p>
+            <p>
+              • Vocês dois precisam ter conta no mesmo app: <b>{where}</b>.
+            </p>
+            <p>• Se a pessoa acabou de criar a conta, peça para ela abrir a aba Amigos uma vez.</p>
+          </div>
+        )}
+        {found && typeof found === 'object' && (
           <div className="flex items-center gap-3 rounded-2xl bg-surface2 p-3">
             <Avatar pet={found.pet} id={found.id} size={52} ring />
             <div className="min-w-0 flex-1">
@@ -167,7 +264,7 @@ function AddFriend({ open, api, onClose, onAdded, onOpenProfile }: { open: boole
             </button>
           </div>
         )}
-        <p className="text-[13px] text-muted">Peça o código para a pessoa (ele aparece no perfil dela, em Amigos).</p>
+        <p className="text-[13px] text-muted">Peça o código para a pessoa (ele aparece no perfil dela, em Amigos) ou mande o seu pelo botão Convidar.</p>
       </div>
     </Sheet>
   );
