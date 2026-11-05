@@ -174,3 +174,11 @@ Pedido do dono do produto: no começo, escolher a área (só perder ou ganhar pe
 - **Plus mais visível:** botão dourado "Plus" no cenário do Início (do lado oposto ao "Mapa") e um cartão do HamiCare+ no Início, em Missões, na Loja, no Armário, no Bem-estar e em Nossa evolução. Itens do Plus têm selo "Plus" e o botão "Só no Plus".
 - **Tela de planos:** tabela Grátis × Plus com os números de verdade (itens, pelagens, 30 dias × 6 meses de gráficos), plano anual (R$ 79,90, economize 48%) e mensal (R$ 12,90) para escolher e o teste de 7 dias. A cobrança paga ainda não existe: depois do teste, a tela avisa que a assinatura chega pelas lojas e pelo Pix.
 - As ofertas não aparecem para quem já é Plus nem para crianças de até 12 anos (sem apelo comercial para criança).
+
+### Lembretes ao longo do dia (novembro de 2026)
+
+- **Tipos:** beber água (plano de 2, 4 ou 6 vezes por dia), quando o Hami precisar de você (fome ou saudade, depois do meio-dia), missões do dia (no horário escolhido, só se faltar alguma), pausa da tarde (15h30), hora de dormir (no horário escolhido), volta dos passeios, desafios novos da semana (segunda de manhã) e avisos de amigos (visita com reação, presente, vibe boa e pedido de amizade). Cada um liga e desliga em Ajustes › Lembretes; pausa e hora de dormir começam desligados.
+- **Gentileza:** no máximo 5 por dia, pelo menos 1 hora entre um e outro, nunca de madrugada (silêncio das 22h30 às 8h; para menores de 18, das 21h30 às 8h), horário perdido não sai atrasado, nenhuma mensagem fala em culpa. Os textos usam o nome do Hami.
+- Tocar no lembrete abre a tela certa (água e missões → Missões, Hami → Cuidar, pausa e sono → Bem-estar, amigos → Amigos). Um lembrete novo do mesmo tipo troca o anterior em vez de empilhar.
+- **Com conta**, os lembretes chegam com o app fechado (push). No iPhone, só com o HamiCare na tela de início. O servidor precisa estar acordado: no plano grátis do Render ele dorme, então os lembretes pedem o plano Starter.
+- **Widget do Hami na tela inicial:** não existe para apps web. Só dá no app das lojas, com código nativo (Android: widget no projeto do app; iPhone: WidgetKit). Fica para quando a conta da Google Play estiver pronta.

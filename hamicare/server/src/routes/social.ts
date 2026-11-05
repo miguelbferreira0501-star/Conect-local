@@ -7,7 +7,8 @@ import type pg from 'pg';
 import { withUser } from '../db';
 import { AppError, forbidden, invalid, notFound } from '../lib/errors';
 import { type AppEnv, requireAuth } from '../auth';
-import { checkKindness, PRESET_COMMENTS, REACTION_IDS, REASON_TEXT } from '../../../web/src/shared/moderation';
+import { checkKindness, PRESET_COMMENTS, REACTIONS, REACTION_IDS, REASON_TEXT } from '../../../web/src/shared/moderation';
+import { notifyFriend } from '../push';
 import { ITEMS } from '../../../web/src/data/items';
 import { arenaOf } from '../../../web/src/shared/game';
 import { gameConfig } from './game';
@@ -26,6 +27,13 @@ async function asMe<T>(c: { get: (k: 'userId') => string | null }, fn: (db: pg.P
     return fn(db, { id: u.id, ageGroup: u.age_group });
   });
 }
+
+/** Nome de quem está agindo (para os avisos aos amigos). */
+async function myName(db: pg.PoolClient): Promise<string> {
+  return (await db.query('SELECT name FROM profiles WHERE user_id = app.current_user_id()')).rows[0]?.name ?? 'Um amigo';
+}
+/** Avisos para amigos saem depois, sem segurar a resposta nem derrubar nada se falharem. */
+const later = (fn: () => Promise<unknown>) => void setTimeout(() => fn().catch(() => {}), 0);
 
 const uuid = z.string().uuid();
 const pid = (v: string) => {
@@ -110,7 +118,12 @@ social.get('/code/:code', (c) =>
 
 social.post('/friends/:id/request', (c) =>
   asMe(c, async (db) => {
-    const result = (await db.query('SELECT app.request_friend($1) AS r', [pid(c.req.param('id'))])).rows[0].r;
+    const target = pid(c.req.param('id'));
+    const result = (await db.query('SELECT app.request_friend($1) AS r', [target])).rows[0].r;
+    if (result === 'ok') {
+      const name = await myName(db);
+      later(() => notifyFriend(target, `${name} quer ser seu amigo no HamiCare 🐹`));
+    }
     return c.json({ result });
   }),
 );
@@ -228,6 +241,11 @@ social.post('/visits/:id', (c) =>
     const host = pid(c.req.param('id'));
     if (!(await db.query('SELECT app.are_friends(app.current_user_id(), $1) AS f', [host])).rows[0].f) throw forbidden('Só dá para reagir na casa de amigos.');
     const r = await db.query('INSERT INTO visits (visitor, host, reaction) VALUES (app.current_user_id(), $1, $2) ON CONFLICT DO NOTHING', [host, body.data.reaction]);
+    if (r.rowCount) {
+      const name = await myName(db);
+      const re = REACTIONS.find((x) => x.id === body.data.reaction)!;
+      later(() => notifyFriend(host, `${name} passou na sua casa e deixou ${re.emoji} ${re.label.toLowerCase()}!`));
+    }
     return c.json({ result: r.rowCount ? 'ok' : 'limite' });
   }),
 );
@@ -469,6 +487,9 @@ social.post('/gifts', (c) =>
       if ((e as { code?: string }).code === '42501') throw forbidden('Presentes só para amigos.');
       throw e;
     }
+    const name = await myName(db);
+    const to = body.data.to;
+    later(() => notifyFriend(to, body.data.itemId === 'vibe' ? `${name} mandou uma vibe boa pra você 💛` : `${name} te mandou um presente 🎁`));
     return c.json({ ok: true }, 201);
   }),
 );
