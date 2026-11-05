@@ -39,6 +39,8 @@ describe('social na página publicada', () => {
     // Pedido por código e aceite
     const found = await ana.findByCode(codeFor('u_bia'));
     expect(found?.name).toBe('Bia');
+    expect((await ana.findByCode(` ${codeFor('u_bia').slice(5).toLowerCase()} `))?.name).toBe('Bia');
+    expect(await ana.findByCode(codeFor('u_ana'))).toBeNull();
     expect(await ana.request('u_bia')).toBe('ok');
     expect((await bia.friends()).incoming.map((p) => p.name)).toEqual(['Ana']);
     expect((await ana.friends()).outgoing.map((p) => p.name)).toEqual(['Bia']);

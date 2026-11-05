@@ -1,7 +1,7 @@
 // Conta no servidor do HamiCare: login, backup automático, Plus e push.
 import { useEffect, useState } from 'react';
 import { http, resetServerCheck } from './social/api';
-import { resetSocial } from './social';
+import { resetSocial, syncProfile } from './social';
 import { getState, grantPremium, replaceState, setChangeHook } from './store';
 import { LEGAL_INFO } from '../shared/legal';
 import { startGameSync, stopGameSync } from './gameSync';
@@ -63,13 +63,21 @@ export function useAccount() {
 export async function register(input: { name: string; email: string; password: string; ageGroup: User['ageGroup']; guardianConsent: boolean }) {
   const r = await http<{ user: User }>('POST', '/auth/register', { ...input, acceptTerms: true, healthConsent: true, termsVersion: LEGAL_INFO.atualizado });
   setUser(r.user);
-  return firstSync();
+  return afterSignIn();
 }
 
 export async function login(email: string, password: string) {
   const r = await http<{ user: User }>('POST', '/auth/login', { email, password });
   setUser(r.user);
-  return firstSync();
+  return afterSignIn();
+}
+
+/** Depois de criar a conta ou entrar: junta o progresso e já cria o perfil (com o código de amigo). */
+async function afterSignIn() {
+  const r = await firstSync();
+  // Se a pessoa ainda vai escolher qual Hami fica, o perfil sai depois da escolha.
+  if (r !== 'escolher') void syncProfile(getState());
+  return r;
 }
 
 /** Esqueci minha senha: o servidor manda o link se a conta existir (a resposta é sempre igual). */
@@ -161,6 +169,7 @@ export async function resolveChoice(keep: 'nuvem' | 'aparelho', server: State) {
   startSync();
   await pushNow();
   startGameSync();
+  void syncProfile(getState());
 }
 
 let timer: number | undefined;

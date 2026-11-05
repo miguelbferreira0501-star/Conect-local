@@ -21,6 +21,7 @@ import { LegalHost } from './components/Legal';
 import { getState, markWelcomed, onCelebrate, tick, todayKey, useApp, type Celebration } from './lib/store';
 import { markReminded, pickReminder, reminderDue, showNotification } from './lib/notify';
 import { syncProfile } from './lib/social';
+import { captureInvite } from './lib/social/invite';
 
 type Tab = TabId;
 
@@ -34,6 +35,8 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 function initialTab(): Tab {
+  // Link de convite (#amigo=HAMI-…): vai para Amigos com o código guardado.
+  if (captureInvite()) return 'amigos';
   const h = location.hash.slice(1);
   return TABS.some((t) => t.id === h) ? (h as Tab) : 'inicio';
 }

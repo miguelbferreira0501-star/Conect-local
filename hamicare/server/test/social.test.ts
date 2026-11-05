@@ -10,6 +10,14 @@ describe('amigos e feed', () => {
     const caio = await withProfile('Caio');
     const found = await call('GET', `/social/code/${bia.code}`, undefined, ana.cookie);
     expect(found.body.profile.name).toBe('Bia');
+    // Do jeito que a pessoa digitar: sem "HAMI-", minúsculo, com espaço, O no lugar de 0.
+    const key = bia.code.slice(5);
+    for (const typed of [key, ` ${bia.code.toLowerCase()} `, `hami ${key}`, bia.code.replace(/0/g, 'O')]) {
+      expect((await call('GET', `/social/code/${encodeURIComponent(typed)}`, undefined, ana.cookie)).body.profile?.name).toBe('Bia');
+    }
+    // Código que não existe ou de outro lugar: ninguém, sem erro.
+    expect((await call('GET', '/social/code/HAMI-ZZZZZZ', undefined, ana.cookie)).body.profile).toBeNull();
+    expect((await call('GET', '/social/code/12', undefined, ana.cookie)).body.profile).toBeNull();
     await befriend(ana, bia);
     expect((await call('GET', '/social/friends', undefined, ana.cookie)).body.friends.map((p: { name: string }) => p.name)).toEqual(['Bia']);
 

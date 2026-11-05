@@ -12,6 +12,7 @@ import { notifyFriend } from '../push';
 import { ITEMS } from '../../../web/src/data/items';
 import { arenaOf } from '../../../web/src/shared/game';
 import { TEAM_MAX, TEAM_MISSIONS_MAX, dayComplete, isTeamMission, teamStreak, type TeamCheckins } from '../../../web/src/shared/team';
+import { codeKey, isServerKey } from '../../../web/src/shared/friendCode';
 import { gameConfig } from './game';
 
 export const social = new Hono<AppEnv>();
@@ -110,7 +111,10 @@ social.put('/profile', (c) =>
 
 social.get('/code/:code', (c) =>
   asMe(c, async (db) => {
-    const p = (await db.query(`SELECT ${PROFILE_COLS} FROM app.find_by_code($1) p`, [c.req.param('code').trim().toUpperCase()])).rows[0];
+    // Aceita do jeito que a pessoa digitar (sem "HAMI-", minúsculo, com espaço, O no lugar de 0).
+    const key = codeKey(c.req.param('code'));
+    if (!isServerKey(key)) return c.json({ profile: null });
+    const p = (await db.query(`SELECT ${PROFILE_COLS} FROM app.find_by_code($1) p`, [`HAMI-${key}`])).rows[0];
     return c.json({ profile: p ?? null });
   }),
 );

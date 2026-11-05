@@ -160,3 +160,11 @@ Cobrança real, push num celular de verdade (precisa do app publicado em HTTPS) 
 - **Página de teste (`web/src/lib/social/artifact.test.ts`):** os mesmos limites e o dia completo só com todos. 125 testes do app.
 - **Navegador com servidor local e 3 contas (390 px e 320 px com fonte maior):** Lia cria a turma com Rui e Gil pelo app, marca "Fiz!"; Rui e Gil marcam; a tela mostra quem fez cada missão, "Todos fizeram!", o dia completo com o prêmio (e as sementes chegam no servidor), a ofensiva de 1 dia e o cartão da turma no Início de Lia e de Rui. Nada passa da largura e sem erros de página.
 - Esse teste achou o problema do backup e da carteira que só ligavam ao abrir certas abas (corrigido).
+
+## Rodada 20 (código de amigo)
+
+- **Problema relatado:** "não achamos ninguém com esse código". Reproduzido no navegador: quem criava a conta pelos Ajustes ficava sem perfil (e sem código no servidor) até abrir a aba Amigos, e o código só era achado se fosse digitado exatamente com "HAMI-".
+- **Correções:** o código é aceito do jeito que a pessoa digitar (sem "HAMI-", minúsculo, com espaço ou traço, O no lugar de 0, I/L no lugar de 1); o perfil é criado logo ao criar a conta ou entrar; mensagens claras para o próprio código, código de outro app (versão de teste), código curto e código não achado; "Seu código" com botão Convidar (link `#amigo=HAMI-…` que abre Amigos com o perfil já procurado, mesmo para quem ainda vai criar a conta); se o perfil não puder ser criado (nome recusado pelo filtro), a tela diz o motivo em vez de ficar carregando.
+- **Servidor (`server/test/social.test.ts`):** busca sem "HAMI-", minúscula com espaços, "hami " + código e O no lugar de 0 acham a pessoa; código inexistente ou curto devolve ninguém. 66 testes do servidor.
+- **App (`web/src/shared/friendCode.test.ts`, `artifact.test.ts`):** normalização do código e busca na página de teste (sem prefixo, minúscula, o próprio código não aparece). 127 testes do app.
+- **Navegador com servidor local e 3 contas:** Bia cria a conta pelos Ajustes e já tem código; Ana acha Bia antes de Bia abrir Amigos; as 8 formas de digitar dão o resultado certo; Caio abre o link de convite sem conta, vê o aviso do convite, cria a conta e cai direto no perfil da Ana. Sem erros e sem rolagem para o lado.
