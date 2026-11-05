@@ -8,6 +8,7 @@ import { Glyph } from '../components/art';
 import { Seed } from '../components/ui';
 import { itemById } from '../data/items';
 import { gameCfg } from '../lib/game';
+import { play } from '../lib/sound';
 import { loadChestShop, openChestNow, type ChestShop, type ChestView, type OpenError } from '../lib/chests';
 import { useApp, type ChestOutcome } from '../lib/store';
 import { prefersReducedMotion } from '../lib/util';
@@ -208,6 +209,18 @@ export function ChestOpening({ chest, free, onClose }: { chest: ChestId; free: b
       live = false;
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sons: o baú treme, abre com o brilho da raridade e o item aparece.
+  useEffect(() => {
+    if (phase === 'shake' && !reduce) {
+      play('bau-treme');
+      const id = setInterval(() => play('bau-treme'), 190);
+      return () => clearInterval(id);
+    }
+    if (phase === 'open' && result) play('bau-abre', { rarity: result.rarity });
+    if (phase === 'item') play('brilho');
+    if (phase === 'erro') play('erro');
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (phase !== 'open' || !result) return;

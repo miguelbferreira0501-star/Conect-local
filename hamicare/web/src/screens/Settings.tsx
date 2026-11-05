@@ -13,6 +13,7 @@ import { askPermission, permission, pickReminder, showNotification } from '../li
 import { copyText, formatDay } from '../lib/util';
 import { syncPush } from '../lib/account';
 import { getState } from '../lib/store';
+import { play } from '../lib/sound';
 import type { AgeGroup, NotifKind, ThemePref, TraitId } from '../types';
 import { Glyph } from '../components/art';
 
@@ -105,6 +106,19 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
               </button>
             ))}
           </div>
+        </Group>
+
+        <Group title="Sons">
+          <Toggle id="set-sound" checked={s.settings.sound !== false} onChange={(on) => (updateSettings({ sound: on }), on && setTimeout(() => play('ligar'), 0))} label="Efeitos sonoros" sub="Botões, banho, comidinha, missões, nível novo e mais. Seguem o volume do celular." />
+          {s.settings.sound !== false && (
+            <div className="seg" role="group" aria-label="Volume dos sons">
+              {(['baixo', 'medio', 'alto'] as const).map((v) => (
+                <button key={v} aria-pressed={(s.settings.volume ?? 'medio') === v} data-sound="none" onClick={() => (updateSettings({ volume: v }), setTimeout(() => play('semente'), 0))}>
+                  {v === 'baixo' ? 'Baixo' : v === 'medio' ? 'Médio' : 'Alto'}
+                </button>
+              ))}
+            </div>
+          )}
         </Group>
 
         <Group title="Lembretes">

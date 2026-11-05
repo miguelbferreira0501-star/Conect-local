@@ -11,6 +11,7 @@ import { PLACES } from '../data/world';
 import { care, cook, feed, owned, setMood, takePhoto, toggleSleep, useApp } from '../lib/store';
 import { snapshotPng, saveFile } from '../lib/platform';
 import { prefersReducedMotion } from '../lib/util';
+import { play, useSoundLoop } from '../lib/sound';
 import type { Mood, Photo, PetMood } from '../types';
 import { Glyph, hasArt } from '../components/art';
 
@@ -197,6 +198,7 @@ function PetGame({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     if (!done) return;
     care('carinho');
+    play('pronto');
     setMoodPet('animado');
     animate(pet.current, 'hop');
     const r = stage.current?.getBoundingClientRect();
@@ -214,18 +216,21 @@ function PetGame({ onClose }: { onClose: () => void }) {
     last.current = { x: e.clientX, y: e.clientY };
     setLove((v) => Math.min(100, v + Math.min(d, 30) / 5));
     spawn({ kind: 'heart', x: p.x, y: p.y, dy: -70, dx: (Math.random() - 0.5) * 40 }, 1000, 110);
+    play('coracao');
     const zone = part(e.clientY);
     if (zone > 0.6) {
       setMoodPet('risada');
       const now = performance.now();
       if (now - laughAt.current > 900) {
         laughAt.current = now;
+        play('risada');
         animate(pet.current, 'wiggle');
         spawn({ kind: 'text', text: ['hihi!', 'cócegas!', 'hahaha!'][Math.floor(Math.random() * 3)], x: p.x, y: p.y - 30, dy: -50 }, 900);
       }
     } else {
       setMoodPet('calmo');
       spawn({ kind: 'note', x: p.x + 20, y: p.y - 10, dy: -60, dx: 30 }, 1100, 380, 'purr');
+      if (Math.random() < 0.08) play('ronrom');
     }
   }
 
@@ -278,6 +283,7 @@ function FeedGame({ onClose }: { onClose: () => void }) {
     if (full) {
       setMoodPet('feliz');
       animate(pet.current, 'nod');
+      play('iii');
       toast(`${s.pet.name}: "Tô cheinho! Depois eu como mais."`);
       return;
     }
@@ -285,6 +291,7 @@ function FeedGame({ onClose }: { onClose: () => void }) {
     chewing.current = true;
     setMoodPet('comendo');
     animate(pet.current, 'chew');
+    play(item.kind === 'comida' && /suco|água|agua|leite|chá|cha|vitamina/i.test(item.name) ? 'gole' : 'nhac');
     const m = mouth();
     const p = local(m.x, m.y);
     for (let i = 0; i < 8; i++) setTimeout(() => spawn({ kind: 'crumb', x: p.x + (Math.random() - 0.5) * 30, y: p.y, dx: (Math.random() - 0.5) * 90, dy: 40 + Math.random() * 40 }, 800), i * 90);
@@ -293,6 +300,7 @@ function FeedGame({ onClose }: { onClose: () => void }) {
       chewing.current = false;
       setMoodPet('animado');
       animate(pet.current, 'hop');
+      play('iii');
       spawn({ kind: 'heart', x: p.x, y: p.y - 70, dy: -60 }, 1000);
       setTimeout(() => setMoodPet('feliz'), 900);
     }, 1200);
@@ -337,6 +345,7 @@ function FeedGame({ onClose }: { onClose: () => void }) {
                   // Toque: a comida voa sozinha até a boca.
                   const r = e.currentTarget.getBoundingClientRect();
                   setMoodPet('boca');
+                  play('jogar');
                   setFly({ id: f.id, from: { x: r.left + r.width / 2, y: r.top + r.height / 2 }, to: mouth() });
                   setTimeout(() => {
                     setFly(null);
@@ -377,7 +386,7 @@ function FeedGame({ onClose }: { onClose: () => void }) {
                   <p className="font-bold leading-tight">{r.name}</p>
                   <p className="text-[13px] text-muted">{r.needs.map((id) => itemById(id)?.name).join(' + ')}</p>
                 </div>
-                <button className="btn btn-soft btn-sm" disabled={!ok} onClick={() => cook(r.result) && toast(`${r.name} pronta!`)}>
+                <button className="btn btn-soft btn-sm" disabled={!ok} data-sound="none" onClick={() => (cook(r.result) ? (play('cozinhar'), toast(`${r.name} pronta!`)) : play('erro'))}>
                   Preparar
                 </button>
               </div>
@@ -439,6 +448,9 @@ function BathGame({ onClose }: { onClose: () => void }) {
   const last = useRef<{ x: number; y: number } | null>(null);
   const foamTotal = useRef(0);
   const cur = BATH[step];
+  // Chuveirinho jorrando enquanto o dedo está na tela; secador enquanto segura o botão.
+  useSoundLoop('chuveiro', !!tool && !done && (cur.id === 'molhar' || cur.id === 'enxaguar'));
+  useSoundLoop('secador', holding && !done && cur.id === 'secador');
 
   // Avança de passo quando a barrinha enche.
   useEffect(() => {
@@ -450,9 +462,11 @@ function BathGame({ onClose }: { onClose: () => void }) {
         setMoodPet('animado');
         animate(pet.current, 'hop');
         care('banho');
+        play('pronto');
       } else {
         if (cur.id === 'enxaguar') setFoam([]);
         if (cur.id === 'secar') setWet(false);
+        play('ligar');
         setStep(step + 1);
         setProg(0);
         setMoodPet('feliz');
@@ -489,6 +503,7 @@ function BathGame({ onClose }: { onClose: () => void }) {
           setProg((v) => v + Math.min(d, 25) / 3.2);
           if (!wet) {
             setWet(true);
+            play('iii');
             setMoodPet('surpreso');
             animate(pet.current, 'wiggle');
             setTimeout(() => setMoodPet('feliz'), 700);
@@ -496,7 +511,10 @@ function BathGame({ onClose }: { onClose: () => void }) {
         } else {
           setFoam((f) => {
             const left = f.filter((b) => Math.abs(b.x - p.x) > 46 || b.y < p.y - 10);
-            if (left.length !== f.length) spawn({ kind: 'pop', x: p.x, y: p.y + 50 }, 400, 60);
+            if (left.length !== f.length) {
+              spawn({ kind: 'pop', x: p.x, y: p.y + 50 }, 400, 60);
+              play('bolha');
+            }
             if (foamTotal.current) setProg(Math.max(prog, (1 - left.length / foamTotal.current) * 100));
             return left;
           });
@@ -506,6 +524,7 @@ function BathGame({ onClose }: { onClose: () => void }) {
     }
     if (cur.id === 'esfregar' && on) {
       setMoodPet('risada');
+      play('espuma');
       setProg((v) => v + Math.min(d, 25) / 4);
       setFoam((f) => {
         if (f.length >= 46) return f;
@@ -516,10 +535,12 @@ function BathGame({ onClose }: { onClose: () => void }) {
     }
     if (cur.id === 'secar' && on) {
       setMoodPet('calmo');
+      if (d > 2) play('toalha');
       setProg((v) => {
         const nv = v + Math.min(d, 25) / 3.5;
-        if (Math.floor(nv / 25) > Math.floor(v / 25)) {
+        if (v < 100 && Math.floor(nv / 25) > Math.floor(v / 25)) {
           animate(pet.current, 'shake');
+          play('sacudir');
           const r = pet.current?.getBoundingClientRect();
           const c = r ? local(r.left + r.width / 2, r.top + r.height * 0.5) : p;
           for (let i = 0; i < 10; i++) spawn({ kind: 'drop', x: c.x, y: c.y, dx: Math.cos(i * 0.63) * 130, dy: Math.sin(i * 0.63) * 80 - 20 }, 700);
@@ -534,6 +555,7 @@ function BathGame({ onClose }: { onClose: () => void }) {
     setBlobs((b) => b + 1);
     setProg((v) => v + 34);
     animate(pet.current, 'squish');
+    play('shampoo');
     const r = pet.current?.getBoundingClientRect();
     if (r) {
       const c = local(r.left + r.width / 2, r.top + r.height * 0.3);
@@ -594,7 +616,7 @@ function BathGame({ onClose }: { onClose: () => void }) {
           </span>
         </div>
         {cur.id === 'shampoo' && !done && (
-          <button className="bottle" onClick={squeeze} aria-label="Apertar o shampoo">
+          <button className="bottle" data-sound="none" onClick={squeeze} aria-label="Apertar o shampoo">
             <Glyph e="🧴" size={60} />
           </button>
         )}
@@ -615,6 +637,7 @@ function BathGame({ onClose }: { onClose: () => void }) {
       {!done && cur.id === 'secador' && (
         <button
           className="btn btn-primary select-none"
+          data-sound="none"
           style={{ touchAction: 'none' }}
           onPointerDown={() => setHolding(true)}
           onPointerUp={() => setHolding(false)}
@@ -689,11 +712,13 @@ function SeedRain({ onClose, onBack }: { onClose: () => void; onBack: () => void
       if (!rewarded.current) {
         rewarded.current = true;
         care('brincar');
+        play('fim-jogo');
         setMoodPet('animado');
         animate(pet.current, 'hop');
       }
       return;
     }
+    if (left <= 5) play('tique');
     const t = setTimeout(() => setLeft((l) => l - 1), 1000);
     return () => clearTimeout(t);
   }, [left, over]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -726,7 +751,11 @@ function SeedRain({ onClose, onBack }: { onClose: () => void; onBack: () => void
           if (it.y >= catchY && it.y < catchY + 30 && Math.abs(it.x - hamiX.current) * w < 46) {
             const pts = FALL[it.kind].pts;
             setScore((v) => v + pts);
-            setCombo((c) => c + 1);
+            setCombo((c) => {
+              play('pega', { step: Math.min(c, 7) });
+              return c + 1;
+            });
+            if (it.kind === 'ouro') play('brilho');
             setMoodPet('animado');
             setTimeout(() => setMoodPet('feliz'), 300);
             spawn({ kind: 'text', text: `+${pts}`, x: it.x * w, y: catchY - 10, dy: -50 }, 700);
@@ -812,6 +841,7 @@ function Fetch({ onClose, onBack }: { onClose: () => void; onBack: () => void })
   useEffect(() => {
     if (done) {
       care('brincar');
+      play('fim-jogo');
       setMoodPet('animado');
       animate(pet.current, 'hop');
     }
@@ -827,10 +857,12 @@ function Fetch({ onClose, onBack }: { onClose: () => void; onBack: () => void })
     setPhase('voando');
     setMoodPet('surpreso');
     animate(pet.current, 'squish');
+    play('jogar');
     setBall({ x: tx, y: ty, flying: true, held: false });
     if (ballRef.current && !prefersReducedMotion()) ballRef.current.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-110px) scale(1.25)', offset: 0.45 }, { transform: 'translateY(0) scale(1)' }], { duration: 650, easing: 'ease-in-out' });
     setTimeout(() => {
       setBall((b) => ({ ...b, flying: false }));
+      play('quica');
       spawn({ kind: 'text', text: 'tum!', x: (tx / 100) * r.width, y: (ty / 100) * r.height - 30, dy: -20 }, 600);
       setPhase('correndo');
       setMoodPet('animado');
@@ -848,6 +880,7 @@ function Fetch({ onClose, onBack }: { onClose: () => void; onBack: () => void })
           setBall({ x: 30, y: 74, flying: false, held: true });
           setCount((c) => c + 1);
           animate(pet.current, 'hop');
+          play('pulo');
           spawn({ kind: 'heart', x: 0.3 * r.width, y: r.height - 150, dy: -60 }, 1000);
         }, 900);
       }, 900);
@@ -907,6 +940,7 @@ function BrushGame({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     if (!done) return;
     care('escovar');
+    play('pronto');
     setMoodPet('animado');
     animate(pet.current, 'hop');
   }, [done]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -920,6 +954,7 @@ function BrushGame({ onClose }: { onClose: () => void }) {
     setBrush({ x: p.x, y: p.y, a });
     if (!over(e.clientX, e.clientY, 12)) return;
     spawn({ kind: 'sparkle', x: p.x, y: p.y, dy: -20 }, 600, 140);
+    if (d > 2) play('escova');
     const pr = pet.current?.getBoundingClientRect();
     if (!pr || d === 0) return;
     setKnots((ks) =>
@@ -933,6 +968,7 @@ function BrushGame({ onClose }: { onClose: () => void }) {
           const c = local(kx, ky);
           for (let i = 0; i < 5; i++) spawn({ kind: 'sparkle', x: c.x, y: c.y, dx: Math.cos(i * 1.25) * 50, dy: Math.sin(i * 1.25) * 50 }, 700);
           spawn({ kind: 'text', text: 'shiiin!', x: c.x, y: c.y - 24, dy: -40 }, 800);
+          play('brilho');
           setMoodPet('risada');
           setTimeout(() => setMoodPet('calmo'), 600);
           animate(pet.current, 'wiggle');
@@ -1025,6 +1061,7 @@ function SleepGame({ onClose }: { onClose: () => void }) {
     const id = setInterval(() => {
       if (covered) return;
       setMoodPet('boca');
+      play('bocejo');
       setTimeout(() => setMoodPet('sono'), 700);
     }, 3200);
     return () => clearInterval(id);
@@ -1033,7 +1070,10 @@ function SleepGame({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     if (!covered || finished || waking) return;
     const r = stage.current?.getBoundingClientRect();
-    const id = setInterval(() => r && spawn({ kind: 'zzz', x: r.width / 2 + 40, y: r.height * 0.4, dx: 30, dy: -70 }, 1600), 900);
+    const id = setInterval(() => {
+      if (r) spawn({ kind: 'zzz', x: r.width / 2 + 40, y: r.height * 0.4, dx: 30, dy: -70 }, 1600);
+      play('ronco');
+    }, 900);
     return () => clearInterval(id);
   }, [covered, finished, waking]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -1041,6 +1081,7 @@ function SleepGame({ onClose }: { onClose: () => void }) {
     const r = stage.current?.getBoundingClientRect();
     if (r) for (let i = 0; i < 3; i++) setTimeout(() => spawn({ kind: 'note', x: r.width * (0.3 + Math.random() * 0.4), y: r.height * 0.6, dx: (Math.random() - 0.5) * 60, dy: -110 }, 1400), i * 150);
     const n = songs + 1;
+    play('cancao', { step: songs });
     setSongs(n);
     if (n >= 3) {
       setMoodPet('dormindo');
@@ -1053,6 +1094,7 @@ function SleepGame({ onClose }: { onClose: () => void }) {
     if (!curtain || finished) return;
     setMoodPet('boca');
     animate(pet.current, 'stretch');
+    play('espreguicar');
     setTimeout(() => {
       setMoodPet('animado');
       setCovered(false);
@@ -1075,16 +1117,17 @@ function SleepGame({ onClose }: { onClose: () => void }) {
           setBlanket(null);
           if (over(e.clientX, e.clientY, 50)) {
             setCovered(true);
+            play('coberta');
             setMoodPet('dormindo');
             animate(pet.current, 'squish');
           }
         }}
       >
-        <button className={`window ${dark ? 'is-night' : ''} ${waking && curtain ? 'is-open' : ''}`} onClick={() => waking && setCurtain(true)} aria-label={waking ? 'Abrir a cortina' : 'Janela'} disabled={!waking || curtain}>
+        <button className={`window ${dark ? 'is-night' : ''} ${waking && curtain ? 'is-open' : ''}`} data-sound="none" onClick={() => waking && (setCurtain(true), play('cortina'))} aria-label={waking ? 'Abrir a cortina' : 'Janela'} disabled={!waking || curtain}>
           <span className="curtain curtain-l" />
           <span className="curtain curtain-r" />
         </button>
-        <button className={`lamp ${light ? 'is-on' : ''}`} onClick={() => !waking && light && setLight(false)} aria-label="Apagar a luz" disabled={waking || !light}>
+        <button className={`lamp ${light ? 'is-on' : ''}`} data-sound="none" onClick={() => !waking && light && (setLight(false), play('interruptor'))} aria-label="Apagar a luz" disabled={waking || !light}>
           <span className="lamp-shade" />
           <span className="lamp-foot" />
         </button>
@@ -1107,13 +1150,13 @@ function SleepGame({ onClose }: { onClose: () => void }) {
             role="button"
             aria-label="Arrastar a cobertinha até o Hami"
             tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && (setCovered(true), setMoodPet('dormindo'))}
+            onKeyDown={(e) => e.key === 'Enter' && (setCovered(true), setMoodPet('dormindo'), play('coberta'))}
           />
         )}
         {layer}
       </div>
       {!waking && covered && !finished && (
-        <button className="btn btn-primary" onClick={sing}>
+        <button className="btn btn-primary" data-sound="none" onClick={sing}>
           <Glyph e="🎵" size={22} /> Cantar ({songs}/3)
         </button>
       )}

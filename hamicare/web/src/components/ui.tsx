@@ -1,10 +1,22 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { X } from 'lucide-react';
+import { play, playSoft } from '../lib/sound';
+
+/** Som de abrir e fechar janelas (não toca ao montar já fechada). */
+function useOpenSound(open: boolean) {
+  const was = useRef(open);
+  useEffect(() => {
+    if (was.current === open) return;
+    was.current = open;
+    play(open ? 'abrir' : 'fechar');
+  }, [open]);
+}
 
 /** Gaveta que sobe da parte de baixo da tela. */
 export function Sheet({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: ReactNode }) {
   const [mounted, setMounted] = useState(open);
   const [shown, setShown] = useState(false);
+  useOpenSound(open);
 
   useEffect(() => {
     if (open) {
@@ -45,6 +57,7 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
 /** Janela central para momentos raros: comemorações e confirmações. */
 export function Modal({ open, onClose, label, children }: { open: boolean; onClose: () => void; label: string; children: ReactNode }) {
   const [shown, setShown] = useState(false);
+  useOpenSound(open);
   useEffect(() => {
     if (!open) return setShown(false);
     const id = requestAnimationFrame(() => requestAnimationFrame(() => setShown(true)));
@@ -176,6 +189,7 @@ let pushToast: ((text: string) => void) | null = null;
 
 export function toast(text: string) {
   pushToast?.(text);
+  playSoft('aviso', 400);
 }
 
 export function Toaster() {

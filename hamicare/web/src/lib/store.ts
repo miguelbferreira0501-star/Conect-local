@@ -234,7 +234,17 @@ export function setChangeHook(fn: ((s: State) => void) | null) {
   changeHook = fn;
 }
 
+const watchers = new Set<(s: State, prev: State) => void>();
+/** Quem precisa saber o que mudou (por exemplo, os efeitos sonoros). */
+export function watchState(fn: (s: State, prev: State) => void) {
+  watchers.add(fn);
+  return () => {
+    watchers.delete(fn);
+  };
+}
+
 function set(next: State, opts: { silent?: boolean } = {}) {
+  const prev = state;
   state = { ...next, updatedAt: Date.now() };
   try {
     localStorage.setItem(KEY, JSON.stringify(state));
@@ -242,6 +252,7 @@ function set(next: State, opts: { silent?: boolean } = {}) {
     // Sem armazenamento: o progresso vive só nesta sessão.
   }
   listeners.forEach((l) => l());
+  watchers.forEach((w) => w(state, prev));
   if (!opts.silent) changeHook?.(state);
 }
 

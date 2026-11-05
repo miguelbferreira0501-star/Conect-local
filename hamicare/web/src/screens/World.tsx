@@ -190,7 +190,7 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
             <p className="text-[13px] text-muted">{advLeft > 0 ? `Volta em ~${advLeft} min. Cada atividade concluída traz ele 5 min mais cedo.` : 'Já voltou!'}</p>
           </div>
           {advLeft === 0 && (
-            <button className="btn btn-primary btn-sm" onClick={() => setResult(finishAdventure())}>
+            <button className="btn btn-primary btn-sm" data-sound="conquista" onClick={() => setResult(finishAdventure())}>
               Abrir
             </button>
           )}
@@ -270,6 +270,7 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
                   <button
                     className="btn btn-primary btn-sm"
                     disabled={!!adv}
+                    data-sound="enviar"
                     onClick={() => {
                       const r = startAdventure(place.id, m.id);
                       const msg = { ok: `${s.pet.name} saiu para a aventura!`, cansado: `${s.pet.name} está cansado. Deixe ele dormir um pouco.`, dormindo: `${s.pet.name} está dormindo.`, ocupado: 'Já tem uma aventura em andamento.', bloqueado: 'Lugar bloqueado.' }[r];

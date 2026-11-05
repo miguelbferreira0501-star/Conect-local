@@ -14,6 +14,7 @@ import { periodOf } from '../data/lines';
 import { gameCfg } from '../lib/game';
 import { homeArenaOf, moveHome, useApp, type Celebration } from '../lib/store';
 import { prefersReducedMotion } from '../lib/util';
+import { play } from '../lib/sound';
 
 type LevelC = Extract<Celebration, { type: 'level' }>;
 type Stage = 'nivel' | 'evolui' | 'arena' | 'casa';
@@ -42,6 +43,13 @@ export function LevelUpScreen({ c, onClose }: { c: LevelC; onClose: () => void }
   const arena = c.arena ? cfg.arenas.find((a) => a.n === c.arena!.n) : undefined;
   const [stage, setStage] = useState<Stage>('nivel');
   const reduce = prefersReducedMotion();
+
+  // Som de cada parte: a magia da evolução, a arena nova e a casa nova.
+  useEffect(() => {
+    if (stage === 'evolui') play('magia');
+    else if (stage === 'arena') play('conquista');
+    else if (stage === 'casa') play('bomdia');
+  }, [stage]);
 
   // A evolução dura um instante e mostra a arena sozinha.
   useEffect(() => {
