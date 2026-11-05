@@ -1,14 +1,15 @@
 import { play } from '../lib/sound';
+import { MoodSlider } from '../components/MoodSlider';
 import { PlusCard } from '../components/PlusCard';
 import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, Copy, Lock, Phone, Shuffle, Trash2, X } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { LineChart, toast } from '../components/ui';
-import { AFFIRMATIONS, EMOTIONS, MOODS, REFLECTIONS } from '../data/lines';
+import { AFFIRMATIONS, EMOTIONS, REFLECTIONS } from '../data/lines';
 import { BODY_SCAN, BREATHS, MEDITATION_CUES, QUIZZES, SLEEP_ROUTINE } from '../data/wellbeing';
 import { addJar, addJournal, dayOf, deleteJar, deleteJournal, getState, isPremium, logEvent, setEmotions, setMood, todayKey, todayTasks, toggleTask, useApp } from '../lib/store';
 import { addDays, copyText, formatDay, hashStr, prefersReducedMotion } from '../lib/util';
-import type { Mood, PetMood } from '../types';
+import type { PetMood } from '../types';
 import { Glyph } from '../components/art';
 
 type Tool = 'sos' | 'respirar' | 'meditar' | 'foco' | 'relaxar' | 'sono' | 'afirmacoes' | 'aterrar' | 'pote' | 'quiz' | null;
@@ -63,13 +64,7 @@ export function Wellbeing({ onPlus }: { onPlus: () => void }) {
 
       <section className="card grid gap-3 p-4" aria-label="Humor de hoje">
         <h2 className="font-display text-[20px] font-bold">Como você está agora?</h2>
-        <div className="flex justify-between gap-1">
-          {MOODS.map((m) => (
-            <button key={m.value} className="mood-opt" aria-pressed={day.mood === m.value} aria-label={m.label} onClick={() => setMood(m.value as Mood)}>
-              <Glyph e={m.emoji} size={36} label={m.label} />
-            </button>
-          ))}
-        </div>
+        <MoodSlider value={day.mood} onCommit={(m) => setMood(m)} />
         <div className="flex flex-wrap gap-1.5">
           {EMOTIONS.map((e) => {
             const on = day.emotions?.includes(e);
