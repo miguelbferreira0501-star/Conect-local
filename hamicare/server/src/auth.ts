@@ -27,8 +27,11 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
   await next();
 });
 
-/** Proteção contra CSRF: cabeçalho obrigatório + origem permitida (ou o próprio site). */
-const allowed = new Set(env.APP_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean));
+/** Origem do app da loja (Capacitor): iPhone e Android. Só existe dentro do app instalado. */
+export const NATIVE_ORIGINS = ['capacitor://localhost', 'https://localhost', 'ionic://localhost'];
+
+/** Proteção contra CSRF: cabeçalho obrigatório + origem permitida (o próprio site, as da configuração ou o app da loja). */
+const allowed = new Set([...env.APP_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean), ...NATIVE_ORIGINS]);
 export const csrfMiddleware = createMiddleware(async (c, next) => {
   if (['GET', 'HEAD', 'OPTIONS'].includes(c.req.method)) return next();
   if (c.req.header('x-requested-with') !== 'hamicare') throw new AppError(403, 'csrf', 'Requisição bloqueada por segurança. Recarregue e tente de novo.');

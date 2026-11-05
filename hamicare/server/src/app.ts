@@ -4,7 +4,7 @@ import { Hono } from 'hono';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { env } from './env';
 import { AppError } from './lib/errors';
-import { type AppEnv, csrfMiddleware, sessionMiddleware } from './auth';
+import { type AppEnv, csrfMiddleware, NATIVE_ORIGINS, sessionMiddleware } from './auth';
 import { account } from './routes/account';
 import { social } from './routes/social';
 import { admin } from './routes/admin';
@@ -24,6 +24,23 @@ export function createApp() {
   });
 
   const api = new Hono<AppEnv>();
+  // App da loja: os pedidos saem pelo lado nativo (sem CORS), mas, se algum sair pelo navegador do app,
+  // a origem dele é aceita (só ela; o site continua na mesma origem).
+  api.use('*', async (c, next) => {
+    const origin = c.req.header('origin');
+    if (origin && NATIVE_ORIGINS.includes(origin)) {
+      c.header('Access-Control-Allow-Origin', origin);
+      c.header('Access-Control-Allow-Credentials', 'true');
+      c.header('Vary', 'Origin');
+      if (c.req.method === 'OPTIONS') {
+        c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        c.header('Access-Control-Allow-Headers', 'content-type, x-requested-with');
+        c.header('Access-Control-Max-Age', '600');
+        return c.body(null, 204);
+      }
+    }
+    await next();
+  });
   api.use('*', sessionMiddleware, csrfMiddleware);
   api.get('/health', (c) => c.json({ ok: true, app: 'hamicare' }));
   api.route('/', account);

@@ -8,6 +8,7 @@ import { logEvent, payGift, receiveGift, todayKey, useApp } from '../lib/store';
 import { formatDay } from '../lib/util';
 import { socialBlocked, syncProfile, useSocial } from '../lib/social';
 import { clearInvite, pendingInvite, shareInvite } from '../lib/social/invite';
+import { isNativeApp } from '../lib/native';
 import { codeKey, isServerKey } from '../shared/friendCode';
 import { RankingTab, VisitsCard } from './social/Ranking';
 import { TeamTab } from './social/Team';
@@ -154,7 +155,7 @@ function AddFriend({ open, api, me, initialCode, onClose, onAdded, onOpenProfile
   const [found, setFound] = useState<Search>(null);
   const [busy, setBusy] = useState(false);
   const server = api.kind === 'servidor';
-  const where = server ? location.host : 'o mesmo link do HamiCare';
+  const where = server ? (isNativeApp() ? 'o app HamiCare (ou o site, com a mesma conta)' : location.host) : 'o mesmo link do HamiCare';
 
   async function search(raw: string) {
     // Aceita do jeito que a pessoa digitar: sem "HAMI-", minúsculo, com espaço, O no lugar de 0.

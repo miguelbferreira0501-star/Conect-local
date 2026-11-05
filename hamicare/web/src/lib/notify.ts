@@ -4,6 +4,8 @@ import { NOTIFS } from '../data/lines';
 import { reminderText } from '../shared/reminders';
 import type { NotifKind, State } from '../types';
 import { dayOf, todayKey, todayTasks } from './store';
+import { isNativeApp } from './native';
+import { askNativePermission, nativePermission, scheduleNativeReminders } from './nativeReminders';
 
 const SENT_KEY = 'hamicare:lembrete';
 
@@ -22,10 +24,17 @@ export function pickReminder(s: State, now = Date.now()): { kind: NotifKind; tex
 }
 
 export function permission(): NotificationPermission | 'indisponivel' {
+  // App da loja: notificações do próprio celular (o pedido de permissão é o do sistema).
+  if (isNativeApp()) return nativePermission();
   return typeof Notification === 'undefined' ? 'indisponivel' : Notification.permission;
 }
 
 export async function askPermission(): Promise<NotificationPermission | 'indisponivel'> {
+  if (isNativeApp()) {
+    const r = await askNativePermission();
+    void scheduleNativeReminders();
+    return r;
+  }
   if (typeof Notification === 'undefined') return 'indisponivel';
   try {
     return await Notification.requestPermission();
