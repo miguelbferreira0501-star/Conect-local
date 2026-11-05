@@ -79,6 +79,9 @@ export function validateGameConfig(cfg: GameConfig, pool: PoolItem[], itemExists
     add(between(c.reward?.coins, 0, 5000) && between(c.reward?.xp, 0, 1000), `Coleção ${c.name}: prêmio de 0 a 5.000 sementes e 0 a 1.000 XP.`);
   }
 
+  // Turma
+  add(between(cfg.team?.coins, 0, 200) && between(cfg.team?.xp, 0, 50), 'Turma: prêmio de 0 a 200 sementes e 0 a 50 XP por dia completo.');
+
   // Temporada
   const tiers = cfg.season?.tiers ?? [];
   add(tiers.length >= 1 && tiers.length <= 20, 'Temporada: de 1 a 20 degraus.');

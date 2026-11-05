@@ -11,6 +11,7 @@ import { checkKindness, PRESET_COMMENTS, REACTIONS, REACTION_IDS, REASON_TEXT } 
 import { notifyFriend } from '../push';
 import { ITEMS } from '../../../web/src/data/items';
 import { arenaOf } from '../../../web/src/shared/game';
+import { TEAM_MAX, TEAM_MISSIONS_MAX, dayComplete, isTeamMission, teamStreak, type TeamCheckins } from '../../../web/src/shared/team';
 import { gameConfig } from './game';
 
 export const social = new Hono<AppEnv>();
@@ -278,6 +279,153 @@ social.get('/ranking', (c) =>
       me: r.user_id === me.id,
     }));
     return c.json({ rows, optedOut: false });
+  }),
+);
+
+// ---------- Turma (até 4 amigos, missões em comum) ----------
+
+const dayParam = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+
+/** Dia pedido pelo app (o dia da pessoa), se estiver perto do dia do servidor; senão, o dia do servidor. */
+async function teamDay(db: pg.PoolClient, raw: unknown): Promise<string> {
+  const d = dayParam.safeParse(raw);
+  const r = (await db.query("SELECT to_char(current_date, 'YYYY-MM-DD') AS today, $1::date BETWEEN current_date - 1 AND current_date + 1 AS near", [d.success ? d.data : '2000-01-01'])).rows[0];
+  return d.success && r.near ? d.data : r.today;
+}
+
+async function loadTeam(db: pg.PoolClient, day: string) {
+  const t = (await db.query('SELECT t.id, t.owner_id AS "ownerId", t.name, t.missions FROM teams t JOIN team_members m ON m.team_id = t.id WHERE m.user_id = app.current_user_id()')).rows[0];
+  if (!t) return null;
+  const members = (await db.query(`SELECT ${PROFILE_COLS} FROM team_members tm JOIN profiles p ON p.user_id = tm.user_id WHERE tm.team_id = $1 ORDER BY tm.joined_at`, [t.id])).rows;
+  const ids = (await db.query('SELECT user_id FROM team_members WHERE team_id = $1 ORDER BY joined_at', [t.id])).rows.map((r) => r.user_id as string);
+  const rows = (await db.query("SELECT user_id, to_char(day, 'YYYY-MM-DD') AS day, mission FROM team_checkins WHERE team_id = $1 AND day >= $2::date - 60", [t.id, day])).rows;
+  const byDay = new Map<string, TeamCheckins>();
+  for (const r of rows) {
+    const m = byDay.get(r.day) ?? {};
+    (m[r.user_id] ??= []).push(r.mission);
+    byDay.set(r.day, m);
+  }
+  const complete = new Set([...byDay.entries()].filter(([, c]) => dayComplete(t.missions, ids, c)).map(([d]) => d));
+  return { ...t, memberIds: ids, members, today: { date: day, checkins: byDay.get(day) ?? {}, complete: complete.has(day) }, streak: teamStreak(complete, day), completeDays: complete.size };
+}
+
+/** Avisa a turma: dia completo (todos) ou "falta só você" (quem ainda não fez), uma vez por dia cada. */
+async function teamNotices(db: pg.PoolClient, team: NonNullable<Awaited<ReturnType<typeof loadTeam>>>, actor: string) {
+  const day = team.today.date;
+  const once = async (userId: string, kind: string) => (await db.query('INSERT INTO team_notices (team_id, user_id, day, kind) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING', [team.id, userId, day, kind])).rowCount;
+  if (team.today.complete) {
+    for (const m of team.memberIds) if (m !== actor && (await once(m, 'completo'))) later(() => notifyFriend(m, `A turma ${team.name} completou as missões de hoje! 🎉 Seu prêmio está esperando.`));
+    return;
+  }
+  const pending = team.memberIds.filter((m: string) => !team.missions.every((ms: string) => (team.today.checkins[m] ?? []).includes(ms)));
+  if (pending.length === 1 && pending[0] !== actor && (await once(pending[0], 'falta'))) {
+    later(() => notifyFriend(pending[0], `A turma ${team.name} está quase lá: só falta a sua parte hoje 💛`));
+  }
+}
+
+social.get('/team', (c) =>
+  asMe(c, async (db) => {
+    return c.json({ team: await loadTeam(db, await teamDay(db, c.req.query('day'))) });
+  }),
+);
+
+const teamMissions = z.array(z.string()).min(1).max(TEAM_MISSIONS_MAX).refine((l) => l.every(isTeamMission) && new Set(l).size === l.length);
+
+function teamError(e: unknown): never {
+  const code = (e as { code?: string }).code;
+  if (code === '23505') throw new AppError(409, 'ja_em_turma', 'Alguém já está em outra turma. Cada pessoa fica em uma turma por vez.');
+  if (code === '23514') throw new AppError(409, 'turma_cheia', `A turma já tem ${TEAM_MAX} pessoas.`);
+  if (code === '42501') throw forbidden('Só dá para chamar amigos para a turma.');
+  throw e;
+}
+
+social.post('/team', (c) =>
+  asMe(c, async (db, me) => {
+    const body = z
+      .object({ name: z.string().trim().min(1).max(40), missions: teamMissions, members: z.array(z.string().uuid()).max(TEAM_MAX - 1).default([]) })
+      .safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success) throw invalid('Turma inválida.');
+    const name = kind(body.data.name);
+    try {
+      const { rows } = await db.query('INSERT INTO teams (owner_id, name, missions) VALUES ($1, $2, $3) RETURNING id', [me.id, name, body.data.missions]);
+      await db.query('INSERT INTO team_members (team_id, user_id) VALUES ($1, $2)', [rows[0].id, me.id]);
+      for (const u of [...new Set(body.data.members)].filter((u) => u !== me.id)) await db.query('INSERT INTO team_members (team_id, user_id) VALUES ($1, $2)', [rows[0].id, u]);
+    } catch (e) {
+      teamError(e);
+    }
+    const team = await loadTeam(db, await teamDay(db, c.req.query('day')));
+    for (const m of team!.memberIds) if (m !== me.id) later(() => notifyFriend(m, `Você entrou na turma ${team!.name}! Façam as missões juntos 🐹`));
+    return c.json({ team }, 201);
+  }),
+);
+
+social.put('/team', (c) =>
+  asMe(c, async (db) => {
+    const body = z.object({ name: z.string().trim().min(1).max(40).optional(), missions: teamMissions.optional() }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success) throw invalid('Turma inválida.');
+    const t = (await db.query('SELECT team_id FROM team_members WHERE user_id = app.current_user_id()')).rows[0];
+    if (!t) throw notFound('Você não está em uma turma.');
+    const r = await db.query('UPDATE teams SET name = COALESCE($2, name), missions = COALESCE($3, missions) WHERE id = $1', [t.team_id, body.data.name ? kind(body.data.name) : null, body.data.missions ?? null]);
+    if (!r.rowCount) throw forbidden('Só quem criou a turma muda as missões.');
+    return c.json({ team: await loadTeam(db, await teamDay(db, c.req.query('day'))) });
+  }),
+);
+
+social.post('/team/members', (c) =>
+  asMe(c, async (db) => {
+    const body = z.object({ userId: z.string().uuid() }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success) throw invalid('Pessoa inválida.');
+    const t = (await db.query('SELECT team_id FROM team_members WHERE user_id = app.current_user_id()')).rows[0];
+    if (!t) throw notFound('Você não está em uma turma.');
+    try {
+      const r = await db.query('INSERT INTO team_members (team_id, user_id) VALUES ($1, $2)', [t.team_id, body.data.userId]);
+      if (!r.rowCount) throw forbidden('Só quem criou a turma chama pessoas.');
+    } catch (e) {
+      if ((e as { code?: string }).code === '42501' && !(await db.query('SELECT app.team_owner($1) = app.current_user_id() AS own', [t.team_id])).rows[0].own) throw forbidden('Só quem criou a turma chama pessoas.');
+      teamError(e);
+    }
+    const team = await loadTeam(db, await teamDay(db, c.req.query('day')));
+    later(() => notifyFriend(body.data.userId, `Você entrou na turma ${team!.name}! Façam as missões juntos 🐹`));
+    return c.json({ team });
+  }),
+);
+
+/** Sair da turma (você) ou tirar alguém (quem criou). Se quem criou sai, a turma acaba. */
+social.delete('/team/members/:id', (c) =>
+  asMe(c, async (db, me) => {
+    const who = pid(c.req.param('id'));
+    const t = (await db.query('SELECT t.id, t.owner_id FROM teams t JOIN team_members m ON m.team_id = t.id WHERE m.user_id = app.current_user_id()')).rows[0];
+    if (!t) throw notFound('Você não está em uma turma.');
+    if (who === me.id && t.owner_id === me.id) await db.query('DELETE FROM teams WHERE id = $1', [t.id]);
+    else {
+      const r = await db.query('DELETE FROM team_members WHERE team_id = $1 AND user_id = $2', [t.id, who]);
+      if (!r.rowCount) throw forbidden('Só quem criou a turma tira pessoas.');
+    }
+    return c.json({ team: await loadTeam(db, await teamDay(db, c.req.query('day'))) });
+  }),
+);
+
+/** Marca (ou desmarca) a sua parte numa missão da turma. */
+social.post('/team/checkin', (c) =>
+  asMe(c, async (db, me) => {
+    const body = z.object({ mission: z.string().max(40), day: dayParam, done: z.boolean().default(true) }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success) throw invalid('Missão inválida.');
+    const t = (await db.query('SELECT team_id FROM team_members WHERE user_id = app.current_user_id()')).rows[0];
+    if (!t) throw notFound('Você não está em uma turma.');
+    const day = await teamDay(db, body.data.day);
+    if (body.data.done) {
+      try {
+        await db.query('INSERT INTO team_checkins (team_id, user_id, day, mission) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING', [t.team_id, me.id, day, body.data.mission]);
+      } catch (e) {
+        if ((e as { code?: string }).code === '42501') throw invalid('Essa missão não é da turma.');
+        throw e;
+      }
+    } else {
+      await db.query('DELETE FROM team_checkins WHERE team_id = $1 AND user_id = $2 AND day = $3 AND mission = $4', [t.team_id, me.id, day, body.data.mission]);
+    }
+    const team = (await loadTeam(db, day))!;
+    if (body.data.done) await teamNotices(db, team, me.id);
+    return c.json({ team });
   }),
 );
 

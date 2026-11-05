@@ -8,6 +8,7 @@ import { logEvent, payGift, receiveGift, todayKey, useApp } from '../lib/store';
 import { formatDay } from '../lib/util';
 import { socialBlocked, syncProfile, useSocial } from '../lib/social';
 import { RankingTab, VisitsCard } from './social/Ranking';
+import { TeamTab } from './social/Team';
 import { postKey, type Feed, type FriendState, type Gift, type GroupChallenge, type Profile, type SocialApi } from '../lib/social/types';
 import { Avatar, Composer, PostCard, type ShareDraft } from './social/Post';
 import { MyHeader, ProfilePage } from './social/Profile';
@@ -16,12 +17,13 @@ import { Glyph } from '../components/art';
 
 export type { ShareDraft };
 
-type Tab = 'feed' | 'grupos' | 'amigos' | 'desafios' | 'ranking' | 'presentes';
+export type FriendsTab = 'feed' | 'turma' | 'grupos' | 'amigos' | 'desafios' | 'ranking' | 'presentes';
+type Tab = FriendsTab;
 
-export function Friends({ share, onShareDone, giftItem, onGiftDone, account }: { share: ShareDraft; onShareDone: () => void; giftItem: string | null; onGiftDone: () => void; account: React.ReactNode }) {
+export function Friends({ share, onShareDone, giftItem, onGiftDone, account, initialTab }: { share: ShareDraft; onShareDone: () => void; giftItem: string | null; onGiftDone: () => void; account: React.ReactNode; initialTab?: Tab }) {
   const s = useApp();
   const { api, loading } = useSocial();
-  const [tab, setTab] = useState<Tab>('feed');
+  const [tab, setTab] = useState<Tab>(initialTab ?? 'feed');
   const [me, setMe] = useState<Profile | null>(null);
   const [fs, setFs] = useState<FriendState | null>(null);
   const [myPosts, setMyPosts] = useState(0);
@@ -73,6 +75,7 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account }: {
   const myId = me?.id ?? '';
   const TABS: { id: Tab; label: string; icon: string }[] = [
     { id: 'feed', icon: '🏡', label: 'Feed' },
+    { id: 'turma', icon: 'art:turma', label: 'Turma' },
     { id: 'grupos', icon: '👥', label: 'Grupos' },
     { id: 'amigos', icon: '🐹', label: `Amigos${fs?.incoming.length ? ` (${fs.incoming.length})` : ''}` },
     { id: 'desafios', icon: '🎯', label: 'Desafios' },
@@ -95,6 +98,7 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account }: {
       {tab === 'desafios' && <ChallengesTab api={api} profiles={fs ? Object.fromEntries([...fs.friends, ...(me ? [me] : [])].map((p) => [p.id, p])) : {}} myId={myId} />}
       {tab === 'presentes' && <GiftsTab api={api} />}
       {tab === 'ranking' && <RankingTab api={api} onOpenProfile={setProfile} />}
+      {tab === 'turma' && <TeamTab api={api} friends={fs?.friends ?? []} onOpenProfile={setProfile} />}
       <GiftSheet api={api} itemId={giftItem} friends={fs?.friends ?? []} onClose={onGiftDone} />
       <AddFriend open={adding} api={api} onClose={() => setAdding(false)} onAdded={refreshFriends} onOpenProfile={setProfile} />
       {profile && <ProfilePage userId={profile} api={api} myId={myId} onClose={() => setProfile(null)} onChanged={refreshFriends} />}

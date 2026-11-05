@@ -50,6 +50,20 @@ export interface RankRow extends RankStats {
   pet: PublicPet;
   me: boolean;
 }
+/** Turma: você e até 3 amigos com missões em comum (só conta quando todos fazem). */
+export interface Team {
+  id: string;
+  ownerId: string;
+  name: string;
+  missions: string[];
+  memberIds: string[];
+  members: Profile[];
+  today: { date: string; checkins: Record<string, string[]>; complete: boolean };
+  /** Dias completos seguidos. */
+  streak: number;
+  completeDays: number;
+}
+
 export interface Visit {
   userId: string;
   name: string;
@@ -191,4 +205,12 @@ export interface SocialApi {
   visits(): Promise<Visit[]>;
   /** Ranking só entre amigos (vazio se você saiu do ranking). */
   ranking(): Promise<{ rows: RankRow[]; optedOut: boolean }>;
+  /** A sua turma (ou null). `day` é o dia de hoje no aparelho. */
+  team(day: string): Promise<Team | null>;
+  createTeam(t: { name: string; missions: string[]; members: string[] }, day: string): Promise<Team>;
+  updateTeam(t: { name?: string; missions?: string[] }, day: string): Promise<Team | null>;
+  addTeamMember(userId: string, day: string): Promise<Team | null>;
+  /** Sair (você) ou tirar alguém (quem criou). Se quem criou sai, a turma acaba. */
+  leaveTeam(userId: string, day: string): Promise<Team | null>;
+  teamCheckin(mission: string, day: string, done: boolean): Promise<Team | null>;
 }

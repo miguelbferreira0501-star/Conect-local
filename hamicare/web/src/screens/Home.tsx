@@ -5,6 +5,7 @@ import { ArenaScene } from '../components/ArenaScene';
 import { ArenaPin, arenaByN } from './Arenas';
 import { WalletSheet } from './Collection';
 import { PLUS_COUNTS, PlusCard, PlusPill } from '../components/PlusCard';
+import { TeamHomeCard } from './social/Team';
 import { JourneyCard, useKcalPop } from '../components/Journey';
 import { TaskRow } from '../components/TaskRow';
 import { MealCard } from '../components/MealPlan';
@@ -29,7 +30,7 @@ export function useNow(ms: number) {
   return now;
 }
 
-export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onArenas: () => void; onPlus: () => void }) {
+export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onArenas: () => void; onPlus: () => void; onTeam: () => void }) {
   const [areaOpen, setAreaOpen] = useState(false);
   const [wallet, setWallet] = useState(false);
   const s = useApp();
@@ -180,6 +181,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus }: { onGo
 
       <AreaPill onClick={() => setAreaOpen(true)} />
       <JourneyCard s={s} onOpen={onEvolution} onCalm={(a) => (requestTool(a), onGo('bem-estar'))} />
+      <TeamHomeCard onOpen={onTeam} />
       <PlusCard onOpen={onPlus} title={`Mais mimos para o ${s.pet.name}`} text={`${PLUS_COUNTS.items} roupas e decorações exclusivas, pelagens especiais e 6 meses de estatísticas.`} />
       <AreaSheet open={areaOpen} onClose={() => setAreaOpen(false)} />
       <WalletSheet open={wallet} onClose={() => setWallet(false)} />

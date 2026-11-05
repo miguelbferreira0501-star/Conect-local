@@ -179,3 +179,39 @@ describe('visitas e ranking na página publicada', () => {
     expect(await bia.ranking()).toEqual({ rows: [], optedOut: true });
   });
 });
+
+describe('turma na página publicada', () => {
+  it('até 4 amigos, uma turma por pessoa, e a missão só conta quando todos fazem', async () => {
+    const db = fakeDb();
+    const day = '2026-11-05';
+    const users = ['ana', 'bia', 'cris', 'duda', 'edu'].map((n) => ({ n, api: createArtifactSocial(db, `u_${n}`) }));
+    for (const u of users) await u.api.saveProfile(profile(u.n));
+    const [ana, bia, cris, duda, edu] = users.map((u) => u.api);
+    for (const other of ['u_bia', 'u_cris', 'u_duda', 'u_edu']) {
+      await ana.request(other);
+      await users.find((u) => `u_${u.n}` === other)!.api.accept('u_ana');
+    }
+    await expect(ana.createTeam({ name: 'Fofos', missions: ['agua'], members: ['u_naoexiste'] }, day)).rejects.toThrow(/amigos/);
+    const t = await ana.createTeam({ name: 'Fofos', missions: ['agua', 'sol', 'inventada'], members: ['u_bia', 'u_cris', 'u_duda'] }, day);
+    expect(t.missions).toEqual(['agua', 'sol']);
+    expect(t.memberIds).toHaveLength(4);
+    await expect(ana.addTeamMember('u_edu', day)).rejects.toThrow(/4 pessoas/);
+    // Bia vê a turma (com os Hamis de todos).
+    expect((await bia.team(day))!.members.map((m) => m.name)).toEqual(['ana', 'bia', 'cris', 'duda']);
+    expect(await edu.team(day)).toBeNull();
+    // Missão só conta quando todos fazem.
+    for (const api of [ana, bia, cris]) await api.teamCheckin('agua', day, true);
+    let v = (await duda.team(day))!;
+    expect(v.today.complete).toBe(false);
+    await duda.teamCheckin('agua', day, true);
+    for (const api of [ana, bia, cris]) await api.teamCheckin('sol', day, true);
+    v = (await duda.teamCheckin('sol', day, true))!;
+    expect(v.today.complete).toBe(true);
+    expect(v.streak).toBe(1);
+    // Duda sai; quem criou desfaz a turma.
+    expect(await duda.leaveTeam('u_duda', day)).toBeNull();
+    expect((await ana.team(day))!.memberIds).toHaveLength(3);
+    await ana.leaveTeam('u_ana', day);
+    expect(await bia.team(day)).toBeNull();
+  });
+});

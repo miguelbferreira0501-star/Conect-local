@@ -7,6 +7,7 @@ import { Home } from './screens/Home';
 import { CareArea } from './screens/CareArea';
 import { Activities } from './screens/Activities';
 import { World, type WorldTab } from './screens/World';
+import type { FriendsTab } from './screens/Friends';
 import { Wellbeing } from './screens/Wellbeing';
 import { Friends, type ShareDraft } from './screens/Friends';
 import { Onboarding } from './screens/Onboarding';
@@ -14,6 +15,7 @@ import { SettingsSheet } from './screens/Settings';
 import { Evolution } from './screens/Evolution';
 import { Paywall } from './screens/Paywall';
 import { AccountSection } from './screens/Account';
+import { useAccount } from './lib/account';
 import { ResetPassword } from './screens/ResetPassword';
 import { LegalHost } from './components/Legal';
 import { getState, markWelcomed, onCelebrate, tick, todayKey, useApp, type Celebration } from './lib/store';
@@ -38,6 +40,9 @@ function initialTab(): Tab {
 
 export default function App() {
   const s = useApp();
+  // Ao abrir o app já logado, confere a conta e liga o backup e a carteira do servidor
+  // (antes isso só acontecia ao abrir Missões, Amigos ou Ajustes).
+  useAccount();
   const account = <AccountSection />;
   const [tab, setTab] = useState<Tab>(initialTab);
   const [settings, setSettings] = useState(false);
@@ -46,6 +51,7 @@ export default function App() {
   const [share, setShare] = useState<ShareDraft>(null);
   const [gift, setGift] = useState<string | null>(null);
   const [worldTab, setWorldTab] = useState<WorldTab | undefined>();
+  const [friendsTab, setFriendsTab] = useState<FriendsTab | undefined>();
   const [queue, setQueue] = useState<Celebration[]>([]);
   const themeSet = useRef(false);
 
@@ -106,9 +112,10 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
-  function go(next: Tab, sub?: WorldTab) {
+  function go(next: Tab, sub?: WorldTab, friendsSub?: FriendsTab) {
     setTab(next);
     setWorldTab(sub);
+    setFriendsTab(friendsSub);
     try {
       history.replaceState(null, '', `#${next}`);
     } catch {
@@ -139,12 +146,12 @@ export default function App() {
   return (
     <>
       <main className="shell">
-        {tab === 'inicio' && <Home onGo={go} onSettings={() => setSettings(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} onPlus={() => setPlus(true)} />}
+        {tab === 'inicio' && <Home onGo={go} onSettings={() => setSettings(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} onPlus={() => setPlus(true)} onTeam={() => go('amigos', undefined, 'turma')} />}
         {tab === 'cuidar' && <CareArea onShare={(photo) => shareTo({ kind: 'foto', photo })} />}
         {tab === 'atividades' && <Activities onShareTask={(task) => shareTo({ kind: 'atividade', task })} onPlus={() => setPlus(true)} />}
         {tab === 'mundo' && <World key={worldTab ?? 'mundo'} initialTab={worldTab} onPlus={() => setPlus(true)} onGift={(id) => (setGift(id), go('amigos'))} />}
         {tab === 'bem-estar' && <Wellbeing onPlus={() => setPlus(true)} />}
-        {tab === 'amigos' && <Friends share={share} onShareDone={() => setShare(null)} giftItem={gift} onGiftDone={() => setGift(null)} account={account} />}
+        {tab === 'amigos' && <Friends key={friendsTab ?? 'amigos'} initialTab={friendsTab} share={share} onShareDone={() => setShare(null)} giftItem={gift} onGiftDone={() => setGift(null)} account={account} />}
       </main>
       <nav className="tabbar" aria-label="Seções do app">
         <div className="tabbar-inner">

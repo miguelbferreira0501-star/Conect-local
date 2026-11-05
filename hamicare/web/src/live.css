@@ -2533,3 +2533,77 @@
   transform: translateY(2px);
   box-shadow: none;
 }
+
+/* ---------- Turma ---------- */
+.team-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+}
+.team-pet {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+.team-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 92px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #2b2240;
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 2px 0 rgba(43, 34, 64, 0.12);
+}
+.team-tag.is-done {
+  background: #2e8a5a;
+  color: #fff;
+}
+.team-mission {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 18px;
+  background: var(--surface-2);
+}
+.team-mission.is-all {
+  background: color-mix(in srgb, #6ccb92 22%, var(--surface));
+  box-shadow: inset 0 0 0 2px #6ccb92;
+}
+.team-dot {
+  display: inline-grid;
+  border-radius: 999px;
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+.team-dot.is-on {
+  opacity: 1;
+  filter: none;
+  box-shadow: 0 0 0 2px #2e8a5a;
+}
+.team-prize {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 24px;
+  color: #fff;
+  background: linear-gradient(135deg, #3fb8ac, #2e8a5a);
+  box-shadow: 0 5px 0 #1f6b4a;
+}
+.team-home .scene {
+  border-radius: 0;
+  box-shadow: none;
+}
+.opt.is-on {
+  border-color: var(--accent);
+}

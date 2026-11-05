@@ -6,7 +6,8 @@
 import { checkKindness, REASON_TEXT, type ReactionId } from '../../shared/moderation';
 import { addDays, hashStr, uid } from '../util';
 import { todayKey } from '../store';
-import type { Comment, Feed, FriendState, Gift, Group, GroupChallenge, Post, Profile, RankRow, Reaction, ReportTarget, SocialApi, Visit } from './types';
+import type { Comment, Feed, FriendState, Gift, Group, GroupChallenge, Post, Profile, RankRow, Reaction, ReportTarget, SocialApi, Team, Visit } from './types';
+import { TEAM_MAX, TEAM_MISSIONS_MAX, dayComplete, isTeamMission, teamStreak } from '../../shared/team';
 import { postKey } from './types';
 
 /** Regras de acesso declaradas na publicação (ver scripts/artifact.mjs). */
@@ -43,9 +44,22 @@ interface SocialDoc {
   leftGroups?: string[];
   /** Reações deixadas nas casas dos amigos. */
   visits?: { to: string; reaction: ReactionId; at: number; day: string }[];
+  /** Turmas de que a pessoa saiu (dono:id). */
+  leftTeams?: string[];
+  /** Missões da turma feitas: dono:id → dia → missões. */
+  teamCheckins?: Record<string, Record<string, string[]>>;
+}
+interface TeamDoc {
+  id: string;
+  name: string;
+  missions: string[];
+  members: string[];
+  createdAt: number;
 }
 interface GroupsDoc {
   items: { id: string; name: string; emoji: string; color: string; members: string[]; createdAt: number }[];
+  /** A turma que esta pessoa criou (no máximo uma). */
+  team?: TeamDoc | null;
 }
 interface ChallengesDoc {
   items: Omit<GroupChallenge, 'members' | 'checkins'>[];
@@ -96,6 +110,49 @@ export function createArtifactSocial(db: Db, myId: string): SocialApi {
       }
     }
     return { ...st, groups, socialDocs };
+  }
+
+  /** Todas as turmas, com quem está nelas de verdade (amigos de quem criou, sem quem saiu). */
+  async function teamState() {
+    const [st, groupDocs, socialDocs] = await Promise.all([state(), all<GroupsDoc>('groups'), all<SocialDoc>('social')]);
+    const teams: (TeamDoc & { key: string; owner: string; memberIds: string[] })[] = [];
+    for (const [owner, doc] of Object.entries(groupDocs)) {
+      const t = doc.team;
+      if (!t || !st.profiles[owner]) continue;
+      const key = `${owner}:${t.id}`;
+      const ownerFriends = st.friendDocs[owner]?.list ?? [];
+      const memberIds = [owner, ...t.members.filter((m) => m !== owner && st.profiles[m] && ownerFriends.includes(m) && (st.friendDocs[m]?.list ?? []).includes(owner) && !(socialDocs[m]?.leftTeams ?? []).includes(key))].slice(0, TEAM_MAX);
+      teams.push({ ...t, key, owner, memberIds });
+    }
+    teams.sort((a, b) => a.createdAt - b.createdAt);
+    const teamOf = (u: string) => teams.find((t) => t.memberIds.includes(u)) ?? null;
+    return { st, groupDocs, socialDocs, teams, teamOf };
+  }
+
+  async function teamView(day: string): Promise<Team | null> {
+    const { st, socialDocs, teamOf } = await teamState();
+    const t = teamOf(myId);
+    if (!t) return null;
+    const byDay = new Map<string, Record<string, string[]>>();
+    for (const m of t.memberIds) {
+      for (const [d, list] of Object.entries(socialDocs[m]?.teamCheckins?.[t.key] ?? {})) {
+        const c = byDay.get(d) ?? {};
+        c[m] = list.filter((x) => t.missions.includes(x));
+        byDay.set(d, c);
+      }
+    }
+    const complete = new Set([...byDay.entries()].filter(([, c]) => dayComplete(t.missions, t.memberIds, c)).map(([d]) => d));
+    return {
+      id: t.key,
+      ownerId: t.owner,
+      name: t.name,
+      missions: t.missions,
+      memberIds: t.memberIds,
+      members: t.memberIds.map((m) => ({ ...st.profiles[m], id: m })),
+      today: { date: day, checkins: byDay.get(day) ?? {}, complete: complete.has(day) },
+      streak: teamStreak(complete, day),
+      completeDays: complete.size,
+    };
   }
 
   /** Junta posts, reações e comentários de um conjunto de autores. */
@@ -319,6 +376,72 @@ export function createArtifactSocial(db: Db, myId: string): SocialApi {
         .filter(({ p }) => p && p.ranked !== false && p.stats)
         .map(({ id, p }) => ({ userId: id, name: p.name, pet: p.pet, me: id === myId, ...p.stats! }));
       return { rows, optedOut: false };
+    },
+    team: (day) => teamView(day),
+    async createTeam(t, day) {
+      const { st, teamOf, groupDocs } = await teamState();
+      if (teamOf(myId)) throw new Error('Você já está numa turma.');
+      const members = [...new Set(t.members)].filter((m) => m !== myId).slice(0, TEAM_MAX - 1);
+      for (const m of members) {
+        if (!st.friends.includes(m)) throw new Error('Só dá para chamar amigos para a turma.');
+        if (teamOf(m)) throw new Error('Alguém já está em outra turma.');
+      }
+      const missions = [...new Set(t.missions)].filter(isTeamMission).slice(0, TEAM_MISSIONS_MAX);
+      if (!missions.length) throw new Error('Escolha pelo menos uma missão.');
+      const doc = groupDocs[myId] ?? { items: [] };
+      const team: TeamDoc = { id: uid(), name: t.name.trim().slice(0, 40) || 'Turma', missions, members, createdAt: Date.now() };
+      await write(`groups/${myId}`, { ...doc, items: doc.items ?? [], team });
+      const mine = await mySocial();
+      await write(`social/${myId}`, { ...mine, leftTeams: (mine.leftTeams ?? []).filter((k) => !k.startsWith(`${myId}:`)) });
+      return (await teamView(day))!;
+    },
+    async updateTeam(t, day) {
+      const doc = await read<GroupsDoc>(`groups/${myId}`, { items: [] });
+      if (!doc.team) throw new Error('Só quem criou a turma muda as missões.');
+      const missions = t.missions ? [...new Set(t.missions)].filter(isTeamMission).slice(0, TEAM_MISSIONS_MAX) : doc.team.missions;
+      await write(`groups/${myId}`, { ...doc, team: { ...doc.team, name: t.name?.trim().slice(0, 40) || doc.team.name, missions: missions.length ? missions : doc.team.missions } });
+      return teamView(day);
+    },
+    async addTeamMember(userId, day) {
+      const { st, teamOf } = await teamState();
+      const doc = await read<GroupsDoc>(`groups/${myId}`, { items: [] });
+      const mine = teamOf(myId);
+      if (!doc.team || !mine || mine.owner !== myId) throw new Error('Só quem criou a turma chama pessoas.');
+      if (mine.memberIds.length >= TEAM_MAX) throw new Error(`A turma já tem ${TEAM_MAX} pessoas.`);
+      if (!st.friends.includes(userId)) throw new Error('Só dá para chamar amigos para a turma.');
+      if (teamOf(userId)) throw new Error('Essa pessoa já está em outra turma.');
+      await write(`groups/${myId}`, { ...doc, team: { ...doc.team, members: [...doc.team.members.filter((m) => m !== userId), userId] } });
+      return teamView(day);
+    },
+    async leaveTeam(userId, day) {
+      const { teamOf } = await teamState();
+      const t = teamOf(myId);
+      if (!t) return null;
+      if (t.owner === myId) {
+        const doc = await read<GroupsDoc>(`groups/${myId}`, { items: [] });
+        if (userId === myId) await write(`groups/${myId}`, { ...doc, team: null });
+        else if (doc.team) await write(`groups/${myId}`, { ...doc, team: { ...doc.team, members: doc.team.members.filter((m) => m !== userId) } });
+      } else if (userId === myId) {
+        const mine = await mySocial();
+        await write(`social/${myId}`, { ...mine, leftTeams: [...(mine.leftTeams ?? []), t.key].slice(-50) });
+      } else throw new Error('Só quem criou a turma tira pessoas.');
+      return teamView(day);
+    },
+    async teamCheckin(mission, day, done) {
+      const { teamOf } = await teamState();
+      const t = teamOf(myId);
+      if (!t || !t.missions.includes(mission)) throw new Error('Essa missão não é da turma.');
+      const mine = await mySocial();
+      const all = { ...(mine.teamCheckins ?? {}) };
+      const days = { ...(all[t.key] ?? {}) };
+      const list = new Set(days[day] ?? []);
+      if (done) list.add(mission);
+      else list.delete(mission);
+      days[day] = [...list];
+      // Guarda só os últimos 60 dias.
+      all[t.key] = Object.fromEntries(Object.entries(days).sort(([a], [b]) => (a < b ? 1 : -1)).slice(0, 60));
+      await write(`social/${myId}`, { ...mine, teamCheckins: all });
+      return teamView(day);
     },
     async challenges() {
       const [{ friends }, chDocs, socialDocs] = await Promise.all([state(), all<ChallengesDoc>('challenges'), all<SocialDoc>('social')]);

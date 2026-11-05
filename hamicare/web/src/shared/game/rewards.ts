@@ -18,7 +18,8 @@ export type Source =
   | { kind: 'nivel'; level: number }
   | { kind: 'arena'; arena: number }
   | { kind: 'colecao'; id: string }
-  | { kind: 'temporada-degrau'; month: string; tier: number };
+  | { kind: 'temporada-degrau'; month: string; tier: number }
+  | { kind: 'turma'; id: string; date: string };
 
 export interface Grant {
   ref: string;
@@ -77,6 +78,8 @@ export function baseGrant(src: Source, cfg: GameConfig): Grant {
       const a = cfg.arenas.find((x) => x.n === src.arena);
       return { ref: `arena:${src.arena}`, label: `Arena ${src.arena} liberada`, xp: 0, coins: a?.reward.coins ?? 0, routine: false };
     }
+    case 'turma':
+      return { ref: `turma:${src.id}:${src.date}`, label: 'Turma completou o dia', xp: cfg.team.xp, coins: cfg.team.coins, routine: false };
     case 'temporada-degrau': {
       const t = cfg.season.tiers[src.tier];
       return { ref: `temporada:${src.month}:d${src.tier}`, label: `Temporada: degrau ${src.tier + 1}`, xp: t?.xp ?? 0, coins: t?.coins ?? 0, routine: false };

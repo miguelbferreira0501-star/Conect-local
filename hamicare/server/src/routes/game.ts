@@ -147,6 +147,7 @@ const sourceSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('temporada'), month: z.string().regex(/^\d{4}-\d{2}$/), xp: z.number().int(), coins: z.number().int() }),
   z.object({ kind: z.literal('evento'), id: z.string().max(60), coins: z.number().int() }),
   z.object({ kind: z.literal('colecao'), id: z.string().max(40) }),
+  z.object({ kind: z.literal('turma'), id: z.string().uuid(), date: day }),
   z.object({ kind: z.literal('temporada-degrau'), month: z.string().regex(/^\d{4}-\d{2}$/), tier: z.number().int().min(0).max(50) }),
 ]);
 const opSchema = z.discriminatedUnion('op', [
@@ -184,6 +185,11 @@ async function trusted(db: pg.PoolClient, userId: string, src: Source, cfg: Game
     case 'evento': {
       const ev = (await db.query('SELECT e.reward_coins FROM event_claims x JOIN events e ON e.id = x.event_id WHERE x.user_id = $1 AND x.event_id::text = $2', [userId, src.id])).rows[0];
       return ev ? { ...src, coins: ev.reward_coins } : null;
+    }
+    case 'turma': {
+      // Só paga se a pessoa está na turma e todos fizeram todas as missões naquele dia.
+      const ok = (await db.query('SELECT app.in_team($1) AND app.team_day_complete($1, $2::date) AS ok', [src.id, src.date])).rows[0]?.ok;
+      return ok ? src : null;
     }
     case 'temporada-degrau': {
       // Mês de agora (ou o anterior, na virada) e dias ativos contados pelo servidor.
