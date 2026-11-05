@@ -1,3 +1,4 @@
+import { play } from '../lib/sound';
 import { PlusCard } from '../components/PlusCard';
 import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, Copy, Lock, Phone, Shuffle, Trash2, X } from 'lucide-react';
@@ -370,6 +371,15 @@ function Breath({ onClose, auto, next }: { onClose: () => void; auto?: boolean; 
 
   const phase = step >= 0 && !finished ? pat.phases[step % pat.phases.length] : null;
   const kind = phase ? kindOf(phase.label) : null;
+  // Som bem baixinho que sobe ao puxar o ar e desce ao soltar.
+  useEffect(() => {
+    if (!phase) return;
+    if (kind === 'in') play('inspira', { ms: phase.ms });
+    else if (kind === 'out') play('expira', { ms: phase.ms });
+  }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (finished) play('bomdia');
+  }, [finished]);
   const lk = kind ? BREATH_LOOK[kind] : null;
   const secLeft = phase ? Math.max(1, Math.ceil((started.current + phase.ms - now) / 1000)) : 0;
   const cycle = Math.floor(Math.max(0, step) / pat.phases.length);

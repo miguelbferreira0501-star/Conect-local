@@ -117,7 +117,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
       {advLeft > 0 ? (
         <p className="text-[13px] text-muted">Volta em ~{advLeft} min. Cada missão traz ele 5 min mais cedo.</p>
       ) : (
-        <button className="btn btn-primary btn-sm" onClick={() => setResult(finishAdventure())}>
+        <button className="btn btn-primary btn-sm" data-sound="conquista" onClick={() => setResult(finishAdventure())}>
           <Mail size={16} /> Ver o que ele trouxe
         </button>
       )}

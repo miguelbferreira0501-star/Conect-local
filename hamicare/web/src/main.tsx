@@ -1,10 +1,13 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { installAppSounds } from './lib/appSounds';
 import './index.css';
 import './live.css';
 import './theme.css';
 import './wellbeing.css';
+
+installAppSounds();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

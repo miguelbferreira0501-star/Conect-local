@@ -192,6 +192,8 @@ export interface Settings {
   /** Lembretes: horário das missões, plano de água e hora de dormir. */
   notif: { enabled: boolean; time: string; kinds: Record<NotifKind, boolean>; water?: 'pouco' | 'normal' | 'muito'; bedtime?: string };
   sound: boolean;
+  /** Volume dos efeitos sonoros. */
+  volume?: 'baixo' | 'medio' | 'alto';
 }
 
 /** Economia do jogo guardada no aparelho (com conta, o servidor confere e manda os valores certos). */

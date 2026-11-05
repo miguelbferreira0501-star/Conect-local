@@ -22,6 +22,7 @@ import { getState, markWelcomed, onCelebrate, tick, todayKey, useApp, type Celeb
 import { markReminded, pickReminder, reminderDue, showNotification } from './lib/notify';
 import { syncProfile } from './lib/social';
 import { captureInvite } from './lib/social/invite';
+import { play, type SoundId } from './lib/sound';
 
 type Tab = TabId;
 
@@ -126,6 +127,18 @@ export default function App() {
     }
     window.scrollTo({ top: 0 });
   }
+
+  // Som de cada comemoração quando ela aparece na tela.
+  const head = queue[0];
+  useEffect(() => {
+    if (!head || !s.onboarded) return;
+    const ids: Record<Celebration['type'], SoundId> = { level: 'nivel', achievement: 'conquista', phase: 'magia', weigh: 'aviso', goal: 'conquista', streak: 'ofensiva' };
+    play(ids[head.type]);
+  }, [head]); // eslint-disable-line react-hooks/exhaustive-deps
+  const welcomeNow = s.onboarded && s.welcomed !== todayKey() && !head;
+  useEffect(() => {
+    if (welcomeNow) play('bomdia');
+  }, [welcomeNow]);
 
   if (!s.onboarded) {
     return (
