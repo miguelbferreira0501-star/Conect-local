@@ -45,6 +45,16 @@ describe('conta e backup', () => {
     expect((await call('POST', '/plus/trial', {}, u.cookie)).status).toBe(409);
   });
 
+  it('teste grátis: 7 dias no plano anual, 3 no mensal', async () => {
+    const a = await newUser('Ema');
+    const m = await newUser('Fabi');
+    const ra = await call('POST', '/plus/trial', { plan: 'anual' }, a.cookie);
+    const rm = await call('POST', '/plus/trial', { plan: 'mensal' }, m.cookie);
+    const days = (v: unknown) => Math.round((Date.parse(String(v).slice(0, 10)) - Date.parse(new Date().toISOString().slice(0, 10))) / 86400000);
+    expect(days(ra.body.premiumUntil)).toBe(7);
+    expect(days(rm.body.premiumUntil)).toBe(3);
+  });
+
   it('exclui a conta com a senha', async () => {
     const u = await newUser('Davi');
     expect((await call('DELETE', '/account', { password: 'errada' }, u.cookie)).status).toBe(401);

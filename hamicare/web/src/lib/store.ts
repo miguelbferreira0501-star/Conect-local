@@ -1404,10 +1404,11 @@ export function updatePrivacy(patch: Partial<State['privacy']>) {
 }
 
 /** Teste grátis de 7 dias do HamiCare+ (uma vez por conta). */
-export function startTrial(): boolean {
+/** Teste grátis (sem conta): 7 dias no plano anual, 3 no mensal. Uma vez só. */
+export function startTrial(days = 7): boolean {
   if (state.premium.trialStart) return false;
   const today = todayKey();
-  commit({ ...state, premium: { trialStart: today, until: addDays(today, 7) } });
+  commit({ ...state, premium: { trialStart: today, until: addDays(today, Math.min(7, Math.max(1, days))) } });
   return true;
 }
 

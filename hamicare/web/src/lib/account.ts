@@ -110,8 +110,8 @@ export async function deleteAccount(password: string) {
   setUser(null);
 }
 
-export async function startTrialOnServer(): Promise<string | null> {
-  const r = await http<{ premiumUntil: string }>('POST', '/plus/trial');
+export async function startTrialOnServer(plan: 'anual' | 'mensal' = 'anual'): Promise<string | null> {
+  const r = await http<{ premiumUntil: string }>('POST', '/plus/trial', { plan });
   grantPremium(r.premiumUntil);
   if (current) current = { ...current, premiumUntil: r.premiumUntil, trialUsed: true };
   return r.premiumUntil;

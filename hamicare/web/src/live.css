@@ -2817,3 +2817,145 @@
 .plus-parade > svg {
   margin: 0 -5px;
 }
+
+/* ---------- Tela do HamiCare+ (duas etapas) ---------- */
+.pw {
+  position: relative;
+  padding: 18px 16px 14px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #5c63d1 0%, #6b76d8 45%, #6f7bdb 100%);
+  color: #fff;
+}
+.pw-parade {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin: -6px -16px 0;
+  padding: 6px 0 10px;
+  border-radius: 28px 28px 50% 50% / 28px 28px 22px 22px;
+  background: #4f56c4;
+}
+.pw-parade > svg {
+  margin: 0 -8px;
+}
+.pw-title {
+  font-family: var(--font-display, inherit);
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  text-wrap: balance;
+}
+.pw-hl {
+  color: #ffd166;
+}
+.pw-benefits {
+  display: grid;
+  gap: 14px;
+  padding: 16px 14px;
+  border-radius: 24px;
+  background: rgba(46, 52, 170, 0.45);
+}
+.pw-benefits li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  line-height: 1.3;
+}
+.pw-benefits b {
+  display: block;
+  font-size: 16.5px;
+  margin-bottom: 2px;
+}
+.pw-ico {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #8e96ec;
+  overflow: hidden;
+}
+.pw-cta {
+  width: 100%;
+  min-height: 56px;
+  border-radius: 20px;
+  background: #fff;
+  color: #2b2240;
+  font-size: 18px;
+  font-weight: 900;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+}
+.pw-cta:active {
+  transform: translateY(3px);
+  box-shadow: none;
+}
+.pw-later {
+  justify-self: center;
+  padding: 8px 14px;
+  font-size: 16px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.92);
+}
+.pw-back {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+.pw-plan {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 16px 18px;
+  border-radius: 22px;
+  background: #4f56c4;
+  color: #fff;
+  text-align: left;
+  font-size: 16px;
+  outline: 3px solid transparent;
+}
+.pw-plan.is-on {
+  outline: 4px solid #fff;
+  outline-offset: 2px;
+}
+.pw-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: #fff;
+  color: #2b2240;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+.pw-link {
+  justify-self: center;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: #fff;
+}
+.pw-laurel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  font-size: 14px;
+}
+.pw-laurel b {
+  display: block;
+  font-size: 17px;
+}
+.pw-table {
+  color: var(--ink);
+}
