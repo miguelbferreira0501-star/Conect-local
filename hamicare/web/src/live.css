@@ -2741,3 +2741,79 @@
   outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* ---------- Vitrine do HamiCare+ (loja) ---------- */
+.plus-showcase {
+  display: grid;
+  gap: 10px;
+  padding: 14px 14px 12px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, #fff6d6, #ffe7f1 70%);
+  box-shadow: 0 3px 0 rgba(242, 165, 22, 0.25), inset 0 0 0 2px rgba(246, 196, 69, 0.45);
+}
+.plus-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  margin: 0 -14px;
+  padding: 2px 14px 6px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.plus-row::-webkit-scrollbar {
+  display: none;
+}
+.plus-row > li {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+.plus-tile {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: 124px;
+  padding: 8px 8px 10px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.06);
+  color: #2b2240;
+}
+.plus-tile:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+.plus-tile-art {
+  display: grid;
+  place-items: end center;
+  width: 100%;
+  height: 96px;
+  border-radius: 14px;
+  background: radial-gradient(circle at 50% 70%, #fff3c4, #fdf3f6 70%);
+  overflow: hidden;
+}
+.plus-tile-name {
+  min-height: 32px;
+  font-size: 12.5px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+}
+.plus-tile-cta {
+  padding: 3px 12px;
+  border-radius: 99px;
+  background: linear-gradient(135deg, #ffe27a, #f2a516);
+  font-size: 12px;
+  font-weight: 900;
+  color: #5a3a00;
+}
+.plus-parade {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 8px 0 2px;
+  border-radius: 22px;
+  background: linear-gradient(160deg, #fff6d6, #ffe7f1);
+}
+.plus-parade > svg {
+  margin: 0 -5px;
+}

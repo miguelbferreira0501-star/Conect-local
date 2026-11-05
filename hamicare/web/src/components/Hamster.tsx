@@ -55,8 +55,8 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
   const geo = { top, w, h, eyeY };
   // Fantasia de corpo inteiro: capuz com orelhinhas no lugar das orelhas e patinhas da cor da fantasia.
   const costume = costumeOf(outfit.roupa);
-  const arm = costume ? costume.c1 : fur.shade;
-  const foot = costume ? costume.c2 : fur.ear;
+  const arm = costume ? costume.paw : fur.shade;
+  const foot = costume ? costume.foot : fur.ear;
   const holding = !!outfit.acessorio && itemById(outfit.acessorio)?.base === 'segurar';
 
   return (

@@ -74,6 +74,22 @@ function Plant({ x, y, s = 1, pot = '#E58FAE' }: { x: number; y: number; s?: num
   );
 }
 
+/** Coraçãozinho, estrela e brilho (usados em várias peças). */
+const heart = (x: number, y: number, s: number) => {
+  const k = s / 12;
+  return `M${x} ${y + 9 * k} C${x - 14 * k} ${y - 1 * k} ${x - 9 * k} ${y - 11 * k} ${x} ${y - 4 * k} C${x + 9 * k} ${y - 11 * k} ${x + 14 * k} ${y - 1 * k} ${x} ${y + 9 * k} Z`;
+};
+const starD = (x: number, y: number, r: number) => {
+  const pts: string[] = [];
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const rr = i % 2 ? r * 0.45 : r;
+    pts.push(`${(x + Math.cos(a) * rr).toFixed(1)},${(y + Math.sin(a) * rr).toFixed(1)}`);
+  }
+  return `M${pts.join(' L')} Z`;
+};
+const sparkleD = (x: number, y: number, r: number) => `M${x} ${y - r} Q${x} ${y} ${x + r} ${y} Q${x} ${y} ${x} ${y + r} Q${x} ${y} ${x - r} ${y} Q${x} ${y} ${x} ${y - r} Z`;
+
 export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: string; c2?: string }) {
   switch (id) {
     // ---------------- Quarto ----------------
@@ -724,6 +740,296 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <path d="M10 40 H70" stroke={c2} strokeWidth="4" opacity="0.7" />
         </S>
       );
+    // ---------------- Coleção Plus ----------------
+    case 'k-cama-dossel':
+      return (
+        <S w={200} h={210}>
+          {/* colunas e dossel com luzinhas */}
+          <rect x="12" y="14" width="9" height="186" rx="4" fill={dk(c2, 0.1)} />
+          <rect x="179" y="14" width="9" height="186" rx="4" fill={dk(c2, 0.1)} />
+          <rect x="6" y="8" width="188" height="12" rx="6" fill={dk(c2, 0.05)} />
+          <path d={`M8 18 H192 V30 ${Array.from({ length: 9 }, (_, i) => `Q${181 - i * 20} 42 ${171 - i * 20} 30`).join(' ')} Q14 42 8 30 Z`} fill={c1} />
+          {Array.from({ length: 12 }, (_, i) => <circle key={i} cx={16 + i * 15.5} cy={36 + (i % 2) * 4} r="2.6" fill="#FFE27A" className="bulb" style={{ animationDelay: `${(i % 4) * 0.3}s` }} />)}
+          <path d="M14 30 Q8 90 34 132 Q28 90 30 32 Z" fill={lt(c1, 0.35)} opacity="0.92" />
+          <path d="M186 30 Q192 90 166 132 Q172 90 170 32 Z" fill={lt(c1, 0.35)} opacity="0.92" />
+          <ellipse cx="30" cy="104" rx="7" ry="4" fill={c1} />
+          <ellipse cx="170" cy="104" rx="7" ry="4" fill={c1} />
+          <g transform="translate(0 58)">
+            <path d="M24 78 V38 Q24 18 46 18 H154 Q176 18 176 38 V78 Z" fill={c2} />
+            {[64, 100, 136].map((x) => <circle key={x} cx={x} cy="44" r="2.6" fill={dk(c2, 0.18)} />)}
+            <path d="M26 74 H174 L188 104 H12 Z" fill="#FFFFFF" />
+            <rect x="40" y="58" width="52" height="26" rx="12" fill="#FFFFFF" stroke="#EEE" strokeWidth="2" />
+            <rect x="108" y="58" width="52" height="26" rx="12" fill="#FFFFFF" stroke="#EEE" strokeWidth="2" />
+            <path d={heart(66, 71, 7)} fill={c1} />
+            <path d={heart(134, 71, 7)} fill={c1} />
+            <path d="M18 88 H182 L194 116 H6 Z" fill={c1} />
+            <path d="M22 86 H178 L182 96 H18 Z" fill={lt(c1, 0.45)} />
+            {[40, 80, 120, 160].map((x) => <path key={x} d={sparkleD(x, 106, 4)} fill="#FFFFFF" opacity="0.8" />)}
+            <rect x="4" y="116" width="192" height="18" rx="6" fill={dk(c1, 0.12)} />
+            <rect x="4" y="132" width="192" height="8" rx="4" fill={dk(c2, 0.1)} />
+          </g>
+        </S>
+      );
+    case 'k-castelinho':
+      return (
+        <S w={150} h={180}>
+          {[[22, 40], [128, 40]].map(([x, y]) => (
+            <g key={x}>
+              <rect x={x - 16} y={y + 18} width="32" height={150 - y} fill={lt(c2, 0.1)} />
+              <path d={`M${x - 20} ${y + 20} L${x} ${y - 26} L${x + 20} ${y + 20} Z`} fill={c1} />
+              <path d={`M${x} ${y - 26} V${y - 44}`} stroke="#8A6A4F" strokeWidth="2" />
+              <path d={`M${x} ${y - 44} l14 5 -14 5 Z`} fill={dk(c1, 0.1)} />
+              <path d={`M${x - 6} ${y + 50} V${y + 40} Q${x} ${y + 32} ${x + 6} ${y + 40} V${y + 50} Z`} fill="#4A3B5A" />
+            </g>
+          ))}
+          <rect x="34" y="70" width="82" height="100" fill={c2} />
+          {[0, 1, 2, 3, 4].map((i) => <rect key={i} x={34 + i * 18} y="60" width="10" height="12" fill={c2} />)}
+          {[86, 102, 118, 134, 150].map((y) => <path key={y} d={`M34 ${y} H116`} stroke={dk(c2, 0.08)} strokeWidth="1.5" />)}
+          <path d="M58 170 V132 Q75 112 92 132 V170 Z" fill="#6A4229" />
+          <circle cx="75" cy="94" r="10" fill="#FFF3B0" stroke={dk(c2, 0.15)} strokeWidth="3" />
+          <path d={heart(75, 96, 7)} fill={c1} />
+          <rect x="2" y="168" width="146" height="8" rx="4" fill={dk(c2, 0.2)} />
+        </S>
+      );
+    case 'k-balanco':
+      return (
+        <S w={140} h={170}>
+          <path d="M14 168 L40 8 L66 168 M74 168 L100 8 L126 168" stroke={WOOD} strokeWidth="8" strokeLinecap="round" fill="none" />
+          <rect x="30" y="4" width="80" height="10" rx="5" fill={dk(WOOD, 0.1)} />
+          <path d="M50 12 V118 M90 12 V118" stroke="#C9A06A" strokeWidth="2.5" />
+          {[30, 60, 90].map((y) => <circle key={y} cx="50" cy={y} r="4" fill={['#FF8FB4', '#FFD34D', '#7CC39A'][y / 30 - 1]} />)}
+          {[45, 75].map((y) => <circle key={y} cx="90" cy={y} r="4" fill={['#FFD34D', '#FF8FB4'][(y - 45) / 30]} />)}
+          <rect x="40" y="116" width="60" height="10" rx="4" fill={WOOD} />
+          <rect x="44" y="106" width="52" height="12" rx="6" fill={c1} />
+          <path d={heart(70, 113, 5)} fill={c2} />
+        </S>
+      );
+    case 'k-escorregador':
+      return (
+        <S w={160} h={130}>
+          <path d="M18 126 V20 M48 126 V20" stroke={c2} strokeWidth="6" strokeLinecap="round" />
+          {[36, 58, 80, 102].map((y) => <path key={y} d={`M18 ${y} H48`} stroke={c2} strokeWidth="5" strokeLinecap="round" />)}
+          <rect x="10" y="14" width="46" height="10" rx="5" fill={dk(c2, 0.1)} />
+          <path d="M50 20 Q90 24 110 80 Q122 112 156 118 L156 128 Q112 126 98 86 Q82 36 50 32 Z" fill={c1} />
+          <path d="M54 24 Q88 30 104 78" stroke={lt(c1, 0.45)} strokeWidth="4" fill="none" strokeLinecap="round" />
+        </S>
+      );
+    case 'k-poltrona-ovo':
+      return (
+        <S w={120} h={180}>
+          <path d="M100 172 V20 Q100 6 86 6 H60" stroke="#B8BFCC" strokeWidth="6" fill="none" strokeLinecap="round" />
+          <ellipse cx="100" cy="174" rx="18" ry="5" fill="#9AA2B4" />
+          <path d="M60 6 V30" stroke="#8A90A0" strokeWidth="3" />
+          <ellipse cx="54" cy="96" rx="46" ry="62" fill="#D9A766" />
+          {Array.from({ length: 7 }, (_, i) => <path key={i} d={`M${16 + i * 13} 52 Q54 ${96 + (i - 3) * 4} ${16 + i * 13} 146`} stroke="#B8854A" strokeWidth="1.5" fill="none" opacity="0.7" />)}
+          <ellipse cx="54" cy="104" rx="34" ry="44" fill={dk('#D9A766', 0.25)} />
+          <ellipse cx="54" cy="122" rx="32" ry="20" fill={c1} />
+          <ellipse cx="44" cy="96" rx="14" ry="12" fill={c2} />
+          <ellipse cx="66" cy="98" rx="12" ry="10" fill={lt(c1, 0.3)} />
+          <path d="M54 34 V40" stroke="#8A90A0" strokeWidth="3" />
+        </S>
+      );
+    case 'k-tenda':
+      return (
+        <S w={150} h={160}>
+          <path d="M60 4 L74 24 M90 4 L76 24" stroke={WOOD} strokeWidth="4" strokeLinecap="round" />
+          <path d="M75 20 L8 154 H142 Z" fill={c1} />
+          {[0.35, 0.6, 0.85].map((t) => <path key={t} d={`M${75 - 67 * t} ${20 + 134 * t} H${75 + 67 * t}`} stroke={c2} strokeWidth="5" />)}
+          <path d="M75 52 L44 154 H106 Z" fill="#4A3B5A" />
+          <path d="M75 52 L40 154 L30 154 Q48 110 75 52 Z" fill={lt(c1, 0.2)} />
+          <path d="M75 52 L110 154 L120 154 Q102 110 75 52 Z" fill={lt(c1, 0.2)} />
+          <ellipse cx="75" cy="146" rx="24" ry="7" fill={c2} />
+          {Array.from({ length: 8 }, (_, i) => <circle key={i} cx={58 + i * 5} cy={70 + Math.abs(i - 3.5) * 3} r="2" fill="#FFE27A" className="bulb" style={{ animationDelay: `${(i % 4) * 0.3}s` }} />)}
+          {[0, 1, 2, 3, 4].map((i) => <path key={i} d={`M${32 + i * 22} 104 l9 0 -4.5 10 Z`} fill={['#FF8FB4', '#FFD34D', '#7FB8F0', '#7CC39A', '#B399F0'][i]} />)}
+        </S>
+      );
+    case 'k-sofa-nuvem':
+      return (
+        <S w={200} h={120}>
+          {[[34, 46, 26], [70, 34, 30], [110, 30, 32], [150, 36, 30], [176, 52, 22]].map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} fill={c1} />)}
+          {[[60, 30, 10], [104, 22, 12], [146, 28, 10]].map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} fill="#FFFFFF" opacity="0.45" />)}
+          <rect x="10" y="56" width="180" height="40" rx="20" fill={lt(c1, 0.2)} />
+          <circle cx="20" cy="70" r="20" fill={c1} />
+          <circle cx="180" cy="70" r="20" fill={c1} />
+          <rect x="10" y="84" width="180" height="20" rx="10" fill={dk(c1, 0.06)} />
+          <path d={starD(70, 58, 12)} fill={c2} />
+          <path d={heart(130, 60, 11)} fill={c2} />
+          <Legs xs={[30, 163]} y={102} h={12} c="#C9CED8" />
+        </S>
+      );
+    case 'k-mesa-cha':
+      return (
+        <S w={180} h={130}>
+          {/* bolo, bule e xícaras */}
+          <rect x="74" y="20" width="32" height="20" rx="4" fill="#FFE3EC" />
+          <rect x="74" y="20" width="32" height="7" rx="3" fill={c1} />
+          <rect x="88" y="10" width="3" height="10" fill="#7FB8F0" />
+          <path d="M89.5 6 q2 2 0 4 q-2 -2 0 -4 Z" fill="#FFB347" />
+          <rect x="70" y="40" width="40" height="4" rx="2" fill="#FFFFFF" />
+          <path d="M28 44 Q28 26 44 26 Q60 26 60 44 Z" fill={c2} />
+          <path d="M60 32 q10 2 10 10" stroke={c2} strokeWidth="4" fill="none" />
+          <path d="M28 34 q-8 -6 -12 2" stroke={c2} strokeWidth="4" fill="none" />
+          <circle cx="44" cy="24" r="3" fill={dk(c2, 0.2)} />
+          {[130, 150].map((x) => (
+            <g key={x}>
+              <path d={`M${x - 8} 36 H${x + 8} Q${x + 7} 46 ${x} 46 Q${x - 7} 46 ${x - 8} 36 Z`} fill="#FFFFFF" />
+              <ellipse cx={x} cy="47" rx="9" ry="2" fill="#E8E2F0" />
+            </g>
+          ))}
+          <ellipse cx="90" cy="48" rx="80" ry="12" fill="#FFFFFF" />
+          <path d={`M10 48 Q10 82 22 88 ${Array.from({ length: 8 }, (_, i) => `Q${30 + i * 19} 80 ${40 + i * 19} 88`).join(' ')} Q170 82 170 48 Z`} fill={c1} />
+          <path d="M10 48 Q90 70 170 48" stroke={lt(c1, 0.4)} strokeWidth="3" fill="none" />
+          <rect x="84" y="86" width="12" height="32" fill={dk(WOOD)} />
+          <ellipse cx="90" cy="120" rx="30" ry="6" fill={dk(WOOD, 0.3)} />
+        </S>
+      );
+    case 'k-piano':
+      return (
+        <S w={200} h={160}>
+          <path d="M30 40 L120 4 L130 12 L50 50 Z" fill={dk(c1, 0.1)} />
+          <path d="M20 54 Q20 28 60 28 H130 Q190 28 190 70 V96 H20 Z" fill={c1} />
+          <path d="M20 54 Q20 40 50 40" stroke={lt(c1, 0.5)} strokeWidth="3" fill="none" />
+          <rect x="16" y="94" width="120" height="20" rx="3" fill="#FFFFFF" />
+          {Array.from({ length: 14 }, (_, i) => <path key={i} d={`M${24 + i * 8} 94 V114`} stroke="#D6DBE3" strokeWidth="1" />)}
+          {[0, 1, 3, 4, 5, 7, 8, 10, 11, 12].map((i) => <rect key={i} x={29 + i * 8} y="94" width="5" height="12" fill="#2B2224" />)}
+          <rect x="16" y="112" width="174" height="10" rx="3" fill={dk(c1, 0.15)} />
+          <Legs xs={[24, 120, 178]} y={120} h={36} c={dk(c1, 0.3)} />
+          <rect x="40" y="132" width="70" height="10" rx="4" fill={c2} />
+          <Legs xs={[46, 98]} y={140} h={16} c={dk(c1, 0.3)} />
+          {[[150, 20], [168, 8]].map(([x, y], i) => <path key={i} d={`M${x} ${y} v12 a4 3 0 1 1 -3 -3`} stroke={dk(c1, 0.5)} strokeWidth="2" fill="none" />)}
+        </S>
+      );
+    case 'k-aquario':
+      return (
+        <S w={130} h={160}>
+          <rect x="6" y="4" width="118" height="80" rx="8" fill="#BFE9F5" opacity="0.9" />
+          <rect x="6" y="4" width="118" height="12" rx="6" fill="#DDF4FB" />
+          <path d="M6 68 Q36 60 66 68 T124 66 V84 H6 Z" fill="#F2DDA8" />
+          {[22, 40, 96, 110].map((x, i) => <path key={x} d={`M${x} 72 Q${x - 6} ${52 - i * 2} ${x + 2} ${34 + i * 4}`} stroke="#5FAE84" strokeWidth="3" fill="none" />)}
+          {[[60, 36, '#FF9A4D'], [86, 54, c2]].map(([x, y, col], i) => (
+            <g key={i}>
+              <ellipse cx={x as number} cy={y as number} rx="9" ry="6" fill={col as string} />
+              <path d={`M${(x as number) + 8} ${y} l8 -6 v12 Z`} fill={col as string} />
+              <circle cx={(x as number) - 4} cy={(y as number) - 1} r="1.4" fill={INK} />
+            </g>
+          ))}
+          {[[48, 26], [52, 18], [50, 10]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r={2 + i * 0.5} fill="none" stroke="#FFFFFF" strokeWidth="1.2" />)}
+          <path d="M14 14 L30 30" stroke="#FFFFFF" strokeWidth="3" opacity="0.6" strokeLinecap="round" />
+          <rect x="2" y="84" width="126" height="10" rx="4" fill={dk(c1, 0.1)} />
+          <rect x="8" y="92" width="114" height="56" rx="4" fill={c1} />
+          <rect x="16" y="100" width="46" height="40" rx="3" fill={lt(c1, 0.2)} />
+          <rect x="68" y="100" width="46" height="40" rx="3" fill={lt(c1, 0.2)} />
+          <Legs xs={[12, 111]} y={146} h={10} c={dk(c1, 0.35)} />
+        </S>
+      );
+    case 'k-neon-coracao':
+    case 'k-neon-estrela':
+    case 'k-neon-lua': {
+      const d = id === 'k-neon-coracao' ? heart(50, 44, 30) : id === 'k-neon-estrela' ? starD(50, 42, 30) : 'M60 12 A30 30 0 1 0 82 62 A24 24 0 1 1 60 12 Z';
+      return (
+        <S w={100} h={84}>
+          <path d={d} fill="none" stroke={c1} strokeWidth="14" opacity="0.18" strokeLinejoin="round" />
+          <path d={d} fill="none" stroke={c1} strokeWidth="8" opacity="0.35" strokeLinejoin="round" />
+          <path d={d} fill="none" stroke={lt(c1, 0.6)} strokeWidth="3.5" strokeLinejoin="round" className="neon-glow" />
+        </S>
+      );
+    }
+    case 'k-varal-luzes':
+      return (
+        <S w={240} h={60}>
+          <path d="M4 8 Q60 34 120 14 Q180 34 236 8" stroke="#5A4A3E" strokeWidth="1.5" fill="none" />
+          {Array.from({ length: 13 }, (_, i) => {
+            const x = 12 + i * 18;
+            const y = i < 7 ? 8 + 22 * Math.sin((x / 120) * Math.PI) * 0.9 : 14 + 18 * Math.sin(((x - 120) / 116) * Math.PI);
+            return i % 3 === 1 ? (
+              <path key={i} d={starD(x, y + 10, 7)} fill={c2} className="bulb" style={{ animationDelay: `${(i % 4) * 0.3}s` }} />
+            ) : (
+              <g key={i}>
+                <rect x={x - 2} y={y} width="4" height="4" fill="#5A4A3E" />
+                <ellipse cx={x} cy={y + 9} rx="4" ry="6" fill={i % 2 ? c1 : '#FFE27A'} className="bulb" style={{ animationDelay: `${(i % 4) * 0.3}s` }} />
+              </g>
+            );
+          })}
+        </S>
+      );
+    case 'k-estante-casinha':
+      return (
+        <S w={130} h={180}>
+          <path d="M65 4 L126 54 V176 H4 V54 Z" fill={c1} />
+          <path d="M65 16 L114 56 V168 H16 V56 Z" fill={dk(c1, 0.3)} />
+          <path d="M16 96 H114 M16 134 H114 M65 56 V96" stroke={c1} strokeWidth="6" />
+          <Plant x={40} y={92} s={0.7} pot={c2} />
+          <Books x={72} y={92} n={4} seed={2} h={22} />
+          <circle cx="40" cy="118" r="12" fill="#C98A5B" />
+          <circle cx="32" cy="108" r="5" fill="#C98A5B" />
+          <circle cx="48" cy="108" r="5" fill="#C98A5B" />
+          <ellipse cx="40" cy="122" rx="6" ry="4" fill="#F2D2B0" />
+          <circle cx="36" cy="115" r="1.6" fill={INK} />
+          <circle cx="44" cy="115" r="1.6" fill={INK} />
+          <rect x="74" y="108" width="28" height="22" rx="3" fill={c2} />
+          <path d={heart(88, 120, 6)} fill="#FFFFFF" />
+          <rect x="24" y="146" width="22" height="18" rx="3" fill="#7FB8F0" />
+          <circle cx="78" cy="156" r="9" fill="#FF8FB4" />
+          <circle cx="98" cy="158" r="7" fill="#FFD34D" />
+          <circle cx="65" cy="38" r="9" fill="#FFF3B0" stroke={c1} strokeWidth="3" />
+        </S>
+      );
+    case 'k-arco-flores':
+      return (
+        <S w={180} h={180}>
+          <path d="M24 176 V80 Q24 14 90 14 Q156 14 156 80 V176" stroke="#FFFFFF" strokeWidth="10" fill="none" />
+          <path d="M24 176 V80 Q24 14 90 14 Q156 14 156 80 V176" stroke="#5FAE84" strokeWidth="3" fill="none" strokeDasharray="10 8" />
+          {Array.from({ length: 16 }, (_, i) => {
+            const a = Math.PI - (i / 15) * Math.PI;
+            const x = 90 + Math.cos(a) * 66;
+            const y = 80 - Math.sin(a) * 66;
+            const col = [c1, c2, '#FFFFFF', '#FFD34D'][i % 4];
+            return (
+              <g key={i}>
+                <ellipse cx={x - 7} cy={y + 4} rx="6" ry="3" fill="#7CC39A" transform={`rotate(-30 ${x - 7} ${y + 4})`} />
+                {[0, 72, 144, 216, 288].map((r) => <circle key={r} cx={x + Math.cos((r * Math.PI) / 180) * 4.5} cy={y + Math.sin((r * Math.PI) / 180) * 4.5} r="4" fill={col} />)}
+                <circle cx={x} cy={y} r="2.6" fill="#FFD34D" />
+              </g>
+            );
+          })}
+          {[100, 130, 160].map((y, i) => [24, 156].map((x) => <circle key={`${x}${y}`} cx={x + (i % 2 ? 6 : -6)} cy={y} r="5" fill={[c1, c2, '#FFFFFF'][i]} />))}
+        </S>
+      );
+    case 'k-tapete-nuvem':
+      return (
+        <S w={220} h={80}>
+          {[[50, 40, 34], [92, 30, 36], [140, 30, 34], [178, 42, 30], [110, 52, 34]].map(([x, y, r], i) => <ellipse key={i} cx={x} cy={y} rx={r * 1.4} ry={r * 0.6} fill={c1} />)}
+          {[[92, 34, 26], [140, 34, 22]].map(([x, y, r], i) => <ellipse key={i} cx={x} cy={y} rx={r * 1.4} ry={r * 0.5} fill={lt(c1, 0.5)} />)}
+          <path d={starD(118, 40, 8)} fill={c2} />
+        </S>
+      );
+    case 'k-tapete-arcoiris':
+      return (
+        <S w={240} h={90}>
+          {['#FF8FA8', '#FFB86B', '#FFE27A', '#9ED99B', '#8DBEF0', '#B9A3F0'].map((col, i) => (
+            <path key={col} d={`M${10 + i * 14} 86 A${110 - i * 14} ${80 - i * 12} 0 0 1 ${230 - i * 14} 86 Z`} fill={col} />
+          ))}
+          <path d="M94 86 A26 18 0 0 1 146 86 Z" fill={c1} />
+          {Array.from({ length: 16 }, (_, i) => <path key={i} d={`M${16 + i * 14} 86 v4`} stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />)}
+        </S>
+      );
+    case 'k-pufe-gato':
+      return (
+        <S w={90} h={80}>
+          <path d="M12 30 L18 4 L34 22 Z M78 30 L72 4 L56 22 Z" fill={c1} />
+          <path d="M17 24 L20 12 L28 22 Z M73 24 L70 12 L62 22 Z" fill="#FF9FC2" />
+          <ellipse cx="45" cy="72" rx="40" ry="8" fill={dk(c1, 0.15)} />
+          <rect x="6" y="18" width="78" height="56" rx="26" fill={c1} />
+          <ellipse cx="45" cy="22" rx="36" ry="8" fill={lt(c1, 0.25)} />
+          <ellipse cx="32" cy="44" rx="4" ry="5" fill={INK} />
+          <ellipse cx="58" cy="44" rx="4" ry="5" fill={INK} />
+          <path d="M42 52 h6 l-3 3 Z" fill="#F07A93" />
+          <path d="M38 57 q3.5 3 7 0 q3.5 3 7 0" stroke={INK} strokeWidth="1.8" fill="none" strokeLinecap="round" />
+          <ellipse cx="24" cy="54" rx="6" ry="3.5" fill="#FF9FC2" opacity="0.7" />
+          <ellipse cx="66" cy="54" rx="6" ry="3.5" fill="#FF9FC2" opacity="0.7" />
+          <path d="M84 56 q14 -4 6 -24" stroke={c1} strokeWidth="7" fill="none" strokeLinecap="round" />
+        </S>
+      );
     default:
       return null;
   }
@@ -742,4 +1048,10 @@ export const KIT_PLACE: Record<string, Place> = {
   'k-tapete': 'tapete',
   'k-tapete-retangulo': 'tapete',
   'k-tapete-coracao': 'tapete',
+  'k-tapete-nuvem': 'tapete',
+  'k-tapete-arcoiris': 'tapete',
+  'k-neon-coracao': 'parede',
+  'k-neon-estrela': 'parede',
+  'k-neon-lua': 'parede',
+  'k-varal-luzes': 'parede',
 };
