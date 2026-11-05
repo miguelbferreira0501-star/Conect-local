@@ -89,7 +89,7 @@ export function MealCard({ s }: { s: State }) {
           </>
         ) : (
           <div className="grid justify-items-center gap-2 py-1 text-center">
-            <Glyph e="🍽️" size={52} />
+            <Glyph e="🍽️" size={68} />
             <p className="text-[15px] font-semibold">Monte o que você vai comer hoje e veja as calorias de cada alimento.</p>
             <button className="btn btn-primary w-full" onClick={() => setOpen(true)}>
               <Plus size={18} /> Montar meu cardápio
