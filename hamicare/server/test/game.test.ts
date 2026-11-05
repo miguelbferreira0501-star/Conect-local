@@ -29,13 +29,13 @@ describe('carteira e ganhos no servidor', () => {
     const u = await newUser('Ana');
     const r1 = await call('POST', '/game/ops', { ops: [task('agua'), task('agua')] }, u.cookie);
     expect(r1.status).toBe(200);
-    expect(r1.body.wallet.xp).toBe(5);
-    expect(r1.body.wallet.coins).toBe(30 + 3);
+    expect(r1.body.wallet.xp).toBe(G.task.xp[0]);
+    expect(r1.body.wallet.coins).toBe(30 + G.task.coins[0]);
     const r2 = await call('POST', '/game/ops', { ops: [{ op: 'revoke', ref: `tarefa:${today()}:agua` }] }, u.cookie);
     expect(r2.body.wallet.xp).toBe(0);
     expect(r2.body.wallet.coins).toBe(30);
     const r3 = await call('POST', '/game/ops', { ops: [task('agua'), task('agua')] }, u.cookie);
-    expect(r3.body.wallet.xp).toBe(5);
+    expect(r3.body.wallet.xp).toBe(G.task.xp[0]);
   });
 
   it('o servidor usa a energia e a categoria da biblioteca, não a do app', async () => {
@@ -59,7 +59,7 @@ describe('carteira e ganhos no servidor', () => {
     expect(fake.body.results[0].ok).toBe(false);
     // Coloca o XP perto do nível 2 e completa uma missão.
     await wallet(u.cookie);
-    await owner((c) => c.query('UPDATE game_wallet SET xp = $2 WHERE user_id = $1', [u.id, xpAt(2, G) - 3]));
+    await owner((c) => c.query('UPDATE game_wallet SET xp = $2 WHERE user_id = $1', [u.id, xpAt(2, G) - G.task.xp[0]]));
     const r = await call('POST', '/game/ops', { ops: [task('agua')] }, u.cookie);
     const arena = G.arenas.find((a) => a.n === 2)!;
     expect(r.body.wallet.level).toBe(2);
@@ -83,9 +83,10 @@ describe('carteira e ganhos no servidor', () => {
     const r = await call('POST', '/game/ops', { ops: [{ op: 'grant', src: { kind: 'conquista', id: 'primeira-tarefa', coins: 99999 } }, { op: 'grant', src: { kind: 'desafio', period: 'semana', id: 'ativos5', key: '2020-01-06' } }] }, u.cookie);
     expect(r.body.results[0].ok).toBe(true);
     expect(r.body.results[1].ok).toBe(false);
-    // 100 XP da conquista já levam ao nível 2: paga também o nível e a arena 2.
+    // Se o XP da conquista chegar ao nível 2, paga também o nível e a arena 2.
+    const levelUp = G.achievementXp >= xpAt(2, G) ? G.levelUp.base + G.levelUp.perLevel * 2 + G.arenas[1].reward.coins : 0;
     expect(r.body.wallet.xp).toBe(G.achievementXp);
-    expect(r.body.wallet.coins).toBe(30 + 10 + G.levelUp.base + G.levelUp.perLevel * 2 + G.arenas[1].reward.coins);
+    expect(r.body.wallet.coins).toBe(30 + 10 + levelUp);
     const w = await call('GET', '/game/wallet', undefined, u.cookie);
     expect(w.body.ledger.find((l: { ref: string }) => l.ref === 'conquista:primeira-tarefa').coins).toBe(10);
   });
@@ -181,8 +182,8 @@ describe('baús no servidor', () => {
     const u = await newUser('Lu');
     await Promise.all(Array.from({ length: 5 }, () => call('POST', '/game/ops', { ops: [task('agua')] }, u.cookie)));
     const w = await call('GET', '/game/wallet', undefined, u.cookie);
-    expect(w.body.wallet.xp).toBe(5);
-    expect(w.body.wallet.coins).toBe(33);
+    expect(w.body.wallet.xp).toBe(G.task.xp[0]);
+    expect(w.body.wallet.coins).toBe(30 + G.task.coins[0]);
   });
 
   it('cada pessoa só vê a própria carteira (regras do banco)', async () => {

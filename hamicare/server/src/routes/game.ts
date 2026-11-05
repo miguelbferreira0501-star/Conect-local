@@ -180,7 +180,7 @@ async function trusted(db: pg.PoolClient, userId: string, src: Source, cfg: Game
     case 'presente':
       return { ...src, coins: Math.min(8, Math.max(0, src.coins)) };
     case 'temporada':
-      return src.month === utcDay(0).slice(0, 7) || src.month === utcDay(-1).slice(0, 7) ? { ...src, xp: 150, coins: 120 } : null;
+      return src.month === utcDay(0).slice(0, 7) || src.month === utcDay(-1).slice(0, 7) ? { ...src, xp: 30, coins: 120 } : null;
     case 'evento': {
       const ev = (await db.query('SELECT e.reward_coins FROM event_claims x JOIN events e ON e.id = x.event_id WHERE x.user_id = $1 AND x.event_id::text = $2', [userId, src.id])).rows[0];
       return ev ? { ...src, coins: ev.reward_coins } : null;

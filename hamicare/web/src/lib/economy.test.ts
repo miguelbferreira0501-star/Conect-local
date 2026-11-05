@@ -17,13 +17,13 @@ describe('economia no app', () => {
   it('missão paga uma vez; desmarcar devolve; marcar de novo paga uma vez só', () => {
     start([T('agua', 1)]);
     toggleTask('agua');
-    expect(getState().xp).toBe(5);
-    expect(getState().coins).toBe(3);
+    expect(getState().xp).toBe(G.task.xp[0]);
+    expect(getState().coins).toBe(G.task.coins[0]);
     toggleTask('agua');
     expect(getState().xp).toBe(0);
     expect(getState().coins).toBe(0);
     toggleTask('agua');
-    expect(getState().xp).toBe(5);
+    expect(getState().xp).toBe(G.task.xp[0]);
     const refs = getState().game.ledger.map((l) => l.ref);
     expect(refs).toContain(`tarefa:${todayKey()}:agua`);
     expect(refs).toContain(`estorno:tarefa:${todayKey()}:agua`);
@@ -49,7 +49,7 @@ describe('economia no app', () => {
   it('subir de nível paga o prêmio do nível e da arena nova, com baú grátis', async () => {
     const seen: Celebration[] = [];
     const off = onCelebrate((c) => seen.push(c));
-    start([T('corrida', 3, 'fitness')], xpAt(2, G) - 5);
+    start([T('corrida', 3, 'fitness')], xpAt(2, G) - 1);
     const before = getState().coins;
     toggleTask('corrida');
     await new Promise((r) => setTimeout(r, 5));
@@ -63,7 +63,7 @@ describe('economia no app', () => {
   });
 
   it('desmarcar não faz voltar de nível, e o prêmio do nível não paga de novo', () => {
-    start([T('corrida', 3, 'fitness')], xpAt(2, G) - 5);
+    start([T('corrida', 3, 'fitness')], xpAt(2, G) - 1);
     toggleTask('corrida');
     const coins = getState().coins;
     toggleTask('corrida');

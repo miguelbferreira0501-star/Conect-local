@@ -1,3 +1,4 @@
+import { PlusCard } from '../components/PlusCard';
 import { useState } from 'react';
 import { Lock, Trash2, X } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
@@ -13,7 +14,7 @@ import { Glyph } from '../components/art';
 import { AreaSheet } from '../components/AreaSheet';
 import { AREAS } from '../logic/areas';
 
-export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: (p: Photo) => void }) {
+export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; onShare: (p: Photo) => void; onPlus: () => void }) {
   const s = useApp();
   const today = todayKey();
   const cond = conditioning(s.days, today);
@@ -320,6 +321,7 @@ export function Evolution({ onClose, onShare }: { onClose: () => void; onShare: 
           </ol>
         </section>
         {!isPremium(s) && <p className="text-center text-[13px] text-muted">Gráficos dos últimos 30 dias. Com o HamiCare+, 6 meses.</p>}
+        <PlusCard onOpen={onPlus} title="Veja 6 meses de evolução" text="Gráficos de 6 meses, além de roupas, pelagens e estilos de casa exclusivos." />
       </div>
 
       <Modal open={!!photo} onClose={() => setPhoto(null)} label="Foto do Hami">

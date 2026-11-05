@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowUpToLine, Gift, Heart, Lock, PackageOpen, Pencil, Sparkles } from 'lucide-react';
+import { ArrowUpToLine, Crown, Gift, Heart, Lock, PackageOpen, Pencil, Sparkles } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { Capivara } from '../components/Capivara';
 import { Room } from '../components/Room';
@@ -21,6 +21,7 @@ import { Glyph } from '../components/art';
 import { ArenasTab, arenaByN } from './Arenas';
 import { ItemIcon } from '../components/ItemIcon';
 import { ChestShopView } from './Chests';
+import { PLUS_COUNTS, PlusCard } from '../components/PlusCard';
 import { AlbumView, InventoryView, WalletSheet, WorkshopView } from './Collection';
 
 export type WorldTab = 'arenas' | 'casa' | 'mapa' | 'loja' | 'armario';
@@ -47,7 +48,7 @@ export function World({ onPlus, onGift, initialTab }: { onPlus: () => void; onGi
       {tab === 'casa' && <HouseTab onArenas={() => setTab('arenas')} />}
       {tab === 'mapa' && <MapTab onPlus={onPlus} />}
       {tab === 'loja' && <ShopTab onPlus={onPlus} onGift={onGift} />}
-      {tab === 'armario' && <WardrobeTab />}
+      {tab === 'armario' && <WardrobeTab onPlus={onPlus} />}
     </div>
   );
 }
@@ -333,6 +334,7 @@ function Vendinha({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: str
 
   return (
     <div className="grid gap-4">
+      <PlusCard onOpen={onPlus} title={`${PLUS_COUNTS.items} itens só do Plus`} text="Roupas, pelagens e estilos de casa completos que não estão na vitrine grátis." />
       <section className="shop-hero" aria-label="Vendinha da Dona Capivara">
         <div className="flex items-end gap-2">
           <div className="seller-bob shrink-0">
@@ -510,6 +512,11 @@ function ShopCard({ item, onPlus, onGift, onTry }: { item: Item; onPlus: () => v
   const isWear = WEARABLE_KINDS.includes(item.kind);
   return (
     <li className={`card shop-card relative grid gap-2 p-3 ${item.plus ? 'is-plus' : ''}`}>
+      {item.plus && (
+        <span className="plus-ribbon">
+          <Crown size={11} /> Plus
+        </span>
+      )}
       <button className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-surface2" aria-label={wished ? 'Tirar dos desejos' : 'Guardar nos desejos'} aria-pressed={wished} onClick={() => toggleWish(item.id)}>
         <Heart size={16} className={wished ? 'fill-[var(--accent)] text-accent' : 'text-muted'} />
       </button>
@@ -528,7 +535,7 @@ function ShopCard({ item, onPlus, onGift, onTry }: { item: Item; onPlus: () => v
         <span className="chip chip-leaf justify-center">Já é seu</span>
       ) : res === 'plus' ? (
         <button className="btn btn-soft btn-sm" onClick={onPlus}>
-          <Lock size={14} /> Plus
+          <Lock size={14} /> Só no Plus
         </button>
       ) : res === 'nivel' ? (
         <span className="chip chip-plain justify-center">Nível {item.level}</span>
@@ -548,14 +555,14 @@ function ShopCard({ item, onPlus, onGift, onTry }: { item: Item; onPlus: () => v
 
 // ---------- Armário ----------
 
-function WardrobeTab() {
+function WardrobeTab({ onPlus }: { onPlus: () => void }) {
   const s = useApp();
   const fresh = Object.values(s.itemMeta ?? {}).filter((m) => !m.seen).length;
   const [sec, setSec] = useState<'vestir' | 'itens' | 'album' | 'oficina'>('vestir');
   return (
     <div className="grid gap-4">
       <Seg value={sec} onChange={setSec} label="Seções do armário" options={[{ id: 'vestir', label: 'Vestir' }, { id: 'itens', label: fresh ? `Itens (${fresh})` : 'Itens' }, { id: 'album', label: 'Álbum' }, { id: 'oficina', label: 'Oficina' }]} />
-      {sec === 'vestir' && <DressUp />}
+      {sec === 'vestir' && <DressUp onPlus={onPlus} />}
       {sec === 'itens' && <InventoryView />}
       {sec === 'album' && <AlbumView onWorkshop={() => setSec('oficina')} />}
       {sec === 'oficina' && <WorkshopView />}
@@ -563,7 +570,7 @@ function WardrobeTab() {
   );
 }
 
-function DressUp() {
+function DressUp({ onPlus }: { onPlus: () => void }) {
   const s = useApp();
   const mine = ITEMS.filter((i) => WEARABLE_KINDS.includes(i.kind) && owned(s, i.id));
   const premium = isPremium(s);
@@ -573,6 +580,7 @@ function DressUp() {
       <div className="grid place-items-center rounded-[26px] py-3" style={{ background: 'color-mix(in srgb, var(--surface) 55%, transparent)' }}>
         <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} size={190} label={s.pet.name} />
       </div>
+      <PlusCard onOpen={onPlus} title="Pelagens e roupas especiais" text={`${PLUS_COUNTS.furs} pelagens e ${PLUS_COUNTS.items} itens exclusivos para o ${s.pet.name}.`} />
       <section className="grid gap-2" aria-label="Pelagens">
         <h2 className="section-label px-1">Pelagem</h2>
         <div className="grid grid-cols-4 gap-2">
