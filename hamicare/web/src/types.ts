@@ -184,12 +184,13 @@ export interface JarNote {
   date: string;
 }
 
-export type NotifKind = 'tarefas' | 'hami' | 'missoes' | 'aventura' | 'amigos';
+export type NotifKind = 'agua' | 'hami' | 'tarefas' | 'pausa' | 'dormir' | 'aventura' | 'missoes' | 'amigos';
 
 export interface Settings {
   theme: ThemePref;
   accent: string;
-  notif: { enabled: boolean; time: string; kinds: Record<NotifKind, boolean> };
+  /** Lembretes: horário das missões, plano de água e hora de dormir. */
+  notif: { enabled: boolean; time: string; kinds: Record<NotifKind, boolean>; water?: 'pouco' | 'normal' | 'muito'; bedtime?: string };
   sound: boolean;
 }
 

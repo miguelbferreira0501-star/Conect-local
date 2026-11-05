@@ -16,16 +16,25 @@ import { getState } from '../lib/store';
 import type { AgeGroup, NotifKind, ThemePref, TraitId } from '../types';
 import { Glyph } from '../components/art';
 
-const NOTIF_LABEL: Record<NotifKind, string> = {
-  tarefas: 'Lembrete das atividades',
-  hami: 'Quando o Hami precisar de você',
-  missoes: 'Missões e desafios novos',
-  aventura: 'Volta das aventuras',
-  amigos: 'Vibes e presentes de amigos',
+const NOTIF_LABEL: Record<NotifKind, [string, string]> = {
+  agua: ['Beber água', 'Nos horários do plano de água'],
+  hami: ['Quando o Hami precisar de você', 'Com fome ou com saudade, uma vez por dia'],
+  tarefas: ['Missões do dia', 'No horário escolhido, se ainda faltar alguma'],
+  pausa: ['Pausa da tarde', 'Respirar ou alongar às 15h30'],
+  dormir: ['Hora de dormir', 'Para desacelerar antes de deitar'],
+  aventura: ['Volta dos passeios', 'Quando o Hami chega da aventura'],
+  missoes: ['Desafios novos da semana', 'Segunda de manhã'],
+  amigos: ['Amigos', 'Visitas, presentes e pedidos de amizade'],
 };
+const WATER_LABEL = { pouco: '2 vezes (11h e 16h)', normal: '4 vezes (10h, 13h, 16h e 19h)', muito: '6 vezes (das 9h às 19h)' } as const;
 
 export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolean; onClose: () => void; onPlus: () => void; account?: ReactNode }) {
   const s = useApp();
+  /** Muda uma escolha dos lembretes e já avisa o servidor. */
+  const setNotif = (patch: Partial<typeof s.settings.notif>) => {
+    updateSettings({ notif: { ...getState().settings.notif, ...patch } });
+    syncPush(getState());
+  };
   const [code, setCode] = useState('');
   const [importText, setImportText] = useState('');
   const [confirm, setConfirm] = useState<'reset' | 'peso' | null>(null);
@@ -108,20 +117,46 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
               syncPush(getState());
             }}
             label="Receber lembretes gentis"
-            sub="Sem culpa e sem pressão. Um por dia, no horário que você escolher."
+            sub="Até 5 por dia, nunca de madrugada e sem culpa. Com conta, chegam mesmo com o app fechado."
           />
           {s.settings.notif.enabled && (
             <>
-              <Field id="set-time" label="Horário">
-                <input id="set-time" type="time" className="field" value={s.settings.notif.time} onChange={(e) => updateSettings({ notif: { ...s.settings.notif, time: e.target.value || '19:00' } })} onBlur={() => syncPush(getState())} />
-              </Field>
               {(Object.keys(NOTIF_LABEL) as NotifKind[]).map((k) => (
-                <Toggle key={k} id={`set-n-${k}`} checked={s.settings.notif.kinds[k]} onChange={(on) => updateSettings({ notif: { ...s.settings.notif, kinds: { ...s.settings.notif.kinds, [k]: on } } })} label={NOTIF_LABEL[k]} />
+                <Toggle
+                  key={k}
+                  id={`set-n-${k}`}
+                  checked={s.settings.notif.kinds[k]}
+                  onChange={(on) => setNotif({ kinds: { ...s.settings.notif.kinds, [k]: on } })}
+                  label={k === 'hami' ? `Quando o ${s.pet.name} precisar de você` : NOTIF_LABEL[k][0]}
+                  sub={NOTIF_LABEL[k][1]}
+                />
               ))}
+              {s.settings.notif.kinds.agua && (
+                <Field id="set-water" label="Plano de água">
+                  <select id="set-water" className="field" value={s.settings.notif.water ?? 'normal'} onChange={(e) => setNotif({ water: e.target.value as 'pouco' | 'normal' | 'muito' })}>
+                    {(Object.keys(WATER_LABEL) as (keyof typeof WATER_LABEL)[]).map((w) => (
+                      <option key={w} value={w}>
+                        {WATER_LABEL[w]}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              )}
+              {s.settings.notif.kinds.tarefas && (
+                <Field id="set-time" label="Horário das missões">
+                  <input id="set-time" type="time" className="field" value={s.settings.notif.time} onChange={(e) => updateSettings({ notif: { ...s.settings.notif, time: e.target.value || '19:00' } })} onBlur={() => syncPush(getState())} />
+                </Field>
+              )}
+              {s.settings.notif.kinds.dormir && (
+                <Field id="set-bed" label="Hora de dormir">
+                  <input id="set-bed" type="time" className="field" value={s.settings.notif.bedtime ?? '22:00'} onChange={(e) => updateSettings({ notif: { ...s.settings.notif, bedtime: e.target.value || '22:00' } })} onBlur={() => syncPush(getState())} />
+                </Field>
+              )}
               <button className="btn btn-ghost btn-sm" onClick={() => showNotification(pickReminder(s)?.text ?? 'Hora de cuidar um pouquinho de você.', toast)}>
                 Testar lembrete
               </button>
               {permission() === 'denied' && <p className="text-[13px] text-muted">As notificações do sistema estão bloqueadas neste navegador. Os lembretes aparecem dentro do app.</p>}
+              <p className="text-[13px] text-muted">No iPhone, os lembretes só chegam com o HamiCare na tela inicial (Compartilhar → Adicionar à Tela de Início).</p>
             </>
           )}
         </Group>

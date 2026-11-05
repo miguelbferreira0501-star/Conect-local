@@ -20,6 +20,7 @@ import { addUsage, arenaItemsOf, arenaOf, baseGrant, canCraft, capGrant, chestPo
 import { arenaHouse } from '../data/arenas';
 import { gameCfg } from './game';
 import type { GameState, ItemOrigin } from '../types';
+import { REMINDER_DEFAULTS } from '../shared/reminders';
 
 const KEY = 'hamicare:v2';
 const OLD_KEY = 'xodo:v1';
@@ -93,7 +94,7 @@ export function fresh(): State {
     achievements: {},
     claimed: {},
     photos: [],
-    settings: { theme: 'claro', accent: 'morango', notif: { enabled: false, time: '19:00', kinds: { tarefas: true, hami: true, missoes: true, aventura: true, amigos: true } }, sound: true },
+    settings: { theme: 'claro', accent: 'morango', notif: { enabled: false, time: '19:00', kinds: { ...REMINDER_DEFAULTS }, water: 'normal', bedtime: '22:00' }, sound: true },
     premium: { trialStart: null, until: null },
     privacy: { requests: 'todos', sharePhotos: true },
     journey: { dir: 'manter', startedAt: today, startGrams: BAND.center, goalGrams: BAND.center, needKcal: 0, reachedAt: null },
@@ -141,6 +142,9 @@ function normalize(raw: State): State {
   // Identidade colorida: o tema claro passa a ser o padrão (uma vez; depois vale a escolha da pessoa).
   if (!raw.themeV) s.settings = { ...s.settings, theme: s.settings.theme === 'auto' ? 'claro' : s.settings.theme };
   s.themeV = 1;
+  // Lembretes novos (água, pausa, hora de dormir): quem já tinha lembretes ganha os padrões.
+  const n = s.settings.notif;
+  s.settings = { ...s.settings, notif: { ...n, kinds: { ...REMINDER_DEFAULTS, ...n.kinds }, water: n.water ?? 'normal', bedtime: n.bedtime ?? '22:00' } };
   // Missões são só hábitos: as antigas de comida saem da lista (o histórico dos dias fica).
   if (s.tasks.some((t) => FOOD_TASKS.includes(t.id))) s.tasks = s.tasks.filter((t) => !FOOD_TASKS.includes(t.id));
   // A garrafa de água ganhou desenho de garrafa (antes era um copo de refrigerante).

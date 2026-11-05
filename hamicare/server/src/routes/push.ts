@@ -32,7 +32,14 @@ push.delete('/subscribe', async (c) => {
 
 push.put('/prefs', async (c) => {
   const body = z
-    .object({ enabled: z.boolean(), time: z.string().regex(/^[0-2]\d:[0-5]\d$/), tz: z.string().max(60).default('America/Sao_Paulo'), kinds: z.record(z.boolean()).default({}) })
+    .object({
+      enabled: z.boolean(),
+      time: z.string().regex(/^[0-2]\d:[0-5]\d$/),
+      tz: z.string().max(60).default('America/Sao_Paulo'),
+      kinds: z.record(z.boolean()).default({}),
+      water: z.enum(['pouco', 'normal', 'muito']).default('normal'),
+      bedtime: z.string().regex(/^[0-2]\d:[0-5]\d$/).default('22:00'),
+    })
     .safeParse(await c.req.json().catch(() => ({})));
   if (!body.success) throw invalid('Preferências inválidas.');
   const b = body.data;
@@ -44,9 +51,9 @@ push.put('/prefs', async (c) => {
   }
   await withUser(c.get('userId'), (db) =>
     db.query(
-      `INSERT INTO push_prefs (user_id, enabled, time, tz, kinds) VALUES (app.current_user_id(), $1, $2, $3, $4)
-       ON CONFLICT (user_id) DO UPDATE SET enabled = $1, time = $2, tz = $3, kinds = $4`,
-      [b.enabled, b.time, tz, b.kinds],
+      `INSERT INTO push_prefs (user_id, enabled, time, tz, kinds, water, bedtime) VALUES (app.current_user_id(), $1, $2, $3, $4, $5, $6)
+       ON CONFLICT (user_id) DO UPDATE SET enabled = $1, time = $2, tz = $3, kinds = $4, water = $5, bedtime = $6`,
+      [b.enabled, b.time, tz, b.kinds, b.water, b.bedtime],
     ),
   );
   return c.json({ ok: true });

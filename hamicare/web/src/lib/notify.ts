@@ -1,6 +1,7 @@
 // Lembretes gentis. Com o app aberto: aviso na tela ou notificação do sistema (se permitida).
 // Com o app instalado e conta ativa, o servidor manda push no horário escolhido.
 import { NOTIFS } from '../data/lines';
+import { reminderText } from '../shared/reminders';
 import type { NotifKind, State } from '../types';
 import { dayOf, todayKey, todayTasks } from './store';
 
@@ -15,6 +16,7 @@ export function pickReminder(s: State, now = Date.now()): { kind: NotifKind; tex
   if (k.aventura && s.adventure && s.adventure.endsAt <= now) return { kind: 'aventura', text: pick(NOTIFS.aventura) };
   if (k.hami && (s.pet.stats.saciedade < 30 || s.pet.stats.felicidade < 30)) return { kind: 'hami', text: pick(NOTIFS.hami) };
   if (k.tarefas && pending > 0) return { kind: 'tarefas', text: pick(NOTIFS.tarefas) };
+  if (k.agua) return { kind: 'agua', text: reminderText('agua', s.pet.name, Math.floor(now / 3_600_000)) };
   if (k.missoes) return { kind: 'missoes', text: pick(NOTIFS.missoes) };
   return null;
 }

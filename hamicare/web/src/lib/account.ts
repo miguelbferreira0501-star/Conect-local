@@ -202,7 +202,8 @@ export async function syncPush(s: State): Promise<'ok' | 'sem-suporte' | 'sem-pe
       const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(publicKey) }));
       await http('POST', '/push/subscribe', sub.toJSON());
     }
-    await http('PUT', '/push/prefs', { enabled: s.settings.notif.enabled, time: s.settings.notif.time, tz: Intl.DateTimeFormat().resolvedOptions().timeZone, kinds: s.settings.notif.kinds });
+    const n = s.settings.notif;
+    await http('PUT', '/push/prefs', { enabled: n.enabled, time: n.time, tz: Intl.DateTimeFormat().resolvedOptions().timeZone, kinds: n.kinds, water: n.water ?? 'normal', bedtime: n.bedtime ?? '22:00' });
     return 'ok';
   } catch {
     return 'sem-suporte';
