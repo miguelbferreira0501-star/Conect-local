@@ -184,3 +184,8 @@ Cobrança real, push num celular de verdade (precisa do app publicado em HTTPS) 
 - **Crescimento:** o Hami nasce com metade do tamanho e cresce um pouquinho a cada dia de cuidado (missão feita ou cuidado com ele, não precisa ser seguido), em 8 fases, até o tamanho máximo com 300 dias de cuidado. Filhote tem olhos maiores e orelhinhas menores. Comemoração a cada fase nova; selinho no Início e cartão "Crescimento" em Nossa evolução. As áreas de toque dos cuidados acompanham o tamanho.
 - **Testes automáticos:** crescimento (tamanho, fases, nunca diminui, conta dias com missão ou cuidado), reforma das casas (casa padrão atualiza, casa arrumada não muda), peças das casas existem e são exclusivas da arena ou da loja. 136 testes do app e 66 do servidor.
 - **Navegador:** as 12 casas, o kit inteiro e todas as roupas novas renderizados e conferidos; Início, Mundo > Casa, Loja e Nossa evolução no app; banho, comida, bolinha, escova e nanar completos com o Hami filhote, sem erros.
+
+## Rodada 23 (humor com barrinha)
+
+- **Bem-estar > Como você está agora?:** no lugar dos 5 botões, uma barrinha para arrastar. A carinha muda aos pouquinhos enquanto o dedo anda (cor de roxo a amarelo, boca de triste a sorriso, sobrancelhas preocupadas, lágrima, bochechas coradas, olhinhos felizes), com uma notinha a cada mudança de humor. Salva ao soltar (ou com as setas do teclado); o valor guardado continua de 1 a 5, então o gráfico e o histórico não mudam.
+- **Testes:** conversão da barrinha para 1–5 e cores (`web/src/components/MoodSlider.test.ts`), 138 testes do app. No navegador: arrastar de ponta a ponta (5 carinhas conferidas), salvar 5 ao soltar na direita e 1 com a tecla Home, sem rolagem para o lado e sem erros.
