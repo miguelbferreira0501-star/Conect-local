@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Check, Crown } from 'lucide-react';
 import { PLUS_COUNTS, PLUS_PRICE } from '../components/PlusCard';
 import { Hamster } from '../components/Hamster';
+import { itemById } from '../data/items';
 import { toast } from '../components/ui';
 import { isPremium, startTrial, useApp } from '../lib/store';
 import { startTrialOnServer, useAccount } from '../lib/account';
@@ -10,13 +11,16 @@ import { formatDay } from '../lib/util';
 
 export { PLUS_PRICE };
 
+const PARADE = ['fantasia-dragao-roxo', 'fantasia-tubarao', 'fantasia-panda', 'fantasia-morango'];
+
 type Row = [string, string | boolean, string | boolean];
 const ROWS: Row[] = [
   ['Hami, missões, arenas e baús', true, true],
   ['SOS, respiração, diário e humor', true, true],
   ['Temporada do mês e coleções', true, true],
   ['Amigos e feed', true, true],
-  [`Roupas e decorações exclusivas`, false, `${PLUS_COUNTS.items} itens`],
+  [`Fantasias, roupas e móveis exclusivos`, false, `${PLUS_COUNTS.items} itens`],
+  [`Estilos de casa completos`, false, `${PLUS_COUNTS.styles}`],
   [`Pelagens especiais`, false, `${PLUS_COUNTS.furs}`],
   ['Estatísticas de evolução e humor', '30 dias', '6 meses'],
 ];
@@ -38,6 +42,16 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
         </p>
         <h2 className="font-display text-[28px] font-bold leading-tight">Mais mimos para o {name ?? (s.pet.name || 'Hami')}</h2>
         <p className="max-w-[34ch] text-[15px] text-muted">Tudo que é cuidado de verdade continua grátis. O Plus é para quem quer mais fofura e mais mundo.</p>
+      </div>
+
+      {/* Um gostinho da coleção do Plus, com a pelagem do próprio Hami */}
+      <div className="grid gap-1">
+        <div className="plus-parade" aria-label="Algumas fantasias do Plus">
+          {PARADE.map((id) => (
+            <Hamster key={id} growth={1} fur={fur ?? s.pet.fur} outfit={{ chapeu: null, oculos: null, roupa: id, acessorio: null, efeito: null }} size={84} idle={false} mood="feliz" label={itemById(id)?.name} />
+          ))}
+        </div>
+        <p className="text-center text-[13px] font-semibold text-muted">Fantasias de dragão, tubarão, panda e moranguinho, cama com dossel, castelinho, piano, neon e muito mais.</p>
       </div>
 
       <div className="plan-table" role="table" aria-label="Grátis e Plus">

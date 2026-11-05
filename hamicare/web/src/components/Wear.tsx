@@ -312,6 +312,73 @@ export function Hat({ id, geo }: { id: string | null; geo: Geo }) {
           <rect x={100 - w * 0.42} y={top} width={w * 0.84} height="6" fill={c2} />
         </g>
       );
+    // ---------- Chapéus especiais (Plus) ----------
+    case 'mago':
+      return (
+        <g>
+          <path d={`M${100 - w * 0.62} ${top + 14} Q100 ${top + 24} ${100 + w * 0.62} ${top + 14} Q100 ${top + 4} ${100 - w * 0.62} ${top + 14} Z`} fill={c1} />
+          <path d={`M${100 - w * 0.4} ${top + 14} Q${100 - w * 0.1} ${top - 30} ${100 + w * 0.22} ${top - 58} Q${100 + w * 0.12} ${top - 20} ${100 + w * 0.4} ${top + 14} Z`} fill={c1} />
+          <path d={`M${100 - w * 0.4} ${top + 8} Q100 ${top + 16} ${100 + w * 0.4} ${top + 8}`} stroke={c2} strokeWidth="5" fill="none" />
+          <path d={star(100 - w * 0.06, top - 14, 6)} fill={c2} />
+          <path d={star(100 + w * 0.14, top - 36, 4)} fill={c2} />
+          <path d={`M${100 - w * 0.22} ${top - 2} a5 5 0 1 0 5 6 a4 4 0 1 1 -5 -6 Z`} fill={c2} />
+          <circle cx={100 + w * 0.22} cy={top - 58} r="4" fill={c2} />
+        </g>
+      );
+    case 'coroa-estrelas':
+      return (
+        <g>
+          <path d={`M${100 - w * 0.64} ${top + 12} Q100 ${top - 4} ${100 + w * 0.64} ${top + 12}`} stroke="#7CC39A" strokeWidth="4" fill="none" />
+          {Array.from({ length: 7 }, (_, i) => {
+            const t = i / 6;
+            const x = 100 - w * 0.6 + t * w * 1.2;
+            const yy = top + 12 - Math.sin(t * Math.PI) * 14;
+            const col = [c1, '#FFFFFF', c2, '#BFE3FF', c1, '#FFFFFF', c2][i];
+            return (
+              <g key={i}>
+                {[0, 72, 144, 216, 288].map((r) => <circle key={r} cx={x + Math.cos((r * Math.PI) / 180) * 4.2} cy={yy + Math.sin((r * Math.PI) / 180) * 4.2} r="3.6" fill={col} />)}
+                <circle cx={x} cy={yy} r="2.4" fill="#FFD34D" />
+              </g>
+            );
+          })}
+          <path d={star(100, top - 14, 8)} fill="#FFD34D" />
+          <path d={star(100 - w * 0.34, top - 6, 5)} fill="#BFA3F2" />
+          <path d={star(100 + w * 0.34, top - 6, 5)} fill="#FF9FC2" />
+        </g>
+      );
+    case 'cogumelo':
+      return (
+        <g>
+          <path d={`M${100 - w * 0.78} ${top + 18} Q${100 - w * 0.7} ${top - 34} 100 ${top - 34} Q${100 + w * 0.7} ${top - 34} ${100 + w * 0.78} ${top + 18} Q100 ${top + 8} ${100 - w * 0.78} ${top + 18} Z`} fill={c1} />
+          {[[-0.4, -14, 7], [0.1, -24, 6], [0.45, -6, 6], [-0.08, -2, 4.5], [-0.62, 4, 4]].map(([dx, dy, r], i) => <circle key={i} cx={100 + dx * w} cy={top + dy} r={r} fill={c2} />)}
+          <path d={`M${100 - w * 0.5} ${top - 20} Q${100 - w * 0.3} ${top - 30} 100 ${top - 31}`} stroke="#FFFFFF" strokeWidth="3" fill="none" opacity="0.5" strokeLinecap="round" />
+        </g>
+      );
+    case 'touca-morango':
+      return (
+        <g>
+          <path d={`M${100 - w * 0.72} ${top + 18} C${100 - w * 0.68} ${top - 26} ${100 + w * 0.68} ${top - 26} ${100 + w * 0.72} ${top + 18} Z`} fill={c1} />
+          {[[-0.4, -2], [-0.1, -12], [0.25, -6], [0.5, 6], [-0.55, 10], [0.05, 4]].map(([dx, dy], i) => <ellipse key={i} cx={100 + dx * w} cy={top + dy} rx="1.8" ry="3" fill="#FFE27A" />)}
+          <rect x={100 - w * 0.75} y={top + 10} width={w * 1.5} height="10" rx="5" fill={c2} />
+          {[-1, 0, 1].map((k) => <path key={k} d={`M100 ${top - 16} L${100 + k * 12} ${top - 30} L${100 + k * 5} ${top - 14} Z`} fill="#5FAE84" />)}
+          <path d={`M100 ${top - 18} v-10`} stroke="#3E8C55" strokeWidth="3" strokeLinecap="round" />
+        </g>
+      );
+    case 'tiara-borboleta':
+      return (
+        <g>
+          <path d={`M${100 - w * 0.66} ${top + 16} Q100 ${top - 10} ${100 + w * 0.66} ${top + 16}`} stroke="#F6C445" strokeWidth="4" fill="none" />
+          <g transform={`translate(${100 + w * 0.28} ${top - 2})`}>
+            <path d="M0 0 C-14 -20 -26 -6 -16 4 C-24 10 -12 22 0 6 Z" fill={c1} />
+            <path d="M0 0 C14 -20 26 -6 16 4 C24 10 12 22 0 6 Z" fill={c1} />
+            <circle cx="-12" cy="-4" r="3.5" fill={c2} />
+            <circle cx="12" cy="-4" r="3.5" fill={c2} />
+            <ellipse cx="0" cy="3" rx="2.5" ry="7" fill="#2B2224" />
+            <path d="M0 -4 q-3 -8 -7 -10 M0 -4 q3 -8 7 -10" stroke="#2B2224" strokeWidth="1.2" fill="none" />
+          </g>
+        </g>
+      );
+
     default:
       return null;
   }
@@ -622,9 +689,21 @@ export function Clothes({ id, geo }: { id: string | null; geo: Geo }) {
     case 'fantasia-dino':
     case 'fantasia-unicornio':
     case 'fantasia-pintinho':
-    case 'fantasia-pinguim': {
+    case 'fantasia-pinguim':
+    case 'fantasia-raposa':
+    case 'fantasia-panda':
+    case 'fantasia-leao':
+    case 'fantasia-dragao':
+    case 'fantasia-tubarao':
+    case 'fantasia-vaca':
+    case 'fantasia-morango':
+    case 'fantasia-abacate':
+    case 'fantasia-rena':
+    {
       const suit = c1 ?? '#FFB3CF';
-      const belly = c2 ?? '#FFFFFF';
+      // Barriga e borda do capuz: algumas fantasias usam a 2ª cor para outra coisa (manchas, orelhas do panda).
+      const belly = base === 'fantasia-panda' || base === 'fantasia-vaca' ? '#FFFFFF' : base === 'fantasia-abacate' ? '#E9F5B8' : c2 ?? '#FFFFFF';
+      const rim = base === 'fantasia-panda' ? '#E6E6EE' : base === 'fantasia-vaca' ? '#FFD6E0' : base === 'fantasia-abacate' ? '#4E9A47' : belly;
       const { eyeY, w } = geo;
       const fx = 100;
       const fy = eyeY + 9;
@@ -636,7 +715,7 @@ export function Clothes({ id, geo }: { id: string | null; geo: Geo }) {
           <path d={hole} fill={suit} fillRule="evenodd" />
           {/* sombra do lado e brilho do tecido */}
           <path d={`M${100 + w * 0.55} ${top} Q${100 + w * 1.05} ${top + h * 0.6} ${100 + w * 0.5} 182 L200 182 L200 ${top} Z`} fill="#000" opacity="0.06" />
-          <ellipse cx={fx} cy={fy} rx={rx + 2} ry={ry + 2} fill="none" stroke={belly} strokeWidth="5" opacity="0.95" />
+          <ellipse cx={fx} cy={fy} rx={rx + 2} ry={ry + 2} fill="none" stroke={rim} strokeWidth="5" opacity="0.95" />
           <ellipse cx={fx} cy={fy} rx={rx + 5} ry={ry + 5} fill="none" stroke="#000" strokeWidth="1.5" opacity="0.08" />
           {base === 'fantasia-pinguim' ? (
             <ellipse cx="100" cy={top + h * 0.82} rx={w * 0.62} ry={h * 0.26} fill={belly} />
@@ -644,9 +723,90 @@ export function Clothes({ id, geo }: { id: string | null; geo: Geo }) {
             <ellipse cx="100" cy={top + h * 0.84} rx={w * 0.5} ry={h * 0.2} fill={belly} opacity="0.95" />
           )}
           {base === 'fantasia-dino' && [0.2, 0.4, 0.6].map((t) => <circle key={t} cx={100 - w * 0.6 + t * w * 0.4} cy={top + h * (0.7 + t * 0.2)} r="4" fill={belly} opacity="0.6" />)}
+          {base === 'fantasia-vaca' && [[-0.86, 0.5, 11, 14], [0.86, 0.62, 10, 13], [-0.42, 0.93, 13, 7], [0.5, 0.92, 11, 7]].map(([dx, dy, rx2, ry2], i) => <ellipse key={i} cx={100 + dx * w} cy={top + dy * h} rx={rx2} ry={ry2} fill={c2 ?? '#2B2224'} />)}
+          {base === 'fantasia-morango' && Array.from({ length: 14 }, (_, i) => {
+            const a = i * 2.4;
+            const rr = 0.3 + (i % 4) * 0.17;
+            const x = 100 + Math.cos(a) * w * rr * 1.2;
+            const yy = top + h * 0.62 + Math.sin(a) * h * 0.24;
+            return <ellipse key={i} cx={x} cy={yy} rx="1.8" ry="3" fill="#FFE27A" transform={`rotate(${(a * 57) % 60 - 30} ${x} ${yy})`} />;
+          })}
+          {base === 'fantasia-abacate' && (
+            <g>
+              <ellipse cx="100" cy={top + h * 0.82} rx={w * 0.56} ry={h * 0.24} fill="#4E9A47" opacity="0.35" />
+              <circle cx="100" cy={top + h * 0.84} r={h * 0.13} fill="#9B6B43" />
+              <circle cx={100 - 4} cy={top + h * 0.8} r={h * 0.04} fill="#FFFFFF" opacity="0.35" />
+            </g>
+          )}
+          {base === 'fantasia-tubarao' &&
+            Array.from({ length: 9 }, (_, i) => {
+              const a = Math.PI * (1.08 + (i / 8) * 0.84);
+              const x = fx + Math.cos(a) * (rx + 1);
+              const yy = fy + Math.sin(a) * (ry + 1);
+              return <path key={i} d={`M${x - 4} ${yy} L${x + 4} ${yy} L${x + (fx - x) * 0.12} ${yy + 7} Z`} fill="#FFFFFF" />;
+            })}
+          {base === 'fantasia-dragao' && [0.62, 0.74, 0.86].map((t) => <rect key={t} x={100 - w * 0.36} y={top + h * t} width={w * 0.72} height="2.5" rx="1.2" fill={c1 ?? '#6CC48C'} opacity="0.4" />)}
           {base === 'fantasia-sapo' && <path d={`M${100 - w * 0.3} ${top + h * 0.9} q${w * 0.3} 8 ${w * 0.6} 0`} stroke={belly} strokeWidth="3" fill="none" opacity="0.7" />}
           {/* zíper de brincadeira */}
           <path d={`M100 ${fy + ry + 6} V${top + h * 0.72}`} stroke="#000" strokeWidth="1.5" opacity="0.12" strokeDasharray="2 3" />
+        </g>
+      );
+    }
+    // ---------- Roupas especiais (Plus) ----------
+    case 'manto-mago': {
+      const cc = c1 ?? '#5B3FA8';
+      const cd = c2 ?? '#FFE27A';
+      return (
+        <g>
+          {full(cc, -10)}
+          <path d={`M100 ${y - 10} L100 200`} stroke={cd} strokeWidth="3" />
+          <path d={`M66 ${y - 10} Q100 ${y + 8} 134 ${y - 10} L134 ${y - 4} Q100 ${y + 16} 66 ${y - 4} Z`} fill={cd} />
+          {[[70, 16, 5], [128, 24, 4], [84, 40, 3.5], [118, 48, 5]].map(([x, dy, r], i) => <path key={i} d={star(x, y + dy, r)} fill={cd} />)}
+          <path d={`M78 ${y + 22} a8 8 0 1 0 8 10 a6 6 0 1 1 -8 -10 Z`} fill={cd} />
+          <circle cx="100" cy={y + 4} r="4" fill="#FF9FC2" stroke={cd} strokeWidth="1.5" />
+        </g>
+      );
+    }
+    case 'sereia': {
+      const cc = c1 ?? '#4FC3B8';
+      const cd = c2 ?? '#BFF2EA';
+      return (
+        <g>
+          {full(cc, 6)}
+          {Array.from({ length: 5 }, (_, r) => (
+            <path key={r} d={`M${r % 2 ? 4 : 14} ${y + 16 + r * 11} ${'q10 9 20 0 '.repeat(10)}`} stroke={cd} strokeWidth="2" fill="none" opacity="0.8" />
+          ))}
+          {Array.from({ length: 9 }, (_, i) => <circle key={i} cx={64 + i * 9} cy={y + 8 + Math.sin(i * 0.8) * 1.5} r="3.2" fill="#FFFFFF" stroke="#E8E2F0" strokeWidth="0.8" />)}
+          <path d={`M88 ${y - 2} q-6 -10 2 -12 q6 4 0 12 Z M112 ${y - 2} q6 -10 -2 -12 q-6 4 0 12 Z`} fill="#FF9FC2" />
+        </g>
+      );
+    }
+    case 'pijama-nuvem': {
+      const cc = c1 ?? '#A9D4F5';
+      return (
+        <g>
+          {full(cc)}
+          {[[66, 20], [124, 34], [86, 48]].map(([x, dy], i) => (
+            <g key={i} fill="#FFFFFF" opacity="0.9">
+              <ellipse cx={x} cy={y + dy} rx="10" ry="6" />
+              <ellipse cx={x - 7} cy={y + dy + 2} rx="6" ry="4.5" />
+              <ellipse cx={x + 7} cy={y + dy + 2} rx="6" ry="4.5" />
+            </g>
+          ))}
+          {[y + 14, y + 28, y + 42].map((yy) => <circle key={yy} cx="100" cy={yy} r="2.8" fill={c2 ?? '#FFE27A'} />)}
+          <path d={`M78 ${y} Q100 ${y + 10} 122 ${y}`} stroke="#FFFFFF" strokeWidth="4" fill="none" />
+        </g>
+      );
+    }
+    case 'arco-iris': {
+      const cols = ['#FF8FA8', '#FFB86B', '#FFE27A', '#9ED99B', '#8DBEF0', '#B9A3F0'];
+      return (
+        <g>
+          {cols.map((col, i) => <rect key={col} x="0" y={y + i * 9} width="200" height="10" fill={col} />)}
+          <rect x="0" y={y + 54} width="200" height="60" fill={cols[5]} />
+          <path d={`M20 ${y + 58} ${'q10 8 20 0 '.repeat(8)}`} stroke="#FFFFFF" strokeWidth="3" fill="none" />
+          <path d={`M90 ${y + 4} L100 ${y + 10} L90 ${y + 16} Z M110 ${y + 4} L100 ${y + 10} L110 ${y + 16} Z`} fill="#FFFFFF" />
+          <circle cx="100" cy={y + 10} r="3.5" fill="#FFFFFF" />
         </g>
       );
     }
@@ -893,6 +1053,62 @@ export function Accessory({ id, geo, paw }: { id: string | null; geo: Geo; paw?:
                 <path d={`M${px - 2} ${py + 25} q2 2 4 0`} stroke={INK} strokeWidth="1.2" fill="none" />
               </g>
             );
+          case 'guarda-chuva':
+            return (
+              <g>
+                <path d={`M${px} ${py + 6} V${py - 34}`} stroke="#8A6A4F" strokeWidth="2.5" />
+                <path d={`M${px} ${py + 6} q0 6 -5 6`} stroke="#8A6A4F" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <path d={`M${px - 26} ${py - 30} Q${px} ${py - 64} ${px + 26} ${py - 30} Q${px + 17} ${py - 36} ${px + 9} ${py - 30} Q${px} ${py - 36} ${px - 9} ${py - 30} Q${px - 17} ${py - 36} ${px - 26} ${py - 30} Z`} fill={c1 ?? '#FF86AC'} />
+                <path d={`M${px} ${py - 30} Q${px - 4} ${py - 52} ${px} ${py - 60} Q${px + 4} ${py - 52} ${px} ${py - 30}`} fill={c2 ?? '#FFFFFF'} opacity="0.6" />
+                {[-14, 14].map((dx) => <path key={dx} d={heartPath(px + dx, py - 40, 5)} fill={c2 ?? '#FFFFFF'} />)}
+              </g>
+            );
+          case 'pelucia':
+            return (
+              <g>
+                <ellipse cx={px + 2} cy={py - 34} rx="4" ry="11" fill={c1 ?? '#FFFFFF'} transform={`rotate(-10 ${px + 2} ${py - 34})`} />
+                <ellipse cx={px + 12} cy={py - 33} rx="4" ry="11" fill={c1 ?? '#FFFFFF'} transform={`rotate(12 ${px + 12} ${py - 33})`} />
+                <ellipse cx={px + 2} cy={py - 34} rx="1.8" ry="7" fill="#FF9FC2" transform={`rotate(-10 ${px + 2} ${py - 34})`} />
+                <ellipse cx={px + 12} cy={py - 33} rx="1.8" ry="7" fill="#FF9FC2" transform={`rotate(12 ${px + 12} ${py - 33})`} />
+                <circle cx={px + 7} cy={py - 18} r="10" fill={c1 ?? '#FFFFFF'} />
+                <ellipse cx={px + 7} cy={py - 4} rx="9" ry="8" fill={c1 ?? '#FFFFFF'} />
+                <circle cx={px + 3.5} cy={py - 19} r="1.5" fill={INK} />
+                <circle cx={px + 10.5} cy={py - 19} r="1.5" fill={INK} />
+                <path d={`M${px + 5} ${py - 15} q2 2 4 0`} stroke={INK} strokeWidth="1.2" fill="none" />
+                <path d={`M${px + 1} ${py - 10} L${px + 7} ${py - 8} L${px + 13} ${py - 10} L${px + 7} ${py - 6} Z`} fill={c2 ?? '#7FB8F0'} />
+              </g>
+            );
+          case 'cha':
+            return (
+              <g>
+                <path d={`M${px - 10} ${py - 26} H${px + 10} L${px + 7} ${py + 6} H${px - 7} Z`} fill="#F7E3C8" opacity="0.95" />
+                <path d={`M${px - 9} ${py - 16} H${px + 9} L${px + 7} ${py + 6} H${px - 7} Z`} fill={c1 ?? '#D9A3E8'} />
+                {[[-4, 0], [2, 2], [-1, -4], [4, -3]].map(([dx, dy], i) => <circle key={i} cx={px + dx} cy={py + dy} r="2.2" fill="#3A2A22" />)}
+                <path d={`M${px - 11} ${py - 26} Q${px} ${py - 34} ${px + 11} ${py - 26} Z`} fill="#FFFFFF" opacity="0.9" />
+                <path d={`M${px + 3} ${py - 30} L${px + 8} ${py - 46}`} stroke={c2 ?? '#FF86AC'} strokeWidth="4" strokeLinecap="round" />
+              </g>
+            );
+          case 'sorvete':
+            return (
+              <g>
+                <path d={`M${px - 8} ${py - 18} L${px + 8} ${py - 18} L${px} ${py + 6} Z`} fill="#E8B97A" />
+                <path d={`M${px - 6} ${py - 12} l12 0 M${px - 4} ${py - 6} l8 0`} stroke="#C99A5B" strokeWidth="1.2" />
+                <circle cx={px} cy={py - 24} r="9" fill={c1 ?? '#FF9FC2'} />
+                <circle cx={px - 2} cy={py - 36} r="8" fill={c2 ?? '#BFE9F5'} />
+                <circle cx={px + 3} cy={py - 46} r="3.5" fill="#F0525F" />
+                {[[-4, -26], [3, -22], [-5, -38], [2, -34]].map(([dx, dy], i) => <rect key={i} x={px + dx} y={py + dy} width="3" height="1.2" rx="0.6" fill={['#FFD34D', '#7FB8F0', '#7CC39A', '#FF86AC'][i]} transform={`rotate(${i * 40} ${px + dx} ${py + dy})`} />)}
+              </g>
+            );
+          case 'livro':
+            return (
+              <g>
+                <path d={`M${px - 14} ${py - 20} Q${px - 6} ${py - 24} ${px} ${py - 20} Q${px + 6} ${py - 24} ${px + 14} ${py - 20} V${py + 2} Q${px + 6} ${py - 2} ${px} ${py + 2} Q${px - 6} ${py - 2} ${px - 14} ${py + 2} Z`} fill="#FFFFFF" stroke={c1 ?? '#7E57D6'} strokeWidth="3" />
+                <path d={`M${px} ${py - 20} V${py + 2}`} stroke={c1 ?? '#7E57D6'} strokeWidth="2" />
+                <path d={sparkle(px - 6, py - 34, 5)} fill={c2 ?? '#FFD34D'} />
+                <path d={sparkle(px + 8, py - 40, 4)} fill={c2 ?? '#FFD34D'} />
+                <path d={star(px + 2, py - 28, 4)} fill={c2 ?? '#FFD34D'} />
+              </g>
+            );
           default:
             return null;
         }
@@ -1103,12 +1319,15 @@ export function EffectFront({ id, geo }: { id: string | null | undefined; geo: G
 
 // ---------- Fantasias: orelhas e detalhes do capuz ----------
 
-const COSTUMES = new Set(['fantasia-coelho', 'fantasia-urso', 'fantasia-gato', 'fantasia-sapo', 'fantasia-dino', 'fantasia-unicornio', 'fantasia-pintinho', 'fantasia-pinguim']);
+const COSTUMES = new Set(['fantasia-coelho', 'fantasia-urso', 'fantasia-gato', 'fantasia-sapo', 'fantasia-dino', 'fantasia-unicornio', 'fantasia-pintinho', 'fantasia-pinguim', 'fantasia-raposa', 'fantasia-panda', 'fantasia-leao', 'fantasia-dragao', 'fantasia-tubarao', 'fantasia-vaca', 'fantasia-morango', 'fantasia-abacate', 'fantasia-rena']);
 
 /** A roupa é uma fantasia de corpo inteiro? Então o Hami fica de capuz (sem as orelhinhas dele) e com patinhas da cor da fantasia. */
-export function costumeOf(roupa: string | null | undefined): { base: string; c1: string; c2: string } | null {
+export function costumeOf(roupa: string | null | undefined): { base: string; c1: string; c2: string; paw: string; foot: string } | null {
   const L = look(roupa, '#FFB3CF', '#FFFFFF');
-  return L.base && COSTUMES.has(L.base) ? { base: L.base, c1: L.c1, c2: L.c2 } : null;
+  if (!L.base || !COSTUMES.has(L.base)) return null;
+  // Panda e vaquinha: patinhas escuras; abacate: pezinhos verde-escuros.
+  const dark = L.base === 'fantasia-panda' || L.base === 'fantasia-vaca' ? '#2B2224' : null;
+  return { base: L.base, c1: L.c1, c2: L.c2, paw: dark ?? L.c1, foot: dark ?? (L.base === 'fantasia-abacate' ? '#4E9A47' : L.c2) };
 }
 
 /** Orelhas, espinhos e cristas: atrás do capuz. */
@@ -1198,6 +1417,81 @@ export function CostumeBack({ id, geo }: { id: string | null | undefined; geo: G
       );
     case 'fantasia-pinguim':
       return <ellipse cx="100" cy={top + 2} rx={w * 0.4} ry="8" fill={c1} />;
+    case 'fantasia-raposa':
+      return (
+        <g>
+          <path d={`M${100 + w * 0.7} 170 Q${100 + w + 34} 160 ${100 + w + 30} 116 Q${100 + w + 8} 140 ${100 + w * 0.6} 150 Z`} fill={c1} />
+          <path d={`M${100 + w + 30} 116 Q${100 + w + 34} 134 ${100 + w + 22} 140 Q${100 + w + 18} 126 ${100 + w + 30} 116 Z`} fill="#FFFFFF" />
+          {[-1, 1].map((s) => (
+            <g key={s}>
+              <path d={`M${100 + s * w * 0.16} ${top + 14} L${100 + s * w * 0.58} ${top - 32} L${100 + s * w * 0.88} ${top + 22} Z`} fill={c1} />
+              <path d={`M${100 + s * w * 0.32} ${top + 10} L${100 + s * w * 0.58} ${top - 18} L${100 + s * w * 0.74} ${top + 14} Z`} fill="#FFFFFF" />
+              <path d={`M${100 + s * w * 0.52} ${top - 22} L${100 + s * w * 0.58} ${top - 32} L${100 + s * w * 0.66} ${top - 20} Z`} fill="#3A2E2A" />
+            </g>
+          ))}
+        </g>
+      );
+    case 'fantasia-panda':
+      return (
+        <g>
+          {[-1, 1].map((s) => <circle key={s} cx={100 + s * w * 0.6} cy={top + 10} r="16" fill={c2} />)}
+        </g>
+      );
+    case 'fantasia-leao':
+      return (
+        <g>
+          {Array.from({ length: 16 }, (_, i) => {
+            const a = (i / 16) * Math.PI * 2;
+            return <circle key={i} cx={100 + Math.cos(a) * w * 0.98} cy={top + 46 + Math.sin(a) * 44} r="16" fill={i % 2 ? '#E8913A' : '#D9772A'} />;
+          })}
+          {[-1, 1].map((s) => (
+            <g key={s}>
+              <circle cx={100 + s * w * 0.5} cy={top + 4} r="11" fill={c1} />
+              <circle cx={100 + s * w * 0.5} cy={top + 5} r="5.5" fill={c2} />
+            </g>
+          ))}
+        </g>
+      );
+    case 'fantasia-dragao':
+      return (
+        <g>
+          {[-1, 1].map((s) => (
+            <path key={s} d={`M${100 + s * w * 0.7} ${top + 56} Q${100 + s * (w + 24)} ${top + 6} ${100 + s * (w + 29)} ${top + 26} Q${100 + s * (w + 18)} ${top + 38} ${100 + s * (w + 23)} ${top + 54} Q${100 + s * (w + 12)} ${top + 56} ${100 + s * (w + 14)} ${top + 72} Q${100 + s * w * 0.9} ${top + 70} ${100 + s * w * 0.7} ${top + 70} Z`} fill={c2} opacity="0.95" />
+          ))}
+          {[-0.36, -0.1, 0.16, 0.42].map((t, i) => (
+            <path key={i} d={`M${100 + t * w * 1.3 - 9} ${top + 8 + Math.abs(t) * 12} L${100 + t * w * 1.3} ${top - 12 + Math.abs(t) * 14} L${100 + t * w * 1.3 + 9} ${top + 8 + Math.abs(t) * 12} Z`} fill={c2} />
+          ))}
+          <path d={`M${100 + w * 0.8} 168 Q${100 + w + 30} 172 ${100 + w + 38} 152 L${100 + w + 46} 158 L${100 + w + 40} 146 Q${100 + w + 20} 166 ${100 + w * 0.7} 152 Z`} fill={c1} />
+        </g>
+      );
+    case 'fantasia-tubarao':
+      return <path d={`M${100 - 14} ${top + 6} Q100 ${top - 34} ${100 + 22} ${top - 30} Q${100 + 10} ${top - 10} ${100 + 16} ${top + 6} Z`} fill={c1} />;
+    case 'fantasia-vaca':
+      return (
+        <g>
+          {[-1, 1].map((s) => (
+            <g key={s}>
+              <path d={`M${100 + s * w * 0.32} ${top + 4} q${s * 4} -16 ${s * 12} -18 q${s * -2} 8 ${s * -4} 18 Z`} fill="#F2E3C8" />
+              <ellipse cx={100 + s * w * 0.78} cy={top + 18} rx="15" ry="8" fill={c1} transform={`rotate(${s * 20} ${100 + s * w * 0.78} ${top + 18})`} />
+              <ellipse cx={100 + s * w * 0.78} cy={top + 18} rx="8" ry="4" fill="#FFB3C7" transform={`rotate(${s * 20} ${100 + s * w * 0.78} ${top + 18})`} />
+            </g>
+          ))}
+        </g>
+      );
+    case 'fantasia-abacate':
+      return <path d={`M100 ${top + 4} q-2 -10 3 -14`} stroke="#6A4229" strokeWidth="4" strokeLinecap="round" fill="none" />;
+    case 'fantasia-rena':
+      return (
+        <g stroke="#8A5A3B" strokeWidth="5" strokeLinecap="round" fill="none">
+          {[-1, 1].map((s) => (
+            <g key={s}>
+              <path d={`M${100 + s * w * 0.3} ${top + 6} Q${100 + s * w * 0.5} ${top - 24} ${100 + s * w * 0.4} ${top - 44}`} />
+              <path d={`M${100 + s * w * 0.42} ${top - 16} L${100 + s * w * 0.72} ${top - 30}`} />
+              <path d={`M${100 + s * w * 0.44} ${top - 32} L${100 + s * w * 0.62} ${top - 46}`} />
+            </g>
+          ))}
+        </g>
+      );
     default:
       return null;
   }
@@ -1218,6 +1512,22 @@ export function CostumeFront({ id, geo }: { id: string | null | undefined; geo: 
       );
     case 'fantasia-pintinho':
       return <path d={`M92 ${top + 16} L100 ${top + 6} L108 ${top + 16} Z`} fill="#FF9A4D" opacity="0.9" />;
+    case 'fantasia-morango':
+      return (
+        <g>
+          {[-2, -1, 0, 1, 2].map((k) => <path key={k} d={`M100 ${top + 6} L${100 + k * 14} ${top - 8 + Math.abs(k) * 4} L${100 + k * 6} ${top + 10} Z`} fill="#5FAE84" />)}
+          <path d={`M100 ${top + 2} v-12`} stroke="#3E8C55" strokeWidth="3.5" strokeLinecap="round" />
+        </g>
+      );
+    case 'fantasia-dragao':
+      return (
+        <g fill="#FFF3D6">
+          <path d={`M88 ${top + 10} q-6 -12 -2 -22 q4 10 8 18 Z`} />
+          <path d={`M112 ${top + 10} q6 -12 2 -22 q-4 10 -8 18 Z`} />
+        </g>
+      );
+    case 'fantasia-rena':
+      return <circle cx="100" cy={geo.eyeY + 12} r="6" fill="#F0525F" />;
     case 'fantasia-urso':
     case 'fantasia-gato':
     case 'fantasia-coelho':

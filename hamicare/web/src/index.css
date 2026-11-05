@@ -922,3 +922,13 @@ h3 {
 @media (prefers-reduced-motion: reduce) {
   .room-pendulum { animation: none; }
 }
+.neon-glow {
+  animation: neon 2.4s ease-in-out infinite;
+}
+@keyframes neon {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .neon-glow { animation: none; }
+}
