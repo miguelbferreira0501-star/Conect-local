@@ -85,6 +85,8 @@ export interface GameConfig {
   collections: CollectionDef[];
   /** Trilha grátis da temporada do mês. */
   season: { tiers: SeasonTier[] };
+  /** Prêmio de cada pessoa quando a turma completa o dia. */
+  team: { coins: number; xp: number };
   rarities: Record<Rarity, { label: string; color: string; fragments: number; craft: number }>;
   chests: Record<ChestId, ChestDef>;
   pity: {
@@ -151,6 +153,7 @@ export const DEFAULT_GAME: GameConfig = {
     { id: 'festa', name: 'Dia de festa', desc: 'Balões, bolo e muita alegria.', art: '🎈', items: ['festa-rosa', 'balao', 'bolo', 'cupcake', 'presente', 'sininho', 'fx-brilhos'], reward: { coins: 100, xp: 10 } },
     { id: 'brincadeiras', name: 'Hora de brincar', desc: 'Do novelo ao fliperama.', art: '🎮', items: ['bola', 'novelo', 'ioio', 'dado', 'quebra-cabeca', 'videogame', 'fliperama'], reward: { coins: 180, xp: 12 } },
   ],
+  team: { coins: 10, xp: 3 },
   season: {
     tiers: [
       { days: 1, coins: 10 },

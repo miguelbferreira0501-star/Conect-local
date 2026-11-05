@@ -182,3 +182,12 @@ Pedido do dono do produto: no começo, escolher a área (só perder ou ganhar pe
 - Tocar no lembrete abre a tela certa (água e missões → Missões, Hami → Cuidar, pausa e sono → Bem-estar, amigos → Amigos). Um lembrete novo do mesmo tipo troca o anterior em vez de empilhar.
 - **Com conta**, os lembretes chegam com o app fechado (push). No iPhone, só com o HamiCare na tela de início. O servidor precisa estar acordado: no plano grátis do Render ele dorme, então os lembretes pedem o plano Starter.
 - **Widget do Hami na tela inicial:** não existe para apps web. Só dá no app das lojas, com código nativo (Android: widget no projeto do app; iPhone: WidgetKit). Fica para quando a conta da Google Play estiver pronta.
+
+### Turma (novembro de 2026)
+
+- **Turma:** você e até 3 amigos (4 pessoas no máximo), com os Hamis juntos no cenário da sua arena. Cada pessoa fica em uma turma por vez, e só dá para chamar amigos de quem criou. Quem está na mesma turma vê o Hami dos outros, mesmo sem ser amigo direto.
+- **Missões em comum:** a turma escolhe de 1 a 3 missões leves da biblioteca (água, caminhar, arrumar a cama, alongar, dentes, sono, sol, respirar, pausa, gratidão, ar livre, passos). **Uma missão só conta quando todos fazem.** Quando todos fazem todas, o dia fecha: cada um ganha 10 sementes e 3 XP (o servidor confere que todos fizeram) e a ofensiva da turma cresce.
+- Marcar a missão pessoal em Missões já marca a parte da turma, e tocar em "Fiz!" na turma também marca a missão pessoal.
+- Avisos (se a pessoa quiser os de amigos): quando entra numa turma, quando a turma completa o dia e um "falta só você" quando todos os outros já fizeram (uma vez por dia, sem culpa).
+- Quem criou pode chamar e tirar pessoas e mudar as missões; quem sai sai sozinho; se quem criou sai, a turma acaba.
+- Também foi corrigido: ao abrir o app já logado, o backup e a carteira do servidor só ligavam quando a pessoa abria Missões, Amigos ou Ajustes. Agora ligam na hora.

@@ -511,6 +511,30 @@ export const WORLD: Record<string, Draw> = {
       <circle cx="56" cy="50" r="6" fill={C.leaf} />
     </g>
   ),
+  // Turma: três Hamis lado a lado.
+  'art:turma': () => (
+    <g>
+      {[
+        [16, 36, '#C9CDD6', '#A3A9B6', 0.86],
+        [48, 36, '#F7DFB9', '#E2C08E', 0.86],
+        [32, 30, '#F2B46D', '#D98E45', 1],
+      ].map(([x, y, body, shade, k], i) => (
+        <g key={i} transform={`translate(${x} ${y}) scale(${k})`}>
+          <circle cx="-11" cy="-12" r="5" fill={shade as string} />
+          <circle cx="11" cy="-12" r="5" fill={shade as string} />
+          <circle cx="-11" cy="-12" r="2.4" fill="#FF9EAA" />
+          <circle cx="11" cy="-12" r="2.4" fill="#FF9EAA" />
+          <ellipse cx="0" cy="2" rx="16" ry="15" fill={body as string} stroke={shade as string} strokeWidth="1.5" />
+          <ellipse cx="0" cy="7" rx="9" ry="7" fill="#FFF6EA" />
+          <circle cx="-5.5" cy="-1" r="1.9" fill="#2B2240" />
+          <circle cx="5.5" cy="-1" r="1.9" fill="#2B2240" />
+          <circle cx="-9" cy="3" r="2.2" fill="#FF9EAA" opacity="0.7" />
+          <circle cx="9" cy="3" r="2.2" fill="#FF9EAA" opacity="0.7" />
+          <path d="M-2 3 Q0 5 2 3" stroke="#2B2240" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+        </g>
+      ))}
+    </g>
+  ),
   '👥': () => (
     <g>
       <circle cx="42" cy="22" r="10" fill={C.purple} />

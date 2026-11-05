@@ -1231,6 +1231,14 @@ export function seasonDays(s: State, today = todayKey()): number {
 }
 export const seasonTierClaimed = (s: State, tier: number, month = todayKey().slice(0, 7)) => !!s.game.paid[`temporada:${month}:d${tier}`];
 
+/** Prêmio da turma no dia completo (com conta, o servidor confere que todos fizeram tudo). */
+export const teamRewardClaimed = (s: State, teamId: string, date: string) => !!s.game.paid[`turma:${teamId}:${date}`];
+export function claimTeamReward(teamId: string, date: string): boolean {
+  if (teamRewardClaimed(state, teamId, date)) return false;
+  commit(grant(state, { kind: 'turma', id: teamId, date }));
+  return true;
+}
+
 /** Pega o prêmio de um degrau da trilha da temporada (grátis). */
 export function claimSeasonTier(tier: number, days = seasonDays(state)): boolean {
   const t = gameCfg().season.tiers[tier];

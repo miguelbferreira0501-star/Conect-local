@@ -1,6 +1,6 @@
 // Parte social e conta usando o servidor do HamiCare (hamicare/server).
 import type { ReactionId } from '../../shared/moderation';
-import type { CommentResult, Feed, FriendState, Gift, GroupChallenge, Profile, RankRow, ReportTarget, SocialApi, Visit } from './types';
+import type { CommentResult, Feed, FriendState, Gift, GroupChallenge, Profile, RankRow, ReportTarget, SocialApi, Team, Visit } from './types';
 
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string, public details?: unknown) {
@@ -89,5 +89,11 @@ export function createApiSocial(): SocialApi {
     visit: (userId, reaction) => http<{ result: 'ok' | 'limite' }>('POST', `/social/visits/${userId}`, { reaction }).then((r) => r.result),
     visits: () => http<{ visits: Visit[] }>('GET', '/social/visits').then((r) => r.visits),
     ranking: () => http<{ rows: RankRow[]; optedOut: boolean }>('GET', '/social/ranking'),
+    team: (day) => http<{ team: Team | null }>('GET', `/social/team?day=${day}`).then((r) => r.team),
+    createTeam: (t, day) => http<{ team: Team }>('POST', `/social/team?day=${day}`, t).then((r) => r.team),
+    updateTeam: (t, day) => http<{ team: Team | null }>('PUT', `/social/team?day=${day}`, t).then((r) => r.team),
+    addTeamMember: (userId, day) => http<{ team: Team | null }>('POST', `/social/team/members?day=${day}`, { userId }).then((r) => r.team),
+    leaveTeam: (userId, day) => http<{ team: Team | null }>('DELETE', `/social/team/members/${userId}?day=${day}`).then((r) => r.team),
+    teamCheckin: (mission, day, done) => http<{ team: Team | null }>('POST', '/social/team/checkin', { mission, day, done }).then((r) => r.team),
   };
 }
