@@ -1,4 +1,5 @@
 // Estado do HamiCare: salvo no aparelho (localStorage) e, com conta, no backup privado do servidor.
+import { careDays, growthOf } from '../logic/growth';
 import { useSyncExternalStore } from 'react';
 import { AREA_GOAL, AREA_PLAN, areaOf, isWeightArea, type Area } from '../logic/areas';
 import type { AgeGroup, Battery, BodyStart, CareId, Category, DayLog, Direction, Freq, GoalId, Incentive, Journey, MealEntry, Mood, Outfit, PetMood, Photo, State, Task, TraitId, WearSlot } from '../types';
@@ -17,7 +18,8 @@ import {
 import { streakOf } from '../logic/streak';
 import { activeQuests, claimKey, levelOf, newAchievements, periodStart, questProgress, QUESTS } from '../logic/progress';
 import { addUsage, arenaItemsOf, arenaOf, baseGrant, canCraft, capGrant, chestPool, collectionProgress, emptyPity, emptyUsage, levelUps, migrateXp, openChest, xpAt, type ChestId, type DayUsage, type Pity, type Rarity, type Source } from '../shared/game';
-import { arenaHouse } from '../data/arenas';
+import { arenaHouse, upgradeHouse } from '../data/arenas';
+import { KIT_PLACE } from '../components/room/kit';
 import { gameCfg } from './game';
 import type { GameState, ItemOrigin } from '../types';
 import { REMINDER_DEFAULTS } from '../shared/reminders';
@@ -39,7 +41,8 @@ export type Celebration =
   | { type: 'phase'; phase: number }
   | { type: 'weigh'; grams: number; before: number; kcal: number }
   | { type: 'goal' }
-  | { type: 'streak'; count: number };
+  | { type: 'streak'; count: number }
+  | { type: 'grow'; stage: number; name: string };
 
 const celebrationListeners = new Set<(c: Celebration) => void>();
 export function onCelebrate(fn: (c: Celebration) => void) {
@@ -76,18 +79,11 @@ export function fresh(): State {
     days: {},
     journal: [],
     jar: [],
-    inventory: { 'p-creme': 1, 'f-madeira': 1, cenoura: 3, maca: 2, semente: 3, rodinha: 1, caminha: 1, planta: 1 },
+    // Os móveis do quartinho inicial já são da pessoa (pode guardar e recolocar).
+    inventory: { 'p-creme': 1, 'f-madeira': 1, cenoura: 3, maca: 2, semente: 3, rodinha: 1, caminha: 1, planta: 1, ...Object.fromEntries(arenaHouse(1).items.map((i) => [i.itemId, 1])) },
     wishlist: [],
-    // Casa inicial: já vem com o básico de todo hamster.
-    house: {
-      wallpaper: 'p-creme',
-      floor: 'f-madeira',
-      items: [
-        { uid: 'inicial-rodinha', itemId: 'rodinha', x: 20, y: 74, z: 1 },
-        { uid: 'inicial-caminha', itemId: 'caminha', x: 79, y: 86, z: 2 },
-        { uid: 'inicial-planta', itemId: 'planta', x: 88, y: 62, z: 3 },
-      ],
-    },
+    // Casa inicial: um quartinho já decorado (cama, criado-mudo, guarda-roupa, rodinha…).
+    house: arenaHouse(1),
     adventure: null,
     finds: [],
     placesDone: {},
@@ -137,6 +133,23 @@ const FOOD_TASKS = ['agua-refri', 'fruta', 'sem-acucar', 'salada', 'refeicao', '
 /** Completa estados antigos (antes da jornada de calorias) e de backups. */
 function normalize(raw: State): State {
   const s: State = { ...fresh(), ...raw, v: 2 };
+  // Reforma das casas: as que ainda estão do jeito que vieram ganham a decoração nova (as arrumadas pela pessoa ficam como estão),
+  // e os móveis novos entram no inventário.
+  return upgradeHouses(normalizeRest(s, raw));
+}
+
+function upgradeHouses(input: State): State {
+  let s = input;
+  const home = upgradeHouse(s.house, s.homeArena ?? 1);
+  if (home !== s.house) s = withHouseFurniture({ ...s, house: home }, home);
+  for (const [n, h] of Object.entries(s.houses ?? {})) {
+    const up = upgradeHouse(h, Number(n));
+    if (up !== h) s = withHouseFurniture({ ...s, houses: { ...s.houses, [n]: up } }, up);
+  }
+  return s;
+}
+
+function normalizeRest(s: State, raw: State): State {
   const goal = OLD_GOAL[s.profile.goal as string] ?? s.profile.goal;
   if (goal !== s.profile.goal) s.profile = { ...s.profile, goal };
   // Identidade colorida: o tema claro passa a ser o padrão (uma vez; depois vale a escolha da pessoa).
@@ -364,8 +377,10 @@ function grant(s: State, src: Source): State {
     if (arena) {
       gifts = arenaItemsOf(arena.n, arena.reward.items).filter((id) => !next.inventory[id]);
       const houses: Record<string, State['house']> = { ...(next.houses ?? {}) };
-      if (!houses[arena.n] && (next.homeArena ?? 1) !== arena.n) houses[arena.n] = arenaHouse(arena.n);
+      const created = !houses[arena.n] && (next.homeArena ?? 1) !== arena.n;
+      if (created) houses[arena.n] = arenaHouse(arena.n);
       next = { ...gainItems(next, gifts, 'arena'), houses };
+      if (created) next = withHouseFurniture(next, houses[arena.n]);
     }
     const celebrated = { level, coins, arena: arena ? { n: arena.n, name: arena.name, chest: arena.reward.chest, items: gifts } : undefined };
     setTimeout(() => celebrate({ type: 'level', ...celebrated }), 0);
@@ -421,6 +436,13 @@ function gainItems(s: State, ids: string[], from: ItemOrigin, opts: { stack?: bo
     if (!had) itemMeta[id] = { at: Date.now(), from };
   }
   return { ...s, inventory, itemMeta };
+}
+
+/** Móveis da loja que vêm junto com uma casa pronta: entram no inventário (um por peça arrumada),
+ *  assim a pessoa pode guardar e recolocar sem perder. Os exclusivos da arena já chegam como presente. */
+function withHouseFurniture(s: State, h: State['house']): State {
+  const ids = h.items.map((i) => i.itemId).filter((id) => !itemById(id)?.arena);
+  return ids.length ? gainItems(s, ids, 'arena', { stack: true }) : s;
 }
 
 /** Tira o selo "Novo" dos itens vistos. */
@@ -566,6 +588,13 @@ export function maintain(input: State): State {
   const today = todayKey();
   // Jornada: o peso do Hami acompanha as calorias das missões (ou a balança, se a pessoa quiser).
   s = applyJourney(s, today);
+  // Crescimento: o Hami cresce com os dias de cuidado (a primeira vez só anota, sem festa).
+  const grown = growthOf(careDays(s.days));
+  if (s.pet.growStage == null) s = { ...s, pet: { ...s.pet, growStage: grown.stage } };
+  else if (grown.stage > s.pet.growStage) {
+    s = { ...s, pet: { ...s.pet, growStage: grown.stage } };
+    setTimeout(() => celebrate({ type: 'grow', stage: grown.stage, name: grown.name }), 0);
+  }
   // Fase (nunca regride)
   const phase = phaseFor(conditioning(s.days, today));
   if (phase > s.pet.phase) {
@@ -1073,7 +1102,10 @@ export function placeItem(itemId: string) {
   const placedCount = [state.house, ...Object.values(state.houses ?? {})].reduce((n, h) => n + h.items.filter((i) => i.itemId === itemId).length, 0);
   if (placedCount >= (state.inventory[itemId] ?? 0)) return;
   const z = Math.max(0, ...state.house.items.map((i) => i.z)) + 1;
-  commit({ ...state, house: { ...state.house, items: [...state.house.items, { uid: uid(), itemId, x: 30 + (z % 5) * 10, y: 72, z }] } });
+  // Quadro e relógio vão para a parede; tapete, para o meio do chão; o resto, para o chão.
+  const place = KIT_PLACE[itemById(itemId)?.svg ?? ''];
+  const y = place === 'parede' ? 40 : place === 'tapete' ? 94 : 76;
+  commit({ ...state, house: { ...state.house, items: [...state.house.items, { uid: uid(), itemId, x: 30 + (z % 5) * 10, y, z }] } });
 }
 
 /** Arena atual (a mais alta já aberta). */

@@ -64,6 +64,61 @@ function cores(base: string, nome: string, kind: ItemKind, price: number, lista:
   });
 }
 
+
+/** Móveis do kit novo (components/room/kit.tsx): cada cor é um item. [sufixo, nome da cor, cor principal, cor de detalhe] */
+type Cor = [string, string, string, string];
+function moveis(base: string, nome: string, kind: ItemKind, price: number, size: number, lista: Cor[], extra: Partial<Item> = {}): Item[] {
+  return lista.map(([suf, cor, c1, c2]) => W(`k-${base}-${suf}`, cor ? `${nome} ${cor}` : nome, kind, price, { svg: `k-${base}`, size, c1, c2, ...extra }));
+}
+const BR: Cor = ['branco', 'branco', '#F7F3EE', '#FF9FC2'];
+const MAD: Cor = ['madeira', 'de madeira', '#C98A5B', '#F7D9A8'];
+
+export const KIT_ITEMS: Item[] = [
+  // Quarto
+  ...moveis('cama', 'Cama', 'movel', 130, 44, [['rosa', 'rosa', '#FF9FC2', '#FFE3EC'], ['azul', 'azul', '#7FB8F0', '#E6F1FB'], ['lilas', 'lilás', '#C3A6F2', '#F1E9FF'], ['menta', 'menta', '#7FD8BE', '#E9FAF1'], ['amarela', 'amarela', '#FFD66B', '#FFF7D6']]),
+  ...moveis('criado', 'Criado-mudo com abajur', 'movel', 45, 14, [BR, MAD, ['rosa', 'rosa', '#FFC2D6', '#FFFFFF'], ['azul', 'azul', '#A9D4F5', '#FFF3B0']]),
+  ...moveis('guarda-roupa', 'Guarda-roupa', 'movel', 140, 25, [BR, ['rosa', 'rosa', '#FFB3CC', '#FFFFFF'], MAD, ['lilas', 'lilás', '#C9B5F0', '#FFE27A']], { level: 2 }),
+  ...moveis('comoda', 'Cômoda', 'movel', 100, 30, [BR, ['rosa', 'rosa', '#FFC2D6', '#7FB8F0'], MAD, ['menta', 'menta', '#9FE3CF', '#FF9FC2']]),
+  ...moveis('espelho', 'Espelho de pé', 'movel', 60, 13, [['dourado', 'dourado', '#F2C14E', '#FF9FC2'], ['rosa', 'rosa', '#FF9FC2', '#FFFFFF'], ['branco', 'branco', '#F7F3EE', '#B399F0']]),
+  ...moveis('penteadeira', 'Penteadeira', 'movel', 120, 28, [['rosa', 'rosa', '#FFC2D6', '#FF9FC2'], ['branca', 'branca', '#F7F3EE', '#B399F0'], ['lilas', 'lilás', '#D7C2FF', '#FFE27A']], { level: 3 }),
+  // Sala
+  ...moveis('sofa', 'Sofá', 'movel', 140, 40, [['rosa', 'rosa', '#FF9FC2', '#FFF3B0'], ['azul', 'azul', '#7FB8F0', '#FFD66B'], ['verde', 'verde', '#7FD8BE', '#FF9FC2'], ['amarelo', 'amarelo', '#FFD66B', '#7FB8F0'], ['lilas', 'lilás', '#C3A6F2', '#FFFFFF'], ['vermelho', 'vermelho', '#E2547A', '#FFE3EA']]),
+  ...moveis('poltrona', 'Poltrona', 'movel', 80, 22, [['rosa', 'rosa', '#FF9FC2', '#FFF3B0'], ['azul', 'azul', '#7FB8F0', '#FFFFFF'], ['verde', 'verde', '#7FD8BE', '#FFE27A'], ['vermelha', 'vermelha', '#E2547A', '#F7E3C8']]),
+  ...moveis('mesa-centro', 'Mesinha de centro', 'movel', 50, 24, [MAD, BR, ['rosa', 'rosa', '#FFC2D6', '#FFFFFF']]),
+  ...moveis('estante', 'Estante de livros', 'movel', 110, 23, [['madeira', 'de madeira', '#B98258', '#FF9FC2'], ['branca', 'branca', '#E8E2DA', '#7FB8F0'], ['rosa', 'rosa', '#F7A8C2', '#FFE27A']], { level: 2 }),
+  ...moveis('rack-tv', 'TV com rack', 'movel', 120, 30, [MAD, BR, ['azul', 'azul', '#A9D4F5', '#FF9FC2']], { level: 3 }),
+  ...moveis('luminaria', 'Luminária de pé', 'movel', 50, 10, [['amarela', 'amarela', '#FFE27A', '#FFFFFF'], ['rosa', 'rosa', '#FF9FC2', '#FFFFFF'], ['menta', 'menta', '#9FE3CF', '#FFFFFF'], ['branca', 'branca', '#F7F3EE', '#FFFFFF']]),
+  // Cozinha
+  ...moveis('mesa-jantar', 'Mesa com cadeiras', 'movel', 110, 34, [['vermelha', 'xadrez vermelho', '#F0525F', '#F7D9A8'], ['azul', 'azul', '#7FB8F0', '#FFFFFF'], ['rosa', 'rosa', '#FF9FC2', '#FFF3B0']], { level: 2 }),
+  ...moveis('geladeira', 'Geladeira retrô', 'movel', 120, 15, [['menta', 'menta', '#9FE3CF', '#FFFFFF'], ['rosa', 'rosa', '#FFB3CC', '#FFFFFF'], ['azul', 'azul', '#A9D4F5', '#FFFFFF'], ['amarela', 'amarela', '#FFE08A', '#FFFFFF']], { level: 3 }),
+  ...moveis('fogao', 'Fogão com panelinha', 'movel', 100, 21, [['branco', 'branco', '#F7F3EE', '#E2547A'], ['menta', 'menta', '#9FE3CF', '#FF9A4D'], ['rosa', 'rosa', '#FFC2D6', '#7FB8F0']], { level: 3 }),
+  // Cantinho do hamster
+  ...moveis('torre', 'Torre de brincar', 'movel', 120, 23, [['rosa', 'rosa', '#FF9FC2', '#7FB8F0'], ['azul', 'azul', '#7FB8F0', '#FFD66B'], ['verde', 'verde', '#7FD8BE', '#FF9FC2']]),
+  ...moveis('casinha', 'Casinha de hamster', 'movel', 80, 22, [['vermelha', 'vermelha', '#E2547A', '#FFD66B'], ['azul', 'azul', '#5B8DEF', '#FF9FC2'], ['verde', 'verde', '#5FBF77', '#FFD66B']]),
+  ...moveis('rodinha', 'Rodinha nova', 'movel', 60, 20, [['rosa', 'rosa', '#FF86AC', '#FFD66B'], ['azul', 'azul', '#5B8DEF', '#FFFFFF'], ['menta', 'menta', '#3FB8A0', '#FFE27A']]),
+  ...moveis('tubo', 'Túnel colorido', 'movel', 70, 28, [['rosa', 'rosa e azul', '#FF9FC2', '#7FB8F0'], ['verde', 'verde e amarelo', '#7FD8BE', '#FFD66B'], ['roxo', 'roxo e rosa', '#B399F0', '#FF9FC2']]),
+  ...moveis('almofada', 'Caminha almofadada', 'movel', 45, 22, [['rosa', 'rosa', '#FF9FC2', '#FFFFFF'], ['azul', 'azul', '#7FB8F0', '#FFE27A'], ['lilas', 'lilás', '#C3A6F2', '#FF9FC2']]),
+  // Parede
+  ...moveis('relogio', 'Relógio cuco', 'decor', 70, 10, [['madeira', '', '#FF9FC2', '#F2C14E']], { level: 2 }),
+  ...moveis('prateleira', 'Prateleira enfeitada', 'decor', 55, 26, [MAD, ['branca', 'branca', '#F7F3EE', '#7FB8F0'], ['rosa', 'rosa', '#FFB3CC', '#FFFFFF']]),
+  ...moveis('quadro', 'Quadro de paisagem', 'decor', 40, 16, [['dourado', 'dourado', '#F2C14E', '#BFE3FF'], ['madeira', 'de madeira', '#C98A5B', '#FFE7C7'], ['rosa', 'rosa', '#FF9FC2', '#DDF0FF']]),
+  ...moveis('quadro-coracao', 'Quadro de coração', 'decor', 35, 11, [['rosa', 'rosa', '#FF86AC', '#FFF0F4'], ['dourado', 'dourado', '#F2C14E', '#FFF8EC']]),
+  ...moveis('quadro-hami', 'Retrato do Hami', 'decor', 45, 12, [['madeira', 'de madeira', '#C98A5B', '#DDF0FF'], ['rosa', 'rosa', '#FF9FC2', '#FFF6E8']]),
+  ...moveis('planta-pendurada', 'Planta pendurada', 'decor', 45, 11, [['rosa', 'em vaso rosa', '#FF9FC2', '#FFFFFF'], ['branca', 'em vaso branco', '#F7F3EE', '#FFFFFF'], ['terracota', 'em vaso de barro', '#D9825B', '#FFFFFF']]),
+  ...moveis('luminaria-teto', 'Luminária pendente', 'decor', 45, 10, [['amarela', 'amarela', '#FFD66B', '#FFFFFF'], ['rosa', 'rosa', '#FF9FC2', '#FFFFFF'], ['menta', 'menta', '#9FE3CF', '#FFFFFF']]),
+  ...moveis('varal', 'Varal de fotos', 'decor', 50, 46, [['rosa', '', '#FF9FC2', '#B399F0']], { level: 2 }),
+  // Plantas, tapetes e fofuras
+  ...moveis('planta-grande', 'Planta grande', 'decor', 55, 15, [['terracota', 'no vaso de barro', '#D9825B', '#FFFFFF'], ['branca', 'no vaso branco', '#F7F3EE', '#FFFFFF'], ['rosa', 'no vaso rosa', '#FF9FC2', '#FFFFFF'], ['azul', 'no vaso azul', '#7FB8F0', '#FFFFFF']]),
+  ...moveis('vaso-flores', 'Vaso de flores', 'decor', 30, 9, [['azul', 'azul', '#7FB8F0', '#B399F0'], ['rosa', 'rosa', '#FF9FC2', '#FFFFFF'], ['amarelo', 'amarelo', '#FFD66B', '#FF86AC']]),
+  ...moveis('tapete', 'Tapete redondo', 'movel', 60, 52, [['rosa', 'rosa', '#FF9FC2', '#FFE3EC'], ['azul', 'azul', '#7FB8F0', '#E6F1FB'], ['verde', 'verde', '#7FD8BE', '#E9FAF1'], ['lilas', 'lilás', '#C3A6F2', '#F1E9FF'], ['amarelo', 'amarelo', '#FFD66B', '#FFF7D6'], ['vermelho', 'vermelho', '#E2547A', '#F7E3C8']]),
+  ...moveis('tapete-retangulo', 'Tapete estampado', 'movel', 80, 60, [['vermelho', 'vermelho', '#E2547A', '#F7D9A8'], ['azul', 'azul', '#5B8DEF', '#E6F1FB'], ['verde', 'verde', '#5FBF77', '#F7F3EE'], ['rosa', 'rosa', '#FF86AC', '#FFF0F4']]),
+  ...moveis('tapete-coracao', 'Tapete de coração', 'movel', 60, 44, [['rosa', 'rosa', '#FF86AC', '#FFFFFF'], ['vermelho', 'vermelho', '#E2547A', '#FFE3EA']], { plus: true }),
+  ...moveis('ursinho', 'Ursinho de pelúcia', 'decor', 40, 11, [['caramelo', 'caramelo', '#C98A5B', '#FF9FC2'], ['rosa', 'rosa', '#FFB3CC', '#7FB8F0'], ['branco', 'branco', '#F2EDE6', '#E2547A']]),
+  ...moveis('cesto', 'Cesto de novelos', 'decor', 35, 12, [['rosa', '', '#FF9FC2', '#7FB8F0']]),
+  ...moveis('bau', 'Baú de brinquedos', 'movel', 70, 19, [['azul', 'azul', '#7FB8F0', '#FFD66B'], ['rosa', 'rosa', '#FF9FC2', '#FFFFFF'], ['madeira', 'de madeira', '#C98A5B', '#FFD66B']]),
+  ...moveis('pufe', 'Pufe', 'movel', 40, 11, [['rosa', 'rosa', '#FF9FC2', '#FFFFFF'], ['amarelo', 'amarelo', '#FFD66B', '#FF9FC2'], ['azul', 'azul', '#7FB8F0', '#FFFFFF'], ['verde', 'verde', '#7FD8BE', '#FFFFFF']]),
+];
+
 export const ITEMS: Item[] = [
   // Chapéus
   W('laco', 'Laço de fita', 'chapeu', 20),
@@ -148,6 +203,29 @@ export const ITEMS: Item[] = [
   W('abobora-roupa', 'Fantasia de abóbora', 'roupa', 55, { base: 'abobora', c1: '#FF9A3D', c2: '#3E9C55', season: 'halloween' }),
   W('caipira', 'Camisa xadrez de festa junina', 'roupa', 40, { base: 'xadrez', c1: '#F0525F', c2: '#FFFFFF', season: 'junina' }),
 
+  // ---------- Fantasias de corpo inteiro (capuz com orelhinhas) ----------
+  W('fantasia-coelho-rosa', 'Fantasia de coelhinho rosa', 'roupa', 120, { base: 'fantasia-coelho', c1: '#FFB3CF', c2: '#FFFFFF' }),
+  W('fantasia-coelho-branco', 'Fantasia de coelhinho branco', 'roupa', 120, { base: 'fantasia-coelho', c1: '#FFFFFF', c2: '#FFD6E4' }),
+  W('fantasia-coelho-lilas', 'Fantasia de coelhinho lilás', 'roupa', 120, { base: 'fantasia-coelho', c1: '#D7C2FF', c2: '#FFFFFF', level: 2 }),
+  W('fantasia-urso-marrom', 'Fantasia de ursinho', 'roupa', 110, { base: 'fantasia-urso', c1: '#B07A52', c2: '#F2D2B0' }),
+  W('fantasia-urso-rosa', 'Fantasia de ursinho rosa', 'roupa', 110, { base: 'fantasia-urso', c1: '#FF9FC2', c2: '#FFE3EC' }),
+  W('fantasia-gato-cinza', 'Fantasia de gatinho cinza', 'roupa', 110, { base: 'fantasia-gato', c1: '#B8BCCB', c2: '#FFFFFF' }),
+  W('fantasia-gato-laranja', 'Fantasia de gatinho laranja', 'roupa', 110, { base: 'fantasia-gato', c1: '#FFB066', c2: '#FFF1DE' }),
+  W('fantasia-gato-preto', 'Fantasia de gatinho preto', 'roupa', 110, { base: 'fantasia-gato', c1: '#4A4452', c2: '#FFFFFF', level: 3 }),
+  W('fantasia-sapo', 'Fantasia de sapinho', 'roupa', 110, { base: 'fantasia-sapo', c1: '#7BD389', c2: '#E8F7C8' }),
+  W('fantasia-dino-verde', 'Fantasia de dinossauro', 'roupa', 130, { base: 'fantasia-dino', c1: '#6CC48C', c2: '#FFE27A', level: 2 }),
+  W('fantasia-dino-roxo', 'Fantasia de dinossauro roxo', 'roupa', 130, { base: 'fantasia-dino', c1: '#A57CF0', c2: '#FFD6E4', level: 4 }),
+  W('fantasia-pintinho', 'Fantasia de pintinho', 'roupa', 100, { base: 'fantasia-pintinho', c1: '#FFE066', c2: '#FFF5C2' }),
+  W('fantasia-pinguim', 'Fantasia de pinguim', 'roupa', 120, { base: 'fantasia-pinguim', c1: '#3A3440', c2: '#FFFFFF', level: 3 }),
+  W('fantasia-unicornio', 'Fantasia de unicórnio', 'roupa', 160, { base: 'fantasia-unicornio', c1: '#FFFFFF', c2: '#FF9FC2', plus: true }),
+  // ---------- Vestidos de festa ----------
+  W('babado-rosa', 'Vestido de babados rosa', 'roupa', 80, { base: 'babado', c1: '#FF9FC2', c2: '#FFFFFF' }),
+  W('babado-lilas', 'Vestido de babados lilás', 'roupa', 80, { base: 'babado', c1: '#C3A6F2', c2: '#FFFFFF' }),
+  W('babado-azul', 'Vestido de babados azul', 'roupa', 80, { base: 'babado', c1: '#9FC8F2', c2: '#FFFFFF' }),
+  W('babado-amarelo', 'Vestido de babados amarelo', 'roupa', 80, { base: 'babado', c1: '#FFD66B', c2: '#FFFFFF' }),
+  W('estrelado-roxo', 'Vestido de estrelinhas', 'roupa', 110, { base: 'estrelado', c1: '#7E57D6', c2: '#FFE27A', level: 3 }),
+  W('estrelado-noite', 'Vestido noite estrelada', 'roupa', 110, { base: 'estrelado', c1: '#3D4F9E', c2: '#FFE27A', plus: true }),
+
   // ---------- Acessórios ----------
   ...cores('cachecol', 'Cachecol', 'acessorio', 30, ['azul', 'verde', 'amarelo', 'rosa']),
   ...cores('gravata', 'Gravata-borboleta', 'acessorio', 20, ['vermelho', 'rosa', 'preto', 'amarelo'], { fem: true }),
@@ -163,6 +241,21 @@ export const ITEMS: Item[] = [
   W('asas-anjo', 'Asas de anjinho', 'acessorio', 120, { base: 'asas-anjo', c1: '#FFFFFF', c2: '#E3E6EE', plus: true }),
   W('asas-borboleta', 'Asas de borboleta', 'acessorio', 80, { base: 'asas-borboleta', c1: '#FF9A4D', c2: '#2B2224', level: 4 }),
 
+  // Colares com pingente
+  W('colar-coracao-ouro', 'Colar de coração', 'acessorio', 55, { base: 'colar-pingente', c1: '#FF5E7E', c2: '#F6C445' }),
+  W('colar-coracao-prata', 'Colar de coração prateado', 'acessorio', 55, { base: 'colar-pingente', c1: '#FF9FC2', c2: '#C9CED8' }),
+  W('colar-estrela-ouro', 'Colar de estrela', 'acessorio', 60, { base: 'colar-pingente', c1: '#FFD34D', c2: '#F6C445', level: 2 }),
+  W('colar-ouro', 'Corrente dourada com estrela', 'acessorio', 90, { base: 'colar-ouro', c1: '#F6C445', c2: '#7FB8F0', level: 4 }),
+  // Coisinhas de segurar (na patinha)
+  W('m-suco', 'Suquinho com canudo', 'acessorio', 30, { base: 'segurar', c1: '#FFB347', c2: '#FF5E7E' }),
+  W('m-microfone', 'Microfone', 'acessorio', 45, { base: 'segurar', c1: '#C9CED8', c2: '#3A3440', level: 2 }),
+  W('m-cestinha', 'Cestinha de morangos', 'acessorio', 40, { base: 'segurar', c1: '#F0525F', c2: '#FFFFFF' }),
+  W('m-pirulito', 'Pirulito', 'acessorio', 20, { base: 'segurar', c1: '#FF86AC', c2: '#FFFFFF' }),
+  W('m-balao', 'Balão na patinha', 'acessorio', 25, { base: 'segurar', c1: '#FF5E7E', c2: '#FFFFFF' }),
+  W('m-varinha', 'Varinha de estrela', 'acessorio', 70, { base: 'segurar', c1: '#FFD34D', c2: '#FFFFFF', level: 3 }),
+  W('m-girassol', 'Girassol na patinha', 'acessorio', 25, { base: 'segurar', c1: '#FFD34D', c2: '#8A5A3B' }),
+  W('m-chaveiro', 'Chaveiro de estrelinha', 'acessorio', 35, { base: 'segurar', c1: '#FFD34D', c2: '#E8B020' }),
+
   // ---------- Efeitos (brilhos ao redor do Hami) ----------
   W('fx-brilhos', 'Brilhinhos', 'efeito', 60, { base: 'brilhos', c1: '#FFE27A' }),
   W('fx-coracoes', 'Chuva de coraçõezinhos', 'efeito', 80, { base: 'coracoes', c1: '#FF6F91' }),
@@ -176,6 +269,8 @@ export const ITEMS: Item[] = [
   W('fx-raios', 'Raios de sol', 'efeito', 110, { base: 'raios', c1: '#FFE27A', level: 5 }),
   W('fx-neve', 'Neve caindo', 'efeito', 70, { base: 'neve', c1: '#FFFFFF', season: 'natal' }),
   W('fx-morcegos', 'Morceguinhos', 'efeito', 70, { base: 'morcegos', c1: '#4B3A78', season: 'halloween' }),
+  // Móveis (kit novo, desenhado com detalhe)
+  ...KIT_ITEMS,
   // Móveis
   W('rodinha', 'Rodinha de exercício', 'movel', 30, { svg: 'rodinha', size: 26 }),
   W('caminha', 'Caminha de hamster', 'movel', 35, { svg: 'caminha', size: 26 }),
@@ -258,84 +353,84 @@ export const ITEMS: Item[] = [
   // Exclusivos das arenas (vêm de presente ao abrir cada arena; não estão à venda)
   ...arenaItems(2, 'raro', [
     ['flor-encantada', 'Flor encantada', 'chapeu', { base: 'flor', c1: '#FF8FC7', c2: '#FFD34D' }],
-    ['banco-galho', 'Banco de galhos', 'movel', { art: 'art:banco-galho', size: 24 }],
+    ['banco-galho', 'Banco de galhos', 'movel', { art: 'art:banco-galho', size: 32 }],
     ['casa-passaro', 'Casinha de passarinho', 'decor', { art: 'art:casa-passaro', size: 12 }],
     ['p-jardim', 'Parede do jardim', 'parede', {}],
     ['f-musgo', 'Piso de musgo', 'piso', {}],
   ]),
   ...arenaItems(3, 'raro', [
     ['boina-vila', 'Boina da vila', 'chapeu', { base: 'boina', c1: '#B07A52', c2: '#7A4E32' }],
-    ['balcao-cafe', 'Balcão de café', 'movel', { art: 'art:balcao-cafe', size: 26 }],
-    ['lampiao', 'Lampião da vila', 'decor', { art: 'art:lampiao', size: 10 }],
+    ['balcao-cafe', 'Balcão de café', 'movel', { art: 'art:balcao-cafe', size: 34 }],
+    ['lampiao', 'Lampião da vila', 'decor', { art: 'art:lampiao', size: 11 }],
     ['p-vila', 'Parede de casa de vila', 'parede', {}],
     ['f-tacos', 'Piso de tacos', 'piso', {}],
   ]),
   ...arenaItems(4, 'raro', [
     ['chapeu-folhas', 'Chapéu de folhas', 'chapeu', { base: 'chapeu-sol', c1: '#5FBF77', c2: '#3E9C55' }],
-    ['luminaria-cogumelo', 'Luminária de cogumelo', 'decor', { art: 'art:luminaria-cogumelo', size: 12, rarity: 'epico' }],
-    ['cama-tronco', 'Cama de tronco', 'movel', { art: 'art:cama-tronco', size: 28 }],
+    ['luminaria-cogumelo', 'Luminária de cogumelo', 'decor', { art: 'art:luminaria-cogumelo', size: 14, rarity: 'epico' }],
+    ['cama-tronco', 'Cama de tronco', 'movel', { art: 'art:cama-tronco', size: 42 }],
     ['p-floresta', 'Parede da floresta', 'parede', {}],
     ['f-folhas', 'Piso de folhas secas', 'piso', {}],
   ]),
   ...arenaItems(5, 'raro', [
     ['oculos-tropical', 'Óculos de sol tropical', 'oculos', { base: 'sol', c1: '#FF6F91', c2: '#FFD34D' }],
     ['camisa-tropical', 'Camisa tropical', 'roupa', { base: 'florida', c1: '#FF9A4D', c2: '#5FBF77', rarity: 'epico' }],
-    ['guarda-sol', 'Guarda-sol', 'decor', { art: 'art:guarda-sol', size: 22 }],
-    ['cadeira-praia', 'Cadeira de praia', 'movel', { art: 'art:cadeira-praia', size: 20 }],
-    ['tapete-tropical', 'Tapete tropical', 'decor', { art: 'art:tapete-tropical', size: 36 }],
+    ['guarda-sol', 'Guarda-sol', 'decor', { art: 'art:guarda-sol', size: 30 }],
+    ['cadeira-praia', 'Cadeira de praia', 'movel', { art: 'art:cadeira-praia', size: 24 }],
+    ['tapete-tropical', 'Tapete tropical', 'decor', { art: 'art:tapete-tropical', size: 52 }],
     ['p-tropical', 'Parede tropical', 'parede', {}],
   ]),
   ...arenaItems(6, 'epico', [
     ['gorro-neve', 'Gorro de neve', 'chapeu', { base: 'gorro', c1: '#FFFFFF', c2: '#5B8DEF', rarity: 'raro' }],
     ['casaco-neve', 'Casaco de inverno', 'roupa', { base: 'jaqueta', c1: '#5B8DEF', c2: '#FFFFFF' }],
-    ['lareira', 'Lareira', 'movel', { art: 'art:lareira', size: 26 }],
-    ['tapete-neve', 'Tapete de neve', 'decor', { art: 'art:tapete-neve', size: 36, rarity: 'raro' }],
+    ['lareira', 'Lareira', 'movel', { art: 'art:lareira', size: 34 }],
+    ['tapete-neve', 'Tapete de neve', 'decor', { art: 'art:tapete-neve', size: 52, rarity: 'raro' }],
     ['p-chale', 'Parede de chalé', 'parede', { rarity: 'raro' }],
     ['f-chale', 'Piso de chalé', 'piso', { rarity: 'raro' }],
   ]),
   ...arenaItems(7, 'epico', [
     ['fone-neon', 'Fone neon', 'chapeu', { base: 'fone', c1: '#A57CF0', c2: '#3AE0D0' }],
     ['luminaria-neon', 'Luminária neon', 'decor', { art: 'art:luminaria-neon', size: 12 }],
-    ['poltrona-moderna', 'Poltrona moderna', 'movel', { art: 'art:poltrona-moderna', size: 22 }],
+    ['poltrona-moderna', 'Poltrona moderna', 'movel', { art: 'art:poltrona-moderna', size: 24 }],
     ['p-cidade', 'Parede da cidade', 'parede', { rarity: 'raro' }],
     ['f-concreto', 'Piso de concreto', 'piso', { rarity: 'raro' }],
   ]),
   ...arenaItems(8, 'epico', [
     ['oculos-mergulho', 'Óculos de mergulho', 'oculos', { base: 'natacao', c1: '#3FC6C0', c2: '#2F7FB8' }],
-    ['cama-concha', 'Cama de concha', 'movel', { art: 'art:cama-concha', size: 28 }],
-    ['coral', 'Coral', 'decor', { art: 'art:coral', size: 12, rarity: 'raro' }],
+    ['cama-concha', 'Cama de concha', 'movel', { art: 'art:cama-concha', size: 42 }],
+    ['coral', 'Coral', 'decor', { art: 'art:coral', size: 14, rarity: 'raro' }],
     ['p-mar', 'Parede do fundo do mar', 'parede', { rarity: 'raro' }],
     ['f-areia-mar', 'Areia do fundo do mar', 'piso', { rarity: 'raro' }],
   ]),
   ...arenaItems(9, 'epico', [
     ['tiara-sonhos', 'Tiara dos sonhos', 'chapeu', { base: 'tiara', c1: '#D7C2FF', c2: '#FF9FC2' }],
-    ['cama-nuvem', 'Cama de nuvem', 'movel', { art: 'art:cama-nuvem', size: 28 }],
-    ['luminaria-lua', 'Luminária de lua', 'decor', { art: 'art:luminaria-lua', size: 12 }],
+    ['cama-nuvem', 'Cama de nuvem', 'movel', { art: 'art:cama-nuvem', size: 42 }],
+    ['luminaria-lua', 'Luminária de lua', 'decor', { art: 'art:luminaria-lua', size: 13 }],
     ['p-sonhos', 'Parede dos sonhos', 'parede', { rarity: 'raro' }],
     ['f-algodao', 'Piso de algodão-doce', 'piso', { rarity: 'raro' }],
   ]),
   ...arenaItems(10, 'epico', [
     ['coroa-castelo', 'Coroa do castelo', 'chapeu', { base: 'coroa-rei', c1: '#F6C445', c2: '#5B8DEF', rarity: 'lendario' }],
     ['manto-real', 'Manto real', 'roupa', { base: 'capa', c1: '#D7263D', c2: '#F6C445' }],
-    ['trono', 'Trono', 'movel', { art: 'art:trono', size: 22, rarity: 'lendario' }],
-    ['tapete-vermelho', 'Tapete vermelho', 'decor', { art: 'art:tapete-vermelho', size: 40 }],
+    ['trono', 'Trono', 'movel', { art: 'art:trono', size: 28, rarity: 'lendario' }],
+    ['tapete-vermelho', 'Tapete vermelho', 'decor', { art: 'art:tapete-vermelho', size: 56 }],
     ['p-castelo', 'Parede de castelo', 'parede', {}],
     ['f-real', 'Piso real', 'piso', {}],
   ]),
   ...arenaItems(11, 'epico', [
     ['capacete-estelar', 'Capacete estelar', 'chapeu', { base: 'capacete', c1: '#E9EEF8', c2: '#A57CF0' }],
     ['traje-estelar', 'Traje espacial estelar', 'roupa', { base: 'astronauta', c1: '#F4F6FA', c2: '#A57CF0', rarity: 'lendario' }],
-    ['cama-estrelas', 'Cama de estrelas', 'movel', { art: 'art:cama-estrelas', size: 28, rarity: 'lendario' }],
-    ['luminaria-estrelas', 'Luminária de estrelas', 'decor', { art: 'art:luminaria-estrelas', size: 12 }],
-    ['mobile-planetas', 'Planetas de pendurar', 'decor', { art: 'art:mobile-planetas', size: 16 }],
+    ['cama-estrelas', 'Cama de estrelas', 'movel', { art: 'art:cama-estrelas', size: 42, rarity: 'lendario' }],
+    ['luminaria-estrelas', 'Luminária de estrelas', 'decor', { art: 'art:luminaria-estrelas', size: 13 }],
+    ['mobile-planetas', 'Planetas de pendurar', 'decor', { art: 'art:mobile-planetas', size: 18 }],
     ['p-espaco', 'Parede espacial', 'parede', {}],
     ['f-metal', 'Piso de nave', 'piso', {}],
   ]),
   ...arenaItems(12, 'lendario', [
     ['aureola-celeste', 'Auréola celeste', 'chapeu', { base: 'aureola', c1: '#FFF3B0', c2: '#F2A516' }],
     ['asas-celestes', 'Asas celestes', 'acessorio', { base: 'asas-anjo', c1: '#FFF7DA', c2: '#F2C94C' }],
-    ['fonte-celeste', 'Fonte celeste', 'decor', { art: 'art:fonte-celeste', size: 18 }],
-    ['portal-celeste', 'Portal celeste', 'decor', { art: 'art:portal-celeste', size: 22 }],
+    ['fonte-celeste', 'Fonte celeste', 'decor', { art: 'art:fonte-celeste', size: 24 }],
+    ['portal-celeste', 'Portal celeste', 'decor', { art: 'art:portal-celeste', size: 30 }],
     ['p-celeste', 'Parede celeste', 'parede', { rarity: 'epico' }],
     ['f-ouro', 'Piso de ouro', 'piso', { rarity: 'epico' }],
   ]),
@@ -453,6 +548,51 @@ export interface StyleSet {
 }
 
 export const STYLES: StyleSet[] = [
+  {
+    id: 'quarto-rosa',
+    name: 'Quartinho rosa',
+    wallpaper: 'p-coracoes',
+    floor: 'f-clara',
+    items: [
+      { itemId: 'k-tapete-coracao-rosa', x: 50, y: 95 },
+      { itemId: 'k-cama-rosa', x: 25, y: 71 },
+      { itemId: 'k-criado-rosa', x: 50.5, y: 68 },
+      { itemId: 'k-penteadeira-rosa', x: 80, y: 70 },
+      { itemId: 'k-quadro-coracao-rosa', x: 17, y: 38 },
+      { itemId: 'k-ursinho-rosa', x: 12, y: 97 },
+      { itemId: 'k-pufe-rosa', x: 86, y: 94 },
+    ],
+  },
+  {
+    id: 'sala-azul',
+    name: 'Salinha azul',
+    wallpaper: 'p-cinza',
+    floor: 'f-madeira',
+    items: [
+      { itemId: 'k-tapete-retangulo-azul', x: 50, y: 97 },
+      { itemId: 'k-sofa-azul', x: 27, y: 71 },
+      { itemId: 'k-quadro-dourado', x: 20, y: 38 },
+      { itemId: 'k-rack-tv-branco', x: 78, y: 70 },
+      { itemId: 'k-mesa-centro-madeira', x: 34, y: 87 },
+      { itemId: 'k-luminaria-amarela', x: 94, y: 88 },
+      { itemId: 'k-planta-grande-branca', x: 7, y: 84 },
+    ],
+  },
+  {
+    id: 'cantinho-hamster',
+    name: 'Cantinho do hamster',
+    wallpaper: 'p-bolinhas',
+    floor: 'f-grama',
+    items: [
+      { itemId: 'k-tapete-verde', x: 50, y: 95 },
+      { itemId: 'k-torre-rosa', x: 22, y: 71 },
+      { itemId: 'k-casinha-azul', x: 78, y: 71 },
+      { itemId: 'k-tubo-rosa', x: 50, y: 74 },
+      { itemId: 'k-rodinha-rosa', x: 86, y: 93 },
+      { itemId: 'k-almofada-rosa', x: 16, y: 95 },
+      { itemId: 'k-planta-pendurada-rosa', x: 92, y: 28 },
+    ],
+  },
   { id: 'minimalista', name: 'Minimalista', wallpaper: 'p-creme', floor: 'f-clara', items: [{ itemId: 'luminaria', x: 82, y: 58 }, { itemId: 'planta', x: 12, y: 74 }, { itemId: 'mesa', x: 30, y: 72 }] },
   { id: 'aconchegante', name: 'Aconchegante', wallpaper: 'p-listras', floor: 'f-carpete', items: [{ itemId: 'sofa', x: 22, y: 66 }, { itemId: 'tapete', x: 50, y: 88 }, { itemId: 'vela', x: 84, y: 70 }, { itemId: 'livros', x: 72, y: 76 }] },
   { id: 'natureza', name: 'Natureza', wallpaper: 'p-bolinhas', floor: 'f-grama', items: [{ itemId: 'planta', x: 10, y: 70 }, { itemId: 'cacto', x: 86, y: 74 }, { itemId: 'flores', x: 74, y: 78 }, { itemId: 'casinha', x: 24, y: 70 }] },

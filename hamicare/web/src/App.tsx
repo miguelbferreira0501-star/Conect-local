@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Sheet, Toaster, toast } from './components/ui';
 import { CelebrationModal, DailyWelcome, StreakScreen } from './components/Celebrate';
 import { LevelUpScreen } from './components/LevelUp';
 import { TabIcon, type TabId } from './components/TabIcon';
 import { Home } from './screens/Home';
+import { GrowthContext } from './components/Hamster';
+import { careDays, growthOf } from './logic/growth';
 import { CareArea } from './screens/CareArea';
 import { Activities } from './screens/Activities';
 import { World, type WorldTab } from './screens/World';
@@ -128,11 +130,14 @@ export default function App() {
     window.scrollTo({ top: 0 });
   }
 
+  // Tamanho do Hami: cresce com os dias de cuidado.
+  const growth = useMemo(() => growthOf(careDays(s.days)), [s.days]);
+
   // Som de cada comemoração quando ela aparece na tela.
   const head = queue[0];
   useEffect(() => {
     if (!head || !s.onboarded) return;
-    const ids: Record<Celebration['type'], SoundId> = { level: 'nivel', achievement: 'conquista', phase: 'magia', weigh: 'aviso', goal: 'conquista', streak: 'ofensiva' };
+    const ids: Record<Celebration['type'], SoundId> = { level: 'nivel', achievement: 'conquista', phase: 'magia', weigh: 'aviso', goal: 'conquista', streak: 'ofensiva', grow: 'magia' };
     play(ids[head.type]);
   }, [head]); // eslint-disable-line react-hooks/exhaustive-deps
   const welcomeNow = s.onboarded && s.welcomed !== todayKey() && !head;
@@ -142,12 +147,12 @@ export default function App() {
 
   if (!s.onboarded) {
     return (
-      <>
+      <GrowthContext.Provider value={growth.scale}>
         <Onboarding />
         <ResetPassword />
         <LegalHost />
         <Toaster />
-      </>
+      </GrowthContext.Provider>
     );
   }
 
@@ -160,7 +165,7 @@ export default function App() {
   const showWelcome = s.welcomed !== todayKey() && !current;
 
   return (
-    <>
+    <GrowthContext.Provider value={growth.scale}>
       <main className="shell">
         {tab === 'inicio' && <Home onGo={go} onSettings={() => setSettings(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} onPlus={() => setPlus(true)} onTeam={() => go('amigos', undefined, 'turma')} />}
         {tab === 'cuidar' && <CareArea onShare={(photo) => shareTo({ kind: 'foto', photo })} />}
@@ -190,6 +195,6 @@ export default function App() {
       <ResetPassword />
       <LegalHost />
       <Toaster />
-    </>
+    </GrowthContext.Provider>
   );
 }

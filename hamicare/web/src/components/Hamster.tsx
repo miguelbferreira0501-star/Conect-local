@@ -1,10 +1,14 @@
-import { useId } from 'react';
+import { createContext, useContext, useId } from 'react';
 import { furById } from '../data/fur';
+import { itemById } from '../data/items';
 import { fluffOf } from '../logic/evolution';
-import { Accessory, AccessoryBack, Cape, Clothes, EffectBack, EffectFront, Glasses, Hat, hidesHeart } from './Wear';
+import { Accessory, AccessoryBack, Cape, Clothes, CostumeBack, CostumeFront, costumeOf, EffectBack, EffectFront, Glasses, Hat, hidesHeart } from './Wear';
 import type { Outfit, PetMood } from '../types';
 
 const INK = '#2B2224';
+
+/** Tamanho do Hami da pessoa (cresce com os dias de cuidado). O App informa; o padrão é o tamanho máximo. */
+export const GrowthContext = createContext(1);
 const NO_OUTFIT: Outfit = { chapeu: null, oculos: null, roupa: null, acessorio: null };
 
 export interface HamsterProps {
@@ -22,14 +26,20 @@ export interface HamsterProps {
   wet?: boolean;
   /** Brilhando depois de escovar ou do banho. */
   shine?: boolean;
+  /** Tamanho (0,5 = recém-nascido, 1 = adulto). Sem valor, usa o tamanho atual do Hami da pessoa. */
+  growth?: number;
 }
 
 /**
  * O Hami: hamster redondo com uma mancha de coração na barriga (a marca do HamiCare).
  * O peso virtual muda a "fofura" (largura e bochechas); as fases mudam postura e detalhes.
  */
-export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', outfit = NO_OUTFIT, size = 180, idle = true, label, neutral, wet, shine }: HamsterProps) {
+export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', outfit = NO_OUTFIT, size = 180, idle = true, label, neutral, wet, shine, growth }: HamsterProps) {
   const fur = furById(furId);
+  const current = useContext(GrowthContext);
+  const k = Math.min(1, Math.max(0.4, neutral ? 1 : growth ?? current));
+  /** Quanto ainda é filhote (0 = adulto, 1 = recém-nascido): olhos maiores e orelhas menores. */
+  const young = Math.min(1, (1 - k) / 0.5);
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
   const f = fluffOf(neutral ? 135 : grams);
   const w = 54 + f * 26;
@@ -40,9 +50,14 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
   const eating = mood === 'comendo';
   const asleep = mood === 'dormindo' || mood === 'sono';
   const body = `M${100 - w} 150 C${100 - w} ${top + 22} ${100 - w * 0.56} ${top} 100 ${top} C${100 + w * 0.56} ${top} ${100 + w} ${top + 22} ${100 + w} 150 C${100 + w} 172 ${100 + w * 0.6} 179 100 179 C${100 - w * 0.6} 179 ${100 - w} 172 ${100 - w} 150 Z`;
-  const earR = 14 + (phase >= 1 ? 2.5 : 0);
+  const earR = (14 + (phase >= 1 ? 2.5 : 0)) * (1 - young * 0.18);
   const pouchR = 8 + f * 7 + (eating ? 9 : 0);
   const geo = { top, w, h, eyeY };
+  // Fantasia de corpo inteiro: capuz com orelhinhas no lugar das orelhas e patinhas da cor da fantasia.
+  const costume = costumeOf(outfit.roupa);
+  const arm = costume ? costume.c1 : fur.shade;
+  const foot = costume ? costume.c2 : fur.ear;
+  const holding = !!outfit.acessorio && itemById(outfit.acessorio)?.base === 'segurar';
 
   return (
     <svg viewBox="0 0 200 200" width={size} height={size} role="img" aria-label={label ?? 'Hami'} className="block overflow-visible">
@@ -55,21 +70,24 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
           <stop offset="100%" stopColor="#FFE07A" stopOpacity="0" />
         </radialGradient>
       </defs>
+      {/* Encolhe a partir dos pés: o filhote fica no chão, no mesmo lugar do adulto. */}
+      <g transform={k < 1 ? `translate(100 188) scale(${k}) translate(-100 -188)` : undefined}>
       {phase >= 3 && <circle cx="100" cy={top + h * 0.55} r="92" fill={`url(#g${uid})`} />}
       <EffectBack id={outfit.efeito} geo={geo} uid={uid} />
       <ellipse cx="100" cy="186" rx={w * 0.85} ry="6.5" fill="rgba(0,0,0,0.13)" />
       <g className={idle && !asleep ? 'pet-idle' : asleep ? 'pet-sleep' : undefined}>
         <Cape id={outfit.roupa} geo={geo} />
         <AccessoryBack id={outfit.acessorio} geo={geo} />
-        {/* Orelhas */}
-        {[-1, 1].map((s) => (
+        {/* Orelhas (ou o capuz da fantasia) */}
+        <CostumeBack id={outfit.roupa} geo={geo} />
+        {!costume && [-1, 1].map((s) => (
           <g key={s}>
             <circle cx={100 + s * w * 0.6} cy={top + 12} r={earR} fill={fur.pattern === 'panda' ? fur.patch : fur.shade} />
             <circle cx={100 + s * w * 0.6} cy={top + 13} r={earR * 0.55} fill={fur.ear} />
           </g>
         ))}
         {/* Bochechas para fora (crescem com a fofura e quando come) */}
-        {!eating && [-1, 1].map((s) => <circle key={s} cx={100 + s * (w - 3)} cy={top + h * 0.52} r={pouchR} fill={fur.body} />)}
+        {!eating && [-1, 1].map((s) => <circle key={s} cx={100 + s * (w - 3)} cy={top + h * 0.52} r={pouchR} fill={costume ? costume.c1 : fur.body} />)}
         <path d={body} fill={fur.body} />
         <g clipPath={`url(#b${uid})`}>
           <path d={`M${100 - w} 150 C${100 - w} 172 ${100 - w * 0.6} 179 100 179 C${100 + w * 0.6} 179 ${100 + w} 172 ${100 + w} 150 C${100 + w * 0.8} 168 ${100 - w * 0.8} 168 ${100 - w} 150 Z`} fill={fur.shade} opacity="0.5" />
@@ -89,20 +107,20 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
           <Clothes id={outfit.roupa} geo={geo} />
         </g>
         <ellipse cx={100 - w * 0.36} cy={top + 18} rx="13" ry="7" fill="#fff" opacity="0.32" transform={`rotate(-22 ${100 - w * 0.36} ${top + 18})`} />
-        {phase === 0 && <path d={`M94 ${top + 4} q3 -11 6 -1 q3 -11 6 0`} stroke={fur.shade} strokeWidth="3.5" strokeLinecap="round" fill="none" />}
+        {phase === 0 && !costume && <path d={`M94 ${top + 4} q3 -11 6 -1 q3 -11 6 0`} stroke={fur.shade} strokeWidth="3.5" strokeLinecap="round" fill="none" />}
         {/* Coração na barriga: a marca do HamiCare */}
         {!hidesHeart(outfit.roupa) && (
           <Heart x={100} y={top + h * 0.74} s={phase >= 3 ? 15 : 12} fill={phase >= 3 ? '#F6C445' : fur.ear} opacity={phase >= 3 ? 1 : 0.5} />
         )}
-        {/* Bracinhos e pezinhos */}
+        {/* Bracinhos e pezinhos (segurando alguma coisa, a patinha direita sobe para a lateral) */}
         {[-1, 1].map((s) => (
           <g key={s}>
-            <ellipse cx={100 + s * w * 0.27} cy={top + h * 0.68} rx="7.5" ry="5.5" fill={fur.shade} transform={`rotate(${s * 30} ${100 + s * w * 0.27} ${top + h * 0.68})`} />
-            <ellipse cx={100 + s * 24} cy="180" rx="11" ry="6" fill={fur.ear} />
+            {!(s === 1 && holding) && <ellipse cx={100 + s * w * 0.27} cy={top + h * 0.68} rx="7.5" ry="5.5" fill={arm} transform={`rotate(${s * 30} ${100 + s * w * 0.27} ${top + h * 0.68})`} />}
+            <ellipse cx={100 + s * 24} cy="180" rx="11" ry="6" fill={foot} />
           </g>
         ))}
         {fur.pattern === 'panda' && [-1, 1].map((s) => <ellipse key={s} cx={100 + s * 19} cy={eyeY} rx="11" ry="12" fill={fur.patch} opacity="0.9" />)}
-        <Face mood={mood} eyeY={eyeY} noseY={noseY} cheek={fur.ear} whisker={fur.shade} />
+        <Face mood={mood} eyeY={eyeY} noseY={noseY} cheek={fur.ear} whisker={fur.shade} eyeK={1 + young * 0.32} />
         {eating && [-1, 1].map((s) => (
           <g key={s}>
             <circle cx={100 + s * (w - 6)} cy={top + h * 0.55} r={pouchR} fill={fur.body} />
@@ -126,11 +144,13 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
             <path className="sparkle" style={{ animationDelay: '0.5s' }} d={`M${100 + w + 4} ${top + h * 0.6} l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z`} fill="#FFF3A6" />
           </g>
         )}
-        <Accessory id={outfit.acessorio} geo={geo} />
+        <CostumeFront id={outfit.roupa} geo={geo} />
+        <Accessory id={outfit.acessorio} geo={geo} paw={arm} />
         <Glasses id={outfit.oculos} eyeY={eyeY} />
         <Hat id={outfit.chapeu} geo={geo} />
         {phase >= 3 && <Sparkles top={top} w={w} />}
         <EffectFront id={outfit.efeito} geo={geo} />
+      </g>
       </g>
       {asleep && (
         <text x={100 + w * 0.7} y={top - 2} className="zzz" fontSize="18" fontWeight="800" fill={INK} opacity="0.6">
@@ -153,12 +173,13 @@ function Heart({ x, y, s, fill, opacity = 1 }: { x: number; y: number; s: number
   );
 }
 
-function Face({ mood, eyeY, noseY, cheek, whisker }: { mood: PetMood; eyeY: number; noseY: number; cheek: string; whisker: string }) {
+function Face({ mood, eyeY, noseY, cheek, whisker, eyeK = 1 }: { mood: PetMood; eyeY: number; noseY: number; cheek: string; whisker: string; eyeK?: number }) {
   const closed = mood === 'calmo' || mood === 'sono' || mood === 'dormindo';
   const happy = mood === 'animado' || mood === 'comendo' || mood === 'risada';
   const wide = mood === 'surpreso' || mood === 'boca';
   return (
     <g>
+      <g transform={eyeK !== 1 ? `translate(100 ${eyeY}) scale(${eyeK}) translate(-100 ${-eyeY})` : undefined}>
       {closed ? (
         <g stroke={INK} strokeWidth="3.2" strokeLinecap="round" fill="none">
           <path d={`M75 ${eyeY} Q81 ${eyeY + 4} 87 ${eyeY}`} />
@@ -186,6 +207,7 @@ function Face({ mood, eyeY, noseY, cheek, whisker }: { mood: PetMood; eyeY: numb
           <circle cx="121.3" cy={eyeY - 3} r="2.3" fill="#fff" />
         </g>
       )}
+      </g>
       <ellipse cx="67" cy={eyeY + 15} rx="9" ry="5.5" fill={cheek} opacity={mood === 'risada' ? 0.95 : 0.55} />
       <ellipse cx="133" cy={eyeY + 15} rx="9" ry="5.5" fill={cheek} opacity={mood === 'risada' ? 0.95 : 0.55} />
       <path d={`M96.5 ${noseY - 2} L103.5 ${noseY - 2} L100 ${noseY + 2.5} Z`} fill="#F07A93" stroke="#F07A93" strokeWidth="2" strokeLinejoin="round" />

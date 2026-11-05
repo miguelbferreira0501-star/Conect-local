@@ -99,7 +99,9 @@ export function CelebrationModal({ c, onClose }: { c: Celebration | undefined; o
   const hide = minor(s) || s.body.hideNumbers;
   const t = JOURNEY_TEXT[s.journey.dir];
   const content: { title: string; text: string; tone: string; icon?: string } =
-    c.type === 'phase'
+    c.type === 'grow'
+      ? { title: `O ${s.pet.name} cresceu!`, text: `Agora ${c.stage >= 7 ? 'ele é um' : 'ele está na fase'} ${c.name}. Cada dia de cuidado faz ele crescer mais um pouquinho.`, tone: 'leaf' }
+      : c.type === 'phase'
       ? { title: `Fase ${PHASES[c.phase]}!`, text: `O ${s.pet.name} evoluiu junto com você. Constância é tudo!`, tone: 'leaf' }
       : c.type === 'achievement'
         ? { title: c.title, icon: c.emoji, text: `Conquista nova! +${c.coins} sementes de girassol.`, tone: 'accent' }

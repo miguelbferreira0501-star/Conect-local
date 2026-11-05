@@ -26,7 +26,7 @@ export function PlusCard({ onOpen, title, text, className = '' }: { onOpen: () =
   return (
     <button className={`plus-card ${className}`} onClick={onOpen} aria-label={`HamiCare+: ${title}. Ver planos`}>
       <span className="plus-card-pet" aria-hidden="true">
-        <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={Math.max(s.pet.phase, 3)} mood="animado" outfit={{ ...s.pet.outfit, chapeu: 'cartola' }} size={74} idle={false} />
+        <Hamster growth={1} fur={s.pet.fur} grams={s.pet.grams} phase={Math.max(s.pet.phase, 3)} mood="animado" outfit={{ ...s.pet.outfit, chapeu: 'cartola' }} size={74} idle={false} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="plus-card-eyebrow">

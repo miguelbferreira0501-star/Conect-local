@@ -46,10 +46,15 @@ describe('as 12 arenas', () => {
       // Roupas são desenhadas no próprio Hami (base); móveis e decoração têm desenho próprio.
       if (i.kind !== 'parede' && i.kind !== 'piso') expect(Boolean(i.base) || hasArt(i.art ?? i.emoji ?? ''), i.id).toBe(true);
     }
-    // Toda peça das casas prontas vem de presente ao abrir a arena.
+    // Toda peça das casas prontas existe: ou é exclusiva da arena (vem de presente), ou é móvel da loja (vem junto com a casa).
     for (const a of G.arenas.filter((x) => x.n > 1)) {
       const gifts = arenaItemsOf(a.n);
-      for (const it of ARENA_HOME[a.n].items) expect(gifts, `${it.itemId} (arena ${a.n})`).toContain(it.itemId);
+      for (const it of ARENA_HOME[a.n].items) {
+        const item = ITEMS.find((i) => i.id === it.itemId);
+        expect(item, it.itemId).toBeTruthy();
+        if (item!.arena) expect(gifts, `${it.itemId} (arena ${a.n})`).toContain(it.itemId);
+        else expect(item!.price, it.itemId).toBeGreaterThan(0);
+      }
     }
   });
 
@@ -111,5 +116,20 @@ describe('casas por arena', () => {
     moveHome(2);
     placeItem('abajur');
     expect(getState().house.items.filter((i) => i.itemId === 'abajur')).toHaveLength(0);
+  });
+});
+
+describe('reforma das casas', () => {
+  it('casa do jeito que veio ganha a decoração nova; casa arrumada pela pessoa fica como está', async () => {
+    const { upgradeHouse, arenaHouse } = await import('./arenas');
+    const old = { wallpaper: 'p-lavanda', floor: 'f-carpete', items: [{ uid: 'a', itemId: 'rodinha', x: 20, y: 74, z: 1 }, { uid: 'b', itemId: 'caminha', x: 79, y: 86, z: 2 }, { uid: 'c', itemId: 'planta', x: 88, y: 62, z: 3 }] };
+    const up = upgradeHouse(old, 1);
+    expect(up.items.map((i) => i.itemId)).toEqual(arenaHouse(1).items.map((i) => i.itemId));
+    expect(up.wallpaper).toBe('p-lavanda');
+    const mine = { ...old, items: [...old.items, { uid: 'd', itemId: 'sofa', x: 30, y: 80, z: 4 }] };
+    expect(upgradeHouse(mine, 1)).toBe(mine);
+    const arena2 = { wallpaper: 'p-jardim', floor: 'f-musgo', items: [{ uid: 'x', itemId: 'casa-passaro', x: 78, y: 46, z: 1 }, { uid: 'y', itemId: 'banco-galho', x: 30, y: 94, z: 2 }] };
+    expect(upgradeHouse(arena2, 2).items.length).toBeGreaterThan(5);
+    expect(upgradeHouse(arenaHouse(3), 3).items).toEqual(arenaHouse(3).items);
   });
 });

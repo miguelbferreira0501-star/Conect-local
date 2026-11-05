@@ -614,13 +614,78 @@ export function Clothes({ id, geo }: { id: string | null; geo: Geo }) {
           ))}
         </g>
       );
+    // ---------- Fantasias de corpo inteiro (capuz com orelhinhas: CostumeBack/CostumeFront) ----------
+    case 'fantasia-coelho':
+    case 'fantasia-urso':
+    case 'fantasia-gato':
+    case 'fantasia-sapo':
+    case 'fantasia-dino':
+    case 'fantasia-unicornio':
+    case 'fantasia-pintinho':
+    case 'fantasia-pinguim': {
+      const suit = c1 ?? '#FFB3CF';
+      const belly = c2 ?? '#FFFFFF';
+      const { eyeY, w } = geo;
+      const fx = 100;
+      const fy = eyeY + 9;
+      const rx = Math.min(44, w * 0.66);
+      const ry = 27;
+      const hole = `M0 0 H200 V200 H0 Z M${fx - rx} ${fy} A${rx} ${ry} 0 1 0 ${fx + rx} ${fy} A${rx} ${ry} 0 1 0 ${fx - rx} ${fy} Z`;
+      return (
+        <g>
+          <path d={hole} fill={suit} fillRule="evenodd" />
+          {/* sombra do lado e brilho do tecido */}
+          <path d={`M${100 + w * 0.55} ${top} Q${100 + w * 1.05} ${top + h * 0.6} ${100 + w * 0.5} 182 L200 182 L200 ${top} Z`} fill="#000" opacity="0.06" />
+          <ellipse cx={fx} cy={fy} rx={rx + 2} ry={ry + 2} fill="none" stroke={belly} strokeWidth="5" opacity="0.95" />
+          <ellipse cx={fx} cy={fy} rx={rx + 5} ry={ry + 5} fill="none" stroke="#000" strokeWidth="1.5" opacity="0.08" />
+          {base === 'fantasia-pinguim' ? (
+            <ellipse cx="100" cy={top + h * 0.82} rx={w * 0.62} ry={h * 0.26} fill={belly} />
+          ) : (
+            <ellipse cx="100" cy={top + h * 0.84} rx={w * 0.5} ry={h * 0.2} fill={belly} opacity="0.95" />
+          )}
+          {base === 'fantasia-dino' && [0.2, 0.4, 0.6].map((t) => <circle key={t} cx={100 - w * 0.6 + t * w * 0.4} cy={top + h * (0.7 + t * 0.2)} r="4" fill={belly} opacity="0.6" />)}
+          {base === 'fantasia-sapo' && <path d={`M${100 - w * 0.3} ${top + h * 0.9} q${w * 0.3} 8 ${w * 0.6} 0`} stroke={belly} strokeWidth="3" fill="none" opacity="0.7" />}
+          {/* zíper de brincadeira */}
+          <path d={`M100 ${fy + ry + 6} V${top + h * 0.72}`} stroke="#000" strokeWidth="1.5" opacity="0.12" strokeDasharray="2 3" />
+        </g>
+      );
+    }
+    // ---------- Vestidos ----------
+    case 'babado': {
+      const cc = c1 ?? '#FF9FC2';
+      const cd = c2 ?? '#FFFFFF';
+      return (
+        <g>
+          {full(cc)}
+          <path d={`M60 ${y + 2} Q100 ${y + 14} 140 ${y + 2} L140 ${y - 4} Q100 ${y + 8} 60 ${y - 4} Z`} fill={cd} />
+          {[0, 1, 2].map((r) => (
+            <path key={r} d={`M20 ${y + 30 + r * 13} ${'q10 8 20 0 '.repeat(8)}`} stroke={cd} strokeWidth="3" fill="none" opacity={0.9 - r * 0.15} />
+          ))}
+          <path d={`M90 ${y + 8} L100 ${y + 14} L90 ${y + 20} Z M110 ${y + 8} L100 ${y + 14} L110 ${y + 20} Z`} fill={cd} />
+          <circle cx="100" cy={y + 14} r="3.5" fill={cd} />
+          {[70, 130].map((x) => <circle key={x} cx={x} cy={y + 22} r="2.5" fill={cd} opacity="0.8" />)}
+        </g>
+      );
+    }
+    case 'estrelado': {
+      const cc = c1 ?? '#7E57D6';
+      const cd = c2 ?? '#FFE27A';
+      return (
+        <g>
+          {full(cc)}
+          <path d={`M0 ${y + 40} Q50 ${y + 34} 100 ${y + 40} T200 ${y + 40} V200 H0 Z`} fill="#FFFFFF" opacity="0.12" />
+          {[[64, 14, 4], [86, 30, 3], [118, 18, 4.5], [138, 36, 3], [100, 48, 3.5], [74, 44, 3]].map(([x, dy, r], i) => <path key={i} d={star(x, y + dy, r)} fill={cd} />)}
+          <path d={`M62 ${y} Q100 ${y + 12} 138 ${y}`} stroke={cd} strokeWidth="3" fill="none" />
+        </g>
+      );
+    }
     default:
       return null;
   }
 }
 
 /** Acessórios da frente (no pescoço e na barriga). */
-export function Accessory({ id, geo }: { id: string | null; geo: Geo }) {
+export function Accessory({ id, geo, paw }: { id: string | null; geo: Geo; paw?: string }) {
   const { top, w, h } = geo;
   const y = top + h * 0.6;
   const it = id ? itemById(id) : undefined;
@@ -720,6 +785,125 @@ export function Accessory({ id, geo }: { id: string | null; geo: Geo }) {
       );
     case 'broche':
       return <path d={heartPath(100 + w * 0.36, y + 8, 10)} fill={c1} stroke={c2} strokeWidth="1.5" />;
+    // ---------- Colares com pingente ----------
+    case 'colar-pingente': {
+      const chain = c2 ?? '#F6C445';
+      const pts = arc(11, 13);
+      const [px, py] = pts[5];
+      return (
+        <g>
+          <path d={`M${pts.map(([x, yy]) => `${x} ${yy}`).join(' L')}`} stroke={chain} strokeWidth="2.6" fill="none" strokeDasharray="3 1.5" strokeLinecap="round" />
+          {it?.id?.includes('estrela') ? <path d={star(px, py + 9, 8)} fill={c1 ?? '#FFD34D'} stroke={chain} strokeWidth="1.5" /> : <path d={heartPath(px, py + 8, 10)} fill={c1 ?? '#FF5E7E'} stroke={chain} strokeWidth="1.5" />}
+          <circle cx={px - 3} cy={py + 5} r="1.6" fill="#FFFFFF" opacity="0.8" />
+        </g>
+      );
+    }
+    case 'colar-ouro': {
+      const pts = arc(13, 14);
+      return (
+        <g>
+          {pts.map(([x, yy], i) => <ellipse key={i} cx={x} cy={yy} rx="3.6" ry="2.6" fill="none" stroke={c1 ?? '#F6C445'} strokeWidth="2" transform={`rotate(${(i - 6) * 8} ${x} ${yy})`} />)}
+          <path d={star(pts[6][0], pts[6][1] + 10, 7)} fill={c2 ?? '#7FB8F0'} stroke={c1 ?? '#F6C445'} strokeWidth="1.5" />
+        </g>
+      );
+    }
+    // ---------- Coisinhas de segurar (na patinha direita) ----------
+    case 'segurar': {
+      // Patinha direita levantada na lateral do corpo; a coisinha fica maior para dar para ver.
+      const px = 100 + w * 0.5;
+      const py = top + h * 0.6;
+      const kind = it?.id?.replace(/^m-/, '') ?? '';
+      const hold = <ellipse cx={px} cy={py + 2} rx="7.5" ry="5.5" fill={paw ?? '#E9A86C'} />;
+      const body = (() => {
+        switch (kind) {
+          case 'suco':
+            return (
+              <g>
+                <path d={`M${px - 9} ${py - 20} H${px + 9} L${px + 7} ${py + 6} H${px - 7} Z`} fill="#DDF0FF" opacity="0.9" />
+                <path d={`M${px - 8} ${py - 12} H${px + 8} L${px + 7} ${py + 6} H${px - 7} Z`} fill={c1 ?? '#FFB347'} />
+                <path d={`M${px + 2} ${py - 20} L${px + 8} ${py - 36}`} stroke={c2 ?? '#FF5E7E'} strokeWidth="3" strokeLinecap="round" />
+                <circle cx={px - 7} cy={py - 20} r="6" fill="#FFD34D" />
+                <circle cx={px - 7} cy={py - 20} r="3.6" fill="#FFE98A" />
+              </g>
+            );
+          case 'microfone':
+            return (
+              <g>
+                <rect x={px - 3.5} y={py - 16} width="7" height="24" rx="3" fill={c2 ?? '#3A3440'} />
+                <circle cx={px} cy={py - 22} r="9" fill={c1 ?? '#C9CED8'} />
+                <path d={`M${px - 7} ${py - 25} h14 M${px - 8} ${py - 21} h16 M${px - 7} ${py - 17} h14`} stroke="#8A90A0" strokeWidth="1.2" />
+                <circle cx={px - 3} cy={py - 26} r="2" fill="#FFFFFF" opacity="0.8" />
+              </g>
+            );
+          case 'cestinha':
+            return (
+              <g>
+                <path d={`M${px - 12} ${py - 16} Q${px} ${py - 36} ${px + 12} ${py - 16}`} stroke="#B8854A" strokeWidth="2.5" fill="none" />
+                {[-6, 0, 6].map((dx, i) => <path key={i} d={`M${px + dx} ${py - 22} q-5 4 0 10 q5 -6 0 -10 Z`} fill={c1 ?? '#F0525F'} />)}
+                <path d={`M${px - 13} ${py - 16} H${px + 13} L${px + 10} ${py + 4} H${px - 10} Z`} fill="#D9A766" />
+                <path d={`M${px - 12} ${py - 9} H${px + 12} M${px - 11} ${py - 3} H${px + 11}`} stroke="#B8854A" strokeWidth="1.5" />
+                <path d={`M${px - 13} ${py - 16} H${px + 13}`} stroke={c2 ?? '#FFFFFF'} strokeWidth="3" />
+              </g>
+            );
+          case 'pirulito':
+            return (
+              <g>
+                <path d={`M${px} ${py + 4} V${py - 22}`} stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" />
+                <circle cx={px} cy={py - 32} r="12" fill={c1 ?? '#FF86AC'} />
+                <path d={`M${px} ${py - 32} m-8 0 a8 8 0 1 1 8 8 a5 5 0 1 1 -5 -5 a2 2 0 1 1 2 2`} stroke={c2 ?? '#FFFFFF'} strokeWidth="2.5" fill="none" />
+              </g>
+            );
+          case 'balao':
+            return (
+              <g>
+                <path d={`M${px} ${py} Q${px + 8} ${py - 24} ${px + 2} ${py - 46}`} stroke="#8A6A4F" strokeWidth="1.2" fill="none" />
+                <ellipse cx={px + 4} cy={py - 62} rx="14" ry="17" fill={c1 ?? '#FF5E7E'} />
+                <path d={`M${px + 1} ${py - 45} l3 -4 3 4 Z`} fill={c1 ?? '#FF5E7E'} />
+                <ellipse cx={px - 1} cy={py - 68} rx="4" ry="6" fill="#FFFFFF" opacity="0.45" />
+              </g>
+            );
+          case 'varinha':
+            return (
+              <g>
+                <path d={`M${px} ${py + 4} L${px + 10} ${py - 26}`} stroke={c2 ?? '#FFFFFF'} strokeWidth="3" strokeLinecap="round" />
+                <path d={star(px + 12, py - 32, 11)} fill={c1 ?? '#FFD34D'} />
+                <path d={sparkle(px + 26, py - 44, 4)} fill={c1 ?? '#FFD34D'} />
+                <path d={sparkle(px - 2, py - 44, 3)} fill={c1 ?? '#FFD34D'} />
+              </g>
+            );
+          case 'girassol':
+            return (
+              <g>
+                <path d={`M${px} ${py + 4} Q${px + 2} ${py - 14} ${px} ${py - 26}`} stroke="#5FAE84" strokeWidth="3" fill="none" />
+                <ellipse cx={px + 6} cy={py - 12} rx="6" ry="3" fill="#7CC39A" transform={`rotate(-30 ${px + 6} ${py - 12})`} />
+                {Array.from({ length: 10 }, (_, i) => {
+                  const a = (i / 10) * Math.PI * 2;
+                  return <ellipse key={i} cx={px + Math.cos(a) * 9} cy={py - 34 + Math.sin(a) * 9} rx="5.5" ry="3" fill={c1 ?? '#FFD34D'} transform={`rotate(${(a * 180) / Math.PI} ${px + Math.cos(a) * 9} ${py - 34 + Math.sin(a) * 9})`} />;
+                })}
+                <circle cx={px} cy={py - 34} r="6" fill={c2 ?? '#8A5A3B'} />
+              </g>
+            );
+          case 'chaveiro':
+            return (
+              <g>
+                <path d={`M${px} ${py} V${py + 10}`} stroke="#8A6A4F" strokeWidth="1.5" />
+                <path d={star(px, py + 22, 12)} fill={c1 ?? '#FFD34D'} stroke={c2 ?? '#E8B020'} strokeWidth="1.5" strokeLinejoin="round" />
+                <circle cx={px - 4} cy={py + 21} r="1.6" fill={INK} />
+                <circle cx={px + 4} cy={py + 21} r="1.6" fill={INK} />
+                <path d={`M${px - 2} ${py + 25} q2 2 4 0`} stroke={INK} strokeWidth="1.2" fill="none" />
+              </g>
+            );
+          default:
+            return null;
+        }
+      })();
+      return (
+        <g transform={`translate(${px} ${py}) scale(1.45) translate(${-px} ${-py})`}>
+          {body}
+          {hold}
+        </g>
+      );
+    }
     default:
       return null;
   }
@@ -912,6 +1096,132 @@ export function EffectFront({ id, geo }: { id: string | null | undefined; geo: G
           ))}
         </g>
       );
+    default:
+      return null;
+  }
+}
+
+// ---------- Fantasias: orelhas e detalhes do capuz ----------
+
+const COSTUMES = new Set(['fantasia-coelho', 'fantasia-urso', 'fantasia-gato', 'fantasia-sapo', 'fantasia-dino', 'fantasia-unicornio', 'fantasia-pintinho', 'fantasia-pinguim']);
+
+/** A roupa é uma fantasia de corpo inteiro? Então o Hami fica de capuz (sem as orelhinhas dele) e com patinhas da cor da fantasia. */
+export function costumeOf(roupa: string | null | undefined): { base: string; c1: string; c2: string } | null {
+  const L = look(roupa, '#FFB3CF', '#FFFFFF');
+  return L.base && COSTUMES.has(L.base) ? { base: L.base, c1: L.c1, c2: L.c2 } : null;
+}
+
+/** Orelhas, espinhos e cristas: atrás do capuz. */
+export function CostumeBack({ id, geo }: { id: string | null | undefined; geo: Geo }) {
+  const c = costumeOf(id);
+  if (!c) return null;
+  const { top, w } = geo;
+  const { base, c1, c2 } = c;
+  const inner = base === 'fantasia-urso' ? c2 : '#FF9FC2';
+  switch (base) {
+    case 'fantasia-coelho':
+      return (
+        <g>
+          {[-1, 1].map((s) => (
+            <g key={s} transform={`rotate(${s * 14} ${100 + s * w * 0.32} ${top + 14})`}>
+              <ellipse cx={100 + s * w * 0.32} cy={top - 22} rx="13" ry="36" fill={c1} />
+              <ellipse cx={100 + s * w * 0.32} cy={top - 20} rx="6.5" ry="26" fill={inner} />
+            </g>
+          ))}
+        </g>
+      );
+    case 'fantasia-urso':
+      return (
+        <g>
+          {[-1, 1].map((s) => (
+            <g key={s}>
+              <circle cx={100 + s * w * 0.58} cy={top + 10} r="17" fill={c1} />
+              <circle cx={100 + s * w * 0.58} cy={top + 11} r="9" fill={inner} />
+            </g>
+          ))}
+        </g>
+      );
+    case 'fantasia-gato':
+      return (
+        <g>
+          {[-1, 1].map((s) => (
+            <g key={s}>
+              <path d={`M${100 + s * w * 0.2} ${top + 12} L${100 + s * w * 0.62} ${top - 26} L${100 + s * w * 0.86} ${top + 24} Z`} fill={c1} strokeLinejoin="round" />
+              <path d={`M${100 + s * w * 0.34} ${top + 10} L${100 + s * w * 0.6} ${top - 14} L${100 + s * w * 0.74} ${top + 16} Z`} fill={inner} />
+            </g>
+          ))}
+        </g>
+      );
+    case 'fantasia-sapo':
+      return (
+        <g>
+          {[-1, 1].map((s) => (
+            <g key={s}>
+              <circle cx={100 + s * w * 0.42} cy={top + 4} r="17" fill={c1} />
+              <circle cx={100 + s * w * 0.42} cy={top + 2} r="10" fill="#FFFFFF" />
+              <circle cx={100 + s * w * 0.42} cy={top + 4} r="5.5" fill={INK} />
+              <circle cx={100 + s * w * 0.42 + 2} cy={top + 1} r="2" fill="#FFFFFF" />
+            </g>
+          ))}
+        </g>
+      );
+    case 'fantasia-dino':
+      return (
+        <g>
+          {[-0.5, -0.2, 0.12, 0.42].map((t, i) => (
+            <path key={i} d={`M${100 + t * w * 1.4 - 12} ${top + 10 + Math.abs(t) * 12} L${100 + t * w * 1.4} ${top - 16 + Math.abs(t) * 14} L${100 + t * w * 1.4 + 12} ${top + 10 + Math.abs(t) * 12} Z`} fill={c2} strokeLinejoin="round" />
+          ))}
+          <path d={`M${100 + w * 0.8} 168 Q${100 + w + 30} 170 ${100 + w + 36} 150 Q${100 + w + 20} 166 ${100 + w * 0.7} 152 Z`} fill={c1} />
+        </g>
+      );
+    case 'fantasia-unicornio':
+      return (
+        <g>
+          {[-1, 1].map((s) => (
+            <g key={s}>
+              <path d={`M${100 + s * w * 0.3} ${top + 12} L${100 + s * w * 0.56} ${top - 16} L${100 + s * w * 0.78} ${top + 20} Z`} fill={c1} />
+              <path d={`M${100 + s * w * 0.42} ${top + 10} L${100 + s * w * 0.56} ${top - 6} L${100 + s * w * 0.68} ${top + 14} Z`} fill={inner} />
+            </g>
+          ))}
+          {['#FF9FC2', '#FFD34D', '#7FD8BE', '#7FB8F0', '#B399F0'].map((col, i) => (
+            <ellipse key={col} cx={100 + w * 0.5 + i * 3} cy={top + 18 + i * 12} rx="11" ry="9" fill={col} />
+          ))}
+        </g>
+      );
+    case 'fantasia-pintinho':
+      return (
+        <g>
+          {[-10, 0, 10].map((dx, i) => (
+            <ellipse key={i} cx={100 + dx} cy={top - 6 - (i === 1 ? 6 : 0)} rx="5" ry="12" fill={c1} transform={`rotate(${dx * 2} ${100 + dx} ${top + 4})`} />
+          ))}
+        </g>
+      );
+    case 'fantasia-pinguim':
+      return <ellipse cx="100" cy={top + 2} rx={w * 0.4} ry="8" fill={c1} />;
+    default:
+      return null;
+  }
+}
+
+/** Detalhes na frente do capuz (chifre do unicórnio, bochechas do sapo, bico do pintinho). */
+export function CostumeFront({ id, geo }: { id: string | null | undefined; geo: Geo }) {
+  const c = costumeOf(id);
+  if (!c) return null;
+  const { top } = geo;
+  switch (c.base) {
+    case 'fantasia-unicornio':
+      return (
+        <g>
+          <path d={`M93 ${top + 8} L100 ${top - 30} L107 ${top + 8} Z`} fill="#FFE27A" stroke="#F2C14E" strokeWidth="1.5" strokeLinejoin="round" />
+          <path d={`M95 ${top - 2} L105 ${top - 6} M96 ${top - 12} L104 ${top - 15}`} stroke="#F2C14E" strokeWidth="1.5" />
+        </g>
+      );
+    case 'fantasia-pintinho':
+      return <path d={`M92 ${top + 16} L100 ${top + 6} L108 ${top + 16} Z`} fill="#FF9A4D" opacity="0.9" />;
+    case 'fantasia-urso':
+    case 'fantasia-gato':
+    case 'fantasia-coelho':
+      return <path d={heartPath(100, top + 16, 6)} fill={c.c2 === '#FFFFFF' ? '#FF9FC2' : c.c2} opacity="0.9" />;
     default:
       return null;
   }
