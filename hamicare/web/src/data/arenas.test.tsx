@@ -76,7 +76,7 @@ describe('as 12 arenas', () => {
 
 describe('casas por arena', () => {
   it('abrir uma arena dá os itens exclusivos e deixa a casa dela pronta, sem mudar o Hami', async () => {
-    start(xpAt(2, G) - 5);
+    start(xpAt(2, G) - 1);
     toggleTask('corrida');
     await new Promise((r) => setTimeout(r, 5));
     const s = getState();

@@ -139,11 +139,11 @@ export default function App() {
   return (
     <>
       <main className="shell">
-        {tab === 'inicio' && <Home onGo={go} onSettings={() => setSettings(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} />}
+        {tab === 'inicio' && <Home onGo={go} onSettings={() => setSettings(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} onPlus={() => setPlus(true)} />}
         {tab === 'cuidar' && <CareArea onShare={(photo) => shareTo({ kind: 'foto', photo })} />}
-        {tab === 'atividades' && <Activities onShareTask={(task) => shareTo({ kind: 'atividade', task })} />}
+        {tab === 'atividades' && <Activities onShareTask={(task) => shareTo({ kind: 'atividade', task })} onPlus={() => setPlus(true)} />}
         {tab === 'mundo' && <World key={worldTab ?? 'mundo'} initialTab={worldTab} onPlus={() => setPlus(true)} onGift={(id) => (setGift(id), go('amigos'))} />}
-        {tab === 'bem-estar' && <Wellbeing />}
+        {tab === 'bem-estar' && <Wellbeing onPlus={() => setPlus(true)} />}
         {tab === 'amigos' && <Friends share={share} onShareDone={() => setShare(null)} giftItem={gift} onGiftDone={() => setGift(null)} account={account} />}
       </main>
       <nav className="tabbar" aria-label="Seções do app">
@@ -156,7 +156,7 @@ export default function App() {
           ))}
         </div>
       </nav>
-      {evolution && <Evolution onClose={() => setEvolution(false)} onShare={(photo) => shareTo({ kind: 'foto', photo })} />}
+      {evolution && <Evolution onClose={() => setEvolution(false)} onShare={(photo) => shareTo({ kind: 'foto', photo })} onPlus={() => setPlus(true)} />}
       <SettingsSheet open={settings} onClose={() => setSettings(false)} onPlus={() => (setSettings(false), setPlus(true))} account={account} />
       <Sheet open={plus} onClose={() => setPlus(false)} title="HamiCare+">
         <Paywall onClose={() => setPlus(false)} />

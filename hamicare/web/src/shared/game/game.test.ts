@@ -44,12 +44,14 @@ describe('níveis', () => {
 
 describe('XP e sementes com limites', () => {
   const day = '2026-11-05';
-  it('missão leve vale 5, normal 10, puxada 15; algumas têm valor próprio', () => {
-    expect(baseGrant({ kind: 'tarefa', id: 'agua', energy: 1, cat: 'habitos', date: day }, G).xp).toBe(5);
-    expect(baseGrant({ kind: 'tarefa', id: 'x', energy: 2, cat: 'habitos', date: day }, G).xp).toBe(10);
-    expect(baseGrant({ kind: 'tarefa', id: 'corrida', energy: 3, cat: 'fitness', date: day }, G).xp).toBe(15);
-    expect(baseGrant({ kind: 'tarefa', id: 'caminhada', energy: 2, cat: 'fitness', date: day }, G).xp).toBe(15);
-    expect(baseGrant({ kind: 'diario', date: day }, G).xp).toBe(10);
+  it('missão leve, normal e puxada valem o XP da configuração; algumas têm valor próprio', () => {
+    expect(baseGrant({ kind: 'tarefa', id: 'agua', energy: 1, cat: 'habitos', date: day }, G).xp).toBe(G.task.xp[0]);
+    expect(baseGrant({ kind: 'tarefa', id: 'x', energy: 2, cat: 'habitos', date: day }, G).xp).toBe(G.task.xp[1]);
+    expect(baseGrant({ kind: 'tarefa', id: 'corrida', energy: 3, cat: 'fitness', date: day }, G).xp).toBe(G.task.xp[2]);
+    expect(baseGrant({ kind: 'tarefa', id: 'caminhada', energy: 2, cat: 'fitness', date: day }, G).xp).toBe(G.task.xpById.caminhada);
+    expect(baseGrant({ kind: 'diario', date: day }, G).xp).toBe(G.small.diario.xp);
+    // Subir de nível é difícil: a missão mais puxada vale bem menos que 1% do caminho até a última arena.
+    expect(G.task.xp[2] / xpAt(12, G)).toBeLessThan(0.001);
   });
 
   it('a mesma coisa tem sempre a mesma referência (não paga duas vezes)', () => {

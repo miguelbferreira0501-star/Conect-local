@@ -1242,7 +1242,7 @@ export function claimSeason(): boolean {
   const today = todayKey();
   const p = seasonProgress(state, today);
   if (p.claimed || p.days < SEASON_GOAL) return false;
-  commit(grant({ ...state, claimed: { ...state.claimed, [`temporada:${today.slice(0, 7)}`]: true } }, { kind: 'temporada', month: today.slice(0, 7), xp: 150, coins: 120 }));
+  commit(grant({ ...state, claimed: { ...state.claimed, [`temporada:${today.slice(0, 7)}`]: true } }, { kind: 'temporada', month: today.slice(0, 7), xp: 30, coins: 120 }));
   return true;
 }
 

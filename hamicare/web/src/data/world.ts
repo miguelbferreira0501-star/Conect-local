@@ -34,7 +34,7 @@ const m = (id: string, title: string, minutes: number, story: string): Mission =
   title,
   minutes,
   coins: minutes <= 15 ? 12 : minutes <= 45 ? 25 : 45,
-  xp: minutes <= 15 ? 15 : minutes <= 45 ? 30 : 55,
+  xp: minutes <= 15 ? 3 : minutes <= 45 ? 6 : 10,
   energy: minutes <= 15 ? 15 : minutes <= 45 ? 25 : 35,
   story,
 });

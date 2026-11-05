@@ -4,6 +4,7 @@ import { Seg, Sheet, toast } from '../components/ui';
 import { KcalChip, useKcalPop } from '../components/Journey';
 import { TaskRow } from '../components/TaskRow';
 import { SeasonBanner } from '../components/Season';
+import { PlusCard } from '../components/PlusCard';
 import { EventsBanner } from './Events';
 import { QuestList } from '../components/QuestList';
 import { CAT_ORDER, CATEGORIES, LIBRARY, TASK_EMOJIS } from '../data/tasks';
@@ -21,7 +22,7 @@ import { Glyph } from '../components/art';
 const BATTERY_ICON = { 1: BatteryLow, 2: BatteryMedium, 3: BatteryFull } as const;
 const PERIOD_LABEL: Record<Period, string> = { dia: 'de hoje', semana: 'da semana', mes: 'do mês' };
 
-export function Activities({ onShareTask }: { onShareTask: (task: Task) => void }) {
+export function Activities({ onShareTask, onPlus }: { onShareTask: (task: Task) => void; onPlus: () => void }) {
   const s = useApp();
   const today = todayKey();
   const day = dayOf(s, today);
@@ -78,6 +79,7 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void 
       )}
 
       <SeasonBanner s={s} />
+      <PlusCard onOpen={onPlus} title="Sua evolução de 6 meses" text="Gráficos de 6 meses, roupas, pelagens e estilos de casa que só o Plus tem." />
 
       <EventsBanner />
 

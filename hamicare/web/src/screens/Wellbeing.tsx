@@ -1,3 +1,4 @@
+import { PlusCard } from '../components/PlusCard';
 import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, Copy, Lock, Phone, Shuffle, Trash2, X } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
@@ -29,7 +30,7 @@ const TOOLS: { id: Exclude<Tool, null>; emoji: string; title: string; desc: stri
   { id: 'quiz', emoji: '🧩', title: 'Quizzes', desc: 'Conhecer o seu jeito', tint: '#FFF1B8' },
 ];
 
-export function Wellbeing() {
+export function Wellbeing({ onPlus }: { onPlus: () => void }) {
   const s = useApp();
   const today = todayKey();
   const day = dayOf(s, today);
@@ -81,6 +82,8 @@ export function Wellbeing() {
         <LineChart points={moodPoints} label="Seu humor" min={1} max={5} tone="var(--accent)" />
         <p className="text-[12px] text-muted">1 = muito difícil · 5 = muito bem. Últimos {range} dias.</p>
       </section>
+
+      <PlusCard onOpen={onPlus} title="Seu humor em 6 meses" text="Com o Plus, os gráficos de humor e de bem-estar mostram 6 meses, não só 30 dias." />
 
       <Journal />
 
