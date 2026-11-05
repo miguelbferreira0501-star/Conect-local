@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Check, Crown } from 'lucide-react';
+import { Check, ChevronLeft, Crown } from 'lucide-react';
 import { PLUS_COUNTS, PLUS_PRICE } from '../components/PlusCard';
 import { Hamster } from '../components/Hamster';
+import { ItemIcon } from '../components/ItemIcon';
 import { itemById } from '../data/items';
 import { toast } from '../components/ui';
 import { isPremium, startTrial, useApp } from '../lib/store';
@@ -11,7 +12,10 @@ import { formatDay } from '../lib/util';
 
 export { PLUS_PRICE };
 
-const PARADE = ['fantasia-dragao-roxo', 'fantasia-tubarao', 'fantasia-panda', 'fantasia-morango'];
+const PARADE = ['fantasia-dragao-roxo', 'fantasia-tubarao', 'fantasia-panda'];
+/** Dias grátis de cada plano (o servidor confere: anual 7, mensal 3). */
+export const TRIAL_DAYS = { anual: 7, mensal: 3 } as const;
+type Plan = keyof typeof TRIAL_DAYS;
 
 type Row = [string, string | boolean, string | boolean];
 const ROWS: Row[] = [
@@ -25,99 +29,186 @@ const ROWS: Row[] = [
   ['Estatísticas de evolução e humor', '30 dias', '6 meses'],
 ];
 
-const cell = (v: string | boolean) => (v === true ? <Check size={18} className="mx-auto text-leaf" aria-label="sim" /> : v === false ? <span className="text-muted" aria-label="não">—</span> : <b>{v}</b>);
+const cell = (v: string | boolean) => (v === true ? <Check size={18} className="mx-auto" aria-label="sim" /> : v === false ? <span className="opacity-60" aria-label="não">—</span> : <b>{v}</b>);
 
-/** HamiCare+: o essencial de autocuidado é sempre grátis. */
+function Compare() {
+  return (
+    <div className="plan-table pw-table" role="table" aria-label="Grátis e Plus">
+      <div className="plan-row plan-head" role="row">
+        <span role="columnheader" />
+        <span role="columnheader">Grátis</span>
+        <span role="columnheader" className="is-plus">
+          <Crown size={14} /> Plus
+        </span>
+      </div>
+      {ROWS.map(([label, free, plus]) => (
+        <div key={label} className="plan-row" role="row">
+          <span role="cell">{label}</span>
+          <span role="cell">{cell(free)}</span>
+          <span role="cell" className="is-plus">
+            {cell(plus)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** HamiCare+ em duas etapas: o que muda (com o Hami vestido) e a escolha do plano. O essencial de autocuidado é sempre grátis. */
 export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () => void; fromOnboarding?: boolean; fur?: string; name?: string }) {
   const s = useApp();
   const { user } = useAccount();
   const premium = isPremium(s);
-  const [plan, setPlan] = useState<'anual' | 'mensal'>('anual');
-  return (
-    <div className="grid gap-4">
-      <div className="grid justify-items-center gap-1 text-center">
-        <Hamster growth={1} fur={fur ?? s.pet.fur} grams={s.pet.grams} phase={Math.max(s.pet.phase, 3)} mood="animado" outfit={{ ...s.pet.outfit, chapeu: 'cartola' }} size={150} />
-        <p className="eyebrow flex items-center gap-1">
-          <Crown size={14} /> HamiCare+
-        </p>
-        <h2 className="font-display text-[28px] font-bold leading-tight">Mais mimos para o {name ?? (s.pet.name || 'Hami')}</h2>
-        <p className="max-w-[34ch] text-[15px] text-muted">Tudo que é cuidado de verdade continua grátis. O Plus é para quem quer mais fofura e mais mundo.</p>
-      </div>
+  const trialFree = !s.premium.trialStart && !user?.trialUsed;
+  const [step, setStep] = useState<'intro' | 'planos'>('intro');
+  const [plan, setPlan] = useState<Plan>('anual');
+  const [compare, setCompare] = useState(false);
+  const pet = name ?? (s.pet.name || 'Hami');
+  const petFur = fur ?? s.pet.fur;
+  const later = fromOnboarding ? 'Continuar grátis' : 'Agora não';
 
-      {/* Um gostinho da coleção do Plus, com a pelagem do próprio Hami */}
-      <div className="grid gap-1">
-        <div className="plus-parade" aria-label="Algumas fantasias do Plus">
-          {PARADE.map((id) => (
-            <Hamster key={id} growth={1} fur={fur ?? s.pet.fur} outfit={{ chapeu: null, oculos: null, roupa: id, acessorio: null, efeito: null }} size={84} idle={false} mood="feliz" label={itemById(id)?.name} />
-          ))}
-        </div>
-        <p className="text-center text-[13px] font-semibold text-muted">Fantasias de dragão, tubarão, panda e moranguinho, cama com dossel, castelinho, piano, neon e muito mais.</p>
-      </div>
+  async function begin() {
+    const days = TRIAL_DAYS[plan];
+    const msg = `${days} dias de Plus liberados!`;
+    if (user) {
+      try {
+        await startTrialOnServer(plan);
+        toast(msg);
+      } catch (e) {
+        toast(e instanceof ApiError ? e.message : 'Não deu certo agora.');
+      }
+    } else if (startTrial(days)) toast(msg);
+    onClose();
+  }
 
-      <div className="plan-table" role="table" aria-label="Grátis e Plus">
-        <div className="plan-row plan-head" role="row">
-          <span role="columnheader" />
-          <span role="columnheader">Grátis</span>
-          <span role="columnheader" className="is-plus">
-            <Crown size={14} /> Plus
-          </span>
-        </div>
-        {ROWS.map(([label, free, plus]) => (
-          <div key={label} className="plan-row" role="row">
-            <span role="cell">{label}</span>
-            <span role="cell">{cell(free)}</span>
-            <span role="cell" className="is-plus">
-              {cell(plus)}
+  if (premium) {
+    return (
+      <div className="pw grid gap-4">
+        <Parade fur={petFur} />
+        <h2 className="pw-title">O {pet} já é Plus! 💛</h2>
+        <p className="rounded-2xl bg-white/15 p-4 text-center font-bold">Plus ativo até {formatDay(s.premium.until!, { day: 'numeric', month: 'long' })}.</p>
+        <Compare />
+        <button className="pw-later" onClick={onClose}>
+          Voltar
+        </button>
+      </div>
+    );
+  }
+
+  if (step === 'intro') {
+    return (
+      <div className="pw grid gap-5">
+        <Parade fur={petFur} />
+        <h2 className="pw-title">
+          Com o Plus, cuidar de você fica <span className="pw-hl">ainda mais gostoso!</span>
+        </h2>
+        <ul className="pw-benefits">
+          <li>
+            <span className="pw-ico">
+              <Hamster growth={1} fur={petFur} outfit={{ chapeu: null, oculos: null, roupa: 'fantasia-raposa', acessorio: null, efeito: null }} size={56} idle={false} mood="feliz" label="Hami de raposinha" />
             </span>
-          </div>
-        ))}
+            <span>
+              <b>Deixe o {pet} do seu jeito</b>
+              Fantasias, roupas e móveis exclusivos: são {PLUS_COUNTS.items} itens só do Plus.
+            </span>
+          </li>
+          <li>
+            <span className="pw-ico">{itemById('k-cama-dossel-rosa') && <ItemIcon item={itemById('k-cama-dossel-rosa')!} size={30} />}</span>
+            <span>
+              <b>Mimos novos todo dia</b>
+              Vitrine especial, casas prontas e pelagens raras, só pra você.
+            </span>
+          </li>
+          <li>
+            <span className="pw-ico">
+              <Hamster growth={1} fur={petFur} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: 'm-pelucia', efeito: null }} size={56} idle={false} mood="animado" label="Hami com pelúcia" />
+            </span>
+            <span>
+              <b>Apoie nossa missão</b>
+              Você ajuda a manter o HamiCare grátis no essencial para quem precisa se cuidar.
+            </span>
+          </li>
+        </ul>
+        <button className="pw-cta" onClick={() => setStep('planos')}>
+          {trialFree ? 'Testar por R$ 0,00' : 'Ver planos'}
+        </button>
+        <button className="pw-later" onClick={onClose}>
+          {later}
+        </button>
       </div>
+    );
+  }
 
-      {premium ? (
-        <p className="rounded-2xl bg-leaf-soft p-4 text-center font-bold">Plus ativo até {formatDay(s.premium.until!, { day: 'numeric', month: 'long' })}.</p>
-      ) : (
-        <>
-          <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Planos">
-            <button className={`plan-card ${plan === 'anual' ? 'is-on' : ''}`} role="radio" aria-checked={plan === 'anual'} onClick={() => setPlan('anual')}>
-              <span className="plan-badge">Economize {PLUS_PRICE.saving}</span>
-              <span className="text-[13px] font-bold text-muted">Anual</span>
-              <span className="font-display text-[22px] font-bold leading-tight">{PLUS_PRICE.year}</span>
-              <span className="text-[12px] text-muted">≈ {PLUS_PRICE.yearMonthly} por mês</span>
-            </button>
-            <button className={`plan-card ${plan === 'mensal' ? 'is-on' : ''}`} role="radio" aria-checked={plan === 'mensal'} onClick={() => setPlan('mensal')}>
-              <span className="text-[13px] font-bold text-muted">Mensal</span>
-              <span className="font-display text-[22px] font-bold leading-tight">{PLUS_PRICE.month}</span>
-              <span className="text-[12px] text-muted">cancele quando quiser</span>
-            </button>
-          </div>
-          {s.premium.trialStart ? (
-            <p className="rounded-2xl bg-surface2 p-4 text-center text-[15px] text-muted">
-              Seu teste grátis já foi usado. A assinatura do plano {plan} chega em breve pela Google Play, pela App Store e no Pix.
-            </p>
-          ) : (
-            <button
-              className="btn btn-primary"
-              onClick={async () => {
-                if (user) {
-                  try {
-                    await startTrialOnServer();
-                    toast('7 dias de Plus liberados!');
-                  } catch (e) {
-                    toast(e instanceof ApiError ? e.message : 'Não deu certo agora.');
-                  }
-                } else if (startTrial()) toast('7 dias de Plus liberados!');
-                onClose();
-              }}
-            >
-              Testar 7 dias grátis
-            </button>
-          )}
-        </>
-      )}
-      <button className="btn btn-ghost" onClick={onClose}>
-        {fromOnboarding ? 'Continuar grátis' : 'Voltar'}
+  return (
+    <div className="pw grid gap-4">
+      <button className="pw-back" onClick={() => setStep('intro')} aria-label="Voltar">
+        <ChevronLeft size={22} />
       </button>
-      <p className="text-center text-[12px] text-muted">O teste não pede cartão e não vira assinatura sozinho. Depois dele, o plano {plan} custa {plan === 'anual' ? `${PLUS_PRICE.year} por ano` : `${PLUS_PRICE.month} por mês`}.</p>
+      <h2 className="pw-title">{trialFree ? 'Escolha seu plano e comece o teste grátis' : 'Escolha seu plano'}</h2>
+      <div className="grid gap-3" role="radiogroup" aria-label="Planos">
+        <button className={`pw-plan ${plan === 'anual' ? 'is-on' : ''}`} role="radio" aria-checked={plan === 'anual'} onClick={() => setPlan('anual')}>
+          <span className="pw-badge">MELHOR OFERTA</span>
+          <b className="text-[19px]">12 meses</b>
+          <span>
+            <s className="opacity-70">{PLUS_PRICE.yearFull}</s> {PLUS_PRICE.year} ({PLUS_PRICE.yearMonthly}/mês)
+          </span>
+          <span className="text-[14px] opacity-85">{trialFree ? `${TRIAL_DAYS.anual} dias grátis · ` : ''}economize {PLUS_PRICE.saving}</span>
+        </button>
+        <button className={`pw-plan ${plan === 'mensal' ? 'is-on' : ''}`} role="radio" aria-checked={plan === 'mensal'} onClick={() => setPlan('mensal')}>
+          <b className="text-[19px]">Mensal</b>
+          <span>{PLUS_PRICE.month} por mês</span>
+          {trialFree && <span className="text-[14px] opacity-85">{TRIAL_DAYS.mensal} dias grátis</span>}
+        </button>
+      </div>
+      <button className="pw-link" onClick={() => setCompare(!compare)} aria-expanded={compare}>
+        {compare ? 'Esconder o que muda' : 'Comparar Grátis e Plus'}
+      </button>
+      {compare && <Compare />}
+      <div className="pw-laurel" aria-label="O essencial é sempre grátis e sem anúncios">
+        <Laurel />
+        <span>
+          <b>O essencial é sempre grátis</b>
+          Sem anúncios
+        </span>
+        <Laurel flip />
+      </div>
+      {trialFree ? (
+        <>
+          <p className="text-center text-[13px] opacity-90">O teste não pede cartão e não vira assinatura sozinho. Depois dele, o plano {plan} custa {plan === 'anual' ? `${PLUS_PRICE.year} por ano` : `${PLUS_PRICE.month} por mês`}. Cancele quando quiser.</p>
+          <button className="pw-cta" onClick={begin}>
+            Começar meus {TRIAL_DAYS[plan]} dias grátis
+          </button>
+        </>
+      ) : (
+        <p className="rounded-2xl bg-white/15 p-4 text-center text-[14px]">Seu teste grátis já foi usado. A assinatura do plano {plan} chega em breve pela Google Play, pela App Store e no Pix.</p>
+      )}
+      <button className="pw-later" onClick={onClose}>
+        {later}
+      </button>
     </div>
+  );
+}
+
+function Parade({ fur }: { fur: string }) {
+  return (
+    <div className="pw-parade" aria-label="Fantasias do Plus">
+      {PARADE.map((id, i) => (
+        <Hamster key={id} growth={1} fur={fur} outfit={{ chapeu: null, oculos: null, roupa: id, acessorio: null, efeito: null }} size={i === 1 ? 108 : 96} idle={false} mood={i === 1 ? 'surpreso' : i === 0 ? 'animado' : 'calmo'} label={itemById(id)?.name} />
+      ))}
+    </div>
+  );
+}
+
+function Laurel({ flip }: { flip?: boolean }) {
+  return (
+    <svg viewBox="0 0 34 64" width="28" height="54" aria-hidden="true" style={{ transform: flip ? 'scaleX(-1)' : undefined }}>
+      <path d="M26 62 Q6 46 14 4" stroke="#F6B94A" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      {[[22, 54, -60], [15, 44, -50], [11, 33, -35], [11, 22, -20], [13, 11, -5]].map(([x, y, r]) => (
+        <ellipse key={y} cx={x - 5} cy={y} rx="4.5" ry="8.5" fill="#F6B94A" transform={`rotate(${r} ${x - 5} ${y})`} />
+      ))}
+      {[[22, 54], [15, 44], [11, 33]].map(([x, y]) => (
+        <ellipse key={y} cx={x + 5} cy={y - 4} rx="3.5" ry="7" fill="#F6B94A" opacity="0.85" transform={`rotate(35 ${x + 5} ${y - 4})`} />
+      ))}
+    </svg>
   );
 }

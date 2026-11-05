@@ -7,7 +7,8 @@ import { ITEMS, STYLES } from '../data/items';
 import { FURS } from '../data/fur';
 import type { State } from '../types';
 
-export const PLUS_PRICE = { month: 'R$ 12,90', year: 'R$ 79,90', yearMonthly: 'R$ 6,66', saving: '48%' };
+/** Preços do HamiCare+. yearFull = 12 × o mensal (para mostrar quanto o anual economiza). */
+export const PLUS_PRICE = { month: 'R$ 49,90', year: 'R$ 329,90', yearMonthly: 'R$ 27,49', yearFull: 'R$ 598,80', saving: '45%' };
 
 /** Quanto conteúdo é só do Plus (para mostrar números de verdade). */
 export const PLUS_COUNTS = {

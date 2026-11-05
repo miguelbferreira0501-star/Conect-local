@@ -166,7 +166,10 @@ account.put('/state', requireAuth, async (c) => {
 // ---------- HamiCare+ ----------
 
 account.post('/plus/trial', requireAuth, async (c) => {
-  const until = await withUser(c.get('userId'), (db) => db.query('SELECT app.start_trial() AS until').then((r) => r.rows[0]?.until));
+  // Anual: 7 dias grátis; mensal: 3 dias (sem plano, vale o anual).
+  const body = (await c.req.json().catch(() => ({}))) as { plan?: string };
+  const days = body?.plan === 'mensal' ? 3 : 7;
+  const until = await withUser(c.get('userId'), (db) => db.query('SELECT app.start_trial($1::int) AS until', [days]).then((r) => r.rows[0]?.until));
   if (!until) throw new AppError(409, 'teste_usado', 'O teste grátis já foi usado nesta conta.');
   return c.json({ premiumUntil: until });
 });
