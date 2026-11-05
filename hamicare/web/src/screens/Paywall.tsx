@@ -32,7 +32,7 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
   return (
     <div className="grid gap-4">
       <div className="grid justify-items-center gap-1 text-center">
-        <Hamster fur={fur ?? s.pet.fur} grams={s.pet.grams} phase={Math.max(s.pet.phase, 3)} mood="animado" outfit={{ ...s.pet.outfit, chapeu: 'cartola' }} size={150} />
+        <Hamster growth={1} fur={fur ?? s.pet.fur} grams={s.pet.grams} phase={Math.max(s.pet.phase, 3)} mood="animado" outfit={{ ...s.pet.outfit, chapeu: 'cartola' }} size={150} />
         <p className="eyebrow flex items-center gap-1">
           <Crown size={14} /> HamiCare+
         </p>

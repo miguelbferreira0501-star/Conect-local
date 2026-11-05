@@ -1,8 +1,8 @@
 // Cuidados com o Hami: cafuné, lanchinho arrastável, banho com ferramentas de verdade,
 // dois jogos de brincar, escovar os nós do pelo, hora de nanar, conversar e foto.
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { X } from 'lucide-react';
-import { Hamster } from '../components/Hamster';
+import { GrowthContext, Hamster } from '../components/Hamster';
 import { Room } from '../components/Room';
 import { Sheet, toast } from '../components/ui';
 import { ITEMS, RECIPES, itemById } from '../data/items';
@@ -95,30 +95,38 @@ function animate(el: Element | null | undefined, move: Move) {
 function useStage() {
   const stage = useRef<HTMLDivElement>(null);
   const pet = useRef<HTMLDivElement>(null);
+  // O desenho encolhe a partir dos pés quando o Hami é filhote: as áreas de toque acompanham.
+  const g = useContext(GrowthContext);
   const local = useCallback((cx: number, cy: number) => {
     const r = stage.current?.getBoundingClientRect();
     return r ? { x: cx - r.left, y: cy - r.top } : { x: 0, y: 0 };
   }, []);
   /** Em cima do corpo do Hami (coordenadas da tela). */
-  const over = useCallback((cx: number, cy: number, pad = 0) => {
-    const r = pet.current?.getBoundingClientRect();
-    if (!r) return false;
-    const x0 = r.left + r.width / 2;
-    const y0 = r.top + r.height * 0.6;
-    const rx = r.width * 0.36 + pad;
-    const ry = r.height * 0.36 + pad;
-    return ((cx - x0) / rx) ** 2 + ((cy - y0) / ry) ** 2 <= 1;
-  }, []);
+  const over = useCallback(
+    (cx: number, cy: number, pad = 0) => {
+      const r = pet.current?.getBoundingClientRect();
+      if (!r) return false;
+      const x0 = r.left + r.width / 2;
+      const y0 = r.top + r.height * (0.94 - 0.34 * g);
+      const rx = r.width * 0.36 * g + pad;
+      const ry = r.height * 0.36 * g + pad;
+      return ((cx - x0) / rx) ** 2 + ((cy - y0) / ry) ** 2 <= 1;
+    },
+    [g],
+  );
   /** Parte do Hami: 0 = topo da cabeça, 1 = pés. */
-  const part = useCallback((cy: number) => {
-    const r = pet.current?.getBoundingClientRect();
-    return r ? (cy - r.top) / r.height : 0.5;
-  }, []);
+  const part = useCallback(
+    (cy: number) => {
+      const r = pet.current?.getBoundingClientRect();
+      return r ? (cy - (r.top + r.height * 0.94 * (1 - g))) / (r.height * g) : 0.5;
+    },
+    [g],
+  );
   /** Boca do Hami, em coordenadas da tela. */
   const mouth = useCallback(() => {
     const r = pet.current?.getBoundingClientRect();
-    return r ? { x: r.left + r.width / 2, y: r.top + r.height * 0.6 } : { x: 0, y: 0 };
-  }, []);
+    return r ? { x: r.left + r.width / 2, y: r.top + r.height * (0.94 - 0.34 * g) } : { x: 0, y: 0 };
+  }, [g]);
   return { stage, pet, local, over, part, mouth };
 }
 

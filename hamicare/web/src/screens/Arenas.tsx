@@ -144,8 +144,8 @@ function ArenaSheet({ n, onClose, onHouse }: { n: number | null; onClose: () => 
     <Sheet open={n != null} onClose={onClose} title={a.name}>
       <div className="grid gap-4">
         {peek && unlocked ? (
-          <Room house={houseOf(s, a.n)} period={periodOf()} height={240}>
-            <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={110} label={s.pet.name} />
+          <Room house={houseOf(s, a.n)} period={periodOf()} height={320}>
+            <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={124} label={s.pet.name} />
           </Room>
         ) : (
           <ArenaScene arena={a.id} height={220} locked={!unlocked}>

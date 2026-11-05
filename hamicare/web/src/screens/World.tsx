@@ -75,8 +75,8 @@ function HouseTab({ onArenas }: { onArenas: () => void }) {
           Trocar de casa
         </button>
       </div>
-      <Room house={s.house} period={periodOf()} height={300} editing={editing} selected={sel} onSelect={setSel} onMove={moveItem}>
-        {!s.adventure && <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={s.pet.sleeping ? 'dormindo' : 'feliz'} size={130} label={s.pet.name} />}
+      <Room house={s.house} period={periodOf()} height={400} editing={editing} selected={sel} onSelect={setSel} onMove={moveItem}>
+        {!s.adventure && <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={s.pet.sleeping ? 'dormindo' : 'feliz'} size={150} label={s.pet.name} />}
       </Room>
       <div className="flex gap-2">
         <button className={`btn flex-1 ${editing ? 'btn-primary' : 'btn-soft'}`} onClick={() => (setEditing(!editing), setSel(null))}>
@@ -523,7 +523,7 @@ function ShopCard({ item, onPlus, onGift, onTry }: { item: Item; onPlus: () => v
       </button>
       <button className="grid h-[80px] place-items-center rounded-2xl bg-surface2" onClick={onTry} aria-label={`Experimentar ${item.name}`} disabled={!onTry}>
         {isWear ? (
-          <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null, [item.kind]: item.id }} size={80} idle={false} label={item.name} />
+          <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null, [item.kind]: item.id }} size={80} idle={false} label={item.name} growth={1} />
         ) : (
           <ItemIcon item={item} size={36} />
         )}

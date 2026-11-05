@@ -1,6 +1,8 @@
 // Móveis desenhados em SVG (os que não existem como emoji). Cores de ilustração.
+import { Kit } from './room/kit';
 
-export function Furniture({ id }: { id: string }) {
+export function Furniture({ id, c1, c2 }: { id: string; c1?: string; c2?: string }) {
+  if (id.startsWith('k-')) return <Kit id={id} c1={c1} c2={c2} />;
   switch (id) {
     case 'rodinha':
       return (

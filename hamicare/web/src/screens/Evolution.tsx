@@ -2,6 +2,7 @@ import { PlusCard } from '../components/PlusCard';
 import { useState } from 'react';
 import { Lock, Trash2, X } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
+import { GrowthCard } from '../components/Growth';
 import { Bar, LineChart, Modal, toast } from '../components/ui';
 import { BAND, DAY_CAP, KCAL_PER_KG, PHASES, PHASE_MIN, REF_KG, conditioning, dayKcal, defaultGoalKg, rapidChange, recentAverageKg } from '../logic/evolution';
 import { ACHIEVEMENTS, countIn } from '../logic/progress';
@@ -74,13 +75,15 @@ export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; o
           </button>
         </div>
 
+        <GrowthCard s={s} />
+
         <section className="card grid gap-3 p-4" aria-label="Fases">
           <h2 className="font-display text-[20px] font-bold">Fases do {s.pet.name}</h2>
           <div className="grid grid-cols-4 gap-1">
             {PHASES.map((name, i) => (
               <div key={name} className={`grid justify-items-center gap-1 rounded-2xl p-1 ${i === s.pet.phase ? 'bg-accent-soft' : ''}`}>
                 <div style={{ opacity: i <= s.pet.phase ? 1 : 0.28, filter: i <= s.pet.phase ? 'none' : 'grayscale(1)' }}>
-                  <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={i} size={74} idle={false} label={`Fase ${name}`} />
+                  <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={i} size={74} idle={false} label={`Fase ${name}`} growth={1} />
                 </div>
                 <span className="text-center text-[10.5px] font-extrabold leading-tight [overflow-wrap:anywhere]">{name}</span>
                 {i > s.pet.phase && <Lock size={12} className="text-muted" />}

@@ -101,6 +101,8 @@ export interface PetState {
   weighIns: { date: string; grams: number }[];
   /** Maior fase alcançada (0 a 3). Nunca diminui. */
   phase: number;
+  /** Maior fase de crescimento já comemorada (logic/growth.ts). */
+  growStage?: number;
   stats: PetStats;
   statsAt: number;
   sleeping: boolean;

@@ -1,3 +1,4 @@
+import { GrowthPill } from '../components/Growth';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Flame, Mail, Plus, Settings } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
@@ -179,6 +180,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
         )}
       </section>
 
+      <GrowthPill s={s} onClick={onEvolution} />
       <AreaPill onClick={() => setAreaOpen(true)} />
       <JourneyCard s={s} onOpen={onEvolution} onCalm={(a) => (requestTool(a), onGo('bem-estar'))} />
       <TeamHomeCard onOpen={onTeam} />

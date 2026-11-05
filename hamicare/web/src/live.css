@@ -2607,3 +2607,91 @@
 .opt.is-on {
   border-color: var(--accent);
 }
+
+/* ---------- Crescimento do Hami ---------- */
+.growth-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  background: var(--surface, #fff);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.06);
+  color: var(--ink);
+}
+.growth-pill:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+.growth-pill-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: #e2f6e4;
+  font-size: 18px;
+}
+.growth-pill-name {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+.growth-pill-next {
+  font-weight: 600;
+  color: var(--muted);
+}
+.growth-pill-bar {
+  display: block;
+  width: 100%;
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(43, 34, 64, 0.1);
+  overflow: hidden;
+}
+.growth-pill-bar > span {
+  display: block;
+  height: 100%;
+  min-width: 6px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #7bd389, #3e9c55);
+}
+.growth-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px 4px;
+}
+.growth-step {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 4px 2px;
+  border-radius: 14px;
+}
+.growth-step.is-now {
+  background: var(--accent-soft, #ffe3ec);
+}
+.growth-pet {
+  display: grid;
+  place-items: end center;
+  height: 52px;
+}
+.growth-step-name {
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* Ícone de móvel na loja: o desenho cabe inteiro na caixinha (cama larga ou luminária alta). */
+.kit-icon {
+  display: grid;
+  place-items: center;
+}
+.kit-icon svg {
+  width: 100%;
+  height: 100%;
+}
