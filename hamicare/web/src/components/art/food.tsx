@@ -401,10 +401,24 @@ export const FOOD: Record<string, Draw> = {
   ),
   '🍽️': () => (
     <g>
-      <circle cx="32" cy="32" r="20" fill="#fff" />
-      <circle cx="32" cy="32" r="14" fill={C.gray} opacity="0.5" />
-      <path d="M6 10 V24 Q6 28 9 28 V56 M9 10 V22 M12 10 V24 Q12 28 9 28" stroke={C.grayD} strokeWidth="2.4" fill="none" strokeLinecap="round" />
-      <path d="M56 56 V34 Q52 32 52 22 Q52 10 56 10Z" fill={C.grayD} />
+      {/* Sombra */}
+      <ellipse cx="32.5" cy="54" rx="16" ry="2.4" fill="#2B2240" opacity="0.08" />
+      {/* Prato: borda com contorno para aparecer em fundo branco */}
+      <circle cx="32.5" cy="32" r="19" fill="#FFFFFF" stroke="#C9D1DF" strokeWidth="2.2" />
+      <circle cx="32.5" cy="32" r="15.8" fill="none" stroke="#FFB8CB" strokeWidth="1.3" strokeDasharray="2.2 2.6" />
+      <circle cx="32.5" cy="32" r="12.5" fill="#EEF2F8" stroke="#DCE2EC" strokeWidth="1.6" />
+      <path d="M24.5 25 Q28 21 33 20.5" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" fill="none" />
+      {/* Garfo */}
+      <g fill="#8E98AC">
+        <rect x="5.6" y="9" width="1.8" height="10" rx="0.9" />
+        <rect x="8.4" y="9" width="1.8" height="10" rx="0.9" />
+        <rect x="11.2" y="9" width="1.8" height="10" rx="0.9" />
+        <path d="M5.6 17.5 H13 Q13 22.5 10.6 24 L10.9 52.5 Q10.9 54.5 9.3 54.5 Q7.7 54.5 7.7 52.5 L8 24 Q5.6 22.5 5.6 17.5Z" />
+      </g>
+      {/* Faca */}
+      <path d="M53.6 9 Q59.6 12 59.4 31 H53.6Z" fill="#B9C2D2" />
+      <path d="M55 12 Q57.4 16 57.6 28" stroke="#FFFFFF" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.8" />
+      <rect x="53.4" y="30" width="6" height="24.5" rx="3" fill="#8E98AC" />
     </g>
   ),
 };
