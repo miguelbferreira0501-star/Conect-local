@@ -1,7 +1,6 @@
 import { useGrowth } from '../components/Growth';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Flame, Mail, Plus, Settings } from 'lucide-react';
-import { Hamster } from '../components/Hamster';
 import { ArenaScene } from '../components/ArenaScene';
 import { ArenaPin, arenaByN } from './Arenas';
 import { WalletSheet } from './Collection';
@@ -22,6 +21,7 @@ import { AreaSheet } from '../components/AreaSheet';
 import { AREAS } from '../logic/areas';
 import { requestTool } from './Wellbeing';
 import { CompanionBuddy } from './Companions';
+import { LivePet } from '../components/LivePet';
 
 export function useNow(ms: number) {
   const [now, setNow] = useState(Date.now());
@@ -43,7 +43,6 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
   const done = tasks.filter((t) => t.id in day.done).length;
   const period = periodOf(new Date(now));
   const streak = streakOf(s.days, today, s.createdAt);
-  const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
   const [result, setResult] = useState<AdventureResult | null>(null);
   const petRef = useRef<HTMLDivElement>(null);
   const [mood, setMoodAnim] = useState<PetMood | null>(null);
@@ -68,21 +67,6 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
         : [{ transform: 'translateY(0) scale(1,1)' }, { transform: 'translateY(0) scale(1.1,0.9)', offset: 0.15 }, { transform: 'translateY(-34px) scale(0.95,1.06)', offset: 0.45 }, { transform: 'translateY(0) scale(1.08,0.92)', offset: 0.8 }, { transform: 'translateY(0) scale(1,1)' }],
       { duration: kind === 'squish' ? 480 : 700, easing: 'cubic-bezier(0.23,1,0.32,1)' },
     );
-  }
-
-  // Tocar no Hami: só um carinho rápido (os cuidados completos ficam na aba Cuidar).
-  function pet(e?: React.PointerEvent) {
-    if (s.pet.sleeping) return toast(`${s.pet.name} está dormindo. Shhh…`);
-    doCare('carinho');
-    const r = petRef.current?.getBoundingClientRect();
-    const x = e && r ? e.clientX - r.left : 85;
-    const y = e && r ? e.clientY - r.top : 40;
-    const id = Date.now();
-    setHearts((h) => [...h.slice(-6), { id, x, y }]);
-    setTimeout(() => setHearts((h) => h.filter((p) => p.id !== id)), 1200);
-    setMoodAnim('animado');
-    setTimeout(() => setMoodAnim(null), 1200);
-    bounce('squish');
   }
 
   function onToggle(t: Task, el: HTMLElement) {
@@ -125,17 +109,20 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
     </div>
   ) : (
     <div className="relative">
-      <button className="relative block" onPointerDown={(e) => pet(e)} aria-label={`Fazer carinho no ${s.pet.name}`}>
-        <div ref={petRef} style={{ transformOrigin: '50% 100%' }}>
-          <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={petMood} size={176} label={s.pet.name} />
-        </div>
-        {hearts.map((h) => (
-          <span key={h.id} className="heart-pop pointer-events-none absolute text-[26px]" style={{ left: h.x - 13, top: h.y - 20 }}>
-            <Glyph e="💗" size={28} />
-          </span>
-        ))}
-      </button>
-      <CompanionBuddy hamster={176} />
+      <div ref={petRef} style={{ transformOrigin: '50% 100%' }}>
+        <LivePet
+          size={210}
+          mood={petMood}
+          onTap={() => {
+            if (s.pet.sleeping) {
+              toast(`${s.pet.name} está dormindo. Shhh…`);
+              return false;
+            }
+            doCare('carinho');
+          }}
+        />
+      </div>
+      <CompanionBuddy hamster={210} />
       {puff && (
         <span key={puff.id} className={`grams-puff ${dir === 'ganhar' ? 'is-gain' : ''}`} aria-live="polite">
           {puff.text}
