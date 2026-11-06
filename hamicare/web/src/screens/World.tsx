@@ -1,28 +1,25 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ArrowUpToLine, Crown, Gift, Heart, Lock, PackageOpen, Pencil, Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowUpToLine, Lock, PackageOpen, Pencil, Sparkles } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
-import { ShopFront, type ShopId } from '../components/ShopFront';
+import { ShopHub } from './Shop';
+import { ISLAND_AT, MAP_H, MAP_W, TripMapArt } from '../components/TripMap';
 import { CompanionBuddy } from './Companions';
 import { Room } from '../components/Room';
 import { FLOOR_CSS, WALLPAPER_CSS } from '../components/Furniture';
 import { Coins, Seed, Seg, Sheet, toast } from '../components/ui';
-import { HOUSE_KINDS, ITEMS, KIND_LABEL, LOOKS, SEASONS, STYLES, WEARABLE_KINDS, currentSeason, inSeason, itemById, stylePrice, type Item, type ItemKind } from '../data/items';
+import { HOUSE_KINDS, ITEMS, KIND_LABEL, STYLES, WEARABLE_KINDS, itemById, stylePrice } from '../data/items';
 import { FURS } from '../data/fur';
 import { ALL_FINDS, PLACES, placeById } from '../data/world';
 import { periodOf } from '../data/lines';
 import { levelOf } from '../logic/progress';
-import { hashStr, mulberry32 } from '../lib/util';
 import {
-  bringFront, buy, buyFur, homeArenaOf, buyLook, buyStyle, canBuy, claimDailyGift, finishAdventure, isPremium, lookPrice, moveItem, owned, placeItem, placeLocked, setFloor, setWallpaper, startAdventure, storeItem, todayKey, toggleWish, unwear, updatePet, useApp, wear, wear as wearItem,
-  type AdventureResult,
+  bringFront, buyFur, homeArenaOf, buyStyle, finishAdventure, isPremium, moveItem, owned, placeItem, placeLocked, setFloor, setWallpaper, startAdventure, storeItem, unwear, updatePet, useApp, wear, type AdventureResult,
 } from '../lib/store';
 import { AdventureModal } from './Home';
-import type { House, WearSlot } from '../types';
-import { KIT_PLACE } from '../components/room/kit';
+import type { WearSlot } from '../types';
 import { Glyph } from '../components/art';
 import { ArenasTab, arenaByN } from './Arenas';
 import { ItemIcon } from '../components/ItemIcon';
-import { ChestShopView } from './Chests';
 import { PLUS_COUNTS, PlusCard } from '../components/PlusCard';
 import { AlbumView, InventoryView, WalletSheet, WorkshopView } from './Collection';
 
@@ -49,7 +46,7 @@ export function World({ onPlus, onGift, initialTab }: { onPlus: () => void; onGi
       {tab === 'arenas' && <ArenasTab onHouse={() => setTab('casa')} />}
       {tab === 'casa' && <HouseTab onArenas={() => setTab('arenas')} />}
       {tab === 'mapa' && <MapTab onPlus={onPlus} />}
-      {tab === 'loja' && <ShopTab onPlus={onPlus} onGift={onGift} />}
+      {tab === 'loja' && <ShopHub onPlus={onPlus} onGift={onGift} />}
       {tab === 'armario' && <WardrobeTab onPlus={onPlus} />}
     </div>
   );
@@ -175,6 +172,7 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
   const s = useApp();
   const [open, setOpen] = useState<string | null>(null);
   const [result, setResult] = useState<AdventureResult | null>(null);
+  const [album, setAlbum] = useState(false);
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 15_000);
@@ -203,26 +201,45 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
           )}
         </div>
       )}
-      <div className="map h-[420px]" role="group" aria-label="Mapa">
+      <div className="trip-map" role="group" aria-label="Mapa dos passeios">
+        <TripMapArt locked={Object.fromEntries(PLACES.map((p) => [p.id, !!placeLocked(s, p.id)]))} />
         {PLACES.map((p) => {
           const lock = placeLocked(s, p.id);
+          const [x, y] = ISLAND_AT[p.id] ?? [200, 400];
+          const got = p.finds.filter((f) => s.finds.includes(f.id)).length;
           return (
-            <button key={p.id} className="map-pin" style={{ left: `${p.pos[0]}%`, top: `${p.pos[1]}%` }} data-locked={!!lock} onClick={() => setOpen(p.id)} aria-label={`${p.name}${lock ? ' (bloqueado)' : ''}`}>
-              <span className="pin-bubble"><Glyph e={lock ? '🔒' : p.emoji} size={30} /></span>
-              <span className="pin-label">{p.name}</span>
+            <button key={p.id} className="trip-spot" style={{ left: `${(x / MAP_W) * 100}%`, top: `${((y - 22) / MAP_H) * 100}%` }} onClick={() => setOpen(p.id)} aria-label={`${p.name}${lock === 'nivel' ? `, libera no nível ${p.level}` : lock === 'plus' ? ', só no Plus' : `, ${got} de ${p.finds.length} achadinhos`}`}>
+              {lock ? (
+                <span className={`trip-lock ${lock === 'plus' ? 'is-plus' : ''}`} aria-hidden="true">
+                  {lock === 'plus' ? <Sparkles size={16} /> : <Lock size={16} />}
+                </span>
+              ) : (
+                <span className="trip-count" aria-hidden="true">
+                  {got}/{p.finds.length}
+                </span>
+              )}
             </button>
           );
         })}
-      </div>
-      <section className="album" aria-label="Álbum de achadinhos">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="font-display text-[21px] font-bold text-[#5b3a1e]">
-            <Glyph e="📒" size={26} className="gi" /> Álbum de achadinhos
-          </h2>
-          <span className="album-count">
-            {s.finds.length}/{ALL_FINDS.length}
+        {(() => {
+          const at = adv && advPlace ? ISLAND_AT[advPlace.id] : ISLAND_AT.casa;
+          return (
+            <span className="trip-pin" style={{ left: `${(at[0] / MAP_W) * 100}%`, top: `${((at[1] - 74) / MAP_H) * 100}%` }} aria-label={adv && advPlace ? `${s.pet.name} está em ${advPlace.name}` : `${s.pet.name} está em casa`}>
+              <span className="trip-pin-face">
+                <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} size={78} idle={false} mood="feliz" growth={1} />
+              </span>
+            </span>
+          );
+        })()}
+        <button className="trip-album" onClick={() => setAlbum(true)}>
+          <Glyph e="📒" size={22} />
+          <span>
+            Álbum {s.finds.length}/{ALL_FINDS.length}
           </span>
-        </div>
+        </button>
+      </div>
+      <Sheet open={album} onClose={() => setAlbum(false)} title="Álbum de achadinhos">
+      <section className="album" aria-label="Álbum de achadinhos">
         <p className="text-[13px] font-semibold text-[#7a5a3a]">Cada aventura pode trazer uma figurinha nova. As que faltam aparecem só a sombrinha.</p>
         <div className="grid gap-2.5">
           {PLACES.map((pl) => {
@@ -253,6 +270,7 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
           })}
         </div>
       </section>
+      </Sheet>
 
       <Sheet open={!!place} onClose={() => setOpen(null)} title={place ? place.name : ''}>
         {place && (
@@ -308,387 +326,6 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
       </Sheet>
       <AdventureModal result={result} onClose={() => setResult(null)} />
     </div>
-  );
-}
-
-// ---------- Loja ----------
-
-/** Cada lojinha tem o Hami de vendedor com a roupa da loja e as categorias dela. */
-const SHOP_AISLES: Record<Exclude<ShopId, 'baus' | 'vendinha'>, ItemKind[]> = {
-  roupas: ['chapeu', 'oculos', 'roupa', 'acessorio', 'efeito'],
-  casa: ['movel', 'decor', 'brinquedo', 'parede', 'piso'],
-  comida: ['comida'],
-};
-
-function ShopTab({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: string) => void }) {
-  const s = useApp();
-  const pending = s.game.pendingChests.length;
-  const [sec, setSec] = useState<ShopId>(pending ? 'baus' : 'vendinha');
-  return (
-    <div className="grid gap-4">
-      <Seg
-        value={sec}
-        onChange={setSec}
-        label="Lojinhas"
-        options={[
-          { id: 'vendinha', label: 'Vendinha' },
-          { id: 'roupas', label: 'Roupas' },
-          { id: 'casa', label: 'Casa' },
-          { id: 'comida', label: 'Comida' },
-          { id: 'baus', label: pending ? `Baús (${pending})` : 'Baús' },
-        ]}
-      />
-      <ShopFront key={`frente-${sec}`} shop={sec} />
-      {sec === 'baus' ? <ChestShopView /> : sec === 'vendinha' ? <Vendinha onPlus={onPlus} onGift={onGift} /> : <Aisle key={`corredor-${sec}`} kinds={SHOP_AISLES[sec]} looks={sec === 'roupas'} onPlus={onPlus} onGift={onGift} />}
-    </div>
-  );
-}
-
-/** Vendinha: coleção do dia, presente, vitrine do Plus, lista de desejos. */
-function Vendinha({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: string) => void }) {
-  const s = useApp();
-  const kids = s.profile.ageGroup === 'ate12';
-  const [kind, setKind] = useState<'desejos' | 'plus' | null>(null);
-  const [tryOn, setTryOn] = useState<Item | null>(null);
-  const season = currentSeason();
-  const giftReady = s.lastGift !== todayKey();
-  const forSale = ITEMS.filter((i) => !i.souvenir && inSeason(i) && i.price > 0);
-  const list = kind === 'desejos' ? forSale.filter((i) => s.wishlist.includes(i.id)) : kind === 'plus' ? forSale.filter((i) => i.plus) : [];
-  const plusWished = s.wishlist.filter((id) => itemById(id)?.plus).length;
-  const daily = dailyCollection(todayKey());
-  const now = new Date();
-  const mins = 24 * 60 - (now.getHours() * 60 + now.getMinutes());
-
-  return (
-    <div className="grid gap-4">
-      <section className="shop-hero" aria-label="Coleção do dia">
-        <div className="flex items-center justify-between gap-2">
-          <p className="font-display text-[20px] font-bold leading-tight">
-            <Glyph e="✨" size={22} className="gi" /> Coleção do dia
-          </p>
-          <span className="renew rounded-full px-3 py-1 text-[12px] font-black">
-            Renova em {Math.floor(mins / 60)}h{String(mins % 60).padStart(2, '0')}
-          </span>
-        </div>
-        <ul className="grid grid-cols-2 gap-2.5">
-          {daily.map((item) => (
-            <ShopCard key={item.id} item={item} onPlus={onPlus} onGift={onGift} />
-          ))}
-        </ul>
-      </section>
-      <button
-        className={`card flex items-center gap-3 p-4 text-left ${giftReady ? '' : 'opacity-60'}`}
-        disabled={!giftReady}
-        onClick={() => {
-          const g = claimDailyGift();
-          if (g) toast(g.food ? `Presente: ${itemById(g.food)?.name}!` : `Presente: +${g.coins} sementes!`);
-        }}
-      >
-        <Gift className="shrink-0 text-accent" />
-        <span className="min-w-0 flex-1">
-          <span className="block font-bold">{giftReady ? 'Presente do dia' : 'Presente de hoje já aberto'}</span>
-          <span className="block text-[13px] text-muted">{giftReady ? 'Toque para abrir: sementes ou uma comidinha' : 'Volte amanhã para outro'}</span>
-        </span>
-      </button>
-      {!kids && <PlusShowcase onTry={setTryOn} onAll={() => setKind('plus')} />}
-      {!kids && (
-        <PlusCard
-          onOpen={onPlus}
-          title={`${PLUS_COUNTS.items} itens só do Plus`}
-          text={plusWished ? `${plusWished === 1 ? '1 item' : `${plusWished} itens`} da sua lista de desejos ${plusWished === 1 ? 'é' : 'são'} do Plus. Fantasias, móveis especiais e estilos de casa completos.` : 'Fantasias de dragão, tubarão e panda, cama com dossel, castelinho, piano e estilos de casa completos.'}
-        />
-      )}
-      {season && (
-        <p className="rounded-2xl bg-gold-soft px-4 py-2 text-[14px] font-bold">
-          <Glyph e="✨" size={18} className="gi" /> {SEASONS[season].label}: itens especiais {SEASONS[season].until}
-        </p>
-      )}
-      <div className="tabs-scroll">
-        <button className={`chip ${kind === 'desejos' ? 'chip-accent' : 'chip-plain'}`} onClick={() => setKind(kind === 'desejos' ? null : 'desejos')}>
-          <Glyph e="💗" size={16} /> Desejos ({s.wishlist.length})
-        </button>
-        {!kids && (
-          <button className={`chip ${kind === 'plus' ? 'chip-accent' : 'chip-plain'}`} onClick={() => setKind(kind === 'plus' ? null : 'plus')}>
-            <Crown size={15} /> Só do Plus ({forSale.filter((i) => i.plus).length})
-          </button>
-        )}
-      </div>
-      {kind &&
-        (list.length ? (
-          <ul className="grid grid-cols-2 gap-2.5">
-            {list.map((item) => (
-              <ShopCard key={item.id} item={item} onPlus={onPlus} onGift={onGift} onTry={() => setTryOn(item)} />
-            ))}
-          </ul>
-        ) : (
-          <p className="text-center text-muted">{kind === 'desejos' ? 'Toque no coração dos itens para guardar aqui.' : 'Você já tem tudo do Plus!'}</p>
-        ))}
-      <TryOn item={tryOn} onClose={() => setTryOn(null)} onPlus={onPlus} />
-    </div>
-  );
-}
-
-/** Corredor de uma lojinha: categorias da loja (o Ateliê também tem os looks prontos). */
-function Aisle({ kinds, looks, onPlus, onGift }: { kinds: ItemKind[]; looks?: boolean; onPlus: () => void; onGift: (itemId: string) => void }) {
-  const [kind, setKind] = useState<ItemKind | 'looks'>(looks ? 'looks' : kinds[0]);
-  const [tryOn, setTryOn] = useState<Item | null>(null);
-  const forSale = ITEMS.filter((i) => !i.souvenir && inSeason(i) && i.price > 0);
-  const list = kind === 'looks' ? [] : forSale.filter((i) => i.kind === kind);
-  const chips: (ItemKind | 'looks')[] = [...(looks ? (['looks'] as const) : []), ...kinds];
-  return (
-    <div className="grid gap-4">
-      {chips.length > 1 && (
-        <div className="tabs-scroll">
-          {chips.map((k) => (
-            <button key={k} className={`chip ${kind === k ? 'chip-accent' : 'chip-plain'}`} onClick={() => setKind(k)}>
-              {k === 'looks' ? (
-                <>
-                  <Glyph e="✨" size={16} /> Looks ({LOOKS.length})
-                </>
-              ) : (
-                `${KIND_LABEL[k]} (${forSale.filter((i) => i.kind === k).length})`
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-      {kind === 'looks' ? (
-        <LooksGrid onPlus={onPlus} />
-      ) : list.length ? (
-        <ul className="grid grid-cols-2 gap-2.5">
-          {list.map((item) => (
-            <ShopCard key={item.id} item={item} onPlus={onPlus} onGift={onGift} onTry={() => setTryOn(item)} />
-          ))}
-        </ul>
-      ) : (
-        <p className="text-center text-muted">Você já tem tudo dessa categoria!</p>
-      )}
-      <TryOn item={tryOn} onClose={() => setTryOn(null)} onPlus={onPlus} />
-    </div>
-  );
-}
-
-/** Provador: o Hami com a roupa de agora + a peça escolhida, antes de comprar. */
-function TryOn({ item, onClose, onPlus }: { item: Item | null; onClose: () => void; onPlus: () => void }) {
-  const s = useApp();
-  if (!item) return <Sheet open={false} onClose={onClose} title="">{null}</Sheet>;
-  const res = canBuy(s, item.id);
-  const wear = WEARABLE_KINDS.includes(item.kind);
-  const outfit = wear ? { ...s.pet.outfit, [item.kind]: item.id } : s.pet.outfit;
-  // Móvel, parede ou piso: mostra na casa da pessoa, do jeitinho que ficaria.
-  const home = !wear && ['movel', 'decor', 'brinquedo', 'parede', 'piso'].includes(item.kind);
-  const preview = home ? previewHouse(s.house, item) : null;
-  return (
-    <Sheet open onClose={onClose} title={wear ? 'Provador' : home ? 'Na sua casa' : item.name}>
-      <div className="grid gap-3 pt-1">
-        {preview ? (
-          <Room house={preview} period={periodOf()} height={300}>
-            <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="animado" size={120} label={s.pet.name} />
-          </Room>
-        ) : (
-          <div className="grid place-items-center rounded-[26px] py-4" style={{ background: 'var(--page)' }}>
-            {/* No provador o Hami aparece grandinho, para ver bem a roupa. */}
-            {wear ? <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={outfit} mood="animado" size={210} label={`${s.pet.name} com ${item.name}`} growth={1} /> : <ItemIcon item={item} size={90} />}
-          </div>
-        )}
-        <p className="text-center font-display text-[22px] font-bold leading-tight">
-          {item.name} {item.plus && <Sparkles size={16} className="inline text-accent" />}
-        </p>
-        {res === 'ja-tem' ? (
-          wear ? (
-            <button className="btn btn-primary" onClick={() => (wearItem(item.id), toast('Vestido!'), onClose())}>
-              Vestir agora
-            </button>
-          ) : (
-            <span className="chip chip-leaf justify-center">Já é seu</span>
-          )
-        ) : res === 'plus' ? (
-          <>
-            {s.profile.ageGroup !== 'ate12' && (
-              <p className="text-center text-[14px] text-muted">
-                {wear ? `Ficou a cara do ${s.pet.name}!` : 'Ficou lindo aqui!'} Esse é do HamiCare+: com o Plus, você compra este e mais {PLUS_COUNTS.items - 1} exclusivos com as suas sementes.
-              </p>
-            )}
-            <button className="btn btn-primary" onClick={onPlus}>
-              <Crown size={16} /> {s.profile.ageGroup === 'ate12' ? 'Exclusivo do HamiCare+' : s.premium.trialStart ? 'Conhecer o HamiCare+' : 'Experimentar o Plus 7 dias grátis'}
-            </button>
-          </>
-        ) : res === 'nivel' ? (
-          <span className="chip chip-plain justify-center">Libera no nível {item.level}</span>
-        ) : (
-          <button className="btn btn-primary" disabled={res === 'sem-sementes'} onClick={() => buy(item.id) === 'ok' && (toast(wear ? `${item.name}: já tá vestindo!` : `${item.name} é seu!`), onClose())}>
-            Comprar por <Seed /> {item.price}
-          </button>
-        )}
-        {res === 'sem-sementes' && <p className="text-center text-[13px] text-muted">Faltam {item.price - s.coins} sementes. Missões, desafios e aventuras dão sementes.</p>}
-        {res !== 'ja-tem' && (
-          <button className="btn btn-ghost btn-sm" onClick={() => toggleWish(item.id)}>
-            <Heart size={15} className={s.wishlist.includes(item.id) ? 'fill-[var(--accent)] text-accent' : ''} /> {s.wishlist.includes(item.id) ? 'Nos desejos' : 'Guardar nos desejos'}
-          </button>
-        )}
-      </div>
-    </Sheet>
-  );
-}
-
-function LooksGrid({ onPlus }: { onPlus: () => void }) {
-  const s = useApp();
-  return (
-    <ul className="grid gap-3">
-      {LOOKS.map((look) => {
-        const lp = lookPrice(s, look.id);
-        const items = look.items.map((id) => itemById(id)!).filter(Boolean);
-        const outfit = { ...s.pet.outfit };
-        for (const it of items) outfit[it.kind as WearSlot] = it.id;
-        const full = items.filter((i) => lp.missing.includes(i.id)).reduce((n, i) => n + i.price, 0);
-        const all = lp.missing.length === 0;
-        return (
-          <li key={look.id} className="card flex items-center gap-3 p-3">
-            <div className="grid shrink-0 place-items-center rounded-[22px]" style={{ background: 'var(--page)', width: 112, height: 112 }}>
-              <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={outfit} size={104} idle={false} label={look.name} />
-            </div>
-            <div className="grid min-w-0 flex-1 gap-1">
-              <p className="font-display text-[18px] font-bold leading-tight">
-                <Glyph e={look.emoji} size={22} className="gi" /> {look.name} {lp.plus && <Sparkles size={14} className="inline text-accent" />}
-              </p>
-              <p className="text-[12px] leading-snug text-muted">{items.map((i) => i.name).join(' · ')}</p>
-              {all ? (
-                <button className="btn btn-soft btn-sm" onClick={() => (items.forEach((i) => wearItem(i.id)), toast(`Look ${look.name} vestido!`))}>
-                  Vestir o look
-                </button>
-              ) : lp.plus && !isPremium(s) ? (
-                <button className="btn btn-soft btn-sm" onClick={onPlus}>
-                  <Lock size={14} /> Plus
-                </button>
-              ) : lp.level > levelOf(s.xp) ? (
-                <span className="chip chip-plain justify-center">Nível {lp.level}</span>
-              ) : (
-                <button className="btn btn-primary btn-sm" disabled={s.coins < lp.price} onClick={() => buyLook(look.id) === 'ok' && toast(`Look ${look.name} é seu!`)}>
-                  <Seed /> {lp.price} <span className="text-[12px] line-through opacity-70">{full}</span> <span className="rounded-full bg-white/30 px-1.5 text-[11px]">−20%</span>
-                </button>
-              )}
-            </div>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
-
-/** Quatro destaques que mudam todo dia (um deles do HamiCare+, quando houver). */
-function dailyCollection(today: string): Item[] {
-  const rnd = mulberry32(hashStr(`colecao:${today}`));
-  const pool = ITEMS.filter((i) => !i.souvenir && i.price > 0 && inSeason(i) && i.kind !== 'comida' && i.kind !== 'parede' && i.kind !== 'piso');
-  const free = pool.filter((i) => !i.plus).sort(() => rnd() - 0.5);
-  const plus = pool.filter((i) => i.plus).sort(() => rnd() - 0.5);
-  return [...free.slice(0, plus.length ? 3 : 4), ...plus.slice(0, 1)];
-}
-
-/** A casa da pessoa com a peça escolhida (parede e piso trocam; móvel entra num cantinho livre). */
-function previewHouse(house: House, item: Item): House {
-  if (item.kind === 'parede') return { ...house, wallpaper: item.id };
-  if (item.kind === 'piso') return { ...house, floor: item.id };
-  const place = KIT_PLACE[item.svg ?? ''];
-  const spot = place === 'parede' ? { x: 50, y: 30 } : place === 'tapete' ? { x: 50, y: 95 } : { x: 74, y: 82 };
-  return { ...house, items: [...house.items, { uid: 'provador', itemId: item.id, ...spot, z: 999 }] };
-}
-
-/** Vitrine do Plus: 8 peças que mudam todo dia, para provar no Hami (ou ver na casa) de graça. */
-function PlusShowcase({ onTry, onAll }: { onTry: (item: Item) => void; onAll: () => void }) {
-  const s = useApp();
-  const today = todayKey();
-  const premium = isPremium(s);
-  const picks = useMemo(() => {
-    const rnd = mulberry32(hashStr(`plus:${today}`));
-    // Só as peças desenhadas mais caprichadas: roupas com desenho no Hami e móveis do kit novo.
-    const pool = ITEMS.filter((i) => i.plus && !i.souvenir && i.price > 0 && inSeason(i)).sort(() => rnd() - 0.5);
-    const wear = pool.filter((i) => WEARABLE_KINDS.includes(i.kind) && i.kind !== 'efeito' && i.base).slice(0, 5);
-    const home = pool.filter((i) => i.svg?.startsWith('k-')).slice(0, 3);
-    return [wear[0], home[0], wear[1], wear[2], home[1], wear[3], home[2], wear[4]].filter(Boolean);
-  }, [today]);
-  return (
-    <section className="plus-showcase" aria-label="Vitrine do HamiCare+">
-      <div className="flex items-end justify-between gap-2">
-        <div className="min-w-0">
-          <p className="flex items-center gap-1 text-[12px] font-black uppercase tracking-wide text-[#9A6A00]">
-            <Crown size={13} /> {premium ? 'Exclusivos do seu Plus' : 'Vitrine do HamiCare+'}
-          </p>
-          <p className="font-display text-[19px] font-bold leading-tight">{premium ? 'Peças especiais para você' : `Prove no ${s.pet.name}, é de graça`}</p>
-        </div>
-        <button className="shrink-0 text-[13px] font-extrabold underline underline-offset-2" onClick={onAll}>
-          Ver tudo
-        </button>
-      </div>
-      <ul className="plus-row">
-        {picks.map((item) => {
-          const wear = WEARABLE_KINDS.includes(item.kind);
-          return (
-            <li key={item.id}>
-              <button className="plus-tile" onClick={() => onTry(item)} aria-label={`${wear ? 'Provar' : 'Ver na casa'}: ${item.name}`}>
-                <span className="plus-tile-art">
-                  {wear ? (
-                    <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null, [item.kind]: item.id }} size={92} idle={false} label={item.name} growth={1} />
-                  ) : (
-                    <ItemIcon item={item} size={44} />
-                  )}
-                </span>
-                <span className="plus-tile-name">{item.name}</span>
-                <span className="plus-tile-cta">{wear ? 'Provar' : 'Ver na casa'}</span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
-  );
-}
-
-function ShopCard({ item, onPlus, onGift, onTry }: { item: Item; onPlus: () => void; onGift: (itemId: string) => void; onTry?: () => void }) {
-  const s = useApp();
-  const res = canBuy(s, item.id);
-  const wished = s.wishlist.includes(item.id);
-  const isWear = WEARABLE_KINDS.includes(item.kind);
-  return (
-    <li className={`card shop-card relative grid gap-2 p-3 ${item.plus ? 'is-plus' : ''}`}>
-      {item.plus && (
-        <span className="plus-ribbon">
-          <Crown size={11} /> Plus
-        </span>
-      )}
-      <button className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-surface2" aria-label={wished ? 'Tirar dos desejos' : 'Guardar nos desejos'} aria-pressed={wished} onClick={() => toggleWish(item.id)}>
-        <Heart size={16} className={wished ? 'fill-[var(--accent)] text-accent' : 'text-muted'} />
-      </button>
-      <button className="grid h-[80px] place-items-center rounded-2xl bg-surface2" onClick={onTry} aria-label={`Experimentar ${item.name}`} disabled={!onTry}>
-        {isWear ? (
-          <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null, [item.kind]: item.id }} size={80} idle={false} label={item.name} growth={1} />
-        ) : (
-          <ItemIcon item={item} size={36} />
-        )}
-      </button>
-      <p className="pr-6 text-[14px] font-extrabold leading-tight">
-        {item.name} {item.plus && <Sparkles size={13} className="inline text-accent" />}
-      </p>
-      {item.kind === 'comida' && <p className="-mt-1 text-[12px] text-muted">Você tem {s.inventory[item.id] ?? 0}</p>}
-      {res === 'ja-tem' ? (
-        <span className="chip chip-leaf justify-center">Já é seu</span>
-      ) : res === 'plus' ? (
-        <button className="btn btn-soft btn-sm" onClick={onPlus}>
-          <Lock size={14} /> Só no Plus
-        </button>
-      ) : res === 'nivel' ? (
-        <span className="chip chip-plain justify-center">Nível {item.level}</span>
-      ) : (
-        <button className="btn btn-soft btn-sm" disabled={res === 'sem-sementes'} onClick={() => buy(item.id) === 'ok' && toast(isWear ? `${item.name}: já tá vestindo!` : `${item.name} é seu!`)}>
-          <Seed /> {item.price}
-        </button>
-      )}
-      {res !== 'plus' && (
-        <button className="text-[12px] font-bold text-muted underline underline-offset-2" onClick={() => onGift(item.id)}>
-          Presentear um amigo
-        </button>
-      )}
-    </li>
   );
 }
 

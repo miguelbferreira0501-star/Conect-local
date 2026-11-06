@@ -44,30 +44,7 @@ const SnowPine = ({ x, y, s }: { x: number; y: number; s: number }) => (
 );
 
 export const ARENA_DETAILS: Record<string, (night: boolean) => ReactNode> = {
-  casinha: (night) => (
-    <g>
-      {/* cerquinha */}
-      <g>
-        <path d="M232 222 H330 M232 232 H330" stroke={night ? '#8D8378' : '#FFF6E8'} strokeWidth="3.5" />
-        {[236, 252, 268, 284, 300, 316].map((x) => (
-          <path key={x} d={`M${x - 4} 240 V218 l4 -5 l4 5 V240 Z`} fill={night ? '#9A8F86' : '#FFFBF4'} stroke={night ? '#6E655D' : '#E8DCCB'} strokeWidth="1" />
-        ))}
-      </g>
-      {/* caixa de correio */}
-      <g transform="translate(128 246)" data-tap="carta">
-        <rect x="-2" y="-14" width="4" height="22" fill="#8A5A3B" />
-        <path d="M-12 -14 V-26 Q-12 -32 -6 -32 H6 Q12 -32 12 -26 V-14 Z" fill="#F26D6D" />
-        <path d="M-12 -14 V-26 Q-12 -32 -6 -32" fill="none" stroke="#D84F55" strokeWidth="1.6" />
-        <path d="M10 -28 V-40 H18 V-35 H12" fill="#FFD34D" />
-        <rect x="-8" y="-24" width="10" height="2.4" rx="1" fill="#FFFFFF" opacity="0.7" />
-      </g>
-      {/* pedras do caminho */}
-      {[[200, 292, 13], [186, 276, 10], [212, 266, 9]].map(([x, y, r], i) => (
-        <ellipse key={i} cx={x} cy={y} rx={r} ry={r * 0.42} fill={night ? '#7B7368' : '#E8DCC6'} stroke={night ? '#5E574F' : '#D4C4A6'} strokeWidth="1" />
-      ))}
-      <Ground tuft="#4FA35C" pebble="#C9C2B4" night={night} />
-    </g>
-  ),
+  casinha: (night) => <Ground tuft="#4FA35C" night={night} />,
   jardim: (night) => (
     <g>
       {/* regador */}

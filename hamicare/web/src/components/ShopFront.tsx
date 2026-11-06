@@ -101,8 +101,75 @@ export const SHOPS: Record<ShopId, ShopLook> = {
   },
 };
 
-/** O Hami de vendedor da loja, com o fundo e o balcão. Tocar nele faz ele pular e falar outra coisa. */
-export function ShopFront({ shop }: { shop: ShopId }) {
+/** Cores de cada lojinha (quadradinhos, botões e abas). */
+export const SHOP_COLORS: Record<ShopId, { tile: string; edge: string; label: string; title: string }> = {
+  vendinha: { tile: '#FF8A65', edge: '#DE6340', label: 'Vendinha', title: 'Vendinha' },
+  roupas: { tile: '#F2679B', edge: '#CC497C', label: 'Roupas', title: 'Ateliê' },
+  casa: { tile: '#17A8BF', edge: '#0E8497', label: 'Casa', title: 'Marcenaria' },
+  comida: { tile: '#F68B3D', edge: '#D56A1E', label: 'Comida', title: 'Cozinha' },
+  baus: { tile: '#8D6BEF', edge: '#6A4BCF', label: 'Baús', title: 'Porto dos Baús' },
+};
+
+/** Ícone de cada lojinha (quadro 40 x 40), para a placa, as abas e as portas. */
+export function ShopIconShape({ id, c = '#7A4A2E' }: { id: ShopId; c?: string }) {
+  switch (id) {
+    case 'vendinha':
+      return (
+        <g>
+          <path d="M14 15 Q14 6 20 6 Q26 6 26 15" stroke={c} strokeWidth="3" fill="none" strokeLinecap="round" />
+          <path d="M9 14 H31 L33 35 H7 Z" fill={c} />
+          <path d="M20 31 C14 27 15 21 20 24 C25 21 26 27 20 31 Z" fill="#FFFFFF" opacity="0.9" />
+        </g>
+      );
+    case 'roupas':
+      return (
+        <g>
+          <path d="M20 9 v-2 q0 -3 3 -3" stroke={c} strokeWidth="2.4" fill="none" strokeLinecap="round" />
+          <path d="M7 15 L20 9 L33 15" stroke={c} strokeWidth="2.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M15 13 H25 L24 20 L32 36 H8 L16 20 Z" fill={c} />
+          <path d="M16 20 H24" stroke="#FFFFFF" strokeWidth="2" opacity="0.8" />
+        </g>
+      );
+    case 'casa':
+      return (
+        <g>
+          <path d="M5 21 L20 8 L35 21" stroke={c} strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M9 19 V35 H31 V19 L20 10 Z" fill={c} />
+          <path d="M17 35 V27 Q20 24 23 27 V35 Z" fill="#FFFFFF" opacity="0.9" />
+        </g>
+      );
+    case 'comida':
+      return (
+        <g>
+          <circle cx="20" cy="9" r="2.8" fill={c} />
+          <path d="M6 29 A14 14 0 0 1 34 29 Z" fill={c} />
+          <rect x="3" y="29" width="34" height="4" rx="2" fill={c} />
+          <path d="M12 23 Q14 17 19 15" stroke="#FFFFFF" strokeWidth="2.2" fill="none" strokeLinecap="round" opacity="0.8" />
+        </g>
+      );
+    case 'baus':
+      return (
+        <g>
+          <path d="M6 17 Q6 8 20 8 Q34 8 34 17 Z" fill={c} />
+          <rect x="6" y="17" width="28" height="17" rx="3" fill={c} />
+          <path d="M6 20 H34" stroke="#FFFFFF" strokeWidth="2" opacity="0.7" />
+          <rect x="17" y="16" width="6" height="8" rx="1.6" fill="#FFD34D" />
+        </g>
+      );
+  }
+}
+
+export function ShopIcon({ id, size = 28, c }: { id: ShopId; size?: number; c?: string }) {
+  return (
+    <svg viewBox="0 0 40 40" width={size} height={size} aria-hidden="true" className="block">
+      <ShopIconShape id={id} c={c} />
+    </svg>
+  );
+}
+
+/** O Hami de vendedor da loja, com o fundo e o balcão. Tocar nele faz ele pular e falar outra coisa.
+ *  `immersive`: versão da tela cheia da loja (placa redonda com o ícone e a fala só aparece ao tocar). */
+export function ShopFront({ shop, immersive }: { shop: ShopId; immersive?: boolean }) {
   const s = useApp();
   const look = SHOPS[shop];
   const pet = s.pet.name || 'Hami';
@@ -111,12 +178,12 @@ export function ShopFront({ shop }: { shop: ShopId }) {
   const line = look.lines[(start + taps) % look.lines.length];
   const name = look.name.replace('{pet}', pet);
   return (
-    <section className="shop-front" aria-label={name}>
+    <section className={`shop-front ${immersive ? 'is-immersive' : ''}`} aria-label={name}>
       <div className="sf-scene">
         <svg className="sf-back" viewBox="0 0 360 210" aria-hidden="true">
           <Back id={shop} look={look} />
           <Awning colors={look.awning} />
-          <Sign text={name} wood={look.wood} />
+          {immersive ? <RoundSign id={shop} wood={look.wood} /> : <Sign text={name} wood={look.wood} />}
         </svg>
         <button
           className="sf-keeper"
@@ -134,11 +201,32 @@ export function ShopFront({ shop }: { shop: ShopId }) {
         <svg className="sf-front" viewBox="0 -14 360 100" aria-hidden="true">
           <Counter id={shop} wood={look.wood} />
         </svg>
+        {immersive && taps > 0 && (
+          <p key={taps} className="sf-bubble" aria-live="polite">
+            {line}
+          </p>
+        )}
       </div>
-      <p className="sf-speech" aria-live="polite">
-        <b>{pet}:</b> {line}
-      </p>
+      {!immersive && (
+        <p className="sf-speech" aria-live="polite">
+          <b>{pet}:</b> {line}
+        </p>
+      )}
     </section>
+  );
+}
+
+/** Placa redonda pendurada com o ícone da loja. */
+function RoundSign({ id, wood }: { id: ShopId; wood: string }) {
+  return (
+    <g>
+      <path d="M300 20 V30" stroke="#6B4A33" strokeWidth="2.4" />
+      <circle cx="300" cy="50" r="21" fill={wood} />
+      <circle cx="300" cy="50" r="17" fill="#FFF3E2" />
+      <svg x="286" y="36" width="28" height="28" viewBox="0 0 40 40">
+        <ShopIconShape id={id} c={SHOP_COLORS[id].edge} />
+      </svg>
+    </g>
   );
 }
 
