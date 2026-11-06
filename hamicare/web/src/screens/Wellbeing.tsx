@@ -4,6 +4,7 @@ import { PlusCard } from '../components/PlusCard';
 import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, Copy, Lock, Phone, Shuffle, Trash2, X } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
+import { LivePet } from '../components/LivePet';
 import { LineChart, toast } from '../components/ui';
 import { AFFIRMATIONS, EMOTIONS, MOODS, REFLECTIONS } from '../data/lines';
 import { BODY_SCAN, BREATHS, MEDITATION_CUES, QUIZZES, SLEEP_ROUTINE } from '../data/wellbeing';
@@ -129,7 +130,6 @@ export function Wellbeing({ onPlus }: { onPlus: () => void }) {
 /** O Hami no cantinho de baixo: tocar nele faz ele pular, soltar coraçõezinhos e falar alguma coisa gentil. */
 function WellbeingPet() {
   const s = useApp();
-  const ref = useRef<HTMLDivElement>(null);
   const [n, setN] = useState(0);
   const line = PET_LINES[(hashStr(todayKey()) + n) % PET_LINES.length];
   return (
@@ -141,29 +141,12 @@ function WellbeingPet() {
       <span className="wb-spark" style={{ left: '14%', top: '12%' }} aria-hidden="true" />
       <span className="wb-spark is-sm" style={{ right: '18%', top: '22%', animationDelay: '0.8s' }} aria-hidden="true" />
       <span className="wb-cloud" aria-hidden="true" />
-      {n > 0 && (
-        <p key={n} className="wb-say" aria-live="polite">
-          {line}
-        </p>
-      )}
-      <button
-        className="wb-pet"
-        data-sound="none"
-        aria-label={`Fazer carinho no ${s.pet.name}`}
-        onClick={() => {
-          play(n % 2 ? 'coracao' : 'iii');
-          hop(ref.current);
-          setN((x) => x + 1);
-        }}
-      >
-        <div ref={ref} style={{ transformOrigin: '50% 100%' }}>
-          <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={n ? 'animado' : 'feliz'} size={240} label={s.pet.name} />
-        </div>
+      <div className="wb-pet">
+        <LivePet size={240} say={n > 0 ? line : null} onTap={() => setN((x) => x + 1)} />
         <span className="wb-heart" aria-hidden="true">
           <Glyph e="💗" size={40} />
         </span>
-        <Burst emoji="💗" k={n} />
-      </button>
+      </div>
     </section>
   );
 }

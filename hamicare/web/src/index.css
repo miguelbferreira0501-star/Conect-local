@@ -932,3 +932,13 @@ h3 {
 @media (prefers-reduced-motion: reduce) {
   .neon-glow { animation: none; }
 }
+/* Hami com vida própria: orelha que mexe, rabinho que balança e bracinho que se ajeita. */
+.pet-ear { animation: pet-ear 6.5s ease-in-out infinite; }
+@keyframes pet-ear { 0%, 88%, 100% { rotate: 0deg; } 91% { rotate: 14deg; } 94% { rotate: -6deg; } 97% { rotate: 6deg; } }
+.pet-tail { animation: pet-tail 2.6s ease-in-out infinite; }
+@keyframes pet-tail { 0%, 100% { rotate: 0deg; } 50% { rotate: 22deg; } }
+.pet-arm { animation: pet-arm 9s ease-in-out infinite; }
+@keyframes pet-arm { 0%, 80%, 100% { rotate: 0deg; } 84% { rotate: 10deg; } 88% { rotate: -4deg; } 92% { rotate: 0deg; } }
+@media (prefers-reduced-motion: reduce) { .pet-ear, .pet-tail, .pet-arm { animation: none; } }
+.pet-wave { animation: pet-wave 0.42s ease-in-out infinite alternate; }
+@keyframes pet-wave { from { rotate: -105deg; } to { rotate: -140deg; } }

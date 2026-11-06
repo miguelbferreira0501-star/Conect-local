@@ -4,7 +4,9 @@ import { Seg, Sheet, toast } from '../components/ui';
 import { KcalChip, useKcalPop } from '../components/Journey';
 import { TaskRow } from '../components/TaskRow';
 import { SeasonBanner } from '../components/Season';
-import { PlusCard } from '../components/PlusCard';
+import { Room } from '../components/Room';
+import { LivePet } from '../components/LivePet';
+import { periodOf } from '../data/lines';
 import { EventsBanner } from './Events';
 import { QuestList } from '../components/QuestList';
 import { CAT_ORDER, CATEGORIES, LIBRARY, TASK_EMOJIS } from '../data/tasks';
@@ -22,7 +24,7 @@ import { Glyph } from '../components/art';
 const BATTERY_ICON = { 1: BatteryLow, 2: BatteryMedium, 3: BatteryFull } as const;
 const PERIOD_LABEL: Record<Period, string> = { dia: 'de hoje', semana: 'da semana', mes: 'do mês' };
 
-export function Activities({ onShareTask, onPlus }: { onShareTask: (task: Task) => void; onPlus: () => void }) {
+export function Activities({ onShareTask }: { onShareTask: (task: Task) => void; onPlus?: () => void }) {
   const s = useApp();
   const today = todayKey();
   const day = dayOf(s, today);
@@ -51,17 +53,33 @@ export function Activities({ onShareTask, onPlus }: { onShareTask: (task: Task) 
   return (
     <div className="grid gap-4">
       {layer}
-      <header className="flex items-end justify-between gap-3">
-        <div>
-          <p className="eyebrow">
-            {done} de {tasks.length} hoje · sem pressa
-          </p>
-          <h1 className="font-display text-[30px] font-bold leading-tight">Missões</h1>
+      <section className="mission-scene scene-bleed" aria-label={`Quarto do ${s.pet.name}`}>
+        <Room house={s.house} period={periodOf()} height={300}>
+          <LivePet size={200} mood={tasks.length && done === tasks.length ? 'animado' : 'feliz'} say={tasks.length && done === tasks.length ? 'Missões completas! Que orgulho!' : done === 0 ? 'Bora começar com uma pequenininha?' : null} />
+        </Room>
+        <div className="mission-hud">
+          <h1 className="mission-title">Missões</h1>
+          <span className={`mission-streak ${streak.today ? 'is-on' : ''}`}>
+            <Flame size={16} /> {streak.count} {streak.count === 1 ? 'dia' : 'dias'}
+          </span>
         </div>
-        <span className={`chip ${streak.today ? 'chip-accent' : 'chip-plain'}`}>
-          <Flame size={16} className={streak.today ? 'text-accent' : 'text-muted'} /> {streak.count} {streak.count === 1 ? 'dia' : 'dias'}
-        </span>
-      </header>
+      </section>
+
+      <section className="mission-progress" aria-label={`${done} de ${tasks.length} missões feitas hoje`}>
+        <p>
+          <b>{done}</b> de {tasks.length} hoje <span>· sem pressa</span>
+        </p>
+        <div className="mission-nodes" aria-hidden="true">
+          <span className="mission-line">
+            <span style={{ width: `${tasks.length ? (done / tasks.length) * 100 : 0}%` }} />
+          </span>
+          {[0.25, 0.5, 0.75, 1].map((k) => (
+            <span key={k} className={`mission-node ${tasks.length && done / tasks.length >= k ? 'is-on' : ''}`} style={{ left: `${k * 100}%` }}>
+              <Glyph e={k === 1 ? '🏆' : '🌼'} size={k === 1 ? 22 : 18} />
+            </span>
+          ))}
+        </div>
+      </section>
 
       {showKcal && dir !== 'manter' && (
         <div className={`journey journey-${dir} !gap-1 !py-3`}>
@@ -79,7 +97,6 @@ export function Activities({ onShareTask, onPlus }: { onShareTask: (task: Task) 
       )}
 
       <SeasonBanner s={s} />
-      <PlusCard onOpen={onPlus} title="Sua evolução de 6 meses" text="Gráficos de 6 meses, roupas, pelagens e estilos de casa que só o Plus tem." />
 
       <EventsBanner />
 

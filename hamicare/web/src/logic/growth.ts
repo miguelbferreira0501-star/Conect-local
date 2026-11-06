@@ -1,4 +1,4 @@
-// Crescimento do Hami: ele nasce bem pequeno e cresce um pouquinho a cada dia de cuidado.
+// Crescimento do Hami: ele nasce pequenininho (uns 70% do tamanho) e cresce um pouquinho a cada dia de cuidado.
 // Demora de propósito: chega ao tamanho máximo depois de uns 300 dias cuidados (não precisam ser seguidos).
 import type { DayLog } from '../types';
 
@@ -11,13 +11,13 @@ export interface GrowthStage {
 }
 
 export const GROWTH: GrowthStage[] = [
-  { days: 0, name: 'Recém-nascido', scale: 0.5 },
-  { days: 4, name: 'Filhote', scale: 0.55 },
-  { days: 12, name: 'Pequenino', scale: 0.61 },
-  { days: 30, name: 'Crescendo', scale: 0.68 },
-  { days: 60, name: 'Jovem', scale: 0.76 },
-  { days: 110, name: 'Quase adulto', scale: 0.84 },
-  { days: 180, name: 'Adulto', scale: 0.92 },
+  { days: 0, name: 'Recém-nascido', scale: 0.72 },
+  { days: 4, name: 'Filhote', scale: 0.75 },
+  { days: 12, name: 'Pequenino', scale: 0.78 },
+  { days: 30, name: 'Crescendo', scale: 0.82 },
+  { days: 60, name: 'Jovem', scale: 0.86 },
+  { days: 110, name: 'Quase adulto', scale: 0.9 },
+  { days: 180, name: 'Adulto', scale: 0.95 },
   { days: 300, name: 'Grandão', scale: 1 },
 ];
 
@@ -52,5 +52,5 @@ export function growthOf(days: number): Growth {
   const next = GROWTH[stage + 1] ?? null;
   const progress = next ? (days - cur.days) / (next.days - cur.days) : 1;
   const scale = next ? cur.scale + (next.scale - cur.scale) * progress : cur.scale;
-  return { stage, name: cur.name, scale: Math.round(scale * 1000) / 1000, days, next, toNext: next ? next.days - days : 0, progress };
+  return { stage, name: cur.name, scale: Math.round(scale * 10000) / 10000, days, next, toNext: next ? next.days - days : 0, progress };
 }

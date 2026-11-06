@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { careDays, growthOf, GROWTH } from './growth';
 
 describe('crescimento do Hami', () => {
-  it('nasce com metade do tamanho e só chega ao máximo depois de 300 dias de cuidado', () => {
-    expect(growthOf(0)).toMatchObject({ stage: 0, name: 'Recém-nascido', scale: 0.5, toNext: 4 });
+  it('nasce menor e só chega ao máximo depois de 300 dias de cuidado', () => {
+    expect(growthOf(0)).toMatchObject({ stage: 0, name: 'Recém-nascido', scale: 0.72, toNext: 4 });
     expect(growthOf(299).scale).toBeLessThan(1);
     expect(growthOf(300)).toMatchObject({ name: 'Grandão', scale: 1, next: null, toNext: 0 });
     expect(growthOf(900).scale).toBe(1);
