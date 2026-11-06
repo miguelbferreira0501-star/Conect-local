@@ -19,6 +19,7 @@ import { streakOf } from '../logic/streak';
 import { activeQuests, claimKey, levelOf, newAchievements, periodStart, questProgress, QUESTS } from '../logic/progress';
 import { addUsage, arenaItemsOf, arenaOf, baseGrant, canCraft, capGrant, chestPool, collectionProgress, emptyPity, emptyUsage, levelUps, migrateXp, openChest, xpAt, type ChestId, type DayUsage, type Pity, type Rarity, type Source } from '../shared/game';
 import { arenaHouse, upgradeHouse } from '../data/arenas';
+import { companionById, eggWarmth, HATCH_DAYS, withEggs } from '../data/companions';
 import { KIT_PLACE } from '../components/room/kit';
 import { gameCfg } from './game';
 import type { GameState, ItemOrigin } from '../types';
@@ -276,6 +277,7 @@ export function useApp(): State {
       listeners.add(cb);
       return () => listeners.delete(cb);
     },
+    () => state,
     () => state,
   );
 }
@@ -595,6 +597,9 @@ export function maintain(input: State): State {
     s = { ...s, pet: { ...s.pet, growStage: grown.stage } };
     setTimeout(() => celebrate({ type: 'grow', stage: grown.stage, name: grown.name }), 0);
   }
+  // Pets companheiros: cada arena aberta traz um ovo misterioso.
+  const comp = withEggs(s.companions, currentArena(s), today);
+  if (comp !== s.companions) s = { ...s, companions: comp };
   // Fase (nunca regride)
   const phase = phaseFor(conditioning(s.days, today));
   if (phase > s.pet.phase) {
@@ -1058,6 +1063,24 @@ export function claimDailyGift(): { coins: number; food?: string } | null {
   const coins = 3 + (roll - 4);
   commit(grant({ ...state, lastGift: today }, { kind: 'presente', coins, date: today }));
   return { coins };
+}
+
+// ---------- Pets companheiros ----------
+
+/** Choca o ovo (só depois dos dias de cuidado). O primeiro pet já vem andar junto com o Hami. */
+export function hatchCompanion(id: string): boolean {
+  const c = state.companions;
+  const g = c?.got[id];
+  if (!c || !g || g.hatched || !companionById(id) || eggWarmth(state.days, g.at) < HATCH_DAYS) return false;
+  commit({ ...state, companions: { got: { ...c.got, [id]: { ...g, hatched: todayKey() } }, active: c.active ?? id } });
+  return true;
+}
+
+/** Escolhe quem anda junto com o Hami (ou ninguém). */
+export function setCompanion(id: string | null) {
+  const c = state.companions;
+  if (!c || (id && !c.got[id]?.hatched)) return;
+  commit({ ...state, companions: { ...c, active: id } });
 }
 
 /** Recebe um presente de um amigo (item já validado pelo servidor ou pela página). */

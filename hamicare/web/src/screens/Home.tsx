@@ -21,6 +21,7 @@ import type { PetMood, Task } from '../types';
 import { Glyph } from '../components/art';
 import { AreaPill, AreaSheet } from '../components/AreaSheet';
 import { requestTool } from './Wellbeing';
+import { CompanionBuddy } from './Companions';
 
 export function useNow(ms: number) {
   const [now, setNow] = useState(Date.now());
@@ -135,6 +136,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
           </span>
         ))}
       </button>
+      <CompanionBuddy hamster={176} />
       {puff && (
         <span key={puff.id} className={`grams-puff ${dir === 'ganhar' ? 'is-gain' : ''}`} aria-live="polite">
           {puff.text}

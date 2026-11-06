@@ -165,6 +165,13 @@ export interface PetSnap {
 
 export type PetMood = 'feliz' | 'calmo' | 'sono' | 'animado' | 'dormindo' | 'comendo' | 'risada' | 'boca' | 'surpreso';
 
+export interface CompanionState {
+  /** Ovos e pets: quando o ovo chegou e quando chocou. */
+  got: Record<string, { at: string; hatched?: string }>;
+  /** Quem anda junto com o Hami agora. */
+  active: string | null;
+}
+
 export interface Photo {
   id: string;
   date: string;
@@ -273,6 +280,8 @@ export interface State {
   homeArena?: number;
   /** As casas das outras arenas (a de agora fica em `house`). */
   houses?: Record<string, House>;
+  /** Pets companheiros: um ovo por arena aberta; choca com dias de cuidado. */
+  companions?: CompanionState;
   /** Quando e de onde veio cada item. */
   itemMeta?: Record<string, ItemMeta>;
   /** Curva de níveis nova aplicada (o XP antigo foi convertido sem perder nível). */

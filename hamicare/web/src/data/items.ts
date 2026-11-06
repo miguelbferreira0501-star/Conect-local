@@ -311,6 +311,20 @@ export const ITEMS: Item[] = [
   W('m-sorvete', 'Sorvete de duas bolas', 'acessorio', 70, { base: 'segurar', c1: '#FF9FC2', c2: '#BFE9F5', plus: true }),
   W('m-livro', 'Livro de feitiços', 'acessorio', 90, { base: 'segurar', c1: '#7E57D6', c2: '#FFD34D', plus: true }),
 
+  // ---------- Roupas de trabalho (o Hami vendedor usa nas lojinhas; dá para comprar também) ----------
+  W('capacete-obra', 'Capacete de obra', 'chapeu', 45, { base: 'capacete-obra', c1: '#FFC93C', c2: '#E8A317' }),
+  W('capacete-obra-rosa', 'Capacete de obra rosa', 'chapeu', 45, { base: 'capacete-obra', c1: '#FF9FC2', c2: '#E87FA5' }),
+  W('colete-obra', 'Colete de construtor', 'roupa', 55, { base: 'colete-obra', c1: '#FF8A3D', c2: '#5E7FB8' }),
+  W('dolma', 'Dólmã de chef', 'roupa', 60, { base: 'dolma', c1: '#FFFFFF', c2: '#F0525F', level: 2 }),
+  W('avental-costura', 'Avental de costureira com fita métrica', 'roupa', 55, { base: 'avental-costura', c1: '#C3A6F2', c2: '#FFD34D' }),
+  W('casaco-capitao', 'Casaco de capitão', 'roupa', 80, { base: 'casaco-capitao', c1: '#3B4F8C', c2: '#F6C445', level: 3 }),
+  W('avental-vendinha', 'Avental listrado de vendedor', 'roupa', 40, { base: 'avental-vendinha', c1: '#FF86AC', c2: '#FFFFFF' }),
+  W('m-martelo', 'Martelinho', 'acessorio', 30, { base: 'segurar', c1: '#C98A5B', c2: '#8A90A0' }),
+  W('m-frigideira', 'Frigideira com ovinho', 'acessorio', 35, { base: 'segurar', c1: '#3A3440', c2: '#FFD34D' }),
+  W('m-tesoura', 'Tesoura de costura', 'acessorio', 30, { base: 'segurar', c1: '#FF86AC', c2: '#C9CED8' }),
+  W('m-mapa', 'Mapa do tesouro na patinha', 'acessorio', 40, { base: 'segurar', c1: '#F3DDB0', c2: '#E2547A', level: 2 }),
+  W('m-sacola', 'Sacolinha de compras', 'acessorio', 25, { base: 'segurar', c1: '#FFFFFF', c2: '#FF86AC' }),
+
   // ---------- Efeitos (brilhos ao redor do Hami) ----------
   W('fx-brilhos', 'Brilhinhos', 'efeito', 60, { base: 'brilhos', c1: '#FFE27A' }),
   W('fx-coracoes', 'Chuva de coraçõezinhos', 'efeito', 80, { base: 'coracoes', c1: '#FF6F91' }),
@@ -574,6 +588,10 @@ export const LOOKS: Look[] = [
   { id: 'realeza', name: 'Realeza', emoji: '👑', items: ['coroa-rei', 'capa-roxo', 'colar-perolas', 'fx-aura-dourada'] },
   { id: 'espaco', name: 'Astronauta', emoji: '🚀', items: ['capacete', 'astronauta', 'fx-estrelas'] },
   { id: 'formando', name: 'Formatura', emoji: '🎓', items: ['formatura', 'smoking', 'medalha'] },
+  { id: 'construtor', name: 'Construtor', emoji: '🪜', items: ['capacete-obra', 'colete-obra', 'm-martelo'] },
+  { id: 'cozinheiro', name: 'Mestre-cuca', emoji: '🍳', items: ['chef', 'dolma', 'm-frigideira'] },
+  { id: 'estilista', name: 'Estilista', emoji: '🧶', items: ['boina-lilas', 'avental-costura', 'm-tesoura'] },
+  { id: 'capitao', name: 'Capitão', emoji: '🗺️', items: ['pirata', 'casaco-capitao', 'm-mapa'] },
 ];
 export const HOUSE_KINDS: ItemKind[] = ['movel', 'decor', 'brinquedo'];
 

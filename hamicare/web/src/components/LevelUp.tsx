@@ -15,6 +15,8 @@ import { gameCfg } from '../lib/game';
 import { homeArenaOf, moveHome, useApp, type Celebration } from '../lib/store';
 import { prefersReducedMotion } from '../lib/util';
 import { play } from '../lib/sound';
+import { Egg } from './Companion';
+import { companionOfArena, HATCH_DAYS } from '../data/companions';
 
 type LevelC = Extract<Celebration, { type: 'level' }>;
 type Stage = 'nivel' | 'evolui' | 'arena' | 'casa';
@@ -123,6 +125,14 @@ export function LevelUpScreen({ c, onClose }: { c: LevelC; onClose: () => void }
             <p className="eyebrow !text-[#8a63d2]">Arena {arena.n} aberta</p>
             <h1 className="font-display text-[30px] font-bold leading-tight text-[#2b2240]">{arena.name}</h1>
             <p className="text-[15px] font-semibold text-[#4b4560]">{arena.desc}</p>
+            {companionOfArena(arena.n) && (
+              <p className="lvl-egg">
+                <Egg colors={companionOfArena(arena.n)!.egg} size={42} />
+                <span>
+                  <b>Ganhou um ovo misterioso!</b> Ele choca com {HATCH_DAYS} dias de cuidado. Veja no Mapa das Arenas.
+                </span>
+              </p>
+            )}
             <button className="btn btn-primary mt-3 w-full" onClick={() => setStage('casa')}>
               Ver a casa nova
             </button>

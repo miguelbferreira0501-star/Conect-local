@@ -95,6 +95,15 @@ export function Hat({ id, geo }: { id: string | null; geo: Geo }) {
           ))}
         </g>
       );
+    case 'capacete-obra':
+      return (
+        <g>
+          <path d={`M${100 - w * 0.7} ${top + 14} C${100 - w * 0.68} ${top - 26} ${100 + w * 0.68} ${top - 26} ${100 + w * 0.7} ${top + 14} Z`} fill={c1} />
+          <path d={`M${100 - w * 0.12} ${top - 15} Q100 ${top - 18} ${100 + w * 0.12} ${top - 15} L${100 + w * 0.15} ${top + 12} L${100 - w * 0.15} ${top + 12} Z`} fill={c2} />
+          <rect x={100 - w * 0.88} y={top + 8} width={w * 1.76} height="9" rx="4.5" fill={c2} />
+          <ellipse cx={100 - w * 0.36} cy={top - 4} rx="8" ry="4" fill="#FFFFFF" opacity="0.45" transform={`rotate(-28 ${100 - w * 0.36} ${top - 4})`} />
+        </g>
+      );
     case 'cartola':
       return (
         <g>
@@ -618,6 +627,85 @@ export function Clothes({ id, geo }: { id: string | null; geo: Geo }) {
           <rect x="88" y={y + 22} width="24" height="13" rx="4" fill={c2} />
         </g>
       );
+    case 'colete-obra': {
+      const vest = c1 ?? '#FF8A3D';
+      return (
+        <g>
+          {full(c2 ?? '#5E7FB8')}
+          <path d={`M0 ${y - 2} H90 L95 ${y + 100} H0 Z`} fill={vest} />
+          <path d={`M200 ${y - 2} H110 L105 ${y + 100} H200 Z`} fill={vest} />
+          {[13, 27].map((dy) => (
+            <g key={dy} fill="#F4F6FA">
+              <rect x="0" y={y + dy} width="91" height="5" />
+              <rect x="109" y={y + dy} width="91" height="5" />
+            </g>
+          ))}
+          <rect x="74" y={y + 2} width="12" height="8" rx="2" fill="#000000" opacity="0.14" />
+          <path d={`M100 ${y} V${y + 100}`} stroke="#3F5E94" strokeWidth="2" strokeDasharray="2 3" />
+        </g>
+      );
+    }
+    case 'dolma': {
+      const tie = c2 ?? '#F0525F';
+      return (
+        <g>
+          {full(c1 ?? '#FFFFFF')}
+          <path d={`M110 ${y + 4} V${y + 100}`} stroke="#E3DEE8" strokeWidth="2" />
+          {[[92, 16], [116, 16], [92, 28], [116, 28]].map(([x, dy]) => (
+            <circle key={`${x}-${dy}`} cx={x} cy={y + dy} r="2.6" fill="#D6D0DC" stroke="#BDB6C6" strokeWidth="0.8" />
+          ))}
+          <path d={`M82 ${y - 3} Q100 ${y + 10} 118 ${y - 3} L113 ${y + 6} Q100 ${y + 14} 87 ${y + 6} Z`} fill={tie} />
+          <path d={`M100 ${y + 7} l-6 13 l6 -3 l6 3 Z`} fill={tie} />
+        </g>
+      );
+    }
+    case 'avental-costura': {
+      const a = c1 ?? '#C3A6F2';
+      const tape = c2 ?? '#FFD34D';
+      return (
+        <g>
+          <path d={`M30 ${y + 2} L170 ${y + 2}`} stroke={a} strokeWidth="2.5" />
+          <rect x="74" y={y - 2} width="52" height="64" rx="10" fill={a} />
+          <rect x="85" y={y + 18} width="30" height="14" rx="4" fill="#FFFFFF" opacity="0.6" />
+          <path d={`M92 ${y + 19} l3 -11`} stroke="#F0525F" strokeWidth="2.6" strokeLinecap="round" />
+          <circle cx="107" cy={y + 17} r="4.5" fill="#FF6F91" />
+          {[[-2, -2], [1, -3], [2, 0]].map(([dx, dy], i) => <path key={i} d={`M${107 + dx} ${y + 17 + dy} l${dx * 2} -4`} stroke="#8A90A0" strokeWidth="1" />)}
+          {[`M62 ${y - 7} Q100 ${y + 7} 138 ${y - 7}`, `M67 ${y - 4} L63 ${y + 40}`, `M133 ${y - 4} L138 ${y + 34}`].map((d) => (
+            <g key={d}>
+              <path d={d} stroke={tape} strokeWidth="6.5" fill="none" />
+              <path d={d} stroke="#9A7A2A" strokeWidth="3" strokeDasharray="1 4" fill="none" />
+            </g>
+          ))}
+        </g>
+      );
+    }
+    case 'casaco-capitao': {
+      const gold = c2 ?? '#F6C445';
+      return (
+        <g>
+          {full(c1 ?? '#3B4F8C')}
+          <path d={`M84 ${y - 2} L100 ${y + 28} L116 ${y - 2} Z`} fill="#FFFFFF" />
+          <path d={`M84 ${y - 2} L100 ${y + 28} L90 ${y + 32} L76 ${y + 2} Z M116 ${y - 2} L100 ${y + 28} L110 ${y + 32} L124 ${y + 2} Z`} fill="#000000" opacity="0.2" />
+          <path d={`M93 ${y + 1} q7 7 14 0 q-2 10 -7 15 q-5 -5 -7 -15 Z`} fill="#FFFFFF" stroke="#E3DEE8" strokeWidth="1" />
+          <rect x="0" y={y + 31} width="200" height="7" fill="#3A2E2A" />
+          <rect x="94" y={y + 30} width="12" height="9" rx="1.5" fill="none" stroke={gold} strokeWidth="2.2" />
+          {[[80, 12], [80, 22], [120, 12], [120, 22]].map(([x, dy]) => <circle key={`${x}-${dy}`} cx={x} cy={y + dy} r="2.6" fill={gold} />)}
+          <rect x="0" y={y + 42} width="200" height="3.5" fill={gold} />
+        </g>
+      );
+    }
+    case 'avental-vendinha': {
+      const st = c1 ?? '#FF86AC';
+      return (
+        <g>
+          <path d={`M30 ${y + 2} L170 ${y + 2}`} stroke={st} strokeWidth="2.5" />
+          <rect x="74" y={y - 2} width="52" height="64" rx="10" fill={c2 ?? '#FFFFFF'} />
+          {[80, 89, 98, 107, 116].map((x) => <rect key={x} x={x} y={y - 2} width="4.5" height="64" fill={st} opacity="0.85" />)}
+          <rect x="85" y={y + 18} width="30" height="15" rx="4" fill="#FFFFFF" stroke={st} strokeWidth="1.5" />
+          <path d={heartPath(100, y + 24, 6)} fill={st} />
+        </g>
+      );
+    }
     case 'smoking':
       return (
         <g>
@@ -1107,6 +1195,58 @@ export function Accessory({ id, geo, paw }: { id: string | null; geo: Geo; paw?:
                 <path d={sparkle(px - 6, py - 34, 5)} fill={c2 ?? '#FFD34D'} />
                 <path d={sparkle(px + 8, py - 40, 4)} fill={c2 ?? '#FFD34D'} />
                 <path d={star(px + 2, py - 28, 4)} fill={c2 ?? '#FFD34D'} />
+              </g>
+            );
+          case 'martelo':
+            return (
+              <g>
+                <path d={`M${px} ${py + 6} L${px + 4} ${py - 26}`} stroke={c1 ?? '#C98A5B'} strokeWidth="4.5" strokeLinecap="round" />
+                <g transform={`rotate(8 ${px + 4} ${py - 29})`}>
+                  <rect x={px - 8} y={py - 35} width="22" height="10" rx="2.5" fill={c2 ?? '#8A90A0'} />
+                  <rect x={px - 11} y={py - 34} width="5" height="8" rx="1.5" fill="#6E7482" />
+                  <path d={`M${px + 13} ${py - 35} q8 1 7 9 l-3 -1 q0 -4 -4 -5 Z`} fill="#6E7482" />
+                  <rect x={px - 6} y={py - 34} width="16" height="2.5" rx="1.2" fill="#FFFFFF" opacity="0.45" />
+                </g>
+              </g>
+            );
+          case 'frigideira':
+            return (
+              <g>
+                <path d={`M${px} ${py + 4} L${px + 3} ${py - 14}`} stroke="#8A5A3B" strokeWidth="5" strokeLinecap="round" />
+                <ellipse cx={px + 6} cy={py - 30} rx="16" ry="15" fill={c1 ?? '#3A3440'} />
+                <ellipse cx={px + 6} cy={py - 31} rx="13" ry="12" fill="#57525F" />
+                <path d={`M${px - 4} ${py - 32} q2 -8 9 -6 q8 -2 9 5 q2 7 -6 9 q-9 3 -12 -8 Z`} fill="#FFFFFF" />
+                <circle cx={px + 6} cy={py - 31} r="4.5" fill={c2 ?? '#FFD34D'} />
+                <circle cx={px + 4.6} cy={py - 32.6} r="1.3" fill="#FFFFFF" opacity="0.85" />
+              </g>
+            );
+          case 'tesoura':
+            return (
+              <g>
+                <path d={`M${px - 3} ${py - 8} L${px + 6} ${py - 40}`} stroke={c2 ?? '#C9CED8'} strokeWidth="4" strokeLinecap="round" />
+                <path d={`M${px + 5} ${py - 8} L${px - 2} ${py - 40}`} stroke="#AEB4C2" strokeWidth="4" strokeLinecap="round" />
+                <circle cx={px + 1.5} cy={py - 24} r="2" fill="#6E7482" />
+                <circle cx={px - 5} cy={py - 5} r="5.5" fill="none" stroke={c1 ?? '#FF86AC'} strokeWidth="3.5" />
+                <circle cx={px + 7} cy={py - 5} r="5.5" fill="none" stroke={c1 ?? '#FF86AC'} strokeWidth="3.5" />
+              </g>
+            );
+          case 'mapa':
+            return (
+              <g transform={`rotate(-8 ${px} ${py})`}>
+                <rect x={px - 14} y={py - 34} width="28" height="29" rx="2" fill={c1 ?? '#F3DDB0'} stroke="#C9A46A" strokeWidth="1.2" />
+                <rect x={px - 16} y={py - 38} width="32" height="7" rx="3.5" fill="#E2C48A" />
+                <rect x={px - 16} y={py - 8} width="32" height="7" rx="3.5" fill="#E2C48A" />
+                <path d={`M${px - 9} ${py - 25} q6 -3 7 3 t9 3`} stroke="#8A6A4F" strokeWidth="1.3" strokeDasharray="2 2" fill="none" />
+                <path d={`M${px + 4} ${py - 24} l6 6 m0 -6 l-6 6`} stroke={c2 ?? '#E2547A'} strokeWidth="2.4" strokeLinecap="round" />
+                <circle cx={px - 8} cy={py - 14} r="3" fill="#7CC39A" />
+              </g>
+            );
+          case 'sacola':
+            return (
+              <g>
+                <path d={`M${px - 7} ${py - 21} Q${px - 7} ${py - 33} ${px} ${py - 33} Q${px + 7} ${py - 33} ${px + 7} ${py - 21}`} stroke={c2 ?? '#FF86AC'} strokeWidth="2.5" fill="none" />
+                <path d={`M${px - 13} ${py - 22} H${px + 13} L${px + 15} ${py + 6} H${px - 15} Z`} fill={c1 ?? '#FFFFFF'} stroke={c2 ?? '#FF86AC'} strokeWidth="1.5" />
+                <path d={heartPath(px, py - 11, 6)} fill={c2 ?? '#FF86AC'} />
               </g>
             );
           default:
