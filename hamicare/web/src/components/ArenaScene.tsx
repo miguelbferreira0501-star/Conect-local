@@ -1,7 +1,13 @@
 // Os cenários das 12 arenas: cada uma com casa própria, paisagem, clima e bichinhos.
 // O céu acompanha a hora do dia. Toque em árvores, flores, cogumelos e na casa: eles reagem.
-import { useId, type ReactNode, type MouseEvent } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode, type MouseEvent } from 'react';
 import { skyOf, type SkyTime } from './Scene';
+import { ARENA_DETAILS } from './arenaDetails';
+import { CompanionShape, EggShape } from './Companion';
+import { companionOfArena, eggWarmth, HATCH_DAYS, PET_VOICE } from '../data/companions';
+import { gameCfg } from '../lib/game';
+import { play, type SoundId } from '../lib/sound';
+import { useApp } from '../lib/store';
 
 type Sky = [string, string];
 interface ArenaLook {
@@ -15,7 +21,7 @@ interface ArenaLook {
 // ---------- Peças que se repetem ----------
 
 const Tree = ({ x, y, s = 1, c = '#3E9C55', trunk = '#8A5A3B' }: { x: number; y: number; s?: number; c?: string; trunk?: string }) => (
-  <g transform={`translate(${x} ${y}) scale(${s})`} className="tree-sway" data-tap="">
+  <g transform={`translate(${x} ${y}) scale(${s})`} className="tree-sway" data-tap="arvore">
     <rect x="-4" y="-4" width="8" height="26" rx="3" fill={trunk} />
     <circle cx="0" cy="-18" r="20" fill={c} />
     <circle cx="-13" cy="-6" r="13" fill={c} />
@@ -25,7 +31,7 @@ const Tree = ({ x, y, s = 1, c = '#3E9C55', trunk = '#8A5A3B' }: { x: number; y:
 );
 
 const Pine = ({ x, y, s = 1, c = '#2F7A4A', snow }: { x: number; y: number; s?: number; c?: string; snow?: boolean }) => (
-  <g transform={`translate(${x} ${y}) scale(${s})`} className="tree-sway" data-tap="">
+  <g transform={`translate(${x} ${y}) scale(${s})`} className="tree-sway" data-tap="arvore">
     <rect x="-3" y="-2" width="6" height="14" fill="#6E4A30" />
     <path d="M0 -60 L18 -30 H10 L24 -6 H-24 L-10 -30 H-18Z" fill={c} />
     {snow && <path d="M0 -60 L9 -45 Q4 -42 0 -46 Q-4 -42 -9 -45Z M-14 -28 Q-8 -24 -2 -28 Q4 -24 10 -28 L14 -24 Q6 -20 0 -23 Q-6 -20 -16 -24Z" fill="#fff" />}
@@ -33,7 +39,7 @@ const Pine = ({ x, y, s = 1, c = '#2F7A4A', snow }: { x: number; y: number; s?: 
 );
 
 const Palm = ({ x, y, s = 1, flip }: { x: number; y: number; s?: number; flip?: boolean }) => (
-  <g transform={`translate(${x} ${y}) scale(${flip ? -s : s} ${s})`} className="tree-sway" data-tap="">
+  <g transform={`translate(${x} ${y}) scale(${flip ? -s : s} ${s})`} className="tree-sway" data-tap="arvore">
     <path d="M0 0 Q-4 -40 6 -78" stroke="#B07A52" strokeWidth="7" fill="none" strokeLinecap="round" />
     <path d="M0 -10 L5 -12 M-1 -24 L4 -26 M0 -38 L5 -40 M2 -52 L7 -54 M4 -66 L9 -67" stroke="#8A5A3B" strokeWidth="2" />
     <path d="M6 -78 Q-20 -94 -42 -76 Q-18 -82 6 -78Z" fill="#3FB27F" />
@@ -46,7 +52,7 @@ const Palm = ({ x, y, s = 1, flip }: { x: number; y: number; s?: number; flip?: 
 );
 
 const Flower = ({ x, y, c, d = 0 }: { x: number; y: number; c: string; d?: number }) => (
-  <g className="flower" style={{ transformOrigin: `${x}px ${y + 14}px`, animationDelay: `${d}s` }} data-tap="">
+  <g className="flower" style={{ transformOrigin: `${x}px ${y + 14}px`, animationDelay: `${d}s` }} data-tap="flor">
     <path d={`M${x} ${y + 14} L${x} ${y}`} stroke="#3E8F4A" strokeWidth="2" />
     {[0, 72, 144, 216, 288].map((a) => (
       <circle key={a} cx={x + Math.cos((a * Math.PI) / 180) * 4} cy={y + Math.sin((a * Math.PI) / 180) * 4} r="3.4" fill={c} />
@@ -56,7 +62,7 @@ const Flower = ({ x, y, c, d = 0 }: { x: number; y: number; c: string; d?: numbe
 );
 
 const Mushroom = ({ x, y, s = 1, c = '#F26D6D' }: { x: number; y: number; s?: number; c?: string }) => (
-  <g transform={`translate(${x} ${y}) scale(${s})`} data-tap="">
+  <g transform={`translate(${x} ${y}) scale(${s})`} data-tap="cogumelo">
     <path d="M-6 0 V-12 H6 V0Z" fill="#FFF3DC" />
     <path d="M-16 -10 Q-16 -30 0 -30 Q16 -30 16 -10Z" fill={c} />
     <circle cx="-7" cy="-20" r="3" fill="#fff" />
@@ -144,7 +150,7 @@ const LOOKS: Record<string, ArenaLook> = {
         <Tree x={342} y={170} s={1.1} c={night ? '#1F4338' : '#3E9C55'} />
         <Tree x={382} y={176} s={0.85} c={night ? '#1F4338' : '#4FA35C'} />
         <path d="M0 222 C70 196 150 206 210 214 C280 224 330 200 400 206 L400 300 L0 300 Z" fill={night ? '#2F5A4C' : '#7CCB6A'} />
-        <g transform="translate(66 156)" data-tap="">
+        <g transform="translate(66 156)" data-tap="casa">
           <path d="M-36 66 C-38 34 -34 6 -28 -6 L28 -6 C34 6 38 34 36 66 Z" fill={night ? '#5B4036' : '#B07A52'} />
           <ellipse cx="0" cy="-6" rx="28" ry="8" fill={night ? '#7A5848' : '#D7A574'} />
           <path d="M-14 66 L-14 40 C-14 26 14 26 14 40 L14 66 Z" fill={night ? '#2B1E1A' : '#5E3B27'} />
@@ -179,7 +185,7 @@ const LOOKS: Record<string, ArenaLook> = {
         ))}
         <path d="M0 228 C80 208 160 216 230 222 C300 228 350 214 400 216 V300 H0Z" fill={night ? '#2F5A4C' : '#86D08A'} />
         {/* Casa de flor */}
-        <g transform="translate(78 182)" data-tap="">
+        <g transform="translate(78 182)" data-tap="casa">
           <ellipse cx="0" cy="40" rx="44" ry="36" fill={night ? '#D9C6B5' : '#FFF3DC'} />
           {[0, 40, 80, 120, 160, 200, 240, 280, 320].map((a) => (
             <ellipse key={a} cx="0" cy="-12" rx="12" ry="26" fill={a % 80 ? '#FF9FC2' : '#FF7FA8'} transform={`rotate(${a} 0 6)`} />
@@ -206,13 +212,13 @@ const LOOKS: Record<string, ArenaLook> = {
           <Flower key={i} x={x as number} y={y as number} c={c as string} d={i * 0.5} />
         ))}
         {/* Joaninha e caracol */}
-        <g transform="translate(300 274)" data-tap="">
+        <g transform="translate(300 274)" data-tap="bicho">
           <ellipse cx="0" cy="0" rx="7" ry="6" fill="#F26D6D" />
           <circle cx="-6" cy="-2" r="3" fill="#4B4F5E" />
           <circle cx="2" cy="-2" r="1.4" fill="#4B4F5E" />
           <circle cx="3" cy="3" r="1.4" fill="#4B4F5E" />
         </g>
-        <g transform="translate(60 276)" data-tap="">
+        <g transform="translate(60 276)" data-tap="bicho">
           <path d="M-10 4 H12 Q16 -6 12 -8" fill="#C9E8B5" stroke="#C9E8B5" strokeWidth="3" strokeLinecap="round" />
           <circle cx="-2" cy="-4" r="7" fill="#FF9F4D" />
           <circle cx="-2" cy="-4" r="3" fill="none" stroke="#E27E2C" strokeWidth="1.6" />
@@ -238,7 +244,7 @@ const LOOKS: Record<string, ArenaLook> = {
         ))}
         <path d="M0 210 C80 196 160 202 240 206 C320 210 360 200 400 202 V300 H0Z" fill={night ? '#4A4458' : '#C9B79A'} />
         {/* Casa de madeira com chaminé */}
-        <g transform="translate(72 150)" data-tap="">
+        <g transform="translate(72 150)" data-tap="casa">
           <rect x="22" y="-26" width="12" height="26" fill="#8A5A3B" />
           <rect x="-44" y="10" width="88" height="88" rx="4" fill={night ? '#7A5848' : '#D7A574'} />
           {[24, 40, 56, 72, 88].map((y) => (
@@ -291,7 +297,7 @@ const LOOKS: Record<string, ArenaLook> = {
         <ellipse cx="300" cy="250" rx="90" ry="20" fill={night ? '#2C4E76' : '#7FC8E8'} />
         <ellipse cx="290" cy="246" rx="40" ry="5" fill="#fff" opacity="0.35" className="wave-bob" />
         {/* Casa na árvore */}
-        <g transform="translate(80 120)" data-tap="">
+        <g transform="translate(80 120)" data-tap="casa">
           <rect x="-12" y="40" width="24" height="110" rx="6" fill="#7A4E32" />
           <circle cx="0" cy="18" r="46" fill={night ? '#1F4A38' : '#3E9C55'} />
           <circle cx="-34" cy="34" r="26" fill={night ? '#1A3F30' : '#4FA35C'} />
@@ -336,7 +342,7 @@ const LOOKS: Record<string, ArenaLook> = {
         {/* Areia */}
         <path d="M0 236 C80 220 170 228 250 232 C320 236 360 226 400 228 V300 H0Z" fill={night ? '#9C8B6A' : '#FFE2A3'} />
         {/* Bangalô sobre a água */}
-        <g transform="translate(88 150)" data-tap="">
+        <g transform="translate(88 150)" data-tap="casa">
           {[-34, -12, 12, 34].map((x) => (
             <rect key={x} x={x - 3} y="56" width="6" height="40" fill="#8A5A3B" />
           ))}
@@ -358,12 +364,12 @@ const LOOKS: Record<string, ArenaLook> = {
           <path d="M-30 4 Q0 -24 30 4Z" fill="#F26D6D" />
           <path d="M-14 2 Q-8 -16 0 -18 Q-6 -10 -6 3Z M8 3 Q8 -10 0 -18 Q10 -16 16 2Z" fill="#fff" />
         </g>
-        <g transform="translate(320 282)" data-tap="">
+        <g transform="translate(320 282)" data-tap="bola">
           <circle r="10" fill="#fff" />
           <path d="M0 -10 A10 10 0 0 1 10 0 L0 0Z" fill="#F26D6D" />
           <path d="M0 10 A10 10 0 0 1 -10 0 L0 0Z" fill="#6AAEF5" />
         </g>
-        <path d="M40 284 l3 -7 l3 7 l7 1 l-5 4 l2 7 l-7 -4 l-7 4 l2 -7 l-5 -4z" fill="#FF9F4D" data-tap="" />
+        <path d="M40 284 l3 -7 l3 7 l7 1 l-5 4 l2 7 l-7 -4 l-7 4 l2 -7 l-5 -4z" fill="#FF9F4D" data-tap="bicho" />
       </>
     ),
   },
@@ -379,7 +385,7 @@ const LOOKS: Record<string, ArenaLook> = {
         <path d="M70 110 L88 132 L76 130 L64 140 L56 128Z M190 80 L212 108 L198 104 L186 116 L174 102Z M320 110 L340 134 L326 130 L314 140 L304 128Z" fill="#fff" />
         <path d="M0 224 C80 206 170 214 240 218 C320 222 360 210 400 212 V300 H0Z" fill="#F4F8FF" />
         {/* Chalé */}
-        <g transform="translate(86 160)" data-tap="">
+        <g transform="translate(86 160)" data-tap="casa">
           <rect x="22" y="-24" width="12" height="26" fill="#8A5A3B" />
           <rect x="-44" y="20" width="88" height="70" rx="3" fill={night ? '#6E4A30' : '#A86E44'} />
           {[34, 48, 62, 76].map((y) => (
@@ -401,7 +407,7 @@ const LOOKS: Record<string, ArenaLook> = {
         <Pine x={260} y={236} s={1.2} c={night ? '#1E4A3A' : '#2F7A4A'} snow />
         <Pine x={370} y={232} s={1} c={night ? '#1E4A3A' : '#3B8C58'} snow />
         {/* Boneco de neve */}
-        <g transform="translate(320 250)" data-tap="">
+        <g transform="translate(320 250)" data-tap="boneco">
           <circle cx="0" cy="16" r="16" fill="#fff" />
           <circle cx="0" cy="-8" r="11" fill="#fff" />
           <circle cx="-4" cy="-10" r="1.6" fill="#4B4F5E" />
@@ -439,7 +445,7 @@ const LOOKS: Record<string, ArenaLook> = {
         ))}
         <rect x="0" y="210" width="400" height="90" fill={night ? '#3A3F58' : '#B9C1D6'} />
         {/* Prédio da casa do Hami */}
-        <g transform="translate(20 70)" data-tap="">
+        <g transform="translate(20 70)" data-tap="casa">
           <rect x="0" y="0" width="110" height="170" rx="6" fill={night ? '#5B4F94' : '#FF9FB5'} />
           {[20, 60, 100].map((y) => (
             <g key={y}>
@@ -491,7 +497,7 @@ const LOOKS: Record<string, ArenaLook> = {
         ))}
         {/* Peixes */}
         {[[300, 90, '#FFD25A'], [240, 130, '#FF9F4D'], [340, 150, '#FF92B4']].map(([x, y, c], i) => (
-          <g key={i} className="fish-swim" style={{ animationDelay: `${i * 1.6}s` }} data-tap="">
+          <g key={i} className="fish-swim" style={{ animationDelay: `${i * 1.6}s` }} data-tap="agua">
             <g transform={`translate(${x} ${y})`}>
               <ellipse cx="0" cy="0" rx="12" ry="7" fill={c as string} />
               <path d="M10 0 L20 -7 V7Z" fill={c as string} />
@@ -503,7 +509,7 @@ const LOOKS: Record<string, ArenaLook> = {
         <path d="M0 236 C80 220 170 228 250 232 C320 236 360 226 400 228 V300 H0Z" fill="#E3CF96" />
         <ellipse cx="350" cy="252" rx="34" ry="14" fill="#8E9BB8" />
         {/* Casa em bolha de vidro */}
-        <g transform="translate(92 170)" data-tap="">
+        <g transform="translate(92 170)" data-tap="casa">
           <ellipse cx="0" cy="66" rx="70" ry="10" fill="#C9B47E" />
           <path d="M-62 66 Q-62 -40 0 -40 Q62 -40 62 66Z" fill="#DDF6FF" opacity="0.45" />
           <rect x="-34" y="10" width="68" height="56" rx="10" fill="#FF92B4" />
@@ -521,7 +527,7 @@ const LOOKS: Record<string, ArenaLook> = {
           <path d="M0 0 V-20 M0 -12 Q-10 -16 -12 -28 M0 -16 Q10 -20 12 -32" stroke="#FF7FA8" strokeWidth="5" fill="none" strokeLinecap="round" />
         </g>
         {/* Baú do tesouro */}
-        <g transform="translate(250 282)" data-tap="">
+        <g transform="translate(250 282)" data-tap="bau">
           <rect x="-16" y="-14" width="32" height="18" rx="3" fill="#A86E44" />
           <path d="M-16 -14 Q0 -28 16 -14Z" fill="#C98D5E" />
           <rect x="-3" y="-12" width="6" height="8" fill="#FFD25A" />
@@ -548,7 +554,7 @@ const LOOKS: Record<string, ArenaLook> = {
         <path d="M0 214 Q30 180 70 200 Q110 160 160 196 Q210 170 250 198 Q300 166 350 196 Q380 182 400 196 V300 H0Z" fill="#fff" />
         <path d="M0 240 Q60 220 120 236 Q190 220 250 236 Q320 222 400 238 V300 H0Z" fill="#FFF0F8" />
         {/* Casa de doce */}
-        <g transform="translate(86 150)" data-tap="">
+        <g transform="translate(86 150)" data-tap="casa">
           <rect x="-40" y="24" width="80" height="70" rx="12" fill="#FFF3DC" />
           <path d="M-52 30 Q-52 -20 0 -24 Q52 -20 52 30 Q40 22 26 30 Q13 22 0 30 Q-13 22 -26 30 Q-40 22 -52 30Z" fill="#FF92B4" />
           <circle cx="-26" cy="0" r="4" fill="#fff" />
@@ -568,7 +574,7 @@ const LOOKS: Record<string, ArenaLook> = {
         ))}
         {/* Estrelas em hastes */}
         {[[270, 246], [190, 260]].map(([x, y], i) => (
-          <g key={i} transform={`translate(${x} ${y})`} data-tap="">
+          <g key={i} transform={`translate(${x} ${y})`} data-tap="brilho">
             <path d="M0 0 V30" stroke="#FFE27A" strokeWidth="2.4" />
             <path d="M0 -12 l4 8 l9 1 l-7 6 l2 9 l-8 -5 l-8 5 l2 -9 l-7 -6 l9 -1z" fill="#FFE27A" />
           </g>
@@ -586,7 +592,7 @@ const LOOKS: Record<string, ArenaLook> = {
         {!night && <Cloud x={250} y={70} s={0.9} cls="cloud cloud-1" />}
         <path d="M0 210 C60 180 140 190 200 200 C270 210 330 182 400 196 V300 H0Z" fill={night ? '#3D4E70' : '#B9D8A4'} />
         {/* Castelo */}
-        <g transform="translate(110 90)" data-tap="">
+        <g transform="translate(110 90)" data-tap="casa">
           <rect x="-70" y="60" width="140" height="110" fill={night ? '#8A84B0' : '#E6E2F5'} />
           {[-70, -44, -18, 8, 34, 60].map((x) => (
             <rect key={x} x={x} y="50" width="14" height="14" fill={night ? '#8A84B0' : '#E6E2F5'} />
@@ -649,7 +655,7 @@ const LOOKS: Record<string, ArenaLook> = {
           <ellipse key={i} cx={x} cy={y} rx={r} ry={(r as number) * 0.4} fill="#6E7590" />
         ))}
         {/* Base espacial */}
-        <g transform="translate(96 170)" data-tap="">
+        <g transform="translate(96 170)" data-tap="casa">
           <path d="M-56 56 Q-56 -14 0 -14 Q56 -14 56 56Z" fill="#E9EEF8" />
           <path d="M-40 56 Q-40 2 0 2 Q40 2 40 56" fill="none" stroke="#C9D2E6" strokeWidth="3" />
           <path d="M-56 30 H56" stroke="#C9D2E6" strokeWidth="3" />
@@ -663,7 +669,7 @@ const LOOKS: Record<string, ArenaLook> = {
           <circle cx="20" cy="-42" r="3" fill="#F26D6D" className="twinkle" />
         </g>
         {/* Foguete */}
-        <g transform="translate(300 234)" data-tap="">
+        <g transform="translate(300 234)" data-tap="foguete">
           <path d="M0 -60 Q14 -44 12 -10 H-12 Q-14 -44 0 -60Z" fill="#fff" />
           <circle cx="0" cy="-36" r="5" fill="#6AAEF5" />
           <path d="M-12 -20 L-22 -4 L-12 -6Z M12 -20 L22 -4 L12 -6Z" fill="#F26D6D" />
@@ -707,7 +713,7 @@ const LOOKS: Record<string, ArenaLook> = {
           <path d="M330 216 V300" stroke="#BFE6FF" strokeWidth="10" opacity="0.9" />
           <path d="M330 216 V300" stroke="#fff" strokeWidth="3" opacity="0.8" strokeDasharray="6 8" className="water-fall" />
           {/* Templo dourado */}
-          <g transform="translate(100 110)" data-tap="">
+          <g transform="translate(100 110)" data-tap="casa">
             <rect x="-56" y="94" width="112" height="10" rx="3" fill="#E8B020" />
             {[-44, -22, 0, 22, 44].map((x) => (
               <rect key={x} x={x - 5} y="40" width="10" height="56" rx="3" fill="#FFF3C9" />
@@ -721,7 +727,7 @@ const LOOKS: Record<string, ArenaLook> = {
           </g>
           {/* Cristais */}
           {[[240, 206], [270, 210]].map(([x, y], i) => (
-            <path key={i} d={`M${x} ${y} l8 -24 l8 24z`} fill={i ? '#C9A8FF' : '#9FE3C9'} data-tap="" />
+            <path key={i} d={`M${x} ${y} l8 -24 l8 24z`} fill={i ? '#C9A8FF' : '#9FE3C9'} data-tap="brilho" />
           ))}
           <Flower x={210} y={200} c="#FF9FC2" />
           <Flower x={300} y={198} c="#FFE27A" d={0.5} />
@@ -783,15 +789,104 @@ function Ambient({ kind, night }: { kind: ArenaLook['ambient']; night: boolean }
   }
 }
 
-/** Toque em algo do cenário: ele balança. */
-function onTap(e: MouseEvent<SVGSVGElement>) {
-  const el = (e.target as Element).closest('[data-tap]');
-  if (!el) return;
-  el.classList.remove('is-tapped');
-  void (el as SVGGraphicsElement).getBBox?.();
-  el.classList.add('is-tapped');
-  setTimeout(() => el.classList.remove('is-tapped'), 650);
+// ---------- Toques: cada coisa reage do seu jeito (som, partículas e um pulinho) ----------
+
+type Fx = 'folhas' | 'petalas' | 'coracoes' | 'bolhas' | 'brilhos' | 'notas';
+const TAP: Record<string, { sound: SoundId; fx: Fx; anim?: string }> = {
+  arvore: { sound: 'sacudir', fx: 'folhas' },
+  flor: { sound: 'brilho', fx: 'petalas' },
+  casa: { sound: 'pronto', fx: 'coracoes' },
+  cogumelo: { sound: 'quica', fx: 'brilhos', anim: 'is-boing' },
+  bola: { sound: 'quica', fx: 'brilhos', anim: 'is-boing' },
+  agua: { sound: 'bolha', fx: 'bolhas' },
+  brilho: { sound: 'brilho', fx: 'brilhos' },
+  bau: { sound: 'bau-abre', fx: 'brilhos' },
+  foguete: { sound: 'magia', fx: 'brilhos', anim: 'is-launch' },
+  boneco: { sound: 'risada', fx: 'coracoes' },
+  bicho: { sound: 'iii', fx: 'coracoes', anim: 'is-boing' },
+  carta: { sound: 'enviar', fx: 'coracoes' },
+  sino: { sound: 'pronto', fx: 'notas' },
+  gato: { sound: 'ronrom', fx: 'coracoes' },
+  '': { sound: 'pega', fx: 'brilhos' },
+};
+
+interface Burst {
+  id: number;
+  x: number;
+  y: number;
+  fx: Fx;
 }
+
+function Particle({ fx, x, y, i }: { fx: Fx; x: number; y: number; i: number }) {
+  switch (fx) {
+    case 'folhas':
+      return <path d={`M${x} ${y} q4 -5 8 0 q-4 5 -8 0`} fill={i % 2 ? '#FFB347' : '#5FBF77'} />;
+    case 'petalas':
+      return <ellipse cx={x} cy={y} rx="3.4" ry="2.2" fill={i % 2 ? '#FFB3C7' : '#FFFFFF'} />;
+    case 'coracoes':
+      return <path d={`M${x} ${y + 4} C${x - 6} ${y} ${x - 4} ${y - 5} ${x} ${y - 2} C${x + 4} ${y - 5} ${x + 6} ${y} ${x} ${y + 4} Z`} fill={i % 2 ? '#FF6F91' : '#FF9FC2'} />;
+    case 'bolhas':
+      return <circle cx={x} cy={y} r={2 + (i % 3)} fill="none" stroke="#FFFFFF" strokeWidth="1.4" />;
+    case 'notas':
+      return (
+        <text x={x} y={y} fontSize="12" fontWeight="800" fill={i % 2 ? '#7E57D6' : '#F6B94A'} fontFamily="sans-serif">
+          {i % 2 ? '♪' : '♫'}
+        </text>
+      );
+    default:
+      return <path d={`M${x} ${y - 4} Q${x + 1} ${y - 1} ${x + 4} ${y} Q${x + 1} ${y + 1} ${x} ${y + 4} Q${x - 1} ${y + 1} ${x - 4} ${y} Q${x - 1} ${y - 1} ${x} ${y - 4} Z`} fill={i % 2 ? '#FFE27A' : '#FFFFFF'} />;
+  }
+}
+
+function BurstFx({ b }: { b: Burst }) {
+  const n = 6;
+  return (
+    <g pointerEvents="none">
+      {Array.from({ length: n }, (_, i) => {
+        const a = (i / n) * Math.PI * 2 + (b.id % 7) * 0.4;
+        const dx = Math.cos(a) * (14 + (i % 3) * 8);
+        const dy = b.fx === 'folhas' ? 24 + (i % 3) * 10 : -20 - (i % 3) * 9 + Math.sin(a) * 6;
+        return (
+          <g key={i} className="burst-p" style={{ '--dx': `${dx.toFixed(1)}px`, '--dy': `${dy.toFixed(1)}px`, animationDelay: `${i * 30}ms` } as CSSProperties}>
+            <Particle fx={b.fx} x={b.x} y={b.y} i={i} />
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+interface Peek {
+  id: number;
+  x: number;
+  y: number;
+}
+
+/** O pet desta arena (ou o ovo dele) espia do lado da casa. */
+function PeekPet({ arenaN, peek }: { arenaN: number; peek: Peek }) {
+  const s = useApp();
+  const pet = companionOfArena(arenaN);
+  const got = pet ? s.companions?.got[pet.id] : undefined;
+  if (!pet || !got) return null;
+  const warmth = got.hatched ? HATCH_DAYS : eggWarmth(s.days, got.at);
+  const say = got.hatched ? `Oi! Sou ${pet.name}` : warmth >= HATCH_DAYS ? 'Vou nascer!' : '?';
+  const w = say.length * 5.6 + 14;
+  return (
+    <g key={peek.id} className="peek-pop" style={{ transformOrigin: `${peek.x}px ${peek.y}px` }} pointerEvents="none">
+      <svg x={peek.x - 24} y={peek.y - 46} width="48" height="48" viewBox="0 0 100 100" overflow="visible">
+        {got.hatched ? <CompanionShape pet={pet} /> : <EggShape colors={pet.egg} warmth={warmth} />}
+      </svg>
+      <g transform={`translate(${Math.min(398 - w, peek.x + 10)} ${peek.y - 62})`}>
+        <rect x="0" y="-12" width={w} height="17" rx="8.5" fill="#FFFFFF" opacity="0.95" />
+        <text x={w / 2} y="0.5" textAnchor="middle" fontSize="10" fontWeight="800" fill="#4B3F66" fontFamily="sans-serif">
+          {say}
+        </text>
+      </g>
+    </g>
+  );
+}
+
+let tapSeq = 0;
 
 interface Props {
   arena: string;
@@ -814,6 +909,55 @@ export function ArenaScene({ arena, time = skyOf(), height = 300, children, over
   const uid = useId().replace(/:/g, '');
   const night = time === 'noite';
   const [top, bottom] = skyFor(look, time);
+  const arenaN = gameCfg().arenas.find((a) => a.id === arena)?.n ?? 0;
+  const s = useApp();
+  const [bursts, setBursts] = useState<Burst[]>([]);
+  const [peek, setPeek] = useState<Peek | null>(null);
+  const timers = useRef<number[]>([]);
+  useEffect(() => () => timers.current.forEach((t) => clearTimeout(t)), []);
+  const later = (fn: () => void, ms: number) => {
+    timers.current.push(window.setTimeout(fn, ms));
+  };
+
+  function onTap(e: MouseEvent<SVGSVGElement>) {
+    const el = (e.target as Element).closest('[data-tap]') as SVGGraphicsElement | null;
+    if (!el) return;
+    const kind = el.getAttribute('data-tap') ?? '';
+    const t = TAP[kind] ?? TAP[''];
+    const anim = t.anim ?? 'is-tapped';
+    el.classList.remove(anim);
+    void el.getBBox?.();
+    el.classList.add(anim);
+    later(() => el.classList.remove(anim), 700);
+    const svg = e.currentTarget;
+    const m = svg.getScreenCTM();
+    if (!m) return;
+    const inv = m.inverse();
+    const toSvg = (x: number, y: number) => {
+      const pt = svg.createSVGPoint();
+      pt.x = x;
+      pt.y = y;
+      return pt.matrixTransform(inv);
+    };
+    const p = toSvg(e.clientX, e.clientY);
+    const id = ++tapSeq;
+    play(t.sound, { step: id % 5 });
+    setBursts((b) => [...b.slice(-5), { id, x: p.x, y: p.y, fx: t.fx }]);
+    later(() => setBursts((b) => b.filter((x) => x.id !== id)), 1100);
+    // Tocou na casa: o pet desta arena (ou o ovo dele) espia do lado.
+    if (kind === 'casa' && arenaN && !locked) {
+      const r = el.getBoundingClientRect();
+      const corner = toSvg(r.right, r.bottom);
+      const x = Math.max(28, Math.min(372, corner.x - 6));
+      const y = Math.max(70, Math.min(294, corner.y - 2));
+      setPeek({ id, x, y });
+      const pet = companionOfArena(arenaN);
+      const got = pet ? s.companions?.got[pet.id] : undefined;
+      if (pet && got) later(() => play(got.hatched ? PET_VOICE[pet.kind] : 'bau-treme'), 380);
+      later(() => setPeek((cur) => (cur?.id === id ? null : cur)), 3400);
+    }
+  }
+
   return (
     <div className={`scene arena-scene ${locked ? 'is-locked' : ''} ${className}`} style={{ height }} data-arena={arena}>
       <svg className="absolute inset-0 h-full w-full" viewBox="0 0 400 300" preserveAspectRatio={`xMidYMax ${fit}`} aria-hidden="true" onClick={mini ? undefined : onTap}>
@@ -822,11 +966,24 @@ export function ArenaScene({ arena, time = skyOf(), height = 300, children, over
             <stop offset="0" stopColor={top} />
             <stop offset="1" stopColor={bottom} />
           </linearGradient>
+          <radialGradient id={`lt-${uid}`} cx="0.82" cy="0.08" r="0.95">
+            <stop offset="0" stopColor="#FFF4CF" stopOpacity={night ? 0 : 0.3} />
+            <stop offset="1" stopColor="#FFF4CF" stopOpacity="0" />
+          </radialGradient>
+          <linearGradient id={`vg-${uid}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0.72" stopColor="#1A1430" stopOpacity="0" />
+            <stop offset="1" stopColor="#1A1430" stopOpacity={night ? 0.26 : 0.1} />
+          </linearGradient>
         </defs>
         <rect width="400" height="300" fill={`url(#sky-${uid})`} />
         {night && !look.fixedSky && look.ambient !== 'celeste' && <Stars list={NIGHT_STARS} />}
         {look.draw({ night, time, id: uid })}
+        {ARENA_DETAILS[arena]?.(night)}
+        <rect width="400" height="300" fill={`url(#lt-${uid})`} pointerEvents="none" />
+        <rect width="400" height="300" fill={`url(#vg-${uid})`} pointerEvents="none" />
         {!mini && <Ambient kind={look.ambient} night={night} />}
+        {!mini && peek && <PeekPet arenaN={arenaN} peek={peek} />}
+        {!mini && bursts.map((b) => <BurstFx key={b.id} b={b} />)}
       </svg>
       {fade && <div className="scene-fade" aria-hidden="true" />}
       {children && <div className="pointer-events-none relative z-[1] flex h-full items-end justify-center pb-3"><div className="pointer-events-auto">{children}</div></div>}

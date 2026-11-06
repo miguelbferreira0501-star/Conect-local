@@ -18,6 +18,9 @@ import { arenaItemsOf } from '../shared/game/catalog';
 import { nextArena, xpAt } from '../shared/game/levels';
 import type { ArenaDef } from '../shared/game/config';
 import type { State } from '../types';
+import { CompanionBuddy, CompanionsCard } from './Companions';
+import { Egg } from '../components/Companion';
+import { companionOfArena, HATCH_DAYS } from '../data/companions';
 
 export const arenaByN = (n: number) => gameCfg().arenas.find((a) => a.n === n) ?? gameCfg().arenas[0];
 
@@ -69,6 +72,7 @@ export function ArenasTab({ onHouse }: { onHouse: () => void }) {
   return (
     <div className="grid gap-4">
       <LevelCard s={s} />
+      <CompanionsCard />
       <ol className="arena-trail" aria-label="Trilha das arenas">
         {cfg.arenas.map((a, i) => {
           const unlocked = a.n <= cur;
@@ -103,9 +107,14 @@ export function ArenasTab({ onHouse }: { onHouse: () => void }) {
 
 function Rewards({ a, fur }: { a: ArenaDef; fur: string }) {
   const items = arenaItemsOf(a.n, a.reward.items).map(itemById).filter(Boolean);
-  if (!a.reward.coins && !a.reward.chest && !items.length) return <p className="text-[14px] text-muted">A casinha onde tudo começa.</p>;
+  const egg = companionOfArena(a.n);
   return (
     <div className="flex flex-wrap gap-2">
+      {egg && (
+        <span className="reward-chip" title={`Choca com ${HATCH_DAYS} dias de cuidado`}>
+          <Egg colors={egg.egg} size={24} /> Ovo de pet misterioso
+        </span>
+      )}
       {a.reward.coins > 0 && (
         <span className="reward-chip">
           <Seed size={18} /> {a.reward.coins}
@@ -149,7 +158,12 @@ function ArenaSheet({ n, onClose, onHouse }: { n: number | null; onClose: () => 
           </Room>
         ) : (
           <ArenaScene arena={a.id} height={220} locked={!unlocked}>
-            {unlocked && <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={104} label={s.pet.name} />}
+            {unlocked && (
+              <div className="relative">
+                <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={104} label={s.pet.name} />
+                <CompanionBuddy hamster={104} />
+              </div>
+            )}
           </ArenaScene>
         )}
         <p className="text-[15px] leading-snug">{a.desc}</p>

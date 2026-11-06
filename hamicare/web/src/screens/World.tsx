@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpToLine, Crown, Gift, Heart, Lock, PackageOpen, Pencil, Sparkles } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
-import { Capivara } from '../components/Capivara';
+import { ShopFront, type ShopId } from '../components/ShopFront';
+import { CompanionBuddy } from './Companions';
 import { Room } from '../components/Room';
 import { FLOOR_CSS, WALLPAPER_CSS } from '../components/Furniture';
 import { Coins, Seed, Seg, Sheet, toast } from '../components/ui';
@@ -77,7 +78,12 @@ function HouseTab({ onArenas }: { onArenas: () => void }) {
         </button>
       </div>
       <Room house={s.house} period={periodOf()} height={400} editing={editing} selected={sel} onSelect={setSel} onMove={moveItem}>
-        {!s.adventure && <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={s.pet.sleeping ? 'dormindo' : 'feliz'} size={150} label={s.pet.name} />}
+        {!s.adventure && (
+          <div className="relative">
+            <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={s.pet.sleeping ? 'dormindo' : 'feliz'} size={150} label={s.pet.name} />
+            {!editing && <CompanionBuddy hamster={150} />}
+          </div>
+        )}
       </Room>
       <div className="flex gap-2">
         <button className={`btn flex-1 ${editing ? 'btn-primary' : 'btn-soft'}`} onClick={() => (setEditing(!editing), setSel(null))}>
@@ -307,51 +313,55 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
 
 // ---------- Loja ----------
 
-const SHOP_KINDS: ItemKind[] = ['chapeu', 'oculos', 'roupa', 'acessorio', 'efeito', 'movel', 'decor', 'brinquedo', 'parede', 'piso', 'comida'];
+/** Cada lojinha tem o Hami de vendedor com a roupa da loja e as categorias dela. */
+const SHOP_AISLES: Record<Exclude<ShopId, 'baus' | 'vendinha'>, ItemKind[]> = {
+  roupas: ['chapeu', 'oculos', 'roupa', 'acessorio', 'efeito'],
+  casa: ['movel', 'decor', 'brinquedo', 'parede', 'piso'],
+  comida: ['comida'],
+};
 
 function ShopTab({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: string) => void }) {
   const s = useApp();
-  const [sec, setSec] = useState<'baus' | 'vendinha'>(s.game.pendingChests.length ? 'baus' : 'vendinha');
+  const pending = s.game.pendingChests.length;
+  const [sec, setSec] = useState<ShopId>(pending ? 'baus' : 'vendinha');
   return (
     <div className="grid gap-4">
-      <Seg value={sec} onChange={setSec} label="Seções da loja" options={[{ id: 'vendinha', label: 'Vendinha' }, { id: 'baus', label: s.game.pendingChests.length ? `Baús (${s.game.pendingChests.length})` : 'Baús' }]} />
-      {sec === 'baus' ? <ChestShopView /> : <Vendinha onPlus={onPlus} onGift={onGift} />}
+      <Seg
+        value={sec}
+        onChange={setSec}
+        label="Lojinhas"
+        options={[
+          { id: 'vendinha', label: 'Vendinha' },
+          { id: 'roupas', label: 'Roupas' },
+          { id: 'casa', label: 'Casa' },
+          { id: 'comida', label: 'Comida' },
+          { id: 'baus', label: pending ? `Baús (${pending})` : 'Baús' },
+        ]}
+      />
+      <ShopFront key={`frente-${sec}`} shop={sec} />
+      {sec === 'baus' ? <ChestShopView /> : sec === 'vendinha' ? <Vendinha onPlus={onPlus} onGift={onGift} /> : <Aisle key={`corredor-${sec}`} kinds={SHOP_AISLES[sec]} looks={sec === 'roupas'} onPlus={onPlus} onGift={onGift} />}
     </div>
   );
 }
 
+/** Vendinha: coleção do dia, presente, vitrine do Plus, lista de desejos. */
 function Vendinha({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: string) => void }) {
   const s = useApp();
-  const [kind, setKind] = useState<ItemKind | 'desejos' | 'looks' | 'plus'>('looks');
   const kids = s.profile.ageGroup === 'ate12';
+  const [kind, setKind] = useState<'desejos' | 'plus' | null>(null);
   const [tryOn, setTryOn] = useState<Item | null>(null);
   const season = currentSeason();
   const giftReady = s.lastGift !== todayKey();
   const forSale = ITEMS.filter((i) => !i.souvenir && inSeason(i) && i.price > 0);
-  const list = forSale.filter((i) => (kind === 'desejos' ? s.wishlist.includes(i.id) : kind === 'plus' ? i.plus : i.kind === kind));
+  const list = kind === 'desejos' ? forSale.filter((i) => s.wishlist.includes(i.id)) : kind === 'plus' ? forSale.filter((i) => i.plus) : [];
   const plusWished = s.wishlist.filter((id) => itemById(id)?.plus).length;
-  const today = todayKey();
-  const daily = dailyCollection(today);
-  const line = SELLER_LINES[hashStr(`${s.seed}:${today}:loja`) % SELLER_LINES.length];
+  const daily = dailyCollection(todayKey());
   const now = new Date();
   const mins = 24 * 60 - (now.getHours() * 60 + now.getMinutes());
 
   return (
     <div className="grid gap-4">
-      <PlusCard
-        onOpen={onPlus}
-        title={`${PLUS_COUNTS.items} itens só do Plus`}
-        text={plusWished ? `${plusWished === 1 ? '1 item' : `${plusWished} itens`} da sua lista de desejos ${plusWished === 1 ? 'é' : 'são'} do Plus. Fantasias, móveis especiais e estilos de casa completos.` : 'Fantasias de dragão, tubarão e panda, cama com dossel, castelinho, piano e estilos de casa completos.'}
-      />
-      <section className="shop-hero" aria-label="Vendinha da Dona Capivara">
-        <div className="flex items-end gap-2">
-          <div className="seller-bob shrink-0">
-            <Capivara size={98} />
-          </div>
-          <p className="seller-speech">
-            <b>Dona Capivara:</b> {line.replace('{pet}', s.pet.name)}
-          </p>
-        </div>
+      <section className="shop-hero" aria-label="Coleção do dia">
         <div className="flex items-center justify-between gap-2">
           <p className="font-display text-[20px] font-bold leading-tight">
             <Glyph e="✨" size={22} className="gi" /> Coleção do dia
@@ -366,7 +376,6 @@ function Vendinha({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: str
           ))}
         </ul>
       </section>
-      {!kids && <PlusShowcase onTry={setTryOn} onAll={() => setKind('plus')} />}
       <button
         className={`card flex items-center gap-3 p-4 text-left ${giftReady ? '' : 'opacity-60'}`}
         disabled={!giftReady}
@@ -381,29 +390,68 @@ function Vendinha({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: str
           <span className="block text-[13px] text-muted">{giftReady ? 'Toque para abrir: sementes ou uma comidinha' : 'Volte amanhã para outro'}</span>
         </span>
       </button>
-      {season && <p className="rounded-2xl bg-gold-soft px-4 py-2 text-[14px] font-bold">
-          <Glyph e="✨" size={18} className="gi" /> {SEASONS[season].label}: itens especiais {SEASONS[season].until}</p>}
+      {!kids && <PlusShowcase onTry={setTryOn} onAll={() => setKind('plus')} />}
+      {!kids && (
+        <PlusCard
+          onOpen={onPlus}
+          title={`${PLUS_COUNTS.items} itens só do Plus`}
+          text={plusWished ? `${plusWished === 1 ? '1 item' : `${plusWished} itens`} da sua lista de desejos ${plusWished === 1 ? 'é' : 'são'} do Plus. Fantasias, móveis especiais e estilos de casa completos.` : 'Fantasias de dragão, tubarão e panda, cama com dossel, castelinho, piano e estilos de casa completos.'}
+        />
+      )}
+      {season && (
+        <p className="rounded-2xl bg-gold-soft px-4 py-2 text-[14px] font-bold">
+          <Glyph e="✨" size={18} className="gi" /> {SEASONS[season].label}: itens especiais {SEASONS[season].until}
+        </p>
+      )}
       <div className="tabs-scroll">
-        {(['looks', ...(kids ? [] : (['plus'] as const)), ...SHOP_KINDS, 'desejos'] as const).map((k) => (
-          <button key={k} className={`chip ${kind === k ? 'chip-accent' : 'chip-plain'}`} onClick={() => setKind(k)}>
-            {k === 'desejos' ? (
-              <>
-                <Glyph e="💗" size={16} /> Desejos ({s.wishlist.length})
-              </>
-            ) : k === 'looks' ? (
-              <>
-                <Glyph e="✨" size={16} /> Looks ({LOOKS.length})
-              </>
-            ) : k === 'plus' ? (
-              <>
-                <Crown size={15} /> Só do Plus ({forSale.filter((i) => i.plus).length})
-              </>
-            ) : (
-              `${KIND_LABEL[k]} (${forSale.filter((i) => i.kind === k).length})`
-            )}
+        <button className={`chip ${kind === 'desejos' ? 'chip-accent' : 'chip-plain'}`} onClick={() => setKind(kind === 'desejos' ? null : 'desejos')}>
+          <Glyph e="💗" size={16} /> Desejos ({s.wishlist.length})
+        </button>
+        {!kids && (
+          <button className={`chip ${kind === 'plus' ? 'chip-accent' : 'chip-plain'}`} onClick={() => setKind(kind === 'plus' ? null : 'plus')}>
+            <Crown size={15} /> Só do Plus ({forSale.filter((i) => i.plus).length})
           </button>
-        ))}
+        )}
       </div>
+      {kind &&
+        (list.length ? (
+          <ul className="grid grid-cols-2 gap-2.5">
+            {list.map((item) => (
+              <ShopCard key={item.id} item={item} onPlus={onPlus} onGift={onGift} onTry={() => setTryOn(item)} />
+            ))}
+          </ul>
+        ) : (
+          <p className="text-center text-muted">{kind === 'desejos' ? 'Toque no coração dos itens para guardar aqui.' : 'Você já tem tudo do Plus!'}</p>
+        ))}
+      <TryOn item={tryOn} onClose={() => setTryOn(null)} onPlus={onPlus} />
+    </div>
+  );
+}
+
+/** Corredor de uma lojinha: categorias da loja (o Ateliê também tem os looks prontos). */
+function Aisle({ kinds, looks, onPlus, onGift }: { kinds: ItemKind[]; looks?: boolean; onPlus: () => void; onGift: (itemId: string) => void }) {
+  const [kind, setKind] = useState<ItemKind | 'looks'>(looks ? 'looks' : kinds[0]);
+  const [tryOn, setTryOn] = useState<Item | null>(null);
+  const forSale = ITEMS.filter((i) => !i.souvenir && inSeason(i) && i.price > 0);
+  const list = kind === 'looks' ? [] : forSale.filter((i) => i.kind === kind);
+  const chips: (ItemKind | 'looks')[] = [...(looks ? (['looks'] as const) : []), ...kinds];
+  return (
+    <div className="grid gap-4">
+      {chips.length > 1 && (
+        <div className="tabs-scroll">
+          {chips.map((k) => (
+            <button key={k} className={`chip ${kind === k ? 'chip-accent' : 'chip-plain'}`} onClick={() => setKind(k)}>
+              {k === 'looks' ? (
+                <>
+                  <Glyph e="✨" size={16} /> Looks ({LOOKS.length})
+                </>
+              ) : (
+                `${KIND_LABEL[k]} (${forSale.filter((i) => i.kind === k).length})`
+              )}
+            </button>
+          ))}
+        </div>
+      )}
       {kind === 'looks' ? (
         <LooksGrid onPlus={onPlus} />
       ) : list.length ? (
@@ -413,7 +461,7 @@ function Vendinha({ onPlus, onGift }: { onPlus: () => void; onGift: (itemId: str
           ))}
         </ul>
       ) : (
-        <p className="text-center text-muted">{kind === 'desejos' ? 'Toque no coração dos itens para guardar aqui.' : 'Você já tem tudo dessa categoria!'}</p>
+        <p className="text-center text-muted">Você já tem tudo dessa categoria!</p>
       )}
       <TryOn item={tryOn} onClose={() => setTryOn(null)} onPlus={onPlus} />
     </div>
@@ -527,14 +575,6 @@ function LooksGrid({ onPlus }: { onPlus: () => void }) {
   );
 }
 
-const SELLER_LINES = [
-  'Bem-vindo à minha vendinha! Tudo fresquinho hoje.',
-  'A coleção do dia vai embora à meia-noite, viu?',
-  'Semente bem gasta é semente feliz.',
-  'Psiu… o {pet} ia ficar lindo de chapéu novo.',
-  'Cuidar de si também merece um mimo.',
-  'Volte amanhã: sempre chega novidade.',
-];
 
 /** Quatro destaques que mudam todo dia (um deles do HamiCare+, quando houver). */
 function dailyCollection(today: string): Item[] {

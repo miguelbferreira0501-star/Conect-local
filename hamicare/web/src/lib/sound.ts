@@ -245,14 +245,15 @@ const jitter = (x: number, amt = 0.04) => x * (1 + (Math.random() * 2 - 1) * amt
 
 const SOUNDS: Record<SoundId, (o: PlayOpts) => void> = {
   // Interface
+  // Toques de botão: um "tec" seco e curtinho (estalo + batidinha grave), sem eco e sem nota que escorrega.
   toque: () => {
-    const r = jitter(1);
-    tone({ f: 1150 * r, to: 560 * r, slide: 0.05, d: 0.07, v: 0.14 });
-    tone({ f: 2300 * r, d: 0.018, v: 0.02, type: 'triangle' });
+    const r = jitter(1, 0.03);
+    noise({ f: 3400 * r, q: 1.4, d: 0.014, v: 0.2, a: 0.0008 });
+    tone({ f: 340 * r, to: 230 * r, d: 0.026, v: 0.11, a: 0.0008, type: 'triangle' });
   },
   aba: () => {
-    tone({ f: 680, to: 1040, slide: 0.06, d: 0.09, v: 0.12 });
-    tone({ f: 1560, t: 0.045, d: 0.12, v: 0.03, wet: 0.15 });
+    noise({ f: 2500, q: 1.4, d: 0.016, v: 0.18, a: 0.0008 });
+    tone({ f: 470, to: 330, d: 0.03, v: 0.1, a: 0.0008, type: 'triangle' });
   },
   abrir: () => {
     noise({ f: 450, to: 2400, q: 0.8, d: 0.24, v: 0.09, a: 0.08 });
