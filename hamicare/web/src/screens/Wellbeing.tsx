@@ -5,14 +5,14 @@ import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, Copy, Lock, Phone, Shuffle, Trash2, X } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { LineChart, toast } from '../components/ui';
-import { AFFIRMATIONS, EMOTIONS, REFLECTIONS } from '../data/lines';
+import { AFFIRMATIONS, EMOTIONS, MOODS, REFLECTIONS } from '../data/lines';
 import { BODY_SCAN, BREATHS, MEDITATION_CUES, QUIZZES, SLEEP_ROUTINE } from '../data/wellbeing';
 import { addJar, addJournal, dayOf, deleteJar, deleteJournal, getState, isPremium, logEvent, setEmotions, setMood, todayKey, todayTasks, toggleTask, useApp } from '../lib/store';
 import { addDays, copyText, formatDay, hashStr, prefersReducedMotion } from '../lib/util';
 import type { PetMood } from '../types';
 import { Glyph } from '../components/art';
 
-type Tool = 'sos' | 'respirar' | 'meditar' | 'foco' | 'relaxar' | 'sono' | 'afirmacoes' | 'aterrar' | 'pote' | 'quiz' | null;
+type Tool = 'sos' | 'respirar' | 'meditar' | 'foco' | 'relaxar' | 'sono' | 'afirmacoes' | 'aterrar' | 'pote' | 'quiz' | 'humor' | 'diario' | 'ajuda' | null;
 
 /** Abrir uma ferramenta vindo de outra aba (ex.: o SOS do cantinho da calma, no Início). */
 let requested: Tool = null;
@@ -20,17 +20,23 @@ export function requestTool(t: Exclude<Tool, null>) {
   requested = t;
 }
 
-const TOOLS: { id: Exclude<Tool, null>; emoji: string; title: string; desc: string; tint: string }[] = [
-  { id: 'respirar', emoji: '🌬️', title: 'Respirar', desc: '3 ritmos guiados pelo Hami', tint: '#CFE8FF' },
-  { id: 'aterrar', emoji: '🖐️', title: '5-4-3-2-1', desc: 'Para crise de ansiedade', tint: '#FFE2C4' },
-  { id: 'meditar', emoji: '🧘', title: 'Meditação', desc: '3, 5 ou 10 minutos', tint: '#E3D7FF' },
-  { id: 'foco', emoji: '🍅', title: 'Foco', desc: 'Pomodoro com o Hami', tint: '#FFD6CC' },
-  { id: 'relaxar', emoji: '🛀', title: 'Relaxar', desc: 'A luz passa pelo corpo', tint: '#E9DDFF' },
-  { id: 'sono', emoji: '🌙', title: 'Para dormir', desc: 'Acenda as estrelas', tint: '#D6DBFF' },
-  { id: 'afirmacoes', emoji: '💐', title: 'Afirmações', desc: 'Frases para guardar', tint: '#FFD6E2' },
-  { id: 'pote', emoji: '🫙', title: 'Pote de coisas boas', desc: 'Momentos felizes', tint: '#DFF5D2' },
-  { id: 'quiz', emoji: '🧩', title: 'Quizzes', desc: 'Conhecer o seu jeito', tint: '#FFF1B8' },
+/** Os blocos coloridos da página (o primeiro é o grandão). */
+const TILES: { id: Exclude<Tool, null>; emoji: string; title: string; desc?: string; color: string }[] = [
+  { id: 'humor', emoji: '😌', title: 'Como você está?', desc: 'Registre seu humor e veja como ele muda com o tempo.', color: '#6567D2' },
+  { id: 'diario', emoji: '📝', title: 'Diário', color: '#EE6A93' },
+  { id: 'sos', emoji: '🫶', title: 'SOS ansiedade', color: '#5BB7C2' },
+  { id: 'respirar', emoji: '🌬️', title: 'Respirar', color: '#3E95EE' },
+  { id: 'foco', emoji: '🍅', title: 'Foco', color: '#F2903A' },
+  { id: 'sono', emoji: '🌙', title: 'Para dormir', color: '#1F2A5E' },
+  { id: 'pote', emoji: '🫙', title: 'Pote de coisas boas', color: '#F1B252' },
+  { id: 'meditar', emoji: '🧘', title: 'Meditação', color: '#8A63D2' },
+  { id: 'afirmacoes', emoji: '🌻', title: 'Afirmações', color: '#3E8BEB' },
+  { id: 'relaxar', emoji: '🛀', title: 'Relaxar', color: '#A17A5B' },
+  { id: 'aterrar', emoji: '🖐️', title: '5-4-3-2-1', color: '#6567D2' },
+  { id: 'quiz', emoji: '🧩', title: 'Quizzes', color: '#4FAF73' },
 ];
+
+const PET_LINES = ['Respira comigo?', 'Tô aqui com você.', 'Um passinho de cada vez.', 'Você está indo bem.', 'Que tal um copo d’água?', 'Hoje vale ser gentil com você.'];
 
 export function Wellbeing({ onPlus }: { onPlus: () => void }) {
   const s = useApp();
@@ -47,59 +53,65 @@ export function Wellbeing({ onPlus }: { onPlus: () => void }) {
     .map((k) => ({ label: formatDay(k, { day: 'numeric', month: 'short' }), value: s.days[k].mood! }));
 
   return (
-    <div className="grid gap-4">
-      <header>
-        <p className="eyebrow">Só você vê o que escreve aqui</p>
+    <div className="wb-page grid gap-3">
+      <header className="flex items-end justify-between gap-2">
         <h1 className="font-display text-[30px] font-bold leading-tight">Bem-estar</h1>
+        <span className="wb-private">
+          <Lock size={12} /> Só você vê
+        </span>
       </header>
 
-      <button className="sos-btn" onClick={() => setTool('sos')}>
-        <Glyph e="🫶" size={34} />
-        <span className="min-w-0 text-left">
-          <span className="block text-[18px] font-extrabold leading-tight">A ansiedade apertou?</span>
-          <span className="block text-[13px] font-semibold opacity-85">SOS com o Hami: respirar, voltar para o agora e pedir ajuda se precisar</span>
-        </span>
-        <ChevronRight size={20} className="ml-auto shrink-0" />
+      <div className="wb-grid">
+        {TILES.map((t, i) => (
+          <button key={t.id} className={`wb-tile ${i === 0 ? 'is-big' : ''}`} style={{ background: t.color }} onClick={() => setTool(t.id)}>
+            <span className="wb-tile-text">
+              <b>{t.title}</b>
+              {t.desc && <small>{t.desc}</small>}
+              {t.id === 'humor' && day.mood && <small className="wb-today">Hoje: {MOODS[day.mood - 1].label}</small>}
+            </span>
+            <span className="wb-tile-ico" aria-hidden="true">
+              <Glyph e={t.id === 'humor' && day.mood ? MOODS[day.mood - 1].emoji : t.emoji} size={i === 0 ? 58 : 46} />
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <WellbeingPet />
+
+      <button className="wb-help" onClick={() => setTool('ajuda')}>
+        <Phone size={16} /> Precisa de ajuda agora? CVV 188
       </button>
 
-      <section className="card grid gap-3 p-4" aria-label="Humor de hoje">
-        <h2 className="font-display text-[20px] font-bold">Como você está agora?</h2>
-        <MoodSlider value={day.mood} onCommit={(m) => setMood(m)} />
-        <div className="flex flex-wrap gap-1.5">
-          {EMOTIONS.map((e) => {
-            const on = day.emotions?.includes(e);
-            return (
-              <button key={e} className={`chip ${on ? 'chip-accent' : 'chip-plain'}`} aria-pressed={!!on} onClick={() => setEmotions(on ? (day.emotions ?? []).filter((x) => x !== e) : [...(day.emotions ?? []), e])}>
-                {e}
-              </button>
-            );
-          })}
-        </div>
-        <LineChart points={moodPoints} label="Seu humor" min={1} max={5} tone="var(--accent)" />
-        <p className="text-[12px] text-muted">1 = muito difícil · 5 = muito bem. Últimos {range} dias.</p>
-      </section>
-
-      <PlusCard onOpen={onPlus} title="Seu humor em 6 meses" text="Com o Plus, os gráficos de humor e de bem-estar mostram 6 meses, não só 30 dias." />
-
-      <Journal />
-
-      <section className="grid gap-2" aria-label="Ferramentas">
-        <h2 className="font-display text-[21px] font-bold">Ferramentas</h2>
-        <div className="grid grid-cols-2 gap-2">
-          {TOOLS.map((t) => (
-            <button key={t.id} className="tool-tile" onClick={() => setTool(t.id)}>
-              <span className="tool-tile-ico" style={{ background: t.tint }} aria-hidden="true">
-                <Glyph e={t.emoji} size={44} />
-              </span>
-              <span className="font-display text-[17px] font-bold leading-tight">{t.title}</span>
-              <span className="text-[12px] font-semibold leading-tight text-muted">{t.desc}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <SosCard />
-
+      {tool === 'humor' && (
+        <ToolScreen title="Como você está?" sub="Arraste a barrinha e marque o que está sentindo" theme="lavanda" onClose={() => setTool(null)}>
+          <section className="card grid gap-3 p-4" aria-label="Humor de hoje">
+            <MoodSlider value={day.mood} onCommit={(m) => setMood(m)} />
+            <div className="flex flex-wrap gap-1.5">
+              {EMOTIONS.map((e) => {
+                const on = day.emotions?.includes(e);
+                return (
+                  <button key={e} className={`chip ${on ? 'chip-accent' : 'chip-plain'}`} aria-pressed={!!on} onClick={() => setEmotions(on ? (day.emotions ?? []).filter((x) => x !== e) : [...(day.emotions ?? []), e])}>
+                    {e}
+                  </button>
+                );
+              })}
+            </div>
+            <LineChart points={moodPoints} label="Seu humor" min={1} max={5} tone="var(--accent)" />
+            <p className="text-[12px] text-muted">1 = muito difícil · 5 = muito bem. Últimos {range} dias.</p>
+          </section>
+          <PlusCard onOpen={onPlus} title="Seu humor em 6 meses" text="Com o Plus, os gráficos de humor e de bem-estar mostram 6 meses, não só 30 dias." />
+        </ToolScreen>
+      )}
+      {tool === 'diario' && (
+        <ToolScreen title="Diário" sub="Só você vê o que escreve aqui" theme="rosa" onClose={() => setTool(null)}>
+          <Journal />
+        </ToolScreen>
+      )}
+      {tool === 'ajuda' && (
+        <ToolScreen title="Ajuda agora" theme="ceu" onClose={() => setTool(null)}>
+          <SosCard />
+        </ToolScreen>
+      )}
       {tool === 'sos' && <Sos onClose={() => setTool(null)} />}
       {tool === 'respirar' && <Breath onClose={() => setTool(null)} />}
       {tool === 'aterrar' && <Grounding onClose={() => setTool(null)} />}
@@ -111,6 +123,48 @@ export function Wellbeing({ onPlus }: { onPlus: () => void }) {
       {tool === 'pote' && <Jar onClose={() => setTool(null)} />}
       {tool === 'quiz' && <Quiz onClose={() => setTool(null)} />}
     </div>
+  );
+}
+
+/** O Hami no cantinho de baixo: tocar nele faz ele pular, soltar coraçõezinhos e falar alguma coisa gentil. */
+function WellbeingPet() {
+  const s = useApp();
+  const ref = useRef<HTMLDivElement>(null);
+  const [n, setN] = useState(0);
+  const line = PET_LINES[(hashStr(todayKey()) + n) % PET_LINES.length];
+  return (
+    <section className="wb-stage" aria-label={`${s.pet.name} te esperando`}>
+      <div className="wb-hill" aria-hidden="true">
+        <span className="wb-crater" style={{ left: '12%', bottom: '18%' }} />
+        <span className="wb-crater is-sm" style={{ right: '16%', bottom: '30%' }} />
+      </div>
+      <span className="wb-spark" style={{ left: '14%', top: '12%' }} aria-hidden="true" />
+      <span className="wb-spark is-sm" style={{ right: '18%', top: '22%', animationDelay: '0.8s' }} aria-hidden="true" />
+      <span className="wb-cloud" aria-hidden="true" />
+      {n > 0 && (
+        <p key={n} className="wb-say" aria-live="polite">
+          {line}
+        </p>
+      )}
+      <button
+        className="wb-pet"
+        data-sound="none"
+        aria-label={`Fazer carinho no ${s.pet.name}`}
+        onClick={() => {
+          play(n % 2 ? 'coracao' : 'iii');
+          hop(ref.current);
+          setN((x) => x + 1);
+        }}
+      >
+        <div ref={ref} style={{ transformOrigin: '50% 100%' }}>
+          <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={n ? 'animado' : 'feliz'} size={240} label={s.pet.name} />
+        </div>
+        <span className="wb-heart" aria-hidden="true">
+          <Glyph e="💗" size={40} />
+        </span>
+        <Burst emoji="💗" k={n} />
+      </button>
+    </section>
   );
 }
 

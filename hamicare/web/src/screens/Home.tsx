@@ -1,11 +1,11 @@
-import { GrowthPill } from '../components/Growth';
+import { useGrowth } from '../components/Growth';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Flame, Mail, Plus, Settings } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { ArenaScene } from '../components/ArenaScene';
 import { ArenaPin, arenaByN } from './Arenas';
 import { WalletSheet } from './Collection';
-import { PLUS_COUNTS, PlusCard, PlusPill } from '../components/PlusCard';
+import { PlusPill } from '../components/PlusCard';
 import { TeamHomeCard } from './social/Team';
 import { JourneyCard, useKcalPop } from '../components/Journey';
 import { TaskRow } from '../components/TaskRow';
@@ -14,12 +14,12 @@ import { Coins, Modal, toast } from '../components/ui';
 import { GREETING, periodOf, petLine } from '../data/lines';
 import { placeById } from '../data/world';
 import { streakOf } from '../logic/streak';
-import { dayOf, finishAdventure, homeArenaOf, getState, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
-import { addDays, prefersReducedMotion, weekStart, WEEKDAYS, fmtNum } from '../lib/util';
-import { isActive } from '../logic/evolution';
+import { areaNow, dayOf, finishAdventure, homeArenaOf, getState, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
+import { prefersReducedMotion, fmtNum } from '../lib/util';
 import type { PetMood, Task } from '../types';
 import { Glyph } from '../components/art';
-import { AreaPill, AreaSheet } from '../components/AreaSheet';
+import { AreaSheet } from '../components/AreaSheet';
+import { AREAS } from '../logic/areas';
 import { requestTool } from './Wellbeing';
 import { CompanionBuddy } from './Companions';
 
@@ -108,7 +108,6 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
   }
 
   const petMood: PetMood = mood ?? (s.pet.sleeping ? 'dormindo' : s.pet.stats.energia < 20 ? 'sono' : day.battery === 1 && done === 0 ? 'calmo' : 'feliz');
-  const week = Array.from({ length: 7 }, (_, i) => addDays(weekStart(today), i));
 
   const hami = adv ? (
     <div className="mb-6 grid justify-items-center gap-1 rounded-3xl bg-surface/95 px-4 py-3 text-center shadow-[var(--shadow)]">
@@ -150,7 +149,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
       {layer}
       <section className="relative" aria-label={`Jardim do ${s.pet.name}`}>
         <div className="scene-bleed relative overflow-hidden">
-          <ArenaScene arena={arenaByN(homeArenaOf(s)).id} height={340} fade>
+          <ArenaScene arena={arenaByN(homeArenaOf(s)).id} height={400} fade>
             {hami}
           </ArenaScene>
           <ArenaPin s={s} onClick={onArenas} />
@@ -182,32 +181,16 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
         )}
       </section>
 
-      <GrowthPill s={s} onClick={onEvolution} />
-      <AreaPill onClick={() => setAreaOpen(true)} />
-      <JourneyCard s={s} onOpen={onEvolution} onCalm={(a) => (requestTool(a), onGo('bem-estar'))} />
-      <TeamHomeCard onOpen={onTeam} />
-      <PlusCard onOpen={onPlus} title={`Mais mimos para o ${s.pet.name}`} text={`${PLUS_COUNTS.items} roupas e decorações exclusivas, pelagens especiais e 6 meses de estatísticas.`} />
+      <HomeChips onGrowth={onEvolution} onArea={() => setAreaOpen(true)} streakCount={streak.count} streakToday={streak.today} />
       <AreaSheet open={areaOpen} onClose={() => setAreaOpen(false)} />
       <WalletSheet open={wallet} onClose={() => setWallet(false)} />
-
-      <MealCard s={s} />
 
       <section className="grid gap-3" aria-label="Missões de hoje">
         <div className="flex items-center justify-between gap-2 px-1">
           <h2 className="section-label">Missões de hoje</h2>
-          <span className={`chip ${streak.today ? 'chip-fire' : 'chip-plain'}`}>
-            <Flame size={15} /> {streak.count} {streak.count === 1 ? 'dia' : 'dias'}
+          <span className="text-[13px] font-extrabold opacity-70">
+            {done}/{tasks.length}
           </span>
-        </div>
-        <div className="card grid grid-cols-7 gap-1 px-3 py-2.5">
-          {week.map((k) => (
-            <div key={k} className="grid justify-items-center gap-0.5 text-[11px] font-extrabold uppercase text-muted">
-              {WEEKDAYS[new Date(`${k}T12:00:00`).getDay()]}
-              <span className={`week-dot ${isActive(s.days[k]) ? 'is-done' : streak.rested.includes(k) ? 'is-rest' : k === today ? 'is-today' : ''}`}>
-                {isActive(s.days[k]) ? <Glyph e="🔥" size={18} /> : streak.rested.includes(k) ? <Glyph e="💤" size={16} /> : ''}
-              </span>
-            </div>
-          ))}
         </div>
         <ul className="grid gap-3">
           {tasks.map((t) => (
@@ -228,7 +211,51 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
         </button>
       </section>
 
+      <MealCard s={s} />
+      <JourneyCard s={s} onOpen={onEvolution} onCalm={(a) => (requestTool(a), onGo('bem-estar'))} />
+      <TeamHomeCard onOpen={onTeam} />
+
       <AdventureModal result={result} onClose={() => setResult(null)} />
+    </div>
+  );
+}
+
+/** Três selinhos no lugar de vários cartões: tamanho do Hami, dias seguidos e área. */
+function HomeChips({ onGrowth, onArea, streakCount, streakToday }: { onGrowth: () => void; onArea: () => void; streakCount: number; streakToday: boolean }) {
+  const s = useApp();
+  const g = useGrowth(s);
+  const a = areaNow(s);
+  return (
+    <div className="home-chips">
+      <button className="home-chip" onClick={onGrowth} aria-label={`${s.pet.name}: ${g.name}. ${g.next ? `Cresce em ${g.toNext} dias de cuidado` : 'Tamanho máximo'}`}>
+        <span className="home-chip-ico" style={{ background: '#DFF5D2' }}>
+          <Glyph e="🌱" size={22} />
+        </span>
+        <span className="home-chip-text">
+          <b>{g.name}</b>
+          <small>{g.next ? `cresce em ${g.toNext}d` : 'tamanho máximo'}</small>
+        </span>
+      </button>
+      <button className="home-chip" onClick={onGrowth} aria-label={`${streakCount} ${streakCount === 1 ? 'dia' : 'dias'} seguidos`}>
+        <span className="home-chip-ico" style={{ background: streakToday ? '#FFE0CC' : '#F1ECE6' }}>
+          <Flame size={20} className={streakToday ? 'text-[#F26B2A]' : 'text-[#A89C90]'} />
+        </span>
+        <span className="home-chip-text">
+          <b>
+            {streakCount} {streakCount === 1 ? 'dia' : 'dias'}
+          </b>
+          <small>seguidos</small>
+        </span>
+      </button>
+      <button className="home-chip" onClick={onArea} aria-label={`Área: ${AREAS[a].short}. Mudar de área`}>
+        <span className="home-chip-ico" style={{ background: '#FFE6EE' }}>
+          <Glyph e={AREAS[a].emoji} size={22} />
+        </span>
+        <span className="home-chip-text">
+          <b>{AREAS[a].short}</b>
+          <small>mudar</small>
+        </span>
+      </button>
     </div>
   );
 }

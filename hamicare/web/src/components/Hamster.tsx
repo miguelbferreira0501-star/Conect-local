@@ -42,8 +42,9 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
   const young = Math.min(1, (1 - k) / 0.5);
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
   const f = fluffOf(neutral ? 135 : grams);
-  const w = 54 + f * 26;
-  const h = 104 + phase * 3 - f * 6;
+  // Corpo redondinho: mais fofo também fica um pouco mais alto (não só mais largo), para não parecer achatado.
+  const w = 52 + f * 16;
+  const h = 106 + phase * 3 + f * 4;
   const top = 178 - h;
   const eyeY = top + h * 0.4;
   const noseY = eyeY + 12;

@@ -20,16 +20,6 @@ interface ArenaLook {
 
 // ---------- Peças que se repetem ----------
 
-const Tree = ({ x, y, s = 1, c = '#3E9C55', trunk = '#8A5A3B' }: { x: number; y: number; s?: number; c?: string; trunk?: string }) => (
-  <g transform={`translate(${x} ${y}) scale(${s})`} className="tree-sway" data-tap="arvore">
-    <rect x="-4" y="-4" width="8" height="26" rx="3" fill={trunk} />
-    <circle cx="0" cy="-18" r="20" fill={c} />
-    <circle cx="-13" cy="-6" r="13" fill={c} />
-    <circle cx="13" cy="-7" r="14" fill={c} />
-    <circle cx="-6" cy="-26" r="7" fill="#fff" opacity="0.13" />
-  </g>
-);
-
 const Pine = ({ x, y, s = 1, c = '#2F7A4A', snow }: { x: number; y: number; s?: number; c?: string; snow?: boolean }) => (
   <g transform={`translate(${x} ${y}) scale(${s})`} className="tree-sway" data-tap="arvore">
     <rect x="-3" y="-2" width="6" height="14" fill="#6E4A30" />
@@ -135,37 +125,176 @@ const Fireflies = ({ list }: { list: [number, number][] }) => (
   </>
 );
 
+// ---------- A casinha inicial (o cenário do Início): bem detalhada ----------
+
+function Casinha({ night, time }: { night: boolean; time: SkyTime }) {
+  const n = (day: string, nite: string) => (night ? nite : day);
+  return (
+    <>
+      <SunMoon night={night} time={time} x={322} y={54} />
+      {!night && <Cloud x={120} y={50} cls="cloud cloud-1" />}
+      {!night && <Cloud x={250} y={86} s={0.7} o={0.85} cls="cloud cloud-2" />}
+      {!night && [[180, 70], [196, 62]].map(([x, y], i) => <path key={i} className="bird-fly" style={{ animationDelay: `${i * 1.5}s` }} d={`M${x} ${y} q4 -4 8 0 q4 -4 8 0`} stroke="#4B4F5E" strokeWidth="1.6" fill="none" />)}
+      {/* morros ao longe, com arvorezinhas e um moinho */}
+      <path d="M0 168 C50 140 110 146 160 160 C220 176 270 140 330 146 C360 150 384 158 400 164 V300 H0 Z" fill={n('#C3E8B4', '#33584D')} />
+      {[[30, 156], [52, 150], [262, 150], [282, 146], [300, 150]].map(([x, y], i) => (
+        <g key={i}>
+          <rect x={x - 1} y={y} width="2" height="6" fill={n('#7A9A6A', '#22403A')} />
+          <circle cx={x} cy={y - 2} r="5" fill={n('#8CCB7E', '#2A4E44')} />
+        </g>
+      ))}
+      <g transform="translate(352 150)" data-tap="brilho">
+        <path d="M-6 0 L-3 -26 H3 L6 0 Z" fill={n('#F2E6D0', '#6E6658')} />
+        <path d="M-4 -26 L0 -32 L4 -26 Z" fill={n('#D9825B', '#5E3B30')} />
+        <g className="spin-slow" style={{ transformOrigin: '0px -24px' }}>
+          {[0, 90, 180, 270].map((a) => (
+            <rect key={a} x="-1.6" y="-44" width="3.2" height="20" rx="1" fill={n('#FFFFFF', '#A8A094')} transform={`rotate(${a} 0 -24)`} />
+          ))}
+        </g>
+        <circle cx="0" cy="-24" r="2" fill={n('#8A5A3B', '#3E2A20')} />
+      </g>
+      <path d="M0 196 C60 176 130 182 190 192 C250 202 320 180 400 186 V300 H0 Z" fill={n('#A8DB92', '#2F5A4C')} />
+      {/* árvore grande com balanço */}
+      <g transform="translate(332 228)" className="tree-sway" data-tap="arvore">
+        <path d="M-6 0 Q-4 -40 -10 -64 M-8 -46 Q-28 -56 -40 -52" stroke={n('#8A5A3B', '#4E3426')} strokeWidth="10" fill="none" strokeLinecap="round" />
+        <circle cx="-8" cy="-84" r="34" fill={n('#4FA35C', '#1F4338')} />
+        <circle cx="-38" cy="-66" r="22" fill={n('#5DB36A', '#22493C')} />
+        <circle cx="20" cy="-70" r="24" fill={n('#46994F', '#1C3E33')} />
+        <circle cx="-20" cy="-100" r="10" fill="#FFFFFF" opacity="0.12" />
+        {[[-24, -78], [4, -92], [16, -64], [-40, -60], [-8, -60]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="3.4" fill={n('#FF6F6F', '#8A3A3A')} />)}
+      </g>
+      <g data-tap="bola">
+        <path d="M290 178 V214 M306 178 V214" stroke={n('#8A6A4F', '#4E3E30')} strokeWidth="1.4" />
+        <rect x="286" y="212" width="24" height="5" rx="2.5" fill={n('#F26D6D', '#7A3A3A')} />
+      </g>
+      {/* a casinha */}
+      <g transform="translate(108 230)" data-tap="casa">
+        <ellipse cx="0" cy="2" rx="62" ry="6" fill="#000000" opacity="0.12" />
+        <rect x="30" y="-104" width="14" height="30" fill={n('#B85B4A', '#5E2F2A')} />
+        <rect x="28" y="-108" width="18" height="6" rx="2" fill={n('#8A3E33', '#401E1A')} />
+        <rect x="-50" y="-62" width="100" height="62" rx="3" fill={n('#FFF1DC', '#8C7B6C')} />
+        <path d="M-50 -14 H50" stroke={n('#EBD6B8', '#6E5E52')} strokeWidth="1.5" />
+        <path d="M-60 -58 L0 -106 L60 -58 Z" fill={n('#F26D6D', '#6A2E30')} />
+        {[-92, -80, -68].map((y, i) => <path key={y} d={`M${-46 + i * 13} ${y + 22} H${46 - i * 13}`} stroke={n('#D9545A', '#55242A')} strokeWidth="2" />)}
+        <path d="M-64 -56 L0 -108 L64 -56" stroke={n('#D9545A', '#55242A')} strokeWidth="6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="0" cy="-76" r="9" fill={n('#BFE8FF', '#FFD36B')} stroke={n('#FFFFFF', '#C9A86A')} strokeWidth="2.6" />
+        <path d="M0 -85 V-67 M-9 -76 H9" stroke={n('#FFFFFF', '#C9A86A')} strokeWidth="1.6" />
+        {[-34, 22].map((x) => (
+          <g key={x}>
+            <rect x={x - 4} y="-50" width="4" height="20" rx="1.5" fill={n('#7FB8F0', '#3E4E6E')} />
+            <rect x={x + 16} y="-50" width="4" height="20" rx="1.5" fill={n('#7FB8F0', '#3E4E6E')} />
+            <rect x={x} y="-50" width="16" height="20" rx="2" fill={n('#BFE8FF', '#FFD36B')} />
+            <path d={`M${x + 8} -50 V-30 M${x} -40 H${x + 16}`} stroke={n('#FFFFFF', '#C9A86A')} strokeWidth="1.6" />
+            <rect x={x - 3} y="-30" width="22" height="6" rx="2" fill={n('#B07A52', '#5E3B27')} />
+            {[2, 7, 12, 17].map((dx, i) => <circle key={dx} cx={x - 2 + dx} cy="-31" r="2.6" fill={['#FF7FA0', '#FFD34D', '#FFFFFF', '#B48CFF'][i]} />)}
+            {night && <rect x={x - 6} y="-54" width="28" height="28" rx="8" fill="#FFD36B" opacity="0.15" />}
+          </g>
+        ))}
+        <path d="M-12 0 V-30 Q-12 -42 0 -42 Q12 -42 12 -30 V0 Z" fill={n('#7FB8F0', '#2E3A56')} />
+        <path d="M-8 -4 V-28 Q-8 -37 0 -37 Q8 -37 8 -28 V-4" stroke={n('#5B8DEF', '#24304A')} strokeWidth="1.4" fill="none" />
+        <circle cx="7" cy="-18" r="1.8" fill="#F6C445" />
+        <rect x="-16" y="0" width="32" height="4" rx="1.5" fill={n('#D9C6A6', '#5E5448')} />
+        <g transform="translate(18 -40)">
+          <path d="M0 0 V-6" stroke={n('#4B4F5E', '#2A2E38')} strokeWidth="1.4" />
+          <rect x="-3.4" y="-1" width="6.8" height="8" rx="2" fill={n('#FFF3B0', '#FFD36B')} />
+          {night && <circle cx="0" cy="3" r="12" fill="#FFD36B" opacity="0.25" />}
+        </g>
+      </g>
+      {/* arbustos com frutinhas nos cantos da casa */}
+      {[[50, 232, 1], [168, 232, 0.9]].map(([x, y, sc], i) => (
+        <g key={i} transform={`translate(${x} ${y}) scale(${sc})`} className="tree-sway" data-tap="arvore">
+          <circle cx="-8" cy="-8" r="11" fill={n('#4FA35C', '#1F4338')} />
+          <circle cx="8" cy="-9" r="12" fill={n('#5DB36A', '#22493C')} />
+          <circle cx="0" cy="-16" r="10" fill={n('#56AA62', '#20463A')} />
+          {[[-8, -10], [6, -14], [10, -4], [-2, -2]].map(([bx, by], k) => <circle key={k} cx={bx} cy={by} r="2" fill={n('#B48CFF', '#5A4A7A')} />)}
+        </g>
+      ))}
+      <path d="M0 238 C80 228 150 232 220 236 C290 240 340 230 400 232 V300 H0 Z" fill={n('#86CF72', '#2A5244')} />
+      {/* cerquinha com portãozinho */}
+      <g>
+        <path d="M30 244 H96 M30 254 H96 M140 244 H178 M140 254 H178" stroke={n('#FFFBF4', '#8D8378')} strokeWidth="3" />
+        {[34, 48, 62, 76, 90, 144, 158, 172].map((x) => (
+          <path key={x} d={`M${x - 4} 262 V240 l4 -5 l4 5 V262 Z`} fill={n('#FFFFFF', '#9A8F86')} stroke={n('#E8DCCB', '#6E655D')} strokeWidth="1" />
+        ))}
+      </g>
+      {/* caminho de pedras até o Hami */}
+      <path d="M108 236 C120 252 150 262 180 270 C196 276 204 286 206 300 H150 C152 290 146 280 130 272 C116 266 100 254 98 240 Z" fill={n('#EFDDB5', '#5E5448')} opacity="0.9" />
+      {[[110, 246, 7], [126, 258, 8], [148, 268, 9], [172, 276, 10], [188, 290, 11]].map(([x, y, r], i) => (
+        <ellipse key={i} cx={x} cy={y} rx={r} ry={r * 0.45} fill={n('#E2D2B4', '#6E6658')} stroke={n('#CDBB98', '#4E4840')} strokeWidth="1" />
+      ))}
+      {/* caixa de correio e poste */}
+      <g transform="translate(232 262)" data-tap="carta">
+        <rect x="-1.6" y="-16" width="3.2" height="18" fill={n('#8A5A3B', '#4E3426')} />
+        <path d="M-10 -16 V-25 Q-10 -30 -5 -30 H5 Q10 -30 10 -25 V-16 Z" fill={n('#F26D6D', '#7A3A3A')} />
+        <path d="M8 -26 V-36 H15 V-31 H10" fill="#FFD34D" />
+      </g>
+      <g transform="translate(268 252)" data-tap="sino">
+        <rect x="-2" y="-46" width="4" height="48" fill={n('#4B4F5E', '#2A2E38')} />
+        <path d="M-9 -54 H9 L7 -44 H-7 Z" fill={n('#FFF3B0', '#FFD36B')} />
+        <path d="M-11 -54 L0 -61 L11 -54 Z" fill={n('#4B4F5E', '#2A2E38')} />
+        {night && <circle cx="0" cy="-49" r="22" fill="#FFD36B" opacity="0.22" />}
+      </g>
+      {/* hortinha */}
+      <g transform="translate(300 262)">
+        <rect x="-24" y="-6" width="48" height="12" rx="5" fill={n('#9C6B45', '#4E3426')} />
+        {[-16, -6, 4, 14].map((x, i) => (
+          <g key={x} data-tap="flor">
+            {i % 2 ? (
+              <>
+                <circle cx={x} cy="-6" r="5" fill={n('#7CC39A', '#2E5A40')} />
+                <circle cx={x} cy="-6" r="2.4" fill={n('#B8E6C4', '#3E6A50')} />
+              </>
+            ) : (
+              <>
+                <path d={`M${x} -4 l-3 -8 M${x} -4 l0 -9 M${x} -4 l3 -8`} stroke={n('#5FAE84', '#2E5A40')} strokeWidth="2" strokeLinecap="round" />
+                <path d={`M${x - 2} -3 h4 l-2 6 Z`} fill="#FF8A3D" />
+              </>
+            )}
+          </g>
+        ))}
+      </g>
+      {/* laguinho com patinho */}
+      <g data-tap="agua">
+        <ellipse cx="352" cy="282" rx="44" ry="13" fill={n('#7FC4EC', '#2C4E76')} />
+        <ellipse cx="352" cy="280" rx="30" ry="6" fill="#FFFFFF" opacity="0.3" className="wave-bob" />
+        <path d="M322 284 a6 2.4 0 1 0 0.1 0 Z M372 278 a7 2.6 0 1 0 0.1 0 Z" fill={n('#5FBF77', '#2E5A40')} />
+      </g>
+      <g transform="translate(346 276)" data-tap="bicho" className="float-bob">
+        <ellipse cx="0" cy="0" rx="8" ry="5" fill="#FFE066" />
+        <circle cx="6" cy="-5" r="4" fill="#FFE066" />
+        <path d="M9 -5 l4 1 l-4 1.4 Z" fill="#FF9D5C" />
+        <circle cx="7" cy="-6" r="0.9" fill="#2B2224" />
+        <path d="M-6 -2 q-4 -2 -4 2" stroke="#F2C94C" strokeWidth="1.6" fill="none" />
+      </g>
+      {/* flores, cogumelos e moitas na frente */}
+      {[[24, 274, '#FF7FA0'], [70, 282, '#FFD34D'], [112, 288, '#B48CFF'], [248, 288, '#FF9D5C'], [282, 292, '#FFFFFF']].map(([x, y, c], i) => (
+        <Flower key={i} x={x as number} y={y as number} c={c as string} d={i * 0.4} />
+      ))}
+      <Mushroom x={86} y={274} s={0.55} />
+      <Mushroom x={98} y={278} s={0.4} c="#FF9F4D" />
+      <g className="tree-sway" data-tap="arvore">
+        <circle cx="-4" cy="300" r="26" fill={n('#3E9C55', '#1A3F30')} />
+        <circle cx="22" cy="306" r="18" fill={n('#4FA35C', '#1F4338')} />
+      </g>
+      <g className="tree-sway" data-tap="arvore">
+        <circle cx="404" cy="296" r="24" fill={n('#3E9C55', '#1A3F30')} />
+        <circle cx="380" cy="306" r="16" fill={n('#4FA35C', '#1F4338')} />
+      </g>
+      {/* fumacinha da chaminé */}
+      {[0, 1, 2].map((i) => (
+        <circle key={i} className="smoke-rise" style={{ animationDelay: `${i * 1.2}s` }} cx="145" cy="118" r="6" fill="#FFFFFF" opacity="0.7" />
+      ))}
+    </>
+  );
+}
+
 // ---------- As 12 arenas ----------
 
 const LOOKS: Record<string, ArenaLook> = {
   casinha: {
-    sky: { dia: ['#7CC8FF', '#D9F2FF'], noite: ['#1C2357', '#4B4C9A'], amanhecer: ['#9FD2FF', '#FFE2C4'], entardecer: ['#8C7BE0', '#FFB38A'] },
+    sky: { dia: ['#7CC8FF', '#DDF4FF'], noite: ['#1C2357', '#4B4C9A'], amanhecer: ['#9FD2FF', '#FFE2C4'], entardecer: ['#8C7BE0', '#FFB38A'] },
     ambient: 'borboletas',
-    draw: ({ night, time }) => (
-      <>
-        <SunMoon night={night} time={time} x={70} y={62} />
-        {!night && <Cloud x={160} y={58} cls="cloud cloud-1" />}
-        {!night && <Cloud x={300} y={96} s={0.8} o={0.8} cls="cloud cloud-2" />}
-        <path d="M0 190 C60 150 120 160 180 178 C240 196 300 150 400 168 L400 300 L0 300 Z" fill={night ? '#3D6B5C' : '#A3DB8E'} />
-        <Tree x={342} y={170} s={1.1} c={night ? '#1F4338' : '#3E9C55'} />
-        <Tree x={382} y={176} s={0.85} c={night ? '#1F4338' : '#4FA35C'} />
-        <path d="M0 222 C70 196 150 206 210 214 C280 224 330 200 400 206 L400 300 L0 300 Z" fill={night ? '#2F5A4C' : '#7CCB6A'} />
-        <g transform="translate(66 156)" data-tap="casa">
-          <path d="M-36 66 C-38 34 -34 6 -28 -6 L28 -6 C34 6 38 34 36 66 Z" fill={night ? '#5B4036' : '#B07A52'} />
-          <ellipse cx="0" cy="-6" rx="28" ry="8" fill={night ? '#7A5848' : '#D7A574'} />
-          <path d="M-14 66 L-14 40 C-14 26 14 26 14 40 L14 66 Z" fill={night ? '#2B1E1A' : '#5E3B27'} />
-          <circle cx="8" cy="50" r="2" fill="#F6C445" />
-          <circle cx="-16" cy="16" r="8" fill={night ? '#FFD36B' : '#BFE8FF'} stroke={night ? '#7A5848' : '#8A5A3B'} strokeWidth="3" />
-          <path d="M-30 -10 C-20 -26 -6 -22 -2 -12" stroke="#5DB36A" strokeWidth="4" fill="none" strokeLinecap="round" />
-          <circle cx="-2" cy="-14" r="5" fill="#FF7FA0" />
-        </g>
-        <path d="M0 252 C90 238 180 244 260 248 C320 251 360 242 400 244 L400 300 L0 300 Z" fill={night ? '#2A5244' : '#6FBF5E'} />
-        <path d="M150 300 C160 270 180 258 200 254 C222 258 240 270 250 300 Z" fill={night ? '#6F6152' : '#F2DDB0'} opacity="0.85" />
-        {[[24, 262, '#FF7FA0'], [118, 252, '#FFD34D'], [292, 256, '#B48CFF'], [352, 266, '#FF9D5C'], [380, 248, '#FFFFFF']].map(([x, y, c], i) => (
-          <Flower key={i} x={x as number} y={y as number} c={c as string} d={i * 0.4} />
-        ))}
-      </>
-    ),
+    draw: ({ night, time }) => <Casinha night={night} time={time} />,
   },
 
   jardim: {
