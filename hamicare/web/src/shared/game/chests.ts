@@ -66,6 +66,8 @@ export function rollRarity(odds: Record<Rarity, number>, rng: () => number): Rar
 }
 
 export interface PoolItem {
+  /** Fantasia exclusiva do Baú Lendário: sai mais vezes nele. */
+  star?: boolean;
   id: string;
   rarity: Rarity;
 }
@@ -95,6 +97,12 @@ export function openChest(args: { chest: ChestId; pity: Pity; owned: Set<string>
     candidates = pool.filter((p) => p.rarity === rarity);
   }
   if (!candidates.length) throw new Error('Baú sem itens');
+  // Exclusivas só saem do Baú Lendário; nele, 60% das vezes o item lendário é uma delas.
+  if (chest !== 'lendario') candidates = candidates.filter((p) => !p.star).length ? candidates.filter((p) => !p.star) : candidates;
+  else if (rarity === 'lendario') {
+    const stars = candidates.filter((p) => p.star);
+    if (stars.length && rng() < 0.6) candidates = stars;
+  }
   const fresh = candidates.filter((p) => !owned.has(p.id));
   const list = fresh.length ? fresh : candidates;
   const item = list[Math.floor(rng() * list.length) % list.length];

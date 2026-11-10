@@ -343,7 +343,7 @@ async function applySpend(db: pg.PoolClient, userId: string, w: WalletRow, op: {
   const give: string[] = [];
   if (kind === 'loja' || kind === 'presente-amigo') {
     const item = itemById(id);
-    if (!item || item.souvenir) return { w, ok: false, error: 'invalido' };
+    if (!item || item.souvenir || item.chestOnly) return { w, ok: false, error: 'invalido' };
     if (kind === 'loja') {
       if (item.plus && !premium) return { w, ok: false, error: 'plus' };
       if ((item.level ?? 1) > level) return { w, ok: false, error: 'nivel' };
