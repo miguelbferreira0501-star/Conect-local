@@ -16,6 +16,7 @@ import { ITEMS, LOOKS, STYLES, itemById, stylePrice } from '../../../web/src/dat
 import { FURS } from '../../../web/src/data/fur';
 import { LIBRARY } from '../../../web/src/data/tasks';
 import { PLACES } from '../../../web/src/data/world';
+import { MOON_ITEMS, MOON_PRICE } from '../../../web/src/data/arenas';
 import { ACHIEVEMENTS, QUESTS, periodStart } from '../../../web/src/logic/progress';
 
 export const game = new Hono<AppEnv>();
@@ -357,6 +358,11 @@ async function applySpend(db: pg.PoolClient, userId: string, w: WalletRow, op: {
     if (style.plus && !premium) return { w, ok: false, error: 'plus' };
     price = stylePrice(style, (x) => owned.has(x));
     give.push(...[style.wallpaper, style.floor, ...style.items.map((i) => i.itemId)].filter((x) => !owned.has(x)));
+  } else if (kind === 'lua') {
+    // Casa na Lua: preço fixo e os itens da casa lunar.
+    if (MOON_ITEMS.every((x) => owned.has(x))) return { w, ok: false, error: 'ja-tem' };
+    price = MOON_PRICE;
+    give.push(...MOON_ITEMS.filter((x) => !owned.has(x)));
   } else if (kind === 'martelinho') {
     // Martelinho que conserta a ofensiva: preço fixo do catálogo do jogo.
     price = HAMMER_PRICE;

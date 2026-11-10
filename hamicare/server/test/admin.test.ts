@@ -20,6 +20,9 @@ describe('administração', () => {
     // Denúncia revisada: conteúdo removido
     const ana = await withProfile('Ana');
     const bia = await withProfile('Bia');
+    // Admin acha a pessoa pelo código de amigo (HAMI-…).
+    const byCode = await call('GET', `/admin/users?q=${encodeURIComponent(ana.code.toLowerCase())}`, undefined, chefe.cookie);
+    expect(byCode.body.users.map((u: { id: string }) => u.id)).toContain(ana.id);
     await befriend(ana, bia);
     const post = await call('POST', '/social/posts', { kind: 'momento', text: 'Oi' }, ana.cookie);
     await call('POST', '/social/reports', { type: 'post', id: post.body.id, userId: ana.id, reason: 'spam' }, bia.cookie);

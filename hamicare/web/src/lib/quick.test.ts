@@ -67,3 +67,21 @@ describe('prêmio por amigo', () => {
     expect(claimFriendReward(2, 3)).toBe(60);
   });
 });
+
+describe('casa na Lua', () => {
+  it('custa 5.000 sementes, dá a casa lunar e o Hami se muda', async () => {
+    const { buyMoon, homeArenaOf } = await import('./store');
+    const { MOON_N, MOON_PRICE } = await import('../data/arenas');
+    start(100);
+    expect(buyMoon()).toBe('sem-sementes');
+    replaceState({ ...getState(), coins: MOON_PRICE + 10 });
+    expect(buyMoon()).toBe('ok');
+    const s = getState();
+    expect(s.moon).toBe(true);
+    expect(homeArenaOf(s)).toBe(MOON_N);
+    expect(s.house.wallpaper).toBe('p-lua');
+    expect(s.inventory['foguete-hami']).toBe(1);
+    expect(s.game.ledger.find((l) => l.label === 'Viagem para a Lua')?.coins).toBe(-MOON_PRICE);
+    expect(buyMoon()).toBe('ja-tem');
+  });
+});

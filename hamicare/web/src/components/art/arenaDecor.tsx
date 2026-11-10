@@ -1,5 +1,5 @@
 // Móveis e decoração exclusivos das arenas (prêmios ao abrir cada arena).
-import { C, Face, Hi, Sh, sparkle, star, type Draw } from './kit';
+import { C, Face, Hi, Sh, heart, sparkle, star, type Draw } from './kit';
 
 export const ARENA_DECOR: Record<string, Draw> = {
   // Jardim Encantado
@@ -253,6 +253,37 @@ export const ARENA_DECOR: Record<string, Draw> = {
       <path d="M26 46 Q30 42 34 46 Q38 50 36 54" fill={C.green} />
       <circle cx="48" cy="28" r="6" fill={C.pink} />
       <path d={star(40, 18, 3, 1.3)} fill={C.yellow} />
+    </g>
+  ),
+  // Casa na Lua
+  'art:foguete': () => (
+    <g>
+      <path d="M32 4 C44 14 46 30 44 46 H20 C18 30 20 14 32 4Z" fill={C.white} />
+      <path d="M32 4 C38 10 41 18 42 26 H22 C23 18 26 10 32 4Z" fill={C.red} />
+      <circle cx="32" cy="34" r="6" fill={C.sky} stroke={C.grayD} strokeWidth="2" />
+      <path d="M20 38 L10 52 L20 50Z M44 38 L54 52 L44 50Z" fill={C.red} />
+      <path d="M24 46 H40 L37 52 H27Z" fill={C.grayD} />
+      <path d="M27 52 Q32 64 37 52Z" fill={C.orange} />
+      <path d="M29 52 Q32 59 35 52Z" fill={C.yellow} />
+      <Hi x={26} y={20} rx={2.5} ry={8} r={10} />
+    </g>
+  ),
+  'art:bandeira-lua': () => (
+    <g>
+      <path d="M18 60 V8" stroke={C.grayD} strokeWidth="3" strokeLinecap="round" />
+      <path d="M19 9 H50 V30 H19Z" fill={C.pink} />
+      <path d={heart(34, 20, 6)} fill="#fff" />
+      <ellipse cx="18" cy="60" rx="10" ry="3" fill="#000" opacity="0.15" />
+    </g>
+  ),
+  'art:cama-cratera': () => (
+    <g>
+      <ellipse cx="32" cy="44" rx="30" ry="14" fill={C.grayD} />
+      <ellipse cx="32" cy="41" rx="25" ry="10" fill={C.gray} />
+      <ellipse cx="32" cy="40" rx="20" ry="7" fill={C.lilac} />
+      <ellipse cx="22" cy="37" rx="8" ry="4" fill="#fff" />
+      <path d={star(46, 36, 4, 1.8)} fill={C.yellow} />
+      <path d={star(38, 42, 3, 1.3)} fill={C.yellow} />
     </g>
   ),
   // Ilha Celestial

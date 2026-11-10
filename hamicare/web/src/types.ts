@@ -290,6 +290,8 @@ export interface State {
   houses?: Record<string, House>;
   /** Pets companheiros: um ovo por arena aberta; choca com dias de cuidado. */
   companions?: CompanionState;
+  /** Comprou a casa na Lua (5.000 sementes). */
+  moon?: boolean;
   /** Martelinhos para consertar a ofensiva (ganha 1 a cada 7 dias seguidos; até 3). */
   hammers?: number;
   /** Turno ("AAAA-MM-DD:n") em que uma missão foi feita: libera a missão rápida "complete uma meta". */
