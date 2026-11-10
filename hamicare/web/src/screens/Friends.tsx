@@ -18,6 +18,7 @@ import { MyHeader, ProfilePage } from './social/Profile';
 import { GroupsTab } from './social/Groups';
 import { Glyph } from '../components/art';
 import { FriendLadder } from '../components/FriendLadder';
+import { AddFriendMenu, FriendTree } from '../components/FriendTree';
 
 export type { ShareDraft };
 
@@ -32,6 +33,7 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account, ini
   const [fs, setFs] = useState<FriendState | null>(null);
   const [myPosts, setMyPosts] = useState(0);
   const [adding, setAdding] = useState(false);
+  const [menu, setMenu] = useState(false);
   const [profile, setProfile] = useState<string | null>(null);
   const [profileErr, setProfileErr] = useState<string | null>(null);
   // Convite por link (#amigo=…): abre "Adicionar amigo" com o código já procurado.
@@ -104,7 +106,7 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account, ini
   ];
   return (
     <Shell>
-      <MyHeader me={me} api={api} postsCount={myPosts} friendsCount={fs?.friends.length ?? 0} onAdd={() => setAdding(true)} error={profileErr} onRetry={refreshFriends} />
+      <MyHeader me={me} api={api} postsCount={myPosts} friendsCount={fs?.friends.length ?? 0} onAdd={() => setMenu(true)} error={profileErr} onRetry={refreshFriends} />
       <div className="tabs-scroll" role="tablist" aria-label="Seções">
         {TABS.map((t) => (
           <button key={t.id} role="tab" aria-selected={tab === t.id} className={`chip ${tab === t.id ? 'chip-accent' : 'chip-plain'}`} onClick={() => setTab(t.id)}>
@@ -112,14 +114,15 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account, ini
           </button>
         ))}
       </div>
-      {tab === 'feed' && <FeedTab api={api} share={share} onShareDone={onShareDone} friends={fs} myId={myId} onOpenProfile={setProfile} onAdd={() => setAdding(true)} />}
+      {tab === 'feed' && <FeedTab api={api} share={share} onShareDone={onShareDone} friends={fs} myId={myId} onOpenProfile={setProfile} onAdd={() => setMenu(true)} />}
       {tab === 'grupos' && <GroupsTab api={api} friends={fs?.friends ?? []} myId={myId} onOpenProfile={setProfile} />}
-      {tab === 'amigos' && <FriendsTab api={api} fs={fs} refresh={refreshFriends} onOpenProfile={setProfile} />}
+      {tab === 'amigos' && <FriendsTab api={api} fs={fs} me={me} refresh={refreshFriends} onOpenProfile={setProfile} onAdd={() => setMenu(true)} />}
       {tab === 'desafios' && <ChallengesTab api={api} profiles={fs ? Object.fromEntries([...fs.friends, ...(me ? [me] : [])].map((p) => [p.id, p])) : {}} myId={myId} />}
       {tab === 'presentes' && <GiftsTab api={api} />}
       {tab === 'ranking' && <RankingTab api={api} onOpenProfile={setProfile} />}
       {tab === 'turma' && <TeamTab api={api} friends={fs?.friends ?? []} onOpenProfile={setProfile} />}
       <GiftSheet api={api} itemId={giftItem} friends={fs?.friends ?? []} onClose={onGiftDone} />
+      <AddFriendMenu open={menu} me={me} server={api.kind === 'servidor'} onClose={() => setMenu(false)} onCode={() => (setMenu(false), setAdding(true))} />
       <AddFriend
         open={adding}
         api={api}
@@ -336,7 +339,7 @@ function FeedTab({ api, share, onShareDone, friends, myId, onOpenProfile, onAdd 
 
 // ---------- Amigos ----------
 
-function FriendsTab({ api, fs, refresh, onOpenProfile }: { api: SocialApi; fs: FriendState | null; refresh: () => void; onOpenProfile: (id: string) => void }) {
+function FriendsTab({ api, fs, me, refresh, onOpenProfile, onAdd }: { api: SocialApi; fs: FriendState | null; me: Profile | null; refresh: () => void; onOpenProfile: (id: string) => void; onAdd: () => void }) {
   if (!fs) return <p className="text-center text-muted">Carregando…</p>;
   const act = async (fn: () => Promise<unknown>, msg: string) => {
     await fn();
@@ -345,6 +348,7 @@ function FriendsTab({ api, fs, refresh, onOpenProfile }: { api: SocialApi; fs: F
   };
   return (
     <div className="grid gap-4">
+      <FriendTree me={me} friends={fs.friends} onAdd={onAdd} onOpenProfile={onOpenProfile} />
       <VisitsCard api={api} onOpenProfile={onOpenProfile} />
       {fs.incoming.length > 0 && (
         <section className="grid gap-2">
