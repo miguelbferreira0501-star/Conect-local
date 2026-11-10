@@ -1,9 +1,15 @@
 // O Hami dormindo enroladinho numa almofada: respira devagar, faz bolinha de ranho e solta "zzz".
 import { furById } from '../data/fur';
+import { costumeOf, garmentColor } from './Wear';
+import type { Outfit } from '../types';
 
-export function SleepingHami({ fur: furId, size = 230 }: { fur: string; size?: number }) {
+export function SleepingHami({ fur: furId, size = 230, outfit }: { fur: string; size?: number; outfit?: Outfit }) {
   const fur = furById(furId);
   const line = '#B8743C';
+  // A roupa que a pessoa escolheu continua no corpo enquanto ele dorme.
+  const costume = costumeOf(outfit?.roupa);
+  const cloth = costume ? costume.c1 : garmentColor(outfit?.roupa);
+  const body = 'M60 106 C58 70 92 52 124 54 C160 56 182 74 180 100 C178 120 150 126 120 124 C88 122 62 122 60 106 Z';
   return (
     <svg viewBox="0 0 240 170" width={size} height={(size * 170) / 240} role="img" aria-label="Hami dormindo" className="block overflow-visible">
       {/* tapetinho e almofada */}
@@ -16,9 +22,25 @@ export function SleepingHami({ fur: furId, size = 230 }: { fur: string; size?: n
         {/* rabinho */}
         <ellipse cx="62" cy="108" rx="11" ry="8" fill={fur.body} stroke={line} strokeWidth="1.8" />
         {/* corpo enroladinho */}
-        <path d="M60 106 C58 70 92 52 124 54 C160 56 182 74 180 100 C178 120 150 126 120 124 C88 122 62 122 60 106 Z" fill={fur.body} stroke={line} strokeWidth="2" />
+        <defs>
+          <clipPath id="sleep-body">
+            <path d={body} />
+          </clipPath>
+        </defs>
+        <path d={body} fill={fur.body} stroke={line} strokeWidth="2" />
+        {cloth && (
+          <g clipPath="url(#sleep-body)">
+            <path d="M40 40 H150 C146 70 146 100 154 140 H40 Z" fill={cloth} />
+            <path d="M150 40 C146 70 146 100 154 140" stroke="#000" strokeOpacity="0.15" strokeWidth="5" fill="none" />
+            <path d="M70 108 C96 116 124 118 150 112" stroke="#FFFFFF" strokeOpacity="0.25" strokeWidth="4" fill="none" />
+          </g>
+        )}
+        {cloth && <path d={body} fill="none" stroke="#000" strokeOpacity="0.18" strokeWidth="2" />}
         <path d="M80 70 C96 60 118 58 134 62" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" opacity="0.35" fill="none" />
         <path d="M76 110 C98 116 130 117 156 112" stroke={line} strokeWidth="1.6" fill="none" opacity="0.5" />
+        {/* orelha de trás (aparece atrás da cabeça) */}
+        <ellipse cx="176" cy="64" rx="11" ry="10" fill={fur.body} stroke={line} strokeWidth="1.8" transform="rotate(20 176 64)" />
+        <ellipse cx="176" cy="65" rx="6.5" ry="6" fill={fur.ear} transform="rotate(20 176 65)" />
         {/* cabeça encostada */}
         <path d="M128 96 C126 74 146 62 166 64 C188 66 200 82 196 100 C192 116 172 122 152 120 C138 118 129 110 128 96 Z" fill={fur.body} stroke={line} strokeWidth="2" />
         <path d="M134 104 C140 96 150 96 156 102 C164 96 176 96 184 104 C188 114 172 120 158 119 C144 118 136 114 134 104 Z" fill={fur.belly} />

@@ -123,7 +123,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
     </div>
   ) : s.pet.sleeping ? (
     <button className="sleep-spot" onClick={() => toast(`${s.pet.name} está dormindo. Shhh…`)} aria-label={`${s.pet.name} dormindo`} data-sound="none">
-      <SleepingHami fur={s.pet.fur} size={205} />
+      <SleepingHami fur={s.pet.fur} size={205} outfit={s.pet.outfit} />
     </button>
   ) : (
     <div className="relative">

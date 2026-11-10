@@ -115,20 +115,12 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
       <g transform={k < 1 ? `translate(100 190) scale(${k}) translate(-100 -190)` : undefined}>
         {phase >= 3 && <circle cx="100" cy="110" r="94" fill={`url(#g${uid})`} />}
         <EffectBack id={outfit.efeito} geo={geo} uid={uid} />
-        <ellipse cx="100" cy="190" rx={bw * 1.05} ry="6.5" fill="rgba(0,0,0,0.13)" />
+        <ellipse cx="100" cy="193" rx={bw * 1.25} ry="6.5" fill="rgba(0,0,0,0.13)" />
         <g className={idle && !asleep ? 'pet-idle' : asleep ? 'pet-sleep' : undefined}>
           <Cape id={outfit.roupa} geo={geo} />
           <AccessoryBack id={outfit.acessorio} geo={geo} />
           {/* rabinho */}
           {!costume && <ellipse className="pet-tail" cx={100 - bw + 2} cy="176" rx="9" ry="7" fill={fur.body} stroke={line} strokeWidth="1.6" style={{ transformOrigin: `${100 - bw + 10}px 176px` }} />}
-          {/* pezinhos (aparecem embaixo do corpo) */}
-          {[-1, 1].map((s) => (
-            <g key={s}>
-              <ellipse cx={100 + s * 22} cy="187" rx="13.5" ry="7.5" fill={foot} stroke={costume ? 'none' : line} strokeWidth="1.6" />
-              {!costume && <ellipse cx={100 + s * 22} cy="188.5" rx="8" ry="3.6" fill={fur.belly} opacity="0.75" />}
-              {!costume && <path d={`M${100 + s * 22 - 4.5} 192 v-2.6 M${100 + s * 22} 192.6 v-3 M${100 + s * 22 + 4.5} 192 v-2.6`} stroke={line} strokeWidth="1.2" strokeLinecap="round" opacity="0.55" />}
-            </g>
-          ))}
           {/* corpo */}
           <path d={body} fill={fur.body} />
           <g clipPath={`url(#b${uid})`}>
@@ -158,6 +150,26 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
           )}
           {/* Coração na barriga: a marca do HamiCare */}
           {!hidesHeart(outfit.roupa) && <Heart x={100} y={170} s={phase >= 3 ? 13 : 10} fill={phase >= 3 ? '#F6C445' : fur.ear} opacity={phase >= 3 ? 1 : 0.6} />}
+          {/* sentado: perninhas para a frente, com a sola e os dedinhos cor-de-rosa aparecendo (como na imagem) */}
+          {[-1, 1].map((s) => {
+            const tx = 100 + s * 31;
+            const fx = 100 + s * 37;
+            const pad = '#F49AAE';
+            const edge = costume ? darken(costume.foot, 0.22) : line;
+            return (
+              <g key={`perna${s}`}>
+                <ellipse cx={tx} cy="177" rx="19" ry="14" fill={foot} stroke={edge} strokeWidth="1.7" />
+                <g transform={`rotate(${s * 16} ${fx} 184)`}>
+                  <ellipse cx={fx} cy="184" rx="13" ry="14.5" fill={foot} stroke={edge} strokeWidth="1.7" />
+                  {!costume && <ellipse cx={fx} cy="184.5" rx="9" ry="10.5" fill={fur.belly} opacity="0.55" />}
+                  <ellipse cx={fx} cy="188" rx="6.8" ry="5.6" fill={pad} />
+                  {[-4.6, 0, 4.6].map((dx) => (
+                    <circle key={dx} cx={fx + dx * 1.1} cy={dx === 0 ? 176.4 : 178} r="2.6" fill={pad} />
+                  ))}
+                </g>
+              </g>
+            );
+          })}
           {/* bracinhos fofos: descem do ombro e as patinhas se encontram na barriga (com manga, quando a roupa tem) */}
           {[-1, 1].map((s) => {
             if (s === 1 && holding) return null;
