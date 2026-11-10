@@ -39,7 +39,7 @@ const depth = (y: number) => 0.8 + 0.2 * Math.min(1, Math.max(0, (y - WALL_H) / 
  * A casa do Hami: um cômodo de verdade (parede com papel, lambri e rodapé, chão em perspectiva,
  * janela com cortina) e os móveis posicionados em % (arrastáveis no modo de edição).
  */
-export function Room({ house, period = 'tarde', height = 260, children, editing, selected, onSelect, onMove }: Props) {
+export function Room({ house, period = 'tarde', height = 260, children, editing, selected, onSelect, onMove, wide = 1 }: Props & { wide?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<{ uid: string; x: number; y: number } | null>(null);
   const trim = trimOf(house.wallpaper);
@@ -86,7 +86,7 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
         const live = drag?.uid === it.uid ? drag : it;
         if (placeOf(it.itemId, item.svg, live.y) !== 'chao') return null;
         const k = depth(live.y);
-        return <span key={`s${it.uid}`} className="room-shadow" style={{ left: `${live.x}%`, top: `${live.y}%`, width: `${(item.size ?? 12) * 0.95 * k}%` }} />;
+        return <span key={`s${it.uid}`} className="room-shadow" style={{ left: `${live.x}%`, top: `${live.y}%`, width: `${((item.size ?? 12) * 0.95 * k) / wide}%` }} />;
       })}
 
       {items.map((it) => {
@@ -113,10 +113,10 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
             style={{
               left: `${live.x}%`,
               top: `${live.y}%`,
-              width: `${item.size ?? 12}%`,
+              width: `${(item.size ?? 12) / wide}%`,
               scale: k === 1 ? undefined : String(k),
               zIndex: place === 'tapete' ? 3 : place === 'parede' ? 5 : 10 + Math.round(live.y),
-              fontSize: `${(item.size ?? 12) * 0.82}cqw`,
+              fontSize: `${((item.size ?? 12) * 0.82) / wide}cqw`,
             }}
             onPointerDown={(e) => {
               if (!editing) return;

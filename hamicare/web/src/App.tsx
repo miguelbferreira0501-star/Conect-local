@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { GoalDone } from './components/GoalDone';
+import { MoodCheckinHost } from './components/MoodCheckin';
 import { Sheet, Toaster, toast } from './components/ui';
 import { CelebrationModal, DailyWelcome, StreakScreen } from './components/Celebrate';
 import { LevelUpScreen } from './components/LevelUp';
@@ -168,7 +169,7 @@ export default function App() {
   return (
     <GrowthContext.Provider value={growth.scale}>
       <main className="shell">
-        {tab === 'inicio' && <Home onGo={go} onSettings={() => setSettings(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} onPlus={() => setPlus(true)} onTeam={() => go('amigos', undefined, 'turma')} />}
+        {tab === 'inicio' && <Home onGo={go} onSettings={() => setSettings(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} onPlus={() => setPlus(true)} onTeam={() => go('amigos', undefined, 'turma')} onWorld={(sub) => go('mundo', sub)} />}
         {tab === 'cuidar' && <CareArea onShare={(photo) => shareTo({ kind: 'foto', photo })} />}
         {tab === 'atividades' && <Activities onShareTask={(task) => shareTo({ kind: 'atividade', task })} onPlus={() => setPlus(true)} />}
         {tab === 'mundo' && <World key={worldTab ?? 'mundo'} initialTab={worldTab} onPlus={() => setPlus(true)} onGift={(id) => (setGift(id), go('amigos'))} />}
@@ -196,6 +197,7 @@ export default function App() {
       <ResetPassword />
       <LegalHost />
       <GoalDone />
+      {!showWelcome && <MoodCheckinHost />}
       <Toaster />
     </GrowthContext.Provider>
   );
