@@ -1,4 +1,7 @@
-import { useId, type ReactNode } from 'react';
+import { createContext, useContext, useId, type ReactNode } from 'react';
+
+/** Ícones pequenos (listas, lojas): desenha sem o filtro de contorno, que pesa muito no celular. */
+export const KitLite = createContext(false);
 
 // Kit de móveis da casa (desenhos próprios do HamiCare). Cada peça aceita duas cores (c1 principal, c2 detalhe),
 // então a mesma cama vira rosa, azul ou lilás na loja. Desenhados de frente, com um pouquinho de profundidade.
@@ -30,7 +33,15 @@ const INK = '#5A3B2E';
  */
 export function S({ w, h, children }: { w: number; h: number; children: ReactNode }) {
   const id = `kf${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
+  const lite = useContext(KitLite);
   const r = Math.max(1.6, Math.min(3, w / 75));
+  if (lite) {
+    return (
+      <svg viewBox={`0 0 ${w} ${h}`} className="block h-auto w-full" aria-hidden="true">
+        {children}
+      </svg>
+    );
+  }
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="block h-auto w-full overflow-visible" aria-hidden="true">
       <defs>
