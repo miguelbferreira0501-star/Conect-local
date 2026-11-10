@@ -13,8 +13,6 @@ import { addDays, formatDay, fmtNum, weekStart, WEEKDAYS } from '../lib/util';
 import { GOALS, JOURNEY_TEXT } from '../data/lines';
 import type { Photo } from '../types';
 import { Glyph } from '../components/art';
-import { AreaSheet } from '../components/AreaSheet';
-import { AREAS } from '../logic/areas';
 
 export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; onShare: (p: Photo) => void; onPlus: () => void }) {
   const s = useApp();
@@ -24,7 +22,6 @@ export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; o
   const area = areaNow(s);
   const noWeight = !weightOn(s);
   const hideNums = noWeight || s.body.hideNumbers;
-  const [areaOpen, setAreaOpen] = useState(false);
   const range = isPremium(s) ? 180 : 30;
   const [kg, setKg] = useState('');
   const [goalKg, setGoalKg] = useState(s.body.goalKg ? String(s.body.goalKg) : '');
@@ -87,7 +84,7 @@ export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; o
                 <div style={{ opacity: i <= s.pet.phase ? 1 : 0.28, filter: i <= s.pet.phase ? 'none' : 'grayscale(1)' }}>
                   <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={i} size={74} idle={false} label={`Fase ${name}`} growth={1} />
                 </div>
-                <span className="text-center text-[10.5px] font-extrabold leading-tight [overflow-wrap:anywhere]">{name}</span>
+                <span lang="pt-BR" className="text-center text-[10.5px] font-extrabold leading-tight [hyphens:auto]">{name === 'Condicionamento' ? <>Condicio&shy;namento</> : name}</span>
                 {i > s.pet.phase && <Lock size={12} className="text-muted" />}
               </div>
             ))}
@@ -122,9 +119,6 @@ export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; o
                     ? `Na área Calma ninguém fala de peso. O ${s.pet.name} evolui com as suas práticas de calma, o sono e o movimento.`
                     : `Na área de hábitos ninguém fala de peso nem de calorias. O ${s.pet.name} evolui com os seus hábitos e o movimento.`}
               </p>
-              <button className="btn btn-soft" onClick={() => setAreaOpen(true)}>
-                <Glyph e={AREAS[area].emoji} size={22} /> Mudar de área
-              </button>
             </>
           ) : (
             <>
@@ -194,9 +188,6 @@ export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; o
                   <Glyph e="⚖️" size={22} /> Informar meu peso e minha meta
                 </button>
               )}
-              <button className="btn btn-soft" onClick={() => setAreaOpen(true)}>
-                <Glyph e={AREAS[area].emoji} size={22} /> Mudar de área
-              </button>
             </>
           )}
         </section>
@@ -346,7 +337,6 @@ export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; o
           </div>
         )}
       </Modal>
-      <AreaSheet open={areaOpen} onClose={() => setAreaOpen(false)} />
     </div>
   );
 }

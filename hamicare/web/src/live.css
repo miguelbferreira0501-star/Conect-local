@@ -4505,3 +4505,7 @@
 }
 .hr-pill { border: 3px solid #ffffff; }
 .hr-icon { border: 3px solid #ffffff; }
+
+/* Descobertas: o texto corre como uma frase só (sem colunas) */
+.imp-insights li .imp-ins-ico { flex: none; }
+.imp-insights li .imp-ins-txt { flex: 1; min-width: 0; display: block; }
