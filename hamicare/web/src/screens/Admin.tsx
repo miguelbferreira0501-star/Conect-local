@@ -173,6 +173,12 @@ function Users() {
             <button className="btn btn-soft btn-sm" onClick={() => run(() => http('POST', `/admin/users/${u.id}/premium`, { until: addDays(todayKey(), 365) }), 'Plus por 1 ano')}>
               Plus por 1 ano
             </button>
+            <button className="btn btn-soft btn-sm" onClick={() => run(() => http('POST', `/admin/users/${u.id}/coins`, { coins: 1000 }), '+1.000 sementes')}>
+              +1.000 sementes
+            </button>
+            <button className="btn btn-soft btn-sm" onClick={() => run(() => http('POST', `/admin/users/${u.id}/coins`, { coins: 10000 }), '+10.000 sementes')}>
+              +10.000 sementes
+            </button>
             {u.premiumUntil && (
               <button className="btn btn-ghost btn-sm" onClick={() => run(() => http('POST', `/admin/users/${u.id}/premium`, { until: null }), 'Plus removido')}>
                 Tirar Plus
