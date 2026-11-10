@@ -47,3 +47,20 @@ describe('administração', () => {
     expect((await call('POST', '/admin/events', { title: 'x', startsOn: today, endsOn: today, rewardCoins: 1 }, comum.cookie)).status).toBe(403);
   });
 });
+
+describe('admin dá sementes', () => {
+  it('só admin; vai para a carteira e para o histórico', async () => {
+    const quem = await withProfile('Sortuda');
+    const comum = await newUser('Curioso');
+    expect((await call('POST', `/admin/users/${quem.id}/coins`, { coins: 10000 }, comum.cookie)).status).toBe(403);
+    // a conta de admin já existe neste arquivo: entra com ela
+    const chefe = { cookie: (await call('POST', '/auth/login', { email: 'chefe@teste.com', password: 'Senha1234' })).cookie as string };
+    expect((await call('POST', `/admin/users/${quem.id}/coins`, { coins: 0 }, chefe.cookie)).status).toBe(422);
+    expect((await call('POST', `/admin/users/${quem.id}/coins`, { coins: 999999 }, chefe.cookie)).status).toBe(422);
+    const r = await call('POST', `/admin/users/${quem.id}/coins`, { coins: 10000 }, chefe.cookie);
+    expect(r.status).toBe(200);
+    const w = await call('GET', '/game/wallet', undefined, quem.cookie);
+    expect(w.body.wallet.coins).toBe(30 + 10000);
+    expect(JSON.stringify(w.body.ledger)).toContain('Presente da equipe HamiCare');
+  });
+});

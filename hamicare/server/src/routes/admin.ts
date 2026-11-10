@@ -48,6 +48,16 @@ admin.post('/users/:id/premium', (c) =>
   }),
 );
 
+admin.post('/users/:id/coins', (c) =>
+  asAdmin(c, async (db) => {
+    const body = z.object({ coins: z.number().int().min(1).max(50000) }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success) throw invalid('Valor inválido (de 1 a 50.000 sementes).');
+    const total = (await db.query('SELECT app.admin_give_coins($1, $2) AS t', [c.req.param('id'), body.data.coins])).rows[0].t;
+    if (total == null) throw notFound('Usuário não encontrado.');
+    return c.json({ ok: true, coins: total });
+  }),
+);
+
 admin.post('/users/:id/ban', (c) =>
   asAdmin(c, async (db) => {
     const body = z.object({ banned: z.boolean() }).safeParse(await c.req.json().catch(() => ({})));
