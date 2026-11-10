@@ -15,9 +15,9 @@ import {
   BAND, JOURNEY_GRAMS, REF_KG, WEIGH_EVERY_DAYS, checkJourneyGoal, conditioning, defaultGoalKg, directionOf, isMinor, journeyGrams, journeyKcal,
   journeyProgress, needKcalFor, phaseFor, PHASES, recentAverageKg, scaleProgress, taskKcal,
 } from '../logic/evolution';
-import { streakOf } from '../logic/streak';
+import { HAMMER_MAX, repairPlan, streakOf, type RepairPlan } from '../logic/streak';
 import { activeQuests, claimKey, levelOf, newAchievements, periodStart, questProgress, QUESTS } from '../logic/progress';
-import { addUsage, arenaItemsOf, arenaOf, baseGrant, canCraft, capGrant, chestPool, collectionProgress, emptyPity, emptyUsage, levelUps, migrateXp, openChest, xpAt, type ChestId, type DayUsage, type Pity, type Rarity, type Source } from '../shared/game';
+import { addUsage, arenaItemsOf, arenaOf, baseGrant, canCraft, capGrant, chestPool, collectionProgress, emptyPity, emptyUsage, FRIEND_LADDER, HAMMER_PRICE, levelUps, migrateXp, openChest, reflectionCoins, xpAt, type ChestId, type DayUsage, type Pity, type QuickId, type Rarity, type Source } from '../shared/game';
 import { arenaHouse, upgradeHouse } from '../data/arenas';
 import { companionById, eggWarmth, HATCH_DAYS, withEggs } from '../data/companions';
 import { KIT_PLACE } from '../components/room/kit';
@@ -42,7 +42,7 @@ export type Celebration =
   | { type: 'phase'; phase: number }
   | { type: 'weigh'; grams: number; before: number; kcal: number }
   | { type: 'goal' }
-  | { type: 'streak'; count: number }
+  | { type: 'streak'; count: number; hammer?: boolean }
   | { type: 'grow'; stage: number; name: string };
 
 const celebrationListeners = new Set<(c: Celebration) => void>();
@@ -341,7 +341,7 @@ function prune(g: GameState, today: string): GameState {
   const usage = Object.fromEntries(Object.entries(g.usage).filter(([d]) => d >= keepFrom));
   const paid = Object.fromEntries(
     Object.entries(g.paid).filter(([ref]) => {
-      const m = ref.match(/^(tarefa|cuidado|diario|pote|humor|bemestar|aventura|presente):(\d{4}-\d{2}-\d{2})/);
+      const m = ref.match(/^(tarefa|cuidado|diario|pote|humor|bemestar|aventura|presente|rapida):(\d{4}-\d{2}-\d{2})/);
       return !m || m[2] >= oldDated;
     }),
   );
@@ -838,9 +838,17 @@ export function toggleTask(id: string): ToggleResult | null {
     if (fact) next = { ...next, pet: { ...next.pet, facts: [...next.pet.facts, String(FACTS.indexOf(fact))] } };
   }
   next = { ...next, pet: { ...next.pet, stats: { ...next.pet.stats, felicidade: clamp(next.pet.stats.felicidade + 4, 0, 100) } } };
+  // Missão rápida "complete uma meta": fica pronta para pegar neste turno (o prêmio é à parte da missão).
+  next = { ...next, quickMetaAt: `${key}:${quickSlot()}` };
+  const streak = firstToday ? streakOf(next.days, key, next.createdAt).count : null;
+  // A cada 7 dias seguidos, ganha um martelinho (guarda até 3).
+  let hammer = false;
+  if (streak && streak % 7 === 0 && hammersOf(next) < HAMMER_MAX) {
+    next = { ...next, hammers: hammersOf(next) + 1 };
+    hammer = true;
+  }
   commit(next);
-  const streak = firstToday ? streakOf(state.days, key, state.createdAt).count : null;
-  if (streak) setTimeout(() => celebrate({ type: 'streak', count: streak }), 0);
+  if (streak) setTimeout(() => celebrate({ type: 'streak', count: streak, hammer }), 0);
   return { reward: got, kcal, streak };
 }
 
@@ -903,6 +911,91 @@ export function addJournal(text: string, prompt?: string) {
   if (!clean) return;
   const next = logEventIn({ ...state, journal: [...state.journal, { id: uid(), date: todayKey(), text: clean, prompt }] }, 'diario');
   commit(grant(next, { kind: 'diario', date: todayKey() }));
+}
+
+// ---------- Missões rápidas (renovam a cada 8 horas) ----------
+
+/** Turno de agora: 0 (madrugada até 8h), 1 (8h às 16h) ou 2 (16h à meia-noite). */
+export const quickSlot = (d = new Date()) => Math.floor(d.getHours() / 8);
+/** Quanto falta para as missões rápidas renovarem (ms). */
+export function quickResetIn(d = new Date()): number {
+  const next = new Date(d);
+  next.setHours((quickSlot(d) + 1) * 8, 0, 0, 0);
+  return next.getTime() - d.getTime();
+}
+export const quickDone = (s: State, id: QuickId, key = todayKey(), slot = quickSlot()) => !!s.game.paid[`rapida:${key}:${slot}:${id}`];
+
+/** Nomeie sua emoção: guarda as emoções de hoje e paga a missão rápida do turno. */
+export function quickEmotion(emotions: string[]): number {
+  if (!emotions.length) return 0;
+  const key = todayKey();
+  const ref = `rapida:${key}:${quickSlot()}:emocao`;
+  const already = !!state.game.paid[ref];
+  const day = dayOf(state, key);
+  const merged = [...new Set([...(day.emotions ?? []), ...emotions])];
+  const next = grant(withDay(state, key, { ...day, emotions: merged }), { kind: 'rapida', id: 'emocao', slot: quickSlot(), coins: 4, date: key });
+  commit(next);
+  return already ? 0 : next.game.paid[ref]?.coins ?? 0;
+}
+
+/** "Complete uma meta" pronta para pegar (fez uma missão neste turno e ainda não pegou). */
+export const quickMetaReady = (s: State, key = todayKey(), slot = quickSlot()) => s.quickMetaAt === `${key}:${slot}` && !quickDone(s, 'meta', key, slot);
+export function claimQuickMeta(): number {
+  const key = todayKey();
+  if (!quickMetaReady(state, key)) return 0;
+  const next = grant(state, { kind: 'rapida', id: 'meta', slot: quickSlot(), coins: 4, date: key });
+  commit(next);
+  return next.game.paid[`rapida:${key}:${quickSlot()}:meta`]?.coins ?? 0;
+}
+
+/** Escreva uma reflexão: vai para o diário; reflexão mais longa vale mais sementes. */
+export function quickReflection(text: string, prompt?: string): number {
+  const clean = text.trim();
+  if (clean.length < 10) return 0;
+  const key = todayKey();
+  const ref = `rapida:${key}:${quickSlot()}:reflexao`;
+  const already = !!state.game.paid[ref];
+  let next = logEventIn({ ...state, journal: [...state.journal, { id: uid(), date: key, text: clean, prompt }] }, 'diario');
+  next = grant(next, { kind: 'diario', date: key });
+  next = grant(next, { kind: 'rapida', id: 'reflexao', slot: quickSlot(), coins: reflectionCoins(clean.length), date: key });
+  commit(next);
+  return already ? 0 : next.game.paid[ref]?.coins ?? 0;
+}
+
+// ---------- Martelinho (conserta a ofensiva) ----------
+
+/** Todo mundo começa com 1 martelinho. */
+export const hammersOf = (s: State) => s.hammers ?? 1;
+export const streakRepair = (s: State, today = todayKey()): RepairPlan | null => repairPlan(s.days, today, s.createdAt);
+
+export function buyHammer(): 'ok' | 'sem-sementes' | 'cheio' {
+  if (hammersOf(state) >= HAMMER_MAX) return 'cheio';
+  if (state.coins < HAMMER_PRICE) return 'sem-sementes';
+  const next = spend(state, HAMMER_PRICE, 'Martelinho', `martelinho:${Date.now()}`);
+  commit({ ...next, hammers: hammersOf(state) + 1 });
+  return 'ok';
+}
+
+/** Usa os martelinhos para consertar os dias que quebraram a ofensiva. */
+export function applyHammers(): RepairPlan | 'sem-martelinho' | null {
+  const plan = streakRepair(state);
+  if (!plan) return null;
+  if (hammersOf(state) < plan.fix.length) return 'sem-martelinho';
+  let next: State = { ...state, hammers: hammersOf(state) - plan.fix.length };
+  for (const k of plan.fix) next = withDay(next, k, { ...dayOf(next, k), repaired: true });
+  commit(next);
+  return plan;
+}
+
+// ---------- Prêmio por amigo (cada amigo novo vale mais) ----------
+
+export const friendRewardClaimed = (s: State, n: number) => !!s.game.paid[`amigo:${n}`];
+/** Pega o prêmio do n-ésimo amigo (o servidor confere quantas amizades a pessoa tem). */
+export function claimFriendReward(n: number, friends: number): number {
+  if (n < 1 || n > FRIEND_LADDER.length || friends < n || friendRewardClaimed(state, n)) return 0;
+  const next = grant(state, { kind: 'amigo', n });
+  commit(next);
+  return next.game.paid[`amigo:${n}`]?.coins ?? 0;
 }
 
 export function deleteJournal(id: string) {

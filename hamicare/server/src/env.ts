@@ -44,6 +44,16 @@ const schema = z.object({
    */
   ANDROID_PACKAGE_NAME: z.string().regex(/^[a-zA-Z][\w]*(\.[a-zA-Z][\w]*)+$/).optional(),
   ANDROID_CERT_SHA256: z.string().optional(),
+  /**
+   * Guardiões do Hami (dar HamiCare+ para quem não pode pagar): pagamento pelo Mercado Pago (Pix e cartão).
+   * MP_ACCESS_TOKEN: "Access token" de produção da sua aplicação no Mercado Pago (Suas integrações → Credenciais).
+   * MP_WEBHOOK_SECRET: "Assinatura secreta" das notificações (Webhooks), para conferir que o aviso veio do Mercado Pago.
+   * Sem token, o botão de ser Guardião fica "em breve". GUARDIAN_TEST_PAY=true liga um pagamento de mentira
+   * (só fora de produção) para testar a fila e o mural.
+   */
+  MP_ACCESS_TOKEN: z.string().optional(),
+  MP_WEBHOOK_SECRET: z.string().optional(),
+  GUARDIAN_TEST_PAY: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
 });
 
 // Campo deixado em branco no painel da hospedagem conta como "não informado".

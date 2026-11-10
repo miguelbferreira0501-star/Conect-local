@@ -29,6 +29,8 @@ export interface Item {
   base?: string;
   c1?: string;
   c2?: string;
+  /** Itens de identidade (prateleira "Sou assim" no Armário). */
+  tag?: 'identidade';
 }
 
 const W = (id: string, name: string, kind: ItemKind, price: number, extra: Partial<Item> = {}): Item => ({ id, name, kind, price, ...extra });
@@ -309,6 +311,20 @@ export const ITEMS: Item[] = [
   W('m-balao', 'Balão na patinha', 'acessorio', 25, { base: 'segurar', c1: '#FF5E7E', c2: '#FFFFFF' }),
   W('m-varinha', 'Varinha de estrela', 'acessorio', 70, { base: 'segurar', c1: '#FFD34D', c2: '#FFFFFF', level: 3 }),
   W('m-girassol', 'Girassol na patinha', 'acessorio', 25, { base: 'segurar', c1: '#FFD34D', c2: '#8A5A3B' }),
+  // Sou assim: itens para a pessoa se ver no Hami (preço baixo de propósito)
+  W('m-bandeira-orgulho', 'Bandeira do orgulho LGBTQIA+', 'acessorio', 15, { base: 'segurar', c1: '#E8455A', c2: '#7E57D6', tag: 'identidade' }),
+  W('m-bandeira-trans', 'Bandeira trans', 'acessorio', 15, { base: 'segurar', c1: '#5BCEFA', c2: '#F5A9B8', tag: 'identidade' }),
+  W('m-bandeira-bi', 'Bandeira bissexual', 'acessorio', 15, { base: 'segurar', c1: '#D60270', c2: '#0038A8', tag: 'identidade' }),
+  W('m-bandeira-brasil', 'Bandeira do Brasil', 'acessorio', 15, { base: 'segurar', c1: '#3E9C55', c2: '#FFD34D', tag: 'identidade' }),
+  W('cordao-girassol', 'Cordão de girassol (deficiência oculta)', 'acessorio', 15, { base: 'cordao-girassol', c1: '#3E9C55', c2: '#FFD34D', tag: 'identidade' }),
+  W('cordao-autismo', 'Cordão do autismo', 'acessorio', 15, { base: 'cordao-autismo', c1: '#5B8DEF', c2: '#FFD34D', tag: 'identidade' }),
+  W('bomba-insulina', 'Bomba de insulina', 'acessorio', 15, { base: 'bomba-insulina', c1: '#5B8DEF', c2: '#DDE6F5', tag: 'identidade' }),
+  W('bomba-insulina-rosa', 'Bomba de insulina rosa', 'acessorio', 15, { base: 'bomba-insulina', c1: '#FF86AC', c2: '#FFE3EC', tag: 'identidade' }),
+  W('sensor-glicose', 'Sensor de glicose no braço', 'acessorio', 15, { base: 'sensor-glicose', c1: '#FFFFFF', c2: '#8A90A0', tag: 'identidade' }),
+  W('aparelho-auditivo', 'Aparelho auditivo', 'acessorio', 15, { base: 'aparelho-auditivo', c1: '#F2D2B0', c2: '#B98A5E', tag: 'identidade' }),
+  W('aparelho-auditivo-azul', 'Aparelho auditivo azul', 'acessorio', 15, { base: 'aparelho-auditivo', c1: '#7FB8F0', c2: '#3D6FD8', tag: 'identidade' }),
+  W('cadeira-rodas', 'Cadeira de rodas', 'acessorio', 15, { base: 'cadeira-rodas', c1: '#5B8DEF', c2: '#3A3440', tag: 'identidade' }),
+  W('cadeira-rodas-rosa', 'Cadeira de rodas rosa', 'acessorio', 15, { base: 'cadeira-rodas', c1: '#FF86AC', c2: '#3A3440', tag: 'identidade' }),
   W('m-chaveiro', 'Chaveiro de estrelinha', 'acessorio', 35, { base: 'segurar', c1: '#FFD34D', c2: '#E8B020' }),
   // Coleção Plus: coisinhas de segurar
   W('m-guarda-chuva', 'Guarda-chuva de coração', 'acessorio', 80, { base: 'segurar', c1: '#FF86AC', c2: '#FFFFFF', plus: true }),

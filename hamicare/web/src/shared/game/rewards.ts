@@ -19,7 +19,19 @@ export type Source =
   | { kind: 'arena'; arena: number }
   | { kind: 'colecao'; id: string }
   | { kind: 'temporada-degrau'; month: string; tier: number }
-  | { kind: 'turma'; id: string; date: string };
+  | { kind: 'turma'; id: string; date: string }
+  | { kind: 'rapida'; id: QuickId; slot: number; coins: number; date: string }
+  | { kind: 'amigo'; n: number };
+
+/** Missões rápidas: renovam a cada 8 horas (3 turnos por dia). */
+export type QuickId = 'emocao' | 'reflexao' | 'meta';
+export const QUICK_IDS: QuickId[] = ['emocao', 'reflexao', 'meta'];
+/** Reflexão mais longa vale mais sementes (até 12). */
+export const reflectionCoins = (chars: number) => (chars >= 400 ? 12 : chars >= 150 ? 8 : 4);
+/** Prêmio por amigo novo: cada um vale mais que o anterior (até o 5º). */
+export const FRIEND_LADDER = [40, 60, 80, 100, 150];
+/** Martelinho que conserta a ofensiva (sementes). */
+export const HAMMER_PRICE = 80;
 
 export interface Grant {
   ref: string;
@@ -83,6 +95,19 @@ export function baseGrant(src: Source, cfg: GameConfig): Grant {
     case 'temporada-degrau': {
       const t = cfg.season.tiers[src.tier];
       return { ref: `temporada:${src.month}:d${src.tier}`, label: `Temporada: degrau ${src.tier + 1}`, xp: t?.xp ?? 0, coins: t?.coins ?? 0, routine: false };
+    }
+    case 'rapida':
+      return {
+        ref: `rapida:${src.date}:${Math.max(0, Math.min(2, Math.floor(src.slot)))}:${src.id}`,
+        label: src.id === 'reflexao' ? 'Missão rápida: reflexão' : src.id === 'emocao' ? 'Missão rápida: emoção' : 'Missão rápida: meta',
+        xp: 4,
+        coins: Math.max(2, Math.min(12, Math.round(src.coins))),
+        routine: true,
+        date: src.date,
+      };
+    case 'amigo': {
+      const n = Math.max(1, Math.min(FRIEND_LADDER.length, Math.floor(src.n)));
+      return { ref: `amigo:${n}`, label: `Prêmio do ${n}º amigo`, xp: 0, coins: FRIEND_LADDER[n - 1], routine: false };
     }
     case 'colecao': {
       const c = cfg.collections.find((x) => x.id === src.id);

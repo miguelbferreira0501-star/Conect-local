@@ -17,6 +17,7 @@ import { Friends, type ShareDraft } from './screens/Friends';
 import { Onboarding } from './screens/Onboarding';
 import { SettingsSheet } from './screens/Settings';
 import { Evolution } from './screens/Evolution';
+import { GuardianHost } from './components/Guardian';
 import { Paywall } from './screens/Paywall';
 import { AccountSection } from './screens/Account';
 import { useAccount } from './lib/account';
@@ -192,12 +193,13 @@ export default function App() {
         <Paywall onClose={() => setPlus(false)} />
       </Sheet>
       {current?.type === 'level' ? <LevelUpScreen c={current} onClose={() => setQueue((q) => q.slice(1))} /> : <CelebrationModal c={current} onClose={() => setQueue((q) => q.slice(1))} />}
-      {current?.type === 'streak' && <StreakScreen count={current.count} onClose={() => setQueue((q) => q.slice(1))} onShare={(photo) => (setQueue((q) => q.slice(1)), shareTo({ kind: 'foto', photo }))} />}
+      {current?.type === 'streak' && <StreakScreen count={current.count} hammer={current.hammer} onClose={() => setQueue((q) => q.slice(1))} onShare={(photo) => (setQueue((q) => q.slice(1)), shareTo({ kind: 'foto', photo }))} />}
       {showWelcome && <DailyWelcome onClose={markWelcomed} />}
       <ResetPassword />
       <LegalHost />
       <GoalDone />
       {!showWelcome && <MoodCheckinHost />}
+      <GuardianHost />
       <Toaster />
     </GrowthContext.Provider>
   );

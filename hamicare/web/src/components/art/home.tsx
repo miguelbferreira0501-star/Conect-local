@@ -14,6 +14,31 @@ export const HOME: Record<string, Draw> = {
     </g>
   ),
 
+  // ---------- Martelinho (conserta a ofensiva) e escudo do Guardião ----------
+  '🔨': () => (
+    <g>
+      <path d="M34 26 L50 58" stroke={C.woodD} strokeWidth="9" strokeLinecap="round" />
+      <path d="M34 26 L50 58" stroke={C.wood} strokeWidth="5" strokeLinecap="round" />
+      <path d="M12 22 Q10 12 20 9 L40 4 Q48 2 50 10 L52 16 Q54 24 46 26 L24 32 Q14 34 12 22Z" fill={C.pink} transform="rotate(-18 32 18)" />
+      <path d="M14 23 L46 15" stroke={C.pinkD} strokeWidth="3" opacity="0.6" transform="rotate(-18 32 18)" />
+      <Hi x={26} y={12} rx={9} ry={3} r={-30} />
+      <path d={heart(31, 19, 4.5)} fill="#fff" opacity="0.9" />
+      <path d={sparkle(54, 32, 5)} fill={C.yellow} />
+      <path d={sparkle(8, 40, 4)} fill={C.yellow} />
+    </g>
+  ),
+  '🛡️': () => (
+    <g>
+      <path d="M32 4 L54 12 V30 Q54 50 32 60 Q10 50 10 30 V12Z" fill={C.purpleD} />
+      <path d="M32 9 L49 15.5 V30 Q49 46 32 54.5 Q15 46 15 30 V15.5Z" fill={C.purple} />
+      <Sh d="M32 9 L49 15.5 V30 Q49 46 32 54.5Z" o={0.12} />
+      <path d={heart(32, 32, 11)} fill={C.pink} />
+      <path d={heart(32, 32, 11)} fill="none" stroke="#fff" strokeWidth="2" opacity="0.7" />
+      <Hi x={24} y={20} rx={6} ry={3} r={-30} />
+      <path d={sparkle(52, 8, 4.5)} fill={C.yellow} />
+    </g>
+  ),
+
   // ---------- Plantas ----------
   '🪴': () => (
     <g>

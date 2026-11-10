@@ -17,6 +17,7 @@ import { Avatar, Composer, PostCard, type ShareDraft } from './social/Post';
 import { MyHeader, ProfilePage } from './social/Profile';
 import { GroupsTab } from './social/Groups';
 import { Glyph } from '../components/art';
+import { FriendLadder } from '../components/FriendLadder';
 
 export type { ShareDraft };
 
@@ -360,6 +361,7 @@ function FriendsTab({ api, fs, refresh, onOpenProfile }: { api: SocialApi; fs: F
           ))}
         </section>
       )}
+      <FriendLadder friends={fs.friends.length} />
       <section className="grid gap-2">
         <h2 className="font-display text-[19px] font-bold">Seus amigos ({fs.friends.length})</h2>
         {fs.friends.length ? (

@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import { installAppSounds } from './lib/appSounds';
 import { installNativeReminders } from './lib/nativeReminders';
+import { installWidget } from './lib/widget';
 import './index.css';
 import './live.css';
 import './theme.css';
@@ -10,6 +11,7 @@ import './wellbeing.css';
 
 installAppSounds();
 installNativeReminders();
+installWidget();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -10,6 +10,9 @@ import { startTrialOnServer, useAccount } from '../lib/account';
 import { ApiError } from '../lib/social/api';
 import { formatDay } from '../lib/util';
 import { storeWord } from '../lib/native';
+import { openGuardian } from '../components/Guardian';
+import { canBuyHere } from '../lib/guardian';
+import { Glyph } from '../components/art';
 
 export { PLUS_PRICE };
 
@@ -133,6 +136,7 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
         <button className="pw-cta" onClick={() => setStep('planos')}>
           {trialFree ? 'Testar por R$ 0,00' : 'Ver planos'}
         </button>
+        {!fromOnboarding && <GuardianLinks onClose={onClose} />}
         <button className="pw-later" onClick={onClose}>
           {later}
         </button>
@@ -147,15 +151,19 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
       </button>
       <h2 className="pw-title">{trialFree ? 'Escolha seu plano e comece o teste grátis' : 'Escolha seu plano'}</h2>
       <div className="grid gap-3" role="radiogroup" aria-label="Planos">
-        <button className={`pw-plan ${plan === 'anual' ? 'is-on' : ''}`} role="radio" aria-checked={plan === 'anual'} onClick={() => setPlan('anual')}>
-          <span className="pw-badge">MELHOR OFERTA</span>
+        <button className={`pw-plan pw-plan-year ${plan === 'anual' ? 'is-on' : ''}`} role="radio" aria-checked={plan === 'anual'} onClick={() => setPlan('anual')}>
+          <span className="pw-badge">MAIS ESCOLHIDO · MELHOR PREÇO</span>
           <b className="text-[19px]">12 meses</b>
-          <span>
-            <s className="opacity-70">{PLUS_PRICE.yearFull}</s> {PLUS_PRICE.year} ({PLUS_PRICE.yearMonthly}/mês)
+          <span className="pw-year-month">
+            {PLUS_PRICE.yearMonthly}
+            <small>/mês</small>
           </span>
-          <span className="text-[14px] opacity-85">{trialFree ? `${TRIAL_DAYS.anual} dias grátis · ` : ''}economize {PLUS_PRICE.saving}</span>
+          <span>
+            <s className="opacity-70">{PLUS_PRICE.yearFull}</s> {PLUS_PRICE.year} por ano
+          </span>
+          <span className="text-[14px] opacity-85">{trialFree ? `${TRIAL_DAYS.anual} dias grátis · ` : ''}economize {PLUS_PRICE.saving} · um ano inteiro de cuidado</span>
         </button>
-        <button className={`pw-plan ${plan === 'mensal' ? 'is-on' : ''}`} role="radio" aria-checked={plan === 'mensal'} onClick={() => setPlan('mensal')}>
+        <button className={`pw-plan pw-plan-month ${plan === 'mensal' ? 'is-on' : ''}`} role="radio" aria-checked={plan === 'mensal'} onClick={() => setPlan('mensal')}>
           <b className="text-[19px]">Mensal</b>
           <span>{PLUS_PRICE.month} por mês</span>
           {trialFree && <span className="text-[14px] opacity-85">{TRIAL_DAYS.mensal} dias grátis</span>}
@@ -183,9 +191,30 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
       ) : (
         <p className="rounded-2xl bg-white/15 p-4 text-center text-[14px]">Seu teste grátis já foi usado. A assinatura do plano {plan} chega em breve {storeWord()}.</p>
       )}
+      {!fromOnboarding && <GuardianLinks onClose={onClose} />}
       <button className="pw-later" onClick={onClose}>
         {later}
       </button>
+    </div>
+  );
+}
+
+/** Guardiões: pedir o Plus de presente ou dar para quem não pode pagar (dar só fora dos apps das lojas). */
+function GuardianLinks({ onClose }: { onClose: () => void }) {
+  const go = () => {
+    onClose();
+    openGuardian();
+  };
+  return (
+    <div className="pw-guardian">
+      <button onClick={go}>
+        <Glyph e="💌" size={24} /> Não dá para pagar agora? Peça um HamiCare+ de presente
+      </button>
+      {canBuyHere() && (
+        <button onClick={go}>
+          <Glyph e="🛡️" size={24} /> Quer ajudar alguém? Seja um Guardião
+        </button>
+      )}
     </div>
   );
 }

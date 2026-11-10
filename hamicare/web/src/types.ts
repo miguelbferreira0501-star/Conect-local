@@ -44,6 +44,8 @@ export interface DayLog {
   battery?: Battery;
   /** Dia de descanso marcado pela pessoa. */
   rest?: boolean;
+  /** Dia consertado com o martelinho: não quebra a ofensiva (e não conta como dia ativo). */
+  repaired?: boolean;
   care: CareId[];
   /** Outros acontecimentos do dia: 'diario', 'pote', 'vibe', 'aventura', 'respirar'… */
   events?: string[];
@@ -288,6 +290,10 @@ export interface State {
   houses?: Record<string, House>;
   /** Pets companheiros: um ovo por arena aberta; choca com dias de cuidado. */
   companions?: CompanionState;
+  /** Martelinhos para consertar a ofensiva (ganha 1 a cada 7 dias seguidos; até 3). */
+  hammers?: number;
+  /** Turno ("AAAA-MM-DD:n") em que uma missão foi feita: libera a missão rápida "complete uma meta". */
+  quickMetaAt?: string;
   /** Quando e de onde veio cada item. */
   itemMeta?: Record<string, ItemMeta>;
   /** Curva de níveis nova aplicada (o XP antigo foi convertido sem perder nível). */

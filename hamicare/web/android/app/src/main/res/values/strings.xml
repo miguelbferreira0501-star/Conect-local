@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">HamiCare</string>
+    <string name="title_activity_main">HamiCare</string>
+    <string name="package_name">com.hamicare.app</string>
+    <string name="custom_url_scheme">com.hamicare.app</string>
+</resources>

@@ -9,7 +9,7 @@ import { pool, withUser } from '../db';
 import { AppError, invalid } from '../lib/errors';
 import { type AppEnv, requireAuth } from '../auth';
 import {
-  CHEST_ORDER, DEFAULT_GAME, addUsage, arenaItemsOf, canCraft, arenaOf, baseGrant, capGrant, chestOdds, chestPool, emptyPity, emptyUsage, isChest, levelOf, levelUps, openChest, pityInfo, rarityOf, xpAt,
+  CHEST_ORDER, DEFAULT_GAME, FRIEND_LADDER, HAMMER_PRICE, addUsage, arenaItemsOf, canCraft, arenaOf, baseGrant, capGrant, chestOdds, chestPool, emptyPity, emptyUsage, isChest, levelOf, levelUps, openChest, pityInfo, rarityOf, xpAt,
   type ChestId, type DayUsage, type GameConfig, type Pity, type Rarity, type Source,
 } from '../../../web/src/shared/game';
 import { ITEMS, LOOKS, STYLES, itemById, stylePrice } from '../../../web/src/data/items';
@@ -149,6 +149,8 @@ const sourceSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('colecao'), id: z.string().max(40) }),
   z.object({ kind: z.literal('turma'), id: z.string().uuid(), date: day }),
   z.object({ kind: z.literal('temporada-degrau'), month: z.string().regex(/^\d{4}-\d{2}$/), tier: z.number().int().min(0).max(50) }),
+  z.object({ kind: z.literal('rapida'), id: z.enum(['emocao', 'reflexao', 'meta']), slot: z.number().int().min(0).max(2), coins: z.number().int(), date: day }),
+  z.object({ kind: z.literal('amigo'), n: z.number().int().min(1).max(FRIEND_LADDER.length) }),
 ]);
 const opSchema = z.discriminatedUnion('op', [
   z.object({ op: z.literal('grant'), src: sourceSchema }),
@@ -204,6 +206,14 @@ async function trusted(db: pg.PoolClient, userId: string, src: Source, cfg: Game
       if (!col) return null;
       const owned = await ownedSet(db, userId);
       return col.items.every((id) => owned.has(id)) ? src : null;
+    }
+    case 'rapida':
+      // O texto da reflexão fica no aparelho: o servidor só limita o valor (até 12 na reflexão, 4 nas outras).
+      return { ...src, coins: src.id === 'reflexao' ? Math.min(12, Math.max(4, src.coins)) : 4 };
+    case 'amigo': {
+      // Só paga o n-ésimo amigo quando a pessoa já tem n amizades aceitas.
+      const n = (await db.query('SELECT app.friend_count($1) AS n', [userId])).rows[0]?.n ?? 0;
+      return n >= src.n ? src : null;
     }
     case 'nivel':
     case 'arena':
@@ -347,6 +357,9 @@ async function applySpend(db: pg.PoolClient, userId: string, w: WalletRow, op: {
     if (style.plus && !premium) return { w, ok: false, error: 'plus' };
     price = stylePrice(style, (x) => owned.has(x));
     give.push(...[style.wallpaper, style.floor, ...style.items.map((i) => i.itemId)].filter((x) => !owned.has(x)));
+  } else if (kind === 'martelinho') {
+    // Martelinho que conserta a ofensiva: preço fixo do catálogo do jogo.
+    price = HAMMER_PRICE;
   } else if (kind === 'pelagem') {
     const fur = FURS.find((f) => f.id === id);
     if (!fur || !fur.price) return { w, ok: false, error: 'invalido' };

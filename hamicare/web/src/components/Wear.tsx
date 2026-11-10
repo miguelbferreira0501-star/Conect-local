@@ -1031,7 +1031,7 @@ export function Clothes({ id, geo }: { id: string | null; geo: Geo }) {
 }
 
 /** Acessórios da frente (no pescoço e na barriga). */
-export function Accessory({ id, geo, paw }: { id: string | null; geo: Geo; paw?: string }) {
+export function Accessory({ id, geo, paw, head }: { id: string | null; geo: Geo; paw?: string; head?: { cx: number; cy: number; rx: number; ry: number } }) {
   const { top, w, h } = geo;
   const y = top + h * 0.6;
   const it = id ? itemById(id) : undefined;
@@ -1347,6 +1347,40 @@ export function Accessory({ id, geo, paw }: { id: string | null; geo: Geo; paw?:
                 <path d={heartPath(px, py - 11, 6)} fill={c2 ?? '#FF86AC'} />
               </g>
             );
+          case 'bandeira-orgulho':
+          case 'bandeira-trans':
+          case 'bandeira-bi':
+          case 'bandeira-brasil': {
+            // Bandeirinha num cabo, balançando de leve.
+            const fx = px + 1;
+            const fy = py - 42;
+            const fw = 30;
+            const fh = 20;
+            const stripes =
+              kind === 'bandeira-orgulho' ? ['#E8455A', '#FF9F4D', '#FFD34D', '#5FBF77', '#5B8DEF', '#7E57D6'] : kind === 'bandeira-trans' ? ['#5BCEFA', '#F5A9B8', '#FFFFFF', '#F5A9B8', '#5BCEFA'] : kind === 'bandeira-bi' ? ['#D60270', '#D60270', '#9B4F96', '#0038A8', '#0038A8'] : null;
+            const band = (y0: number, hh: number, fill: string, i: number) => (
+              <path key={i} d={`M${fx} ${y0} Q${fx + fw / 2} ${y0 - 3} ${fx + fw} ${y0} V${y0 + hh} Q${fx + fw / 2} ${y0 + hh - 3} ${fx} ${y0 + hh} Z`} fill={fill} />
+            );
+            return (
+              <g>
+                <path d={`M${px} ${py + 6} V${py - 44}`} stroke="#B8854A" strokeWidth="3" strokeLinecap="round" />
+                <circle cx={px} cy={py - 45} r="2.6" fill="#F6C445" />
+                <g className="flag-wave" style={{ transformOrigin: `${fx}px ${fy + fh / 2}px` }}>
+                  {stripes ? (
+                    stripes.map((c, i) => band(fy + (i * fh) / stripes.length, fh / stripes.length + 0.4, c, i))
+                  ) : (
+                    <g>
+                      {band(fy, fh, '#3E9C55', 0)}
+                      <path d={`M${fx + 3} ${fy + fh / 2 - 1} L${fx + fw / 2} ${fy + 2} L${fx + fw - 3} ${fy + fh / 2 - 1} L${fx + fw / 2} ${fy + fh - 3} Z`} fill="#FFD34D" />
+                      <circle cx={fx + fw / 2} cy={fy + fh / 2 - 1} r="5" fill="#2E4FA8" />
+                      <path d={`M${fx + fw / 2 - 5} ${fy + fh / 2 - 2} Q${fx + fw / 2} ${fy + fh / 2 - 4} ${fx + fw / 2 + 5} ${fy + fh / 2}`} stroke="#FFFFFF" strokeWidth="1" fill="none" />
+                    </g>
+                  )}
+                  <path d={`M${fx} ${fy} Q${fx + fw / 2} ${fy - 3} ${fx + fw} ${fy} V${fy + fh} Q${fx + fw / 2} ${fy + fh - 3} ${fx} ${fy + fh} Z`} fill="none" stroke="#000" strokeOpacity="0.12" strokeWidth="1" />
+                </g>
+              </g>
+            );
+          }
           default:
             return null;
         }
@@ -1358,9 +1392,125 @@ export function Accessory({ id, geo, paw }: { id: string | null; geo: Geo; paw?:
         </g>
       );
     }
+    // ---------- Sou assim (identidade) ----------
+    case 'cordao-girassol':
+    case 'cordao-autismo': {
+      // Cordão no pescoço com o crachá: girassol (deficiências ocultas) ou quebra-cabeça (autismo).
+      const sun = base === 'cordao-girassol';
+      const by = y + 26;
+      const strap = sun ? '#3E9C55' : '#5B8DEF';
+      const L = `M${100 - w * 0.42} ${y - 6} Q${100 - w * 0.34} ${y + 14} 100 ${by - 6}`;
+      const R = `M${100 + w * 0.42} ${y - 6} Q${100 + w * 0.34} ${y + 14} 100 ${by - 6}`;
+      return (
+        <g>
+          {[L, R].map((d) => (
+            <g key={d}>
+              <path d={d} stroke={strap} strokeWidth="4.4" fill="none" strokeLinecap="round" />
+              <path d={d} stroke={sun ? '#FFD34D' : '#FFFFFF'} strokeWidth="2" fill="none" strokeDasharray={sun ? '0.1 6' : '3 3'} strokeLinecap="round" />
+            </g>
+          ))}
+          <rect x="91" y={by - 7} width="18" height="20" rx="3" fill="#FFFFFF" stroke="#D9D4E2" strokeWidth="1" />
+          <rect x="97" y={by - 9} width="6" height="4" rx="1" fill="#A3AEBD" />
+          {sun ? (
+            <g>
+              {Array.from({ length: 8 }, (_, i) => {
+                const a = (i / 8) * Math.PI * 2;
+                return <ellipse key={i} cx={100 + Math.cos(a) * 4.6} cy={by + 3 + Math.sin(a) * 4.6} rx="2.8" ry="1.6" fill="#FFD34D" transform={`rotate(${(a * 180) / Math.PI} ${100 + Math.cos(a) * 4.6} ${by + 3 + Math.sin(a) * 4.6})`} />;
+              })}
+              <circle cx="100" cy={by + 3} r="3" fill="#8A5A3B" />
+            </g>
+          ) : (
+            <g>
+              {[['#5B8DEF', -3.5, -0.5], ['#F0525F', 3.5, -0.5], ['#FFD34D', -3.5, 6.5], ['#5FBF77', 3.5, 6.5]].map(([c, dx, dy]) => (
+                <rect key={c as string} x={100 + (dx as number) - 3.2} y={by + (dy as number) - 3.2} width="6.4" height="6.4" rx="1.4" fill={c as string} />
+              ))}
+              <circle cx="100" cy={by - 0.5} r="1.6" fill="#FFFFFF" />
+              <circle cx="100" cy={by + 6.5} r="1.6" fill="#FFFFFF" />
+            </g>
+          )}
+        </g>
+      );
+    }
+    case 'bomba-insulina': {
+      // Bomba de insulina presa na lateral da barriga, com o tubinho até o adesivo.
+      const bx = 100 - w * 0.62;
+      const by = y + 34;
+      return (
+        <g>
+          <path d={`M${bx + 8} ${by + 2} C${bx + 22} ${by + 12} ${100 + 4} ${by + 2} ${100 + 10} ${by - 6}`} stroke="#DDE6F5" strokeWidth="2.2" fill="none" />
+          <circle cx={100 + 10} cy={by - 6} r="3.2" fill="#FFFFFF" stroke="#C9CED8" strokeWidth="1" />
+          <rect x={bx - 9} y={by - 7} width="18" height="14" rx="4" fill={c1 ?? '#5B8DEF'} stroke={darkenHex(c1 ?? '#5B8DEF')} strokeWidth="1.2" />
+          <rect x={bx - 6} y={by - 4.5} width="9" height="6" rx="1.5" fill={c2 ?? '#DDE6F5'} />
+          <circle cx={bx + 5.5} cy={by - 1.5} r="1.6" fill="#FFFFFF" />
+          <path d={`M${bx - 4.5} ${by - 2} h6`} stroke="#5B6BA8" strokeWidth="0.9" />
+        </g>
+      );
+    }
+    case 'sensor-glicose': {
+      // Sensor redondinho no braço esquerdo.
+      const sx = 100 - w * 0.86;
+      const sy = y + 12;
+      return (
+        <g>
+          <circle cx={sx} cy={sy} r="7.5" fill="#FFFFFF" opacity="0.85" />
+          <circle cx={sx} cy={sy} r="5.6" fill={c1 ?? '#FFFFFF'} stroke={c2 ?? '#8A90A0'} strokeWidth="1.3" />
+          <circle cx={sx} cy={sy} r="2" fill={c2 ?? '#8A90A0'} />
+          <circle cx={sx - 2} cy={sy - 2.6} r="1.1" fill="#FFFFFF" />
+        </g>
+      );
+    }
+    case 'aparelho-auditivo': {
+      // Aparelho atrás das duas orelhas (o da direita aparece mais).
+      if (!head) return null;
+      const dev = (s: 1 | -1) => {
+        const ax = head.cx + s * head.rx * 0.9;
+        const ay = head.cy - head.ry * 0.42;
+        return (
+          <g key={s}>
+            <path d={`M${ax} ${ay - 9} C${ax + s * 9} ${ay - 10} ${ax + s * 10} ${ay + 6} ${ax + s * 3} ${ay + 11} C${ax + s * 1} ${ay + 6} ${ax + s * 3} ${ay - 4} ${ax} ${ay - 4} Z`} fill={c1 ?? '#F2D2B0'} stroke={c2 ?? '#B98A5E'} strokeWidth="1.3" strokeLinejoin="round" />
+            <path d={`M${ax} ${ay - 7} Q${ax - s * 5} ${ay - 2} ${ax - s * 4} ${ay + 4}`} stroke={c2 ?? '#B98A5E'} strokeWidth="1.4" fill="none" strokeLinecap="round" />
+            <circle cx={ax + s * 4.6} cy={ay - 4} r="1.2" fill="#FFFFFF" opacity="0.8" />
+          </g>
+        );
+      };
+      return <g>{[-1, 1].map((s) => dev(s as 1 | -1))}</g>;
+    }
+    case 'cadeira-rodas': {
+      // Cadeira de rodas vista de frente: rodas grandes dos lados, rodinhas e apoio dos pés (o encosto fica atrás).
+      const metal = c2 ?? '#3A3440';
+      const frame = c1 ?? '#5B8DEF';
+      return (
+        <g>
+          {[-1, 1].map((s) => {
+            const wx = 100 + s * (w + 9);
+            return (
+              <g key={s}>
+                <path d={`M${100 + s * (w - 4)} ${y + 38} H${wx}`} stroke={frame} strokeWidth="3.4" strokeLinecap="round" />
+                <ellipse cx={wx} cy={y + 40} rx="7.5" ry="27" fill="none" stroke={metal} strokeWidth="4.5" />
+                <ellipse cx={wx} cy={y + 40} rx="4.5" ry="22" fill="none" stroke="#C9CED8" strokeWidth="1.6" />
+                <ellipse cx={wx} cy={y + 40} rx="2.4" ry="5" fill={frame} />
+                <path d={`M${wx - s * 3} ${y + 14} V${y + 66}`} stroke="#FFFFFF" strokeWidth="1" opacity="0.5" />
+                <circle cx={100 + s * (w - 8)} cy={y + 70} r="4.2" fill={metal} />
+                <circle cx={100 + s * (w - 8)} cy={y + 70} r="1.6" fill="#C9CED8" />
+              </g>
+            );
+          })}
+          <rect x={100 - w * 0.62} y={y + 66} width={w * 1.24} height="4.5" rx="2" fill={frame} />
+        </g>
+      );
+    }
     default:
       return null;
   }
+}
+
+/** Escurece um pouquinho a cor (contorno de peças pequenas). */
+function darkenHex(hex: string, t = 0.22) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  const ch = (v: number) => Math.round(v * (1 - t)).toString(16).padStart(2, '0');
+  return `#${ch(n >> 16)}${ch((n >> 8) & 255)}${ch(n & 255)}`;
 }
 
 /** Asas: ficam atrás do corpo. */
@@ -1377,6 +1527,24 @@ export function AccessoryBack({ id, geo }: { id: string | null | undefined; geo:
     </g>
   );
   switch (base) {
+    case 'cadeira-rodas': {
+      // Encosto e assento atrás do corpo, com as manoplas aparecendo dos lados, abaixo das bochechas.
+      const frame = it?.c1 ?? '#5B8DEF';
+      const metal = it?.c2 ?? '#3A3440';
+      const hx = w * 1.18;
+      return (
+        <g>
+          <rect x={100 - hx} y={top + h * 0.56} width={hx * 2} height={h * 0.36} rx="10" fill={frame} />
+          <rect x={100 - hx + 6} y={top + h * 0.6} width={hx * 2 - 12} height={h * 0.28} rx="8" fill="#000" opacity="0.12" />
+          {[-1, 1].map((s) => (
+            <g key={s}>
+              <path d={`M${100 + s * hx} ${top + h * 0.95} V${top + h * 0.56} Q${100 + s * hx} ${top + h * 0.52} ${100 + s * (hx + 6)} ${top + h * 0.5}`} stroke={metal} strokeWidth="4.2" fill="none" strokeLinecap="round" />
+              <circle cx={100 + s * (hx + 7)} cy={top + h * 0.5} r="3.6" fill={metal} />
+            </g>
+          ))}
+        </g>
+      );
+    }
     case 'asas-fada':
       return (
         <g>

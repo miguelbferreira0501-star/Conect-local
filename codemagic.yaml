@@ -23,6 +23,17 @@ workflows:
       - name: Copiar o app web para o projeto do iPhone
         working_directory: hamicare/web
         script: npx cap sync ios
+      - name: Widget do Hami na tela do iPhone (só com HAMI_WIDGET=1)
+        # Antes, no site da Apple: App Group group.com.hamicare.app ligado em com.hamicare.app e com.hamicare.app.widget
+        # (passo a passo em hamicare/docs/LOJAS.md, parte "Widget"). Sem HAMI_WIDGET=1, o app sai sem widget, como antes.
+        working_directory: hamicare/web/ios
+        script: |
+          if [ "$HAMI_WIDGET" = "1" ]; then
+            ruby -e "require 'xcodeproj'" 2>/dev/null || gem install --user-install xcodeproj --no-document
+            ruby scripts/add-widget.rb
+          else
+            echo "Widget desligado (HAMI_WIDGET diferente de 1)."
+          fi
       - name: Certificados e perfis de assinatura
         script: xcode-project use-profiles
       - name: Número da versão (cada envio ao TestFlight precisa de um número maior)
@@ -39,3 +50,43 @@ workflows:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
+
+  # App Android (Capacitor) com o widget do Hami, assinado e enviado para a Google Play (teste interno).
+  # Passo a passo (chave de assinatura e conta de serviço da Google): hamicare/docs/LOJAS.md, parte "Android com Capacitor".
+  hamicare-android:
+    name: HamiCare Android (Google Play)
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      android_signing:
+        # Nome da chave (keystore) cadastrada no Codemagic (Team settings → Code signing identities → Android keystores).
+        - hamicare_keystore
+      groups:
+        # Grupo com GCLOUD_SERVICE_ACCOUNT_CREDENTIALS (conta de serviço da Google Play, em JSON).
+        - google_play
+      node: 22
+      java: 21
+    scripts:
+      - name: Instalar e compilar o app web
+        working_directory: hamicare/web
+        script: |
+          npm ci --include=dev
+          npm run build
+      - name: Copiar o app web para o projeto Android
+        working_directory: hamicare/web
+        script: npx cap sync android
+      - name: Número da versão (cada envio para a Play precisa de um número maior)
+        working_directory: hamicare/web/android
+        script: |
+          sed -i "s/versionCode [0-9]*/versionCode $((BUILD_NUMBER + 10))/" app/build.gradle
+      - name: Gerar o app assinado (.aab)
+        working_directory: hamicare/web/android
+        script: ./gradlew bundleRelease
+    artifacts:
+      - hamicare/web/android/app/build/outputs/**/*.aab
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: true
+

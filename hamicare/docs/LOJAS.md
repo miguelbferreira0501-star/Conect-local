@@ -174,40 +174,113 @@ para o TestFlight. Para a App Store, escolher a compilação nova na página da 
 
 ---
 
+## 2.1 Widget do Hami na tela do celular
+
+O widget mostra o Hami, as missões de hoje (ex.: 3/7), a água em litros e a ofensiva. O app manda o resumo
+sozinho sempre que algo muda (plugin próprio em `hamicare/web/plugins/hami-widget`). No site e no navegador ele não existe.
+
+### No iPhone (uma vez só, no site da Apple)
+1. Entre em [developer.apple.com/account](https://developer.apple.com/account) → **Certificates, IDs & Profiles**.
+2. **Identifiers → +** → **App Groups** → descrição `HamiCare` e identificador `group.com.hamicare.app`.
+3. Em **Identifiers**, abra `com.hamicare.app` → marque **App Groups** → **Configure** → escolha `group.com.hamicare.app` → **Save**.
+4. **Identifiers → + → App IDs → App** → descrição `HamiCare Widget`, Bundle ID `com.hamicare.app.widget`,
+   marque **App Groups** e escolha o mesmo grupo → **Register**.
+5. Em **Profiles**, apague os perfis antigos do HamiCare (o Codemagic cria perfis novos já com o App Group).
+6. No Codemagic → app HamiCare → **Environment variables**: adicione `HAMI_WIDGET` = `1`.
+7. Rode o workflow **HamiCare iOS** de novo. No iPhone: segure a tela inicial → **+** → procure **HamiCare**.
+
+Sem o passo 6, o app continua saindo sem widget, igual a antes (nada quebra).
+
+### No Android
+O widget vem junto com o app Android feito com Capacitor (parte 2.2). Depois de instalar: segure a tela
+inicial → **Widgets** → **HamiCare** → arraste o **Hami** para a tela.
+
+---
+
+## 2.2 Android com Capacitor (com widget), no lugar do PWABuilder
+
+O PWABuilder (parte 1.2) gera um app que é só o site em tela cheia: **não dá para ter widget**. Agora o projeto
+também tem o app Android de verdade em `hamicare/web/android` (igual ao do iPhone), com o widget e os lembretes
+nativos. Ele é gerado no Codemagic, no workflow **HamiCare Android**.
+
+1. **Chave de assinatura.** Se você já gerou o pacote no PWABuilder, use a mesma chave (`signing.keystore` e as
+   senhas do `signing-key-info.txt`). Se ainda não mandou nada para a Play, pode criar uma nova no Codemagic.
+   No Codemagic → **Team settings → Code signing identities → Android keystores → Add keystore**: envie o arquivo,
+   preencha as senhas e o alias, e dê o nome `hamicare_keystore`. Nunca mande esses arquivos no chat.
+2. **Conta de serviço da Google Play** (para o Codemagic enviar o app): siga o guia do Codemagic
+   "Google Play service account" e guarde o JSON no Codemagic → **Environment variables**, no grupo `google_play`,
+   com o nome `GCLOUD_SERVICE_ACCOUNT_CREDENTIALS` (marque como secreto).
+3. **Primeiro envio:** a Google exige que o primeiro `.aab` seja enviado à mão. Rode o workflow, baixe o `.aab`
+   em **Artifacts** e envie em **Play Console → Testar e lançar → Teste interno → Criar versão**. Dos próximos
+   em diante, o Codemagic manda sozinho para o teste interno (como rascunho).
+4. O nome do pacote continua `com.hamicare.app`. O `assetlinks.json` (parte 1.3) não é mais necessário para
+   este app, mas pode ficar.
+
+---
+
+## 2.3 Guardiões do Hami: pagamento pelo Mercado Pago
+
+Quem pode pagar dá HamiCare+ para quem não pode (pagamento único, Pix ou cartão, só pelo site: os apps das
+lojas mostram o mural e o pedido de ajuda, mas não vendem). Sem estas chaves, o botão aparece como "Abre em breve".
+
+1. Crie a conta no [Mercado Pago](https://www.mercadopago.com.br) **no nome do adulto responsável**
+   (CPF ou CNPJ, o mesmo do app).
+2. Em [mercadopago.com.br/developers](https://www.mercadopago.com.br/developers) → **Suas integrações → Criar aplicação**
+   (tipo "Pagamentos on-line", produto "Checkout Pro").
+3. **Credenciais de produção → Access token** → copie e coloque no Render (serviço hamicare → Environment)
+   como `MP_ACCESS_TOKEN`. É segredo: não mande no chat.
+4. Na mesma aplicação → **Webhooks → Configurar notificações**:
+   - URL de produção: `https://hamicare.onrender.com/api/guardiao-webhook`
+   - Evento: **Pagamentos**
+   - Salve e copie a **Assinatura secreta** para o Render como `MP_WEBHOOK_SECRET`.
+5. Salve no Render (ele reinicia sozinho). Teste com um valor pequeno (Aliado, 1 mês) e veja o seu nome no mural.
+
+O servidor nunca confia no aviso: ele confere o pagamento direto no Mercado Pago antes de entregar as vagas.
+Cada vaga vira 1 mês (ou 1 ano) de HamiCare+ para a próxima pessoa da fila de quem pediu ajuda.
+
+---
+
 ## 3. Textos da loja
 
-**Nome (até 30):** `HamiCare: hábitos e calma`
+Posicionamento (lição do Finch): o HamiCare se apresenta como **app de autocuidado e saúde emocional**, não
+como "jogo de bichinho". O bichinho é o jeito gostoso de cuidar de você. Categoria: **Saúde e fitness**.
+Nada de promessa médica: é bem-estar, não tratamento.
 
-**Subtítulo da App Store (até 30):** `Hábitos, calma e um mascote`
+**Nome (até 30):** `HamiCare: autocuidado e calma`
+
+**Subtítulo da App Store (até 30):** `Autocuidado com um hamster`
 
 **Descrição curta da Google Play (até 80):**
-`Cuide de você com o Hami: hábitos, calma e um mundo para explorar.`
+`Cuide de você e o Hami cresce junto: hábitos, calma, água e humor do seu jeito.`
 
 **Palavras-chave da App Store (até 100):**
-`hábitos,autocuidado,ansiedade,calma,bem-estar,mascote,hamster,rotina,saúde,respiração,diário,humor`
+`autocuidado,saúde mental,ansiedade,hábitos,calma,bem-estar,rotina,humor,diário,água,pet virtual`
 
 **Descrição completa:**
 
-> Conheça o Hami, um hamster que evolui junto com você. Cada cuidado que você tem consigo mesmo, como
-> beber água, arrumar a cama, caminhar ou respirar fundo, vira uma missão cumprida, e o Hami fica mais feliz.
+> Conheça o Hami, um hamster que cresce junto com você. Cada cuidado que você tem consigo, como beber água,
+> arrumar a cama, alongar ou respirar fundo, vira uma missão cumprida: explode confete e o Hami fica feliz.
 >
-> **Escolha a sua área**
-> • Hábitos saudáveis: rotina leve, no seu ritmo
-> • Calma para a ansiedade: SOS, respiração, 5-4-3-2-1 e sono
-> • Perder ou ganhar peso, com acompanhamento opcional e privado (só para maiores de 18)
+> **Autocuidado sem pressão**
+> • Missões pequenas do seu jeito, e uma meta do dia que você escolhe
+> • Missões rápidas a cada 8 horas: nomeie sua emoção, escreva uma reflexão, complete uma meta
+> • Água em litros, com garrafinha e lembretes
+> • Como você está agora? Check-in de humor com a carinha que muda
+> • Dias de descanso não quebram a sua ofensiva, e o martelinho conserta um dia que faltou
 >
-> **Um mundo inteiro para explorar**
-> • 12 arenas, da casinha inicial à ilha celestial, cada uma com casa própria
-> • Baús, coleções, roupas e móveis para o Hami, tudo com sementes ganhas se cuidando
-> • Temporada grátis todo mês: um dia com uma missão feita já conta
+> **Um cantinho só seu**
+> • Decore a casa do Hami, vista roupas fofas e se veja nele (bandeiras, cordão de girassol, bomba de insulina, cadeira de rodas e mais)
+> • Mande o Hami em passeios e colecione pets companheiros
+> • Widget na tela do celular com o Hami e as missões do dia
 >
-> **Cuidado de verdade**
-> • Sem pressa e sem culpa: dias de descanso não quebram a sua ofensiva
-> • Diário e humor só seus
+> **Ninguém fica sem cuidado**
+> • O essencial é sempre grátis e sem anúncios
+> • Não dá para pagar o HamiCare+ agora? Peça de presente a um Guardião do Hami
 > • Amigos e feed só de gentileza, com moderação
-> • Funciona sem conta. Com conta, o seu progresso fica salvo na nuvem
 >
 > O HamiCare é um app de bem-estar e não substitui acompanhamento profissional.
 > Em uma crise, ligue para o CVV (188) ou o SAMU (192).
 
 **O que há de novo (versão 1.0.0):** `Primeira versão do HamiCare na loja.`
+
+O plano de divulgação (anúncios, TikTok e comunidade) está em `docs/DIVULGACAO.md`.

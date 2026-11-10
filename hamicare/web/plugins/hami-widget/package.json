@@ -1,0 +1,12 @@
+{
+  "name": "hami-widget",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Plugin local do HamiCare: manda o resumo do dia (Hami, missões, água, ofensiva) para o widget da tela do celular (iPhone e Android).",
+  "license": "UNLICENSED",
+  "capacitor": {
+    "ios": { "src": "ios" },
+    "android": { "src": "android" }
+  },
+  "files": ["android/src/main/", "android/build.gradle", "ios/Sources", "Package.swift"]
+}

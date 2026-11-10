@@ -24,3 +24,17 @@ Pesquisa de 03/11/2026 em fontes públicas, mais o relato do fundador, que insta
 | Sem login para salvar progresso | Avaliação da Play Store BR | Conta com backup automático, mais o código de backup |
 
 **O que o HamiCare tem e o Finch não:** peso virtual e jornada física do mascote, ofensiva com descanso protegido, casa com móveis que se arrastam, banho em 6 passos, comida, rede social só de gentileza e foto da tarefa concluída.
+
+## Rodada 33: o que veio do episódio sobre o Finch (Two and a Half Gamers)
+
+| No Finch (segundo o vídeo) | No HamiCare (do nosso jeito) |
+|---|---|
+| Widget fora do app, "extremamente importante" | Widget do Hami no iPhone e no Android (missões, água em litros, ofensiva) |
+| Confete ao concluir tarefa | Confete saindo do quadradinho em toda missão |
+| Missões que renovam a cada 8 horas (nomear emoção, reflexão, meta) | Missões rápidas nos 3 turnos do dia; reflexão mais longa vale mais sementes |
+| Martelo que conserta a sequência | Martelinho: ganha 1 a cada 7 dias seguidos (até 3) ou compra com sementes; conserta até 2 dias dos últimos 7 |
+| Itens de identidade (bandeiras, bomba de insulina) | Prateleira "Sou assim": bandeiras, cordão de girassol, cordão do autismo, bomba de insulina, sensor de glicose, aparelho auditivo e cadeira de rodas |
+| Convite com prêmio que aumenta | Prêmio por amigo: 40, 60, 80, 100 e 150 sementes (o servidor confere as amizades) |
+| Guardian: patrocinar o Plus de quem não pode pagar, com valor livre | Guardiões do Hami: Aliado, Protetor e Super-herói (valor livre), fila por ordem de chegada, mural e sementes de agradecimento |
+| Plano anual que adianta o dinheiro | Plano anual em destaque, com o preço por mês grande |
+| Marketing de autocuidado, não de pet | Textos da loja e plano de divulgação (docs/DIVULGACAO.md) |

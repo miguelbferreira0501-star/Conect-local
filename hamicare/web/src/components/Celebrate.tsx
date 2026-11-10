@@ -52,7 +52,7 @@ export function DailyWelcome({ onClose }: { onClose: () => void }) {
 }
 
 /** Ofensiva: tela cheia com raios girando, o Hami pulando e a semana marcada. */
-export function StreakScreen({ count, onClose, onShare }: { count: number; onClose: () => void; onShare: (p: Photo) => void }) {
+export function StreakScreen({ count, hammer, onClose, onShare }: { count: number; hammer?: boolean; onClose: () => void; onShare: (p: Photo) => void }) {
   const s = useApp();
   const today = todayKey();
   const week = Array.from({ length: 7 }, (_, i) => addDays(weekStart(today), i));
@@ -71,6 +71,11 @@ export function StreakScreen({ count, onClose, onShare }: { count: number; onClo
         </p>
         <p className="font-display text-[28px] font-bold leading-tight text-white">{count === 1 ? 'Primeiro dia da ofensiva!' : `${count} dias seguidos!`}</p>
         <p className="max-w-[300px] text-[15px] font-bold text-white/90">Você apareceu por você hoje. O {s.pet.name} está orgulhoso (e pulando de alegria).</p>
+        {hammer && (
+          <p className="streak-hammer">
+            <Glyph e="🔨" size={26} /> Ganhou um martelinho! Ele conserta a ofensiva se você faltar um dia.
+          </p>
+        )}
         <div className="mt-2 grid grid-cols-7 gap-1.5 rounded-3xl bg-white/20 p-3">
           {week.map((k) => (
             <div key={k} className="grid justify-items-center gap-1 text-[11px] font-black uppercase text-white">

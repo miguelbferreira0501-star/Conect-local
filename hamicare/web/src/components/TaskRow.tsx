@@ -4,6 +4,7 @@ import { Check, Pencil } from 'lucide-react';
 import { KcalChip } from './Journey';
 import { Seed } from './ui';
 import { prefersReducedMotion } from '../lib/util';
+import { burstConfetti } from '../lib/confetti';
 import type { Direction, Task } from '../types';
 import { Glyph } from './art';
 
@@ -46,6 +47,8 @@ export function TaskRow({ task, done, kcal, dir, sub, onToggle, onEdit }: {
           if (!done && ref.current && !prefersReducedMotion()) {
             ref.current.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25) rotate(-8deg)' }, { transform: 'scale(0.92)' }, { transform: 'scale(1)' }], { duration: 420, easing: 'cubic-bezier(0.23,1,0.32,1)' });
           }
+          // Confete a cada missão concluída.
+          if (!done) burstConfetti(ref.current);
           onToggle(ref.current!);
         }}
       >
