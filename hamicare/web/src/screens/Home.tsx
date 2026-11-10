@@ -1,4 +1,5 @@
 import { PlusWeeklyCard } from '../components/PlusWeekly';
+import { MoonTeaser } from '../components/MoonTeaser';
 import { useGrowth } from '../components/Growth';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Flame, Mail, Plus, Settings } from 'lucide-react';
@@ -182,6 +183,9 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
           <button className="hr-icon" onClick={onArenas} aria-label="Mapa das arenas">
             <Glyph e="🗺️" size={32} />
           </button>
+          <button className="hr-icon hr-rocket" onClick={onArenas} aria-label="Viajar para a Lua">
+            <Glyph e="🚀" size={32} />
+          </button>
         </div>
         <div className="hr-tools" role="toolbar" aria-label="Atalhos">
           <button onClick={() => onWorld?.('armario')} aria-label="Roupas">
@@ -211,6 +215,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
       </section>
 
       <PlusWeeklyCard />
+      <MoonTeaser onGo={onArenas} />
       <StreakRepairCard />
 
       <section className="hc-adv" aria-label="Meta do dia">

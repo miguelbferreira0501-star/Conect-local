@@ -16,6 +16,7 @@ import { getState } from '../lib/store';
 import { play } from '../lib/sound';
 import type { AgeGroup, NotifKind, ThemePref, TraitId } from '../types';
 import { Glyph } from '../components/art';
+import { openGuardian } from '../components/Guardian';
 
 const NOTIF_LABEL: Record<NotifKind, [string, string]> = {
   agua: ['Beber água', 'Nos horários do plano de água'],
@@ -217,6 +218,13 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
             <span className="min-w-0 flex-1">{isPremium(s) ? `Plus ativo até ${formatDay(s.premium.until!, { day: 'numeric', month: 'long' })}` : 'Conhecer o HamiCare+'}</span>
             <ChevronRight size={18} className="text-muted" />
           </button>
+          {s.profile.ageGroup !== 'ate12' && (
+            <button className="opt" onClick={() => (onClose(), openGuardian())}>
+              <Glyph e="🛡️" size={22} />
+              <span className="min-w-0 flex-1">Guardiões do Hami</span>
+              <ChevronRight size={18} className="text-muted" />
+            </button>
+          )}
         </Group>
 
         {account}

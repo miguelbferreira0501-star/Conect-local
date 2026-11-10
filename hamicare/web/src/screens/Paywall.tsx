@@ -99,6 +99,7 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
         <p className="rounded-2xl bg-white/15 p-4 text-center font-bold">Plus ativo até {formatDay(s.premium.until!, { day: 'numeric', month: 'long' })}.</p>
         <PlusWeeklyCard always />
         <Compare />
+        <GuardianLinks onClose={onClose} />
         <button className="pw-later" onClick={onClose}>
           Voltar
         </button>
