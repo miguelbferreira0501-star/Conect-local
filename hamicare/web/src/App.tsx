@@ -172,7 +172,7 @@ export default function App() {
       <main className="shell">
         {tab === 'inicio' && <Home onGo={go} onSettings={() => setSettings(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} onPlus={() => setPlus(true)} onTeam={() => go('amigos', undefined, 'turma')} onWorld={(sub) => go('mundo', sub)} />}
         {tab === 'cuidar' && <CareArea onShare={(photo) => shareTo({ kind: 'foto', photo })} />}
-        {tab === 'atividades' && <Activities onShareTask={(task) => shareTo({ kind: 'atividade', task })} onPlus={() => setPlus(true)} />}
+        {tab === 'atividades' && <Activities onShareTask={(task) => shareTo({ kind: 'atividade', task })} onPlus={() => setPlus(true)} onHome={() => go('inicio')} />}
         {tab === 'mundo' && <World key={worldTab ?? 'mundo'} initialTab={worldTab} onPlus={() => setPlus(true)} onGift={(id) => (setGift(id), go('amigos'))} />}
         {tab === 'bem-estar' && <Wellbeing onPlus={() => setPlus(true)} />}
         {tab === 'amigos' && <Friends key={friendsTab ?? 'amigos'} initialTab={friendsTab} share={share} onShareDone={() => setShare(null)} giftItem={gift} onGiftDone={() => setGift(null)} account={account} />}
