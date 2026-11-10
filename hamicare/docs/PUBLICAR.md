@@ -16,6 +16,11 @@ pode vir depois, quando for lançar de verdade (veja a seção 6).
 > **Plano grátis do Render:** o servidor dorme depois de 15 minutos sem visitas e leva cerca de
 > 1 minuto para acordar. Para testar com amigos, tudo bem. Para lançar de verdade, use o plano
 > Starter (US$ 7/mês): os **lembretes (água, Hami, missões, amigos…) só saem com o servidor acordado**.
+>
+> **Pagou o Starter e o app continua "acordando"?** O serviço é controlado pelo arquivo `hamicare/render.yaml`
+> (Blueprint). Se ele disser `plan: free`, cada sincronização do Blueprint volta o serviço para o grátis.
+> O arquivo agora diz `plan: starter`. Confira no Render → serviço **hamicare** → **Settings → Instance Type**:
+> tem que estar **Starter**. Se não estiver, abra **Blueprints → o do HamiCare → Manual Sync**.
 
 ---
 
