@@ -5,7 +5,8 @@ services:
   - type: web
     name: hamicare
     runtime: node
-    plan: free
+    # Starter (US$ 7/mês): o app não "dorme". Com free, cada sincronização do Blueprint volta para o grátis.
+    plan: starter
     rootDir: hamicare
     # --include=dev: o Render usa NODE_ENV=production, e sem isso o npm não instala as ferramentas de build.
     buildCommand: cd web && npm ci --include=dev && npm run build && cd ../server && npm ci
