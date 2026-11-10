@@ -25,6 +25,8 @@ export interface Item {
   arena?: number;
   /** Raridade definida à mão (se faltar, é estimada pelo preço). */
   rarity?: 'comum' | 'incomum' | 'raro' | 'epico' | 'lendario';
+  /** Só sai do Baú Lendário (não está à venda nem pode ser presenteado). */
+  chestOnly?: boolean;
   /** Peça desenhada no Hami: o modelo e as cores (as variações de cor usam o mesmo desenho). */
   base?: string;
   c1?: string;
@@ -258,6 +260,15 @@ export const ITEMS: Item[] = [
   W('fantasia-morango', 'Fantasia de moranguinho', 'roupa', 150, { base: 'fantasia-morango', c1: '#F0525F', c2: '#FFE3E3', plus: true }),
   W('fantasia-abacate', 'Fantasia de abacate', 'roupa', 150, { base: 'fantasia-abacate', c1: '#7BC86C', c2: '#E9F5B8', plus: true }),
   W('fantasia-rena', 'Fantasia de renazinha', 'roupa', 140, { base: 'fantasia-rena', c1: '#B07A52', c2: '#F2D2B0', plus: true }),
+  // Só no Baú Lendário: as fantasias mais especiais do HamiCare (não estão à venda)
+  W('fantasia-dragao-dourado', 'Fantasia de dragão dourado', 'roupa', 300, { base: 'fantasia-dragao', c1: '#F6C445', c2: '#FFF1C9', rarity: 'lendario', chestOnly: true }),
+  W('fantasia-dragao-galaxia', 'Fantasia de dragão galáxia', 'roupa', 300, { base: 'fantasia-dragao', c1: '#3E3A8C', c2: '#C9B6FF', rarity: 'lendario', chestOnly: true }),
+  W('fantasia-unicornio-arco', 'Fantasia de unicórnio arco-íris', 'roupa', 300, { base: 'fantasia-unicornio', c1: '#FFF4FA', c2: '#8FD3FF', rarity: 'lendario', chestOnly: true }),
+  W('fantasia-unicornio-noite', 'Fantasia de unicórnio da noite', 'roupa', 300, { base: 'fantasia-unicornio', c1: '#4B3F8F', c2: '#FFD86B', rarity: 'lendario', chestOnly: true }),
+  W('fantasia-leao-real', 'Fantasia de leão real', 'roupa', 300, { base: 'fantasia-leao', c1: '#F2A516', c2: '#FFE7A3', rarity: 'lendario', chestOnly: true }),
+  W('fantasia-tubarao-rosa', 'Fantasia de tubarão rosa', 'roupa', 300, { base: 'fantasia-tubarao', c1: '#FF9FC2', c2: '#FFFFFF', rarity: 'lendario', chestOnly: true }),
+  W('fantasia-raposa-neve', 'Fantasia de raposa da neve', 'roupa', 300, { base: 'fantasia-raposa', c1: '#F4F5F8', c2: '#BFE6FF', rarity: 'lendario', chestOnly: true }),
+  W('fantasia-panda-vermelho', 'Fantasia de panda-vermelho', 'roupa', 300, { base: 'fantasia-raposa', c1: '#C8502A', c2: '#2B2224', rarity: 'lendario', chestOnly: true }),
   // Coleção Plus: roupas especiais
   W('manto-mago-roxo', 'Manto de mago', 'roupa', 140, { base: 'manto-mago', c1: '#5B3FA8', c2: '#FFE27A', plus: true }),
   W('manto-mago-azul', 'Manto de mago azul', 'roupa', 140, { base: 'manto-mago', c1: '#3D5BA8', c2: '#FFE27A', plus: true }),

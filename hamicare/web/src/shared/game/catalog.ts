@@ -23,7 +23,7 @@ export function rarityOf(item: Item): Rarity {
 
 /** Itens que podem sair nos baús (sem comidas, lembranças de aventura, itens do Plus e de época). */
 export function chestPool(items: Item[] = ITEMS): PoolItem[] {
-  return items.filter((i) => CHEST_KINDS.includes(i.kind) && !i.souvenir && !i.plus && !i.season && i.price > 0).map((i) => ({ id: i.id, rarity: rarityOf(i) }));
+  return items.filter((i) => CHEST_KINDS.includes(i.kind) && !i.souvenir && !i.plus && !i.season && i.price > 0).map((i) => ({ id: i.id, rarity: rarityOf(i), ...(i.chestOnly ? { star: true } : {}) }));
 }
 
 /** Itens exclusivos que a arena dá de presente (a configuração pode trocar a lista). */

@@ -165,8 +165,10 @@ function ChestCard({ c, coins, oddsOpen, onOdds, onOpen }: { c: ChestView; coins
                   <span className="font-black tabular-nums">{c.odds[r].toLocaleString('pt-BR')}%</span>
                 </li>
               ))}
+              {c.id === 'lendario' && <li className="pt-1 text-[13px] font-semibold text-muted">Quando sai um item lendário, 6 em cada 10 vezes é uma fantasia exclusiva deste baú (dragão dourado, unicórnio arco-íris e outras).</li>}
             </ul>
           )}
+          {c.id === 'lendario' && <p className="text-[13px] font-bold text-[#b7791f]">✨ Fantasias exclusivas que só saem aqui</p>}
         </>
       )}
       <button className="btn btn-primary" disabled={short > 0} onClick={onOpen}>

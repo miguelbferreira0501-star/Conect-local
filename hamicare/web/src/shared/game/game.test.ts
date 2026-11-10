@@ -189,3 +189,23 @@ describe('baús', () => {
     expect(pool.some((p) => p.id === 'maca' || p.id === 'cartola' || p.id === 'gorro-natal')).toBe(false);
   });
 });
+
+describe('fantasias exclusivas do Baú Lendário', async () => {
+  const { openChest, chestPool, DEFAULT_GAME: cfg } = await import('./index');
+  const { ITEMS } = await import('../../data/items');
+  const pool = chestPool();
+  const stars = new Set(pool.filter((p) => p.star).map((p) => p.id));
+  const pity = { semRaro: 0, semLendario: 0 };
+  it('existem e não estão à venda', () => {
+    expect(stars.size).toBeGreaterThanOrEqual(6);
+    expect(ITEMS.filter((i) => stars.has(i.id)).every((i) => i.chestOnly && i.kind === 'roupa')).toBe(true);
+  });
+  it('só saem do Baú Lendário, e saem bastante nele', () => {
+    let seed = 7;
+    const rng = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    for (let i = 0; i < 300; i++) expect(stars.has(openChest({ chest: 'magico', pity, owned: new Set(), pool, rng, cfg }).itemId)).toBe(false);
+    let hits = 0;
+    for (let i = 0; i < 400; i++) if (stars.has(openChest({ chest: 'lendario', pity, owned: new Set(), pool, rng, cfg }).itemId)) hits++;
+    expect(hits / 400).toBeGreaterThan(0.2);
+  });
+});

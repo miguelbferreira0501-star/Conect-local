@@ -27,7 +27,7 @@ const AISLES: Record<'roupas' | 'casa' | 'comida', ItemKind[]> = {
   casa: ['movel', 'decor', 'brinquedo', 'parede', 'piso'],
   comida: ['comida'],
 };
-const forSale = () => ITEMS.filter((i) => !i.souvenir && inSeason(i) && i.price > 0);
+const forSale = () => ITEMS.filter((i) => !i.souvenir && !i.chestOnly && inSeason(i) && i.price > 0);
 
 // ---------- A rua das lojinhas ----------
 
@@ -447,7 +447,7 @@ function TryOn({ item, list, onPick, onClose, onPlus, onGift }: { item: Item | n
 /** Seis destaques que mudam todo dia (um deles do HamiCare+, quando houver). */
 function dailyCollection(today: string): Item[] {
   const rnd = mulberry32(hashStr(`colecao:${today}`));
-  const pool = ITEMS.filter((i) => !i.souvenir && i.price > 0 && inSeason(i) && i.kind !== 'comida' && i.kind !== 'parede' && i.kind !== 'piso');
+  const pool = ITEMS.filter((i) => !i.souvenir && !i.chestOnly && i.price > 0 && inSeason(i) && i.kind !== 'comida' && i.kind !== 'parede' && i.kind !== 'piso');
   const free = pool.filter((i) => !i.plus).sort(() => rnd() - 0.5);
   const plus = pool.filter((i) => i.plus).sort(() => rnd() - 0.5);
   return [...free.slice(0, plus.length ? 5 : 6), ...plus.slice(0, 1)];

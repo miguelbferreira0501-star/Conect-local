@@ -615,7 +615,7 @@ social.post('/reports', (c) =>
 
 // ---------- Presentes ----------
 
-const GIFTABLE = new Set(['vibe', ...ITEMS.filter((i) => !i.souvenir && i.price > 0).map((i) => i.id)]);
+const GIFTABLE = new Set(['vibe', ...ITEMS.filter((i) => !i.souvenir && !i.chestOnly && i.price > 0).map((i) => i.id)]);
 
 social.get('/gifts', (c) =>
   asMe(c, async (db) => {
