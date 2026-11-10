@@ -12,6 +12,7 @@ import { push } from './routes/push';
 import { game } from './routes/game';
 import { legal } from './routes/legal';
 import { stores } from './routes/stores';
+import { guardian, guardianWebhook } from './routes/guardian';
 
 export function createApp() {
   const app = new Hono<AppEnv>();
@@ -48,7 +49,10 @@ export function createApp() {
   api.route('/admin', admin);
   api.route('/push', push);
   api.route('/game', game);
+  api.route('/guardiao', guardian);
   api.notFound((c) => c.json({ error: 'nao_encontrado', message: 'Rota não encontrada.' }, 404));
+  // Aviso do Mercado Pago (Guardiões): sem cookie e sem CSRF, conferido direto na API do Mercado Pago.
+  app.route('/api/guardiao-webhook', guardianWebhook);
   app.route('/api', api);
 
   app.onError((err, c) => {

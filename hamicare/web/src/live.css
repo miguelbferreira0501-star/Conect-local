@@ -4366,3 +4366,78 @@
 .hc-tasks .check3d, .hc-tasks .task[data-done='true'] .check3d { border: 2.5px solid #ffffff; }
 .hr-tools button { border: 2.5px solid transparent; }
 :root[data-theme='dark'] .btn, :root[data-theme='dark'] .icon-btn, :root[data-theme='dark'] button.chip { outline-color: rgba(0, 0, 0, 0.35); }
+
+/* ================= Confete ao concluir missão ================= */
+.burst { position: fixed; z-index: 95; width: 0; height: 0; pointer-events: none; }
+.burst-piece { position: absolute; left: -4px; top: -6px; width: 8px; height: 12px; border-radius: 2px; animation: burst 1.25s cubic-bezier(0.2, 0.7, 0.4, 1) forwards; }
+.burst-piece.is-round { width: 9px; height: 9px; border-radius: 50%; }
+@keyframes burst {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0) scale(0.6); }
+  35% { opacity: 1; transform: translate(var(--dx), var(--dy)) rotate(calc(var(--r) * 0.4)) scale(1); }
+  100% { opacity: 0; transform: translate(calc(var(--dx) * 1.15), calc(var(--dy) + 120px)) rotate(var(--r)) scale(0.9); }
+}
+.streak-hammer { display: flex; align-items: center; gap: 8px; max-width: 320px; padding: 8px 14px; border-radius: 18px; background: rgba(255, 255, 255, 0.92); color: #5a3b7a; font-size: 14px; font-weight: 800; text-align: left; }
+
+/* ================= Martelinho e missões rápidas ================= */
+.repair-card { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 24px; background: linear-gradient(135deg, #fff3e3, #ffe0ea); box-shadow: 0 4px 0 rgba(43, 34, 64, 0.1); color: #3a2e4a; animation: bubble-in 400ms var(--ease-out); }
+.repair-ico { display: grid; place-items: center; flex-shrink: 0; width: 58px; height: 58px; border-radius: 18px; background: #ffffff; box-shadow: 0 3px 0 rgba(43, 34, 64, 0.1); }
+.repair-title { font-family: var(--font-display, inherit); font-size: 17px; font-weight: 800; line-height: 1.25; }
+.repair-sub { margin-top: 2px; font-size: 13.5px; font-weight: 600; opacity: 0.85; }
+.repair-have { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 800; opacity: 0.8; }
+.hammer-bag { display: grid; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
+.hammer-slot { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 12px; background: var(--surface-2); filter: grayscale(1); opacity: 0.45; }
+.hammer-slot.is-on { filter: none; opacity: 1; background: #ffe7ef; }
+.quick-card { display: grid; gap: 10px; padding: 14px; border-radius: 24px; background: var(--surface); box-shadow: 0 4px 0 var(--line); }
+.quick-title { font-family: var(--font-display, inherit); font-size: 18px; font-weight: 800; }
+.quick-count { margin-left: 4px; padding: 1px 8px; border-radius: 99px; background: #ffe7ef; color: #d2477a; font-size: 13px; }
+.quick-reset { font-size: 12px; font-weight: 800; color: var(--muted); }
+.quick-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.quick-item { display: grid; justify-items: center; align-content: start; gap: 4px; width: 100%; height: 100%; padding: 10px 6px; border-radius: 18px; background: #fff7e8; text-align: center; box-shadow: 0 3px 0 rgba(43, 34, 64, 0.12); }
+.quick-item:active:not(:disabled) { translate: 0 2px; box-shadow: 0 1px 0 rgba(43, 34, 64, 0.12); }
+.quick-item.is-done { background: #e6f7ea; opacity: 0.85; }
+.quick-ico { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 15px; background: #ffffff; }
+.quick-name { font-size: 13px; font-weight: 800; line-height: 1.2; color: var(--ink); }
+.quick-sub { font-size: 11px; font-weight: 700; line-height: 1.2; color: var(--muted); }
+.quick-item.is-done .quick-sub { color: #2f9a55; }
+:root[data-theme='dark'] .quick-item { background: var(--surface-2); }
+:root[data-theme='dark'] .repair-card { background: linear-gradient(135deg, #4a3a2f, #4a2f3d); color: #fff; }
+
+/* ================= Prêmio por amigo e plano anual ================= */
+.ladder-card { display: grid; gap: 10px; padding: 14px; border-radius: 22px; background: var(--surface); box-shadow: 0 3px 0 var(--line); }
+.ladder { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.ladder-step { display: grid; justify-items: center; gap: 3px; padding: 8px 2px; border-radius: 14px; background: var(--surface-2); }
+.ladder-step.is-ready { background: #fff1c9; box-shadow: inset 0 0 0 2px #f2c14e; }
+.ladder-step.is-got { background: #e3f6e8; }
+.ladder-n { font-size: 12px; font-weight: 900; color: var(--muted); }
+.ladder-coins { display: inline-flex; align-items: center; gap: 2px; font-size: 13px; font-weight: 900; }
+.ladder-state { font-size: 13px; }
+.ladder-btn { padding: 3px 8px; border-radius: 99px; background: #f2a51d; color: #ffffff; font-size: 12px; font-weight: 900; border: 2px solid #ffffff; }
+.pw-plan-year { padding: 20px 18px 16px; background: linear-gradient(135deg, #6a4fd8, #4f56c4); }
+.pw-year-month { font-family: var(--font-display, inherit); font-size: 34px; font-weight: 800; line-height: 1.05; }
+.pw-year-month small { font-size: 16px; font-weight: 800; opacity: 0.85; }
+.pw-plan-month { padding: 12px 18px; opacity: 0.9; }
+
+/* ================= Guardiões do Hami ================= */
+.gd-hero { display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 24px; background: linear-gradient(135deg, #7e6cd0, #a98bf2); color: #ffffff; }
+.gd-hero-title { font-family: var(--font-display, inherit); font-size: 20px; font-weight: 800; line-height: 1.2; }
+.gd-hero-sub { margin-top: 2px; font-size: 14px; font-weight: 600; opacity: 0.95; }
+.gd-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; text-align: center; }
+.gd-stats span { display: grid; padding: 8px 4px; border-radius: 16px; background: var(--surface-2); font-size: 12px; font-weight: 700; color: var(--muted); }
+.gd-stats b { font-family: var(--font-display, inherit); font-size: 20px; color: var(--ink); }
+.gd-card { display: grid; gap: 10px; padding: 14px; border-radius: 22px; background: var(--surface); box-shadow: 0 3px 0 var(--line), inset 0 0 0 1px var(--line); }
+.gd-card.gd-got { display: flex; align-items: center; gap: 10px; background: #f1ebff; }
+.gd-title { font-family: var(--font-display, inherit); font-size: 18px; font-weight: 800; }
+.gd-tiers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.gd-tier { display: grid; justify-items: center; gap: 3px; padding: 10px 6px; border-radius: 18px; background: var(--surface-2); text-align: center; }
+.gd-tier b { font-size: 14px; }
+.gd-tier span { font-size: 11.5px; font-weight: 600; color: var(--muted); line-height: 1.2; }
+.gd-tier em { font-style: normal; font-size: 13px; font-weight: 900; color: #6a4fd8; }
+.gd-tier.is-on { background: #efe8ff; box-shadow: inset 0 0 0 3px #7e6cd0; }
+.gd-wall { display: grid; gap: 10px; }
+.gd-wall li { display: flex; gap: 10px; align-items: flex-start; }
+.gd-test { display: grid; gap: 8px; padding: 12px; border-radius: 16px; background: #fff7d6; }
+.pw-guardian { display: grid; gap: 6px; padding: 12px 14px; border-radius: 20px; background: rgba(255, 255, 255, 0.16); }
+.pw-guardian button { display: flex; align-items: center; gap: 8px; border: 0; background: none; color: #ffffff; font-size: 14.5px; font-weight: 800; text-align: left; }
+.quick-item.is-ready { background: #fff1c9; box-shadow: inset 0 0 0 2px #f2c14e, 0 3px 0 rgba(43, 34, 64, 0.12); animation: quick-pulse 1.6s ease-in-out infinite; }
+@keyframes quick-pulse { 50% { transform: scale(1.03); } }
+@media (prefers-reduced-motion: reduce) { .quick-item.is-ready { animation: none; } }

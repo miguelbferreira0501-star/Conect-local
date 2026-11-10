@@ -19,6 +19,7 @@ import { prefersReducedMotion, fmtNum } from '../lib/util';
 import type { PetMood, Task } from '../types';
 import { Glyph } from '../components/art';
 import { WaterCard } from '../components/WaterCard';
+import { StreakRepairCard } from '../components/StreakRepair';
 import { requestTool } from './Wellbeing';
 import { CompanionBuddy } from './Companions';
 import { LivePet } from '../components/LivePet';
@@ -207,6 +208,8 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
         )}
         <span className="hr-hint" aria-hidden="true">‹ arraste para ver a casa ›</span>
       </section>
+
+      <StreakRepairCard />
 
       <section className="hc-adv" aria-label="Meta do dia">
         <button className="hc-adv-title" onClick={() => setAreaOpen(true)}>

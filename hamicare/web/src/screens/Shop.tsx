@@ -271,17 +271,22 @@ function VendinhaBody({ onTry, kids }: { onTry: (item: Item, list?: Item[]) => v
 function AisleBody({ kinds, looks, onTry, onPlus }: { kinds: ItemKind[]; looks?: boolean; onTry: (item: Item, list?: Item[]) => void; onPlus: () => void }) {
   const s = useApp();
   const kids = s.profile.ageGroup === 'ate12';
-  const [kind, setKind] = useState<ItemKind | 'looks'>(looks ? 'looks' : kinds[0]);
+  const [kind, setKind] = useState<ItemKind | 'looks' | 'identidade'>(looks ? 'looks' : kinds[0]);
   // Para menores de 13 anos, nada do Plus aparece nas prateleiras.
-  const items = useMemo(() => (kind === 'looks' ? [] : shelf(forSale().filter((i) => i.kind === kind && !(kids && i.plus)), s)), [kind, s, kids]);
-  const chips: (ItemKind | 'looks')[] = [...(looks ? (['looks'] as const) : []), ...kinds];
+  const items = useMemo(
+    () => (kind === 'looks' ? [] : shelf(forSale().filter((i) => (kind === 'identidade' ? i.tag === 'identidade' : i.kind === kind) && !(kids && i.plus)), s)),
+    [kind, s, kids],
+  );
+  // Roupas: a prateleira "Sou assim" junta os itens de identidade (bandeiras, cordões, bomba de insulina, cadeira de rodas…).
+  const wear = kinds.includes('acessorio');
+  const chips: (ItemKind | 'looks' | 'identidade')[] = [...(looks ? (['looks'] as const) : []), ...kinds, ...(wear ? (['identidade'] as const) : [])];
   return (
     <>
       {chips.length > 1 && (
         <div className="sm-chips" role="tablist" aria-label="Prateleiras">
           {chips.map((k) => (
             <button key={k} role="tab" aria-selected={kind === k} className={`sm-chip-btn ${kind === k ? 'is-on' : ''}`} onClick={() => setKind(k)}>
-              {k === 'looks' ? 'Looks' : KIND_LABEL[k]}
+              {k === 'looks' ? 'Looks' : k === 'identidade' ? 'Sou assim' : KIND_LABEL[k]}
             </button>
           ))}
         </div>

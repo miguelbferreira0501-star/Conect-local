@@ -247,7 +247,7 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
             </g>
           )}
           <CostumeFront id={outfit.roupa} geo={geo} />
-          <Accessory id={outfit.acessorio} geo={{ ...geo, top: chin - 36, h: 64, w: bw }} paw={arm} />
+          <Accessory id={outfit.acessorio} geo={{ ...geo, top: chin - 36, h: 64, w: bw }} paw={arm} head={{ cx: hcx, cy: hcy, rx: hrx, ry: hry }} />
           <Glasses id={outfit.oculos} eyeY={eyeY} ex={ex} />
           <Hat id={outfit.chapeu} geo={geo} />
           {phase >= 3 && <Sparkles top={top} w={hrx} />}

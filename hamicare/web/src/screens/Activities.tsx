@@ -14,6 +14,8 @@ import { BATTERIES, JOURNEY_TEXT } from '../data/lines';
 import { dayKcal, taskKcal } from '../logic/evolution';
 import { activeQuests, type Period } from '../logic/progress';
 import { REST_PER_WEEK, streakOf } from '../logic/streak';
+import { QuickQuests } from '../components/QuickQuests';
+import { HammerBag, StreakRepairCard } from '../components/StreakRepair';
 import { addLibraryTask, addTask, areaNow, dayOf, deleteTask, kcalOf, personKg, weightOn, setBattery, setRest, todayKey, todayTasks, toggleTask, updateTask, useApp, type TaskInput } from '../lib/store';
 import { AREAS } from '../logic/areas';
 import { fmtNum } from '../lib/util';
@@ -81,6 +83,10 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void;
         </div>
       </section>
 
+      <StreakRepairCard />
+
+      <QuickQuests onMeta={() => document.querySelector('[aria-label="Atividades de hoje"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />
+
       {showKcal && dir !== 'manter' && (
         <div className={`journey journey-${dir} !gap-1 !py-3`}>
           <p className="flex items-center gap-1.5 text-[13px] font-extrabold uppercase tracking-wide opacity-90">
@@ -129,6 +135,7 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void;
             )}
           </button>
         </div>
+        <HammerBag />
       </section>
 
       <section className="grid gap-3" aria-label="Atividades de hoje">

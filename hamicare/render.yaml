@@ -44,3 +44,9 @@ services:
         sync: false
       - key: ANDROID_CERT_SHA256
         sync: false
+      # Guardiões do Hami (dar HamiCare+ para quem não pode pagar): Mercado Pago (Pix e cartão).
+      # Access token de produção e a assinatura secreta dos Webhooks (veja docs/LOJAS.md, parte "Guardiões").
+      - key: MP_ACCESS_TOKEN
+        sync: false
+      - key: MP_WEBHOOK_SECRET
+        sync: false

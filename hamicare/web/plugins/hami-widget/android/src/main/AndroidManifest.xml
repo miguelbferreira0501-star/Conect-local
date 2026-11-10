@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- Widget do Hami na tela inicial: o Hami, as missões de hoje, a água e a ofensiva. -->
+        <receiver
+            android:name="com.hamicare.widget.HamiWidgetProvider"
+            android:exported="false"
+            android:label="@string/hami_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/hami_widget_info" />
+        </receiver>
+    </application>
+</manifest>

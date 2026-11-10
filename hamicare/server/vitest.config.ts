@@ -9,6 +9,7 @@ export default defineConfig({
       NODE_ENV: 'test',
       ADMIN_EMAILS: 'chefe@teste.com',
       WEB_DIST: '/nao-existe',
+      GUARDIAN_TEST_PAY: 'true',
     },
     fileParallelism: false,
     testTimeout: 30000,
