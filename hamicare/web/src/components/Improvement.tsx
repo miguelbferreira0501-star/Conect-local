@@ -97,7 +97,7 @@ export function ImprovementCard({ onPlus }: { onPlus: () => void }) {
       <div className="grid gap-2">
         <p className="section-label">Água nos últimos 7 dias · média {litersText(d.waterAvg)} por dia · meta {litersText(goal)}</p>
         <div className="imp-bars" role="img" aria-label={`Litros de água por dia: ${d.water7.map((w) => litersText(w.cups)).join(', ')}`}>
-          <span className="imp-goal" style={{ bottom: `${(goal / maxCups) * 100}%` }} />
+          <span className="imp-goal" style={{ bottom: `calc(18px + (100% - 18px) * ${goal / maxCups})` }} />
           {d.water7.map((w) => (
             <div key={w.key} className="imp-bar-col">
               <span className={`imp-bar ${w.cups >= goal ? 'is-hit' : ''}`} style={{ height: `${Math.max(4, (w.cups / maxCups) * 100)}%` }} />

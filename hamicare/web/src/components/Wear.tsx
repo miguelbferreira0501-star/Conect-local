@@ -1155,10 +1155,11 @@ export function Accessory({ id, geo, paw, head }: { id: string | null; geo: Geo;
     }
     // ---------- Coisinhas de segurar (na patinha direita) ----------
     case 'segurar': {
-      // Patinha direita levantada na lateral do corpo; a coisinha fica maior para dar para ver.
-      const px = 100 + w * 0.5;
-      const py = top + h * 0.6;
+      // Patinha direita na lateral do corpo, mais baixa e para fora: a coisinha não cobre o rosto.
       const kind = it?.id?.replace(/^m-/, '') ?? '';
+      // O guarda-chuva é largo: fica um pouco mais para fora para não cobrir o olho.
+      const px = 100 + w * 0.95 + (kind === 'guarda-chuva' ? 16 : 0);
+      const py = top + h * 0.82;
       const hold = <ellipse cx={px} cy={py + 2} rx="7.5" ry="5.5" fill={paw ?? '#E9A86C'} />;
       const body = (() => {
         switch (kind) {
@@ -1386,7 +1387,7 @@ export function Accessory({ id, geo, paw, head }: { id: string | null; geo: Geo;
         }
       })();
       return (
-        <g transform={`translate(${px} ${py}) scale(1.45) translate(${-px} ${-py})`}>
+        <g transform={`translate(${px} ${py}) scale(1.2) translate(${-px} ${-py})`}>
           {body}
           {hold}
         </g>

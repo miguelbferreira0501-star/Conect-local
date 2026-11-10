@@ -109,7 +109,6 @@ function HouseTab({ onArenas }: { onArenas: () => void }) {
                 {tray.map((i) => (
                   <button key={i.id} className="tile !p-2" onClick={() => placeItem(i.id)} aria-label={`Colocar ${i.name}`}>
                     <ItemIcon item={i} />
-                    <span className="text-[11px] font-bold leading-tight">{i.name}</span>
                   </button>
                 ))}
               </div>
