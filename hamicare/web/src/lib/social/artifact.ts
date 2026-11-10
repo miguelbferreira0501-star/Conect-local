@@ -6,9 +6,9 @@
 import { checkKindness, REASON_TEXT, type ReactionId } from '../../shared/moderation';
 import { codeKey } from '../../shared/friendCode';
 import { addDays, hashStr, uid } from '../util';
-import { todayKey } from '../store';
+import { getState, isPremium, todayKey } from '../store';
 import type { Comment, Feed, FriendState, Gift, Group, GroupChallenge, Post, Profile, RankRow, Reaction, ReportTarget, SocialApi, Team, Visit } from './types';
-import { TEAM_MAX, TEAM_MISSIONS_MAX, dayComplete, isTeamMission, teamStreak } from '../../shared/team';
+import { TEAM_MAX, TEAM_MAX_PLUS, TEAM_MISSIONS_MAX, dayComplete, isTeamMission, teamStreak } from '../../shared/team';
 import { postKey } from './types';
 
 /** Regras de acesso declaradas na publicação (ver scripts/artifact.mjs). */
@@ -56,6 +56,8 @@ interface TeamDoc {
   missions: string[];
   members: string[];
   createdAt: number;
+  /** Quem criou tem HamiCare+: cabem até 8 pessoas. */
+  plus?: boolean;
 }
 interface GroupsDoc {
   items: { id: string; name: string; emoji: string; color: string; members: string[]; createdAt: number }[];
@@ -122,7 +124,7 @@ export function createArtifactSocial(db: Db, myId: string): SocialApi {
       if (!t || !st.profiles[owner]) continue;
       const key = `${owner}:${t.id}`;
       const ownerFriends = st.friendDocs[owner]?.list ?? [];
-      const memberIds = [owner, ...t.members.filter((m) => m !== owner && st.profiles[m] && ownerFriends.includes(m) && (st.friendDocs[m]?.list ?? []).includes(owner) && !(socialDocs[m]?.leftTeams ?? []).includes(key))].slice(0, TEAM_MAX);
+      const memberIds = [owner, ...t.members.filter((m) => m !== owner && st.profiles[m] && ownerFriends.includes(m) && (st.friendDocs[m]?.list ?? []).includes(owner) && !(socialDocs[m]?.leftTeams ?? []).includes(key))].slice(0, t.plus ? TEAM_MAX_PLUS : TEAM_MAX);
       teams.push({ ...t, key, owner, memberIds });
     }
     teams.sort((a, b) => a.createdAt - b.createdAt);
@@ -149,6 +151,7 @@ export function createArtifactSocial(db: Db, myId: string): SocialApi {
       name: t.name,
       missions: t.missions,
       memberIds: t.memberIds,
+      max: t.plus ? TEAM_MAX_PLUS : TEAM_MAX,
       members: t.memberIds.map((m) => ({ ...st.profiles[m], id: m })),
       today: { date: day, checkins: byDay.get(day) ?? {}, complete: complete.has(day) },
       streak: teamStreak(complete, day),
@@ -384,7 +387,8 @@ export function createArtifactSocial(db: Db, myId: string): SocialApi {
     async createTeam(t, day) {
       const { st, teamOf, groupDocs } = await teamState();
       if (teamOf(myId)) throw new Error('Você já está numa turma.');
-      const members = [...new Set(t.members)].filter((m) => m !== myId).slice(0, TEAM_MAX - 1);
+      const plus = isPremium(getState());
+      const members = [...new Set(t.members)].filter((m) => m !== myId).slice(0, (plus ? TEAM_MAX_PLUS : TEAM_MAX) - 1);
       for (const m of members) {
         if (!st.friends.includes(m)) throw new Error('Só dá para chamar amigos para a turma.');
         if (teamOf(m)) throw new Error('Alguém já está em outra turma.');
@@ -392,7 +396,7 @@ export function createArtifactSocial(db: Db, myId: string): SocialApi {
       const missions = [...new Set(t.missions)].filter(isTeamMission).slice(0, TEAM_MISSIONS_MAX);
       if (!missions.length) throw new Error('Escolha pelo menos uma missão.');
       const doc = groupDocs[myId] ?? { items: [] };
-      const team: TeamDoc = { id: uid(), name: t.name.trim().slice(0, 40) || 'Turma', missions, members, createdAt: Date.now() };
+      const team: TeamDoc = { id: uid(), name: t.name.trim().slice(0, 40) || 'Turma', missions, members, createdAt: Date.now(), plus };
       await write(`groups/${myId}`, { ...doc, items: doc.items ?? [], team });
       const mine = await mySocial();
       await write(`social/${myId}`, { ...mine, leftTeams: (mine.leftTeams ?? []).filter((k) => !k.startsWith(`${myId}:`)) });
@@ -410,10 +414,12 @@ export function createArtifactSocial(db: Db, myId: string): SocialApi {
       const doc = await read<GroupsDoc>(`groups/${myId}`, { items: [] });
       const mine = teamOf(myId);
       if (!doc.team || !mine || mine.owner !== myId) throw new Error('Só quem criou a turma chama pessoas.');
-      if (mine.memberIds.length >= TEAM_MAX) throw new Error(`A turma já tem ${TEAM_MAX} pessoas.`);
+      const plus = isPremium(getState());
+      const max = plus ? TEAM_MAX_PLUS : TEAM_MAX;
+      if (mine.memberIds.length >= max) throw new Error(plus ? `A turma já tem ${max} pessoas.` : `A turma já tem ${max} pessoas. Com HamiCare+, cabem até ${TEAM_MAX_PLUS}.`);
       if (!st.friends.includes(userId)) throw new Error('Só dá para chamar amigos para a turma.');
       if (teamOf(userId)) throw new Error('Essa pessoa já está em outra turma.');
-      await write(`groups/${myId}`, { ...doc, team: { ...doc.team, members: [...doc.team.members.filter((m) => m !== userId), userId] } });
+      await write(`groups/${myId}`, { ...doc, team: { ...doc.team, plus, members: [...doc.team.members.filter((m) => m !== userId), userId] } });
       return teamView(day);
     },
     async leaveTeam(userId, day) {

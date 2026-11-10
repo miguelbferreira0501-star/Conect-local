@@ -114,8 +114,12 @@ describe('casas por arena', () => {
     placeItem('abajur');
     expect(getState().house.items.filter((i) => i.itemId === 'abajur')).toHaveLength(1);
     moveHome(2);
-    placeItem('abajur');
-    expect(getState().house.items.filter((i) => i.itemId === 'abajur')).toHaveLength(0);
+    // colocar de novo traz o móvel da outra casa para a casa de agora
+    expect(placeItem('abajur')).toBe('movido');
+    const s1 = getState();
+    expect(s1.house.items.filter((i) => i.itemId === 'abajur')).toHaveLength(1);
+    expect(Object.values(s1.houses ?? {}).flatMap((h) => h.items).filter((i) => i.itemId === 'abajur')).toHaveLength(0);
+    expect(placeItem('abajur')).toBe('ja-esta');
   });
 });
 

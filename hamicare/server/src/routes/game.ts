@@ -152,6 +152,7 @@ const sourceSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('temporada-degrau'), month: z.string().regex(/^\d{4}-\d{2}$/), tier: z.number().int().min(0).max(50) }),
   z.object({ kind: z.literal('rapida'), id: z.enum(['emocao', 'reflexao', 'meta']), slot: z.number().int().min(0).max(2), coins: z.number().int(), date: day }),
   z.object({ kind: z.literal('amigo'), n: z.number().int().min(1).max(FRIEND_LADDER.length) }),
+  z.object({ kind: z.literal('plus'), week: day }),
 ]);
 const opSchema = z.discriminatedUnion('op', [
   z.object({ op: z.literal('grant'), src: sourceSchema }),
@@ -215,6 +216,12 @@ async function trusted(db: pg.PoolClient, userId: string, src: Source, cfg: Game
       // Só paga o n-ésimo amigo quando a pessoa já tem n amizades aceitas.
       const n = (await db.query('SELECT app.friend_count($1) AS n', [userId])).rows[0]?.n ?? 0;
       return n >= src.n ? src : null;
+    }
+    case 'plus': {
+      // Mesada do HamiCare+: só com Plus ativo, uma vez por semana (a semana de agora, com folga na virada).
+      const weeks = [periodStart('semana', utcDay(-1)), periodStart('semana', utcDay(0)), periodStart('semana', utcDay(1))];
+      if (!weeks.includes(src.week)) return null;
+      return (await isPremium(db, userId)) ? src : null;
     }
     case 'nivel':
     case 'arena':

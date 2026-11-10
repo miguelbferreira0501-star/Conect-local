@@ -4519,3 +4519,13 @@
 .icon-still { display: block; }
 .icon-still *, .inv-icon *, .kit-icon * { animation: none !important; }
 .inv-tile { contain: layout paint style; }
+
+/* ---------- Mesada do HamiCare+ ---------- */
+.plusw { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 22px; background: linear-gradient(135deg, #ffe7a3, #ffc95c); border: 3px solid #fff; box-shadow: 0 6px 14px rgba(160, 100, 20, 0.18); color: #5a3a12; }
+.plusw.is-done { background: rgba(255, 255, 255, 0.18); color: inherit; box-shadow: none; }
+.plusw-ico { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 14px; background: #fff; color: #e09a1a; }
+.plusw-txt { display: grid; gap: 2px; min-width: 0; flex: 1; line-height: 1.25; }
+.plusw-txt b { font-size: 15px; font-weight: 900; }
+.plusw-txt small { font-size: 12.5px; font-weight: 700; opacity: 0.8; }
+.plusw-btn { display: inline-flex; align-items: center; gap: 4px; flex: none; padding: 9px 12px; border-radius: 999px; background: #8fb84f; color: #fff; font-weight: 900; font-size: 14px; border: 3px solid #fff; box-shadow: 0 3px 0 #5f8a2c; }
+.plusw-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #5f8a2c; }

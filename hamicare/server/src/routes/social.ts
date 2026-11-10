@@ -11,7 +11,7 @@ import { checkKindness, PRESET_COMMENTS, REACTIONS, REACTION_IDS, REASON_TEXT } 
 import { notifyFriend } from '../push';
 import { ITEMS } from '../../../web/src/data/items';
 import { arenaOf } from '../../../web/src/shared/game';
-import { TEAM_MAX, TEAM_MISSIONS_MAX, dayComplete, isTeamMission, teamStreak, type TeamCheckins } from '../../../web/src/shared/team';
+import { TEAM_MAX_PLUS, TEAM_MISSIONS_MAX, dayComplete, isTeamMission, teamStreak, type TeamCheckins } from '../../../web/src/shared/team';
 import { codeKey, isServerKey } from '../../../web/src/shared/friendCode';
 import { gameConfig } from './game';
 
@@ -310,7 +310,8 @@ async function loadTeam(db: pg.PoolClient, day: string) {
     byDay.set(r.day, m);
   }
   const complete = new Set([...byDay.entries()].filter(([, c]) => dayComplete(t.missions, ids, c)).map(([d]) => d));
-  return { ...t, memberIds: ids, members, today: { date: day, checkins: byDay.get(day) ?? {}, complete: complete.has(day) }, streak: teamStreak(complete, day), completeDays: complete.size };
+  const max = (await db.query('SELECT app.team_max($1) AS n', [t.id])).rows[0].n as number;
+  return { ...t, max, memberIds: ids, members, today: { date: day, checkins: byDay.get(day) ?? {}, complete: complete.has(day) }, streak: teamStreak(complete, day), completeDays: complete.size };
 }
 
 /** Avisa a turma: dia completo (todos) ou "falta só você" (quem ainda não fez), uma vez por dia cada. */
@@ -338,7 +339,7 @@ const teamMissions = z.array(z.string()).min(1).max(TEAM_MISSIONS_MAX).refine((l
 function teamError(e: unknown): never {
   const code = (e as { code?: string }).code;
   if (code === '23505') throw new AppError(409, 'ja_em_turma', 'Alguém já está em outra turma. Cada pessoa fica em uma turma por vez.');
-  if (code === '23514') throw new AppError(409, 'turma_cheia', `A turma já tem ${TEAM_MAX} pessoas.`);
+  if (code === '23514') throw new AppError(409, 'turma_cheia', 'A turma está cheia. Sem Plus, cabem 4 pessoas; com HamiCare+, até 8.');
   if (code === '42501') throw forbidden('Só dá para chamar amigos para a turma.');
   throw e;
 }
@@ -346,7 +347,7 @@ function teamError(e: unknown): never {
 social.post('/team', (c) =>
   asMe(c, async (db, me) => {
     const body = z
-      .object({ name: z.string().trim().min(1).max(40), missions: teamMissions, members: z.array(z.string().uuid()).max(TEAM_MAX - 1).default([]) })
+      .object({ name: z.string().trim().min(1).max(40), missions: teamMissions, members: z.array(z.string().uuid()).max(TEAM_MAX_PLUS - 1).default([]) })
       .safeParse(await c.req.json().catch(() => ({})));
     if (!body.success) throw invalid('Turma inválida.');
     const name = kind(body.data.name);

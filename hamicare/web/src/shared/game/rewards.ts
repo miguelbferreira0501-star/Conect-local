@@ -21,7 +21,8 @@ export type Source =
   | { kind: 'temporada-degrau'; month: string; tier: number }
   | { kind: 'turma'; id: string; date: string }
   | { kind: 'rapida'; id: QuickId; slot: number; coins: number; date: string }
-  | { kind: 'amigo'; n: number };
+  | { kind: 'amigo'; n: number }
+  | { kind: 'plus'; week: string };
 
 /** Missões rápidas: renovam a cada 8 horas (3 turnos por dia). */
 export type QuickId = 'emocao' | 'reflexao' | 'meta';
@@ -30,6 +31,8 @@ export const QUICK_IDS: QuickId[] = ['emocao', 'reflexao', 'meta'];
 export const reflectionCoins = (chars: number) => (chars >= 400 ? 12 : chars >= 150 ? 8 : 4);
 /** Prêmio por amigo novo: cada um vale mais que o anterior (até o 5º). */
 export const FRIEND_LADDER = [40, 60, 80, 100, 150];
+/** HamiCare+: mesada de sementes toda semana (cerca de 2.000 por mês). */
+export const PLUS_WEEKLY = 500;
 /** Martelinho que conserta a ofensiva (sementes). */
 export const HAMMER_PRICE = 80;
 
@@ -109,6 +112,8 @@ export function baseGrant(src: Source, cfg: GameConfig): Grant {
       const n = Math.max(1, Math.min(FRIEND_LADDER.length, Math.floor(src.n)));
       return { ref: `amigo:${n}`, label: `Prêmio do ${n}º amigo`, xp: 0, coins: FRIEND_LADDER[n - 1], routine: false };
     }
+    case 'plus':
+      return { ref: `plus:${src.week}`, label: 'Mesada semanal do HamiCare+', xp: 0, coins: PLUS_WEEKLY, routine: false };
     case 'colecao': {
       const c = cfg.collections.find((x) => x.id === src.id);
       return { ref: `colecao:${src.id}`, label: `Coleção completa: ${c?.name ?? src.id}`, xp: c?.reward.xp ?? 0, coins: c?.reward.coins ?? 0, routine: false };
