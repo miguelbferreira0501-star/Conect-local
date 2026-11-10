@@ -393,93 +393,174 @@ export function Hat({ id, geo }: { id: string | null; geo: Geo }) {
   }
 }
 
-export function Glasses({ id, eyeY }: { id: string | null; eyeY: number }) {
+/**
+ * Óculos que encaixam nos olhos do Hami (olhos em 100 ± ex): armação fina, lente com brilho,
+ * ponte curvinha e hastes que vão até a lateral da cabeça.
+ */
+export function Glasses({ id, eyeY, ex = 27 }: { id: string | null; eyeY: number; ex?: number }) {
   const it = id ? itemById(id) : undefined;
   const base = it?.base ?? id;
   const c1 = it?.c1;
   const c2 = it?.c2;
+  if (!base) return null;
+  const L = 100 - ex;
+  const R = 100 + ex;
+  const y = eyeY;
+  // brilho diagonal da lente
+  const shine = (x: number, r: number) => <path d={`M${x - r * 0.55} ${y - r * 0.1} L${x - r * 0.05} ${y - r * 0.6}`} stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" opacity="0.7" />;
+  const temples = (col: string, r: number) => <path d={`M${L - r} ${y - 3} Q${L - r - 7} ${y - 5} ${L - r - 12} ${y - 2} M${R + r} ${y - 3} Q${R + r + 7} ${y - 5} ${R + r + 12} ${y - 2}`} stroke={col} strokeWidth="2.4" strokeLinecap="round" fill="none" />;
+  const bridge = (col: string, r: number, w = 2.4) => <path d={`M${L + r - 1} ${y - 2} Q100 ${y - 8} ${R - r + 1} ${y - 2}`} stroke={col} strokeWidth={w} strokeLinecap="round" fill="none" />;
   switch (base) {
-    case 'redondos':
-      return (
-        <g stroke={c1 ?? INK} strokeWidth="2.8" fill="#FFFFFF" fillOpacity="0.15">
-          <circle cx="81" cy={eyeY} r="11.5" />
-          <circle cx="119" cy={eyeY} r="11.5" />
-          <path d={`M92.5 ${eyeY - 1} Q100 ${eyeY - 5} 107.5 ${eyeY - 1}`} fill="none" />
-        </g>
-      );
-    case 'sol':
+    case 'redondos': {
+      const col = c1 ?? '#3A3440';
       return (
         <g>
-          <rect x="68" y={eyeY - 8} width="26" height="16" rx="7" fill={c1 ?? '#2B2224'} opacity={c1 ? 0.92 : 1} />
-          <rect x="106" y={eyeY - 8} width="26" height="16" rx="7" fill={c1 ?? '#2B2224'} opacity={c1 ? 0.92 : 1} />
-          <path d={`M94 ${eyeY - 2} L106 ${eyeY - 2}`} stroke={c2 ?? '#2B2224'} strokeWidth="3" />
-          <path d={`M72 ${eyeY - 4} l6 0`} stroke="#fff" strokeWidth="2" opacity="0.6" />
+          {temples(col, 13)}
+          {[L, R].map((x) => (
+            <g key={x}>
+              <circle cx={x} cy={y} r="13.5" fill="#E8F6FF" fillOpacity="0.22" stroke={col} strokeWidth="2.4" />
+              {shine(x, 13)}
+            </g>
+          ))}
+          {bridge(col, 13.5)}
         </g>
       );
-    case 'coracao':
+    }
+    case 'sol': {
+      const lens = c1 ?? '#2B2630';
+      const frame = c2 ?? '#1E1A22';
+      const shape = (x: number) => `M${x - 15} ${y - 8} Q${x} ${y - 10} ${x + 15} ${y - 8} Q${x + 15.5} ${y + 9} ${x} ${y + 10} Q${x - 15.5} ${y + 9} ${x - 15} ${y - 8} Z`;
       return (
         <g>
-          <path d={heartPath(81, eyeY - 1, 15)} fill="#FF5E7E" opacity="0.9" />
-          <path d={heartPath(119, eyeY - 1, 15)} fill="#FF5E7E" opacity="0.9" />
-          <path d={`M93 ${eyeY - 3} L107 ${eyeY - 3}`} stroke="#E2416A" strokeWidth="2.5" />
+          {temples(frame, 15)}
+          {[L, R].map((x) => (
+            <g key={x}>
+              <path d={shape(x)} fill={lens} opacity="0.92" stroke={frame} strokeWidth="2.2" strokeLinejoin="round" />
+              <path d={`M${x - 10} ${y - 3} L${x - 4} ${y - 7} M${x - 9} ${y + 3} L${x + 2} ${y - 6}`} stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" opacity="0.55" />
+            </g>
+          ))}
+          <path d={`M${L + 14} ${y - 6} Q100 ${y - 10} ${R - 14} ${y - 6}`} stroke={frame} strokeWidth="2.6" fill="none" strokeLinecap="round" />
         </g>
       );
-    case 'quadrado':
+    }
+    case 'coracao': {
+      const col = c1 ?? '#FF5E7E';
+      const edge = c2 ?? '#E2416A';
       return (
-        <g stroke={c1} strokeWidth="4" fill="#FFFFFF" fillOpacity="0.12" strokeLinejoin="round">
-          <rect x="67" y={eyeY - 10} width="27" height="20" rx="4" />
-          <rect x="106" y={eyeY - 10} width="27" height="20" rx="4" />
-          <path d={`M94 ${eyeY - 3} L106 ${eyeY - 3}`} fill="none" />
+        <g>
+          {temples(edge, 14)}
+          {[L, R].map((x) => (
+            <g key={x}>
+              <path d={heartPath(x, y - 1, 17)} fill={col} fillOpacity="0.55" stroke={edge} strokeWidth="2.2" strokeLinejoin="round" />
+              <path d={`M${x - 9} ${y - 5} q2 -4 6 -4`} stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" fill="none" opacity="0.8" />
+            </g>
+          ))}
+          {bridge(edge, 13)}
         </g>
       );
+    }
+    case 'quadrado': {
+      const col = c1 ?? '#3A3440';
+      return (
+        <g>
+          {temples(col, 14)}
+          {[L, R].map((x) => (
+            <g key={x}>
+              <rect x={x - 14} y={y - 11} width="28" height="22" rx="6" fill="#E8F6FF" fillOpacity="0.22" stroke={col} strokeWidth="2.8" />
+              {shine(x, 13)}
+            </g>
+          ))}
+          <path d={`M${L + 14} ${y - 3} Q100 ${y - 8} ${R - 14} ${y - 3}`} stroke={col} strokeWidth="2.8" fill="none" strokeLinecap="round" />
+        </g>
+      );
+    }
     case 'gatinho': {
-      const lens = `M68 ${eyeY - 4} Q78 ${eyeY - 13} 94 ${eyeY - 8} L93 ${eyeY + 5} Q82 ${eyeY + 12} 71 ${eyeY + 5} Z`;
+      const col = c1 ?? '#E85A9B';
+      const lens = (x: number, s: number) => `M${x - s * 15} ${y - 10} Q${x} ${y - 9} ${x + s * 14} ${y - 6} Q${x + s * 14} ${y + 9} ${x} ${y + 10} Q${x - s * 14} ${y + 9} ${x - s * 15} ${y - 10} Z`;
       return (
-        <g stroke={c1} strokeWidth="3.5" fill="#FFFFFF" fillOpacity="0.12" strokeLinejoin="round">
-          <path d={lens} />
-          <path d={lens} transform="translate(200 0) scale(-1 1)" />
-          <path d={`M94 ${eyeY - 3} L106 ${eyeY - 3}`} fill="none" />
+        <g>
+          {temples(col, 14)}
+          {([[L, -1], [R, 1]] as const).map(([x, s]) => (
+            <g key={x}>
+              <path d={lens(x, -s)} fill="#E8F6FF" fillOpacity="0.22" stroke={col} strokeWidth="2.8" strokeLinejoin="round" />
+              {shine(x, 12)}
+            </g>
+          ))}
+          {bridge(col, 14, 2.6)}
         </g>
       );
     }
-    case 'estrela':
+    case 'estrela': {
+      const col = c1 ?? '#FFD34D';
+      const edge = c2 ?? '#E8B020';
       return (
         <g>
-          <path d={star(81, eyeY, 14)} fill={c1} opacity="0.92" stroke={c2} strokeWidth="1.5" strokeLinejoin="round" />
-          <path d={star(119, eyeY, 14)} fill={c1} opacity="0.92" stroke={c2} strokeWidth="1.5" strokeLinejoin="round" />
-          <path d={`M94 ${eyeY - 2} L106 ${eyeY - 2}`} stroke={c2} strokeWidth="2.5" />
+          {temples(edge, 14)}
+          {[L, R].map((x) => (
+            <g key={x}>
+              <path d={star(x, y, 17)} fill={col} fillOpacity="0.6" stroke={edge} strokeWidth="2.2" strokeLinejoin="round" />
+              {shine(x, 10)}
+            </g>
+          ))}
+          {bridge(edge, 12)}
         </g>
       );
+    }
     case 'aviador': {
-      const lens = `M68 ${eyeY - 8} L94 ${eyeY - 8} Q95 ${eyeY + 10} 81 ${eyeY + 11} Q67 ${eyeY + 9} 68 ${eyeY - 8} Z`;
+      const lens = c1 ?? '#3A3440';
+      const frame = c2 ?? '#F6C445';
+      const shape = (x: number, s: number) => `M${x - 15} ${y - 9} L${x + 15} ${y - 9} Q${x + 16 + s * 1} ${y + 6} ${x + s * 3} ${y + 12} Q${x - 16} ${y + 10} ${x - 15} ${y - 9} Z`;
       return (
         <g>
-          <path d={lens} fill={c1} opacity="0.9" stroke={c2} strokeWidth="2" />
-          <path d={lens} transform="translate(200 0) scale(-1 1)" fill={c1} opacity="0.9" stroke={c2} strokeWidth="2" />
-          <path d={`M94 ${eyeY - 7} L106 ${eyeY - 7} M95 ${eyeY - 3} Q100 ${eyeY - 6} 105 ${eyeY - 3}`} stroke={c2} strokeWidth="2" fill="none" />
+          {temples(frame, 15)}
+          {([[L, 1], [R, -1]] as const).map(([x, s]) => (
+            <g key={x}>
+              <path d={shape(x, s)} fill={lens} opacity="0.85" stroke={frame} strokeWidth="2" strokeLinejoin="round" transform={s === -1 ? `translate(${2 * x} 0) scale(-1 1)` : undefined} />
+              <path d={`M${x - 9} ${y - 3} L${x - 3} ${y - 7}`} stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" opacity="0.6" />
+            </g>
+          ))}
+          <path d={`M${L + 15} ${y - 8} L${R - 15} ${y - 8} M${L + 14} ${y - 3} Q100 ${y - 6} ${R - 14} ${y - 3}`} stroke={frame} strokeWidth="2" fill="none" />
         </g>
       );
     }
-    case 'monoculo':
+    case 'monoculo': {
+      const col = c1 ?? '#F6C445';
       return (
         <g>
-          <circle cx="119" cy={eyeY} r="12" fill="#FFFFFF" fillOpacity="0.15" stroke={c1} strokeWidth="3" />
-          <path d={`M131 ${eyeY + 2} Q138 ${eyeY + 18} 134 ${eyeY + 32}`} fill="none" stroke={c2} strokeWidth="1.6" strokeDasharray="2 2" />
+          <circle cx={R} cy={y} r="14" fill="#E8F6FF" fillOpacity="0.2" stroke={col} strokeWidth="2.8" />
+          <circle cx={R} cy={y} r="14" fill="none" stroke="#FFFFFF" strokeWidth="0.8" opacity="0.5" />
+          {shine(R, 13)}
+          <path d={`M${R + 12} ${y + 7} Q${R + 20} ${y + 22} ${R + 14} ${y + 36}`} fill="none" stroke={c2 ?? '#D99E1E'} strokeWidth="1.6" strokeDasharray="2.4 1.8" strokeLinecap="round" />
         </g>
       );
+    }
     case 'mascara': {
-      const hole = (x: number) => `M${x - 10} ${eyeY} a10 9 0 1 0 20 0 a10 9 0 1 0 -20 0 Z`;
-      return <path fillRule="evenodd" d={`M58 ${eyeY - 10} Q100 ${eyeY - 17} 142 ${eyeY - 10} L140 ${eyeY + 9} Q100 ${eyeY + 13} 60 ${eyeY + 9} Z ${hole(81)} ${hole(119)}`} fill={c1} />;
-    }
-    case 'natacao':
+      const col = c1 ?? '#E8455A';
+      const hole = (x: number) => `M${x - 10.5} ${y} a10.5 9.5 0 1 0 21 0 a10.5 9.5 0 1 0 -21 0 Z`;
       return (
         <g>
-          <path d={`M56 ${eyeY} L69 ${eyeY} M131 ${eyeY} L144 ${eyeY}`} stroke={c2} strokeWidth="4" strokeLinecap="round" />
-          <ellipse cx="81" cy={eyeY} rx="12.5" ry="10.5" fill={c1} fillOpacity="0.45" stroke={c2} strokeWidth="3" />
-          <ellipse cx="119" cy={eyeY} rx="12.5" ry="10.5" fill={c1} fillOpacity="0.45" stroke={c2} strokeWidth="3" />
-          <path d={`M93 ${eyeY - 1} L107 ${eyeY - 1}`} stroke={c2} strokeWidth="3" />
+          <path d={`M${L - 20} ${y + 2} Q${L - 26} ${y + 10} ${L - 30} ${y + 16} M${L - 20} ${y + 2} Q${L - 28} ${y + 4} ${L - 34} ${y + 8}`} stroke={col} strokeWidth="3.4" strokeLinecap="round" fill="none" />
+          <path fillRule="evenodd" d={`M${L - 20} ${y - 9} Q100 ${y - 18} ${R + 20} ${y - 9} Q${R + 22} ${y + 6} ${R + 12} ${y + 11} Q100 ${y + 6} ${L - 12} ${y + 11} Q${L - 22} ${y + 6} ${L - 20} ${y - 9} Z ${hole(L)} ${hole(R)}`} fill={col} />
+          <path d={`M${L - 12} ${y - 10} Q100 ${y - 16} ${R + 12} ${y - 10}`} stroke="#FFFFFF" strokeWidth="2" opacity="0.35" fill="none" strokeLinecap="round" />
         </g>
       );
+    }
+    case 'natacao': {
+      const col = c1 ?? '#5B8DEF';
+      const edge = c2 ?? '#3D6FD8';
+      return (
+        <g>
+          <path d={`M${L - 14} ${y} Q${L - 22} ${y - 1} ${L - 30} ${y + 2} M${R + 14} ${y} Q${R + 22} ${y - 1} ${R + 30} ${y + 2}`} stroke={edge} strokeWidth="4.5" strokeLinecap="round" fill="none" />
+          {[L, R].map((x) => (
+            <g key={x}>
+              <ellipse cx={x} cy={y} rx="14.5" ry="12.5" fill={col} fillOpacity="0.4" stroke={edge} strokeWidth="3.4" />
+              {shine(x, 13)}
+            </g>
+          ))}
+          <path d={`M${L + 14} ${y - 1} Q100 ${y - 5} ${R - 14} ${y - 1}`} stroke={edge} strokeWidth="3.4" fill="none" strokeLinecap="round" />
+        </g>
+      );
+    }
     default:
       return null;
   }
@@ -1487,7 +1568,31 @@ export function sleeveOf(roupa: string | null | undefined): string | null {
   const base = it?.base ?? roupa;
   if (!SLEEVED.has(base)) return null;
   if (base === 'jardineira') return '#FFFFFF';
-  return it?.c1 ?? (base === 'moletom' ? '#8FA8E8' : base === 'smoking' ? '#2B2224' : '#FFFFFF');
+  return it?.c1 ?? GARMENT_DEFAULT[base] ?? '#FFFFFF';
+}
+
+/** Cor principal das peças que não têm cor no catálogo (a mesma que o desenho usa). */
+const GARMENT_DEFAULT: Record<string, string> = { moletom: '#8FA8E8', smoking: '#2B2224', pijama: '#3E4C8A', regata: '#FF6F91', camiseta: '#FFFFFF', vestido: '#FFB3CF', jaqueta: '#3A3440', kimono: '#F0525F', florida: '#5B8DEF', futebol: '#FFD34D', abelha: '#FFD34D', astronauta: '#F4F6FA', princesa: '#FFB3CF', sueter: '#D7263D', abobora: '#FF9A3D', xadrez: '#F0525F', 'manto-mago': '#5B3FA8', sereia: '#4FC3B8', 'pijama-nuvem': '#A9D4F5', 'arco-iris': '#B9A3F0', babado: '#FF9FC2', estrelado: '#7E57D6', 'colete-obra': '#5E7FB8', dolma: '#FFFFFF', 'casaco-capitao': '#3B4F8C', listrada: '#FFFFFF' };
+/** Cor da peça (para a "casca" de tecido que veste por cima do corpo). */
+export function garmentColor(roupa: string | null | undefined): string | null {
+  if (!roupa) return null;
+  const it = itemById(roupa);
+  const base = it?.base ?? roupa;
+  if (base === 'listrada') return '#FFFFFF';
+  if (base === 'arco-iris') return '#B9A3F0';
+  return it?.c1 ?? GARMENT_DEFAULT[base] ?? null;
+}
+
+const TOPS = new Set(['moletom', 'camiseta', 'listrada', 'jaqueta', 'kimono', 'florida', 'futebol', 'dolma', 'casaco-capitao', 'sueter', 'xadrez', 'smoking', 'astronauta', 'pijama', 'pijama-nuvem', 'regata', 'abelha', 'abobora', 'colete-obra']);
+const DRESSES = new Set(['vestido', 'princesa', 'babado', 'estrelado', 'arco-iris', 'sereia', 'manto-mago']);
+/**
+ * Formato da peça por cima do corpo: 'top' (blusa/moletom, termina acima das perninhas) ou
+ * 'dress' (vestido que abre embaixo). null = peça pequena (avental, saia, capa) que fica no corpo.
+ */
+export function garmentShape(roupa: string | null | undefined): 'top' | 'dress' | null {
+  if (!roupa) return null;
+  const base = itemById(roupa)?.base ?? roupa;
+  return TOPS.has(base) ? 'top' : DRESSES.has(base) ? 'dress' : null;
 }
 
 export function costumeOf(roupa: string | null | undefined): { base: string; c1: string; c2: string; paw: string; foot: string } | null {

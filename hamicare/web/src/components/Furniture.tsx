@@ -1,12 +1,12 @@
 // Móveis desenhados em SVG (os que não existem como emoji). Cores de ilustração.
-import { Kit } from './room/kit';
+import { Kit, S } from './room/kit';
 
 export function Furniture({ id, c1, c2 }: { id: string; c1?: string; c2?: string }) {
   if (id.startsWith('k-')) return <Kit id={id} c1={c1} c2={c2} />;
   switch (id) {
     case 'rodinha':
       return (
-        <svg viewBox="0 0 100 100" className="block h-auto w-full" aria-hidden="true">
+        <S w={100} h={100}>
           <path d="M30 96 L50 52 L70 96" stroke="#9AA6B8" strokeWidth="6" fill="none" strokeLinecap="round" />
           <circle cx="50" cy="48" r="40" fill="none" stroke="#7FB8F0" strokeWidth="8" />
           <circle cx="50" cy="48" r="40" fill="none" stroke="#B9DAF7" strokeWidth="2" strokeDasharray="4 6" />
@@ -14,62 +14,62 @@ export function Furniture({ id, c1, c2 }: { id: string; c1?: string; c2?: string
             <path key={a} d={`M50 48 L${50 + Math.cos((a * Math.PI) / 180) * 38} ${48 + Math.sin((a * Math.PI) / 180) * 38}`} stroke="#7FB8F0" strokeWidth="2.5" />
           ))}
           <circle cx="50" cy="48" r="6" fill="#5B9BD9" />
-        </svg>
+        </S>
       );
     case 'caminha':
       return (
-        <svg viewBox="0 0 100 60" className="block h-auto w-full" aria-hidden="true">
+        <S w={100} h={60}>
           <ellipse cx="50" cy="40" rx="48" ry="18" fill="#E58FAE" />
           <ellipse cx="50" cy="34" rx="38" ry="12" fill="#FFD6E4" />
           <ellipse cx="34" cy="31" rx="12" ry="6" fill="#FFFFFF" />
-        </svg>
+        </S>
       );
     case 'casinha':
       return (
-        <svg viewBox="0 0 100 90" className="block h-auto w-full" aria-hidden="true">
+        <S w={100} h={90}>
           <path d="M10 42 L50 6 L90 42 Z" fill="#C0694A" />
           <rect x="18" y="40" width="64" height="48" rx="4" fill="#E8B07C" />
           <path d="M40 88 L40 64 Q50 52 60 64 L60 88 Z" fill="#7A4A30" />
           <circle cx="68" cy="56" r="7" fill="#FFF3D6" stroke="#7A4A30" strokeWidth="2" />
-        </svg>
+        </S>
       );
     case 'mesa':
       return (
-        <svg viewBox="0 0 100 70" className="block h-auto w-full" aria-hidden="true">
+        <S w={100} h={70}>
           <rect x="6" y="16" width="88" height="10" rx="5" fill="#C98A5B" />
           <rect x="16" y="26" width="8" height="42" rx="3" fill="#A86E44" />
           <rect x="76" y="26" width="8" height="42" rx="3" fill="#A86E44" />
           <circle cx="62" cy="10" r="7" fill="#FF8FB4" />
           <rect x="58" y="10" width="8" height="7" fill="#7FCBA9" />
-        </svg>
+        </S>
       );
     case 'luminaria':
       return (
-        <svg viewBox="0 0 40 120" className="block h-auto w-full" aria-hidden="true">
+        <S w={40} h={120}>
           <ellipse cx="20" cy="22" rx="18" ry="8" fill="#FFE9A8" opacity="0.6" />
           <path d="M6 28 L12 6 L28 6 L34 28 Z" fill="#FFD27A" />
           <rect x="18" y="28" width="4" height="84" fill="#7C6A5A" />
           <ellipse cx="20" cy="114" rx="14" ry="5" fill="#7C6A5A" />
-        </svg>
+        </S>
       );
     case 'tapete':
       return (
-        <svg viewBox="0 0 100 30" className="block h-auto w-full" aria-hidden="true">
+        <S w={100} h={30}>
           <ellipse cx="50" cy="15" rx="49" ry="14" fill="#F7A8B8" />
           <ellipse cx="50" cy="15" rx="38" ry="10" fill="#FFD3DC" />
           <ellipse cx="50" cy="15" rx="24" ry="6" fill="#F7A8B8" />
-        </svg>
+        </S>
       );
     case 'estante':
       return (
-        <svg viewBox="0 0 70 100" className="block h-auto w-full" aria-hidden="true">
+        <S w={70} h={100}>
           <rect x="2" y="2" width="66" height="96" rx="4" fill="#B98258" />
           {[30, 62, 94].map((y) => <rect key={y} x="6" y={y - 4} width="58" height="4" fill="#8E5E3C" />)}
           {[['#FF8FB4', 10], ['#7FB8F0', 18], ['#FFD27A', 26], ['#93D6A9', 42], ['#B39AE6', 50]].map(([c, x], i) => (
             <rect key={i} x={x as number} y={i < 3 ? 8 : 40} width="7" height="18" rx="1.5" fill={c as string} />
           ))}
           <circle cx="40" cy="80" r="8" fill="#7FCBA9" />
-        </svg>
+        </S>
       );
     default:
       return null;
@@ -135,6 +135,37 @@ export const WALLPAPER_CSS: Record<string, string> = {
   'p-espaco': 'radial-gradient(circle at 20% 30%,#FFFFFF 1.5px,transparent 2px) 0 0/46px 46px,radial-gradient(circle at 70% 70%,#FFE27A 1.5px,transparent 2px) 0 0/58px 58px,radial-gradient(circle at 80% 20%,rgba(169,139,242,.6) 18px,transparent 19px),linear-gradient(180deg,#1E2350,#3E2F7A)',
   'p-celeste': 'radial-gradient(circle at 50% 0%,rgba(255,233,160,.9),transparent 60%),radial-gradient(ellipse 50px 20px at 20% 80%,#FFFFFF 60%,transparent 62%) 0 0/140px 90px,linear-gradient(180deg,#FFF3C9,#BFE6FF)',
 };
+
+/** Cor "de fundo" de cada piso: o Início continua o chão nessa cor (degradê e página). */
+export const FLOOR_TONE: Record<string, string> = {
+  'f-madeira': '#C79F75', 'f-clara': '#E2CBAE', 'f-carpete': '#F2BCC8', 'f-azulejo': '#C9DCEE', 'f-grama': '#7FC47A', 'f-marmore': '#D6D7DE',
+  'f-areia': '#E9CF97', 'f-tabuleiro': '#D9D2EC', 'f-hexagono': '#F2CD6A', 'f-azul': '#A9CBF2', 'f-nuvem': '#BCDCFA', 'f-ladrilho': '#F6C3B6',
+  'f-musgo': '#7BC46C', 'f-tacos': '#B98251', 'f-folhas': '#A9744A', 'f-chale': '#6A4229', 'f-concreto': '#9AA2B4', 'f-areia-mar': '#CDB57A',
+  'f-algodao': '#F0C2DD', 'f-real': '#E3CB93', 'f-metal': '#9AA3BC', 'f-ouro': '#E8B83A',
+};
+
+/** Escurece (t > 0) ou clareia (t < 0) uma cor #RRGGBB. */
+export function shade(hex: string, t: number) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = (v: number) => Math.round(t >= 0 ? v * (1 - t) : v + (255 - v) * -t).toString(16).padStart(2, '0');
+  return `#${f(n >> 16)}${f((n >> 8) & 255)}${f(n & 255)}`;
+}
+
+const lum = (hex: string) => {
+  const n = parseInt(hex.slice(1), 16);
+  const c = (v: number) => ((v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * c(n >> 16) + 0.7152 * c((n >> 8) & 255) + 0.0722 * c(n & 255);
+};
+/**
+ * Cores do Início a partir do chão da casa: a página continua o piso (um tom mais fundo, com texto
+ * branco legível) e os cartões ficam num tom ainda mais escuro da mesma cor.
+ */
+export function floorPalette(floor: string) {
+  const tone = FLOOR_TONE[floor] ?? FLOOR_TONE['f-madeira'];
+  let t = 0.12;
+  while (t < 0.6 && 1.05 / (lum(shade(tone, t)) + 0.05) < 3.1) t += 0.04;
+  return { tone, page: shade(tone, t), card: shade(tone, t + 0.12), deep: shade(tone, t + 0.2), dark: shade(tone, 0.72) };
+}
 
 export const FLOOR_CSS: Record<string, string> = {
   'f-madeira': 'repeating-linear-gradient(90deg,#D8B48C 0 46px,#C79F75 46px 48px)',

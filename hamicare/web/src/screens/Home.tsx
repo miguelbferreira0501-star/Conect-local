@@ -2,6 +2,7 @@ import { useGrowth } from '../components/Growth';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Flame, Mail, Plus, Settings } from 'lucide-react';
 import { Room } from '../components/Room';
+import { floorPalette } from '../components/Furniture';
 import { SleepingHami } from '../components/SleepingHami';
 import { openCheckin } from '../components/MoodCheckin';
 import { WalletSheet } from './Collection';
@@ -37,6 +38,18 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
   const s = useApp();
   const now = useNow(20_000);
   const today = todayKey();
+  // O Início continua o chão da casa: o degradê, a página e os cartões seguem a cor do piso.
+  const floor = s.house.floor;
+  useEffect(() => {
+    const p = floorPalette(floor);
+    const root = document.documentElement.style;
+    root.setProperty('--home-floor', p.tone);
+    root.setProperty('--home-page', p.page);
+    root.setProperty('--home-card', p.card);
+    root.setProperty('--home-deep', p.deep);
+    root.setProperty('--home-page-dark', p.dark);
+    return () => ['--home-floor', '--home-page', '--home-card', '--home-deep', '--home-page-dark'].forEach((k) => root.removeProperty(k));
+  }, [floor]);
   const day = dayOf(s, today);
   const tasks = todayTasks(s, today);
   const done = tasks.filter((t) => t.id in day.done).length;
@@ -109,13 +122,13 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
     </div>
   ) : s.pet.sleeping ? (
     <button className="sleep-spot" onClick={() => toast(`${s.pet.name} está dormindo. Shhh…`)} aria-label={`${s.pet.name} dormindo`} data-sound="none">
-      <SleepingHami fur={s.pet.fur} size={250} />
+      <SleepingHami fur={s.pet.fur} size={205} />
     </button>
   ) : (
     <div className="relative">
       <div ref={petRef} style={{ transformOrigin: '50% 100%' }}>
         <LivePet
-          size={260}
+          size={196}
           mood={petMood}
           onTap={() => {
             if (s.pet.sleeping) {
@@ -126,7 +139,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
           }}
         />
       </div>
-      <CompanionBuddy hamster={260} />
+      <CompanionBuddy hamster={196} />
       {puff && (
         <span key={puff.id} className={`grams-puff ${dir === 'ganhar' ? 'is-gain' : ''}`} aria-live="polite">
           {puff.text}

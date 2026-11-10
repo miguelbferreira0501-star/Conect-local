@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 
 // Kit de móveis da casa (desenhos próprios do HamiCare). Cada peça aceita duas cores (c1 principal, c2 detalhe),
 // então a mesma cama vira rosa, azul ou lilás na loja. Desenhados de frente, com um pouquinho de profundidade.
@@ -24,11 +24,47 @@ const WOOD = '#C98A5B';
 const GOLD = '#F2C14E';
 const INK = '#5A3B2E';
 
-const S = ({ w, h, children }: { w: number; h: number; children: ReactNode }) => (
-  <svg viewBox={`0 0 ${w} ${h}`} className="block h-auto w-full overflow-visible" aria-hidden="true">
-    {children}
-  </svg>
-);
+/**
+ * Moldura de toda peça: contorno marrom macio por fora (estilo adesivo), luz em cima, sombrinha embaixo
+ * e um pouco de volume. Vale para todos os móveis de uma vez.
+ */
+export function S({ w, h, children }: { w: number; h: number; children: ReactNode }) {
+  const id = `kf${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
+  const r = Math.max(1.6, Math.min(3, w / 75));
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="block h-auto w-full overflow-visible" aria-hidden="true">
+      <defs>
+        <filter id={id} x="-8%" y="-8%" width="116%" height="120%" colorInterpolationFilters="sRGB">
+          {/* só as partes "sólidas" ganham contorno (brilhos e luzes transparentes ficam de fora) */}
+          <feComponentTransfer in="SourceAlpha" result="solid">
+            <feFuncA type="discrete" tableValues="0 0 1 1" />
+          </feComponentTransfer>
+          {/* contorno */}
+          <feMorphology in="solid" operator="dilate" radius={r} result="grow" />
+          <feFlood floodColor="#4A2E22" floodOpacity="0.72" />
+          <feComposite in2="grow" operator="in" result="line" />
+          {/* luz na borda de cima */}
+          <feOffset in="solid" dy={r * 1.4} result="down" />
+          <feComposite in="solid" in2="down" operator="out" result="topRim" />
+          <feFlood floodColor="#FFFFFF" floodOpacity="0.42" />
+          <feComposite in2="topRim" operator="in" result="light" />
+          {/* sombra na borda de baixo */}
+          <feOffset in="solid" dy={-r * 1.8} result="up" />
+          <feComposite in="solid" in2="up" operator="out" result="botRim" />
+          <feFlood floodColor="#2B1A14" floodOpacity="0.2" />
+          <feComposite in2="botRim" operator="in" result="dark" />
+          <feMerge>
+            <feMergeNode in="line" />
+            <feMergeNode in="SourceGraphic" />
+            <feMergeNode in="light" />
+            <feMergeNode in="dark" />
+          </feMerge>
+        </filter>
+      </defs>
+      <g filter={`url(#${id})`}>{children}</g>
+    </svg>
+  );
+}
 
 /** Perninhas de móvel. */
 const Legs = ({ xs, y, h, c = dk(WOOD) }: { xs: number[]; y: number; h: number; c?: string }) => (

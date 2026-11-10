@@ -180,7 +180,7 @@ function ShopTile({ item, onTry }: { item: Item; onTry: (item: Item, list?: Item
           </span>
         )}
         {count > 0 && <span className="sm-badge sm-badge-count" aria-hidden="true">x{count}</span>}
-        <span className={`sm-art ${item.kind === 'chapeu' || item.kind === 'oculos' ? 'is-head' : ''}`} aria-hidden="true">
+        <span className={`sm-art ${item.kind === 'chapeu' || item.kind === 'oculos' ? 'is-head' : item.kind === 'roupa' ? 'is-body' : ''}`} aria-hidden="true">
           {wear ? <Hamster fur={s.pet.fur} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null, [item.kind]: item.id }} size={86} idle={false} growth={1} /> : <ItemIcon item={item} size={item.svg ? 44 : 36} />}
         </span>
         <span className="sm-price" aria-hidden="true">

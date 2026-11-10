@@ -1423,16 +1423,20 @@ export function updateSettings(patch: Partial<State['settings']>) {
 export const waterGoalOf = (s: State) => s.settings.waterGoal ?? 8;
 export const dayGoalOf = (s: State, total: number) => Math.min(total || 1, s.settings.dayGoal ?? Math.max(3, Math.ceil(total * 0.6)));
 
-/** Mais (ou menos) um copo de água hoje. Bater a meta dá uma comemoração. */
-export function addWater(delta: 1 | -1): { cups: number; hitGoal: boolean } {
+/** Água de hoje em copinhos de 250 ml (4 = 1 litro). Bater a meta dá uma comemoração. */
+export function addWater(delta: number): { cups: number; hitGoal: boolean } {
   const today = todayKey();
   const day = dayOf(state, today);
-  const cups = Math.max(0, Math.min(30, (day.water ?? 0) + delta));
+  const before = day.water ?? 0;
+  const cups = Math.max(0, Math.min(40, before + Math.round(delta)));
   const goal = waterGoalOf(state);
-  const hitGoal = delta > 0 && cups === goal;
+  const hitGoal = delta > 0 && before < goal && cups >= goal;
   commit(withDay(state, today, { ...day, water: cups }));
   return { cups, hitGoal };
 }
+
+/** Litros a partir dos copinhos de 250 ml, no jeito brasileiro ("1,25 L"). */
+export const litersText = (cups: number) => `${(cups / 4).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} L`;
 
 export function setWaterGoal(n: number) {
   updateSettings({ waterGoal: Math.max(4, Math.min(16, Math.round(n))) });
