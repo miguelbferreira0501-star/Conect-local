@@ -10,8 +10,8 @@ import { Seed, toast } from '../../components/ui';
 import { libById } from '../../data/tasks';
 import { gameCfg } from '../../lib/game';
 import { useSocial } from '../../lib/social';
-import { claimTeamReward, dayOf, homeArenaOf, teamRewardClaimed, todayKey, toggleTask, useApp } from '../../lib/store';
-import { TEAM_MAX, TEAM_MISSIONS, TEAM_MISSIONS_MAX, missionDoneByAll } from '../../shared/team';
+import { claimTeamReward, dayOf, homeArenaOf, isPremium, teamRewardClaimed, todayKey, toggleTask, useApp } from '../../lib/store';
+import { TEAM_MAX, TEAM_MAX_PLUS, TEAM_MISSIONS, TEAM_MISSIONS_MAX, missionDoneByAll } from '../../shared/team';
 import type { Profile, SocialApi, Team } from '../../lib/social/types';
 import { Avatar } from './Post';
 
@@ -146,7 +146,7 @@ export function TeamTab({ api, friends, onOpenProfile }: { api: SocialApi; frien
           <div className="min-w-0 flex-1">
             <p className="font-display text-[21px] font-bold leading-tight">{team.name}</p>
             <p className="text-[13px] text-muted">
-              {team.members.length} de {TEAM_MAX} · {team.completeDays} {team.completeDays === 1 ? 'dia completo' : 'dias completos'}
+              {team.members.length} de {team.max ?? TEAM_MAX} · {team.completeDays} {team.completeDays === 1 ? 'dia completo' : 'dias completos'}
             </p>
           </div>
           <span className={`chip ${team.streak ? 'chip-fire' : 'chip-plain'} shrink-0`}>
@@ -225,9 +225,12 @@ export function TeamTab({ api, friends, onOpenProfile }: { api: SocialApi; frien
             )}
           </div>
         ))}
-        {isOwner && team.members.length < TEAM_MAX && outside.length > 0 && (
+        {isOwner && team.members.length >= (team.max ?? TEAM_MAX) && (team.max ?? TEAM_MAX) < TEAM_MAX_PLUS && (
+          <p className="px-1 text-[13px] font-bold text-muted">Turma cheia. Com HamiCare+, a turma cabe até {TEAM_MAX_PLUS} pessoas.</p>
+        )}
+        {isOwner && team.members.length < (team.max ?? TEAM_MAX) && outside.length > 0 && (
           <div className="grid gap-2">
-            <p className="px-1 text-[13px] font-bold text-muted">Chamar mais amigos ({TEAM_MAX - team.members.length} vagas)</p>
+            <p className="px-1 text-[13px] font-bold text-muted">Chamar mais amigos ({(team.max ?? TEAM_MAX) - team.members.length} vagas)</p>
             {outside.slice(0, 8).map((f) => (
               <div key={f.id} className="card flex items-center gap-3 p-3">
                 <Avatar pet={f.pet} id={f.id} size={36} />
@@ -249,6 +252,7 @@ export function TeamTab({ api, friends, onOpenProfile }: { api: SocialApi; frien
 
 function CreateTeam({ api, friends, onCreated }: { api: SocialApi; friends: Profile[]; onCreated: (t: Team) => void }) {
   const s = useApp();
+  const teamCap = isPremium(s) ? TEAM_MAX_PLUS : TEAM_MAX;
   const [name, setName] = useState(`Turma do ${s.pet.name}`);
   const [members, setMembers] = useState<string[]>([]);
   const [missions, setMissions] = useState<string[]>(['agua', 'caminhada']);
@@ -272,19 +276,19 @@ function CreateTeam({ api, friends, onCreated }: { api: SocialApi; friends: Prof
       <section className="card grid justify-items-center gap-2 p-5 text-center">
         <Glyph e="art:turma" size={72} />
         <h2 className="font-display text-[22px] font-bold leading-tight">Monte a sua turma</h2>
-        <p className="text-[14px] text-muted">Você e até {TEAM_MAX - 1} amigos, com os Hamis juntos. Vocês escolhem missões em comum, e cada missão só conta quando todo mundo faz.</p>
+        <p className="text-[14px] text-muted">Você e até {teamCap - 1} amigos, com os Hamis juntos.{teamCap < TEAM_MAX_PLUS ? ` Com HamiCare+, até ${TEAM_MAX_PLUS - 1} amigos.` : ''} Vocês escolhem missões em comum, e cada missão só conta quando todo mundo faz.</p>
       </section>
       <label className="grid gap-1 text-[14px] font-bold" htmlFor="team-name">
         Nome da turma
         <input id="team-name" className="field" maxLength={40} value={name} onChange={(e) => setName(e.target.value)} />
       </label>
       <section className="grid gap-2">
-        <h2 className="section-label px-1">Amigos ({members.length} de {TEAM_MAX - 1})</h2>
+        <h2 className="section-label px-1">Amigos ({members.length} de {teamCap - 1})</h2>
         {friends.length ? (
           friends.map((f) => {
             const on = members.includes(f.id);
             return (
-              <button key={f.id} className={`opt ${on ? 'is-on' : ''}`} aria-pressed={on} onClick={() => setMembers(toggleIn(members, f.id, TEAM_MAX - 1))}>
+              <button key={f.id} className={`opt ${on ? 'is-on' : ''}`} aria-pressed={on} onClick={() => setMembers(toggleIn(members, f.id, teamCap - 1))}>
                 <Avatar pet={f.pet} id={f.id} size={36} />
                 <span className="min-w-0 flex-1 truncate">{f.name}</span>
                 {on && <Check size={18} className="text-accent" />}

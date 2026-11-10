@@ -1,3 +1,4 @@
+import { PlusWeeklyCard } from '../components/PlusWeekly';
 import { useGrowth } from '../components/Growth';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Flame, Mail, Plus, Settings } from 'lucide-react';
@@ -209,6 +210,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
         <span className="hr-hint" aria-hidden="true">‹ arraste para ver a casa ›</span>
       </section>
 
+      <PlusWeeklyCard />
       <StreakRepairCard />
 
       <section className="hc-adv" aria-label="Meta do dia">

@@ -58,6 +58,8 @@ export interface Team {
   missions: string[];
   memberIds: string[];
   members: Profile[];
+  /** Quantas pessoas cabem (4, ou 8 se quem criou tem HamiCare+). */
+  max?: number;
   today: { date: string; checkins: Record<string, string[]>; complete: boolean };
   /** Dias completos seguidos. */
   streak: number;

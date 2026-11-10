@@ -294,6 +294,8 @@ export interface State {
   moon?: boolean;
   /** Martelinhos para consertar a ofensiva (ganha 1 a cada 7 dias seguidos; até 3). */
   hammers?: number;
+  /** Mês (AAAA-MM) em que o martelinho grátis do HamiCare+ já foi entregue. */
+  plusHammerMonth?: string;
   /** Turno ("AAAA-MM-DD:n") em que uma missão foi feita: libera a missão rápida "complete uma meta". */
   quickMetaAt?: string;
   /** Quando e de onde veio cada item. */

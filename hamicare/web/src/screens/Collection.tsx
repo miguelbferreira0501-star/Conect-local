@@ -113,7 +113,7 @@ export function InventoryView() {
               </button>
             )}
             {HOUSE_KINDS.includes(open.kind) && (
-              <button className="btn btn-primary w-full" onClick={() => (placeItem(open.id), toast(`${open.name} foi para a casa.`), setOpen(null))}>
+              <button className="btn btn-primary w-full" onClick={() => { const r = placeItem(open.id); toast(r === 'ja-esta' ? `${open.name} já está na casa.` : r === 'movido' ? `${open.name} se mudou para a casa de agora.` : `${open.name} foi para a casa.`); setOpen(null); }}>
                 Colocar na casa
               </button>
             )}

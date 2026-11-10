@@ -10,14 +10,14 @@ import { FACTS } from '../data/lines';
 import { FURS } from '../data/fur';
 import { presetByName } from '../data/foods';
 import { checkRef, cleanKcal } from '../logic/meals';
-import { addDays, clamp, dayDiff, dayKey, hashStr, uid } from './util';
+import { addDays, clamp, dayDiff, dayKey, hashStr, uid, weekStart } from './util';
 import {
   BAND, JOURNEY_GRAMS, REF_KG, WEIGH_EVERY_DAYS, checkJourneyGoal, conditioning, defaultGoalKg, directionOf, isMinor, journeyGrams, journeyKcal,
   journeyProgress, needKcalFor, phaseFor, PHASES, recentAverageKg, scaleProgress, taskKcal,
 } from '../logic/evolution';
 import { HAMMER_MAX, repairPlan, streakOf, type RepairPlan } from '../logic/streak';
 import { activeQuests, claimKey, levelOf, newAchievements, periodStart, questProgress, QUESTS } from '../logic/progress';
-import { addUsage, arenaItemsOf, arenaOf, baseGrant, canCraft, capGrant, chestPool, collectionProgress, emptyPity, emptyUsage, FRIEND_LADDER, HAMMER_PRICE, levelUps, migrateXp, openChest, reflectionCoins, xpAt, type ChestId, type DayUsage, type Pity, type QuickId, type Rarity, type Source } from '../shared/game';
+import { addUsage, arenaItemsOf, arenaOf, baseGrant, canCraft, capGrant, chestPool, collectionProgress, emptyPity, emptyUsage, FRIEND_LADDER, HAMMER_PRICE, PLUS_WEEKLY, levelUps, migrateXp, openChest, reflectionCoins, xpAt, type ChestId, type DayUsage, type Pity, type QuickId, type Rarity, type Source } from '../shared/game';
 import { arenaHouse, MOON_ITEMS, MOON_N, MOON_PRICE, upgradeHouse } from '../data/arenas';
 import { companionById, eggWarmth, HATCH_DAYS, withEggs } from '../data/companions';
 import { KIT_PLACE } from '../components/room/kit';
@@ -987,6 +987,27 @@ export function applyHammers(): RepairPlan | 'sem-martelinho' | null {
   return plan;
 }
 
+// ---------- HamiCare+: mesada semanal e martelinho do mês ----------
+
+export { PLUS_WEEKLY };
+/** Semana de agora (segunda-feira), chave da mesada. */
+export const plusWeek = (today = todayKey()) => weekStart(today);
+export const plusWeeklyClaimed = (s: State, today = todayKey()) => !!s.game.paid[`plus:${plusWeek(today)}`];
+
+/**
+ * Pega a mesada da semana (500 sementes) e, uma vez por mês, um martelinho grátis.
+ * O servidor confere se o Plus está ativo e se a semana ainda não foi paga.
+ */
+export function claimPlusWeekly(): { coins: number; hammer: boolean } | null {
+  if (!isPremium(state) || plusWeeklyClaimed(state)) return null;
+  let next = grant(state, { kind: 'plus', week: plusWeek() });
+  const month = todayKey().slice(0, 7);
+  const hammer = next.plusHammerMonth !== month && hammersOf(next) < HAMMER_MAX;
+  if (hammer) next = { ...next, hammers: hammersOf(next) + 1, plusHammerMonth: month };
+  commit(next);
+  return { coins: next.game.paid[`plus:${plusWeek()}`]?.coins ?? PLUS_WEEKLY, hammer };
+}
+
 // ---------- Prêmio por amigo (cada amigo novo vale mais) ----------
 
 export const friendRewardClaimed = (s: State, n: number) => !!s.game.paid[`amigo:${n}`];
@@ -1218,15 +1239,40 @@ export function setFloor(id: string) {
   if (owned(state, id)) commit({ ...state, house: { ...state.house, floor: id } });
 }
 
-export function placeItem(itemId: string) {
-  // O mesmo móvel não fica em duas casas ao mesmo tempo.
-  const placedCount = [state.house, ...Object.values(state.houses ?? {})].reduce((n, h) => n + h.items.filter((i) => i.itemId === itemId).length, 0);
-  if (placedCount >= (state.inventory[itemId] ?? 0)) return;
+/**
+ * Coloca um móvel na casa onde o Hami mora. Se todas as unidades já estão em outra casa (de outra arena),
+ * o móvel se muda de lá para cá, em vez de não acontecer nada.
+ */
+export function placeItem(itemId: string): 'ok' | 'movido' | 'ja-esta' | 'sem-item' {
+  const owned = state.inventory[itemId] ?? 0;
+  if (owned <= 0) return 'sem-item';
+  const here = state.house.items.filter((i) => i.itemId === itemId).length;
+  const others = Object.entries(state.houses ?? {});
+  const away = others.reduce((n, [, h]) => n + h.items.filter((i) => i.itemId === itemId).length, 0);
+  let houses = state.houses;
+  let res: 'ok' | 'movido' = 'ok';
+  if (here + away >= owned) {
+    if (!away) return 'ja-esta';
+    // tira uma unidade da outra casa
+    const [key, h] = others.find(([, h]) => h.items.some((i) => i.itemId === itemId))!;
+    const idx = h.items.findIndex((i) => i.itemId === itemId);
+    houses = { ...(state.houses ?? {}), [key]: { ...h, items: h.items.filter((_, j) => j !== idx) } };
+    res = 'movido';
+  }
   const z = Math.max(0, ...state.house.items.map((i) => i.z)) + 1;
   // Quadro e relógio vão para a parede; tapete, para o meio do chão; o resto, para o chão.
   const place = KIT_PLACE[itemById(itemId)?.svg ?? ''];
-  const y = place === 'parede' ? 40 : place === 'tapete' ? 94 : 76;
-  commit({ ...state, house: { ...state.house, items: [...state.house.items, { uid: uid(), itemId, x: 30 + (z % 5) * 10, y, z }] } });
+  const y = place === 'parede' ? 40 : place === 'tapete' ? 94 : 78;
+  // Vai para a parte da casa que aparece na tela, ao lado do Hami (não atrás dos botões das bordas),
+  // no lugar mais livre entre alguns pontos perto do meio.
+  const spots = [38, 62, 30, 70, 46, 54];
+  const near = state.house.items.filter((i) => Math.abs(i.y - y) < 18);
+  const x = spots.reduce((best, c) => {
+    const free = (v: number) => Math.min(99, ...near.map((i) => Math.abs(i.x - v)));
+    return free(c) > free(best) + 4 ? c : best;
+  }, spots[0]);
+  commit({ ...state, houses, house: { ...state.house, items: [...state.house.items, { uid: uid(), itemId, x, y, z }] } });
+  return res;
 }
 
 /** Viagem para a Lua: compra a casa lunar (5.000 sementes) e o Hami se muda para lá. */

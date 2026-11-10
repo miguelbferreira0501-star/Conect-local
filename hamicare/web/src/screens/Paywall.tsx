@@ -4,7 +4,7 @@ import { PLUS_COUNTS, PLUS_PRICE } from '../components/PlusCard';
 import { Hamster } from '../components/Hamster';
 import { ItemIcon } from '../components/ItemIcon';
 import { itemById } from '../data/items';
-import { toast } from '../components/ui';
+import { Seed, toast } from '../components/ui';
 import { isPremium, startTrial, useApp } from '../lib/store';
 import { startTrialOnServer, useAccount } from '../lib/account';
 import { ApiError } from '../lib/social/api';
@@ -13,6 +13,9 @@ import { storeWord } from '../lib/native';
 import { openGuardian } from '../components/Guardian';
 import { canBuyHere } from '../lib/guardian';
 import { Glyph } from '../components/art';
+import { PlusWeeklyCard } from '../components/PlusWeekly';
+import { PLUS_WEEKLY } from '../lib/store';
+import { TEAM_MAX, TEAM_MAX_PLUS } from '../shared/team';
 
 export { PLUS_PRICE };
 
@@ -27,6 +30,9 @@ const ROWS: Row[] = [
   ['SOS, respiração, diário e humor', true, true],
   ['Temporada do mês e coleções', true, true],
   ['Amigos e feed', true, true],
+  ['Sementes de presente toda semana', false, `${PLUS_WEEKLY}`],
+  ['Pessoas na turma', `${TEAM_MAX}`, `${TEAM_MAX_PLUS}`],
+  ['Martelinho grátis todo mês', false, true],
   [`Fantasias, roupas e móveis exclusivos`, false, `${PLUS_COUNTS.items} itens`],
   [`Estilos de casa completos`, false, `${PLUS_COUNTS.styles}`],
   [`Pelagens especiais`, false, `${PLUS_COUNTS.furs}`],
@@ -91,6 +97,7 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
         <Parade fur={petFur} />
         <h2 className="pw-title">O {pet} já é Plus! 💛</h2>
         <p className="rounded-2xl bg-white/15 p-4 text-center font-bold">Plus ativo até {formatDay(s.premium.until!, { day: 'numeric', month: 'long' })}.</p>
+        <PlusWeeklyCard always />
         <Compare />
         <button className="pw-later" onClick={onClose}>
           Voltar
@@ -114,6 +121,24 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
             <span>
               <b>Deixe o {pet} do seu jeito</b>
               Fantasias, roupas e móveis exclusivos: são {PLUS_COUNTS.items} itens só do Plus.
+            </span>
+          </li>
+          <li>
+            <span className="pw-ico">
+              <Seed size={34} />
+            </span>
+            <span>
+              <b>{PLUS_WEEKLY} sementes toda semana</b>
+              Uma mesada de cerca de 2.000 sementes por mês, mais um martelinho grátis para salvar a sua sequência.
+            </span>
+          </li>
+          <li>
+            <span className="pw-ico">
+              <Glyph e="art:turma" size={44} />
+            </span>
+            <span>
+              <b>Turma com até {TEAM_MAX_PLUS} pessoas</b>
+              Chame mais amigos para cuidar dos Hamis juntos (sem Plus, cabem {TEAM_MAX}).
             </span>
           </li>
           <li>
