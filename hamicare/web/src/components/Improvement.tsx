@@ -119,16 +119,20 @@ export function ImprovementCard({ onPlus }: { onPlus: () => void }) {
         <Locked locked={!plus} onPlus={onPlus} kids={kids}>
           <ul className="imp-insights">
             <li>
-              <span>📅</span> Seu melhor dia é <b>{d.best ?? 'quarta'}</b>: é quando você mais cumpre missões.
+              <span className="imp-ins-ico">📅</span>
+              <span className="imp-ins-txt">Seu melhor dia é <b>{d.best ?? 'quarta'}</b>: é quando você mais cumpre missões.</span>
             </li>
             <li>
-              <span>⭐</span> Hábito mais firme: <b>{d.topName ?? 'beber água'}</b> ({d.topCount || 12} vezes no mês).
+              <span className="imp-ins-ico">⭐</span>
+              <span className="imp-ins-txt">Hábito mais firme: <b>{d.topName ?? 'beber água'}</b> ({d.topCount || 12} vezes no mês).</span>
             </li>
             <li>
-              <span>😊</span> {d.moodGain !== null ? <>Nos dias com missões seu humor fica <b>{d.moodGain >= 0 ? `${d.moodGain}% melhor` : `${Math.abs(d.moodGain)}% mais baixo`}</b>.</> : <>Nos dias com missões seu humor fica <b>18% melhor</b>.</>}
+              <span className="imp-ins-ico">😊</span>
+              <span className="imp-ins-txt">{d.moodGain !== null ? <>Nos dias com missões seu humor fica <b>{d.moodGain >= 0 ? `${d.moodGain}% melhor` : `${Math.abs(d.moodGain)}% mais baixo`}</b>.</> : <>Nos dias com missões seu humor fica <b>18% melhor</b>.</>}</span>
             </li>
             <li>
-              <span>🔮</span> No seu ritmo, em 30 dias serão <b>{d.forecast || 45} missões</b> a mais.
+              <span className="imp-ins-ico">🔮</span>
+              <span className="imp-ins-txt">No seu ritmo, em 30 dias serão <b>{d.forecast || 45} missões</b> a mais.</span>
             </li>
           </ul>
         </Locked>
