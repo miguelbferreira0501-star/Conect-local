@@ -4102,8 +4102,8 @@
 .imp-stat b.is-up { color: #3e9c55; }
 .imp-stat b.is-down { color: #d6385e; }
 .imp-stat small { font-size: 11px; font-weight: 700; color: var(--muted); line-height: 1.2; }
-.imp-bars { position: relative; display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; gap: 6px; height: 110px; padding-bottom: 18px; }
-.imp-goal { position: absolute; left: 0; right: 0; margin-bottom: 18px; border-top: 2px dashed #9dcbef; pointer-events: none; }
+.imp-bars { position: relative; display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; gap: 6px; height: 110px; margin-top: 10px; padding-bottom: 18px; }
+.imp-goal { position: absolute; left: 0; right: 0; border-top: 2px dashed #9dcbef; pointer-events: none; }
 .imp-bar-col { position: relative; display: grid; justify-items: center; align-items: end; height: 100%; }
 .imp-bar { width: 70%; border-radius: 8px 8px 4px 4px; background: #b9def8; }
 .imp-bar.is-hit { background: #3ea0ef; }
