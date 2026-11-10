@@ -18,7 +18,13 @@ export const AREAS: Record<Area, { label: string; short: string; emoji: string; 
 };
 
 /** A área de cada objetivo (os objetivos antigos viram "hábitos"). Menores de 18 nunca ficam numa área de peso. */
-export function areaOf(goal: GoalId, minor: boolean): Area {
+export function areaOf(_goal: GoalId, _minor: boolean): Area {
+  // Por enquanto o app tem uma área só: hábitos saudáveis (as de peso e calma saíram; parar de fumar vem depois).
+  return 'habitos';
+}
+
+/** Como era antes (guardado para quando outras áreas voltarem). */
+export function areaOfLegacy(goal: GoalId, minor: boolean): Area {
   if (goal === 'calma') return 'calma';
   if (minor) return 'habitos';
   if (goal === 'emagrecer') return 'perder';
@@ -30,7 +36,10 @@ export function areaOf(goal: GoalId, minor: boolean): Area {
 export const isWeightArea = (a: Area) => a === 'perder' || a === 'ganhar' || a === 'manter';
 
 /** Áreas que a pessoa pode escolher. No começo não aparece "manter" (ele faz sentido depois da meta). */
-export function areasFor(age: AgeGroup, where: 'comeco' | 'app'): Area[] {
+export function areasFor(_age: AgeGroup, _where: 'comeco' | 'app'): Area[] {
+  return ['habitos'];
+}
+export function areasForLegacy(age: AgeGroup, where: 'comeco' | 'app'): Area[] {
   if (isMinor(age)) return ['habitos', 'calma'];
   return where === 'comeco' ? ['perder', 'ganhar', 'habitos', 'calma'] : ['perder', 'ganhar', 'manter', 'habitos', 'calma'];
 }

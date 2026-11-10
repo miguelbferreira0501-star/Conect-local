@@ -18,7 +18,7 @@ export function Onboarding() {
   const s = useApp();
   const migrated = s.from === 'xodo';
   const [a, setA] = useState<OnboardingAnswers>(() => ({
-    goal: 'emagrecer', focus: [], minutes: 15, likes: [], incentive: 'carinho', feeling: 3, ageGroup: '18mais', tracking: false,
+    goal: 'habitos', focus: ['autocuidado', 'habitos'], minutes: 15, likes: [], incentive: 'carinho', feeling: 3, ageGroup: '18mais', tracking: false,
     weightKg: null, heightCm: null, goalKg: null, fur: getState().pet.fur, trait: 'carinhoso', petName: getState().pet.name, userName: getState().profile.name, body: 'equilibrado',
   }));
   const [ageSet, setAgeSet] = useState(false);
@@ -31,7 +31,8 @@ export function Onboarding() {
   const weightJourney = dir !== 'manter';
 
   const steps: StepId[] = useMemo(() => {
-    const list: StepId[] = ['intro', 'age', 'goal'];
+    // Por enquanto só há a área de hábitos saudáveis: sem a pergunta de objetivo nem jornada de peso.
+    const list: StepId[] = ['intro', 'age'];
     if (weightJourney) list.push('body-data', 'journey');
     list.push('focus', 'minutes', 'likes', 'incentive', 'feeling', 'pet', 'name', 'you', 'plan', 'plus');
     return list;
@@ -93,7 +94,7 @@ export function Onboarding() {
               ['13a17', '13 a 17 anos'],
               ['18mais', '18 anos ou mais'],
             ] as [AgeGroup, string][]).map(([g, t]) => (
-              <Opt key={g} on={ageSet && a.ageGroup === g} onClick={() => (up({ ageGroup: g, goal: isMinor(g) ? 'habitos' : 'emagrecer' }), setAgeSet(true), setGuardianOk(false))} emoji={g === '18mais' ? '🧑' : g === '13a17' ? '🧒' : '👶'} title={t} />
+              <Opt key={g} on={ageSet && a.ageGroup === g} onClick={() => (up({ ageGroup: g, goal: 'habitos' }), setAgeSet(true), setGuardianOk(false))} emoji={g === '18mais' ? '🧑' : g === '13a17' ? '🧒' : '👶'} title={t} />
             ))}
             {ageSet && a.ageGroup === 'ate12' && (
               <label className="flex items-start gap-3 rounded-2xl bg-gold-soft p-4 text-[15px]" htmlFor="guardian">

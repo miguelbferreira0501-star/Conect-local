@@ -234,3 +234,16 @@ Cobrança real, push num celular de verdade (precisa do app publicado em HTTPS) 
 - **Cuidar no estilo de jogo:** o quarto do Hami ocupa a tela, com o Hami grande no meio e o que ele precisa num balãozinho; no alto, quatro marcadores redondos (carinho, energia, barriguinha, limpeza; piscam quando estão baixos) e as sementes; embaixo, uma bandeja marrom com duas abas: Cuidados (8 quadradinhos, o mais urgente em destaque) e Comidinhas (cada uma com quantidade e quanto de carinho dá); dá para arrastar a comida até o Hami ou tocar nela.
 - **Missões:** o quarto do Hami no alto com ele falando, e uma trilha do dia com florzinhas até o troféu conforme as missões são feitas.
 - **Testes:** 146 testes do app (o crescimento continua abaixo do máximo até o dia 300). No navegador: Hami novo em 16 variações (fofura, humores, pelagens, roupas, fantasia, coisinha na mão); rolar e acenar no Início; Cuidar com arrastar a cenoura até o Hami (estoque e barriguinha mudam, som de nhac); Missões com a trilha; loja, mapa, Bem-estar e pets das rodadas anteriores; sem erros.
+
+## Rodada 30 (só hábitos saudáveis, água, meta do dia, gráficos, Hami da imagem, provador e viagem)
+
+- **Só a área de hábitos saudáveis:** as áreas de perder/ganhar/manter peso e calma saíram. Quem estava nelas passa para hábitos (o Hami para de mudar de peso; missões continuam). O começo do app não pergunta mais o objetivo. A área de parar de fumar fica para depois.
+- **Água de hoje:** cartão no Início com copinhos que enchem com um toque, meta escolhida pela pessoa (4 a 16 copos) e lembrete de água (2, 4 ou 6 vezes por dia, nunca de madrugada). Bater a meta dá comemoração e som.
+- **Meta do dia:** a pessoa escolhe quantas missões quer fazer por dia (selinho no Início). Ao bater, aparece "Uhuu! Meta do dia batida!" com o Hami de óculos escuros, em qualquer tela.
+- **Quanto você melhorou (Nossa evolução):** missões vs. semana passada, missões nos últimos 7 dias, dias ativos no mês e gráfico de água com a linha da meta. O gráfico de 30 dias e as descobertas (melhor dia da semana, hábito mais firme, humor nos dias com missão, previsão de 30 dias) ficam borrados sem o Plus.
+- **Hami igual à imagem de referência:** tufinhos de pelo nas bochechas e na cabeça, máscara clara no focinho que desce até a barriga, olhos castanhos brilhantes, sorriso aberto com dois dentinhos, orelhas inclinadas, pezinhos claros com dedinhos e sombreado de pelúcia.
+- **Roupas mais bem encaixadas:** roupas de cima com mangas (o bracinho fica da cor da roupa e a patinha aparece), sombreado nas laterais; moletom refeito com gola de capuz, cordinhas, bolso canguru e ursinho.
+- **Provador no estilo jogo:** o Hami grandão no centro (ou o móvel dentro da sua casa), nome, preço e um carrossel com as peças da prateleira para ir trocando.
+- **Móveis novos:** alvo de dardos, janela com cortina, nichos de colmeia, luminária de chão, escrivaninha com notebook e cabideiro (16 itens).
+- **Viagem:** ao sair para um passeio, o Hami vai dirigindo um carrinho vermelho pela estrada até o lugar.
+- **Testes:** 146 testes do app (os de área foram atualizados). No navegador: Início com Hami novo, água, meta do dia e a comemoração, gráficos com partes borradas, provador com carrossel, viagem de carro, Cuidar, mapa, Bem-estar e pets, sem erros.

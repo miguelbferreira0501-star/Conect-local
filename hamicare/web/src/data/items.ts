@@ -136,6 +136,12 @@ export const KIT_ITEMS: Item[] = [
   ...moveis('tapete-nuvem', 'Tapete nuvem', 'movel', 100, 50, [['branco', 'branco', '#F2F4FA', '#FFD34D'], ['azul', 'azul', '#CFE6FB', '#FFFFFF']], { plus: true }),
   ...moveis('tapete-arcoiris', 'Tapete arco-íris', 'movel', 120, 56, [['colorido', '', '#FFFFFF', '#FFFFFF']], { plus: true }),
   ...moveis('pufe-gato', 'Pufe gatinho', 'movel', 90, 12, [['cinza', 'cinza', '#C9CCD8', '#FFFFFF'], ['laranja', 'laranja', '#FFB066', '#FFFFFF'], ['rosa', 'rosa', '#FFC2D6', '#FFFFFF']], { plus: true }),
+  ...moveis('alvo', 'Alvo de dardos', 'decor', 45, 12, [['vermelho', 'vermelho', '#F0525F', '#7FB8F0'], ['azul', 'azul', '#5B8DEF', '#FFD34D']]),
+  ...moveis('janela', 'Janela com cortina', 'decor', 60, 24, [['rosa', 'rosa', '#FF9FC2', '#7FC4F5'], ['azul', 'azul', '#7FB8F0', '#BFE8FF'], ['amarela', 'amarela', '#FFD66B', '#9FD8F0']]),
+  ...moveis('colmeia', 'Nichos de colmeia', 'decor', 55, 24, [['madeira', 'de madeira', '#E2B27A', '#7FB8F0'], ['rosa', 'rosa', '#FFC2D6', '#B399F0']]),
+  ...moveis('luminaria-chao', 'Luminária de chão', 'movel', 45, 12, [['amarela', 'amarela', '#FFD66B', '#4B4F5E'], ['rosa', 'rosa', '#FF9FC2', '#FFFFFF'], ['menta', 'menta', '#9FE3CF', '#4B4F5E']]),
+  ...moveis('mesa-estudo', 'Escrivaninha com notebook', 'movel', 110, 32, [['branca', 'branca', '#F7F3EE', '#B399F0'], ['madeira', 'de madeira', '#C98A5B', '#7FC4F5']], { level: 2 }),
+  ...moveis('cabideiro', 'Cabideiro com casaquinhos', 'movel', 55, 14, [['rosa', 'rosa', '#FF9FC2', '#FFD34D'], ['azul', 'azul', '#7FB8F0', '#F0525F']]),
   ...moveis('pufe', 'Pufe', 'movel', 40, 11, [['rosa', 'rosa', '#FF9FC2', '#FFFFFF'], ['amarelo', 'amarelo', '#FFD66B', '#FF9FC2'], ['azul', 'azul', '#7FB8F0', '#FFFFFF'], ['verde', 'verde', '#7FD8BE', '#FFFFFF']]),
 ];
 

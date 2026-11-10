@@ -495,14 +495,31 @@ export function Clothes({ id, geo }: { id: string | null; geo: Geo }) {
   const c2 = it?.c2;
   const full = (fill: string, dy = 0) => <rect x="0" y={y + dy} width="200" height="100" fill={fill} />;
   switch (base) {
-    case 'moletom':
+    case 'moletom': {
+      // Moletom de verdade: gola do capuz, cordinhas, bolso canguru e um ursinho estampado.
+      const m = c1 ?? '#8FA8E8';
+      const d = c2 ?? '#7A93D6';
       return (
         <g>
-          {full(c1 ?? '#8FA8E8')}
-          <rect x="82" y={y + 22} width="36" height="16" rx="5" fill={c2 ?? '#7A93D6'} />
-          <path d={`M92 ${y} l0 14 M108 ${y} l0 14`} stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+          {full(m, -4)}
+          <path d={`M60 ${y - 6} Q100 ${y + 12} 140 ${y - 6} L140 ${y + 2} Q100 ${y + 20} 60 ${y + 2} Z`} fill={d} />
+          <path d={`M93 ${y + 6} l-1 16 M107 ${y + 6} l1 16`} stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" />
+          <circle cx="92" cy={y + 23} r="2" fill="#FFFFFF" />
+          <circle cx="108" cy={y + 23} r="2" fill="#FFFFFF" />
+          <path d={`M78 ${y + 26} H122 L126 ${y + 44} H74 Z`} fill={d} />
+          <path d={`M78 ${y + 26} L74 ${y + 44} M122 ${y + 26} L126 ${y + 44}`} stroke="#000000" strokeOpacity="0.12" strokeWidth="2" />
+          <g transform={`translate(100 ${y + 33})`}>
+            <circle cx="-4.6" cy="-4" r="2.6" fill="#FFFFFF" />
+            <circle cx="4.6" cy="-4" r="2.6" fill="#FFFFFF" />
+            <ellipse cx="0" cy="0" rx="6" ry="5" fill="#FFFFFF" />
+            <circle cx="-2" cy="-0.6" r="0.9" fill={d} />
+            <circle cx="2" cy="-0.6" r="0.9" fill={d} />
+            <ellipse cx="0" cy="1.6" rx="1.2" ry="0.8" fill={d} />
+          </g>
+          <rect x="0" y={y + 52} width="200" height="6" fill={d} />
         </g>
       );
+    }
     case 'regata':
       return (
         <g>
@@ -1462,6 +1479,17 @@ export function EffectFront({ id, geo }: { id: string | null | undefined; geo: G
 const COSTUMES = new Set(['fantasia-coelho', 'fantasia-urso', 'fantasia-gato', 'fantasia-sapo', 'fantasia-dino', 'fantasia-unicornio', 'fantasia-pintinho', 'fantasia-pinguim', 'fantasia-raposa', 'fantasia-panda', 'fantasia-leao', 'fantasia-dragao', 'fantasia-tubarao', 'fantasia-vaca', 'fantasia-morango', 'fantasia-abacate', 'fantasia-rena']);
 
 /** A roupa é uma fantasia de corpo inteiro? Então o Hami fica de capuz (sem as orelhinhas dele) e com patinhas da cor da fantasia. */
+/** Roupas de cima com manga: o bracinho do Hami fica da cor da roupa (com a patinha aparecendo). */
+const SLEEVED = new Set(['moletom', 'camiseta', 'listrada', 'jaqueta', 'kimono', 'florida', 'futebol', 'dolma', 'casaco-capitao', 'sueter', 'xadrez', 'smoking', 'astronauta', 'pijama', 'jardineira', 'vestido', 'princesa', 'babado', 'estrelado', 'manto-mago', 'pijama-nuvem']);
+export function sleeveOf(roupa: string | null | undefined): string | null {
+  if (!roupa) return null;
+  const it = itemById(roupa);
+  const base = it?.base ?? roupa;
+  if (!SLEEVED.has(base)) return null;
+  if (base === 'jardineira') return '#FFFFFF';
+  return it?.c1 ?? (base === 'moletom' ? '#8FA8E8' : base === 'smoking' ? '#2B2224' : '#FFFFFF');
+}
+
 export function costumeOf(roupa: string | null | undefined): { base: string; c1: string; c2: string; paw: string; foot: string } | null {
   const L = look(roupa, '#FFB3CF', '#FFFFFF');
   if (!L.base || !COSTUMES.has(L.base)) return null;

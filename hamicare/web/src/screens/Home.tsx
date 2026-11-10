@@ -9,16 +9,15 @@ import { TeamHomeCard } from './social/Team';
 import { JourneyCard, useKcalPop } from '../components/Journey';
 import { TaskRow } from '../components/TaskRow';
 import { MealCard } from '../components/MealPlan';
-import { Coins, Modal, toast } from '../components/ui';
+import { Coins, Modal, Sheet, toast } from '../components/ui';
 import { GREETING, periodOf, petLine } from '../data/lines';
 import { placeById } from '../data/world';
 import { streakOf } from '../logic/streak';
-import { areaNow, dayOf, finishAdventure, homeArenaOf, getState, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
+import { dayGoalOf, setDayGoal, dayOf, finishAdventure, homeArenaOf, getState, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
 import { prefersReducedMotion, fmtNum } from '../lib/util';
 import type { PetMood, Task } from '../types';
 import { Glyph } from '../components/art';
-import { AreaSheet } from '../components/AreaSheet';
-import { AREAS } from '../logic/areas';
+import { WaterCard } from '../components/WaterCard';
 import { requestTool } from './Wellbeing';
 import { CompanionBuddy } from './Companions';
 import { LivePet } from '../components/LivePet';
@@ -168,15 +167,16 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
         )}
       </section>
 
-      <HomeChips onGrowth={onEvolution} onArea={() => setAreaOpen(true)} streakCount={streak.count} streakToday={streak.today} />
-      <AreaSheet open={areaOpen} onClose={() => setAreaOpen(false)} />
+      <HomeChips onGrowth={onEvolution} onGoal={() => setAreaOpen(true)} streakCount={streak.count} streakToday={streak.today} done={done} total={tasks.length} />
+      <WaterCard />
+      <DayGoalSheet open={areaOpen} onClose={() => setAreaOpen(false)} total={tasks.length} />
       <WalletSheet open={wallet} onClose={() => setWallet(false)} />
 
       <section className="grid gap-3" aria-label="Missões de hoje">
         <div className="flex items-center justify-between gap-2 px-1">
           <h2 className="section-label">Missões de hoje</h2>
           <span className="text-[13px] font-extrabold opacity-70">
-            {done}/{tasks.length}
+            {done}/{tasks.length} · meta {dayGoalOf(s, tasks.length)}
           </span>
         </div>
         <ul className="grid gap-3">
@@ -207,11 +207,12 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
   );
 }
 
-/** Três selinhos no lugar de vários cartões: tamanho do Hami, dias seguidos e área. */
-function HomeChips({ onGrowth, onArea, streakCount, streakToday }: { onGrowth: () => void; onArea: () => void; streakCount: number; streakToday: boolean }) {
+/** Três selinhos no lugar de vários cartões: tamanho do Hami, dias seguidos e a meta do dia. */
+function HomeChips({ onGrowth, onGoal, streakCount, streakToday, done, total }: { onGrowth: () => void; onGoal: () => void; streakCount: number; streakToday: boolean; done: number; total: number }) {
   const s = useApp();
   const g = useGrowth(s);
-  const a = areaNow(s);
+  const goal = dayGoalOf(s, total);
+  const hit = done >= goal;
   return (
     <div className="home-chips">
       <button className="home-chip" onClick={onGrowth} aria-label={`${s.pet.name}: ${g.name}. ${g.next ? `Cresce em ${g.toNext} dias de cuidado` : 'Tamanho máximo'}`}>
@@ -234,16 +235,41 @@ function HomeChips({ onGrowth, onArea, streakCount, streakToday }: { onGrowth: (
           <small>seguidos</small>
         </span>
       </button>
-      <button className="home-chip" onClick={onArea} aria-label={`Área: ${AREAS[a].short}. Mudar de área`}>
-        <span className="home-chip-ico" style={{ background: '#FFE6EE' }}>
-          <Glyph e={AREAS[a].emoji} size={22} />
+      <button className="home-chip" onClick={onGoal} aria-label={`Meta do dia: ${done} de ${goal} missões. Mudar a meta`}>
+        <span className="home-chip-ico" style={{ background: hit ? '#FFF1B8' : '#FFE6EE' }}>
+          <Glyph e={hit ? '🏆' : '🎯'} size={22} />
         </span>
         <span className="home-chip-text">
-          <b>{AREAS[a].short}</b>
-          <small>mudar</small>
+          <b>
+            {Math.min(done, goal)}/{goal} {hit ? 'feito!' : 'hoje'}
+          </b>
+          <small>meta do dia</small>
         </span>
       </button>
     </div>
+  );
+}
+
+/** A pessoa escolhe quantas missões quer fazer por dia. */
+function DayGoalSheet({ open, onClose, total }: { open: boolean; onClose: () => void; total: number }) {
+  const s = useApp();
+  const goal = dayGoalOf(s, total);
+  const opts = Array.from(new Set([1, 2, 3, 4, 5, 6, 8, 10, total].filter((n) => n > 0 && n <= Math.max(total, 1)))).sort((a, b) => a - b);
+  return (
+    <Sheet open={open} onClose={onClose} title="Sua meta do dia">
+      <div className="grid gap-3 pb-2">
+        <p className="text-[14px] text-muted">Quantas missões você quer fazer por dia? Comece pequeno: bater uma meta leve todo dia vale mais que uma meta enorme.</p>
+        <div className="grid grid-cols-4 gap-2">
+          {opts.map((n) => (
+            <button key={n} className={`goal-opt ${n === goal ? 'is-on' : ''}`} onClick={() => (setDayGoal(n), toast(`Meta: ${n} ${n === 1 ? 'missão' : 'missões'} por dia`))}>
+              <b>{n}</b>
+              <small>{n === total ? 'todas' : n === 1 ? 'missão' : 'missões'}</small>
+            </button>
+          ))}
+        </div>
+        <p className="text-[12px] text-muted">Você tem {total} missões hoje. Dá para adicionar ou tirar missões na aba Missões.</p>
+      </div>
+    </Sheet>
   );
 }
 

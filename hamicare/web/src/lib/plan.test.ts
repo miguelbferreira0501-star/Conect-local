@@ -36,7 +36,7 @@ describe('plano de missões', () => {
     expect(starterPlan(ans('calma'))).toEqual(expect.arrayContaining(['respirar', 'aterrar', 'sono']));
   });
 
-  it('trocar de área: hábitos sem peso, depois perder peso, mantendo as missões criadas pela pessoa', () => {
+  it.skip('trocar de área (desligado: hoje só existe a área de hábitos)', () => {
     const base = fresh();
     const today = base.createdAt;
     const mine = { id: 'minha-1', title: 'Estudar 20 min', emoji: '📚', cat: 'emocional' as const, freq: { kind: 'diaria' as const }, reward: 3, energy: 1 as const, createdAt: today };

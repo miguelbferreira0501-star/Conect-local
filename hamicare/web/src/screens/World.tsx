@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowUpToLine, Lock, PackageOpen, Pencil, Sparkles } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { ShopHub } from './Shop';
+import { TripDepart } from '../components/TripDepart';
 import { ISLAND_AT, MAP_H, MAP_W, TripMapArt } from '../components/TripMap';
 import { CompanionBuddy } from './Companions';
 import { Room } from '../components/Room';
@@ -173,6 +174,7 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
   const [open, setOpen] = useState<string | null>(null);
   const [result, setResult] = useState<AdventureResult | null>(null);
   const [album, setAlbum] = useState(false);
+  const [trip, setTrip] = useState<{ name: string; colors: [string, string] } | null>(null);
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 15_000);
@@ -299,8 +301,10 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
                     onClick={() => {
                       const r = startAdventure(place.id, m.id);
                       const msg = { ok: `${s.pet.name} saiu para a aventura!`, cansado: `${s.pet.name} está cansado. Deixe ele dormir um pouco.`, dormindo: `${s.pet.name} está dormindo.`, ocupado: 'Já tem uma aventura em andamento.', bloqueado: 'Lugar bloqueado.' }[r];
-                      toast(msg);
-                      if (r === 'ok') setOpen(null);
+                      if (r === 'ok') {
+                        setOpen(null);
+                        setTrip({ name: place.name, colors: place.colors as [string, string] });
+                      } else toast(msg);
                     }}
                   >
                     Ir
@@ -325,6 +329,7 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
         )}
       </Sheet>
       <AdventureModal result={result} onClose={() => setResult(null)} />
+      <TripDepart place={trip} onDone={() => (setTrip(null), toast(`${s.pet.name} saiu para a aventura!`))} />
     </div>
   );
 }
