@@ -1,6 +1,6 @@
 // Coleção: o inventário (com raridade, origem e o selo "Novo"), o Álbum de Coleções com prêmios,
 // a Oficina (fragmentos viram o item que falta) e a Carteira (histórico de sementes e XP).
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { Check, Hammer } from 'lucide-react';
 import { ItemIcon } from '../components/ItemIcon';
 import { Glyph } from '../components/art';
@@ -17,18 +17,19 @@ const ORIGIN_LABEL: Record<ItemOrigin, string> = { loja: 'Vendinha', bau: 'Baú'
 const ownedIds = (s: State) => new Set(Object.keys(s.inventory).filter((id) => s.inventory[id] > 0));
 const isNew = (s: State, id: string) => !!s.itemMeta?.[id] && !s.itemMeta[id].seen;
 
-function Tile({ item, s, onClick, dim }: { item: Item; s: State; onClick?: () => void; dim?: boolean }) {
+// Só redesenha quando o próprio item muda (antes a lista inteira redesenhava a cada toque).
+const TileView = memo(function TileView({ item, fresh, fur, onOpen, dim }: { item: Item; fresh: boolean; fur: string; onOpen: (i: Item) => void; dim?: boolean }) {
   const r = rarityOf(item);
   return (
-    <button className={`inv-tile ${dim ? 'is-dim' : ''}`} style={{ ['--rc' as string]: rarityColor(r) }} onClick={onClick} aria-label={`${item.name}, ${rarityLabel(r)}${isNew(s, item.id) ? ', novo' : ''}`}>
-      {isNew(s, item.id) && <span className="inv-new">Novo</span>}
+    <button className={`inv-tile ${dim ? 'is-dim' : ''}`} style={{ ['--rc' as string]: rarityColor(r) }} onClick={() => onOpen(item)} aria-label={`${item.name}, ${rarityLabel(r)}${fresh ? ', novo' : ''}`}>
+      {fresh && <span className="inv-new">Novo</span>}
       <span className="inv-icon">
-        <ItemIcon item={item} size={30} fur={s.pet.fur} />
+        <ItemIcon item={item} size={30} fur={fur} />
       </span>
       <span className="inv-name">{item.name}</span>
     </button>
   );
-}
+});
 
 // ---------- Itens ----------
 
@@ -89,7 +90,7 @@ export function InventoryView() {
       {list.length ? (
         <div className="inv-grid">
           {list.map((i) => (
-            <Tile key={i.id} item={i} s={s} onClick={() => setOpen(i)} />
+            <TileView key={i.id} item={i} fresh={isNew(s, i.id)} fur={s.pet.fur} onOpen={setOpen} />
           ))}
         </div>
       ) : (

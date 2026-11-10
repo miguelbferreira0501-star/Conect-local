@@ -4509,3 +4509,13 @@
 /* Descobertas: o texto corre como uma frase só (sem colunas) */
 .imp-insights li .imp-ins-ico { flex: none; }
 .imp-insights li .imp-ins-txt { flex: 1; min-width: 0; display: block; }
+
+/* Coleção leve: o celular só desenha os quadradinhos que estão na tela, e o desenho cabe na caixinha */
+.inv-tile { content-visibility: auto; contain-intrinsic-size: auto 120px; }
+.inv-icon { overflow: hidden; contain: paint; }
+.inv-icon .kit-icon { max-width: 50px; max-height: 50px; }
+.inv-icon .kit-icon svg { max-width: 100%; max-height: 100%; width: auto; height: auto; }
+/* Ícones de item ficam paradinhos: dezenas de Hamis piscando ao mesmo tempo travavam a rolagem */
+.icon-still { display: block; }
+.icon-still *, .inv-icon *, .kit-icon * { animation: none !important; }
+.inv-tile { contain: layout paint style; }
