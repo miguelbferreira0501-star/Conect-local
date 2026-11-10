@@ -247,3 +247,12 @@ Cobrança real, push num celular de verdade (precisa do app publicado em HTTPS) 
 - **Móveis novos:** alvo de dardos, janela com cortina, nichos de colmeia, luminária de chão, escrivaninha com notebook e cabideiro (16 itens).
 - **Viagem:** ao sair para um passeio, o Hami vai dirigindo um carrinho vermelho pela estrada até o lugar.
 - **Testes:** 146 testes do app (os de área foram atualizados). No navegador: Início com Hami novo, água, meta do dia e a comemoração, gráficos com partes borradas, provador com carrossel, viagem de carro, Cuidar, mapa, Bem-estar e pets, sem erros.
+
+## Rodada 31 (identidade visual: Hami da imagem, roupas que vestem, Início estilo Catzy e check-in de humor)
+
+- **Hami redesenhado como a imagem enviada:** cabeça grande e larga com bochechas fofas em tufinhos, focinho e bochechas creme, sobrancelhinhas, olhos castanhos enormes com brilho, nariz rosado, boca aberta com dois dentinhos e linguinha, orelhas grandes inclinadas, topete, contorno marrom suave e sombreado de pelúcia; corpo menor embaixo com barriguinha creme, bracinhos e pezinhos com dedinhos.
+- **Roupas que vestem de verdade:** a roupa agora é o próprio corpo (como no Finch): toma o formato do corpo inteiro abaixo da cabeça, com contorno da cor da roupa, mangas nos bracinhos com punho, sombreado e o moletom com capuz, cordinhas, bolso canguru e ursinho. As fantasias cobrem cabeça e corpo e deixam o rostinho do Hami aparecendo.
+- **Início no estilo do Catzy:** fundo azul-lavanda; a casa do Hami é quase o dobro da largura da tela e dá para arrastar para os lados (começa no meio); ícones à esquerda (missões com o número que falta, bem-estar, mapa), barra de atalhos à direita (roupas, decorar, cuidar, Plus); balão de fala com botão de check-in; cartão "Meta do dia" em bolinhas; lista "Concluído hoje" com quadradinhos azuis e check azul-claro.
+- **Hami dormindo:** quando ele vai dormir, aparece enroladinho numa almofada verde, respirando devagar, com bolinha de ranho que enche e esvazia e "zzz" subindo.
+- **Check-in de humor ao abrir (uma vez por dia):** tela que sobe de baixo com "Como você está se sentindo agora?", carinha de olhinhos que muda com a barrinha, balão com o nome (Muito ruim, Ruim, Neutro, Bem, Ótimo), fundo que muda de cor, "Explorar mais" (emoções) e "Continuar". Também abre pelo balão do Hami e pelo botão de carinha na lista.
+- **Testes:** 146 testes do app. No navegador: check-in (neutro e ótimo), casa arrastando para o lado, lista nova, Hami dormindo, Cuidar, mapa, Bem-estar e a rodada anterior, sem erros.

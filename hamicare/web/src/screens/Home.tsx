@@ -1,19 +1,19 @@
 import { useGrowth } from '../components/Growth';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Flame, Mail, Plus, Settings } from 'lucide-react';
-import { ArenaScene } from '../components/ArenaScene';
-import { ArenaPin, arenaByN } from './Arenas';
+import { ChevronRight, Flame, Mail, Plus, Settings } from 'lucide-react';
+import { Room } from '../components/Room';
+import { SleepingHami } from '../components/SleepingHami';
+import { openCheckin } from '../components/MoodCheckin';
 import { WalletSheet } from './Collection';
-import { PlusPill } from '../components/PlusCard';
 import { TeamHomeCard } from './social/Team';
 import { JourneyCard, useKcalPop } from '../components/Journey';
 import { TaskRow } from '../components/TaskRow';
 import { MealCard } from '../components/MealPlan';
 import { Coins, Modal, Sheet, toast } from '../components/ui';
-import { GREETING, periodOf, petLine } from '../data/lines';
+import { GREETING, MOODS, periodOf, petLine } from '../data/lines';
 import { placeById } from '../data/world';
 import { streakOf } from '../logic/streak';
-import { dayGoalOf, setDayGoal, dayOf, finishAdventure, homeArenaOf, getState, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
+import { dayGoalOf, setDayGoal, dayOf, finishAdventure, getState, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
 import { prefersReducedMotion, fmtNum } from '../lib/util';
 import type { PetMood, Task } from '../types';
 import { Glyph } from '../components/art';
@@ -31,7 +31,7 @@ export function useNow(ms: number) {
   return now;
 }
 
-export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onArenas: () => void; onPlus: () => void; onTeam: () => void }) {
+export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, onWorld }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onArenas: () => void; onPlus: () => void; onTeam: () => void; onWorld?: (tab: 'casa' | 'armario' | 'loja') => void }) {
   const [areaOpen, setAreaOpen] = useState(false);
   const [wallet, setWallet] = useState(false);
   const s = useApp();
@@ -48,6 +48,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
   const [puff, setPuff] = useState<{ id: number; text: string } | null>(null);
   const { pop, layer } = useKcalPop();
   const dir = s.journey.dir;
+  const growthName = useGrowth(s).name;
 
   const line = useMemo(
     () => petLine({ period, battery: day.battery, done, total: tasks.length, user: s.profile.name, seed: s.seed + today.length + done, stats: s.pet.stats, sleeping: s.pet.sleeping }),
@@ -106,11 +107,15 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
         </button>
       )}
     </div>
+  ) : s.pet.sleeping ? (
+    <button className="sleep-spot" onClick={() => toast(`${s.pet.name} está dormindo. Shhh…`)} aria-label={`${s.pet.name} dormindo`} data-sound="none">
+      <SleepingHami fur={s.pet.fur} size={250} />
+    </button>
   ) : (
     <div className="relative">
       <div ref={petRef} style={{ transformOrigin: '50% 100%' }}>
         <LivePet
-          size={210}
+          size={260}
           mood={petMood}
           onTap={() => {
             if (s.pet.sleeping) {
@@ -121,7 +126,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
           }}
         />
       </div>
-      <CompanionBuddy hamster={210} />
+      <CompanionBuddy hamster={260} />
       {puff && (
         <span key={puff.id} className={`grams-puff ${dir === 'ganhar' ? 'is-gain' : ''}`} aria-live="polite">
           {puff.text}
@@ -133,51 +138,99 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
   return (
     <div className="grid gap-4">
       {layer}
-      <section className="relative" aria-label={`Jardim do ${s.pet.name}`}>
-        <div className="scene-bleed relative overflow-hidden">
-          <ArenaScene arena={arenaByN(homeArenaOf(s)).id} height={400} fade>
+      <section className="home-room" aria-label={`Casa do ${s.pet.name}`}>
+        <PanRoom>
+          <Room house={s.house} period={period} height={430} wide={1.9}>
             {hami}
-          </ArenaScene>
-          <ArenaPin s={s} onClick={onArenas} />
-          <PlusPill onOpen={onPlus} scene />
-        </div>
-        <div className="scene-top">
-          <span className="pill min-w-0 flex-1">
-            <span className="truncate font-display text-[17px]">
-              {GREETING[period]}
-              {s.profile.name ? `, ${s.profile.name}` : ''}
-            </span>
+          </Room>
+        </PanRoom>
+        <div className="hr-top">
+          <span className="hr-hello">
+            {GREETING[period]}
+            {s.profile.name ? `, ${s.profile.name}` : ''}
           </span>
-          <button className="pill shrink-0" onClick={() => setWallet(true)} aria-label={`Carteira: ${s.coins} sementes`}>
+          <button className="hr-pill" onClick={() => setWallet(true)} aria-label={`Carteira: ${s.coins} sementes`}>
             <Coins value={s.coins} />
           </button>
-          <button className="pill pill-round shrink-0" onClick={onSettings} aria-label="Ajustes">
-            <Settings size={19} />
+          <button className="hr-pill hr-round" onClick={onSettings} aria-label="Ajustes">
+            <Settings size={18} />
+          </button>
+        </div>
+        <div className="hr-left">
+          <button className="hr-icon" onClick={() => onGo('atividades')} aria-label={`Missões: faltam ${Math.max(0, tasks.length - done)}`}>
+            <Glyph e="📅" size={34} />
+            {tasks.length - done > 0 && <span className="hr-badge">{tasks.length - done}</span>}
+          </button>
+          <button className="hr-icon" onClick={() => onGo('bem-estar')} aria-label="Bem-estar">
+            <Glyph e="💗" size={34} />
+          </button>
+          <button className="hr-icon" onClick={onArenas} aria-label="Mapa das arenas">
+            <Glyph e="🗺️" size={32} />
+          </button>
+        </div>
+        <div className="hr-tools" role="toolbar" aria-label="Atalhos">
+          <button onClick={() => onWorld?.('armario')} aria-label="Roupas">
+            <Glyph e="👗" size={34} />
+          </button>
+          <button onClick={() => onWorld?.('casa')} aria-label="Decorar a casa">
+            <Glyph e="🏡" size={34} />
+          </button>
+          <button onClick={() => onGo('cuidar')} aria-label="Cuidar e brincar">
+            <Glyph e="🧶" size={34} />
+          </button>
+          <button onClick={onPlus} aria-label="HamiCare+">
+            <Glyph e="👑" size={32} />
           </button>
         </div>
         {!adv && (
-          <div className="absolute inset-x-4 top-[68px] z-[3]">
-            <div className="speech-float">
-              <p className="text-[15px] font-semibold leading-snug">
-                <span className="font-display font-bold text-accent">{s.pet.name}: </span>
-                {line}
-              </p>
-            </div>
+          <div className="hr-bubble">
+            <p>{line}</p>
+            {!day.mood && (
+              <button onClick={() => openCheckin()}>
+                Como você está agora? <ChevronRight size={18} />
+              </button>
+            )}
           </div>
         )}
+        <span className="hr-hint" aria-hidden="true">‹ arraste para ver a casa ›</span>
       </section>
 
-      <HomeChips onGrowth={onEvolution} onGoal={() => setAreaOpen(true)} streakCount={streak.count} streakToday={streak.today} done={done} total={tasks.length} />
+      <section className="hc-adv" aria-label="Meta do dia">
+        <button className="hc-adv-title" onClick={() => setAreaOpen(true)}>
+          Meta do dia · {Math.min(done, dayGoalOf(s, tasks.length))}/{dayGoalOf(s, tasks.length)}
+        </button>
+        <div className="hc-nodes" aria-hidden="true">
+          {Array.from({ length: Math.min(6, dayGoalOf(s, tasks.length)) }, (_, i) => {
+            const goal = dayGoalOf(s, tasks.length);
+            const n = Math.min(6, goal);
+            const step = (goal / n) * (i + 1);
+            return (
+              <span key={i} className="hc-node-wrap">
+                {i > 0 && <span className={`hc-link ${done >= (goal / n) * i ? 'is-on' : ''}`} />}
+                <span className={`hc-node ${done >= step ? 'is-on' : ''}`}>{done >= step ? '✓' : ''}</span>
+              </span>
+            );
+          })}
+        </div>
+        <p className="hc-adv-sub">
+          <Flame size={14} /> {streak.count} {streak.count === 1 ? 'dia seguido' : 'dias seguidos'} · <button onClick={onEvolution}>{growthName}</button>
+        </p>
+      </section>
       <WaterCard />
       <DayGoalSheet open={areaOpen} onClose={() => setAreaOpen(false)} total={tasks.length} />
       <WalletSheet open={wallet} onClose={() => setWallet(false)} />
 
-      <section className="grid gap-3" aria-label="Missões de hoje">
-        <div className="flex items-center justify-between gap-2 px-1">
-          <h2 className="section-label">Missões de hoje</h2>
-          <span className="text-[13px] font-extrabold opacity-70">
-            {done}/{tasks.length} · meta {dayGoalOf(s, tasks.length)}
+      <section className="grid gap-3 hc-tasks" aria-label="Missões de hoje">
+        <div className="hc-head">
+          <span className="hc-head-ico" aria-hidden="true">
+            <Glyph e="📅" size={24} />
           </span>
+          <h2>
+            Concluído hoje <b>{done}/{tasks.length}</b>
+          </h2>
+          <button className="hc-head-btn" onClick={() => openCheckin()} aria-label="Como você está agora?">
+            <Glyph e={day.mood ? MOODS[day.mood - 1].emoji : '😐'} size={24} />
+          </button>
         </div>
         <ul className="grid gap-3">
           {tasks.map((t) => (
@@ -207,45 +260,30 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam }
   );
 }
 
-/** Três selinhos no lugar de vários cartões: tamanho do Hami, dias seguidos e a meta do dia. */
-function HomeChips({ onGrowth, onGoal, streakCount, streakToday, done, total }: { onGrowth: () => void; onGoal: () => void; streakCount: number; streakToday: boolean; done: number; total: number }) {
-  const s = useApp();
-  const g = useGrowth(s);
-  const goal = dayGoalOf(s, total);
-  const hit = done >= goal;
+/** A casa é mais larga que a tela: arrasta para os lados (com o dedo ou o mouse). Começa no meio. */
+function PanRoom({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ x: number; left: number } | null>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (el) el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+  }, []);
   return (
-    <div className="home-chips">
-      <button className="home-chip" onClick={onGrowth} aria-label={`${s.pet.name}: ${g.name}. ${g.next ? `Cresce em ${g.toNext} dias de cuidado` : 'Tamanho máximo'}`}>
-        <span className="home-chip-ico" style={{ background: '#DFF5D2' }}>
-          <Glyph e="🌱" size={22} />
-        </span>
-        <span className="home-chip-text">
-          <b>{g.name}</b>
-          <small>{g.next ? `cresce em ${g.toNext}d` : 'tamanho máximo'}</small>
-        </span>
-      </button>
-      <button className="home-chip" onClick={onGrowth} aria-label={`${streakCount} ${streakCount === 1 ? 'dia' : 'dias'} seguidos`}>
-        <span className="home-chip-ico" style={{ background: streakToday ? '#FFE0CC' : '#F1ECE6' }}>
-          <Flame size={20} className={streakToday ? 'text-[#F26B2A]' : 'text-[#A89C90]'} />
-        </span>
-        <span className="home-chip-text">
-          <b>
-            {streakCount} {streakCount === 1 ? 'dia' : 'dias'}
-          </b>
-          <small>seguidos</small>
-        </span>
-      </button>
-      <button className="home-chip" onClick={onGoal} aria-label={`Meta do dia: ${done} de ${goal} missões. Mudar a meta`}>
-        <span className="home-chip-ico" style={{ background: hit ? '#FFF1B8' : '#FFE6EE' }}>
-          <Glyph e={hit ? '🏆' : '🎯'} size={22} />
-        </span>
-        <span className="home-chip-text">
-          <b>
-            {Math.min(done, goal)}/{goal} {hit ? 'feito!' : 'hoje'}
-          </b>
-          <small>meta do dia</small>
-        </span>
-      </button>
+    <div
+      ref={ref}
+      className="hr-scroll"
+      onPointerDown={(e) => {
+        if (e.pointerType !== 'mouse') return;
+        drag.current = { x: e.clientX, left: ref.current!.scrollLeft };
+      }}
+      onPointerMove={(e) => {
+        if (!drag.current) return;
+        ref.current!.scrollLeft = drag.current.left - (e.clientX - drag.current.x);
+      }}
+      onPointerUp={() => (drag.current = null)}
+      onPointerLeave={() => (drag.current = null)}
+    >
+      <div className="hr-inner">{children}</div>
     </div>
   );
 }
