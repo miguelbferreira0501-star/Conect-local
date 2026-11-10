@@ -3,12 +3,12 @@
 // e abas da loja embaixo (Vendinha, Roupas, Casa, Comida e Baús).
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Check, ChevronLeft, ChevronRight, Crown, Gift, Heart, Lock, Sparkles } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Crown, Gift, Heart, Lock } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { Room } from '../components/Room';
 import { ItemIcon } from '../components/ItemIcon';
 import { Glyph } from '../components/art';
-import { Coins, Seed, Sheet, toast } from '../components/ui';
+import { Coins, Seed, toast } from '../components/ui';
 import { SHOP_COLORS, SHOPS, ShopFront, ShopIcon, type ShopId } from '../components/ShopFront';
 import { PLUS_COUNTS } from '../components/PlusCard';
 import { KIT_PLACE } from '../components/room/kit';
@@ -75,7 +75,8 @@ export function ShopHub({ onPlus, onGift }: { onPlus: () => void; onGift: (itemI
 function ShopMode({ shop, onShop, onClose, onPlus, onGift }: { shop: ShopId; onShop: (id: ShopId) => void; onClose: () => void; onPlus: () => void; onGift: (itemId: string) => void }) {
   const s = useApp();
   const kids = s.profile.ageGroup === 'ate12';
-  const [tryOn, setTryOn] = useState<Item | null>(null);
+  const [tryOn, setTryOn] = useState<{ item: Item; list: Item[] } | null>(null);
+  const openTry = (item: Item, list?: Item[]) => setTryOn({ item, list: list ?? [item] });
   const scroller = useRef<HTMLDivElement>(null);
   const c = SHOP_COLORS[shop];
   const pending = s.game.pendingChests.length;
@@ -104,8 +105,8 @@ function ShopMode({ shop, onShop, onClose, onPlus, onGift }: { shop: ShopId; onS
         </div>
         <div className="sm-body">
           {!kids && !isPremium(s) && <PlusBanner onPlus={onPlus} />}
-          {shop === 'vendinha' && <VendinhaBody onTry={setTryOn} kids={kids} />}
-          {(shop === 'roupas' || shop === 'casa' || shop === 'comida') && <AisleBody key={shop} kinds={AISLES[shop]} looks={shop === 'roupas'} onTry={setTryOn} onPlus={onPlus} />}
+          {shop === 'vendinha' && <VendinhaBody onTry={openTry} kids={kids} />}
+          {(shop === 'roupas' || shop === 'casa' || shop === 'comida') && <AisleBody key={shop} kinds={AISLES[shop]} looks={shop === 'roupas'} onTry={openTry} onPlus={onPlus} />}
           {shop === 'baus' && (
             <div className="sm-chests">
               <ChestShopView />
@@ -124,7 +125,7 @@ function ShopMode({ shop, onShop, onClose, onPlus, onGift }: { shop: ShopId; onS
           </button>
         ))}
       </nav>
-      <TryOn item={tryOn} onClose={() => setTryOn(null)} onPlus={onPlus} onGift={onGift} />
+      <TryOn item={tryOn?.item ?? null} list={tryOn?.list ?? []} onPick={(it) => setTryOn((t) => (t ? { ...t, item: it } : t))} onClose={() => setTryOn(null)} onPlus={onPlus} onGift={onGift} />
     </div>,
     document.body,
   );
@@ -158,7 +159,7 @@ function Title({ children, side }: { children: React.ReactNode; side?: React.Rea
 }
 
 /** Quadradinho de um item: só o desenho e o preço. */
-function ShopTile({ item, onTry }: { item: Item; onTry: (item: Item) => void }) {
+function ShopTile({ item, onTry }: { item: Item; onTry: (item: Item, list?: Item[]) => void }) {
   const s = useApp();
   const res = canBuy(s, item.id);
   const wished = s.wishlist.includes(item.id);
@@ -200,11 +201,11 @@ function ShopTile({ item, onTry }: { item: Item; onTry: (item: Item) => void }) 
   );
 }
 
-function TileGrid({ items, onTry }: { items: Item[]; onTry: (item: Item) => void }) {
+function TileGrid({ items, onTry }: { items: Item[]; onTry: (item: Item, list?: Item[]) => void }) {
   return (
     <ul className="sm-grid">
       {items.map((item) => (
-        <ShopTile key={item.id} item={item} onTry={onTry} />
+        <ShopTile key={item.id} item={item} onTry={(it) => onTry(it, items)} />
       ))}
     </ul>
   );
@@ -216,7 +217,7 @@ function shelf(items: Item[], s: ReturnType<typeof useApp>) {
   return [...items].sort((a, b) => rank(a) - rank(b) || a.price - b.price);
 }
 
-function VendinhaBody({ onTry, kids }: { onTry: (item: Item) => void; kids: boolean }) {
+function VendinhaBody({ onTry, kids }: { onTry: (item: Item, list?: Item[]) => void; kids: boolean }) {
   const s = useApp();
   const today = todayKey();
   const daily = dailyCollection(today).filter((i) => !kids || !i.plus);
@@ -267,7 +268,7 @@ function VendinhaBody({ onTry, kids }: { onTry: (item: Item) => void; kids: bool
   );
 }
 
-function AisleBody({ kinds, looks, onTry, onPlus }: { kinds: ItemKind[]; looks?: boolean; onTry: (item: Item) => void; onPlus: () => void }) {
+function AisleBody({ kinds, looks, onTry, onPlus }: { kinds: ItemKind[]; looks?: boolean; onTry: (item: Item, list?: Item[]) => void; onPlus: () => void }) {
   const s = useApp();
   const kids = s.profile.ageGroup === 'ate12';
   const [kind, setKind] = useState<ItemKind | 'looks'>(looks ? 'looks' : kinds[0]);
@@ -343,70 +344,98 @@ function LookTiles({ onPlus }: { onPlus: () => void }) {
 }
 
 /** Provador: o Hami com a roupa de agora + a peça escolhida, antes de comprar. */
-function TryOn({ item, onClose, onPlus, onGift }: { item: Item | null; onClose: () => void; onPlus: () => void; onGift?: (itemId: string) => void }) {
+/** Provador no estilo jogo: o Hami grandão no meio (ou a peça dentro da sua casa), nome e preço,
+ *  e um carrossel com as peças da prateleira para ir trocando. */
+function TryOn({ item, list, onPick, onClose, onPlus, onGift }: { item: Item | null; list: Item[]; onPick: (item: Item) => void; onClose: () => void; onPlus: () => void; onGift?: (itemId: string) => void }) {
   const s = useApp();
-  if (!item) return <Sheet open={false} onClose={onClose} title="">{null}</Sheet>;
+  const strip = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    strip.current?.querySelector('.fit-pick.is-on')?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  }, [item]);
+  if (!item) return null;
   const res = canBuy(s, item.id);
   const wear = WEARABLE_KINDS.includes(item.kind);
   const outfit = wear ? { ...s.pet.outfit, [item.kind]: item.id } : s.pet.outfit;
-  // Móvel, parede ou piso: mostra na casa da pessoa, do jeitinho que ficaria.
   const home = !wear && ['movel', 'decor', 'brinquedo', 'parede', 'piso'].includes(item.kind);
   const preview = home ? previewHouse(s.house, item) : null;
+  const kids = s.profile.ageGroup === 'ate12';
+  const wished = s.wishlist.includes(item.id);
   return (
-    <Sheet open onClose={onClose} title={wear ? 'Provador' : home ? 'Na sua casa' : item.name}>
-      <div className="grid gap-3 pt-1">
+    <div className="fitting" role="dialog" aria-modal="true" aria-label={item.name}>
+      <div className="fit-top">
+        <button className="sm-back !static" onClick={onClose} aria-label="Voltar">
+          <ChevronLeft size={24} />
+        </button>
+        <button className={`fit-wish ${wished ? 'is-on' : ''}`} onClick={() => toggleWish(item.id)} aria-label={wished ? 'Tirar dos desejos' : 'Guardar nos desejos'} aria-pressed={wished}>
+          <Heart size={18} />
+        </button>
+      </div>
+      <div className="fit-stage">
         {preview ? (
-          <Room house={preview} period={periodOf()} height={300}>
-            <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="animado" size={120} label={s.pet.name} />
-          </Room>
+          <div className="fit-room">
+            <Room house={preview} period={periodOf()} height={300}>
+              <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="animado" size={120} label={s.pet.name} />
+            </Room>
+          </div>
+        ) : wear ? (
+          <div key={item.id} className="fit-pet">
+            <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={outfit} mood="feliz" size={250} label={`${s.pet.name} com ${item.name}`} growth={1} />
+          </div>
         ) : (
-          <div className="grid place-items-center rounded-[26px] py-4" style={{ background: 'var(--page)' }}>
-            {/* No provador o Hami aparece grandinho, para ver bem a roupa. */}
-            {wear ? <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={outfit} mood="animado" size={210} label={`${s.pet.name} com ${item.name}`} growth={1} /> : <ItemIcon item={item} size={90} />}
+          <div key={item.id} className="fit-pet">
+            <ItemIcon item={item} size={110} />
           </div>
         )}
-        <p className="text-center font-display text-[22px] font-bold leading-tight">
-          {item.name} {item.plus && <Sparkles size={16} className="inline text-accent" />}
+      </div>
+      <div className="fit-info">
+        <p className="fit-name">
+          {item.name} {item.plus && <Crown size={16} className="inline" />}
         </p>
         {res === 'ja-tem' ? (
           wear ? (
-            <button className="btn btn-primary" onClick={() => (wearItem(item.id), toast('Vestido!'), onClose())}>
+            <button className="fit-btn" onClick={() => (wearItem(item.id), toast('Vestido!'))}>
               Vestir agora
             </button>
           ) : (
-            <span className="chip chip-leaf justify-center">Já é seu</span>
+            <span className="fit-btn is-owned">Já é seu</span>
           )
         ) : res === 'plus' ? (
-          <>
-            {s.profile.ageGroup !== 'ate12' && (
-              <p className="text-center text-[14px] text-muted">
-                {wear ? `Ficou a cara do ${s.pet.name}!` : 'Ficou lindo aqui!'} Esse é do HamiCare+: com o Plus, você compra este e mais {PLUS_COUNTS.items - 1} exclusivos com as suas sementes.
-              </p>
-            )}
-            <button className="btn btn-primary" onClick={onPlus}>
-              <Crown size={16} /> {s.profile.ageGroup === 'ate12' ? 'Exclusivo do HamiCare+' : s.premium.trialStart ? 'Conhecer o HamiCare+' : 'Experimentar o Plus 7 dias grátis'}
-            </button>
-          </>
+          <button className="fit-btn is-plus" onClick={kids ? undefined : onPlus} disabled={kids}>
+            <Crown size={16} /> {kids ? 'Exclusivo do HamiCare+' : 'Liberar com o Plus'}
+          </button>
         ) : res === 'nivel' ? (
-          <span className="chip chip-plain justify-center">Libera no nível {item.level}</span>
+          <span className="fit-btn is-owned">
+            <Lock size={14} /> Libera no nível {item.level}
+          </span>
         ) : (
-          <button className="btn btn-primary" disabled={res === 'sem-sementes'} onClick={() => buy(item.id) === 'ok' && (toast(wear ? `${item.name}: já tá vestindo!` : `${item.name} é seu!`), onClose())}>
-            Comprar por <Seed /> {item.price}
+          <button className="fit-btn" disabled={res === 'sem-sementes'} onClick={() => buy(item.id) === 'ok' && toast(wear ? `${item.name}: já tá vestindo!` : `${item.name} é seu!`)}>
+            <Seed size={16} /> {item.price}
           </button>
         )}
-        {res === 'sem-sementes' && <p className="text-center text-[13px] text-muted">Faltam {item.price - s.coins} sementes. Missões, desafios e aventuras dão sementes.</p>}
-        {onGift && res !== 'plus' && s.profile.ageGroup !== 'ate12' && (
-          <button className="btn btn-ghost btn-sm" onClick={() => (onClose(), onGift(item.id))}>
-            <Gift size={15} /> Presentear um amigo
-          </button>
-        )}
-        {res !== 'ja-tem' && (
-          <button className="btn btn-ghost btn-sm" onClick={() => toggleWish(item.id)}>
-            <Heart size={15} className={s.wishlist.includes(item.id) ? 'fill-[var(--accent)] text-accent' : ''} /> {s.wishlist.includes(item.id) ? 'Nos desejos' : 'Guardar nos desejos'}
+        {res === 'sem-sementes' && <p className="fit-note">Faltam {item.price - s.coins} sementes</p>}
+        {onGift && res !== 'plus' && !kids && (
+          <button className="fit-link" onClick={() => (onClose(), onGift(item.id))}>
+            <Gift size={14} /> Presentear um amigo
           </button>
         )}
       </div>
-    </Sheet>
+      {list.length > 1 && (
+        <div className="fit-strip" ref={strip}>
+          {list.map((it) => {
+            const r = canBuy(s, it.id);
+            return (
+              <button key={it.id} className={`fit-pick ${it.id === item.id ? 'is-on' : ''}`} onClick={() => (play('vestir'), onPick(it))} aria-label={it.name} data-sound="none">
+                <span className={`sm-art ${it.kind === 'chapeu' || it.kind === 'oculos' ? 'is-head' : ''}`}>
+                  {WEARABLE_KINDS.includes(it.kind) ? <Hamster fur={s.pet.fur} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null, [it.kind]: it.id }} size={70} idle={false} growth={1} /> : <ItemIcon item={it} size={30} />}
+                </span>
+                {r === 'plus' && <span className="fit-pick-tag">PLUS</span>}
+                {r === 'ja-tem' && <span className="fit-pick-tag is-own">✓</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -429,7 +458,7 @@ function previewHouse(house: House, item: Item): House {
 }
 
 /** Vitrine do Plus: 8 peças que mudam todo dia, para provar no Hami (ou ver na casa) de graça. */
-export function PlusShowcase({ onTry, onAll }: { onTry: (item: Item) => void; onAll: () => void }) {
+export function PlusShowcase({ onTry, onAll }: { onTry: (item: Item, list?: Item[]) => void; onAll: () => void }) {
   const s = useApp();
   const today = todayKey();
   const premium = isPremium(s);

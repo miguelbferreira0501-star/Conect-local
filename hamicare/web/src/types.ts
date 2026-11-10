@@ -47,6 +47,8 @@ export interface DayLog {
   care: CareId[];
   /** Outros acontecimentos do dia: 'diario', 'pote', 'vibe', 'aventura', 'respirar'… */
   events?: string[];
+  /** Copos de água do dia. */
+  water?: number;
   /** id da tarefa → calorias da jornada que ela contou (para desfazer certinho). */
   kcal?: Record<string, number>;
   /** Cardápio do dia: o que a pessoa vai comer (privado, nunca compartilhado). */
@@ -203,6 +205,10 @@ export interface Settings {
   sound: boolean;
   /** Volume dos efeitos sonoros. */
   volume?: 'baixo' | 'medio' | 'alto';
+  /** Meta de copos de água por dia (escolhida pela pessoa). */
+  waterGoal?: number;
+  /** Meta de missões por dia (escolhida pela pessoa). */
+  dayGoal?: number;
 }
 
 /** Economia do jogo guardada no aparelho (com conta, o servidor confere e manda os valores certos). */

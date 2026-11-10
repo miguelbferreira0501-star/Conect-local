@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { GoalDone } from './components/GoalDone';
 import { Sheet, Toaster, toast } from './components/ui';
 import { CelebrationModal, DailyWelcome, StreakScreen } from './components/Celebrate';
 import { LevelUpScreen } from './components/LevelUp';
@@ -194,6 +195,7 @@ export default function App() {
       {showWelcome && <DailyWelcome onClose={markWelcomed} />}
       <ResetPassword />
       <LegalHost />
+      <GoalDone />
       <Toaster />
     </GrowthContext.Provider>
   );

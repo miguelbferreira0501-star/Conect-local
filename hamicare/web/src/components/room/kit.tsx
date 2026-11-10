@@ -1030,6 +1030,94 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <path d="M84 56 q14 -4 6 -24" stroke={c1} strokeWidth="7" fill="none" strokeLinecap="round" />
         </S>
       );
+    // ---------- Peças novas (inspiradas nos quartinhos dos vídeos) ----------
+    case 'k-alvo':
+      return (
+        <S w={80} h={80}>
+          <circle cx="40" cy="40" r="38" fill={dk(WOOD, 0.2)} />
+          {[34, 27, 20, 13, 6].map((r, i) => <circle key={r} cx="40" cy="40" r={r} fill={i % 2 ? '#FFF8EC' : c1} />)}
+          <circle cx="40" cy="40" r="2.6" fill={INK} />
+          <g transform="rotate(-30 40 40)">
+            <path d="M40 40 L66 40" stroke="#8A90A0" strokeWidth="2.4" />
+            <path d="M62 36 l8 4 l-8 4 Z" fill={c2} />
+          </g>
+          <ellipse cx="28" cy="22" rx="10" ry="5" fill="#FFFFFF" opacity="0.25" transform="rotate(-30 28 22)" />
+        </S>
+      );
+    case 'k-janela':
+      return (
+        <S w={120} h={110}>
+          <rect x="18" y="10" width="84" height="80" rx="6" fill={lt(c2, 0.5)} stroke="#FFFFFF" strokeWidth="6" />
+          <path d="M60 10 V90 M18 50 H102" stroke="#FFFFFF" strokeWidth="5" />
+          <ellipse cx="44" cy="30" rx="14" ry="6" fill="#FFFFFF" opacity="0.7" />
+          <ellipse cx="82" cy="66" rx="10" ry="4" fill="#FFFFFF" opacity="0.6" />
+          <rect x="6" y="2" width="108" height="8" rx="4" fill={dk(WOOD, 0.1)} />
+          <path d="M8 8 Q14 50 6 96 Q20 92 30 96 Q24 50 34 8 Z" fill={c1} />
+          <path d="M112 8 Q106 50 114 96 Q100 92 90 96 Q96 50 86 8 Z" fill={c1} />
+          <path d="M14 20 Q18 60 12 92 M106 20 Q102 60 108 92" stroke={dk(c1, 0.15)} strokeWidth="2" fill="none" />
+          <path d="M6 58 Q20 62 32 56 M114 58 Q100 62 88 56" stroke={GOLD} strokeWidth="3" fill="none" strokeLinecap="round" />
+          <rect x="14" y="90" width="92" height="8" rx="3" fill="#FFFFFF" />
+          <path d="M40 90 v-8 a4 4 0 0 1 8 0 v8" fill="#7CC39A" />
+        </S>
+      );
+    case 'k-colmeia':
+      return (
+        <S w={120} h={90}>
+          {[[30, 26], [62, 26], [46, 54], [78, 54], [94, 26]].map(([x, y], i) => {
+            const hex = `M${x} ${y - 18} L${x + 15} ${y - 9} L${x + 15} ${y + 9} L${x} ${y + 18} L${x - 15} ${y + 9} L${x - 15} ${y - 9} Z`;
+            return (
+              <g key={i}>
+                <path d={hex} fill={lt(c1, 0.15)} stroke={dk(c1, 0.15)} strokeWidth="3" strokeLinejoin="round" />
+                {i === 0 && <path d={`M${x - 6} ${y + 9} v-12 h4 v12 M${x} ${y + 9} v-15 h4 v15 M${x + 6} ${y + 9} v-10 h4 v10`} stroke={c2} strokeWidth="3" />}
+                {i === 1 && <><circle cx={x} cy={y + 2} r="7" fill="#7CC39A" /><rect x={x - 5} y={y + 6} width="10" height="7" rx="2" fill="#D9825B" /></>}
+                {i === 2 && <path d={`M${x - 7} ${y + 8} Q${x} ${y - 10} ${x + 7} ${y + 8} Z`} fill={GOLD} />}
+                {i === 3 && <circle cx={x} cy={y + 2} r="6" fill="#FF9FC2" />}
+                {i === 4 && <rect x={x - 6} y={y - 4} width="12" height="14" rx="2" fill="#7FB8F0" />}
+              </g>
+            );
+          })}
+        </S>
+      );
+    case 'k-luminaria-chao':
+      return (
+        <S w={60} h={170}>
+          <ellipse cx="30" cy="164" rx="20" ry="5" fill={dk(c2, 0.2)} />
+          <path d="M30 162 V50" stroke={dk(c2, 0.1)} strokeWidth="4" />
+          <path d="M8 52 L16 14 H44 L52 52 Z" fill={c1} />
+          <path d="M8 52 H52" stroke={dk(c1, 0.15)} strokeWidth="3" />
+          <path d="M18 22 L14 48" stroke="#FFFFFF" strokeWidth="3" opacity="0.4" strokeLinecap="round" />
+          <ellipse cx="30" cy="58" rx="14" ry="4" fill="#FFF3B0" opacity="0.8" />
+        </S>
+      );
+    case 'k-mesa-estudo':
+      return (
+        <S w={140} h={110}>
+          <rect x="6" y="50" width="128" height="10" rx="3" fill={c1} />
+          <rect x="96" y="60" width="34" height="46" rx="3" fill={dk(c1, 0.08)} />
+          <rect x="100" y="66" width="26" height="10" rx="2" fill={lt(c1, 0.25)} />
+          <rect x="100" y="82" width="26" height="10" rx="2" fill={lt(c1, 0.25)} />
+          <path d="M14 60 V106 M90 60 V106" stroke={dk(c1, 0.15)} strokeWidth="5" strokeLinecap="round" />
+          <path d="M30 50 L36 22 H78 L72 50 Z" fill="#4A4458" />
+          <path d="M38 26 H74 L69 46 H33 Z" fill={lt(c2, 0.4)} />
+          <path d="M24 50 H84" stroke="#8A90A0" strokeWidth="4" strokeLinecap="round" />
+          <rect x="88" y="36" width="10" height="14" rx="3" fill="#FFFFFF" />
+          <path d="M98 40 q5 1 0 6" stroke="#FFFFFF" strokeWidth="2" fill="none" />
+          <path d="M110 50 V30 l10 -8" stroke="#8A90A0" strokeWidth="3" fill="none" />
+          <path d="M116 18 l12 2 -4 8 Z" fill={c2} />
+        </S>
+      );
+    case 'k-cabideiro':
+      return (
+        <S w={70} h={170}>
+          <path d="M35 160 V16" stroke={WOOD} strokeWidth="5" />
+          <path d="M18 166 L35 150 L52 166" stroke={WOOD} strokeWidth="5" fill="none" strokeLinecap="round" />
+          <path d="M35 26 l-14 -8 M35 26 l14 -8 M35 40 l-12 -6 M35 40 l12 -6" stroke={dk(WOOD, 0.2)} strokeWidth="4" strokeLinecap="round" />
+          <circle cx="35" cy="12" r="5" fill={dk(WOOD, 0.2)} />
+          <path d="M20 18 Q8 40 14 74 L30 74 Q30 44 22 20 Z" fill={c1} />
+          <path d="M48 32 Q62 50 56 66 Q46 62 44 40 Z" fill={c2} />
+          <ellipse cx="50" cy="30" rx="10" ry="5" fill={c2} />
+        </S>
+      );
     default:
       return null;
   }
@@ -1054,4 +1142,7 @@ export const KIT_PLACE: Record<string, Place> = {
   'k-neon-estrela': 'parede',
   'k-neon-lua': 'parede',
   'k-varal-luzes': 'parede',
+  'k-alvo': 'parede',
+  'k-janela': 'parede',
+  'k-colmeia': 'parede',
 };

@@ -151,6 +151,11 @@ function upgradeHouses(input: State): State {
 }
 
 function normalizeRest(s: State, raw: State): State {
+  // Só a área de hábitos saudáveis por enquanto: quem estava numa área de peso ou calma passa para hábitos (o Hami para de mudar de peso).
+  if (s.profile.goal !== 'habitos') {
+    s.profile = { ...s.profile, goal: 'habitos' };
+    s.journey = { ...s.journey, dir: 'manter', startGrams: s.pet.grams, goalGrams: s.pet.grams };
+  }
   const goal = OLD_GOAL[s.profile.goal as string] ?? s.profile.goal;
   if (goal !== s.profile.goal) s.profile = { ...s.profile, goal };
   // Identidade colorida: o tema claro passa a ser o padrão (uma vez; depois vale a escolha da pessoa).
@@ -1411,6 +1416,30 @@ export function updatePet(patch: Partial<Pick<State['pet'], 'name' | 'fur' | 'tr
 
 export function updateSettings(patch: Partial<State['settings']>) {
   commit({ ...state, settings: { ...state.settings, ...patch } });
+}
+
+// ---------- Água e meta do dia ----------
+
+export const waterGoalOf = (s: State) => s.settings.waterGoal ?? 8;
+export const dayGoalOf = (s: State, total: number) => Math.min(total || 1, s.settings.dayGoal ?? Math.max(3, Math.ceil(total * 0.6)));
+
+/** Mais (ou menos) um copo de água hoje. Bater a meta dá uma comemoração. */
+export function addWater(delta: 1 | -1): { cups: number; hitGoal: boolean } {
+  const today = todayKey();
+  const day = dayOf(state, today);
+  const cups = Math.max(0, Math.min(30, (day.water ?? 0) + delta));
+  const goal = waterGoalOf(state);
+  const hitGoal = delta > 0 && cups === goal;
+  commit(withDay(state, today, { ...day, water: cups }));
+  return { cups, hitGoal };
+}
+
+export function setWaterGoal(n: number) {
+  updateSettings({ waterGoal: Math.max(4, Math.min(16, Math.round(n))) });
+}
+
+export function setDayGoal(n: number) {
+  updateSettings({ dayGoal: Math.max(1, Math.min(20, Math.round(n))) });
 }
 
 /** O cartão de boas-vindas aparece uma vez por dia. */

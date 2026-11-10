@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Lock, Trash2, X } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { GrowthCard } from '../components/Growth';
+import { ImprovementCard } from '../components/Improvement';
 import { Bar, LineChart, Modal, toast } from '../components/ui';
 import { BAND, DAY_CAP, KCAL_PER_KG, PHASES, PHASE_MIN, REF_KG, conditioning, dayKcal, defaultGoalKg, rapidChange, recentAverageKg } from '../logic/evolution';
 import { ACHIEVEMENTS, countIn } from '../logic/progress';
@@ -76,6 +77,7 @@ export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; o
         </div>
 
         <GrowthCard s={s} />
+        <ImprovementCard onPlus={onPlus} />
 
         <section className="card grid gap-3 p-4" aria-label="Fases">
           <h2 className="font-display text-[20px] font-bold">Fases do {s.pet.name}</h2>
