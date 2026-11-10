@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { Lock } from 'lucide-react';
 import { LineChart } from './ui';
 import { libById } from '../data/tasks';
-import { isPremium, todayKey, useApp, waterGoalOf } from '../lib/store';
+import { isPremium, litersText, todayKey, useApp, waterGoalOf } from '../lib/store';
 import { addDays, formatDay, WEEKDAYS } from '../lib/util';
 import type { DayLog, State } from '../types';
 
@@ -22,7 +22,7 @@ export function improvementData(s: State, today = todayKey()) {
   const lastWeek = sum(-13, -7, doneOf);
   const change = lastWeek ? Math.round(((thisWeek - lastWeek) / lastWeek) * 100) : thisWeek ? 100 : 0;
   const water7 = Array.from({ length: 7 }, (_, i) => ({ key: day(i - 6), cups: s.days[day(i - 6)]?.water ?? 0 }));
-  const waterAvg = Math.round((water7.reduce((n, d) => n + d.cups, 0) / 7) * 10) / 10;
+  const waterAvg = Math.round(water7.reduce((n, d) => n + d.cups, 0) / 7);
   const active30 = Array.from({ length: 30 }, (_, i) => doneOf(s.days[day(-i)]) > 0).filter(Boolean).length;
   // Descobertas (Plus)
   const byWeekday = Array(7).fill(0) as number[];
@@ -95,8 +95,8 @@ export function ImprovementCard({ onPlus }: { onPlus: () => void }) {
       </div>
 
       <div className="grid gap-2">
-        <p className="section-label">Água nos últimos 7 dias · média {d.waterAvg.toLocaleString('pt-BR')} copos</p>
-        <div className="imp-bars" role="img" aria-label={`Copos de água por dia: ${d.water7.map((w) => w.cups).join(', ')}`}>
+        <p className="section-label">Água nos últimos 7 dias · média {litersText(d.waterAvg)} por dia · meta {litersText(goal)}</p>
+        <div className="imp-bars" role="img" aria-label={`Litros de água por dia: ${d.water7.map((w) => litersText(w.cups)).join(', ')}`}>
           <span className="imp-goal" style={{ bottom: `${(goal / maxCups) * 100}%` }} />
           {d.water7.map((w) => (
             <div key={w.key} className="imp-bar-col">

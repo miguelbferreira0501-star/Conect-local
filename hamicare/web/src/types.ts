@@ -205,7 +205,7 @@ export interface Settings {
   sound: boolean;
   /** Volume dos efeitos sonoros. */
   volume?: 'baixo' | 'medio' | 'alto';
-  /** Meta de copos de água por dia (escolhida pela pessoa). */
+  /** Meta de água por dia, em copinhos de 250 ml (4 = 1 litro), escolhida pela pessoa em litros. */
   waterGoal?: number;
   /** Meta de missões por dia (escolhida pela pessoa). */
   dayGoal?: number;

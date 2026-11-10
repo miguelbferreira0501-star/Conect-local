@@ -1,15 +1,14 @@
-// Check-in de humor ao abrir o app (uma vez por dia), no estilo da referência: fundo que muda de cor,
-// carinha de olhinhos que muda com a barrinha, balão com o nome do humor, "Explorar mais" e "Continuar".
+// Check-in de humor ao abrir o app (uma vez por dia), com a NOSSA carinha: ela muda aos pouquinhos de
+// triste para feliz enquanto a pessoa arrasta a barrinha colorida. "Explorar mais" abre as emoções e
+// "Continuar" salva.
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { SlidersHorizontal } from 'lucide-react';
-import { EMOTIONS } from '../data/lines';
+import { EMOTIONS, MOODS } from '../data/lines';
 import { play } from '../lib/sound';
 import { dayOf, setEmotions, setMood, todayKey, useApp } from '../lib/store';
-import type { Mood } from '../types';
+import { MoodFace, moodColor, moodOf } from './MoodSlider';
 
-const LABELS = ['Muito ruim', 'Ruim', 'Neutro', 'Bem', 'Ótimo'];
-const BG = ['#C9C3E8', '#C2D3EC', '#BADAE9', '#CDEBC9', '#FFD9A3'];
 const KEY = 'hamicare:checkin';
 
 let opener: (() => void) | null = null;
@@ -18,33 +17,18 @@ export function openCheckin() {
   opener?.();
 }
 
-const mix = (a: string, b: string, t: number) => {
-  const p = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-  const [x, y] = [p(a), p(b)];
-  return `#${x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join('')}`;
-};
-
-function Face({ v }: { v: number }) {
-  // v de 0 a 1: boca de triste a sorriso, olhos que piscam devagar
-  const curve = (v - 0.5) * 30;
-  return (
-    <svg viewBox="0 0 200 140" width="200" height="140" aria-hidden="true" className="ci-face">
-      {[70, 130].map((x) => (
-        <g key={x}>
-          <circle cx={x} cy="60" r="26" fill="#FFFFFF" />
-          <circle cx={x + (v - 0.5) * 6} cy={62 - (v - 0.5) * 4} r="15" fill="#3B3B3B" className="ci-pupil" />
-        </g>
-      ))}
-      {v < 0.25 && <path d="M50 30 l26 8 M150 30 l-26 8" stroke="#3B3B3B" strokeWidth="6" strokeLinecap="round" opacity={0.25 + (0.25 - v) * 3} />}
-      <path d={`M76 112 Q100 ${112 + curve} 124 112`} stroke="#3B3B3B" strokeWidth="11" strokeLinecap="round" fill="none" />
-    </svg>
-  );
+/** Fundo bem clarinho na cor da carinha. */
+function tint(hex: string, k = 0.72) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = (v: number) => Math.round(v + (255 - v) * k).toString(16).padStart(2, '0');
+  return `#${f(n >> 16)}${f((n >> 8) & 255)}${f(n & 255)}`;
 }
 
 export function MoodCheckinHost() {
   const s = useApp();
   const [open, setOpen] = useState(false);
   const [v, setV] = useState(50);
+  const [touched, setTouched] = useState(false);
   const [more, setMore] = useState(false);
   const [picked, setPicked] = useState<string[]>([]);
   const today = todayKey();
@@ -53,6 +37,7 @@ export function MoodCheckinHost() {
     opener = () => {
       const d = dayOf(s, todayKey());
       setV(d.mood ? (d.mood - 1) * 25 : 50);
+      setTouched(!!d.mood);
       setPicked(d.emotions ?? []);
       setOpen(true);
     };
@@ -77,7 +62,9 @@ export function MoodCheckinHost() {
 
   if (!open) return null;
   const t = v / 100;
-  const idx = Math.min(4, Math.round(v / 25));
+  const m = moodOf(v);
+  const color = moodColor(t);
+  const label = touched ? MOODS[m - 1].label : 'Arraste a barrinha';
   const close = () => {
     try {
       localStorage.setItem(KEY, today);
@@ -90,29 +77,36 @@ export function MoodCheckinHost() {
   return createPortal(
     <div className="ci-wrap" role="dialog" aria-modal="true" aria-label="Como você está se sentindo agora?">
       <div className="ci-dim" onClick={close} />
-      <div className="ci-sheet" style={{ background: bgFor(v) }}>
-        <p className="ci-title">👇 Como você está se sentindo agora?</p>
-        <Face v={t} />
+      <div className="ci-sheet" style={{ background: `linear-gradient(180deg, ${tint(color, 0.55)}, ${tint(color, 0.85)} 70%)` }}>
+        <span className="ci-grab" aria-hidden="true" />
+        <p className="ci-title">Como você está se sentindo agora?</p>
+        <div className="ci-face">
+          <MoodFace t={t} size={172} />
+        </div>
+        <p className={`ci-label ${touched ? '' : 'is-hint'}`} aria-hidden="true">
+          {label}
+        </p>
         <div className="ci-slider">
-          <span className="ci-bubble" style={{ left: `${Math.min(84, Math.max(16, v))}%` }}>
-            {LABELS[idx]}
-          </span>
           <input
             type="range"
             min={0}
             max={100}
             value={v}
+            className="mood-range"
+            style={{ ['--thumb' as string]: color }}
             aria-label="Como você está agora"
-            aria-valuetext={LABELS[idx]}
+            aria-valuetext={label}
+            data-sound="none"
             onChange={(e) => {
               const nv = Number(e.target.value);
-              if (Math.round(nv / 25) !== idx) play('pega', { step: Math.round(nv / 25) });
+              if (moodOf(nv) !== m) play('pega', { step: moodOf(nv) - 1 });
               setV(nv);
+              setTouched(true);
             }}
           />
-          <div className="ci-ends">
-            <span>Muito ruim</span>
-            <span>Ótimo</span>
+          <div className="ci-ends" aria-hidden="true">
+            <span>Muito difícil</span>
+            <span>Muito bem</span>
           </div>
         </div>
         {more && (
@@ -132,8 +126,9 @@ export function MoodCheckinHost() {
         </button>
         <button
           className="ci-go"
+          style={{ background: color }}
           onClick={() => {
-            setMood((idx + 1) as Mood);
+            setMood(m);
             if (picked.length) setEmotions(picked);
             play('tarefa');
             close();
@@ -145,11 +140,4 @@ export function MoodCheckinHost() {
     </div>,
     document.body,
   );
-}
-
-/** Cor do fundo ao longo da barrinha (lilás → azul → verde → laranja). */
-function bgFor(v: number) {
-  const x = (v / 100) * 4;
-  const i = Math.min(3, Math.floor(x));
-  return mix(BG[i], BG[i + 1], x - i);
 }
