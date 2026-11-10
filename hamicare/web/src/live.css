@@ -4470,3 +4470,38 @@
 .moon-card .bar { position: relative; background: rgba(255, 255, 255, 0.18); }
 .moon-card .btn { position: relative; }
 @media (prefers-reduced-motion: reduce) { .moon-stars, .moon-earth, .moon-moon, .moon-rocket, .moon-flame { animation: none; } }
+
+/* ================= Missões no estilo Catzy (creme, cartões grandes e coloridos) ================= */
+:root[data-screen='atividades']:not([data-theme='dark']) { --page: #fbecc9; }
+.mx-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 6px; }
+.mx-title { font-family: var(--font-display, inherit); font-size: 32px; font-weight: 800; color: #5a3a22; }
+.mx-streak { display: inline-flex; align-items: center; gap: 4px; padding: 7px 14px; border-radius: 99px; background: #ffffff; color: #e2602b; font-weight: 900; border: 3px solid #ffffff; box-shadow: 0 3px 0 rgba(90, 58, 34, 0.18); }
+.mx-big { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mx-btn { display: flex; align-items: center; gap: 10px; min-height: 84px; padding: 12px 14px; border-radius: 26px; border: 3px solid #ffffff; color: #ffffff; text-align: left; font-family: var(--font-display, inherit); font-size: 18px; font-weight: 800; line-height: 1.15; box-shadow: 0 5px 0 rgba(0, 0, 0, 0.16); }
+.mx-btn small { display: block; margin-top: 2px; font-family: var(--font-body, inherit); font-size: 12.5px; font-weight: 700; opacity: 0.92; }
+.mx-btn:active { translate: 0 3px; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.16); }
+.mx-brown { background: #c8854a; }
+.mx-green { background: #8fb84f; }
+.mx-wide { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; border-radius: 26px; border: 3px solid #ffffff; background: #7b6cd4; color: #ffffff; text-align: left; box-shadow: 0 5px 0 rgba(60, 40, 140, 0.35); }
+.mx-wide b { display: block; font-family: var(--font-display, inherit); font-size: 19px; }
+.mx-wide small { display: block; font-size: 13px; font-weight: 600; opacity: 0.92; }
+.mx-wide > span:nth-child(2) { flex: 1; min-width: 0; }
+.mx-wide-go { flex-shrink: 0; padding: 9px 14px; border-radius: 16px; background: #ffffff; color: #3a2e6a; font-weight: 900; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18); }
+.mx-card { display: grid; gap: 10px; padding: 16px; border-radius: 26px; background: #fff7e2; border: 3px solid #ffffff; color: #5a3a22; box-shadow: 0 4px 0 rgba(90, 58, 34, 0.12); }
+.mx-label { padding: 0 4px; font-size: 13px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #8a5a32; }
+.mx-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 18px; background: var(--surface-2); border: 2.5px solid #ffffff; outline: 1.5px solid rgba(43, 34, 64, 0.1); }
+.mx-page .mission-progress { background: #fff7e2; border: 3px solid #ffffff; box-shadow: 0 4px 0 rgba(90, 58, 34, 0.12); }
+.mx-page .quick-card { background: #fff7e2; border: 3px solid #ffffff; box-shadow: 0 4px 0 rgba(90, 58, 34, 0.12); }
+.mx-page .quick-item { border: 3px solid #ffffff; }
+.mx-page .quick-item:nth-child(1), .mx-page li:nth-child(1) > .quick-item { background: #ffe0e8; }
+.mx-page li:nth-child(2) > .quick-item { background: #e2ecff; }
+.mx-page li:nth-child(3) > .quick-item:not(.is-ready) { background: #e3f4d6; }
+.mx-page .quick-item.is-done { background: #dff3e4 !important; }
+.mx-page .quest, .mx-page .card { border: 3px solid #ffffff; }
+
+/* ================= Ícones com contorno branco (adesivo, como no Catzy) ================= */
+.tab-ico svg, .hr-icon .glyph, .hr-tools .glyph, .hr-icon .glyph-emoji, .hr-tools .glyph-emoji {
+  filter: drop-shadow(1.6px 0 0 #fff) drop-shadow(-1.6px 0 0 #fff) drop-shadow(0 1.6px 0 #fff) drop-shadow(0 -1.6px 0 #fff) drop-shadow(0 2px 1px rgba(0, 0, 0, 0.18));
+}
+.hr-pill { border: 3px solid #ffffff; }
+.hr-icon { border: 3px solid #ffffff; }

@@ -1,32 +1,27 @@
 import { useState } from 'react';
-import { BatteryFull, BatteryLow, BatteryMedium, Flame, Plus, Trash2 } from 'lucide-react';
+import { Flame, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Seg, Sheet, toast } from '../components/ui';
 import { KcalChip, useKcalPop } from '../components/Journey';
-import { TaskRow } from '../components/TaskRow';
 import { SeasonBanner } from '../components/Season';
-import { Room } from '../components/Room';
-import { LivePet } from '../components/LivePet';
-import { periodOf } from '../data/lines';
 import { EventsBanner } from './Events';
 import { QuestList } from '../components/QuestList';
 import { CAT_ORDER, CATEGORIES, LIBRARY, TASK_EMOJIS } from '../data/tasks';
-import { BATTERIES, JOURNEY_TEXT } from '../data/lines';
+import { JOURNEY_TEXT } from '../data/lines';
 import { dayKcal, taskKcal } from '../logic/evolution';
 import { activeQuests, type Period } from '../logic/progress';
 import { REST_PER_WEEK, streakOf } from '../logic/streak';
 import { QuickQuests } from '../components/QuickQuests';
 import { HammerBag, StreakRepairCard } from '../components/StreakRepair';
-import { addLibraryTask, addTask, areaNow, dayOf, deleteTask, kcalOf, personKg, weightOn, setBattery, setRest, todayKey, todayTasks, toggleTask, updateTask, useApp, type TaskInput } from '../lib/store';
+import { addLibraryTask, addTask, areaNow, dayOf, deleteTask, personKg, weightOn, setRest, todayKey, todayTasks, updateTask, useApp, type TaskInput } from '../lib/store';
 import { AREAS } from '../logic/areas';
 import { fmtNum } from '../lib/util';
 import { WEEKDAYS } from '../lib/util';
-import type { Battery, Category, Freq, Task } from '../types';
+import type { Category, Freq, Task } from '../types';
 import { Glyph } from '../components/art';
 
-const BATTERY_ICON = { 1: BatteryLow, 2: BatteryMedium, 3: BatteryFull } as const;
 const PERIOD_LABEL: Record<Period, string> = { dia: 'de hoje', semana: 'da semana', mes: 'do mês' };
 
-export function Activities({ onShareTask }: { onShareTask: (task: Task) => void; onPlus?: () => void }) {
+export function Activities({ onShareTask, onHome }: { onShareTask: (task: Task) => void; onPlus?: () => void; onHome?: () => void }) {
   const s = useApp();
   const today = todayKey();
   const day = dayOf(s, today);
@@ -38,34 +33,20 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void;
   const quests = activeQuests(s.seed, today);
   const dir = s.journey.dir;
   const jt = JOURNEY_TEXT[dir];
-  const { pop, layer } = useKcalPop();
+  const { layer } = useKcalPop();
   const showKcal = weightOn(s) && !s.body.hideNumbers;
   const todayK = dayKcal(day, dir, s.mealRef ?? null);
 
-  function onToggle(t: Task, el: HTMLElement) {
-    const r = toggleTask(t.id);
-    if (!r) return;
-    const gain = dir === 'ganhar';
-    if (r.kcal > 0 && dir !== 'manter') pop(el, `${gain ? '+' : '−'}${r.kcal} kcal`, gain);
-    else pop(el, `+${r.reward} sementes`);
-    // A ofensiva tem a própria comemoração; nos outros casos, oferece compartilhar.
-    if (!r.streak) setTimeout(() => setJustDone({ task: t, kcal: r.kcal }), 650);
-  }
-
+  const [manage, setManage] = useState(false);
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 mx-page">
       {layer}
-      <section className="mission-scene scene-bleed" aria-label={`Quarto do ${s.pet.name}`}>
-        <Room house={s.house} period={periodOf()} height={300}>
-          <LivePet size={200} mood={tasks.length && done === tasks.length ? 'animado' : 'feliz'} say={tasks.length && done === tasks.length ? 'Missões completas! Que orgulho!' : done === 0 ? 'Bora começar com uma pequenininha?' : null} />
-        </Room>
-        <div className="mission-hud">
-          <h1 className="mission-title">Missões</h1>
-          <span className={`mission-streak ${streak.today ? 'is-on' : ''}`}>
-            <Flame size={16} /> {streak.count} {streak.count === 1 ? 'dia' : 'dias'}
-          </span>
-        </div>
-      </section>
+      <header className="mx-head">
+        <h1 className="mx-title">Missões</h1>
+        <span className={`mx-streak ${streak.today ? 'is-on' : ''}`}>
+          <Flame size={16} /> {streak.count} {streak.count === 1 ? 'dia' : 'dias'}
+        </span>
+      </header>
 
       <section className="mission-progress" aria-label={`${done} de ${tasks.length} missões feitas hoje`}>
         <p>
@@ -85,7 +66,36 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void;
 
       <StreakRepairCard />
 
-      <QuickQuests onMeta={() => document.querySelector('[aria-label="Atividades de hoje"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />
+      {/* Atalhos grandes e coloridos (estilo Catzy): as missões em si ficam só no Início. */}
+      <div className="mx-big">
+        <button className="mx-btn mx-brown" onClick={() => onHome?.()}>
+          <Glyph e="📅" size={38} />
+          <span>
+            Missões de hoje
+            <small>
+              {done}/{tasks.length} no Início
+            </small>
+          </span>
+        </button>
+        <button className="mx-btn mx-green" onClick={() => setEditing('new')}>
+          <Plus size={30} strokeWidth={3.2} />
+          <span>
+            Nova missão
+            <small>do seu jeito</small>
+          </span>
+        </button>
+      </div>
+
+      <QuickQuests onMeta={() => onHome?.()} />
+
+      <button className="mx-wide" onClick={() => setManage(true)}>
+        <Glyph e="📝" size={42} />
+        <span>
+          <b>Editar minhas missões</b>
+          <small>Mude nome, frequência ou tire as que não servem mais.</small>
+        </span>
+        <span className="mx-wide-go">Abrir</span>
+      </button>
 
       {showKcal && dir !== 'manter' && (
         <div className={`journey journey-${dir} !gap-1 !py-3`}>
@@ -96,9 +106,6 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void;
             Hoje: {jt.sign}
             {fmtNum(todayK, 0)} kcal para você e o {s.pet.name}
           </p>
-          <p className="text-[12.5px] font-bold opacity-85">
-            {dir === 'perder' ? 'Cada missão concluída tira as mesmas calorias de vocês dois.' : `O ${s.pet.name} cresce com o que você come acima da referência no Cardápio do Início. As missões são hábitos que ajudam.`}
-          </p>
         </div>
       )}
 
@@ -106,24 +113,10 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void;
 
       <EventsBanner />
 
-      <section className="card grid gap-3 p-4" aria-label="Como está sua bateria">
-        <p className="text-[15px] font-extrabold">Como tá sua bateria hoje?</p>
-        <div className="grid grid-cols-3 gap-2">
-          {BATTERIES.map((b) => {
-            const Icon = BATTERY_ICON[b.value];
-            return (
-              <button key={b.value} className="opt !min-h-0 flex-col !items-center !gap-1 !px-2 !py-2 text-center" aria-pressed={day.battery === b.value} onClick={() => setBattery(b.value as Battery)}>
-                <Icon size={24} aria-hidden="true" />
-                <span className="text-[15px] leading-none">{b.label}</span>
-                <span className="text-[11px] font-semibold text-muted">{b.hint}</span>
-              </button>
-            );
-          })}
-        </div>
-        {day.battery === 1 && <p className="rounded-2xl bg-accent-soft px-3 py-2 text-[14px] font-semibold">Modo dia difícil: só ficaram as atividades leves. Fazer uma já vale.</p>}
-        <div className="flex items-center justify-between gap-2 border-t border-line pt-3">
-          <p className="text-[14px] text-muted">
-            <Glyph e="🔥" size={18} className="gi" /> Ofensiva protegida: até {REST_PER_WEEK} dias de descanso por semana não quebram a sequência. Restam <b className="text-ink">{streak.restLeft}</b> nesta semana.
+      <section className="mx-card" aria-label="Ofensiva">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[14px] font-semibold">
+            <Glyph e="🔥" size={18} className="gi" /> Ofensiva protegida: até {REST_PER_WEEK} dias de descanso por semana não quebram a sequência. Restam <b>{streak.restLeft}</b> nesta semana.
           </p>
           <button className={`btn btn-sm shrink-0 ${day.rest ? 'btn-soft' : 'btn-ghost'}`} onClick={() => setRest(!day.rest)} aria-pressed={!!day.rest}>
             {day.rest ? (
@@ -138,41 +131,39 @@ export function Activities({ onShareTask }: { onShareTask: (task: Task) => void;
         <HammerBag />
       </section>
 
-      <section className="grid gap-3" aria-label="Atividades de hoje">
-        {CAT_ORDER.map((cat) => {
-          const list = tasks.filter((t) => t.cat === cat);
-          if (!list.length) return null;
-          return (
-            <div key={cat} className="grid gap-2">
-              <h2 className="section-label flex items-center gap-2 px-1">
-                <Glyph e={CATEGORIES[cat].emoji} size={24} /> {CATEGORIES[cat].label}
-              </h2>
-              <ul className="grid gap-3">
-                {list.map((t) => (
-                  <TaskRow key={t.id} task={t} done={t.id in day.done} kcal={showKcal ? kcalOf(s, t) : 0} dir={dir} sub={freqLabel(t.freq)} onToggle={(el) => onToggle(t, el)} onEdit={() => setEditing(t)} />
-                ))}
-              </ul>
-            </div>
-          );
-        })}
-        {!tasks.length && <p className="rounded-2xl border-2 border-dashed border-line p-5 text-center text-muted">Nenhuma atividade para hoje. Que tal adicionar uma bem pequena?</p>}
-        <button className="btn-page" onClick={() => setEditing('new')} aria-label="Nova atividade">
-          <span className="btn-page-ico" aria-hidden="true">
-            <Plus size={26} strokeWidth={3} />
-          </span>
-          Adicionar uma missão
-        </button>
-      </section>
-
       <section className="grid gap-4" aria-label="Desafios">
         {(['dia', 'semana', 'mes'] as Period[]).map((period) => (
           <div key={period} className="grid gap-3">
-            <h2 className="section-label px-1">Desafios {PERIOD_LABEL[period]}</h2>
+            <h2 className="mx-label">Desafios {PERIOD_LABEL[period]}</h2>
             <QuestList quests={quests.filter((q) => q.period === period)} s={s} today={today} />
           </div>
         ))}
-        <p className="px-1 text-[13px] text-muted">Constância vale mais que intensidade: os desafios contam dias, não quantidade.</p>
+        <p className="px-1 text-[13px] font-semibold text-[#8a6a4a]">Constância vale mais que intensidade: os desafios contam dias, não quantidade.</p>
       </section>
+
+      <Sheet open={manage} onClose={() => setManage(false)} title="Minhas missões">
+        <div className="grid gap-2 pb-2">
+          {s.tasks.length ? (
+            s.tasks.map((t) => (
+              <button key={t.id} className="mx-row" onClick={() => (setManage(false), setEditing(t))}>
+                <Glyph e={t.emoji} size={34} />
+                <span className="min-w-0 flex-1 text-left">
+                  <b className="block text-[15px] leading-tight">{t.title}</b>
+                  <small className="text-[12px] font-bold text-muted">
+                    {CATEGORIES[t.cat]?.label} · {freqLabel(t.freq)}
+                  </small>
+                </span>
+                <Pencil size={18} />
+              </button>
+            ))
+          ) : (
+            <p className="text-[14px] text-muted">Nenhuma missão ainda.</p>
+          )}
+          <button className="btn btn-primary" onClick={() => (setManage(false), setEditing('new'))}>
+            <Plus size={18} /> Nova missão
+          </button>
+        </div>
+      </Sheet>
 
       <TaskSheet task={editing} onClose={() => setEditing(null)} />
       <Sheet open={!!justDone} onClose={() => setJustDone(null)} title="Mandou bem!">
