@@ -525,6 +525,12 @@ export const ITEMS: Item[] = [
     ['p-celeste', 'Parede celeste', 'parede', { rarity: 'epico' }],
     ['f-ouro', 'Piso de ouro', 'piso', { rarity: 'epico' }],
   ]),
+  // Casa na Lua: vem junto com a viagem (5.000 sementes), não está à venda.
+  W('p-lua', 'Parede lunar com a Terra', 'parede', 0, { souvenir: true, rarity: 'lendario' }),
+  W('f-lua', 'Chão da Lua', 'piso', 0, { souvenir: true, rarity: 'lendario' }),
+  W('foguete-hami', 'Foguete do Hami', 'decor', 0, { souvenir: true, rarity: 'lendario', art: 'art:foguete', size: 22 }),
+  W('bandeira-lua', 'Bandeirinha na Lua', 'decor', 0, { souvenir: true, rarity: 'lendario', art: 'art:bandeira-lua', size: 12 }),
+  W('cama-cratera', 'Cama de cratera', 'movel', 0, { souvenir: true, rarity: 'lendario', art: 'art:cama-cratera', size: 36 }),
   // Comidas (consumíveis)
   W('semente', 'Semente de girassol extra', 'comida', 3, { emoji: '🌻', food: { saciedade: 8, felicidade: 6 } }),
   W('cenoura', 'Cenourinha', 'comida', 4, { emoji: '🥕', food: { saciedade: 15, felicidade: 4 } }),

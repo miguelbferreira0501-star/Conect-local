@@ -156,7 +156,7 @@ function Users() {
       <label className="sr-only" htmlFor="adm-q">
         Buscar por nome ou e-mail
       </label>
-      <input id="adm-q" className="field" placeholder="Buscar por nome ou e-mail" value={q} onChange={(e) => setQ(e.target.value)} />
+      <input id="adm-q" className="field" placeholder="Buscar por nome, e-mail ou código (HAMI-…)" value={q} onChange={(e) => setQ(e.target.value)} />
       {list?.map((u) => (
         <div key={u.id} className="card grid gap-2 p-3">
           <p className="font-bold leading-tight">
@@ -169,6 +169,9 @@ function Users() {
           <div className="flex flex-wrap gap-2">
             <button className="btn btn-soft btn-sm" onClick={() => run(() => http('POST', `/admin/users/${u.id}/premium`, { until: addDays(todayKey(), 30) }), 'Plus por 30 dias')}>
               +30 dias de Plus
+            </button>
+            <button className="btn btn-soft btn-sm" onClick={() => run(() => http('POST', `/admin/users/${u.id}/premium`, { until: addDays(todayKey(), 365) }), 'Plus por 1 ano')}>
+              Plus por 1 ano
             </button>
             {u.premiumUntil && (
               <button className="btn btn-ghost btn-sm" onClick={() => run(() => http('POST', `/admin/users/${u.id}/premium`, { until: null }), 'Plus removido')}>

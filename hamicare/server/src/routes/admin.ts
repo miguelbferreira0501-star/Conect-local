@@ -28,7 +28,9 @@ admin.get('/users', (c) =>
       await db.query(
         `SELECT id, email, name, age_group AS "ageGroup", role, premium_until AS "premiumUntil", banned_at IS NOT NULL AS banned,
            to_char(created_at, 'YYYY-MM-DD') AS "createdAt", to_char(last_seen_at, 'YYYY-MM-DD') AS "lastSeen"
-         FROM users WHERE lower(email) LIKE $1 OR lower(name) LIKE $1 ORDER BY created_at DESC LIMIT 50`,
+         FROM users WHERE lower(email) LIKE $1 OR lower(name) LIKE $1
+           OR id IN (SELECT user_id FROM profiles WHERE lower(code) LIKE $1)
+         ORDER BY created_at DESC LIMIT 50`,
         [q],
       )
     ).rows;

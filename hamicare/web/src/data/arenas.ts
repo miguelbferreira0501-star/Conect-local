@@ -182,6 +182,22 @@ export const ARENA_HOME: Record<number, { wallpaper: string; floor: string; item
   },
 };
 
+/** Casa na Lua (fora das arenas: comprada com 5.000 sementes). */
+export const MOON_N = 13;
+export const MOON_PRICE = 5000;
+export const MOON_ITEMS = ['p-lua', 'f-lua', 'foguete-hami', 'bandeira-lua', 'cama-cratera', 'mobile-planetas', 'luminaria-lua'];
+ARENA_HOME[MOON_N] = {
+  wallpaper: 'p-lua',
+  floor: 'f-lua',
+  items: [
+    { itemId: 'cama-cratera', x: 24, y: 86 },
+    { itemId: 'foguete-hami', x: 84, y: 76 },
+    { itemId: 'bandeira-lua', x: 64, y: 72 },
+    { itemId: 'mobile-planetas', x: 30, y: 30 },
+    { itemId: 'luminaria-lua', x: 46, y: 70 },
+  ],
+};
+
 export function arenaHouse(n: number): House {
   const h = ARENA_HOME[n] ?? ARENA_HOME[1];
   return { wallpaper: h.wallpaper, floor: h.floor, items: h.items.map((it, i) => ({ uid: `arena${n}-${i}`, itemId: it.itemId, x: it.x, y: it.y, z: i + 1 })) };

@@ -1,3 +1,4 @@
+import { MOON_N } from '../data/arenas';
 import { useEffect, useState } from 'react';
 import { ArrowUpToLine, Lock, PackageOpen, Pencil, Sparkles } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
@@ -69,7 +70,7 @@ function HouseTab({ onArenas }: { onArenas: () => void }) {
     <div className="grid gap-4">
       <div className="flex items-center gap-2">
         <p className="min-w-0 flex-1 truncate font-bold">
-          Casa em <span className="font-display text-[17px]">{arenaByN(homeArenaOf(s)).name}</span>
+          Casa em <span className="font-display text-[17px]">{homeArenaOf(s) === MOON_N ? 'Lua' : arenaByN(homeArenaOf(s)).name}</span>
         </p>
         <button className="btn btn-soft btn-sm shrink-0" onClick={onArenas}>
           Trocar de casa

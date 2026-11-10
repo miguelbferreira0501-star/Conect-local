@@ -18,7 +18,7 @@ import {
 import { HAMMER_MAX, repairPlan, streakOf, type RepairPlan } from '../logic/streak';
 import { activeQuests, claimKey, levelOf, newAchievements, periodStart, questProgress, QUESTS } from '../logic/progress';
 import { addUsage, arenaItemsOf, arenaOf, baseGrant, canCraft, capGrant, chestPool, collectionProgress, emptyPity, emptyUsage, FRIEND_LADDER, HAMMER_PRICE, levelUps, migrateXp, openChest, reflectionCoins, xpAt, type ChestId, type DayUsage, type Pity, type QuickId, type Rarity, type Source } from '../shared/game';
-import { arenaHouse, upgradeHouse } from '../data/arenas';
+import { arenaHouse, MOON_ITEMS, MOON_N, MOON_PRICE, upgradeHouse } from '../data/arenas';
 import { companionById, eggWarmth, HATCH_DAYS, withEggs } from '../data/companions';
 import { KIT_PLACE } from '../components/room/kit';
 import { gameCfg } from './game';
@@ -1229,10 +1229,21 @@ export function placeItem(itemId: string) {
   commit({ ...state, house: { ...state.house, items: [...state.house.items, { uid: uid(), itemId, x: 30 + (z % 5) * 10, y, z }] } });
 }
 
+/** Viagem para a Lua: compra a casa lunar (5.000 sementes) e o Hami se muda para lá. */
+export function buyMoon(): 'ok' | 'sem-sementes' | 'ja-tem' {
+  if (state.moon) return 'ja-tem';
+  if (state.coins < MOON_PRICE) return 'sem-sementes';
+  let next = spend(state, MOON_PRICE, 'Viagem para a Lua', `lua:casa`);
+  next = gainItems({ ...next, moon: true }, MOON_ITEMS.filter((id) => !next.inventory[id]), 'loja');
+  commit(next);
+  moveHome(MOON_N);
+  return 'ok';
+}
+
 /** Arena atual (a mais alta já aberta). */
 export const currentArena = (s: State) => arenaOf(Math.max(levelOf(s.xp), s.game.maxLevel), gameCfg()).n;
 /** Arena onde o Hami mora. */
-export const homeArenaOf = (s: State) => Math.min(s.homeArena ?? 1, currentArena(s));
+export const homeArenaOf = (s: State) => (s.homeArena === MOON_N && s.moon ? MOON_N : Math.min(s.homeArena ?? 1, currentArena(s)));
 /** Casa de uma arena (a de agora ou uma guardada). */
 export function houseOf(s: State, n: number) {
   return n === homeArenaOf(s) ? s.house : s.houses?.[n] ?? arenaHouse(n);
@@ -1240,7 +1251,7 @@ export function houseOf(s: State, n: number) {
 
 /** Muda a casa principal do Hami para outra arena já aberta (as casas antigas ficam guardadas). */
 export function moveHome(n: number): boolean {
-  if (n < 1 || n > currentArena(state)) return false;
+  if (n === MOON_N ? !state.moon : n < 1 || n > currentArena(state)) return false;
   const from = homeArenaOf(state);
   if (n === from) return true;
   const houses: Record<string, State['house']> = { ...(state.houses ?? {}), [from]: state.house };

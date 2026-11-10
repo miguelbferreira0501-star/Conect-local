@@ -132,6 +132,7 @@ export const WALLPAPER_CSS: Record<string, string> = {
   'p-mar': 'radial-gradient(circle at 20% 70%,rgba(255,255,255,.5) 4px,transparent 5px) 0 0/50px 60px,radial-gradient(circle at 70% 30%,rgba(255,255,255,.4) 3px,transparent 4px) 0 0/50px 60px,linear-gradient(180deg,#7FD3E8,#2F7FB8)',
   'p-sonhos': 'radial-gradient(ellipse 40px 18px at 30% 40%,#FFFFFF 60%,transparent 62%) 0 0/120px 80px,radial-gradient(circle at 80% 20%,#FFF3B0 3px,transparent 4px) 0 0/60px 60px,linear-gradient(180deg,#F2D9FF,#FFC9E8)',
   'p-castelo': 'repeating-linear-gradient(0deg,#C9C2DA 0 2px,transparent 2px 22px),repeating-linear-gradient(90deg,#C9C2DA 0 2px,transparent 2px 44px),linear-gradient(180deg,#E9E4F5,#D8D0EC)',
+  'p-lua': 'radial-gradient(circle at 78% 26%,#7FB8F0 0 22px,#5FBF77 22px 26px,transparent 27px),radial-gradient(circle at 15% 25%,#FFFFFF 1.4px,transparent 2px) 0 0/38px 38px,radial-gradient(circle at 60% 75%,#FFF3B0 1.2px,transparent 2px) 0 0/54px 54px,linear-gradient(180deg,#0E1233,#2A2466)',
   'p-espaco': 'radial-gradient(circle at 20% 30%,#FFFFFF 1.5px,transparent 2px) 0 0/46px 46px,radial-gradient(circle at 70% 70%,#FFE27A 1.5px,transparent 2px) 0 0/58px 58px,radial-gradient(circle at 80% 20%,rgba(169,139,242,.6) 18px,transparent 19px),linear-gradient(180deg,#1E2350,#3E2F7A)',
   'p-celeste': 'radial-gradient(circle at 50% 0%,rgba(255,233,160,.9),transparent 60%),radial-gradient(ellipse 50px 20px at 20% 80%,#FFFFFF 60%,transparent 62%) 0 0/140px 90px,linear-gradient(180deg,#FFF3C9,#BFE6FF)',
 };
@@ -141,7 +142,7 @@ export const FLOOR_TONE: Record<string, string> = {
   'f-madeira': '#C79F75', 'f-clara': '#E2CBAE', 'f-carpete': '#F2BCC8', 'f-azulejo': '#C9DCEE', 'f-grama': '#7FC47A', 'f-marmore': '#D6D7DE',
   'f-areia': '#E9CF97', 'f-tabuleiro': '#D9D2EC', 'f-hexagono': '#F2CD6A', 'f-azul': '#A9CBF2', 'f-nuvem': '#BCDCFA', 'f-ladrilho': '#F6C3B6',
   'f-musgo': '#7BC46C', 'f-tacos': '#B98251', 'f-folhas': '#A9744A', 'f-chale': '#6A4229', 'f-concreto': '#9AA2B4', 'f-areia-mar': '#CDB57A',
-  'f-algodao': '#F0C2DD', 'f-real': '#E3CB93', 'f-metal': '#9AA3BC', 'f-ouro': '#E8B83A',
+  'f-algodao': '#F0C2DD', 'f-real': '#E3CB93', 'f-metal': '#9AA3BC', 'f-ouro': '#E8B83A', 'f-lua': '#B9BDCB',
 };
 
 /** Escurece (t > 0) ou clareia (t < 0) uma cor #RRGGBB. */
@@ -189,6 +190,7 @@ export const FLOOR_CSS: Record<string, string> = {
   'f-areia-mar': 'radial-gradient(circle at 3px 3px,#E9D7A6 1px,transparent 1.5px) 0 0/9px 9px,linear-gradient(180deg,#E3CF96,#CDB57A)',
   'f-algodao': 'radial-gradient(ellipse 30px 14px at 30% 40%,#FFE3F1 60%,transparent 62%) 0 0/80px 30px,#F7D2E8',
   'f-real': 'conic-gradient(#F4E7C6 25%,#E9D19A 0 50%,#F4E7C6 0 75%,#E9D19A 0) 0 0/34px 34px',
+  'f-lua': 'radial-gradient(ellipse 26px 10px at 30% 40%,#A9ADBD 60%,transparent 62%) 0 0/90px 46px,radial-gradient(ellipse 14px 6px at 75% 75%,#B7BBC9 60%,transparent 62%) 0 0/70px 38px,linear-gradient(180deg,#D7DAE3,#C3C7D3)',
   'f-metal': 'repeating-linear-gradient(90deg,#8C95AE 0 2px,transparent 2px 36px),linear-gradient(180deg,#B9C1D6,#9AA3BC)',
   'f-ouro': 'linear-gradient(135deg,#FFE9A3 0%,#F2C94C 40%,#FFF3C4 60%,#E8B020 100%)',
 };
