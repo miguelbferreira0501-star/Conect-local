@@ -261,6 +261,8 @@ export interface State {
   adventure: Adventure | null;
   /** Viagem do dia: o Hami sai andando depois de algumas missões e volta com um presente. */
   trek?: { startedAt: number; endsAt: number; day: string } | null;
+  /** Arena da Terra onde ele morava antes de ir para a Lua (para voltar). */
+  earthHome?: number;
   /** Cartões de lembrança das viagens: quantos de cada lugar. */
   trekCards?: Record<string, number>;
   /** Dia da última viagem (uma por dia). */

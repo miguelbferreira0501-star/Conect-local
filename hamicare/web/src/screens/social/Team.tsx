@@ -10,7 +10,7 @@ import { Seed, toast } from '../../components/ui';
 import { libById } from '../../data/tasks';
 import { gameCfg } from '../../lib/game';
 import { useSocial } from '../../lib/social';
-import { claimTeamReward, dayOf, homeArenaOf, isPremium, teamRewardClaimed, todayKey, toggleTask, useApp } from '../../lib/store';
+import { claimTeamReward, dayOf, isPremium, trekPlaceOf, teamRewardClaimed, todayKey, toggleTask, useApp } from '../../lib/store';
 import { TEAM_MAX, TEAM_MAX_PLUS, TEAM_MISSIONS, TEAM_MISSIONS_MAX, missionDoneByAll } from '../../shared/team';
 import type { Profile, SocialApi, Team } from '../../lib/social/types';
 import { Avatar } from './Post';
@@ -84,7 +84,7 @@ export function TeamHomeCard({ onOpen }: { onOpen: () => void }) {
   const { team } = useTeam(api);
   if (!team) return null;
   const doneAll = team.missions.filter((m) => missionDoneByAll(m, team.memberIds, team.today.checkins)).length;
-  const arena = gameCfg().arenas.find((a) => a.n === homeArenaOf(s))?.id ?? 'casinha';
+  const arena = trekPlaceOf(s);
   return (
     <button className="card team-home grid gap-2 overflow-hidden p-0 text-left" onClick={onOpen} aria-label={`Turma ${team.name}: ${doneAll} de ${team.missions.length} missões completas hoje`}>
       <TeamHamis team={team} size={team.members.length > 3 ? 56 : 64} arena={arena} />
@@ -108,7 +108,7 @@ export function TeamTab({ api, friends, onOpenProfile }: { api: SocialApi; frien
   const s = useApp();
   const { team, setTeam, myId, today } = useTeam(api);
   const [busy, setBusy] = useState(false);
-  const arena = gameCfg().arenas.find((a) => a.n === homeArenaOf(s))?.id ?? 'casinha';
+  const arena = trekPlaceOf(s);
   const cfg = gameCfg();
 
   const run = async (fn: () => Promise<Team | null>, ok?: string) => {

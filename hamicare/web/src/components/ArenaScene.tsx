@@ -864,6 +864,41 @@ const LOOKS: Record<string, ArenaLook> = {
       </>
     ),
   },
+
+  // Fora da casa lunar: chão de Lua, crateras, a Terra no céu e o foguete.
+  lua: {
+    sky: { dia: ['#0D1030', '#262A5C'], noite: ['#0D1030', '#262A5C'], amanhecer: ['#0D1030', '#262A5C'], entardecer: ['#0D1030', '#262A5C'] },
+    ambient: 'estrelas',
+    draw: () => (
+      <>
+        <Stars list={NIGHT_STARS} />
+        <g data-tap="">
+          <circle cx="320" cy="64" r="30" fill="#5FB4F5" />
+          <path d="M304 50 q14 -8 22 2 q-4 14 -18 10 Z M322 74 q14 -4 18 6 q-10 10 -20 2 Z" fill="#6FC46A" />
+          <circle cx="320" cy="64" r="30" fill="none" stroke="#BFE6FF" strokeOpacity="0.45" strokeWidth="3" />
+        </g>
+        <path d="M0 210 Q70 176 140 200 Q210 170 290 198 Q350 180 400 196 V300 H0Z" fill="#6D7392" />
+        <path d="M0 232 Q100 206 200 226 T400 220 V300 H0Z" fill="#8E94AE" />
+        <path d="M0 256 Q120 240 240 252 T400 248 V300 H0Z" fill="#B9BDCB" />
+        {[[70, 268, 26], [200, 280, 34], [330, 266, 22], [130, 244, 14], [280, 240, 12]].map(([x, y, r], i) => (
+          <g key={i} data-tap="">
+            <ellipse cx={x} cy={y} rx={r} ry={r * 0.28} fill="#8E94AE" />
+            <ellipse cx={x} cy={y - 1.5} rx={r * 0.7} ry={r * 0.16} fill="#6D7392" />
+          </g>
+        ))}
+        <g transform="translate(92 150)" data-tap="casa">
+          <path d="M0 -70 C22 -44 22 0 16 34 H-16 C-22 0 -22 -44 0 -70 Z" fill="#F4F5F8" />
+          <path d="M0 -70 C10 -58 14 -48 15 -40 H-15 C-14 -48 -10 -58 0 -70 Z" fill="#E0554F" />
+          <circle cx="0" cy="-14" r="10" fill="#7FB8F0" stroke="#fff" strokeWidth="3" />
+          <path d="M-16 14 L-34 40 H-16 Z M16 14 L34 40 H16 Z" fill="#E0554F" />
+        </g>
+        <g transform="translate(250 196)" data-tap="">
+          <rect x="-2" y="-46" width="4" height="46" fill="#D5D8E6" />
+          <path d="M2 -46 H30 L23 -36 L30 -26 H2 Z" fill="#FF8FA8" />
+        </g>
+      </>
+    ),
+  },
 };
 
 export const ARENA_SCENE_IDS = Object.keys(LOOKS);
