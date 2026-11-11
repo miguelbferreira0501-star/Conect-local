@@ -5,9 +5,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Flame, Mail, Plus, Settings } from 'lucide-react';
 import { Room } from '../components/Room';
 import { floorPalette, tonePalette } from '../components/Furniture';
-import { TREK_THEMES, Suitcase, TrekBar, TrekCard, TrekScene, TrekStart, TrekUnpack, WalkingHami, finishTrek, trekThemeOf } from '../components/Trek';
+import { TREK_THEMES, Suitcase, TrekBar, TrekScene, TrekStart, TrekUnpack, WalkingHami, finishTrek, trekThemeOf } from '../components/Trek';
 import type { TrekResult } from '../lib/store';
 import { openUi } from '../lib/bus';
+import { startTrek, trekReady } from '../lib/store';
 import { unreadMail } from '../lib/mail';
 import { SleepingHami } from '../components/SleepingHami';
 import { openCheckin } from '../components/MoodCheckin';
@@ -53,6 +54,13 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
   const mailN = unreadMail(s);
   const [trekStart, setTrekStart] = useState(false);
   const [trekResult, setTrekResult] = useState<TrekResult | null>(null);
+  // Meta do dia completa: o Hami sai em viagem sozinho.
+  const goalDone = trekReady(s);
+  useEffect(() => {
+    if (!goalDone) return;
+    const t = setTimeout(() => startTrek() && setTrekStart(true), 1200);
+    return () => clearTimeout(t);
+  }, [goalDone]);
   useEffect(() => {
     // Na viagem, a página continua o chão do caminho.
     const p = trekTheme ? tonePalette((TREK_THEMES[trekTheme] ?? TREK_THEMES.casinha).ground) : floorPalette(floor);
@@ -244,7 +252,6 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
       </section>
 
       <TrekBar now={now} />
-      <TrekCard onStarted={() => setTrekStart(true)} />
 
       <PlusWeeklyCard />
       <MoonTeaser onGo={onArenas} />
@@ -267,6 +274,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
             );
           })}
         </div>
+        {!s.trek && s.trekDay !== today && <p className="hc-adv-trip">🎒 Complete a meta e o {s.pet.name} sai em viagem!</p>}
         <p className="hc-adv-sub">
           <Flame size={14} /> {streak.count} {streak.count === 1 ? 'dia seguido' : 'dias seguidos'} · <button onClick={onEvolution}>{growthName}</button>
         </p>

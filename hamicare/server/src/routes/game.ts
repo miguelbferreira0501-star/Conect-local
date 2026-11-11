@@ -9,7 +9,7 @@ import { pool, withUser } from '../db';
 import { AppError, invalid } from '../lib/errors';
 import { type AppEnv, requireAuth } from '../auth';
 import {
-  CHEST_ORDER, DEFAULT_GAME, FRIEND_LADDER, HAMMER_PRICE, SEASON_PLUS, TREK, addUsage, arenaItemsOf, canCraft, arenaOf, baseGrant, capGrant, chestOdds, chestPool, emptyPity, emptyUsage, isChest, levelOf, levelUps, openChest, pityInfo, rarityOf, xpAt,
+  CHEST_ORDER, DEFAULT_GAME, FRIEND_LADDER, HAMMER_PRICE, SEASON_PLUS, addUsage, arenaItemsOf, canCraft, arenaOf, baseGrant, capGrant, chestOdds, chestPool, emptyPity, emptyUsage, isChest, levelOf, levelUps, openChest, pityInfo, rarityOf, xpAt,
   type ChestId, type DayUsage, type GameConfig, type Pity, type Rarity, type Source,
 } from '../../../web/src/shared/game';
 import { ITEMS, LOOKS, STYLES, itemById, stylePrice } from '../../../web/src/data/items';
@@ -222,7 +222,8 @@ async function trusted(db: pg.PoolClient, userId: string, src: Source, cfg: Game
     case 'viagem': {
       // A viagem só sai depois de algumas missões naquele dia (ou na véspera, se ele voltou depois da meia-noite).
       const n = (await db.query("SELECT count(*)::int AS n FROM game_ledger WHERE user_id = $1 AND active AND ref LIKE 'tarefa:%' AND day BETWEEN $2::date - 1 AND $2::date", [userId, src.date])).rows[0]?.n ?? 0;
-      return n >= TREK.needs ? src : null;
+      // A meta do dia é escolhida pela pessoa: o servidor só exige pelo menos uma missão feita.
+      return n >= 1 ? src : null;
     }
     case 'temporada-plus': {
       // Trilha Plus: só com Plus ativo, no mês de agora, com os dias ativos contados pelo servidor.
