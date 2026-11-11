@@ -27,6 +27,11 @@ import { getState, markWelcomed, onCelebrate, tick, todayKey, useApp, type Celeb
 import { markReminded, pickReminder, reminderDue, showNotification } from './lib/notify';
 import { syncProfile } from './lib/social';
 import { captureInvite } from './lib/social/invite';
+import { onUi } from './lib/bus';
+import { MenuScreen } from './components/Menu';
+import { MailScreen } from './components/Mail';
+import { SeasonPass } from './components/Season';
+import { WalletSheet } from './screens/Collection';
 import { play, type SoundId } from './lib/sound';
 
 type Tab = TabId;
@@ -55,6 +60,10 @@ export default function App() {
   const account = <AccountSection />;
   const [tab, setTab] = useState<Tab>(initialTab);
   const [settings, setSettings] = useState(false);
+  const [menu, setMenu] = useState(false);
+  const [mail, setMail] = useState(false);
+  const [season, setSeason] = useState(false);
+  const [walletOpen, setWalletOpen] = useState(false);
   const [plus, setPlus] = useState(false);
   const [evolution, setEvolution] = useState(false);
   const [share, setShare] = useState<ShareDraft>(null);
@@ -108,6 +117,23 @@ export default function App() {
   }, []);
 
   useEffect(() => onCelebrate((c) => setQueue((q) => [...q, c])), []);
+
+  // Atalhos pedidos por outras telas (menu, correio, trilha…).
+  useEffect(
+    () =>
+      onUi((t) => {
+        if (t === 'plus') setPlus(true);
+        else if (t === 'menu') setMenu(true);
+        else if (t === 'ajustes') setSettings(true);
+        else if (t === 'correio') setMail(true);
+        else if (t === 'temporada') setSeason(true);
+        else if (t === 'evolucao') setEvolution(true);
+        else if (t === 'carteira') setWalletOpen(true);
+        else if (t === 'amigos') setTab('amigos');
+        else if (t === 'missoes') setTab('atividades');
+      }),
+    [],
+  );
 
   // Perfil público (nome, roupa, casa, nível) acompanha as mudanças.
   useEffect(() => {
@@ -170,7 +196,7 @@ export default function App() {
   return (
     <GrowthContext.Provider value={growth.scale}>
       <main className="shell">
-        {tab === 'inicio' && <Home onGo={go} onSettings={() => setSettings(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} onPlus={() => setPlus(true)} onTeam={() => go('amigos', undefined, 'turma')} onWorld={(sub) => go('mundo', sub)} />}
+        {tab === 'inicio' && <Home onGo={go} onSettings={() => setMenu(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} onPlus={() => setPlus(true)} onTeam={() => go('amigos', undefined, 'turma')} onWorld={(sub) => go('mundo', sub)} />}
         {tab === 'cuidar' && <CareArea onShare={(photo) => shareTo({ kind: 'foto', photo })} />}
         {tab === 'atividades' && <Activities onShareTask={(task) => shareTo({ kind: 'atividade', task })} onPlus={() => setPlus(true)} onHome={() => go('inicio')} />}
         {tab === 'mundo' && <World key={worldTab ?? 'mundo'} initialTab={worldTab} onPlus={() => setPlus(true)} onGift={(id) => (setGift(id), go('amigos'))} />}
@@ -188,6 +214,10 @@ export default function App() {
         </div>
       </nav>
       {evolution && <Evolution onClose={() => setEvolution(false)} onShare={(photo) => shareTo({ kind: 'foto', photo })} onPlus={() => setPlus(true)} />}
+      <MenuScreen open={menu} onClose={() => setMenu(false)} />
+      <MailScreen open={mail} onClose={() => setMail(false)} />
+      <SeasonPass open={season} onClose={() => setSeason(false)} />
+      <WalletSheet open={walletOpen} onClose={() => setWalletOpen(false)} />
       <SettingsSheet open={settings} onClose={() => setSettings(false)} onPlus={() => (setSettings(false), setPlus(true))} account={account} />
       <Sheet open={plus} onClose={() => setPlus(false)} title="HamiCare+">
         <Paywall onClose={() => setPlus(false)} />

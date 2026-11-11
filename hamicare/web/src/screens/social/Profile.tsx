@@ -1,6 +1,6 @@
 // Perfis no estilo rede social: o meu (com bio editável) e o de amigos (grade de posts, casa e ações).
 import { useCallback, useEffect, useState } from 'react';
-import { ChevronLeft, Flag, Grid3x3, Home as HomeIcon, Lock, Pencil, Share2, ShieldBan, UserPlus } from 'lucide-react';
+import { ChevronLeft, Copy, Flag, Grid3x3, Home as HomeIcon, Lock, Pencil, Share2, ShieldBan, UserPlus } from 'lucide-react';
 import { Modal, Sheet, toast } from '../../components/ui';
 import { checkKindness, REASON_TEXT } from '../../shared/moderation';
 import { logEvent, setBio, useApp } from '../../lib/store';
@@ -10,6 +10,8 @@ import { postKey, type Feed, type Post, type Profile, type SocialApi, type UserP
 import { Avatar, PostCard, PostMedia } from './Post';
 import { VisitView } from './Ranking';
 import { Glyph } from '../../components/art';
+import { Hamster } from '../../components/Hamster';
+import { copyText } from '../../lib/util';
 
 function Counter({ value, label, icon }: { value: number | string; label: string; icon?: string }) {
   return (
@@ -43,28 +45,47 @@ export function MyHeader({ me, api, postsCount, friendsCount, onAdd, error, onRe
   }
   if (!me) return <div className="card h-40 animate-pulse" />;
   return (
-    <section className="profile-head" aria-label="Seu perfil">
-      <div className="flex items-center gap-4">
-        <Avatar pet={me.pet} id={me.id} size={78} ring label={`Hami de ${me.name}`} />
-        <div className="grid flex-1 grid-cols-3 gap-1">
+    <section className="pf" aria-label="Seu perfil">
+      <div className="pf-card">
+        <span className="pf-clip" aria-hidden="true" />
+        <span className="pf-stamp" aria-hidden="true" />
+        <div className="pf-top">
+          <span className="pf-photo" role="img" aria-label={`Hami de ${me.name}`}>
+            <Hamster fur={me.pet.fur} phase={me.pet.phase} outfit={me.pet.outfit} size={112} idle={false} neutral label="" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="pf-name">{me.name}</p>
+            <p className="pf-sub">
+              {me.pet.name} · nível {me.level}
+            </p>
+            <p className="pf-label">Código de amigo</p>
+            <button className="pf-code" onClick={async () => toast((await copyText(me.code)) ? 'Código copiado!' : me.code)} aria-label={`Copiar código ${me.code}`}>
+              {me.code} <Copy size={15} />
+            </button>
+          </div>
+        </div>
+        <p className="pf-bio">{me.bio || <span className="opacity-60">Escreva uma bio curtinha e gentil.</span>}</p>
+        <div className="pf-strip">
           <Counter value={postsCount} label="posts" />
           <Counter value={friendsCount} label="amigos" />
           <Counter value={me.streak ?? 0} icon="🔥" label="ofensiva" />
         </div>
       </div>
-      <div className="grid gap-0.5">
-        <p className="font-display text-[19px] font-bold leading-tight">{me.name}</p>
-        <p className="text-[13px] font-bold text-muted">
-          {me.code} · {me.pet.name} · nível {me.level}
-        </p>
-        <p className="whitespace-pre-wrap text-[14.5px]">{me.bio || <span className="text-muted">Escreva uma bio curtinha e gentil.</span>}</p>
+      <div className="pf-streak">
+        <span className="pf-sun" aria-hidden="true">✓</span>
+        <span className="min-w-0 flex-1">
+          <b>
+            <em>{me.streak ?? 0}</em> {(me.streak ?? 0) === 1 ? 'dia de ofensiva' : 'dias de ofensiva'}
+          </b>
+          <small>Sua sequência de autocuidado</small>
+        </span>
       </div>
       <div className="grid grid-cols-3 gap-2">
-        <button className="btn btn-ghost btn-sm" onClick={() => (setBioText(s.bio), setEdit(true))}>
+        <button className="pf-btn" onClick={() => (setBioText(s.bio), setEdit(true))}>
           <Pencil size={15} /> Editar
         </button>
         <button
-          className="btn btn-ghost btn-sm"
+          className="pf-btn"
           onClick={async () => {
             const msg = await shareInvite(me.code, api.kind === 'servidor');
             if (msg) toast(msg);
@@ -72,7 +93,7 @@ export function MyHeader({ me, api, postsCount, friendsCount, onAdd, error, onRe
         >
           <Share2 size={15} /> Convidar
         </button>
-        <button className="btn btn-primary btn-sm" onClick={onAdd}>
+        <button className="pf-btn is-main" onClick={onAdd}>
           <UserPlus size={15} /> Adicionar
         </button>
       </div>

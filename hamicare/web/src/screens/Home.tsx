@@ -4,7 +4,11 @@ import { useGrowth } from '../components/Growth';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Flame, Mail, Plus, Settings } from 'lucide-react';
 import { Room } from '../components/Room';
-import { floorPalette } from '../components/Furniture';
+import { floorPalette, tonePalette } from '../components/Furniture';
+import { TREK_THEMES, TrekBar, TrekCard, TrekResultModal, TrekScene, TrekStart, WalkingHami, finishTrek, trekThemeOf } from '../components/Trek';
+import type { TrekResult } from '../lib/store';
+import { openUi } from '../lib/bus';
+import { unreadMail } from '../lib/mail';
 import { SleepingHami } from '../components/SleepingHami';
 import { openCheckin } from '../components/MoodCheckin';
 import { WalletSheet } from './Collection';
@@ -43,16 +47,22 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
   const today = todayKey();
   // O Início continua o chão da casa: o degradê, a página e os cartões seguem a cor do piso.
   const floor = s.house.floor;
+  const trekTheme = s.trek ? trekThemeOf(s) : null;
+  const mailN = unreadMail(s);
+  const [trekStart, setTrekStart] = useState(false);
+  const [trekResult, setTrekResult] = useState<TrekResult | null>(null);
   useEffect(() => {
-    const p = floorPalette(floor);
+    // Na viagem, a página continua o chão do caminho.
+    const p = trekTheme ? tonePalette((TREK_THEMES[trekTheme] ?? TREK_THEMES.casinha).ground) : floorPalette(floor);
     const root = document.documentElement.style;
     root.setProperty('--home-floor', p.tone);
     root.setProperty('--home-page', p.page);
     root.setProperty('--home-card', p.card);
     root.setProperty('--home-deep', p.deep);
     root.setProperty('--home-page-dark', p.dark);
-    return () => ['--home-floor', '--home-page', '--home-card', '--home-deep', '--home-page-dark'].forEach((k) => root.removeProperty(k));
-  }, [floor]);
+    root.setProperty('--home-ink', p.ink);
+    return () => ['--home-floor', '--home-page', '--home-card', '--home-deep', '--home-page-dark', '--home-ink'].forEach((k) => root.removeProperty(k));
+  }, [floor, trekTheme]);
   const day = dayOf(s, today);
   const tasks = todayTasks(s, today);
   const done = tasks.filter((t) => t.id in day.done).length;
@@ -155,11 +165,24 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
     <div className="grid gap-4">
       {layer}
       <section className="home-room" aria-label={`Casa do ${s.pet.name}`}>
-        <PanRoom>
-          <Room house={s.house} period={period} height={430} wide={1.9}>
-            {hami}
-          </Room>
-        </PanRoom>
+        {s.trek && trekTheme ? (
+          <TrekScene theme={trekTheme} height={430} still={now >= s.trek.endsAt}>
+            <div className="grid justify-items-center gap-2">
+              {now >= s.trek.endsAt && (
+                <button className="btn btn-primary btn-sm" data-sound="conquista" onClick={() => setTrekResult(finishTrek())}>
+                  <Mail size={16} /> Ver o que ele trouxe
+                </button>
+              )}
+              <WalkingHami fur={s.pet.fur} outfit={s.pet.outfit} size={176} still={now >= s.trek.endsAt} />
+            </div>
+          </TrekScene>
+        ) : (
+          <PanRoom>
+            <Room house={s.house} period={period} height={430} wide={1.9}>
+              {hami}
+            </Room>
+          </PanRoom>
+        )}
         <div className="hr-top">
           <span className="hr-hello">
             {GREETING[period]}
@@ -168,7 +191,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
           <button className="hr-pill" onClick={() => setWallet(true)} aria-label={`Carteira: ${s.coins} sementes`}>
             <Coins value={s.coins} />
           </button>
-          <button className="hr-pill hr-round" onClick={onSettings} aria-label="Ajustes">
+          <button className="hr-pill hr-round" onClick={onSettings} aria-label="Menu">
             <Settings size={18} />
           </button>
         </div>
@@ -177,8 +200,9 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
             <Glyph e="📅" size={34} />
             {tasks.length - done > 0 && <span className="hr-badge">{tasks.length - done}</span>}
           </button>
-          <button className="hr-icon" onClick={() => onGo('bem-estar')} aria-label="Bem-estar">
-            <Glyph e="💗" size={34} />
+          <button className="hr-icon" onClick={() => openUi('correio')} aria-label={`Correio${mailN ? `: ${mailN} novas` : ''}`}>
+            <Glyph e="💌" size={34} />
+            {mailN > 0 && <span className="hr-badge">{mailN}</span>}
           </button>
           <button className="hr-icon" onClick={onArenas} aria-label="Mapa das arenas">
             <Glyph e="🗺️" size={32} />
@@ -201,7 +225,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
             <Glyph e="👑" size={32} />
           </button>
         </div>
-        {!adv && (
+        {!adv && !s.trek && (
           <div className="hr-bubble">
             <p>{line}</p>
             {!day.mood && (
@@ -211,8 +235,11 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
             )}
           </div>
         )}
-        <span className="hr-hint" aria-hidden="true">‹ arraste para ver a casa ›</span>
+        {!s.trek && <span className="hr-hint" aria-hidden="true">‹ arraste para ver a casa ›</span>}
       </section>
+
+      <TrekBar now={now} />
+      <TrekCard onStarted={() => setTrekStart(true)} />
 
       <PlusWeeklyCard />
       <MoonTeaser onGo={onArenas} />
@@ -279,6 +306,8 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
       <TeamHomeCard onOpen={onTeam} />
 
       <AdventureModal result={result} onClose={() => setResult(null)} />
+      <TrekStart open={trekStart} onClose={() => setTrekStart(false)} />
+      <TrekResultModal result={trekResult} onClose={() => setTrekResult(null)} />
     </div>
   );
 }

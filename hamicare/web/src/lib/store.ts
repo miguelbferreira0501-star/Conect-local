@@ -17,7 +17,7 @@ import {
 } from '../logic/evolution';
 import { HAMMER_MAX, repairPlan, streakOf, type RepairPlan } from '../logic/streak';
 import { activeQuests, claimKey, levelOf, newAchievements, periodStart, questProgress, QUESTS } from '../logic/progress';
-import { addUsage, arenaItemsOf, arenaOf, baseGrant, canCraft, capGrant, chestPool, collectionProgress, emptyPity, emptyUsage, FRIEND_LADDER, HAMMER_PRICE, PLUS_WEEKLY, levelUps, migrateXp, openChest, reflectionCoins, xpAt, type ChestId, type DayUsage, type Pity, type QuickId, type Rarity, type Source } from '../shared/game';
+import { addUsage, arenaItemsOf, arenaOf, baseGrant, canCraft, capGrant, chestPool, collectionProgress, emptyPity, emptyUsage, FRIEND_LADDER, HAMMER_PRICE, PLUS_WEEKLY, SEASON_PLUS, TREK, levelUps, migrateXp, openChest, reflectionCoins, xpAt, type ChestId, type DayUsage, type Pity, type QuickId, type Rarity, type Source } from '../shared/game';
 import { arenaHouse, MOON_ITEMS, MOON_N, MOON_PRICE, upgradeHouse } from '../data/arenas';
 import { companionById, eggWarmth, HATCH_DAYS, withEggs } from '../data/companions';
 import { KIT_PLACE } from '../components/room/kit';
@@ -831,6 +831,8 @@ export function toggleTask(id: string): ToggleResult | null {
   const got = next.game.paid[`tarefa:${key}:${id}`]?.coins ?? 0;
   // Durante uma aventura, cada atividade traz o Hami 5 minutos mais cedo.
   if (next.adventure) next = { ...next, adventure: { ...next.adventure, endsAt: next.adventure.endsAt - 5 * 60_000 } };
+  // Na viagem do dia, cada missão traz ele 15 minutos mais cedo.
+  if (next.trek) next = { ...next, trek: { ...next.trek, endsAt: next.trek.endsAt - TREK.perTaskMin * 60_000 } };
   const firstToday = Object.keys(d.done).length === 0;
   // Um dia de cuidado revela uma curiosidade nova sobre o Hami.
   if (firstToday && next.pet.facts.length < FACTS.length) {
@@ -1374,6 +1376,79 @@ export function finishAdventure(now = Date.now()): AdventureResult | null {
   next = logEventIn(grant(next, { kind: 'aventura', place: place.id, xp: mission.xp, coins: mission.coins, date: todayKey(), n: advN }), 'aventura');
   commit(next);
   return { placeId: place.id, story: mission.story, coins: mission.coins, xp: mission.xp, find };
+}
+
+// ---------- Viagem do dia (o Hami sai andando e volta com um presente) ----------
+
+export { TREK, SEASON_PLUS };
+const doneToday = (s: State, today = todayKey()) => Object.keys(dayOf(s, today).done).length;
+/** Pronto para viajar? Algumas missões feitas hoje, sem viagem hoje, acordado e em casa. */
+export const trekReady = (s: State, today = todayKey()) => !s.trek && s.trekDay !== today && !s.adventure && !s.pet.sleeping && doneToday(s, today) >= TREK.needs;
+/** Quantas missões faltam para a viagem de hoje (0 = pronto ou já foi). */
+export const trekMissing = (s: State, today = todayKey()) => (s.trek || s.trekDay === today ? 0 : Math.max(0, TREK.needs - doneToday(s, today)));
+
+export function startTrek(now = Date.now()): boolean {
+  if (!trekReady(state)) return false;
+  const today = todayKey();
+  commit({ ...state, trek: { startedAt: now, endsAt: now + TREK.hours * 3600_000, day: today }, trekDay: today });
+  return true;
+}
+
+export interface TrekResult {
+  coins: number;
+  xp: number;
+  food: string;
+  story: string;
+}
+
+const TREK_FOODS = ['morango', 'milho', 'cenoura', 'maca', 'banana'];
+const TREK_STORIES = [
+  'achou uma trilha nova e voltou cheio de história pra contar',
+  'fez um amigo no caminho e dividiu o lanche com ele',
+  'subiu num lugar bem alto só para ver a vista',
+  'aprendeu que ir devagar também é chegar',
+  'encontrou uma flor diferente e ficou um tempão olhando',
+  'descansou na sombra e ouviu os passarinhos',
+  'seguiu uma borboleta e descobriu um cantinho secreto',
+];
+
+/** O Hami voltou: sementes, XP, uma comidinha e uma história. */
+export function finishTrek(now = Date.now()): TrekResult | null {
+  const t = state.trek;
+  if (!t || now < t.endsAt) return null;
+  const today = todayKey();
+  const date = dayDiff(t.day, today) <= 1 ? t.day : today;
+  const h = hashStr(`${state.seed}:viagem:${t.startedAt}`);
+  const food = TREK_FOODS[h % TREK_FOODS.length];
+  let next: State = { ...state, trek: null, inventory: { ...state.inventory, [food]: (state.inventory[food] ?? 0) + 1 } };
+  next = logEventIn(grant(next, { kind: 'viagem', date }), 'aventura');
+  commit(next);
+  const paid = next.game.paid[`viagem:${date}`];
+  return { coins: paid?.coins ?? TREK.coins, xp: paid?.xp ?? TREK.xp, food, story: TREK_STORIES[h % TREK_STORIES.length] };
+}
+
+// ---------- Trilha Plus da temporada ----------
+
+export const seasonPlusClaimed = (s: State, tier: number, month = todayKey().slice(0, 7)) => !!s.game.paid[`temporada:${month}:p${tier}`];
+export function claimSeasonPlus(tier: number, days = seasonDays(state)): number {
+  const t = gameCfg().season.tiers[tier];
+  const month = todayKey().slice(0, 7);
+  if (!t || tier >= SEASON_PLUS.length || !isPremium(state) || days < t.days || seasonPlusClaimed(state, tier, month)) return 0;
+  const next = grant(state, { kind: 'temporada-plus', month, tier });
+  commit(next);
+  return next.game.paid[`temporada:${month}:p${tier}`]?.coins ?? 0;
+}
+
+// ---------- Correio do Hami ----------
+
+export function mailRead(id: string) {
+  const m = state.mail ?? { read: [], gone: [] };
+  if (m.read.includes(id)) return;
+  commit({ ...state, mail: { ...m, read: [...m.read, id].slice(-80) } });
+}
+export function mailClear(ids: string[]) {
+  const m = state.mail ?? { read: [], gone: [] };
+  commit({ ...state, mail: { read: m.read, gone: [...new Set([...m.gone, ...ids])].slice(-80) } });
 }
 
 export function unlockedPlaces(s: State) {

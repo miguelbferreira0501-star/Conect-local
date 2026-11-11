@@ -259,6 +259,12 @@ export interface State {
   wishlist: string[];
   house: House;
   adventure: Adventure | null;
+  /** Viagem do dia: o Hami sai andando depois de algumas missões e volta com um presente. */
+  trek?: { startedAt: number; endsAt: number; day: string } | null;
+  /** Dia da última viagem (uma por dia). */
+  trekDay?: string;
+  /** Correio do Hami: cartas já lidas e cartas apagadas. */
+  mail?: { read: string[]; gone: string[] };
   finds: string[];
   placesDone: Record<string, number>;
   achievements: Record<string, string>;

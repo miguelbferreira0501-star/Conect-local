@@ -54,3 +54,32 @@ describe('HamiCare+', () => {
     expect(t.body.team.members).toHaveLength(8);
   });
 });
+
+describe('viagem do dia e trilha Plus', () => {
+  const today = () => new Date().toISOString().slice(0, 10);
+  const task = (id: string) => ({ op: 'grant', src: { kind: 'tarefa', id, energy: 1, cat: 'habitos', date: today() } });
+  it('a viagem só paga com 3 missões no dia, uma vez', async () => {
+    const u = await newUser('Vivi');
+    const cedo = await call('POST', '/game/ops', { ops: [{ op: 'grant', src: { kind: 'viagem', date: today() } }] }, u.cookie);
+    expect(cedo.body.wallet.coins).toBe(30);
+    const r = await call('POST', '/game/ops', { ops: [task('agua'), task('caminhada'), task('alongar'), { op: 'grant', src: { kind: 'viagem', date: today() } }] }, u.cookie);
+    const depois = r.body.wallet.coins as number;
+    const r2 = await call('POST', '/game/ops', { ops: [{ op: 'grant', src: { kind: 'viagem', date: today() } }] }, u.cookie);
+    expect(r2.body.wallet.coins).toBe(depois);
+    expect(JSON.stringify((await call('GET', '/game/wallet', undefined, u.cookie)).body.ledger)).toContain('Viagem do dia');
+  });
+  it('a trilha Plus só paga com Plus ativo e dias ativos', async () => {
+    const u = await newUser('Teo');
+    const month = today().slice(0, 7);
+    const plusTier = { ops: [{ op: 'grant', src: { kind: 'temporada-plus', month, tier: 0 } }] };
+    await call('POST', '/game/ops', { ops: [task('agua')] }, u.cookie);
+    const antes = (await call('POST', '/game/ops', plusTier, u.cookie)).body.wallet.coins as number;
+    await givePlus(u.id);
+    const com = (await call('POST', '/game/ops', plusTier, u.cookie)).body.wallet.coins as number;
+    expect(com).toBe(antes + 15);
+    expect((await call('POST', '/game/ops', plusTier, u.cookie)).body.wallet.coins).toBe(com);
+    // degrau que pede mais dias ativos ainda não paga
+    const longe = { ops: [{ op: 'grant', src: { kind: 'temporada-plus', month, tier: 5 } }] };
+    expect((await call('POST', '/game/ops', longe, u.cookie)).body.wallet.coins).toBe(com);
+  });
+});

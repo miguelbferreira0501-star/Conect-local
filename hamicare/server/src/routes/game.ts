@@ -9,7 +9,7 @@ import { pool, withUser } from '../db';
 import { AppError, invalid } from '../lib/errors';
 import { type AppEnv, requireAuth } from '../auth';
 import {
-  CHEST_ORDER, DEFAULT_GAME, FRIEND_LADDER, HAMMER_PRICE, addUsage, arenaItemsOf, canCraft, arenaOf, baseGrant, capGrant, chestOdds, chestPool, emptyPity, emptyUsage, isChest, levelOf, levelUps, openChest, pityInfo, rarityOf, xpAt,
+  CHEST_ORDER, DEFAULT_GAME, FRIEND_LADDER, HAMMER_PRICE, SEASON_PLUS, TREK, addUsage, arenaItemsOf, canCraft, arenaOf, baseGrant, capGrant, chestOdds, chestPool, emptyPity, emptyUsage, isChest, levelOf, levelUps, openChest, pityInfo, rarityOf, xpAt,
   type ChestId, type DayUsage, type GameConfig, type Pity, type Rarity, type Source,
 } from '../../../web/src/shared/game';
 import { ITEMS, LOOKS, STYLES, itemById, stylePrice } from '../../../web/src/data/items';
@@ -153,6 +153,8 @@ const sourceSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('rapida'), id: z.enum(['emocao', 'reflexao', 'meta']), slot: z.number().int().min(0).max(2), coins: z.number().int(), date: day }),
   z.object({ kind: z.literal('amigo'), n: z.number().int().min(1).max(FRIEND_LADDER.length) }),
   z.object({ kind: z.literal('plus'), week: day }),
+  z.object({ kind: z.literal('viagem'), date: day }),
+  z.object({ kind: z.literal('temporada-plus'), month: z.string().regex(/^\d{4}-\d{2}$/), tier: z.number().int().min(0).max(SEASON_PLUS.length - 1) }),
 ]);
 const opSchema = z.discriminatedUnion('op', [
   z.object({ op: z.literal('grant'), src: sourceSchema }),
@@ -216,6 +218,18 @@ async function trusted(db: pg.PoolClient, userId: string, src: Source, cfg: Game
       // Só paga o n-ésimo amigo quando a pessoa já tem n amizades aceitas.
       const n = (await db.query('SELECT app.friend_count($1) AS n', [userId])).rows[0]?.n ?? 0;
       return n >= src.n ? src : null;
+    }
+    case 'viagem': {
+      // A viagem só sai depois de algumas missões naquele dia (ou na véspera, se ele voltou depois da meia-noite).
+      const n = (await db.query("SELECT count(*)::int AS n FROM game_ledger WHERE user_id = $1 AND active AND ref LIKE 'tarefa:%' AND day BETWEEN $2::date - 1 AND $2::date", [userId, src.date])).rows[0]?.n ?? 0;
+      return n >= TREK.needs ? src : null;
+    }
+    case 'temporada-plus': {
+      // Trilha Plus: só com Plus ativo, no mês de agora, com os dias ativos contados pelo servidor.
+      if (src.month !== utcDay(0).slice(0, 7) && src.month !== utcDay(-1).slice(0, 7)) return null;
+      const t = cfg.season.tiers[src.tier];
+      if (!t || !(await isPremium(db, userId))) return null;
+      return (await activeDays(db, userId, src.month)) >= t.days ? src : null;
     }
     case 'plus': {
       // Mesada do HamiCare+: só com Plus ativo, uma vez por semana (a semana de agora, com folga na virada).
