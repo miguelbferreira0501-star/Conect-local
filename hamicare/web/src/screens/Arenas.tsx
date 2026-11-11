@@ -12,7 +12,7 @@ import { Seed, Sheet, toast } from '../components/ui';
 import { itemById } from '../data/items';
 import { periodOf } from '../data/lines';
 import { gameCfg } from '../lib/game';
-import { buyMoon, currentArena, homeArenaOf, houseOf, moveHome, useApp } from '../lib/store';
+import { backToEarth, buyMoon, currentArena, homeArenaOf, houseOf, moveHome, useApp } from '../lib/store';
 import { MoonTrip } from '../components/MoonTrip';
 import { MOON_N, MOON_PRICE } from '../data/arenas';
 import { levelProgress } from '../logic/progress';
@@ -237,9 +237,14 @@ function MoonCard({ onHouse }: { onHouse: () => void }) {
       </p>
       {s.moon ? (
         home ? (
-          <button className="btn btn-soft btn-sm justify-self-start" onClick={onHouse}>
-            Ver a casa lunar
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button className="btn btn-soft btn-sm" onClick={onHouse}>
+              Ver a casa lunar
+            </button>
+            <button className="btn btn-primary btn-sm" onClick={() => backToEarth() && toast(`${s.pet.name} voltou para a Terra! 🌍`)}>
+              🌍 Voltar para a Terra
+            </button>
+          </div>
         ) : (
           <button className="btn btn-primary btn-sm justify-self-start" onClick={() => setFlying(true)}>
             Voar para a Lua

@@ -21,7 +21,8 @@ const reactionOf = (id: ReactionId) => REACTIONS.find((r) => r.id === id) ?? REA
 export function VisitView({ p, api, canReact }: { p: Profile; api: SocialApi; canReact: boolean }) {
   const [inside, setInside] = useState(false);
   const [sent, setSent] = useState<ReactionId | null>(null);
-  const arena = gameCfg().arenas.find((a) => a.n === (p.arena ?? 1)) ?? gameCfg().arenas[0];
+  // 13 = casa na Lua
+  const arena = p.arena === 13 ? { id: 'lua', name: 'Lua' } : gameCfg().arenas.find((a) => a.n === (p.arena ?? 1)) ?? gameCfg().arenas[0];
   const pet = <Hamster fur={p.pet.fur} phase={p.pet.phase} outfit={p.pet.outfit} size={inside ? 120 : 110} neutral label={p.pet.name} />;
 
   async function react(id: ReactionId) {
@@ -47,7 +48,7 @@ export function VisitView({ p, api, canReact }: { p: Profile; api: SocialApi; ca
       )}
       <div className="flex items-center justify-between gap-2">
         <p className="min-w-0 text-[14px] text-muted">
-          <b className="text-ink">{p.pet.name}</b> mora em {arena.name}
+          <b className="text-ink">{p.pet.name}</b> mora {p.arena === 13 ? 'na' : 'em'} {arena.name}
         </p>
         <button className="btn btn-soft btn-sm shrink-0" onClick={() => setInside(!inside)}>
           <Eye size={15} /> {inside ? 'Ver lá fora' : 'Ver dentro'}

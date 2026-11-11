@@ -1288,6 +1288,12 @@ export function buyMoon(): 'ok' | 'sem-sementes' | 'ja-tem' {
   return 'ok';
 }
 
+/** Volta da Lua para a casa da Terra onde ele morava (ou a arena mais alta). */
+export function backToEarth(): boolean {
+  if (homeArenaOf(state) !== MOON_N) return false;
+  return moveHome(Math.min(state.earthHome ?? currentArena(state), currentArena(state)) || 1);
+}
+
 /** Arena atual (a mais alta já aberta). */
 export const currentArena = (s: State) => arenaOf(Math.max(levelOf(s.xp), s.game.maxLevel), gameCfg()).n;
 /** Arena onde o Hami mora. */
@@ -1305,7 +1311,7 @@ export function moveHome(n: number): boolean {
   const houses: Record<string, State['house']> = { ...(state.houses ?? {}), [from]: state.house };
   const house = houses[n] ?? arenaHouse(n);
   delete houses[n];
-  commit({ ...state, homeArena: n, house, houses });
+  commit({ ...state, homeArena: n, house, houses, earthHome: n === MOON_N && from !== MOON_N ? from : state.earthHome });
   return true;
 }
 

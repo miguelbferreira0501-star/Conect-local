@@ -10,10 +10,11 @@ const SKY: Record<Period, [string, string]> = {
   noite: ['#141A44', '#33306E'],
 };
 
-export function RoomWindow({ trim, period }: { trim: WallTrim; period: Period }) {
+export function RoomWindow({ trim, period, lunar = false }: { trim: WallTrim; period: Period; lunar?: boolean }) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
-  const [a, b] = SKY[period];
-  const night = period === 'noite';
+  // Na casa lunar, a janela dá para o espaço: sempre noite, com a Terra no céu e chão de Lua.
+  const [a, b] = lunar ? (['#0D1030', '#262A5C'] as [string, string]) : SKY[period];
+  const night = lunar || period === 'noite';
   const frame = '#FFFFFF';
   const shape = trim.window;
   // Vão da janela (onde aparece o céu)
@@ -33,7 +34,14 @@ export function RoomWindow({ trim, period }: { trim: WallTrim; period: Period })
       <g transform="translate(0 0)">
         <g clipPath={`url(#p${uid})`}>
           <rect x="0" y="0" width="120" height="120" fill={`url(#s${uid})`} />
-          {night ? (
+          {lunar ? (
+            <>
+              <circle cx="76" cy="36" r="11" fill="#5FB4F5" />
+              <path d="M70 31 q5 -3 8 1 q-2 5 -7 3 Z M77 40 q5 -1 6 3 q-4 3 -7 0 Z" fill="#6FC46A" />
+              <circle cx="76" cy="36" r="11" fill="none" stroke="#BFE6FF" strokeOpacity="0.5" strokeWidth="1.5" />
+              {[[36, 28], [48, 50], [92, 60], [40, 66], [58, 24]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="1.4" fill="#FFFFFF" opacity="0.9" />)}
+            </>
+          ) : night ? (
             <>
               <circle cx="78" cy="34" r="9" fill="#FFF3C2" />
               <circle cx="82" cy="31" r="8" fill={a} />
@@ -47,8 +55,9 @@ export function RoomWindow({ trim, period }: { trim: WallTrim; period: Period })
             </>
           )}
           {/* morrinhos lá fora */}
-          <path d="M20 96 Q44 70 66 84 T104 76 V100 H20 Z" fill={night ? '#2A3C5E' : '#8FD08A'} />
-          <path d="M20 100 Q50 84 80 94 T104 90 V100 H20 Z" fill={night ? '#22314E' : '#6FBF77'} />
+          <path d="M20 96 Q44 70 66 84 T104 76 V100 H20 Z" fill={lunar ? '#8E94AE' : night ? '#2A3C5E' : '#8FD08A'} />
+          <path d="M20 100 Q50 84 80 94 T104 90 V100 H20 Z" fill={lunar ? '#B9BDCB' : night ? '#22314E' : '#6FBF77'} />
+          {lunar && <><ellipse cx="46" cy="95" rx="7" ry="2" fill="#8E94AE" /><ellipse cx="78" cy="96" rx="5" ry="1.6" fill="#8E94AE" /></>}
         </g>
         {shape === 'vigia' ? (
           <>

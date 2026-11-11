@@ -137,3 +137,17 @@ describe('reforma das casas', () => {
     expect(upgradeHouse(arenaHouse(3), 3).items).toEqual(arenaHouse(3).items);
   });
 });
+
+describe('casa na Lua', () => {
+  it('voltar para a Terra leva para a casa onde ele morava', async () => {
+    const { backToEarth, buyMoon, homeArenaOf, getState, replaceState, fresh, moveHome } = await import('../lib/store');
+    const { xpAt, DEFAULT_GAME } = await import('../shared/game');
+    replaceState({ ...fresh(), onboarded: true, xp: xpAt(4, DEFAULT_GAME), coins: 6000 });
+    moveHome(3);
+    expect(backToEarth()).toBe(false);
+    expect(buyMoon()).toBe('ok');
+    expect(homeArenaOf(getState())).toBe(13);
+    expect(backToEarth()).toBe(true);
+    expect(homeArenaOf(getState())).toBe(3);
+  });
+});

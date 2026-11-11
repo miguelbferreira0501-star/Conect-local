@@ -70,7 +70,7 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
       )}
       <div className="room-crown" style={{ ['--tr' as string]: trim.trim }} />
       <div className="room-window" aria-hidden="true">
-        <RoomWindow trim={trim} period={period} />
+        <RoomWindow trim={trim} period={period} lunar={house.wallpaper === 'p-lua' || house.floor === 'f-lua'} />
       </div>
       {/* Chão */}
       <div className="room-floor-wrap" style={{ perspective: `${height * 1.4}px`, perspectiveOrigin: `50% ${height * 0.3}px` }}>
