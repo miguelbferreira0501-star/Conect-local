@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Flame, Mail, Plus, Settings } from 'lucide-react';
 import { Room } from '../components/Room';
 import { floorPalette, tonePalette } from '../components/Furniture';
-import { TREK_THEMES, TrekBar, TrekCard, TrekResultModal, TrekScene, TrekStart, WalkingHami, finishTrek, trekThemeOf } from '../components/Trek';
+import { TREK_THEMES, Suitcase, TrekBar, TrekCard, TrekScene, TrekStart, TrekUnpack, WalkingHami, finishTrek, trekThemeOf } from '../components/Trek';
 import type { TrekResult } from '../lib/store';
 import { openUi } from '../lib/bus';
 import { unreadMail } from '../lib/mail';
@@ -47,7 +47,9 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
   const today = todayKey();
   // O Início continua o chão da casa: o degradê, a página e os cartões seguem a cor do piso.
   const floor = s.house.floor;
-  const trekTheme = s.trek ? trekThemeOf(s) : null;
+  // Enquanto ele anda, o Início mostra o caminho; quando volta, ele aparece em casa com a mala.
+  const trekBack = !!s.trek && now >= s.trek.endsAt;
+  const trekTheme = s.trek && !trekBack ? trekThemeOf(s) : null;
   const mailN = unreadMail(s);
   const [trekStart, setTrekStart] = useState(false);
   const [trekResult, setTrekResult] = useState<TrekResult | null>(null);
@@ -166,15 +168,8 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
       {layer}
       <section className="home-room" aria-label={`Casa do ${s.pet.name}`}>
         {s.trek && trekTheme ? (
-          <TrekScene theme={trekTheme} height={430} still={now >= s.trek.endsAt}>
-            <div className="grid justify-items-center gap-2">
-              {now >= s.trek.endsAt && (
-                <button className="btn btn-primary btn-sm" data-sound="conquista" onClick={() => setTrekResult(finishTrek())}>
-                  <Mail size={16} /> Ver o que ele trouxe
-                </button>
-              )}
-              <WalkingHami fur={s.pet.fur} outfit={s.pet.outfit} size={176} still={now >= s.trek.endsAt} />
-            </div>
+          <TrekScene theme={trekTheme} height={430}>
+            <WalkingHami fur={s.pet.fur} outfit={s.pet.outfit} size={176} />
           </TrekScene>
         ) : (
           <PanRoom>
@@ -225,6 +220,16 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
             <Glyph e="👑" size={32} />
           </button>
         </div>
+        {trekBack && (
+          <>
+            <div className="hr-bubble">
+              <p>Vamos ver qual é o presente desta vez!</p>
+            </div>
+            <button className="hr-mala" data-sound="conquista" onClick={() => setTrekResult(finishTrek())} aria-label="Abrir a mala da viagem">
+              <Suitcase size={84} />
+            </button>
+          </>
+        )}
         {!adv && !s.trek && (
           <div className="hr-bubble">
             <p>{line}</p>
@@ -235,7 +240,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
             )}
           </div>
         )}
-        {!s.trek && <span className="hr-hint" aria-hidden="true">‹ arraste para ver a casa ›</span>}
+        {!trekTheme && <span className="hr-hint" aria-hidden="true">‹ arraste para ver a casa ›</span>}
       </section>
 
       <TrekBar now={now} />
@@ -307,7 +312,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
 
       <AdventureModal result={result} onClose={() => setResult(null)} />
       <TrekStart open={trekStart} onClose={() => setTrekStart(false)} />
-      <TrekResultModal result={trekResult} onClose={() => setTrekResult(null)} />
+      <TrekUnpack result={trekResult} onClose={() => setTrekResult(null)} />
     </div>
   );
 }

@@ -261,6 +261,8 @@ export interface State {
   adventure: Adventure | null;
   /** Viagem do dia: o Hami sai andando depois de algumas missões e volta com um presente. */
   trek?: { startedAt: number; endsAt: number; day: string } | null;
+  /** Cartões de lembrança das viagens: quantos de cada lugar. */
+  trekCards?: Record<string, number>;
   /** Dia da última viagem (uma por dia). */
   trekDay?: string;
   /** Correio do Hami: cartas já lidas e cartas apagadas. */

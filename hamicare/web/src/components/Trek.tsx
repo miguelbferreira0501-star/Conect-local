@@ -4,13 +4,12 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Zap } from 'lucide-react';
 import { furById } from '../data/fur';
 import { itemById } from '../data/items';
-import { MOON_N } from '../data/arenas';
 import { gameCfg } from '../lib/game';
-import { finishTrek, homeArenaOf, startTrek, trekMissing, trekReady, useApp, TREK, type TrekResult } from '../lib/store';
+import { finishTrek, startTrek, trekMissing, trekPlaceOf, trekReady, useApp, TREK, TREK_TALES, type TrekResult } from '../lib/store';
 import { costumeOf, garmentColor } from './Wear';
 import { shade } from './Furniture';
 import { Glyph } from './art';
-import { Modal, Seed } from './ui';
+import { Seed } from './ui';
 import type { Outfit, State } from '../types';
 
 // ---------- Hami de lado, andando com a trouxinha ----------
@@ -103,11 +102,7 @@ export const TREK_THEMES: Record<string, Theme> = {
 };
 
 /** Tema da viagem: a arena onde o Hami mora (ou a Lua). */
-export function trekThemeOf(s: State): string {
-  const n = homeArenaOf(s);
-  if (n === MOON_N) return 'lua';
-  return gameCfg().arenas.find((a) => a.n === n)?.id ?? 'casinha';
-}
+export const trekThemeOf = (s: State): string => trekPlaceOf(s);
 
 function PropArt({ kind, x, t }: { kind: Prop; x: number; t: Theme }) {
   const g = (children: ReactNode) => <g transform={`translate(${x} 0)`}>{children}</g>;
@@ -241,6 +236,7 @@ export function TrekBar({ now }: { now: number }) {
   if (!t) return null;
   const pct = (now - t.startedAt) / Math.max(1, t.endsAt - t.startedAt);
   const back = now >= t.endsAt;
+  if (back) return null;
   return (
     <section className="trek-bar" aria-label="Viagem do dia">
       <p>
@@ -320,34 +316,144 @@ export function inkOn(hex: string) {
   return l > 0.62 ? '#4A3423' : '#FFFFFF';
 }
 
-/** O que ele trouxe da viagem. */
-export function TrekResultModal({ result, onClose }: { result: TrekResult | null; onClose: () => void }) {
-  const s = useApp();
-  const food = result ? itemById(result.food) : null;
+/** A mala que o Hami traz da viagem. */
+export function Suitcase({ size = 90 }: { size?: number }) {
   return (
-    <Modal open={!!result} onClose={onClose} label="Volta da viagem">
-      {result && (
-        <div className="grid justify-items-center gap-3 p-6 text-center">
-          <WalkingHami fur={s.pet.fur} outfit={s.pet.outfit} size={130} still />
-          <h2 className="font-display text-[24px] font-bold leading-tight">{s.pet.name} voltou da viagem!</h2>
-          <p className="text-[16px] leading-relaxed text-muted">
-            Hoje ele {result.story}.
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            <span className="chip chip-gold"><Seed /> +{result.coins} sementes</span>
-            <span className="chip chip-plain">+{result.xp} XP</span>
-            {food && (
-              <span className="chip chip-leaf">
-                <Glyph e={food.art ?? food.emoji} size={18} /> {food.name}
-              </span>
-            )}
+    <svg viewBox="0 0 100 110" width={size} height={(size * 110) / 100} aria-hidden="true">
+      <ellipse cx="50" cy="104" rx="34" ry="5" fill="#000" opacity="0.16" />
+      <path d="M36 18 V10 C36 5 40 3 44 3 H56 C60 3 64 5 64 10 V18" stroke="#C0562B" strokeWidth="6" fill="none" strokeLinecap="round" />
+      <rect x="12" y="16" width="76" height="80" rx="16" fill="#F58A3C" stroke="#C0562B" strokeWidth="3.5" />
+      <rect x="22" y="26" width="56" height="34" rx="9" fill="#8E7BE0" stroke="#6A56C4" strokeWidth="3" />
+      <path d="M28 34 C34 30 44 30 50 33" stroke="#fff" strokeOpacity="0.45" strokeWidth="4" strokeLinecap="round" fill="none" />
+      <rect x="20" y="68" width="60" height="6" rx="3" fill="#FFB36B" />
+      <rect x="20" y="80" width="60" height="6" rx="3" fill="#FFB36B" />
+      <circle cx="30" cy="77" r="3" fill="#C0562B" /><circle cx="50" cy="77" r="3" fill="#C0562B" /><circle cx="70" cy="77" r="3" fill="#C0562B" />
+      <rect x="22" y="94" width="14" height="8" rx="4" fill="#5A4636" /><rect x="64" y="94" width="14" height="8" rx="4" fill="#5A4636" />
+    </svg>
+  );
+}
+
+const PLACE_NAME: Record<string, string> = { lua: 'Lua' };
+const placeName = (id: string) => PLACE_NAME[id] ?? gameCfg().arenas.find((a) => a.id === id)?.name ?? 'Passeio';
+
+function Confetti() {
+  const colors = ['#F5B82E', '#E0554F', '#6CB84F', '#5B8BD6', '#F29BB2', '#8E7BE0'];
+  return (
+    <div className="unp-confetti" aria-hidden="true">
+      {Array.from({ length: 22 }, (_, i) => (
+        <i key={i} style={{ left: `${(i * 37) % 100}%`, background: colors[i % colors.length], animationDelay: `${(i % 7) * 0.12}s`, transform: `rotate(${i * 40}deg)` }} />
+      ))}
+    </div>
+  );
+}
+
+/**
+ * A mala da volta (estilo Catzy): toca na mala, vira o cartão de lembrança, escolhe o fim da
+ * historinha e depois vê os presentes, um de cada vez.
+ */
+export function TrekUnpack({ result, onClose }: { result: TrekResult | null; onClose: () => void }) {
+  const s = useApp();
+  const [step, setStep] = useState<'mala' | 'verso' | 'frente' | 'fim' | 'comida' | 'sementes'>('mala');
+  const [pick, setPick] = useState<0 | 1 | null>(null);
+  useEffect(() => {
+    if (result) (setStep('mala'), setPick(null));
+  }, [result]);
+  if (!result) return null;
+  const tale = TREK_TALES[Math.abs(result.tale) % TREK_TALES.length] ?? TREK_TALES[0];
+  const food = itemById(result.food);
+  const dark = step === 'frente' || step === 'fim';
+  const card = (
+    <div className="unp-card is-front">
+      <div className="unp-card-art">
+        <TrekScene theme={result.place} height={210} still>
+          <WalkingHami fur={s.pet.fur} outfit={s.pet.outfit} size={96} still />
+        </TrekScene>
+      </div>
+      <b>{placeName(result.place)}</b>
+    </div>
+  );
+  return (
+    <div className={`unp ${dark ? 'is-dark' : ''}`} role="dialog" aria-modal="true" aria-label="A mala da viagem">
+      {!dark && (
+        <div className="unp-top" aria-hidden="true">
+          <TrekScene theme={result.place} height={120} still />
+        </div>
+      )}
+      {step === 'mala' && (
+        <button className="unp-body unp-tap" onClick={() => setStep('verso')}>
+          <h2>{s.pet.name} voltou com a mala cheia!</h2>
+          <span className="unp-mala is-big"><Suitcase size={150} /></span>
+          <p>Toque na mala para abrir</p>
+        </button>
+      )}
+      {step === 'verso' && (
+        <div className="unp-body">
+          <h2>{s.pet.name} trouxe um cartão de lembrança</h2>
+          <p className="unp-sub">Toda vez que ele volta de uma viagem, você ganha 1 cartão do lugar por onde ele passou.</p>
+          <div className="unp-card is-back">
+            <span>🐹</span>
+            <i>HamiCare</i>
           </div>
-          <button className="btn btn-primary w-full" data-sound="conquista" onClick={onClose}>
-            Que viagem boa!
+          <p className="unp-plus">Cartão de lembrança +1 · você tem {result.cards} de {placeName(result.place)}</p>
+          <span className="unp-mala"><Suitcase size={70} /></span>
+          <button className="unp-btn" data-sound="conquista" onClick={() => setStep('frente')}>
+            Virar
           </button>
         </div>
       )}
-    </Modal>
+      {step === 'frente' && (
+        <div className="unp-body">
+          <p className="unp-story">{tale.s}</p>
+          <div className="unp-flip">{card}</div>
+          <h2>
+            {s.pet.name} {tale.q}
+          </h2>
+          <div className="grid w-full gap-3">
+            {tale.a.map((a, i) => (
+              <button key={a} className="unp-btn" onClick={() => (setPick(i as 0 | 1), setStep('fim'))}>
+                {a}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {step === 'fim' && (
+        <div className="unp-body">
+          <p className="unp-story">Cartão de lembrança · {placeName(result.place)}</p>
+          {card}
+          <h2>{tale.r[pick ?? 0]}</h2>
+          <p className="unp-sub">Hoje ele {result.story}.</p>
+          <span className="unp-chip">+{result.xp} XP</span>
+          <button className="unp-btn" onClick={() => setStep('comida')}>
+            Continuar
+          </button>
+        </div>
+      )}
+      {step === 'comida' && (
+        <div className="unp-body">
+          <Confetti />
+          <h2>Parabéns!</h2>
+          <span className="unp-prize">{food && <Glyph e={food.art ?? food.emoji} size={72} />}</span>
+          <p className="unp-plus">{food?.name ?? 'Comidinha'} +1</p>
+          <span className="unp-mala"><Suitcase size={84} /></span>
+          <button className="unp-btn" data-sound="conquista" onClick={() => setStep('sementes')}>
+            Continuar
+          </button>
+        </div>
+      )}
+      {step === 'sementes' && (
+        <div className="unp-body">
+          <Confetti />
+          <h2>Parabéns!</h2>
+          <span className="unp-prize"><Seed size={64} /></span>
+          <p className="unp-plus">+{result.coins} sementes</p>
+          <span className="unp-mala"><Suitcase size={84} /></span>
+          <button className="unp-btn" data-sound="conquista" onClick={onClose}>
+            OK
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 

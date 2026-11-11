@@ -1399,6 +1399,11 @@ export interface TrekResult {
   xp: number;
   food: string;
   story: string;
+  /** Lugar do cartão de lembrança (arena onde mora, ou "lua") e quantos a pessoa já tem dele. */
+  place: string;
+  cards: number;
+  /** Qual historinha de escolha vem no cartão. */
+  tale: number;
 }
 
 const TREK_FOODS = ['morango', 'milho', 'cenoura', 'maca', 'banana'];
@@ -1411,20 +1416,37 @@ const TREK_STORIES = [
   'descansou na sombra e ouviu os passarinhos',
   'seguiu uma borboleta e descobriu um cantinho secreto',
 ];
+/** Historinhas de escolha do cartão de lembrança (as duas respostas são boas). */
+export const TREK_TALES: { s: string; q: string; a: [string, string]; r: [string, string] }[] = [
+  { s: 'Uma ponte de corda balança devagar. Do outro lado, um campo cheio de flores.', q: 'quer atravessar. Como?', a: ['Primeiro espiar com calma.', 'Ir de um pulinho!'], r: ['Espiar primeiro é se cuidar com carinho.', 'Pular é confiar no próprio instinto.'] },
+  { s: 'No meio do caminho, uma poça enorme reflete o céu inteiro.', q: 'parou na frente dela. E agora?', a: ['Dar a volta devagar.', 'Pular dentro e rir!'], r: ['Dar a volta também é um jeito de chegar.', 'Às vezes brincar é o melhor descanso.'] },
+  { s: 'Um bichinho pequeno parece perdido e olha em volta sem saber para onde ir.', q: 'quer ajudar. Como?', a: ['Ficar do lado em silêncio.', 'Perguntar se ele quer companhia.'], r: ['Estar perto já é uma ajuda enorme.', 'Perguntar é um jeito bonito de cuidar.'] },
+  { s: 'A subida ficou longa e as perninhas começaram a cansar.', q: 'pensa no que fazer.', a: ['Sentar e descansar um pouco.', 'Ir mais devagar, sem parar.'], r: ['Descansar faz parte do caminho.', 'Devagar também é seguir em frente.'] },
+  { s: 'Começou a chover fininho e apareceu uma folha grande do tamanho de um guarda-chuva.', q: 'olha para a chuva.', a: ['Se abrigar embaixo da folha.', 'Sentir a chuva no rosto.'], r: ['Se proteger é um carinho com você.', 'Sentir o momento também é viver.'] },
+  { s: 'Duas trilhas se abrem: uma conhecida e uma que ninguém sabe onde vai dar.', q: 'precisa escolher.', a: ['A trilha conhecida.', 'A trilha nova.'], r: ['O que é familiar também acolhe.', 'Coragem é dar um passo no desconhecido.'] },
+];
 
-/** O Hami voltou: sementes, XP, uma comidinha e uma história. */
+/** Lugar da viagem: a arena onde o Hami mora, ou a Lua. */
+export function trekPlaceOf(s: State): string {
+  const n = homeArenaOf(s);
+  return n === MOON_N ? 'lua' : gameCfg().arenas.find((a) => a.n === n)?.id ?? 'casinha';
+}
+
+/** O Hami voltou: sementes, XP, uma comidinha, um cartão de lembrança e uma história. */
 export function finishTrek(now = Date.now()): TrekResult | null {
   const t = state.trek;
   if (!t || now < t.endsAt) return null;
   const today = todayKey();
   const date = dayDiff(t.day, today) <= 1 ? t.day : today;
   const h = hashStr(`${state.seed}:viagem:${t.startedAt}`);
-  const food = TREK_FOODS[h % TREK_FOODS.length];
-  let next: State = { ...state, trek: null, inventory: { ...state.inventory, [food]: (state.inventory[food] ?? 0) + 1 } };
+  const food = TREK_FOODS[Math.abs(h) % TREK_FOODS.length];
+  const place = trekPlaceOf(state);
+  const cards = (state.trekCards?.[place] ?? 0) + 1;
+  let next: State = { ...state, trek: null, trekCards: { ...(state.trekCards ?? {}), [place]: cards }, inventory: { ...state.inventory, [food]: (state.inventory[food] ?? 0) + 1 } };
   next = logEventIn(grant(next, { kind: 'viagem', date }), 'aventura');
   commit(next);
   const paid = next.game.paid[`viagem:${date}`];
-  return { coins: paid?.coins ?? TREK.coins, xp: paid?.xp ?? TREK.xp, food, story: TREK_STORIES[h % TREK_STORIES.length] };
+  return { coins: paid?.coins ?? TREK.coins, xp: paid?.xp ?? TREK.xp, food, story: TREK_STORIES[Math.abs(h) % TREK_STORIES.length], place, cards, tale: Math.floor(Math.abs(h) / 8) % TREK_TALES.length };
 }
 
 // ---------- Trilha Plus da temporada ----------

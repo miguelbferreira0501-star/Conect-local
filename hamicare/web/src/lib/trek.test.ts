@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { claimSeasonPlus, finishTrek, fresh, getState, mailClear, mailRead, replaceState, startTrek, todayKey, toggleTask, trekMissing, trekReady, SEASON_PLUS, TREK } from './store';
+import { claimSeasonPlus, finishTrek, fresh, getState, mailClear, mailRead, replaceState, startTrek, todayKey, toggleTask, trekMissing, trekReady, SEASON_PLUS, TREK, TREK_TALES } from './store';
 import { lettersOf, unreadMail } from './mail';
 import { addDays } from './util';
 import type { Task } from '../types';
@@ -33,11 +33,28 @@ describe('viagem do dia', () => {
     const coins = getState().coins;
     const r = finishTrek(getState().trek!.endsAt + 1)!;
     expect(r.coins).toBe(TREK.coins);
+    expect(r.cards).toBe(1);
+    expect(getState().trekCards?.[r.place]).toBe(1);
     expect(getState().coins).toBeGreaterThanOrEqual(coins + TREK.coins);
     expect(getState().inventory[r.food]).toBeGreaterThanOrEqual(1);
     expect(getState().trek).toBeNull();
     // hoje não sai de novo
     expect(trekReady(getState())).toBe(false);
+  });
+});
+
+describe('a mala da volta', () => {
+  it('toda viagem traz uma historinha válida, uma comidinha que existe e um cartão', () => {
+    for (let i = 0; i < 60; i++) {
+      start({ seed: i * 7919 + 1 });
+      for (const id of ['a', 'b', 'c']) toggleTask(id);
+      startTrek(1000 + i * 7919);
+      const r = finishTrek(getState().trek!.endsAt + 1)!;
+      expect(TREK_TALES[r.tale]).toBeTruthy();
+      expect(r.story).toBeTruthy();
+      expect(r.food).toBeTruthy();
+      expect(r.cards).toBe(1);
+    }
   });
 });
 
