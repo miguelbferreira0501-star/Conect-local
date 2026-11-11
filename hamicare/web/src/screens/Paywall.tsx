@@ -33,6 +33,7 @@ const ROWS: Row[] = [
   ['Sementes de presente toda semana', false, `${PLUS_WEEKLY}`],
   ['Pessoas na turma', `${TEAM_MAX}`, `${TEAM_MAX_PLUS}`],
   ['Martelinho grátis todo mês', false, true],
+  ['Trilha Plus da temporada (sementes extras)', false, true],
   [`Fantasias, roupas e móveis exclusivos`, false, `${PLUS_COUNTS.items} itens`],
   [`Estilos de casa completos`, false, `${PLUS_COUNTS.styles}`],
   [`Pelagens especiais`, false, `${PLUS_COUNTS.furs}`],

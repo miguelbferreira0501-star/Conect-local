@@ -162,10 +162,19 @@ const lum = (hex: string) => {
  * branco legível) e os cartões ficam num tom ainda mais escuro da mesma cor.
  */
 export function floorPalette(floor: string) {
-  const tone = FLOOR_TONE[floor] ?? FLOOR_TONE['f-madeira'];
+  return tonePalette(FLOOR_TONE[floor] ?? FLOOR_TONE['f-madeira']);
+}
+/**
+ * A página do Início é a própria cor do chão, lisa (sem degradê). Os cartões ficam num tom mais
+ * fundo da mesma cor (com texto branco legível) e o texto solto na página escolhe claro ou escuro.
+ */
+export function tonePalette(tone: string) {
   let t = 0.12;
   while (t < 0.6 && 1.05 / (lum(shade(tone, t)) + 0.05) < 3.1) t += 0.04;
-  return { tone, page: shade(tone, t), card: shade(tone, t + 0.12), deep: shade(tone, t + 0.2), dark: shade(tone, 0.72) };
+  // texto solto na página: o que contrastar mais com o chão (branco ou um tom bem escuro da mesma cor)
+  const darkInk = shade(tone, 0.8);
+  const ink = 1.05 / (lum(tone) + 0.05) >= (lum(tone) + 0.05) / (lum(darkInk) + 0.05) ? '#FFFFFF' : darkInk;
+  return { tone, page: tone, card: shade(tone, t + 0.06), deep: shade(tone, t + 0.16), dark: shade(tone, 0.72), ink };
 }
 
 export const FLOOR_CSS: Record<string, string> = {

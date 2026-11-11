@@ -16,7 +16,7 @@ export const LEGAL_INFO = {
   /** E-mail para dúvidas e pedidos de privacidade. */
   email: '[E-MAIL DE CONTATO]',
   /** Data desta versão (AAAA-MM-DD). */
-  atualizado: '2026-11-10',
+  atualizado: '2026-11-11',
 };
 
 export type LegalId = 'privacidade' | 'termos';
@@ -253,7 +253,7 @@ export const TERMS: LegalDoc = {
       body: [
         [
           'Sementes são a moeda do app. Você ganha cuidando do Hami e cumprindo missões.',
-          'Quem assina o HamiCare+ recebe uma mesada de 500 sementes por semana (pega no app, uma vez por semana, enquanto o Plus estiver ativo) e um martelinho por mês. A mesada faz parte dos benefícios do Plus: sementes não são vendidas avulsas.',
+          'Quem assina o HamiCare+ recebe uma mesada de 500 sementes por semana (pega no app, uma vez por semana, enquanto o Plus estiver ativo) e um martelinho por mês, além da trilha Plus da temporada (sementes extras em cada degrau, liberadas pelos dias ativos no mês). Tudo isso faz parte dos benefícios do Plus: sementes não são vendidas avulsas.',
           'Sementes, roupas, pelagens, móveis e outros itens são licenças de uso dentro do app. Eles não têm valor em dinheiro, não podem ser trocados por dinheiro nem vendidos fora do app.',
           'Presentes entre amigos são permitidos dentro do app.',
           'Podemos ajustar preços em sementes, itens e temporadas para manter o jogo equilibrado.',

@@ -22,7 +22,9 @@ export type Source =
   | { kind: 'turma'; id: string; date: string }
   | { kind: 'rapida'; id: QuickId; slot: number; coins: number; date: string }
   | { kind: 'amigo'; n: number }
-  | { kind: 'plus'; week: string };
+  | { kind: 'plus'; week: string }
+  | { kind: 'viagem'; date: string }
+  | { kind: 'temporada-plus'; month: string; tier: number };
 
 /** Missões rápidas: renovam a cada 8 horas (3 turnos por dia). */
 export type QuickId = 'emocao' | 'reflexao' | 'meta';
@@ -33,6 +35,10 @@ export const reflectionCoins = (chars: number) => (chars >= 400 ? 12 : chars >= 
 export const FRIEND_LADDER = [40, 60, 80, 100, 150];
 /** HamiCare+: mesada de sementes toda semana (cerca de 2.000 por mês). */
 export const PLUS_WEEKLY = 500;
+/** Viagem do dia: o Hami sai para explorar depois de algumas missões e volta com um presente. */
+export const TREK = { needs: 3, hours: 4, perTaskMin: 15, coins: 20, xp: 10 };
+/** Trilha Plus da temporada: sementes extras em cada degrau (mesmos dias da trilha grátis). */
+export const SEASON_PLUS = [15, 20, 30, 40, 50, 60, 80, 100, 120, 200];
 /** Martelinho que conserta a ofensiva (sementes). */
 export const HAMMER_PRICE = 80;
 
@@ -111,6 +117,12 @@ export function baseGrant(src: Source, cfg: GameConfig): Grant {
     case 'amigo': {
       const n = Math.max(1, Math.min(FRIEND_LADDER.length, Math.floor(src.n)));
       return { ref: `amigo:${n}`, label: `Prêmio do ${n}º amigo`, xp: 0, coins: FRIEND_LADDER[n - 1], routine: false };
+    }
+    case 'viagem':
+      return { ref: `viagem:${src.date}`, label: 'Viagem do dia', xp: TREK.xp, coins: TREK.coins, routine: false, date: src.date };
+    case 'temporada-plus': {
+      const tier = Math.max(0, Math.min(SEASON_PLUS.length - 1, Math.floor(src.tier)));
+      return { ref: `temporada:${src.month}:p${tier}`, label: `Temporada Plus: degrau ${tier + 1}`, xp: 0, coins: SEASON_PLUS[tier], routine: false };
     }
     case 'plus':
       return { ref: `plus:${src.week}`, label: 'Mesada semanal do HamiCare+', xp: 0, coins: PLUS_WEEKLY, routine: false };

@@ -39,11 +39,17 @@ describe('cores do Início a partir do chão', () => {
     const c = (v: number) => ((v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
     return 0.2126 * c(n >> 16) + 0.7152 * c((n >> 8) & 255) + 0.0722 * c(n & 255);
   };
-  it('todo piso dá uma página onde o texto branco grande fica legível', () => {
+  it('a página é a própria cor do chão (lisa) e o texto solto nela fica legível', () => {
+    const ratio = (a: string, b: string) => {
+      const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
+      return (x + 0.05) / (y + 0.05);
+    };
     for (const floor of Object.keys(FLOOR_TONE)) {
       const p = floorPalette(floor);
-      expect(1.05 / (lum(p.page) + 0.05)).toBeGreaterThanOrEqual(3);
-      expect(p.page).toMatch(/^#[0-9a-f]{6}$/);
+      expect(p.page.toLowerCase()).toBe(FLOOR_TONE[floor].toLowerCase());
+      expect(ratio(p.ink, p.page)).toBeGreaterThanOrEqual(3);
+      // os cartões continuam num tom mais fundo, com texto branco legível
+      expect(1.05 / (lum(p.card) + 0.05)).toBeGreaterThanOrEqual(3);
     }
   });
   it('piso desconhecido usa a madeira', () => {
