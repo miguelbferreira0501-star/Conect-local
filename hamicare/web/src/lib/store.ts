@@ -1383,9 +1383,11 @@ export function finishAdventure(now = Date.now()): AdventureResult | null {
 export { TREK, SEASON_PLUS };
 const doneToday = (s: State, today = todayKey()) => Object.keys(dayOf(s, today).done).length;
 /** Pronto para viajar? Algumas missões feitas hoje, sem viagem hoje, acordado e em casa. */
-export const trekReady = (s: State, today = todayKey()) => !s.trek && s.trekDay !== today && !s.adventure && !s.pet.sleeping && doneToday(s, today) >= TREK.needs;
+/** A viagem sai quando a Meta do dia fica completa. */
+export const trekNeeds = (s: State, today = todayKey()) => dayGoalOf(s, todayTasks(s, today).length);
+export const trekReady = (s: State, today = todayKey()) => !s.trek && s.trekDay !== today && !s.adventure && !s.pet.sleeping && doneToday(s, today) >= trekNeeds(s, today);
 /** Quantas missões faltam para a viagem de hoje (0 = pronto ou já foi). */
-export const trekMissing = (s: State, today = todayKey()) => (s.trek || s.trekDay === today ? 0 : Math.max(0, TREK.needs - doneToday(s, today)));
+export const trekMissing = (s: State, today = todayKey()) => (s.trek || s.trekDay === today ? 0 : Math.max(0, trekNeeds(s, today) - doneToday(s, today)));
 
 export function startTrek(now = Date.now()): boolean {
   if (!trekReady(state)) return false;
