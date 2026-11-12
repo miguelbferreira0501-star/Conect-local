@@ -25,6 +25,8 @@ const registerSchema = z.object({
   healthConsent: z.literal(true, { errorMap: () => ({ message: 'Para guardar o backup na nuvem, é preciso autorizar os dados de saúde. Sem conta, tudo fica só no aparelho.' }) }),
   termsVersion: z.string().max(20).optional(),
   guardianConsent: z.boolean().optional(),
+  /** De onde a pessoa veio (link com ?ref=, anúncio, convite de amigo). */
+  ref: z.string().max(60).optional(),
 });
 
 async function openSession(c: Parameters<typeof setSessionCookie>[0], userId: string) {
@@ -36,6 +38,7 @@ async function openSession(c: Parameters<typeof setSessionCookie>[0], userId: st
 export async function me(userId: string) {
   return withUser(userId, async (db) => {
     await db.query('UPDATE users SET last_seen_at = now() WHERE id = $1', [userId]);
+    await db.query('SELECT app.touch_day()');
     const { rows } = await db.query(
       `SELECT id, email, name, age_group AS "ageGroup", role, premium_until AS "premiumUntil", trial_used AS "trialUsed", banned_at IS NOT NULL AS banned FROM users WHERE id = $1`,
       [userId],
@@ -58,7 +61,10 @@ account.post('/auth/register', async (c) => {
     if ((e as { code?: string }).code === '23505') throw new AppError(409, 'email_em_uso', 'Já existe uma conta com esse e-mail. Tente entrar.');
     throw e;
   }
-  await withUser(id, (db) => db.query('SELECT app.record_consent($1, $2)', [b.termsVersion ?? LEGAL_INFO.atualizado, b.healthConsent]));
+  await withUser(id, async (db) => {
+    await db.query('SELECT app.record_consent($1, $2)', [b.termsVersion ?? LEGAL_INFO.atualizado, b.healthConsent]);
+    if (b.ref) await db.query('SELECT app.set_ref($1)', [b.ref]);
+  });
   const admins = (env.ADMIN_EMAILS ?? '').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean);
   if (admins.includes(b.email)) await pool.query('SELECT app.promote_admins($1)', [[b.email]]);
   await openSession(c, id);

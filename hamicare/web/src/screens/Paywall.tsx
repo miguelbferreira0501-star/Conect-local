@@ -26,6 +26,9 @@ type Plan = keyof typeof TRIAL_DAYS;
 
 type Row = [string, string | boolean, string | boolean];
 const ROWS: Row[] = [
+  ['Trilha Hábito que fica (21 dias)', '3 dias', '21 dias'],
+  ['Relatório da semana', false, true],
+  ['Estatísticas de evolução e humor', '30 dias', '6 meses'],
   ['Hami, missões, arenas e baús', true, true],
   ['SOS, respiração, diário e humor', true, true],
   ['Temporada do mês e coleções', true, true],
@@ -37,7 +40,6 @@ const ROWS: Row[] = [
   [`Fantasias, roupas e móveis exclusivos`, false, `${PLUS_COUNTS.items} itens`],
   [`Estilos de casa completos`, false, `${PLUS_COUNTS.styles}`],
   [`Pelagens especiais`, false, `${PLUS_COUNTS.furs}`],
-  ['Estatísticas de evolução e humor', '30 dias', '6 meses'],
 ];
 
 const cell = (v: string | boolean) => (v === true ? <Check size={18} className="mx-auto" aria-label="sim" /> : v === false ? <span className="opacity-60" aria-label="não">—</span> : <b>{v}</b>);
@@ -113,9 +115,27 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
       <div className="pw grid gap-5">
         <Parade fur={petFur} />
         <h2 className="pw-title">
-          Com o Plus, cuidar de você fica <span className="pw-hl">ainda mais gostoso!</span>
+          Com o Plus, seus hábitos <span className="pw-hl">ficam de verdade</span>
         </h2>
         <ul className="pw-benefits">
+          <li>
+            <span className="pw-ico">
+              <Glyph e="🌱" size={44} />
+            </span>
+            <span>
+              <b>Hábito que fica, em 21 dias</b>
+              Uma trilha guiada, um passo curto por dia, para transformar uma missão em hábito de verdade.
+            </span>
+          </li>
+          <li>
+            <span className="pw-ico">
+              <Glyph e="📊" size={44} />
+            </span>
+            <span>
+              <b>Seu relatório toda semana</b>
+              Dias ativos, missões, água e humor comparados com a semana passada, para você ver o que está mudando.
+            </span>
+          </li>
           <li>
             <span className="pw-ico">
               <Hamster growth={1} fur={petFur} outfit={{ chapeu: null, oculos: null, roupa: 'fantasia-raposa', acessorio: null, efeito: null }} size={56} idle={false} mood="feliz" label="Hami de raposinha" />

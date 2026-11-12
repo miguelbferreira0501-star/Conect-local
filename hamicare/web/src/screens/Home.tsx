@@ -8,7 +8,8 @@ import { floorPalette, tonePalette } from '../components/Furniture';
 import { TREK_THEMES, Suitcase, TrekBar, TrekScene, TrekStart, TrekUnpack, WalkingHami, finishTrek, trekThemeOf } from '../components/Trek';
 import type { TrekResult } from '../lib/store';
 import { openUi } from '../lib/bus';
-import { startTrek, trekReady } from '../lib/store';
+import { introDay, startTrek, trekReady } from '../lib/store';
+import { TrailCard, WeekReportCard } from '../components/Trail';
 import { unreadMail } from '../lib/mail';
 import { SleepingHami } from '../components/SleepingHami';
 import { openCheckin } from '../components/MoodCheckin';
@@ -254,8 +255,9 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
       <TrekBar now={now} />
 
       <PlusWeeklyCard />
-      <MoonTeaser onGo={onArenas} />
-      <StreakRepairCard />
+      {/* Nos 3 primeiros dias o Início fica só com o essencial: meta, trilha, água e missões. */}
+      {introDay(s) > 3 && <MoonTeaser onGo={onArenas} />}
+      {introDay(s) > 3 && <StreakRepairCard />}
 
       <section className="hc-adv" aria-label="Meta do dia">
         <button className="hc-adv-title" onClick={() => setAreaOpen(true)}>
@@ -279,6 +281,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
           <Flame size={14} /> {streak.count} {streak.count === 1 ? 'dia seguido' : 'dias seguidos'} · <button onClick={onEvolution}>{growthName}</button>
         </p>
       </section>
+      <TrailCard />
       <WaterCard />
       <DayGoalSheet open={areaOpen} onClose={() => setAreaOpen(false)} total={tasks.length} />
       <WalletSheet open={wallet} onClose={() => setWallet(false)} />
@@ -314,9 +317,10 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
         </button>
       </section>
 
+      {introDay(s) > 2 && <WeekReportCard />}
       <MealCard s={s} />
       <JourneyCard s={s} onOpen={onEvolution} onCalm={(a) => (requestTool(a), onGo('bem-estar'))} />
-      <TeamHomeCard onOpen={onTeam} />
+      {introDay(s) > 3 && <TeamHomeCard onOpen={onTeam} />}
 
       <AdventureModal result={result} onClose={() => setResult(null)} />
       <TrekStart open={trekStart} onClose={() => setTrekStart(false)} />

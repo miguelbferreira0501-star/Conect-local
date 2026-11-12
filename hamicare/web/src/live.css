@@ -4842,3 +4842,37 @@
 @media (prefers-reduced-motion: reduce) { .hr-mala, .unp, .unp-mala.is-big, .unp-card.is-back, .unp-flip, .unp-confetti i, .unp-prize { animation: none; } }
 
 .hc-adv-trip { margin-top: -2px; font-size: 13.5px; font-weight: 800; color: #fff; opacity: 0.95; text-align: center; }
+
+/* ================= Trilha "Hábito que fica" e Relatório da semana ================= */
+.trail-card { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border-radius: 24px; background: #fff; color: #2b2f45; border: 3px solid #fff; box-shadow: 0 3px 0 rgba(43, 47, 85, 0.18); }
+.trail-card.is-ready { background: linear-gradient(135deg, #e9f7d8, #d5efc0); }
+.trail-ico { display: grid; place-items: center; width: 48px; height: 48px; flex: none; border-radius: 16px; background: #e3f4d6; font-size: 26px; }
+.trail-card small { display: block; font-size: 12px; font-weight: 900; letter-spacing: 0.04em; color: #5f8a2c; }
+.trail-card b { display: block; font-family: var(--font-display, inherit); font-size: 16.5px; font-weight: 800; line-height: 1.25; }
+.trail-bar { display: block; height: 7px; margin-top: 6px; border-radius: 99px; background: #e4e0ee; overflow: hidden; }
+.trail-bar span { display: block; height: 100%; border-radius: 99px; background: #8fb84f; }
+.trail-step { display: grid; gap: 10px; padding: 14px; border-radius: 20px; background: var(--surface2, #f4f0f7); }
+.trail-step small { font-size: 12px; font-weight: 900; color: #5f8a2c; text-transform: uppercase; letter-spacing: 0.06em; }
+.trail-step b { font-family: var(--font-display, inherit); font-size: 19px; font-weight: 800; }
+.trail-step p { font-size: 15px; line-height: 1.45; }
+.trail-do { display: flex; gap: 6px; align-items: flex-start; padding: 10px 12px; border-radius: 14px; background: #fff; font-weight: 700; }
+.trail-blur { filter: blur(5px); user-select: none; }
+.trail-list { display: grid; gap: 4px; }
+.trail-list li { display: flex; align-items: center; gap: 10px; padding: 6px 4px; font-size: 14.5px; font-weight: 700; }
+.trail-list li span { display: grid; place-items: center; width: 26px; height: 26px; flex: none; border-radius: 50%; background: #e4e0ee; font-size: 12px; font-weight: 900; }
+.trail-list li.is-got span { background: #8fb84f; color: #fff; }
+.trail-list li.is-lock { opacity: 0.5; }
+.wr { display: grid; gap: 12px; padding: 14px 16px; border-radius: 24px; background: #fff; color: #2b2f45; border: 3px solid #fff; box-shadow: 0 3px 0 rgba(43, 47, 85, 0.18); }
+.wr-kicker { display: block; font-size: 12px; font-weight: 900; letter-spacing: 0.04em; color: #7e6cd0; }
+.wr-title { display: block; font-family: var(--font-display, inherit); font-size: 17px; font-weight: 800; line-height: 1.25; }
+.wr-tag { flex: none; padding: 4px 10px; border-radius: 99px; background: #6b82e8; color: #fff; font-size: 12px; font-weight: 900; }
+.wr-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.wr-grid > div { display: grid; justify-items: center; gap: 2px; padding: 10px 4px; border-radius: 16px; background: var(--surface2, #f4f0f7); text-align: center; }
+.wr-grid b { font-family: var(--font-display, inherit); font-size: 19px; font-weight: 900; line-height: 1.1; min-height: 26px; display: grid; place-items: center; }
+.wr-grid small { font-size: 11px; font-weight: 800; color: #6a6478; line-height: 1.2; }
+.wr-delta { display: inline-flex; align-items: center; gap: 2px; font-size: 11.5px; font-weight: 900; }
+.wr-delta.is-up { color: #3f9a4e; } .wr-delta.is-down { color: #c8563f; }
+.wr-locked { position: relative; }
+.wr-blur { filter: blur(6px); pointer-events: none; user-select: none; }
+.wr-unlock { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 99px; background: #6b82e8; color: #fff; font-size: 14px; font-weight: 900; white-space: nowrap; box-shadow: 0 4px 0 #4c62c4; }
+.wr-note { font-size: 13.5px; font-weight: 700; color: #6a6478; }

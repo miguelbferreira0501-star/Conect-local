@@ -21,6 +21,8 @@ async function asAdmin<T>(c: { get: (k: 'userId') => string | null }, fn: (db: p
 
 admin.get('/stats', (c) => asAdmin(c, async (db) => c.json({ stats: (await db.query('SELECT app.admin_stats() AS s')).rows[0].s })));
 
+admin.get('/metrics', (c) => asAdmin(c, async (db) => c.json({ metrics: (await db.query('SELECT app.admin_metrics() AS m')).rows[0].m })));
+
 admin.get('/users', (c) =>
   asAdmin(c, async (db) => {
     const q = `%${(c.req.query('q') ?? '').trim().toLowerCase()}%`;

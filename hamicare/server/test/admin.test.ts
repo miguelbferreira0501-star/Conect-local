@@ -64,3 +64,17 @@ describe('admin dá sementes', () => {
     expect(JSON.stringify(w.body.ledger)).toContain('Presente da equipe HamiCare');
   });
 });
+
+describe('métricas de produto', () => {
+  it('retenção, origem e teste grátis; só admin vê', async () => {
+    const r = await call('POST', '/auth/register', { name: 'Origem', email: `origem${Date.now()}@teste.com`, password: 'Senha1234', ageGroup: '18mais', acceptTerms: true, healthConsent: true, ref: 'tiktok' });
+    expect(r.status).toBe(201);
+    await call('GET', '/auth/me', undefined, r.cookie);
+    expect((await call('GET', '/admin/metrics', undefined, r.cookie)).status).toBe(403);
+    const chefe = { cookie: (await call('POST', '/auth/login', { email: 'chefe@teste.com', password: 'Senha1234' })).cookie as string };
+    const m = (await call('GET', '/admin/metrics', undefined, chefe.cookie)).body.metrics;
+    expect(m.origem.tiktok).toBe(1);
+    expect(m.ativosHoje).toBeGreaterThanOrEqual(1);
+    expect(m.retencao.d1).toBeTruthy();
+  });
+});
