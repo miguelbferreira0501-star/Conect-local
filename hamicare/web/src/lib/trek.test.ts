@@ -86,3 +86,26 @@ describe('correio do Hami', () => {
     expect(lettersOf(getState()).some((l) => l.id.startsWith('guardioes'))).toBe(false);
   });
 });
+
+describe('trilha Hábito que fica e relatório', async () => {
+  const { trailDo, trailNext, weekReport, TRAIL_FREE } = await import('./store');
+  it('um passo por dia; depois dos grátis pede o Plus', () => {
+    start();
+    expect(trailNext(getState()).state).toBe('pronto');
+    expect(trailDo()).toBe(true);
+    expect(trailNext(getState()).state).toBe('amanha');
+    expect(trailDo()).toBe(false);
+    replaceState({ ...getState(), trail: { start: '2026-01-01', done: Object.fromEntries(Array.from({ length: TRAIL_FREE }, (_, i) => [i, `2026-01-0${i + 1}`])) } });
+    expect(trailNext(getState()).state).toBe('plus');
+    replaceState({ ...getState(), premium: { trialStart: null, until: addDays(todayKey(), 10) } });
+    expect(trailNext(getState()).state).toBe('pronto');
+  });
+  it('relatório compara com a semana anterior', () => {
+    start();
+    toggleTask('a');
+    const r = weekReport(getState());
+    expect(r.active).toBe(1);
+    expect(r.missions).toBe(1);
+    expect(r.activePrev).toBe(0);
+  });
+});

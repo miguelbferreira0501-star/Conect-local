@@ -20,7 +20,7 @@ import { Evolution } from './screens/Evolution';
 import { GuardianHost } from './components/Guardian';
 import { Paywall } from './screens/Paywall';
 import { AccountSection } from './screens/Account';
-import { useAccount } from './lib/account';
+import { captureRef, useAccount } from './lib/account';
 import { ResetPassword } from './screens/ResetPassword';
 import { LegalHost } from './components/Legal';
 import { getState, markWelcomed, onCelebrate, tick, todayKey, useApp, type Celebration } from './lib/store';
@@ -44,6 +44,8 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'bem-estar', label: 'Bem-estar' },
   { id: 'amigos', label: 'Amigos' },
 ];
+
+captureRef();
 
 function initialTab(): Tab {
   // Link de convite (#amigo=HAMI-…): vai para Amigos com o código guardado.

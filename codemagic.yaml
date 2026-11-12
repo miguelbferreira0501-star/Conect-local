@@ -14,7 +14,7 @@ workflows:
         bundle_identifier: com.hamicare.app
       node: 22
       xcode: latest
-    scripts:
+    scripts: &ios_scripts
       - name: Instalar e compilar o app web
         working_directory: hamicare/web
         script: |
@@ -50,6 +50,36 @@ workflows:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
+
+  # Igual ao de cima, mas também manda para a REVISÃO da App Store. Roda sozinho quando você cria uma tag
+  # "ios-v1.0.0" (ou pelo botão no Codemagic). Lançamento manual: depois de aprovado, você toca em "Publicar".
+  hamicare-ios-loja:
+    name: HamiCare iOS (enviar para a App Store)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'ios-v*'
+    integrations:
+      app_store_connect: HamiCare ASC
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.hamicare.app
+      node: 22
+      xcode: latest
+    scripts: *ios_scripts
+    artifacts:
+      - hamicare/web/ios/App/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: true
+        release_type: MANUAL
 
   # App Android (Capacitor) com o widget do Hami, assinado e enviado para a Google Play (teste interno).
   # Passo a passo (chave de assinatura e conta de serviço da Google): hamicare/docs/LOJAS.md, parte "Android com Capacitor".

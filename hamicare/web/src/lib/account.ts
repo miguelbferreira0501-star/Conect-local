@@ -61,7 +61,7 @@ export function useAccount() {
 }
 
 export async function register(input: { name: string; email: string; password: string; ageGroup: User['ageGroup']; guardianConsent: boolean }) {
-  const r = await http<{ user: User }>('POST', '/auth/register', { ...input, acceptTerms: true, healthConsent: true, termsVersion: LEGAL_INFO.atualizado });
+  const r = await http<{ user: User }>('POST', '/auth/register', { ...input, acceptTerms: true, healthConsent: true, termsVersion: LEGAL_INFO.atualizado, ref: signupRef() });
   setUser(r.user);
   return afterSignIn();
 }
@@ -216,5 +216,23 @@ export async function syncPush(s: State): Promise<'ok' | 'sem-suporte' | 'sem-pe
     return 'ok';
   } catch {
     return 'sem-suporte';
+  }
+}
+
+/** Origem do cadastro: ?ref=… ou ?utm_source=… no link, ou "amigo" quando veio por convite. Guardada até criar a conta. */
+export function captureRef() {
+  try {
+    const q = new URLSearchParams(location.search);
+    const r = q.get('ref') || q.get('utm_source') || (/^#amigo=/.test(location.hash) ? 'amigo' : '');
+    if (r && !localStorage.getItem('hamicare:ref')) localStorage.setItem('hamicare:ref', r.slice(0, 40));
+  } catch {
+    /* sem armazenamento */
+  }
+}
+function signupRef(): string | undefined {
+  try {
+    return localStorage.getItem('hamicare:ref') ?? undefined;
+  } catch {
+    return undefined;
   }
 }

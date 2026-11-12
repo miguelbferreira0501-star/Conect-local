@@ -1457,6 +1457,75 @@ export function finishTrek(now = Date.now()): TrekResult | null {
   return { coins: paid?.coins ?? TREK.coins, xp: paid?.xp ?? TREK.xp, food, story: TREK_STORIES[Math.abs(h) % TREK_STORIES.length], place, cards, tale: Math.floor(Math.abs(h) / 8) % TREK_TALES.length };
 }
 
+// ---------- Trilha "Hábito que fica" (21 dias) ----------
+
+export { TRAIL, TRAIL_FREE } from '../data/trail';
+import { TRAIL as _TRAIL, TRAIL_FREE as _TRAIL_FREE } from '../data/trail';
+/** Próximo passo da trilha: um por dia. 'amanha' = já fez o de hoje; 'plus' = acabou a parte grátis; 'fim' = completou. */
+export function trailNext(s: State, today = todayKey()): { i: number; state: 'pronto' | 'amanha' | 'plus' | 'fim' } {
+  const done = s.trail?.done ?? {};
+  const i = Object.keys(done).length;
+  if (i >= _TRAIL.length) return { i: _TRAIL.length - 1, state: 'fim' };
+  if (Object.values(done).includes(today)) return { i, state: 'amanha' };
+  if (i >= _TRAIL_FREE && !isPremium(s, today)) return { i, state: 'plus' };
+  return { i, state: 'pronto' };
+}
+export function trailDo(): boolean {
+  const today = todayKey();
+  const n = trailNext(state, today);
+  if (n.state !== 'pronto') return false;
+  const t = state.trail ?? { start: today, done: {} };
+  commit({ ...state, trail: { ...t, done: { ...t.done, [n.i]: today } } });
+  return true;
+}
+
+// ---------- Relatório da semana (HamiCare+) ----------
+
+export interface WeekReport {
+  from: string;
+  to: string;
+  active: number;
+  activePrev: number;
+  missions: number;
+  missionsPrev: number;
+  waterL: number;
+  mood: number | null;
+  moodPrev: number | null;
+  best: string | null;
+  streak: number;
+}
+/** Os últimos 7 dias comparados com os 7 anteriores. */
+export function weekReport(s: State, today = todayKey()): WeekReport {
+  const span = (from: number, to: number) => {
+    let active = 0, missions = 0, water = 0;
+    const moods: number[] = [];
+    const count: Record<string, number> = {};
+    for (let i = from; i < to; i++) {
+      const d = s.days[addDays(today, -i)];
+      if (!d) continue;
+      const n = Object.keys(d.done).length;
+      if (n) active++;
+      missions += n;
+      water += d.water ?? 0;
+      if (d.mood) moods.push(d.mood);
+      for (const id of Object.keys(d.done)) count[id] = (count[id] ?? 0) + 1;
+    }
+    const top = Object.entries(count).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+    return { active, missions, water, mood: moods.length ? moods.reduce((a, b) => a + b, 0) / moods.length : null, top };
+  };
+  const now = span(0, 7);
+  const prev = span(7, 14);
+  const task = now.top ? s.tasks.find((t) => t.id === now.top) : null;
+  return {
+    from: addDays(today, -6), to: today,
+    active: now.active, activePrev: prev.active, missions: now.missions, missionsPrev: prev.missions,
+    waterL: Math.round((now.water * 0.25) * 10) / 10, mood: now.mood, moodPrev: prev.mood,
+    best: task?.title ?? null, streak: streakOf(s.days, today, s.createdAt).count,
+  };
+}
+/** Dias desde que a pessoa começou (1 = primeiro dia). Nos primeiros dias o Início fica mais simples. */
+export const introDay = (s: State, today = todayKey()) => dayDiff(s.createdAt, today) + 1;
+
 // ---------- Trilha Plus da temporada ----------
 
 export const seasonPlusClaimed = (s: State, tier: number, month = todayKey().slice(0, 7)) => !!s.game.paid[`temporada:${month}:p${tier}`];

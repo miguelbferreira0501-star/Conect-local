@@ -261,6 +261,8 @@ export interface State {
   adventure: Adventure | null;
   /** Viagem do dia: o Hami sai andando depois de algumas missões e volta com um presente. */
   trek?: { startedAt: number; endsAt: number; day: string } | null;
+  /** Trilha "Hábito que fica": dia em que começou e passos feitos (índice → dia em que fez). */
+  trail?: { start: string; done: Record<number, string> };
   /** Arena da Terra onde ele morava antes de ir para a Lua (para voltar). */
   earthHome?: number;
   /** Cartões de lembrança das viagens: quantos de cada lugar. */

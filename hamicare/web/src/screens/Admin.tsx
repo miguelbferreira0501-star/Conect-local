@@ -64,7 +64,63 @@ function Stats() {
           <p className="text-[13px] font-bold text-muted">{label}</p>
         </div>
       ))}
+      <Metrics />
     </div>
+  );
+}
+
+interface MetricsData {
+  retencao?: Record<string, { elegiveis: number; voltaram: number }>;
+  cadastros90: number;
+  testes: number;
+  testesVencidos: number;
+  pagantesDepoisDoTeste: number;
+  origem: Record<string, number>;
+  ativosHoje: number;
+  turmas: number;
+  amizades30: number;
+}
+
+/** Retenção, conversão e origem: os números que o conselho pediu para acompanhar. */
+function Metrics() {
+  const [m, setM] = useState<MetricsData | null>(null);
+  useEffect(() => {
+    http<{ metrics: MetricsData }>('GET', '/admin/metrics').then((r) => setM(r.metrics)).catch(() => {});
+  }, []);
+  if (!m) return null;
+  const pc = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : '—');
+  const ret = (k: string) => {
+    const r = m.retencao?.[k];
+    return r ? `${pc(r.voltaram, r.elegiveis)} (${r.voltaram}/${r.elegiveis})` : '—';
+  };
+  const rows: [string, string][] = [
+    ['Voltou no dia 1', ret('d1')],
+    ['Voltou no dia 7', ret('d7')],
+    ['Voltou no dia 30', ret('d30')],
+    ['Cadastros (90 dias)', String(m.cadastros90)],
+    ['Começaram o teste grátis', `${m.testes} (${pc(m.testes, m.cadastros90)})`],
+    ['Viraram pagantes depois do teste (aprox.)', `${m.pagantesDepoisDoTeste} de ${m.testesVencidos} (${pc(m.pagantesDepoisDoTeste, m.testesVencidos)})`],
+    ['Usaram o app hoje', String(m.ativosHoje)],
+    ['Turmas criadas', String(m.turmas)],
+    ['Amizades novas (30 dias)', String(m.amizades30)],
+  ];
+  return (
+    <section className="card col-span-2 grid gap-2 p-4">
+      <h3 className="font-display text-[18px] font-bold">Retenção e conversão</h3>
+      {rows.map(([k, v]) => (
+        <p key={k} className="flex justify-between gap-3 text-[14px]">
+          <span className="text-muted">{k}</span>
+          <b className="tabular-nums">{v}</b>
+        </p>
+      ))}
+      <h4 className="mt-2 text-[14px] font-bold">De onde vieram (link com ?ref=)</h4>
+      {Object.entries(m.origem).map(([k, v]) => (
+        <p key={k} className="flex justify-between text-[14px]">
+          <span className="text-muted">{k}</span>
+          <b className="tabular-nums">{v}</b>
+        </p>
+      ))}
+    </section>
   );
 }
 
