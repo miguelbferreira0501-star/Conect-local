@@ -38,7 +38,7 @@ interface CareDef {
 const CARES: CareDef[] = [
   { id: 'comida', care: 'comida', emoji: '🥕', label: 'Comida', desc: 'Lanchinho e cozinha', tone: '#FFE2B8' },
   { id: 'banho', care: 'banho', emoji: '🛁', label: 'Banho', desc: 'Espuma, toalha e secador', tone: '#CDEBFF' },
-  { id: 'brincar', care: 'brincar', emoji: '🎾', label: 'Brincar', desc: 'Dois joguinhos', tone: '#D9F5C8' },
+  { id: 'brincar', care: 'brincar', emoji: '🎾', label: 'Brincar', desc: 'Parque com 9 jogos', tone: '#D9F5C8' },
   { id: 'carinho', care: 'carinho', emoji: '🤲', label: 'Carinho', desc: 'Cafuné e cócegas', tone: '#FFD3DF' },
   { id: 'escovar', care: 'escovar', emoji: '🪮', label: 'Escovar', desc: 'Desfazer os nozinhos', tone: '#E9DDFF' },
   { id: 'dormir', care: 'dormir', emoji: '🌙', label: 'Dormir', desc: 'Recupera a energia', tone: '#D6DBFF' },

@@ -9,6 +9,7 @@ import './index.css';
 import './live.css';
 import './theme.css';
 import './wellbeing.css';
+import './arcade.css';
 
 installAppSounds();
 installNativeReminders();

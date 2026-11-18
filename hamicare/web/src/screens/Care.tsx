@@ -8,12 +8,14 @@ import { Sheet, toast } from '../components/ui';
 import { ITEMS, RECIPES, itemById } from '../data/items';
 import { CHATS, FACTS, periodOf } from '../data/lines';
 import { PLACES } from '../data/world';
-import { care, cook, feed, owned, setMood, takePhoto, toggleSleep, useApp } from '../lib/store';
+import { care, cook, feed, finishGame, owned, setMood, takePhoto, toggleSleep, useApp } from '../lib/store';
 import { snapshotPng, saveFile } from '../lib/platform';
 import { prefersReducedMotion } from '../lib/util';
 import { play, useSoundLoop } from '../lib/sound';
 import type { Mood, Photo, PetMood } from '../types';
 import { Glyph, hasArt } from '../components/art';
+import { ArcadeHub, metaOf } from '../components/arcade/Arcade';
+import { starsOf } from '../components/arcade/kit';
 
 export type CareMode = 'carinho' | 'comida' | 'banho' | 'brincar' | 'escovar' | 'dormir' | 'conversar' | 'foto' | null;
 
@@ -665,29 +667,19 @@ function BathGame({ onClose }: { onClose: () => void }) {
 // ---------- Brincar ----------
 
 function PlayHub({ onClose }: { onClose: () => void }) {
-  const s = useApp();
-  const [game, setGame] = useState<'chuva' | 'bola' | null>(null);
-  if (game === 'chuva') return <SeedRain onClose={onClose} onBack={() => setGame(null)} />;
-  if (game === 'bola') return <Fetch onClose={onClose} onBack={() => setGame(null)} />;
   return (
-    <CareShell title="Hora de brincar" step={`Escolha uma brincadeira com o ${s.pet.name}`} onClose={onClose}>
-      <button className="game-card game-rain" onClick={() => setGame('chuva')}>
-        <Glyph e="🌻" size={56} />
-        <span className="min-w-0 text-left">
-          <span className="block font-display text-[21px] font-bold">Chuva de sementes</span>
-          <span className="block text-[14px] font-semibold opacity-80">Arraste o {s.pet.name} para pegar as sementes que caem</span>
-        </span>
-      </button>
-      <button className="game-card game-ball" onClick={() => setGame('bola')}>
-        <Glyph e="🎾" size={56} />
-        <span className="min-w-0 text-left">
-          <span className="block font-display text-[21px] font-bold">Busca a bolinha!</span>
-          <span className="block text-[14px] font-semibold opacity-80">Toque no campo para jogar e veja ele correr atrás</span>
-        </span>
-      </button>
-    </CareShell>
+    <ArcadeHub
+      onClose={onClose}
+      legacy={{
+        chuva: (back) => <SeedRain onClose={onClose} onBack={back} />,
+        bolinha: (back) => <Fetch onClose={onClose} onBack={back} />,
+      }}
+    />
   );
 }
+
+/** Texto do prêmio no fim das brincadeiras antigas. */
+const prizeText = (coins: number) => (coins > 0 ? ` Vocês ganharam ${coins} sementes!` : '');
 
 interface Falling {
   id: number;
@@ -714,12 +706,15 @@ function SeedRain({ onClose, onBack }: { onClose: () => void; onBack: () => void
   const face = useRef(1);
   const over = left <= 0;
   const rewarded = useRef(false);
+  const [coins, setCoins] = useState(0);
+  const scoreRef = useRef(0);
+  scoreRef.current = score;
 
   useEffect(() => {
     if (over) {
       if (!rewarded.current) {
         rewarded.current = true;
-        care('brincar');
+        setCoins(finishGame('chuva', starsOf(metaOf('chuva'), scoreRef.current)));
         play('fim-jogo');
         setMoodPet('animado');
         animate(pet.current, 'hop');
@@ -821,7 +816,7 @@ function SeedRain({ onClose, onBack }: { onClose: () => void; onBack: () => void
         {over && <Confetti />}
       </div>
       {over && (
-        <DoneCard title={`Você fez ${score} ${score === 1 ? 'ponto' : 'pontos'}!`} text={<>O {s.pet.name} ficou muito mais feliz. Brincar também é se mexer: que tal levantar e se alongar um pouquinho?</>} onClose={onClose}>
+        <DoneCard title={`Você fez ${score} ${score === 1 ? 'ponto' : 'pontos'}!`} text={<>O {s.pet.name} ficou muito mais feliz.{prizeText(coins)} Brincar também é se mexer: que tal levantar e se alongar um pouquinho?</>} onClose={onClose}>
           <button className="btn btn-soft" onClick={onBack}>
             Jogar outra brincadeira
           </button>
@@ -845,10 +840,11 @@ function Fetch({ onClose, onBack }: { onClose: () => void; onBack: () => void })
   const [mood, setMoodPet] = useState<PetMood>('feliz');
   const ballRef = useRef<HTMLSpanElement>(null);
   const done = count >= FETCH_GOAL;
+  const [coins, setCoins] = useState(0);
 
   useEffect(() => {
     if (done) {
-      care('brincar');
+      setCoins(finishGame('bolinha', 1));
       play('fim-jogo');
       setMoodPet('animado');
       animate(pet.current, 'hop');
@@ -918,7 +914,7 @@ function Fetch({ onClose, onBack }: { onClose: () => void; onBack: () => void })
         {done && <Confetti />}
       </div>
       {done && (
-        <DoneCard title={`${FETCH_GOAL} bolinhas!`} text={<>O {s.pet.name} correu tanto que ficou sem fôlego (e muito feliz).</>} onClose={onClose}>
+        <DoneCard title={`${FETCH_GOAL} bolinhas!`} text={<>O {s.pet.name} correu tanto que ficou sem fôlego (e muito feliz).{prizeText(coins)}</>} onClose={onClose}>
           <button className="btn btn-soft" onClick={onBack}>
             Jogar outra brincadeira
           </button>
