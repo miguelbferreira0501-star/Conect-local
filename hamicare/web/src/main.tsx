@@ -4,6 +4,7 @@ import App from './App';
 import { installAppSounds } from './lib/appSounds';
 import { installNativeReminders } from './lib/nativeReminders';
 import { installWidget } from './lib/widget';
+import './fonts.css';
 import './index.css';
 import './live.css';
 import './theme.css';

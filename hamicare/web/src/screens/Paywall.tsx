@@ -236,7 +236,7 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
           </button>
         </>
       ) : (
-        <p className="rounded-2xl bg-white/15 p-4 text-center text-[14px]">Seu teste grátis já foi usado. A assinatura do plano {plan} chega em breve {storeWord()}.</p>
+        <p className="rounded-2xl bg-white/15 p-4 text-center text-[14px]">Seu teste grátis já foi usado. A assinatura do plano {plan} chega em breve {storeWord()}. Ela vai renovar sozinha no fim de cada período até você cancelar, e o cancelamento leva poucos toques nos ajustes da loja.</p>
       )}
       {!fromOnboarding && <GuardianLinks onClose={onClose} />}
       <button className="pw-later" onClick={onClose}>
