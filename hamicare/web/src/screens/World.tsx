@@ -1,5 +1,5 @@
 import { MOON_N } from '../data/arenas';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { ArrowUpToLine, Lock, PackageOpen, Pencil, Sparkles } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { ShopHub } from './Shop';
@@ -351,6 +351,39 @@ function WardrobeTab({ onPlus }: { onPlus: () => void }) {
   );
 }
 
+// Quadradinhos do armário: só redesenham quando mudam e ficam paradinhos (dezenas de Hamis animados travavam).
+const FurTile = memo(function FurTile({ id, label, price, has, locked, on, coins }: { id: string; label: string; price?: number; has: boolean; locked: boolean; on: boolean; coins: number }) {
+  return (
+    <button
+      className="wardrobe-tile"
+      aria-pressed={on}
+      aria-label={`${label}${locked ? ' (Plus)' : !has ? ` por ${price} sementes` : ''}`}
+      onClick={() => {
+        if (locked) return toast('Pelagem exclusiva do HamiCare+');
+        if (!has) {
+          const r = buyFur(id);
+          return toast(r === 'ok' ? `Pelagem ${label} é sua!` : r === 'sem-sementes' ? `Faltam ${price! - coins} sementes` : 'Não deu agora.');
+        }
+        updatePet({ fur: id });
+      }}
+    >
+      <span className="icon-still"><Hamster fur={id} size={54} idle={false} label={label} /></span>
+      <span className="truncate text-[11px] font-extrabold">{label}</span>
+      {locked ? <Lock size={12} className="absolute right-1.5 top-1.5 text-muted" /> : !has && <span className="wardrobe-price">🌻{price}</span>}
+    </button>
+  );
+});
+
+const WearTile = memo(function WearTile({ id, name, slot, fur, on }: { id: string; name: string; slot: WearSlot; fur: string; on: boolean }) {
+  return (
+    <button className="wardrobe-tile" aria-pressed={on} onClick={() => (on ? unwear(slot) : wear(id))} aria-label={on ? `Tirar ${name}` : `Vestir ${name}`}>
+      <span className="icon-still"><Hamster fur={fur} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null, [slot]: id }} size={66} idle={false} label={name} /></span>
+      <span className="line-clamp-2 text-[11px] font-extrabold leading-tight">{name}</span>
+      {on && <span className="care-tile-done !right-1.5 !top-1.5">✓</span>}
+    </button>
+  );
+});
+
 function DressUp({ onPlus }: { onPlus: () => void }) {
   const s = useApp();
   const mine = ITEMS.filter((i) => WEARABLE_KINDS.includes(i.kind) && owned(s, i.id));
@@ -365,31 +398,9 @@ function DressUp({ onPlus }: { onPlus: () => void }) {
       <section className="grid gap-2" aria-label="Pelagens">
         <h2 className="section-label px-1">Pelagem</h2>
         <div className="grid grid-cols-4 gap-2">
-          {FURS.map((f) => {
-            const has = !f.price || owned(s, `fur:${f.id}`);
-            const locked = f.plus && !premium;
-            const on = s.pet.fur === f.id;
-            return (
-              <button
-                key={f.id}
-                className="wardrobe-tile"
-                aria-pressed={on}
-                aria-label={`${f.label}${locked ? ' (Plus)' : !has ? ` por ${f.price} sementes` : ''}`}
-                onClick={() => {
-                  if (locked) return toast('Pelagem exclusiva do HamiCare+');
-                  if (!has) {
-                    const r = buyFur(f.id);
-                    return toast(r === 'ok' ? `Pelagem ${f.label} é sua!` : r === 'sem-sementes' ? `Faltam ${f.price! - s.coins} sementes` : 'Não deu agora.');
-                  }
-                  updatePet({ fur: f.id });
-                }}
-              >
-                <Hamster fur={f.id} size={54} idle={false} label={f.label} />
-                <span className="truncate text-[11px] font-extrabold">{f.label}</span>
-                {locked ? <Lock size={12} className="absolute right-1.5 top-1.5 text-muted" /> : !has && <span className="wardrobe-price">🌻{f.price}</span>}
-              </button>
-            );
-          })}
+          {FURS.map((f) => (
+            <FurTile key={f.id} id={f.id} label={f.label} price={f.price} has={!f.price || owned(s, `fur:${f.id}`)} locked={!!f.plus && !premium} on={s.pet.fur === f.id} coins={s.coins} />
+          ))}
         </div>
       </section>
       {mine.length ? (
@@ -403,14 +414,7 @@ function DressUp({ onPlus }: { onPlus: () => void }) {
               </h2>
               <div className="grid grid-cols-3 gap-2">
                 {items.map((i) => {
-                  const on = s.pet.outfit[slot] === i.id;
-                  return (
-                    <button key={i.id} className="wardrobe-tile" aria-pressed={on} onClick={() => (on ? unwear(slot) : wear(i.id))} aria-label={on ? `Tirar ${i.name}` : `Vestir ${i.name}`}>
-                      <Hamster fur={s.pet.fur} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null, [slot]: i.id }} size={66} idle={false} label={i.name} />
-                      <span className="line-clamp-2 text-[11px] font-extrabold leading-tight">{i.name}</span>
-                      {on && <span className="care-tile-done !right-1.5 !top-1.5">✓</span>}
-                    </button>
-                  );
+                  return <WearTile key={i.id} id={i.id} name={i.name} slot={slot} fur={s.pet.fur} on={s.pet.outfit[slot] === i.id} />;
                 })}
               </div>
             </section>

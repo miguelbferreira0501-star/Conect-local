@@ -24,6 +24,37 @@ const DAY_COLORS: [string, string][] = [
   ['#A8E6E0', '#3FB8AC'],
 ];
 
+/** Cenário fofo das telas de abertura: nuvens, bolinhas, corações e estrelas flutuando e um morrinho florido. */
+function DwDecor() {
+  const floaters = ['♥', '✦', '★', '♥', '✿', '✦', '♥', '★', '✿', '♥'];
+  return (
+    <div className="dw-decor" aria-hidden="true">
+      <span className="dw-dots" />
+      <span className="dw-cloud dw-cloud-1" />
+      <span className="dw-cloud dw-cloud-2" />
+      <span className="dw-cloud dw-cloud-3" />
+      {floaters.map((c, i) => (
+        <span key={i} className="dw-float" style={{ left: `${6 + ((i * 37) % 88)}%`, animationDelay: `${(i * 0.9) % 7}s`, fontSize: `${14 + (i % 3) * 6}px` }}>
+          {c}
+        </span>
+      ))}
+      <svg className="dw-hill" viewBox="0 0 400 120" preserveAspectRatio="none">
+        <path d="M0 60 Q100 20 200 46 T400 40 V120 H0Z" fill="#FFFFFF" opacity="0.22" />
+        <path d="M0 84 Q120 56 240 76 T400 70 V120 H0Z" fill="#FFFFFF" opacity="0.32" />
+        {[[40, 80], [96, 72], [300, 74], [356, 78], [180, 82]].map(([x, y], i) => (
+          <g key={i} transform={`translate(${x} ${y})`}>
+            <rect x="-1" y="0" width="2" height="12" fill="#6FB868" />
+            {[0, 72, 144, 216, 288].map((a) => (
+              <circle key={a} cx={Math.cos((a * Math.PI) / 180) * 4} cy={Math.sin((a * Math.PI) / 180) * 4} r="3.4" fill={['#FF9FC2', '#FFE27A', '#FFFFFF', '#C9B6FF', '#9FD8FF'][i]} />
+            ))}
+            <circle r="2.4" fill="#FFB347" />
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
 /**
  * Abertura do dia (estilo Catzy), em três passos: os dias juntos com o contador subindo,
  * a sequência de 7 dias com corações e o crescimento do Hami.
@@ -53,13 +84,26 @@ export function DailyWelcome({ onClose }: { onClose: () => void }) {
   const [a, b] = DAY_COLORS[dow];
   return (
     <div className="welcome dw" role="dialog" aria-modal="true" aria-label="Boas-vindas do dia" style={{ ['--w1' as string]: a, ['--w2' as string]: b }}>
+      <DwDecor />
       {step === 0 && (
         <div className="dw-step">
           <p className="dw-kicker">{DAY_NAMES[dow]}</p>
           <p className="dw-hello">{hello}</p>
           <div className="dw-heart">
             <svg viewBox="0 0 200 180" aria-hidden="true">
-              <path d="M100 168 C40 124 14 92 14 58 C14 30 36 12 60 12 C78 12 92 22 100 36 C108 22 122 12 140 12 C164 12 186 30 186 58 C186 92 160 124 100 168 Z" fill="rgba(255,255,255,0.16)" stroke="rgba(255,255,255,0.7)" strokeWidth="5" />
+              <defs>
+                <linearGradient id="dwh" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#FFD3E4" />
+                  <stop offset="1" stopColor="#FF9FC2" />
+                </linearGradient>
+                <pattern id="dwp" width="18" height="18" patternUnits="userSpaceOnUse">
+                  <circle cx="9" cy="9" r="2.6" fill="#FFFFFF" opacity="0.45" />
+                </pattern>
+              </defs>
+              <path d="M100 172 C40 128 12 94 12 58 C12 28 36 8 62 8 C80 8 92 18 100 32 C108 18 120 8 138 8 C164 8 188 28 188 58 C188 94 160 128 100 172 Z" fill="#FFFFFF" />
+              <path d="M100 164 C44 122 20 92 20 58 C20 33 40 16 62 16 C79 16 92 26 100 42 C108 26 121 16 138 16 C160 16 180 33 180 58 C180 92 156 122 100 164 Z" fill="url(#dwh)" />
+              <path d="M100 164 C44 122 20 92 20 58 C20 33 40 16 62 16 C79 16 92 26 100 42 C108 26 121 16 138 16 C160 16 180 33 180 58 C180 92 156 122 100 164 Z" fill="url(#dwp)" />
+              <path d="M44 46 C48 34 60 28 70 30" stroke="#FFFFFF" strokeWidth="7" strokeLinecap="round" fill="none" opacity="0.8" />
             </svg>
             <span className="dw-star dw-star-1">★</span>
             <span className="dw-star dw-star-2">★</span>
@@ -68,8 +112,12 @@ export function DailyWelcome({ onClose }: { onClose: () => void }) {
               <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="animado" size={150} />
             </span>
           </div>
-          <p key={shown} className="dw-count">{shown}</p>
-          <p className="dw-label">{shown === 1 ? 'dia junto' : 'dias juntos'}</p>
+          <div className="dw-badge">
+            <p key={shown} className="dw-count">{shown}</p>
+            <p className="dw-ribbon">
+              <span>{shown === 1 ? 'dia junto' : 'dias juntos'}</span>
+            </p>
+          </div>
           <button className="dw-btn" onClick={() => setStep(1)}>
             Começar hoje
           </button>
@@ -83,9 +131,6 @@ export function DailyWelcome({ onClose }: { onClose: () => void }) {
           </p>
           <div className="dw-talk">
             <p>{line}</p>
-            <span className="dw-talk-pet">
-              <Hamster fur={s.pet.fur} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={74} idle={false} />
-            </span>
           </div>
           <ol className="dw-week" aria-label={`${filled} de 7 dias desta sequência`}>
             {Array.from({ length: 7 }, (_, i) => (
@@ -96,6 +141,13 @@ export function DailyWelcome({ onClose }: { onClose: () => void }) {
             ))}
           </ol>
           <p className="dw-note">Cuide de você aos poucos por 7 dias. Cada vez que completar um ciclo, uma sequência nova começa{streak.count >= 1 ? ' e você ganha um martelinho' : ''}.</p>
+          <div className="dw-stage" aria-hidden="true">
+            <span className="dw-cushion" />
+            <span className="dw-stage-pet">
+              <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={180} />
+            </span>
+            <span className="dw-bubble">🔥 {streak.count}</span>
+          </div>
           <button className="dw-btn" onClick={() => setStep(2)}>
             Vamos começar!
           </button>
@@ -105,11 +157,21 @@ export function DailyWelcome({ onClose }: { onClose: () => void }) {
         <div className="dw-step">
           <p className="dw-hello">Seus cuidados de cada dia fazem o {s.pet.name} crescer, mais forte e saudável.</p>
           <div className="dw-grow">
+            <span className="dw-sun" aria-hidden="true" />
             <span className="dw-ruler" aria-hidden="true" />
+            <span className="dw-pot" aria-hidden="true">🌱</span>
             <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={170} />
           </div>
-          <p className="dw-title">{g.name}</p>
-          <p className="dw-note">{g.next ? `Cresce de novo com mais ${g.toNext} ${g.toNext === 1 ? 'dia' : 'dias'} de cuidado.` : 'Ele já está do tamanho máximo. Que orgulho!'}</p>
+          <div className="dw-card">
+            <p className="dw-card-name">
+              <span aria-hidden="true">🌱</span> {g.name}
+              {g.next && <small> → {g.next.name}</small>}
+            </p>
+            <span className="dw-card-bar" aria-hidden="true">
+              <span style={{ width: `${Math.max(6, Math.round(g.progress * 100))}%` }} />
+            </span>
+            <p className="dw-card-note">{g.next ? `Cresce de novo com mais ${g.toNext} ${g.toNext === 1 ? 'dia' : 'dias'} de cuidado.` : 'Ele já está do tamanho máximo. Que orgulho!'}</p>
+          </div>
           <button className="dw-btn" onClick={onClose}>
             Bora, {s.pet.name}!
           </button>

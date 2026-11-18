@@ -1031,17 +1031,23 @@ export function Clothes({ id, geo }: { id: string | null; geo: Geo }) {
 }
 
 /** Acessórios da frente (no pescoço e na barriga). */
+/** Acessórios que ficam no pescoço (desenhados por baixo da cabeça). */
+export const NECK_ITEMS = new Set(['colar-perolas', 'colar-flores', 'colar-pingente', 'colar-ouro', 'cordao-girassol', 'cordao-autismo', 'medalha', 'lenco', 'cachecol', 'gravata', 'gravata-longa']);
+
 export function Accessory({ id, geo, paw, head }: { id: string | null; geo: Geo; paw?: string; head?: { cx: number; cy: number; rx: number; ry: number } }) {
   const { top, w, h } = geo;
-  const y = top + h * 0.6;
   const it = id ? itemById(id) : undefined;
   const base = it?.base ?? id;
+  // Colares, cordões, lenços e gravatas ficam no pescoço: logo abaixo do queixo (a cabeça do Hami é grande).
+  const neck = !!head && NECK_ITEMS.has(base ?? '');
+  const y = neck ? head!.cy + head!.ry + 5 : top + h * 0.6;
   const c1 = it?.c1;
   const c2 = it?.c2;
   const arc = (n: number, depth: number) =>
     Array.from({ length: n }, (_, i) => {
       const t = i / (n - 1);
-      const x = 100 - w * 0.55 + t * w * 1.1;
+      const span = neck ? 0.4 : 0.55;
+      const x = 100 - w * span + t * w * span * 2;
       const yy = y - 6 + Math.sin(t * Math.PI) * depth;
       return [x, yy] as const;
     });

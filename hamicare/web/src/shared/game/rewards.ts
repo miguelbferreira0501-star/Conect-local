@@ -37,8 +37,24 @@ export const FRIEND_LADDER = [40, 60, 80, 100, 150];
 export const PLUS_WEEKLY = 500;
 /** Viagem do dia: o Hami sai para explorar depois de algumas missões e volta com um presente. */
 export const TREK = { needs: 3, hours: 4, perTaskMin: 15, coins: 20, xp: 10 };
-/** Trilha Plus da temporada: sementes extras em cada degrau (mesmos dias da trilha grátis). */
-export const SEASON_PLUS = [15, 20, 30, 40, 50, 60, 80, 100, 120, 200];
+/** Trilha Plus da temporada: um prêmio grande em cada degrau (mesmos dias da trilha grátis). */
+export interface SeasonPlusTier {
+  coins?: number;
+  chest?: 'prata' | 'ouro' | 'magico' | 'lendario';
+  item?: string;
+}
+export const SEASON_PLUS: SeasonPlusTier[] = [
+  { coins: 150 },
+  { chest: 'prata' },
+  { item: 'fantasia-raposa' },
+  { coins: 400 },
+  { chest: 'ouro' },
+  { item: 'fantasia-dragao-roxo' },
+  { coins: 800 },
+  { chest: 'magico' },
+  { item: 'fantasia-unicornio' },
+  { coins: 2000, chest: 'lendario' },
+];
 /** Martelinho que conserta a ofensiva (sementes). */
 export const HAMMER_PRICE = 80;
 
@@ -122,7 +138,7 @@ export function baseGrant(src: Source, cfg: GameConfig): Grant {
       return { ref: `viagem:${src.date}`, label: 'Viagem do dia', xp: TREK.xp, coins: TREK.coins, routine: false, date: src.date };
     case 'temporada-plus': {
       const tier = Math.max(0, Math.min(SEASON_PLUS.length - 1, Math.floor(src.tier)));
-      return { ref: `temporada:${src.month}:p${tier}`, label: `Temporada Plus: degrau ${tier + 1}`, xp: 0, coins: SEASON_PLUS[tier], routine: false };
+      return { ref: `temporada:${src.month}:p${tier}`, label: `Temporada Plus: degrau ${tier + 1}`, xp: 0, coins: SEASON_PLUS[tier].coins ?? 0, routine: false };
     }
     case 'plus':
       return { ref: `plus:${src.week}`, label: 'Mesada semanal do HamiCare+', xp: 0, coins: PLUS_WEEKLY, routine: false };

@@ -76,7 +76,7 @@ describe('viagem do dia e trilha Plus', () => {
     const antes = (await call('POST', '/game/ops', plusTier, u.cookie)).body.wallet.coins as number;
     await givePlus(u.id);
     const com = (await call('POST', '/game/ops', plusTier, u.cookie)).body.wallet.coins as number;
-    expect(com).toBe(antes + 15);
+    expect(com).toBe(antes + 150);
     expect((await call('POST', '/game/ops', plusTier, u.cookie)).body.wallet.coins).toBe(com);
     // degrau que pede mais dias ativos ainda não paga
     const longe = { ops: [{ op: 'grant', src: { kind: 'temporada-plus', month, tier: 5 } }] };

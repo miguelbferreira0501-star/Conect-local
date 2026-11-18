@@ -308,6 +308,12 @@ async function applyGrant(db: pg.PoolClient, userId: string, w: WalletRow, raw: 
   const before = w.xp;
   let next = { ...w, coins: w.coins + paid.coins, xp: w.xp + paid.xp };
   // Degrau da temporada também pode dar fragmentos e um baú grátis.
+  // Degrau da trilha Plus: baú grátis e roupa exclusiva, além das sementes.
+  if (src.kind === 'temporada-plus') {
+    const t = SEASON_PLUS[src.tier];
+    if (t?.chest) next = { ...next, pending_chests: [...next.pending_chests, t.chest] };
+    if (t?.item) await db.query("INSERT INTO game_inventory (user_id, item_id, qty, origin) VALUES ($1, $2, 1, 'presente') ON CONFLICT DO NOTHING", [userId, t.item]);
+  }
   if (src.kind === 'temporada-degrau') {
     const t = cfg.season.tiers[src.tier];
     next = { ...next, fragments: next.fragments + (t.fragments ?? 0), pending_chests: t.chest ? [...next.pending_chests, t.chest] : next.pending_chests };
