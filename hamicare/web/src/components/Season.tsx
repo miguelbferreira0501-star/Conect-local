@@ -4,6 +4,7 @@ import { X, Lock, Check, Zap, Clock, Crown } from 'lucide-react';
 import { claimSeasonPlus, claimSeasonTier, isPremium, seasonDays, seasonPlusClaimed, seasonTierClaimed, useApp, SEASON_PLUS } from '../lib/store';
 import { openUi } from '../lib/bus';
 import { Hamster } from './Hamster';
+import { itemById } from '../data/items';
 import { Seed, toast } from './ui';
 import { Chest } from './Chest';
 import { gameCfg } from '../lib/game';
@@ -209,13 +210,11 @@ export function SeasonPass({ open, onClose }: { open: boolean; onClose: () => vo
                   onClick={() => {
                     if (!premium) return void (onClose(), openUi('plus'));
                     if (!openTier) return void toast(`Abre com ${t.days} ${t.days === 1 ? 'dia ativo' : 'dias ativos'} no mês.`);
-                    const c = claimSeasonPlus(i, days);
-                    if (c) toast(`+${c} sementes do Plus!`);
+                    if (claimSeasonPlus(i, days) >= 0) toast(`${plusText(SEASON_PLUS[i])}!`);
                   }}
-                  aria-label={`Dia ${t.days}, Plus: ${SEASON_PLUS[i]} sementes${gotPlus ? ', pego' : !premium ? ', só com Plus' : openTier ? ', pronto para pegar' : ''}`}
+                  aria-label={`Dia ${t.days}, Plus: ${plusText(SEASON_PLUS[i])}${gotPlus ? ', pego' : !premium ? ', só com Plus' : openTier ? ', pronto para pegar' : ''}`}
                 >
-                  <Seed size={40} />
-                  <small>+{SEASON_PLUS[i]}</small>
+                  <PlusPrize p={SEASON_PLUS[i]} fur={s.pet.fur} />
                   {gotPlus ? <span className="sp-check"><Check size={18} strokeWidth={4} /></span> : !premium ? <span className="sp-lock"><Lock size={16} strokeWidth={3} /></span> : null}
                 </button>
               ) : showPlus ? (
@@ -227,5 +226,39 @@ export function SeasonPass({ open, onClose }: { open: boolean; onClose: () => vo
       </div>
       <p className="sp-foot">Cada dia com pelo menos uma missão feita conta um dia na trilha.</p>
     </div>
+  );
+}
+
+type PlusTier = (typeof SEASON_PLUS)[number];
+function plusText(p: PlusTier): string {
+  const parts: string[] = [];
+  if (p.coins) parts.push(`+${p.coins.toLocaleString('pt-BR')} sementes`);
+  if (p.chest) parts.push(gameCfg().chests[p.chest].name);
+  if (p.item) parts.push(itemById(p.item)?.name ?? 'Roupa exclusiva');
+  return parts.join(' e ');
+}
+/** O prêmio grande do degrau Plus: fantasia vestida no Hami, baú ou sementes. */
+function PlusPrize({ p, fur }: { p: PlusTier; fur: string }) {
+  if (p.item)
+    return (
+      <>
+        <span className="icon-still sp-prize-pet">
+          <Hamster fur={fur} size={66} idle={false} growth={1} outfit={{ chapeu: null, oculos: null, roupa: p.item, acessorio: null, efeito: null }} label="" />
+        </span>
+        <small>{(itemById(p.item)?.name ?? 'Fantasia').replace(/^Fantasia de /, '')}</small>
+      </>
+    );
+  if (p.chest)
+    return (
+      <>
+        <Chest kind={p.chest} size={p.coins ? 42 : 52} />
+        <small>{p.coins ? `+${p.coins.toLocaleString('pt-BR')}` : gameCfg().chests[p.chest].name.replace(/^Baú (de )?/, '')}</small>
+      </>
+    );
+  return (
+    <>
+      <Seed size={40} />
+      <small>+{(p.coins ?? 0).toLocaleString('pt-BR')}</small>
+    </>
   );
 }

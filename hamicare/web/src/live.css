@@ -4876,3 +4876,67 @@
 .wr-blur { filter: blur(6px); pointer-events: none; user-select: none; }
 .wr-unlock { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 99px; background: #6b82e8; color: #fff; font-size: 14px; font-weight: 900; white-space: nowrap; box-shadow: 0 4px 0 #4c62c4; }
 .wr-note { font-size: 13.5px; font-weight: 700; color: #6a6478; }
+/* Armário e lojas leves: os quadradinhos fora da tela não são desenhados e os Hamis ficam parados */
+.wardrobe-tile { content-visibility: auto; contain-intrinsic-size: auto 110px; contain: layout paint style; }
+.wardrobe-tile *, .sm-body .icon-still * { animation: none !important; }
+.sm-art *, .sm-art { animation: none !important; }
+.sm-body button:has(> .sm-art) { content-visibility: auto; contain-intrinsic-size: auto 150px; }
+
+.sp-prize-pet { display: block; margin: -6px 0 -4px; }
+.sp-tile.is-plus { background: linear-gradient(160deg, #3a3560, #2c2848); }
+
+/* ===== Abertura do dia mais fofa: cenário, coração estampado, selo com fita ===== */
+.welcome.dw { position: fixed; overflow: hidden; }
+.dw-step { z-index: 1; }
+.dw-decor { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.dw-dots { position: absolute; inset: 0; background-image: radial-gradient(circle 3px at 12px 12px, rgba(255, 255, 255, 0.22) 99%, transparent); background-size: 34px 34px; }
+.dw-cloud { position: absolute; height: 34px; border-radius: 99px; background: rgba(255, 255, 255, 0.55); animation: dw-cloud 22s linear infinite; }
+.dw-cloud::before, .dw-cloud::after { content: ''; position: absolute; border-radius: 50%; background: inherit; }
+.dw-cloud::before { width: 46px; height: 46px; left: 18px; top: -22px; }
+.dw-cloud::after { width: 34px; height: 34px; left: 52px; top: -14px; }
+.dw-cloud-1 { width: 110px; top: 13%; left: -10%; }
+.dw-cloud-2 { width: 90px; top: 30%; left: 60%; animation-duration: 30s; animation-delay: -12s; opacity: 0.8; }
+.dw-cloud-3 { width: 130px; top: 6%; left: 40%; animation-duration: 38s; animation-delay: -20s; opacity: 0.6; }
+@keyframes dw-cloud { from { transform: translateX(-60vw); } to { transform: translateX(80vw); } }
+.dw-float { position: absolute; bottom: -30px; color: #fff; opacity: 0; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.06); animation: dw-up 8s ease-in infinite; }
+.dw-float:nth-child(3n) { color: #ffe27a; } .dw-float:nth-child(3n + 1) { color: #ffc6dd; }
+@keyframes dw-up { 0% { transform: translateY(0) rotate(0); opacity: 0; } 15% { opacity: 0.95; } 100% { transform: translateY(-105vh) rotate(40deg); opacity: 0; } }
+.dw-hill { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 22vh; }
+.dw-heart { filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.08)); }
+.dw-pet { bottom: 18px; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.06)); }
+.dw-badge { position: relative; display: grid; justify-items: center; margin-top: 4px; }
+.dw-badge .dw-count { display: grid; place-items: center; width: 120px; height: 120px; margin: 0; border-radius: 50%; background: #fff; color: #f0688f; font-size: 64px; box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.35), 0 6px 0 rgba(0, 0, 0, 0.1); text-shadow: none; }
+.dw-ribbon { position: relative; margin-top: -18px; padding: 8px 26px; background: #f0688f; color: #fff; font-size: 16px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 10px; box-shadow: 0 4px 0 #c94a72; }
+.dw-ribbon::before, .dw-ribbon::after { content: ''; position: absolute; top: 8px; width: 22px; height: 100%; background: #d9547e; z-index: -1; }
+.dw-ribbon::before { left: -14px; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 40% 50%); }
+.dw-ribbon::after { right: -14px; clip-path: polygon(0 0, 100% 0, 60% 50%, 100% 100%, 0 100%); }
+.dw-week { background: rgba(255, 255, 255, 0.28); box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.45); }
+.dw-week span { background: rgba(255, 255, 255, 0.35); color: rgba(255, 255, 255, 0.7); }
+.dw-talk { border: 3px solid #fff; }
+.dw-sun { position: absolute; left: 6px; top: 0; width: 46px; height: 46px; border-radius: 50%; background: #ffe27a; box-shadow: 0 0 0 10px rgba(255, 226, 122, 0.35); animation: dw-beat 3s ease-in-out infinite; }
+.dw-pot { position: absolute; left: 24px; bottom: 0; font-size: 34px; }
+@media (prefers-reduced-motion: reduce) { .dw-cloud, .dw-float { animation: none; } .dw-float { display: none; } }
+
+/* Rodada 40: palco com almofada na sequência e cartão de crescimento (estilo adesivo) */
+.dw-stage { position: relative; display: grid; place-items: end center; width: 250px; height: 220px; margin: auto 0; }
+.dw-cushion { position: absolute; left: 10px; right: 10px; bottom: 0; height: 52px; border-radius: 50%; background: radial-gradient(ellipse at 50% 35%, #ffd3e4 0 55%, #ff9fc2 56%); border: 4px solid #fff; box-shadow: 0 6px 0 rgba(0, 0, 0, 0.1); }
+.dw-cushion::after { content: ''; position: absolute; inset: 8px 22px; border-radius: 50%; border: 2px dashed rgba(255, 255, 255, 0.8); }
+.dw-stage-pet { position: relative; bottom: 22px; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.06)); }
+.dw-bubble { position: absolute; right: -6px; top: 14px; padding: 6px 12px; border-radius: 99px; background: #fff; color: #f0688f; font-size: 17px; font-weight: 900; border: 3px solid #ffd3e4; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.1); transform: rotate(8deg); animation: dw-beat 2.4s ease-in-out infinite; }
+.dw-step:has(.dw-stage) .dw-btn { margin-top: 0; }
+.dw-card { align-self: stretch; margin-top: auto; padding: 14px 16px; border-radius: 22px; background: #fff; color: #3a2f55; border: 3px solid rgba(255, 255, 255, 0.8); box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3), 0 5px 0 rgba(0, 0, 0, 0.1); text-align: left; }
+.dw-card-name { font-family: var(--font-display, inherit); font-size: 22px; font-weight: 900; }
+.dw-card-name small { font-size: 15px; opacity: 0.6; }
+.dw-card-bar { display: block; height: 16px; margin: 10px 0 8px; border-radius: 99px; background: #efe8fb; overflow: hidden; box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.06); }
+.dw-card-bar span { display: block; height: 100%; border-radius: inherit; background: repeating-linear-gradient(135deg, #7fd38a 0 10px, #6cc479 10px 20px); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.1); animation: dw-fill 900ms cubic-bezier(0.2, 0.9, 0.3, 1) backwards; }
+.dw-card-note { font-size: 14px; font-weight: 700; opacity: 0.75; }
+.dw-step:has(.dw-card) .dw-btn { margin-top: 18px; }
+.dw-grow { margin-top: auto; }
+@keyframes dw-fill { from { width: 0; } }
+@media (prefers-reduced-motion: reduce) { .dw-bubble, .dw-card-bar span { animation: none; } }
+.dw-talk::after { display: none; }
+.sp-tile small { max-width: calc(100% - 14px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: capitalize; }
+.sp-tile.is-plus small { padding-right: 10px; }
+.sp-tile .sp-lock { top: -10px; bottom: auto; width: 30px; height: 30px; }
+.sp-tile small { max-width: calc(100% - 6px); font-size: 12px; }
+.sp-tile.is-plus small { padding-right: 0; }

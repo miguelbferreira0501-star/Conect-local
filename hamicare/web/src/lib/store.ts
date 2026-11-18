@@ -1529,11 +1529,15 @@ export const introDay = (s: State, today = todayKey()) => dayDiff(s.createdAt, t
 // ---------- Trilha Plus da temporada ----------
 
 export const seasonPlusClaimed = (s: State, tier: number, month = todayKey().slice(0, 7)) => !!s.game.paid[`temporada:${month}:p${tier}`];
+/** Pega o prêmio de um degrau da trilha Plus. Devolve as sementes ganhas (pode ser 0 quando o prêmio é baú ou roupa); -1 se não deu. */
 export function claimSeasonPlus(tier: number, days = seasonDays(state)): number {
   const t = gameCfg().season.tiers[tier];
   const month = todayKey().slice(0, 7);
-  if (!t || tier >= SEASON_PLUS.length || !isPremium(state) || days < t.days || seasonPlusClaimed(state, tier, month)) return 0;
-  const next = grant(state, { kind: 'temporada-plus', month, tier });
+  if (!t || tier >= SEASON_PLUS.length || !isPremium(state) || days < t.days || seasonPlusClaimed(state, tier, month)) return -1;
+  let next = grant(state, { kind: 'temporada-plus', month, tier });
+  const prize = SEASON_PLUS[tier];
+  if (prize.chest) next = { ...next, game: { ...next.game, pendingChests: [...next.game.pendingChests, prize.chest] } };
+  if (prize.item && !(next.inventory[prize.item] > 0)) next = gainItems(next, [prize.item], 'presente');
   commit(next);
   return next.game.paid[`temporada:${month}:p${tier}`]?.coins ?? 0;
 }

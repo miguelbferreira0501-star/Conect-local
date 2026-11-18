@@ -61,11 +61,23 @@ describe('a mala da volta', () => {
 describe('trilha Plus da temporada', () => {
   it('só com Plus e com os dias ativos; uma vez por degrau', () => {
     start();
-    expect(claimSeasonPlus(0, 5)).toBe(0);
+    expect(claimSeasonPlus(0, 5)).toBe(-1);
     start({ premium: { trialStart: null, until: addDays(todayKey(), 30) } });
-    expect(claimSeasonPlus(0, 0)).toBe(0);
-    expect(claimSeasonPlus(0, 5)).toBe(SEASON_PLUS[0]);
-    expect(claimSeasonPlus(0, 5)).toBe(0);
+    expect(claimSeasonPlus(0, 0)).toBe(-1);
+    expect(claimSeasonPlus(0, 5)).toBe(SEASON_PLUS[0].coins);
+    expect(claimSeasonPlus(0, 5)).toBe(-1);
+  });
+  it('degraus Plus entregam baú e fantasia de verdade, e o último dá 2000 sementes', () => {
+    start({ premium: { trialStart: null, until: addDays(todayKey(), 30) } });
+    const chestTier = SEASON_PLUS.findIndex((p) => p.chest && !p.coins);
+    const before = getState().game.pendingChests.length;
+    expect(claimSeasonPlus(chestTier, 99)).toBe(0);
+    expect(getState().game.pendingChests.length).toBe(before + 1);
+    const itemTier = SEASON_PLUS.findIndex((p) => p.item);
+    claimSeasonPlus(itemTier, 99);
+    expect(getState().inventory[SEASON_PLUS[itemTier].item!]).toBeGreaterThan(0);
+    expect(SEASON_PLUS[SEASON_PLUS.length - 1].coins).toBe(2000);
+    expect(claimSeasonPlus(SEASON_PLUS.length - 1, 99)).toBe(2000);
   });
 });
 
