@@ -73,9 +73,9 @@ Avise quem for testar para olhar o spam na primeira vez.
 
 ## 4. Antes de chamar pessoas
 
-- [ ] **Seus dados na política e nos termos.** Abra `web/src/shared/legal.ts` e troque os campos entre
-      `[colchetes]` em `LEGAL_INFO`: nome da empresa (ou o seu), CNPJ/CPF, cidade e e-mail de contato.
-      Enquanto não trocar, o servidor avisa no registro (*Logs*) do Render. Me mande os dados que eu troco.
+- [x] **Seus dados na política e nos termos.** Preenchido em `LEGAL_INFO` (`web/src/shared/legal.ts`): nome,
+      cidade e e-mail de contato da Jessika. O CPF fica de fora de propósito (o texto é público). Quando
+      houver CNPJ (MEI, por exemplo), coloque em `documento` e ele passa a aparecer.
 - [ ] **Revisão jurídica.** O texto segue a LGPD, o CDC e o Estatuto Digital da Criança e do
       Adolescente (Lei 15.211/2025), mas vale a revisão de um advogado, principalmente sobre:
       verificação de idade e vínculo com responsável para menores de 16 na parte social,

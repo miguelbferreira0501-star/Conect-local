@@ -8,13 +8,13 @@
 
 export const LEGAL_INFO = {
   /** Quem responde pelo app: razão social da empresa (ou seu nome completo, se for pessoa física/MEI). */
-  controlador: '[NOME DA EMPRESA OU SEU NOME COMPLETO]',
-  /** CNPJ (ou CPF, se ainda não tiver empresa). */
-  documento: '[CNPJ OU CPF]',
+  controlador: 'Jessika Neusa Borges Gervin',
+  /** CNPJ, quando houver empresa (MEI, por exemplo). Não coloque CPF aqui: este texto é público. Vazio = não aparece. */
+  documento: '',
   /** Cidade e estado. */
-  cidade: '[CIDADE/UF]',
+  cidade: 'Guaramirim/SC',
   /** E-mail para dúvidas e pedidos de privacidade. */
-  email: '[E-MAIL DE CONTATO]',
+  email: 'jessikan.borges01@gmail.com',
   /** Data desta versão (AAAA-MM-DD). */
   atualizado: '2026-11-18',
 };
@@ -49,7 +49,7 @@ export const PRIVACY: LegalDoc = {
     {
       h: '1. Quem cuida dos seus dados',
       body: [
-        `O HamiCare é oferecido por ${I.controlador}, inscrito sob o nº ${I.documento}, com sede em ${I.cidade} ("nós"). Somos o controlador dos dados pessoais tratados no app, nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018, "LGPD").`,
+        `O HamiCare é oferecido por ${I.controlador}${I.documento ? `, CNPJ ${I.documento}` : ''}, de ${I.cidade} ("nós"). Somos o controlador dos dados pessoais tratados no app, nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018, "LGPD").`,
         `Canal de privacidade (encarregado): ${I.email}. Respondemos em até 15 dias.`,
       ],
     },
@@ -175,7 +175,7 @@ export const PRIVACY: LegalDoc = {
     },
     {
       h: '12. Fale com a gente',
-      body: [`${I.controlador} · ${I.documento} · ${I.cidade} · ${I.email}`],
+      body: [[I.controlador, I.documento && `CNPJ ${I.documento}`, I.cidade, I.email].filter(Boolean).join(' · ')],
     },
   ],
 };
@@ -193,7 +193,7 @@ export const TERMS: LegalDoc = {
     {
       h: '1. Aceitação',
       body: [
-        `Estes Termos são um contrato entre você e ${I.controlador} (${I.documento}), responsável pelo HamiCare. Ao usar o app ou criar uma conta, você concorda com estes Termos e com a Política de Privacidade. Se não concordar, não use o app.`,
+        `Estes Termos são um contrato entre você e ${I.controlador}${I.documento ? ` (CNPJ ${I.documento})` : ''}, responsável pelo HamiCare. Ao usar o app ou criar uma conta, você concorda com estes Termos e com a Política de Privacidade. Se não concordar, não use o app.`,
       ],
     },
     {
