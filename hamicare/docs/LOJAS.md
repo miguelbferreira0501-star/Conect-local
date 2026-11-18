@@ -11,8 +11,8 @@ Imagens prontas para as lojas ficam em [`docs/lojas/`](lojas): ícone 512×512, 
 
 ## 0. Antes de começar
 
-- [ ] **Seus dados na política e nos termos** (`LEGAL_INFO` em `web/src/shared/legal.ts`): nome ou empresa,
-      CPF ou CNPJ, cidade e e-mail de contato. As duas lojas exigem saber quem responde pelo app.
+- [x] **Seus dados na política e nos termos** (`LEGAL_INFO` em `web/src/shared/legal.ts`): nome, cidade e
+      e-mail de contato já preenchidos. CPF não vai no texto público; CNPJ entra em `documento` quando houver.
 - [ ] **Plano Starter no Render (US$ 7/mês).** No plano grátis o servidor dorme e leva 1 minuto para abrir.
       Quem avalia o app nas lojas pode recusar um app que demora para abrir.
 - [ ] **Domínio próprio (opcional).** O app das lojas fica preso ao endereço. Se depois trocar
@@ -153,8 +153,7 @@ Não use documento de outra pessoa numa conta que não está no nome dela: foi o
      fiscais dele) e cria um grupo de assinaturas **HamiCare+** com dois produtos:
      `com.hamicare.app.plus.anual` (R$ 329,90, oferta de 7 dias grátis) e `com.hamicare.app.plus.mensal`
      (R$ 49,90, 3 dias grátis). Com isso pronto, o Claude liga a compra no app e no servidor.
-   - **Preencher os dados de quem publica** em `web/src/shared/legal.ts` (`LEGAL_INFO`: nome do responsável
-     ou da empresa, CPF/CNPJ, cidade e e-mail de contato). A política de privacidade e os termos usam esses dados.
+   - **Dados de quem publica** em `web/src/shared/legal.ts` (`LEGAL_INFO`): já preenchidos (nome, cidade e e-mail).
    - **Privacidade do app** (App Store Connect → Privacidade do app): coleta *e-mail e nome* (conta),
      *saúde e condicionamento* (peso, só se a pessoa ligar), *conteúdo do usuário* (fotos, posts, diário no
      backup), *identificador do usuário*. Tudo **ligado à conta**, **nada usado para rastreamento**, sem anúncios.
