@@ -82,4 +82,17 @@ describe('viagem do dia e trilha Plus', () => {
     const longe = { ops: [{ op: 'grant', src: { kind: 'temporada-plus', month, tier: 5 } }] };
     expect((await call('POST', '/game/ops', longe, u.cookie)).body.wallet.coins).toBe(com);
   });
+  it('parque de jogos: jogo do Plus só paga com Plus e o teto vem do número da partida', async () => {
+    const u = await newUser('Lia');
+    const d = today();
+    const ops = (game: string, n: number, stars = 3) => ({ ops: [{ op: 'grant', src: { kind: 'jogo', game, n, stars, date: d } }] });
+    const c0 = (await call('POST', '/game/ops', ops('penalti', 1), u.cookie)).body.wallet.coins as number;
+    const c1 = (await call('POST', '/game/ops', ops('volei', 2), u.cookie)).body.wallet.coins as number;
+    expect(c1).toBe(c0);
+    await givePlus(u.id);
+    const c2 = (await call('POST', '/game/ops', ops('volei', 2), u.cookie)).body.wallet.coins as number;
+    expect(c2).toBe(c1 + 15);
+    expect((await call('POST', '/game/ops', ops('penalti', 2), u.cookie)).body.wallet.coins).toBe(c2);
+    expect((await call('POST', '/game/ops', ops('penalti', 99), u.cookie)).body.wallet?.coins ?? c2).toBe(c2);
+  });
 });

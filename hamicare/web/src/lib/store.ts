@@ -17,7 +17,7 @@ import {
 } from '../logic/evolution';
 import { HAMMER_MAX, repairPlan, streakOf, type RepairPlan } from '../logic/streak';
 import { activeQuests, claimKey, levelOf, newAchievements, periodStart, questProgress, QUESTS } from '../logic/progress';
-import { addUsage, arenaItemsOf, arenaOf, baseGrant, canCraft, capGrant, chestPool, collectionProgress, emptyPity, emptyUsage, FRIEND_LADDER, HAMMER_PRICE, PLUS_WEEKLY, SEASON_PLUS, TREK, levelUps, migrateXp, openChest, reflectionCoins, xpAt, type ChestId, type DayUsage, type Pity, type QuickId, type Rarity, type Source } from '../shared/game';
+import { addUsage, arenaItemsOf, arenaOf, baseGrant, canCraft, capGrant, chestPool, collectionProgress, emptyPity, emptyUsage, FRIEND_LADDER, HAMMER_PRICE, JOGO, PLUS_GAMES, PLUS_WEEKLY, gameCoins, type GameId, SEASON_PLUS, TREK, levelUps, migrateXp, openChest, reflectionCoins, xpAt, type ChestId, type DayUsage, type Pity, type QuickId, type Rarity, type Source } from '../shared/game';
 import { arenaHouse, MOON_ITEMS, MOON_N, MOON_PRICE, upgradeHouse } from '../data/arenas';
 import { companionById, eggWarmth, HATCH_DAYS, withEggs } from '../data/companions';
 import { KIT_PLACE } from '../components/room/kit';
@@ -1540,6 +1540,34 @@ export function claimSeasonPlus(tier: number, days = seasonDays(state)): number 
   if (prize.item && !(next.inventory[prize.item] > 0)) next = gainItems(next, [prize.item], 'presente');
   commit(next);
   return next.game.paid[`temporada:${month}:p${tier}`]?.coins ?? 0;
+}
+
+// ---------- Parque de jogos ----------
+
+export { JOGO, PLUS_GAMES, gameCoins };
+export type { GameId };
+/** Quantas partidas premiadas ainda restam hoje. */
+export function gamePrizesLeft(s: State, today = todayKey()): number {
+  let used = 0;
+  for (let n = 1; n <= JOGO.perDay; n++) if (s.game.paid[`jogo:${today}:${n}`]) used = n;
+  return JOGO.perDay - used;
+}
+export const gameLocked = (s: State, game: GameId) => PLUS_GAMES.includes(game) && !isPremium(s);
+/**
+ * Fim de partida: o Hami fica feliz (cuidado de brincar) e, enquanto houver partidas premiadas no dia,
+ * ganha sementes conforme as estrelas. Devolve as sementes ganhas (0 se acabaram as do dia).
+ */
+export function finishGame(game: GameId, stars: number): number {
+  if (gameLocked(state, game)) return 0;
+  if (!state.pet.sleeping) care('brincar');
+  const today = todayKey();
+  const left = gamePrizesLeft(state, today);
+  if (left <= 0 || stars < 1) return 0;
+  const n = JOGO.perDay - left + 1;
+  const next = grant(state, { kind: 'jogo', game, n, stars: Math.min(3, Math.floor(stars)), date: today });
+  if (next === state) return 0;
+  commit(next);
+  return next.game.paid[`jogo:${today}:${n}`]?.coins ?? 0;
 }
 
 // ---------- Correio do Hami ----------

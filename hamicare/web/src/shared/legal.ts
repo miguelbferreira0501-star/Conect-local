@@ -255,7 +255,7 @@ export const TERMS: LegalDoc = {
       h: '7. Sementes e itens virtuais',
       body: [
         [
-          'Sementes são a moeda do app. Você ganha cuidando do Hami e cumprindo missões.',
+          'Sementes são a moeda do app. Você ganha cuidando do Hami, cumprindo missões e jogando no parque de jogos (até 8 partidas premiadas por dia).',
           'Quem assina o HamiCare+ recebe uma mesada de 500 sementes por semana (pega no app, uma vez por semana, enquanto o Plus estiver ativo) e um martelinho por mês, além da trilha Plus da temporada (sementes, baús e fantasias exclusivas em cada degrau, liberados pelos dias ativos no mês). Tudo isso faz parte dos benefícios do Plus: sementes não são vendidas avulsas.',
           'Sementes, roupas, pelagens, móveis e outros itens são licenças de uso dentro do app. Eles não têm valor em dinheiro, não podem ser trocados por dinheiro nem vendidos fora do app.',
           'Presentes entre amigos são permitidos dentro do app.',

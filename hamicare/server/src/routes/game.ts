@@ -9,7 +9,7 @@ import { pool, withUser } from '../db';
 import { AppError, invalid } from '../lib/errors';
 import { type AppEnv, requireAuth } from '../auth';
 import {
-  CHEST_ORDER, DEFAULT_GAME, FRIEND_LADDER, HAMMER_PRICE, SEASON_PLUS, addUsage, arenaItemsOf, canCraft, arenaOf, baseGrant, capGrant, chestOdds, chestPool, emptyPity, emptyUsage, isChest, levelOf, levelUps, openChest, pityInfo, rarityOf, xpAt,
+  CHEST_ORDER, DEFAULT_GAME, FRIEND_LADDER, GAMES, HAMMER_PRICE, JOGO, PLUS_GAMES, SEASON_PLUS, addUsage, arenaItemsOf, canCraft, arenaOf, baseGrant, capGrant, chestOdds, chestPool, emptyPity, emptyUsage, isChest, levelOf, levelUps, openChest, pityInfo, rarityOf, xpAt,
   type ChestId, type DayUsage, type GameConfig, type Pity, type Rarity, type Source,
 } from '../../../web/src/shared/game';
 import { ITEMS, LOOKS, STYLES, itemById, stylePrice } from '../../../web/src/data/items';
@@ -155,6 +155,7 @@ const sourceSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('plus'), week: day }),
   z.object({ kind: z.literal('viagem'), date: day }),
   z.object({ kind: z.literal('temporada-plus'), month: z.string().regex(/^\d{4}-\d{2}$/), tier: z.number().int().min(0).max(SEASON_PLUS.length - 1) }),
+  z.object({ kind: z.literal('jogo'), game: z.enum(GAMES), n: z.number().int().min(1).max(JOGO.perDay), stars: z.number().int().min(1).max(3), date: day }),
 ]);
 const opSchema = z.discriminatedUnion('op', [
   z.object({ op: z.literal('grant'), src: sourceSchema }),
@@ -237,6 +238,11 @@ async function trusted(db: pg.PoolClient, userId: string, src: Source, cfg: Game
       const weeks = [periodStart('semana', utcDay(-1)), periodStart('semana', utcDay(0)), periodStart('semana', utcDay(1))];
       if (!weeks.includes(src.week)) return null;
       return (await isPremium(db, userId)) ? src : null;
+    }
+    case 'jogo': {
+      // Jogos do Plus só pagam com Plus ativo. O teto de partidas por dia já vem do número da partida (n).
+      if (PLUS_GAMES.includes(src.game) && !(await isPremium(db, userId))) return null;
+      return src;
     }
     case 'nivel':
     case 'arena':

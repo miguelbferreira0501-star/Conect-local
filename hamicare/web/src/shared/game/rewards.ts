@@ -24,7 +24,8 @@ export type Source =
   | { kind: 'amigo'; n: number }
   | { kind: 'plus'; week: string }
   | { kind: 'viagem'; date: string }
-  | { kind: 'temporada-plus'; month: string; tier: number };
+  | { kind: 'temporada-plus'; month: string; tier: number }
+  | { kind: 'jogo'; game: GameId; n: number; stars: number; date: string };
 
 /** Missões rápidas: renovam a cada 8 horas (3 turnos por dia). */
 export type QuickId = 'emocao' | 'reflexao' | 'meta';
@@ -35,6 +36,14 @@ export const reflectionCoins = (chars: number) => (chars >= 400 ? 12 : chars >= 
 export const FRIEND_LADDER = [40, 60, 80, 100, 150];
 /** HamiCare+: mesada de sementes toda semana (cerca de 2.000 por mês). */
 export const PLUS_WEEKLY = 500;
+
+/** Parque de jogos: os três últimos são só do HamiCare+. */
+export const GAMES = ['embaixadinha', 'carrinho', 'penalti', 'memoria', 'chuva', 'bolinha', 'volei', 'skate', 'nuvens'] as const;
+export type GameId = (typeof GAMES)[number];
+export const PLUS_GAMES: readonly GameId[] = ['volei', 'skate', 'nuvens'];
+/** Partidas premiadas por dia (as outras valem só a diversão) e sementes por estrela (1 a 3). */
+export const JOGO = { perDay: 8, coins: [4, 7, 10], plusCoins: [6, 10, 15], xp: 2 };
+export const gameCoins = (game: GameId, stars: number) => (PLUS_GAMES.includes(game) ? JOGO.plusCoins : JOGO.coins)[Math.max(1, Math.min(3, Math.floor(stars))) - 1];
 /** Viagem do dia: o Hami sai para explorar depois de algumas missões e volta com um presente. */
 export const TREK = { needs: 3, hours: 4, perTaskMin: 15, coins: 20, xp: 10 };
 /** Trilha Plus da temporada: um prêmio grande em cada degrau (mesmos dias da trilha grátis). */
@@ -139,6 +148,10 @@ export function baseGrant(src: Source, cfg: GameConfig): Grant {
     case 'temporada-plus': {
       const tier = Math.max(0, Math.min(SEASON_PLUS.length - 1, Math.floor(src.tier)));
       return { ref: `temporada:${src.month}:p${tier}`, label: `Temporada Plus: degrau ${tier + 1}`, xp: 0, coins: SEASON_PLUS[tier].coins ?? 0, routine: false };
+    }
+    case 'jogo': {
+      const n = Math.max(1, Math.min(JOGO.perDay, Math.floor(src.n)));
+      return { ref: `jogo:${src.date}:${n}`, label: 'Partida no parque de jogos', xp: JOGO.xp, coins: gameCoins(src.game, src.stars), routine: false, date: src.date };
     }
     case 'plus':
       return { ref: `plus:${src.week}`, label: 'Mesada semanal do HamiCare+', xp: 0, coins: PLUS_WEEKLY, routine: false };
