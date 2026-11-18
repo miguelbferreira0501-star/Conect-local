@@ -16,7 +16,7 @@ export const LEGAL_INFO = {
   /** E-mail para dúvidas e pedidos de privacidade. */
   email: '[E-MAIL DE CONTATO]',
   /** Data desta versão (AAAA-MM-DD). */
-  atualizado: '2026-11-11',
+  atualizado: '2026-11-18',
 };
 
 export type LegalId = 'privacidade' | 'termos';
@@ -66,8 +66,10 @@ export const PRIVACY: LegalDoc = {
           'Lembretes, se você ligar: o endereço de notificação do aparelho, o horário escolhido, o fuso horário e os tipos de lembrete.',
           'Guardiões do Hami, se você participar: quem pede ajuda guarda o pedido e, se quiser, um motivo curto (só a equipe vê, nunca aparece para outras pessoas); quem é Guardião guarda o pedido, o valor, o nome escolhido para o mural (ou anônimo) e o recadinho, que aparecem no mural.',
           'Dados técnicos: um cookie de sessão para manter você conectado, o endereço IP (usado na hora para barrar tentativas em massa de login) e registros técnicos de erros e acesso do servidor.',
+          'Contagem de uso: os dias em que você abriu o app com a conta e, se você chegou por um convite ou divulgação, o código dessa origem. Olhamos isso só em números somados (por exemplo, quantas pessoas voltaram na semana), para saber se o app está ajudando.',
         ],
         'Não coletamos localização, contatos, identificador de publicidade nem o rolo da câmera. Uma foto só sai do aparelho quando você mesmo escolhe postá-la.',
+        'Não usamos ferramentas de rastreamento de outras empresas, não gravamos a sua tela, seus toques ou o que você digita, e não carregamos fontes nem scripts de terceiros: até as letras do app vêm do nosso próprio servidor.',
       ],
     },
     {
@@ -91,7 +93,7 @@ export const PRIVACY: LegalDoc = {
         [
           'Hospedagem do servidor (por exemplo, Render).',
           'Banco de dados (por exemplo, Neon).',
-          'Envio de e-mails, como o de troca de senha (por exemplo, Resend).',
+          'Envio de e-mails, como o de troca de senha (por exemplo, Resend ou Brevo). Só mandamos e-mails necessários para a sua conta; nada de propaganda.',
           'Serviço de notificações do seu navegador ou aparelho (Google, Apple ou Mozilla), que recebe só o endereço de notificação e o texto do lembrete.',
           'Lojas de aplicativos e meios de pagamento, se você assinar o HamiCare+. Eles cuidam do pagamento; nós não recebemos os dados do seu cartão.',
           'Mercado Pago, se você for Guardião do Hami: ele processa o Pix ou o cartão e nos avisa só se o pagamento foi aprovado e o valor. Não recebemos os dados do cartão nem da sua conta bancária.',
@@ -246,6 +248,7 @@ export const TERMS: LegalDoc = {
       h: '6. O que você publica',
       body: [
         'O que você posta continua sendo seu. Você nos autoriza a guardar e mostrar esse conteúdo dentro do app, apenas para as pessoas com quem você escolheu compartilhar (amigos e grupos), pelo tempo em que ele estiver publicado. Ao apagar o post ou a conta, ele sai do app. Só publique o que você tem direito de publicar.',
+        `Se algo publicado no app usa sua imagem, sua obra ou outro direito seu sem permissão, avise pelo e-mail ${I.email} com o link ou a descrição do post, quem você é e qual direito foi violado. Analisamos e, se for o caso, removemos o conteúdo e avisamos quem publicou. Imagens íntimas divulgadas sem autorização são removidas assim que recebemos o aviso (Marco Civil da Internet, art. 21).`,
       ],
     },
     {
@@ -253,7 +256,7 @@ export const TERMS: LegalDoc = {
       body: [
         [
           'Sementes são a moeda do app. Você ganha cuidando do Hami e cumprindo missões.',
-          'Quem assina o HamiCare+ recebe uma mesada de 500 sementes por semana (pega no app, uma vez por semana, enquanto o Plus estiver ativo) e um martelinho por mês, além da trilha Plus da temporada (sementes extras em cada degrau, liberadas pelos dias ativos no mês). Tudo isso faz parte dos benefícios do Plus: sementes não são vendidas avulsas.',
+          'Quem assina o HamiCare+ recebe uma mesada de 500 sementes por semana (pega no app, uma vez por semana, enquanto o Plus estiver ativo) e um martelinho por mês, além da trilha Plus da temporada (sementes, baús e fantasias exclusivas em cada degrau, liberados pelos dias ativos no mês). Tudo isso faz parte dos benefícios do Plus: sementes não são vendidas avulsas.',
           'Sementes, roupas, pelagens, móveis e outros itens são licenças de uso dentro do app. Eles não têm valor em dinheiro, não podem ser trocados por dinheiro nem vendidos fora do app.',
           'Presentes entre amigos são permitidos dentro do app.',
           'Podemos ajustar preços em sementes, itens e temporadas para manter o jogo equilibrado.',

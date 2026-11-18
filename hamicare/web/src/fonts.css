@@ -1,0 +1,6 @@
+/* Fontes servidas pelo próprio app (sem chamar o Google: o IP de quem usa não sai para terceiros). Licença SIL OFL, ver LICENSE-*.txt. */
+@font-face { font-family: 'Baloo 2'; font-style: normal; font-display: swap; font-weight: 500; src: url('./assets/fonts/baloo-2-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Baloo 2'; font-style: normal; font-display: swap; font-weight: 600; src: url('./assets/fonts/baloo-2-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Baloo 2'; font-style: normal; font-display: swap; font-weight: 700; src: url('./assets/fonts/baloo-2-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Baloo 2'; font-style: normal; font-display: swap; font-weight: 800; src: url('./assets/fonts/baloo-2-latin-800-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Nunito Sans'; font-style: normal; font-display: swap; font-weight: 200 1000; src: url('./assets/fonts/nunito-sans-latin-opsz-normal.woff2') format('woff2-variations'), url('./assets/fonts/nunito-sans-latin-opsz-normal.woff2') format('woff2'); }
