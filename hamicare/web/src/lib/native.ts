@@ -9,6 +9,8 @@ export const isNativeApp = () => {
   }
 };
 export const nativePlatform = () => (isNativeApp() ? Capacitor.getPlatform() : 'web');
+/** Guardiões (pagamento por Pix/cartão fora da loja) não aparecem no app do iPhone: lá o Plus só se compra pela Apple. */
+export const guardiansHere = () => nativePlatform() !== 'ios';
 
 const ENV = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
 

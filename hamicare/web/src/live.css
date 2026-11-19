@@ -4940,3 +4940,5 @@
 .sp-tile .sp-lock { top: -10px; bottom: auto; width: 30px; height: 30px; }
 .sp-tile small { max-width: calc(100% - 6px); font-size: 12px; }
 .sp-tile.is-plus small { padding-right: 0; }
+.pw-legal { font-size: 12px; font-weight: 700; line-height: 1.4; text-align: center; opacity: 0.85; }
+.pw-legal button { font-weight: 800; }

@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Copy } from 'lucide-react';
 import { Hamster } from './Hamster';
 import { AreaSheet } from './AreaSheet';
 import { openGuardian } from './Guardian';
+import { guardiansHere } from '../lib/native';
 import { openLegal } from './Legal';
 import { showPlusOffers } from './PlusCard';
 import { Glyph } from './art';
@@ -110,7 +111,7 @@ export function MenuScreen({ open, onClose }: { open: boolean; onClose: () => vo
         <button onClick={() => go('amigos')}>
           <Glyph e="💌" size={30} /> <span className="menu-t">Convidar amigos</span> <ChevronRight size={22} />
         </button>
-        {s.profile.ageGroup !== 'ate12' && (
+        {s.profile.ageGroup !== 'ate12' && guardiansHere() && (
           <button onClick={() => (onClose(), openGuardian())}>
             <Glyph e="🛡️" size={30} /> <span className="menu-t">Guardiões do Hami</span> <ChevronRight size={22} />
           </button>
