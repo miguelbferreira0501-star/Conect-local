@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, ChevronLeft, Crown } from 'lucide-react';
 import { PLUS_COUNTS, PLUS_PRICE } from '../components/PlusCard';
 import { Hamster } from '../components/Hamster';
@@ -9,13 +9,16 @@ import { isPremium, startTrial, useApp } from '../lib/store';
 import { startTrialOnServer, useAccount } from '../lib/account';
 import { ApiError } from '../lib/social/api';
 import { formatDay } from '../lib/util';
-import { storeWord } from '../lib/native';
+import { guardiansHere, storeWord } from '../lib/native';
 import { openGuardian } from '../components/Guardian';
 import { canBuyHere } from '../lib/guardian';
 import { Glyph } from '../components/art';
 import { PlusWeeklyCard } from '../components/PlusWeekly';
 import { PLUS_WEEKLY } from '../lib/store';
 import { TEAM_MAX, TEAM_MAX_PLUS } from '../shared/team';
+import { buyPlan, iapAvailable, loadStorePrices, restorePlans, type StorePrice } from '../lib/iap';
+import { openLegal } from '../components/Legal';
+import { openUi } from '../lib/bus';
 
 export { PLUS_PRICE };
 
@@ -79,6 +82,13 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
   const pet = name ?? (s.pet.name || 'Hami');
   const petFur = fur ?? s.pet.fur;
   const later = fromOnboarding ? 'Continuar grátis' : 'Agora não';
+  // No iPhone, os preços vêm da App Store (na moeda da pessoa).
+  const [prices, setPrices] = useState<Partial<Record<Plan, StorePrice>>>({});
+  useEffect(() => {
+    if (iapAvailable()) loadStorePrices().then(setPrices).catch(() => {});
+  }, []);
+  const yearPrice = prices.anual?.price ?? PLUS_PRICE.year;
+  const monthPrice = prices.mensal?.price ?? PLUS_PRICE.month;
 
   async function begin() {
     const days = TRIAL_DAYS[plan];
@@ -206,13 +216,13 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
             <small>/mês</small>
           </span>
           <span>
-            <s className="opacity-70">{PLUS_PRICE.yearFull}</s> {PLUS_PRICE.year} por ano
+            <s className="opacity-70">{PLUS_PRICE.yearFull}</s> {yearPrice} por ano
           </span>
           <span className="text-[14px] opacity-85">{trialFree ? `${TRIAL_DAYS.anual} dias grátis · ` : ''}economize {PLUS_PRICE.saving} · um ano inteiro de cuidado</span>
         </button>
         <button className={`pw-plan pw-plan-month ${plan === 'mensal' ? 'is-on' : ''}`} role="radio" aria-checked={plan === 'mensal'} onClick={() => setPlan('mensal')}>
           <b className="text-[19px]">Mensal</b>
-          <span>{PLUS_PRICE.month} por mês</span>
+          <span>{monthPrice} por mês</span>
           {trialFree && <span className="text-[14px] opacity-85">{TRIAL_DAYS.mensal} dias grátis</span>}
         </button>
       </div>
@@ -230,11 +240,13 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
       </div>
       {trialFree ? (
         <>
-          <p className="text-center text-[13px] opacity-90">O teste não pede cartão e não vira assinatura sozinho. Depois dele, o plano {plan} custa {plan === 'anual' ? `${PLUS_PRICE.year} por ano` : `${PLUS_PRICE.month} por mês`}. Cancele quando quiser.</p>
+          <p className="text-center text-[13px] opacity-90">O teste não pede cartão e não vira assinatura sozinho. Depois dele, o plano {plan} custa {plan === 'anual' ? `${yearPrice} por ano` : `${monthPrice} por mês`}. Cancele quando quiser.</p>
           <button className="pw-cta" onClick={begin}>
             Começar meus {TRIAL_DAYS[plan]} dias grátis
           </button>
         </>
+      ) : iapAvailable() ? (
+        <AppStoreBuy plan={plan} price={plan === 'anual' ? `${yearPrice} por ano` : `${monthPrice} por mês`} userId={user?.id ?? null} onClose={onClose} />
       ) : (
         <p className="rounded-2xl bg-white/15 p-4 text-center text-[14px]">Seu teste grátis já foi usado. A assinatura do plano {plan} chega em breve {storeWord()}. Ela vai renovar sozinha no fim de cada período até você cancelar, e o cancelamento leva poucos toques nos ajustes da loja.</p>
       )}
@@ -246,8 +258,57 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
   );
 }
 
+/** Assinar pela App Store (iPhone): compra, restaurar e o aviso de renovação automática que a Apple pede. */
+function AppStoreBuy({ plan, price, userId, onClose }: { plan: Plan; price: string; userId: string | null; onClose: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const needAccount = () => {
+    toast('Entre ou crie sua conta para assinar: assim o Plus vale em qualquer aparelho.');
+    onClose();
+    openUi('ajustes');
+  };
+  async function run(fn: () => Promise<string | null>, none: string) {
+    setBusy(true);
+    try {
+      const until = await fn();
+      if (until) {
+        toast(`HamiCare+ ativo até ${formatDay(until, { day: 'numeric', month: 'long' })}!`);
+        onClose();
+      } else if (none) toast(none);
+    } catch (e) {
+      toast(e instanceof ApiError || e instanceof Error ? e.message : 'Não deu certo agora.');
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="grid gap-3">
+      <button className="pw-cta" disabled={busy} onClick={() => (userId ? run(() => buyPlan(plan, userId), '') : needAccount())}>
+        {busy ? 'Falando com a App Store…' : `Assinar por ${price}`}
+      </button>
+      <p className="pw-legal">
+        Assinatura {plan} de {price}, com renovação automática até você cancelar. A cobrança é feita na sua conta Apple quando você confirma a compra e a cada renovação.
+        Cancele quando quiser nos Ajustes do iPhone (seu nome → Assinaturas), até 24 horas antes do fim do período.
+      </p>
+      <p className="pw-legal">
+        <button className="underline" onClick={() => openLegal('termos')}>
+          Termos de Uso
+        </button>
+        {' · '}
+        <button className="underline" onClick={() => openLegal('privacidade')}>
+          Privacidade
+        </button>
+        {' · '}
+        <button className="underline" disabled={busy} onClick={() => (userId ? run(restorePlans, 'Não encontramos uma assinatura ativa nesta conta Apple.') : needAccount())}>
+          Restaurar compras
+        </button>
+      </p>
+    </div>
+  );
+}
+
 /** Guardiões: pedir o Plus de presente ou dar para quem não pode pagar (dar só fora dos apps das lojas). */
 function GuardianLinks({ onClose }: { onClose: () => void }) {
+  if (!guardiansHere()) return null;
   const go = () => {
     onClose();
     openGuardian();

@@ -151,8 +151,9 @@ Não use documento de outra pessoa numa conta que não está no nome dela: foi o
    - **Assinatura do Plus pela compra da Apple.** A Apple exige que assinaturas vendidas no iPhone usem a
      compra dela. O adulto assina o *Contrato de apps pagos* (App Store Connect → Negócios: dados bancários e
      fiscais dele) e cria um grupo de assinaturas **HamiCare+** com dois produtos:
-     `com.hamicare.app.plus.anual` (R$ 329,90, oferta de 7 dias grátis) e `com.hamicare.app.plus.mensal`
-     (R$ 49,90, 3 dias grátis). Com isso pronto, o Claude liga a compra no app e no servidor.
+     `com.hamicare.app.plus.anual` (R$ 329,90) e `com.hamicare.app.plus.mensal` (R$ 49,90), sem oferta de
+     teste da Apple (o app já dá o teste sem cartão). A compra já está ligada no app e no servidor: veja o passo
+     a passo completo em `docs/APP-STORE-RAPIDO.md`.
    - **Dados de quem publica** em `web/src/shared/legal.ts` (`LEGAL_INFO`): já preenchidos (nome, cidade e e-mail).
    - **Privacidade do app** (App Store Connect → Privacidade do app): coleta *e-mail e nome* (conta),
      *saúde e condicionamento* (peso, só se a pessoa ligar), *conteúdo do usuário* (fotos, posts, diário no

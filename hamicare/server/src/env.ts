@@ -54,6 +54,13 @@ const schema = z.object({
   MP_ACCESS_TOKEN: z.string().optional(),
   MP_WEBHOOK_SECRET: z.string().optional(),
   GUARDIAN_TEST_PAY: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
+  /**
+   * Assinatura do HamiCare+ pela App Store. APPLE_BUNDLE_ID é o pacote do app; APPLE_APP_ID é o número
+   * do app no App Store Connect (Informações do app → "Apple ID", só números). Sem APPLE_APP_ID, só as
+   * compras de teste (Sandbox/TestFlight) são aceitas.
+   */
+  APPLE_BUNDLE_ID: z.string().default('com.hamicare.app'),
+  APPLE_APP_ID: z.coerce.number().int().positive().optional(),
 });
 
 // Campo deixado em branco no painel da hospedagem conta como "não informado".

@@ -17,6 +17,8 @@ import { play } from '../lib/sound';
 import type { AgeGroup, NotifKind, ThemePref, TraitId } from '../types';
 import { Glyph } from '../components/art';
 import { openGuardian } from '../components/Guardian';
+import { guardiansHere } from '../lib/native';
+import { iapAvailable, manageSubscription, restorePlans } from '../lib/iap';
 
 const NOTIF_LABEL: Record<NotifKind, [string, string]> = {
   agua: ['Beber água', 'Nos horários do plano de água'],
@@ -218,7 +220,7 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
             <span className="min-w-0 flex-1">{isPremium(s) ? `Plus ativo até ${formatDay(s.premium.until!, { day: 'numeric', month: 'long' })}` : 'Conhecer o HamiCare+'}</span>
             <ChevronRight size={18} className="text-muted" />
           </button>
-          {s.profile.ageGroup !== 'ate12' && (
+          {s.profile.ageGroup !== 'ate12' && guardiansHere() && (
             <button className="opt" onClick={() => (onClose(), openGuardian())}>
               <Glyph e="🛡️" size={22} />
               <span className="min-w-0 flex-1">Guardiões do Hami</span>
@@ -262,6 +264,28 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
             Recuperar
           </button>
         </Group>
+
+        {iapAvailable() && (
+          <Group title="Assinatura da App Store">
+            <button
+              className="opt"
+              onClick={() =>
+                restorePlans()
+                  .then((until) => toast(until ? `HamiCare+ ativo até ${formatDay(until, { day: 'numeric', month: 'long' })}!` : 'Não encontramos uma assinatura ativa nesta conta Apple.'))
+                  .catch(() => toast('Entre na sua conta do HamiCare e tente de novo.'))
+              }
+            >
+              <Sparkles size={20} className="text-accent" />
+              <span className="min-w-0 flex-1">Restaurar compras</span>
+              <ChevronRight size={18} className="text-muted" />
+            </button>
+            <button className="opt" onClick={() => manageSubscription().catch(() => toast('Abra Ajustes do iPhone → seu nome → Assinaturas.'))}>
+              <FileText size={20} className="text-accent" />
+              <span className="min-w-0 flex-1">Gerenciar ou cancelar assinatura</span>
+              <ChevronRight size={18} className="text-muted" />
+            </button>
+          </Group>
+        )}
 
         <Group title="Privacidade e termos">
           <button className="opt" onClick={() => openLegal('privacidade')}>

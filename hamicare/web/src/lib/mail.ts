@@ -1,4 +1,5 @@
 // Correio do Hami: cartinhas do app (temporada nova, Guardiões, mesada do Plus…). Ficam no aparelho.
+import { guardiansHere } from './native';
 import { addDays, dayDiff } from './util';
 import { isPremium, plusWeek, plusWeeklyClaimed, todayKey } from './store';
 import type { UiTarget } from './bus';
@@ -40,7 +41,7 @@ export function lettersOf(s: State, today = todayKey()): Letter[] {
       action: { label: 'Ver a trilha', go: 'temporada' },
     },
   ];
-  if (s.profile.ageGroup !== 'ate12') {
+  if (s.profile.ageGroup !== 'ate12' && guardiansHere()) {
     list.push({
       id: `guardioes:${month}`,
       kind: 'arco',
