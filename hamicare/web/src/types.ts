@@ -15,6 +15,7 @@ export type ThemePref = 'auto' | 'claro' | 'escuro';
 export type CareId = 'carinho' | 'comida' | 'banho' | 'brincar' | 'escovar' | 'dormir' | 'conversar' | 'foto';
 export type WearSlot = 'chapeu' | 'oculos' | 'roupa' | 'acessorio' | 'efeito';
 
+export type DayPart = 'manha' | 'tarde' | 'noite';
 export type Freq = { kind: 'diaria' } | { kind: 'dias'; days: number[] } | { kind: 'hoje'; date: string };
 
 export interface Task {
@@ -27,6 +28,14 @@ export interface Task {
   createdAt: string;
   /** 1 = cabe num dia difícil. Tarefas 2 e 3 somem no modo dia difícil. */
   energy: 1 | 2 | 3;
+  /** Calendário: começa (e termina, se quiser) nestas datas (AAAA-MM-DD). */
+  start?: string;
+  end?: string;
+  /** Horário opcional (HH:MM) e lembrete no horário. */
+  at?: string;
+  remind?: boolean;
+  /** Parte do dia em que aparece no Início. */
+  part?: DayPart;
   /** Gasto estimado: intensidade (MET) e minutos. */
   met?: number;
   min?: number;
@@ -135,6 +144,8 @@ export interface Profile {
   likes: string[];
   incentive: Incentive;
   feeling: Mood;
+  /** Áreas da vida escolhidas no começo: saude, estudo, casa, calma. */
+  lifeAreas?: ('saude' | 'estudo' | 'casa' | 'calma')[];
 }
 
 export interface HouseItem {

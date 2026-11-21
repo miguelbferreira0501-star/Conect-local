@@ -16,7 +16,7 @@ import { addLibraryTask, addTask, areaNow, dayOf, deleteTask, personKg, weightOn
 import { AREAS } from '../logic/areas';
 import { fmtNum } from '../lib/util';
 import { WEEKDAYS } from '../lib/util';
-import type { Category, Freq, Task } from '../types';
+import type { Category, DayPart, Freq, Task } from '../types';
 import { Glyph } from '../components/art';
 
 const PERIOD_LABEL: Record<Period, string> = { dia: 'de hoje', semana: 'da semana', mes: 'do mês' };
@@ -196,20 +196,20 @@ export function Activities({ onShareTask, onHome }: { onShareTask: (task: Task) 
   );
 }
 
-function freqLabel(f: Freq): string {
+export function freqLabel(f: Freq): string {
   if (f.kind === 'diaria') return 'todo dia';
-  if (f.kind === 'hoje') return 'só hoje';
+  if (f.kind === 'hoje') return f.date === todayKey() ? 'só hoje' : `uma vez (${f.date.slice(8, 10)}/${f.date.slice(5, 7)})`;
   return f.days.map((d) => WEEKDAYS[d]).join(', ');
 }
 
-function TaskSheet({ task, onClose }: { task: Task | 'new' | null; onClose: () => void }) {
+export function TaskSheet({ task, onClose, date }: { task: Task | 'new' | null; onClose: () => void; date?: string }) {
   const isNew = task === 'new';
   const t = task && task !== 'new' ? task : null;
   const [tab, setTab] = useState<'biblioteca' | 'minha'>('biblioteca');
   const [form, setForm] = useState<TaskInput | null>(null);
   const s = useApp();
   const area = areaNow(s);
-  const current: TaskInput = form ?? (t ? { title: t.title, emoji: t.emoji, cat: t.cat, freq: t.freq, energy: t.energy } : { title: '', emoji: '⭐', cat: 'autocuidado', freq: { kind: 'diaria' }, energy: 2 });
+  const current: TaskInput = form ?? (t ? { title: t.title, emoji: t.emoji, cat: t.cat, freq: t.freq, energy: t.energy, start: t.start, end: t.end, at: t.at, remind: t.remind, part: t.part } : { title: '', emoji: '⭐', cat: 'autocuidado', freq: { kind: 'diaria' }, energy: 2, start: date && date > todayKey() ? date : undefined });
   const up = (p: Partial<TaskInput>) => setForm({ ...current, ...p });
   const close = () => {
     setForm(null);
@@ -306,9 +306,12 @@ function TaskSheet({ task, onClose }: { task: Task | 'new' | null; onClose: () =
               <Seg
                 value={freqKind}
                 label="Frequência"
-                onChange={(k) => up({ freq: k === 'diaria' ? { kind: 'diaria' } : k === 'hoje' ? { kind: 'hoje', date: todayKey() } : { kind: 'dias', days: [1, 3, 5] } })}
-                options={[{ id: 'diaria', label: 'Todo dia' }, { id: 'dias', label: 'Alguns dias' }, { id: 'hoje', label: 'Só hoje' }]}
+                onChange={(k) => up({ freq: k === 'diaria' ? { kind: 'diaria' } : k === 'hoje' ? { kind: 'hoje', date: date ?? todayKey() } : { kind: 'dias', days: [1, 3, 5] } })}
+                options={[{ id: 'diaria', label: 'Todo dia' }, { id: 'dias', label: 'Dias da semana' }, { id: 'hoje', label: 'Uma vez' }]}
               />
+              {current.freq.kind === 'hoje' && (
+                <input type="date" className="field" aria-label="Data" min={todayKey()} value={current.freq.date} onChange={(e) => e.target.value && up({ freq: { kind: 'hoje', date: e.target.value } })} />
+              )}
               {freqKind === 'dias' && (
                 <div className="grid grid-cols-7 gap-1">
                   {WEEKDAYS.map((w, i) => (
@@ -318,6 +321,37 @@ function TaskSheet({ task, onClose }: { task: Task | 'new' | null; onClose: () =
                   ))}
                 </div>
               )}
+            </div>
+            {freqKind !== 'hoje' && (
+              <div className="grid grid-cols-2 gap-2">
+                <label className="grid gap-1 text-[13px] font-extrabold">
+                  Começa em
+                  <input type="date" className="field" value={current.start ?? todayKey()} onChange={(e) => up({ start: e.target.value || undefined })} />
+                </label>
+                <label className="grid gap-1 text-[13px] font-extrabold">
+                  Termina em (opcional)
+                  <input type="date" className="field" min={current.start ?? todayKey()} value={current.end ?? ''} onChange={(e) => up({ end: e.target.value || undefined })} />
+                </label>
+              </div>
+            )}
+            <div className="grid gap-1">
+              <span className="text-[14px] font-extrabold">Parte do dia</span>
+              <Seg
+                value={current.part ?? 'qualquer'}
+                label="Parte do dia"
+                onChange={(v) => up({ part: v === 'qualquer' ? undefined : (v as DayPart) })}
+                options={[{ id: 'qualquer', label: 'Qualquer' }, { id: 'manha', label: 'Manhã' }, { id: 'tarde', label: 'Tarde' }, { id: 'noite', label: 'Noite' }]}
+              />
+            </div>
+            <div className="grid grid-cols-[1fr_auto] items-end gap-2">
+              <label className="grid gap-1 text-[13px] font-extrabold">
+                Horário (opcional)
+                <input type="time" className="field" value={current.at ?? ''} onChange={(e) => up({ at: e.target.value || undefined, remind: e.target.value ? current.remind ?? true : false })} />
+              </label>
+              <label className={`flex min-h-[48px] items-center gap-2 rounded-2xl bg-surface2 px-3 text-[13px] font-extrabold ${current.at ? '' : 'opacity-50'}`}>
+                <input type="checkbox" className="h-5 w-5 accent-[var(--accent)]" disabled={!current.at} checked={!!current.remind && !!current.at} onChange={(e) => up({ remind: e.target.checked })} />
+                Lembrete
+              </label>
             </div>
             <div className="grid gap-1">
               <span className="text-[14px] font-extrabold">Esforço</span>

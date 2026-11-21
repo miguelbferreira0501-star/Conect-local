@@ -3,7 +3,7 @@
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { planDay } from '../shared/reminders';
 import { isNativeApp } from './native';
-import { dayOf, getState, todayKey, todayTasks, watchState } from './store';
+import { dayOf, getState, isDue, todayKey, todayTasks, watchState } from './store';
 import type { State } from '../types';
 
 /** Quantos dias para frente ficam agendados (o app reagenda sempre que abre). */
@@ -34,7 +34,29 @@ async function refreshPermission() {
 /** Monta a lista de notificações dos próximos dias (pura, para conferir nos testes). */
 export function plannedNotifications(s: State, now = new Date()) {
   const n = s.settings.notif;
-  if (!s.onboarded || !n.enabled) return [];
+  if (!s.onboarded) return [];
+  return [...(n.enabled ? generalNotifications(s, now) : []), ...taskNotifications(s, now)];
+}
+
+/** Lembrete no horário de cada tarefa do calendário (só nos dias em que ela aparece e se ainda não foi feita). */
+function taskNotifications(s: State, now: Date) {
+  const list = s.tasks.filter((t) => t.remind && t.at).slice(0, 40);
+  const out: { id: number; title: string; body: string; schedule: { at: Date; allowWhileIdle: boolean } }[] = [];
+  for (let d = 0; d < DAYS_AHEAD; d++) {
+    const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + d);
+    const key = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
+    list.forEach((t, i) => {
+      if (!isDue(t, key) || (t.id in dayOf(s, key).done)) return;
+      const [h, m] = t.at!.split(':').map(Number);
+      const at = new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m);
+      if (at.getTime() > now.getTime() + 30_000) out.push({ id: 10_000 + d * 100 + i, title: s.pet.name || 'Hami', body: `Hora de: ${t.title}`, schedule: { at, allowWhileIdle: true } });
+    });
+  }
+  return out;
+}
+
+function generalNotifications(s: State, now: Date) {
+  const n = s.settings.notif;
   const prefs = { enabled: true, time: n.time, bedtime: n.bedtime ?? '22:00', water: n.water ?? 'normal', kinds: n.kinds };
   const minor = s.profile.ageGroup !== '18mais';
   const today = todayKey();

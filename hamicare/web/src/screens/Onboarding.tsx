@@ -1,14 +1,16 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { ChevronLeft, Lock } from 'lucide-react';
+import { Check, ChevronLeft, Lock, Plus as PlusIcon } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { FURS } from '../data/fur';
 import { INCENTIVES, LIKES, MOODS, PET_NAME_IDEAS, TRAITS } from '../data/lines';
-import { CAT_ORDER, CATEGORIES, libById } from '../data/tasks';
+import { libById } from '../data/tasks';
 import { JOURNEY_GRAMS, KCAL_PER_KG, REF_KG, checkJourneyGoal, defaultGoalKg, directionOf, isMinor, taskKcal } from '../logic/evolution';
 import { completeOnboarding, getState, starterPlan, useApp, type OnboardingAnswers } from '../lib/store';
 import type { AgeGroup, Category, Incentive, Mood, TraitId } from '../types';
 import { fmtNum } from '../lib/util';
 import { Paywall } from './Paywall';
+import { StoryIntro } from '../components/StoryIntro';
+import { LIFE_AREAS, LIFE_ORDER } from '../data/tasks';
 import { Glyph } from '../components/art';
 import { AREA_GOAL, AREAS, areaOf, areasFor } from '../logic/areas';
 
@@ -54,6 +56,9 @@ export function Onboarding() {
 
   const say = (text: ReactNode) => <p className="bubble-pet text-[17px]">{text}</p>;
 
+  // Quem chega pela primeira vez conhece o Hami numa pequena história antes das perguntas.
+  if (step === 'intro' && !migrated) return <StoryIntro fur={a.fur} onDone={next} />;
+
   return (
     <div className="shell grid content-start gap-4 !pb-10">
       <div className="flex items-center gap-3">
@@ -69,7 +74,7 @@ export function Onboarding() {
       </div>
 
       {/* Na tela do Plus o Hami aparece lá dentro, de cartola: aqui em cima ficaria repetido. */}
-      {step !== 'plus' && (
+      {step !== 'plus' && step !== 'focus' && (
         <div className="flex justify-center">
           <Hamster fur={a.fur} grams={grams} phase={0} mood={step === 'intro' ? 'dormindo' : step === 'plan' ? 'animado' : 'feliz'} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null }} size={step === 'intro' ? 200 : 150} label={petName} />
         </div>
@@ -210,12 +215,46 @@ export function Onboarding() {
 
         {step === 'focus' && (
           <>
-            {say('Em que você quer mais ajuda? Pode escolher mais de um.')}
-            {CAT_ORDER.map((c: Category) => (
-              <Opt key={c} on={a.focus.includes(c)} onClick={() => up({ focus: a.focus.includes(c) ? a.focus.filter((x) => x !== c) : [...a.focus, c] })} emoji={CATEGORIES[c].emoji} title={CATEGORIES[c].label} sub={CATEGORIES[c].desc} />
-            ))}
-            <button className="btn btn-primary" onClick={next} disabled={!a.focus.length}>
+            <h2 className="ob-areas-title">
+              Em quais <span>áreas</span> você quer começar?
+            </h2>
+            <p className="text-center text-[14px] text-muted">Escolha uma ou mais. Cada área traz missões prontas, e você muda quando quiser.</p>
+            <div className="ob-areas">
+              {LIFE_ORDER.map((ar) => {
+                const on = (a.lifeAreas ?? []).includes(ar);
+                const L = LIFE_AREAS[ar];
+                return (
+                  <button
+                    key={ar}
+                    className={`ob-area ${on ? 'is-on' : ''}`}
+                    style={{ ['--tone' as string]: L.tone }}
+                    aria-pressed={on}
+                    onClick={() => {
+                      const cur = a.lifeAreas ?? [];
+                      const list = on ? cur.filter((x) => x !== ar) : [...cur, ar];
+                      up({ lifeAreas: list, focus: [...new Set(list.flatMap((x) => LIFE_AREAS[x].focus))] as Category[] });
+                    }}
+                  >
+                    <span className="ob-area-check" aria-hidden="true">
+                      {on ? <Check size={16} strokeWidth={3.5} /> : <PlusIcon size={16} strokeWidth={3.5} />}
+                    </span>
+                    <span className="ob-area-name">{L.label}</span>
+                    <span className="ob-area-art icon-still" aria-hidden="true">
+                      <Hamster fur={a.fur} size={104} idle={false} growth={1} mood={ar === 'calma' ? 'calmo' : ar === 'estudo' ? 'feliz' : 'animado'} outfit={{ chapeu: null, oculos: ar === 'estudo' ? 'redondos' : null, roupa: null, acessorio: null }} label="" />
+                      <span className="ob-area-prop">
+                        <Glyph e={L.prop} size={40} />
+                      </span>
+                    </span>
+                    <span className="ob-area-desc">{L.desc}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <button className="btn btn-primary" onClick={next} disabled={!(a.lifeAreas ?? []).length}>
               Continuar
+            </button>
+            <button className="btn btn-ghost" onClick={() => (up({ lifeAreas: ['saude'], focus: ['fitness', 'habitos'] }), next())}>
+              Escolher depois
             </button>
           </>
         )}

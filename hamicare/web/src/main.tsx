@@ -10,6 +10,7 @@ import './live.css';
 import './theme.css';
 import './wellbeing.css';
 import './arcade.css';
+import './story.css';
 
 installAppSounds();
 installNativeReminders();

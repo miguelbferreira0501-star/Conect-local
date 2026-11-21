@@ -213,6 +213,24 @@ export const HABITS: Record<string, Draw> = {
       <Sh d="M36 41 L28 60 Q24 59 21 57.5 L30 41Z" o={0.1} />
     </g>
   ),
+  '👕': () => (
+    <g>
+      <path d="M22 8 Q32 14 42 8 L58 18 L52 30 L46 27 V56 Q46 58 44 58 H20 Q18 58 18 56 V27 L12 30 L6 18Z" fill={C.blue} />
+      <path d="M22 8 Q32 18 42 8 Q38 6 32 12 Q26 6 22 8Z" fill={C.blueD} />
+      <path d="M18 27 V56 Q18 58 20 58 H24 V30Z" fill={C.blueD} opacity="0.35" />
+      <circle cx="32" cy="38" r="5" fill={C.yellow} />
+      <Hi x={40} y={34} rx={1.6} ry={9} />
+    </g>
+  ),
+  '🗑️': () => (
+    <g>
+      <rect x="12" y="12" width="40" height="8" rx="3" fill={C.greenD} />
+      <rect x="26" y="7" width="12" height="6" rx="2" fill={C.greenD} />
+      <path d="M15 22 H49 L45 56 Q45 58 43 58 H21 Q19 58 19 56Z" fill={C.green} />
+      <path d="M25 28 L26.5 52 M32 28 V52 M39 28 L37.5 52" stroke={C.greenD} strokeWidth="3" strokeLinecap="round" />
+      <Sh d="M15 22 H21 L24 58 H21 Q19 58 19 56Z" o={0.1} />
+    </g>
+  ),
   '🛏️': () => (
     <g>
       <rect x="6" y="16" width="9" height="40" rx="4" fill={C.woodD} />

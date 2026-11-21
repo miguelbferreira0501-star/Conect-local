@@ -2,8 +2,8 @@
 import { careDays, growthOf } from '../logic/growth';
 import { useSyncExternalStore } from 'react';
 import { AREA_GOAL, AREA_PLAN, areaOf, isWeightArea, type Area } from '../logic/areas';
-import type { AgeGroup, Battery, BodyStart, CareId, Category, DayLog, Direction, Freq, GoalId, Incentive, Journey, MealEntry, Mood, Outfit, PetMood, Photo, State, Task, TraitId, WearSlot } from '../types';
-import { LIBRARY, libById, rewardFor } from '../data/tasks';
+import type { AgeGroup, Battery, BodyStart, CareId, Category, DayLog, DayPart, Direction, Freq, GoalId, Incentive, Journey, MealEntry, Mood, Outfit, PetMood, Photo, State, Task, TraitId, WearSlot } from '../types';
+import { LIBRARY, LIFE_AREAS, libById, rewardFor, type LifeArea } from '../data/tasks';
 import { ITEMS, LOOKS, RECIPES, STYLES, WEARABLE_KINDS, itemById, stylePrice } from '../data/items';
 import { PLACES, placeById } from '../data/world';
 import { FACTS } from '../data/lines';
@@ -715,12 +715,22 @@ export interface OnboardingAnswers {
   petName: string;
   userName: string;
   body: BodyStart;
+  /** Áreas escolhidas nos cartões do começo (Saúde, Trabalho e estudo, Casa, Calma). */
+  lifeAreas?: LifeArea[];
 }
 
 /** Plano inicial: 4 a 6 atividades escolhidas pelas respostas. */
 /** Plano inicial: 7 a 8 hábitos escolhidos pelas respostas (missões nunca têm comida). */
-export function starterPlan(a: Pick<OnboardingAnswers, 'goal' | 'focus' | 'minutes' | 'likes' | 'ageGroup'>): string[] {
+export function starterPlan(a: Pick<OnboardingAnswers, 'goal' | 'focus' | 'minutes' | 'likes' | 'ageGroup' | 'lifeAreas'>): string[] {
   const easy = a.minutes <= 10;
+  // Com áreas escolhidas: as missões de cada área se revezam (uma de cada, depois a segunda…), mais água.
+  if (a.lifeAreas?.length) {
+    const lists = a.lifeAreas.map((ar) => LIFE_AREAS[ar].tasks.filter((id) => !easy || (libById(id)?.energy ?? 1) <= 2));
+    const mixed: string[] = [];
+    for (let i = 0; i < 5; i++) for (const l of lists) if (l[i]) mixed.push(l[i]);
+    const size = a.minutes <= 5 ? 4 : a.minutes <= 15 ? 6 : PLAN_SIZE;
+    return [...new Set(['agua', ...mixed])].filter((id) => libById(id)).slice(0, size);
+  }
   const dir = directionOf(a.goal, isMinor(a.ageGroup));
   const likedMoves = a.likes.map((id) => libById(id)).filter((t) => t && t.cat === 'fitness' && (!easy || t.energy <= 2));
   const move = (fallback: string) => (likedMoves.length ? likedMoves[0]!.id : fallback);
@@ -765,7 +775,7 @@ export function completeOnboarding(a: OnboardingAnswers) {
     ...base,
     onboarded: true,
     journey,
-    profile: { name: a.userName.trim(), ageGroup: a.ageGroup, goal, focus: a.focus, minutes: a.minutes, likes: a.likes, incentive: a.incentive, feeling: a.feeling },
+    profile: { name: a.userName.trim(), ageGroup: a.ageGroup, goal, focus: a.focus, minutes: a.minutes, likes: a.likes, incentive: a.incentive, feeling: a.feeling, lifeAreas: a.lifeAreas },
     pet: { ...base.pet, name: a.petName.trim() || 'Hami', fur: a.fur, trait: a.trait, body: bodyStart, grams, startGrams: grams, lastWeighIn: today, weighIns: [{ date: today, grams }] },
     body: {
       ...base.body,
@@ -786,6 +796,8 @@ export function completeOnboarding(a: OnboardingAnswers) {
 // ---------- Tarefas ----------
 
 export function isDue(t: Task, key: string): boolean {
+  if (t.start && key < t.start) return false;
+  if (t.end && key > t.end) return false;
   if (t.freq.kind === 'diaria') return true;
   if (t.freq.kind === 'hoje') return t.freq.date === key;
   return t.freq.days.includes(new Date(`${key}T12:00:00`).getDay());
@@ -860,13 +872,45 @@ export interface TaskInput {
   cat: Category;
   freq: Freq;
   energy: 1 | 2 | 3;
+  start?: string;
+  end?: string;
+  at?: string;
+  remind?: boolean;
+  part?: DayPart;
 }
+
+/** Tira os campos vazios do calendário (para não guardar chaves sem valor). */
+function calFields(input: Partial<TaskInput>) {
+  const out: Partial<Pick<Task, 'start' | 'end' | 'at' | 'remind' | 'part'>> = {};
+  if (input.start) out.start = input.start;
+  if (input.end && (!input.start || input.end >= input.start)) out.end = input.end;
+  if (input.at && /^\d{2}:\d{2}$/.test(input.at)) out.at = input.at;
+  if (input.remind && out.at) out.remind = true;
+  if (input.part) out.part = input.part;
+  else if (out.at) out.part = partOfTime(out.at);
+  return out;
+}
+export const partOfTime = (at: string): DayPart => (at < '12:00' ? 'manha' : at < '18:00' ? 'tarde' : 'noite');
 
 export function addTask(input: TaskInput) {
   const title = input.title.trim();
   if (!title) return;
-  const task: Task = { id: `t${uid()}`, title, emoji: input.emoji, cat: input.cat, freq: input.freq, energy: input.energy, reward: rewardFor(input.energy), createdAt: todayKey() };
+  const task: Task = { id: `t${uid()}`, title, emoji: input.emoji, cat: input.cat, freq: input.freq, energy: input.energy, reward: rewardFor(input.energy), createdAt: todayKey(), ...calFields(input) };
   commit({ ...state, tasks: [...state.tasks, task] });
+}
+
+/** Adiciona uma área inteira (as missões dela que ainda não existem) e guarda a escolha no perfil. */
+export function addLifeArea(area: LifeArea): number {
+  const today = todayKey();
+  const fresh = LIFE_AREAS[area].tasks.filter((id) => !state.tasks.some((t) => t.id === id)).map((id) => libTask(id, today)).filter(Boolean) as Task[];
+  const areas = [...new Set([...(state.profile.lifeAreas ?? []), area])];
+  commit({ ...state, tasks: [...state.tasks, ...fresh], profile: { ...state.profile, lifeAreas: areas } });
+  return fresh.length;
+}
+
+/** Tarefas de um dia qualquer do calendário (sem o filtro do dia difícil). */
+export function tasksOn(s: State, key: string): Task[] {
+  return s.tasks.filter((t) => isDue(t, key));
 }
 
 export function addLibraryTask(libId: string) {
@@ -878,7 +922,14 @@ export function addLibraryTask(libId: string) {
 export function updateTask(id: string, patch: Partial<TaskInput>) {
   commit({
     ...state,
-    tasks: state.tasks.map((t) => (t.id === id ? { ...t, ...patch, title: (patch.title ?? t.title).trim() || t.title, reward: rewardFor(patch.energy ?? t.energy) } : t)),
+    tasks: state.tasks.map((t) => {
+      if (t.id !== id) return t;
+      const { start, end, at, remind, part, ...rest } = t;
+      const cal = calFields({ start, end, at, remind, part, ...patch });
+      const { start: _s, end: _e, at: _a, remind: _r, part: _p, ...plain } = patch;
+      void _s, void _e, void _a, void _r, void _p, void start, void end, void at, void remind, void part;
+      return { ...rest, ...plain, ...cal, title: (patch.title ?? t.title).trim() || t.title, reward: rewardFor(patch.energy ?? t.energy) };
+    }),
   });
 }
 
