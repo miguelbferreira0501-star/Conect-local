@@ -6,71 +6,22 @@ import { furById } from '../data/fur';
 import { itemById } from '../data/items';
 import { gameCfg } from '../lib/game';
 import { finishTrek, startTrek, trekMissing, trekPlaceOf, trekReady, useApp, TREK, TREK_TALES, type TrekResult } from '../lib/store';
-import { costumeOf, garmentColor } from './Wear';
 import { shade } from './Furniture';
 import { Glyph } from './art';
+import { Hamster } from './Hamster';
 import { Seed } from './ui';
 import type { Outfit, State } from '../types';
 
 // ---------- Hami de lado, andando com a trouxinha ----------
 
-export function WalkingHami({ fur: furId, outfit, size = 170, still = false }: { fur: string; outfit?: Outfit; size?: number; still?: boolean }) {
-  const fur = furById(furId);
-  const line = shade(fur.shade, 0.15);
-  const costume = costumeOf(outfit?.roupa);
-  const cloth = costume ? costume.c1 : garmentColor(outfit?.roupa);
-  const bodyC = cloth ?? fur.body;
-  const bodyL = cloth ? shade(cloth, 0.22) : line;
+export function WalkingHami({ fur, outfit, size = 170, still = false }: { fur: string; outfit?: Outfit; size?: number; still?: boolean }) {
+  // O mesmo Hami, saltitando pelo caminho.
   return (
-    <svg viewBox="0 0 220 200" width={size} height={(size * 200) / 220} className={`wk ${still ? 'is-still' : ''}`} role="img" aria-label="Hami andando com a trouxinha">
-      <ellipse cx="112" cy="190" rx="54" ry="7" fill="#000" opacity="0.16" />
-      {/* perninha de trás */}
-      <g className="wk-leg wk-leg-b">
-        <ellipse cx="96" cy="180" rx="15" ry="9" fill={shade(fur.belly, 0.1)} stroke={line} strokeWidth="2.2" />
-      </g>
-      <g className="wk-bob">
-        {/* rabinho */}
-        <circle cx="54" cy="150" r="9" fill={fur.body} stroke={line} strokeWidth="2.2" />
-        {/* trouxinha nas costas */}
-        <g className="wk-sack">
-          <path d="M30 108 C24 82 46 62 70 66 C92 70 100 92 92 112 C86 128 66 136 48 130 C38 126 32 118 30 108 Z" fill="#D9534F" stroke="#A93B38" strokeWidth="2.4" />
-          <path d="M44 84 C50 76 62 72 72 76" stroke="#FFFFFF" strokeOpacity="0.35" strokeWidth="5" strokeLinecap="round" fill="none" />
-          <path d="M84 70 C90 62 100 62 104 70 C100 78 90 78 84 70 Z" fill="#C8433F" stroke="#A93B38" strokeWidth="2" />
-          <circle cx="58" cy="108" r="5" fill="#FFFFFF" opacity="0.25" />
-          <circle cx="74" cy="98" r="3.5" fill="#FFFFFF" opacity="0.25" />
-        </g>
-        {/* orelha de trás */}
-        <circle cx="150" cy="40" r="14" fill={fur.body} stroke={line} strokeWidth="2.4" />
-        {/* corpo */}
-        <ellipse cx="108" cy="136" rx="50" ry="48" fill={bodyC} stroke={bodyL} strokeWidth="2.6" />
-        {!cloth && <ellipse cx="132" cy="150" rx="24" ry="28" fill={fur.belly} />}
-        {cloth && <path d="M78 104 C96 96 124 96 146 108" stroke="#FFFFFF" strokeOpacity="0.28" strokeWidth="5" strokeLinecap="round" fill="none" />}
-        {/* cabeça grande virada para a frente do caminho */}
-        <path d="M82 84 C80 52 108 32 138 34 C170 36 190 60 188 90 C186 116 164 132 134 130 C104 128 84 112 82 84 Z" fill={fur.body} stroke={line} strokeWidth="2.6" />
-        {/* topetinho */}
-        <path d="M124 36 C126 26 133 25 135 33 C138 25 146 26 146 36" fill={fur.body} stroke={line} strokeWidth="2.2" strokeLinejoin="round" />
-        {/* orelha da frente */}
-        <circle cx="112" cy="44" r="16" fill={fur.body} stroke={line} strokeWidth="2.4" />
-        <circle cx="113" cy="45" r="9.5" fill={fur.ear} />
-        {/* focinho claro */}
-        <path d="M134 96 C136 82 152 76 168 80 C182 84 190 96 186 108 C182 122 164 130 148 126 C138 122 132 110 134 96 Z" fill={fur.belly} />
-        {/* olho */}
-        <ellipse cx="150" cy="82" rx="9" ry="10.5" fill="#3A2016" />
-        <circle cx="153" cy="78" r="3.6" fill="#FFFFFF" />
-        <circle cx="147" cy="86" r="1.8" fill="#FFFFFF" opacity="0.8" />
-        {/* bochecha, nariz e boquinha */}
-        <ellipse cx="140" cy="106" rx="9" ry="6" fill={fur.ear} opacity="0.75" />
-        <ellipse cx="184" cy="96" rx="4.6" ry="3.6" fill="#F08A9A" />
-        <path d="M170 110 q6 5 12 0" stroke="#6B3A2A" strokeWidth="2" strokeLinecap="round" fill="none" />
-        {/* bracinho segurando a alça */}
-        <path d="M96 76 C102 96 108 106 116 116" stroke="#8C5A3A" strokeWidth="4" strokeLinecap="round" fill="none" />
-        <ellipse cx="118" cy="120" rx="13" ry="9.5" fill={cloth ?? fur.body} stroke={bodyL} strokeWidth="2.2" transform="rotate(-28 118 120)" />
-      </g>
-      {/* perninha da frente */}
-      <g className="wk-leg wk-leg-a">
-        <ellipse cx="132" cy="181" rx="16" ry="9.5" fill={fur.belly} stroke={line} strokeWidth="2.2" />
-      </g>
-    </svg>
+    <span className={`wk ${still ? 'is-still' : ''}`} style={{ display: 'inline-block', width: size, height: (size * 200) / 220 }} role="img" aria-label="Hami andando">
+      <span className="wk-hop">
+        <Hamster fur={fur} outfit={outfit} mood={still ? 'feliz' : 'animado'} size={(size * 200) / 220} idle={false} label="Hami andando" />
+      </span>
+    </span>
   );
 }
 

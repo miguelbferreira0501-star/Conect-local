@@ -400,3 +400,15 @@ span.tcal-ico { background: transparent; }
 .hc-head .hc-head-btn { border: 0 !important; background: color-mix(in srgb, var(--home-deep, #4a6a3a) 20%, transparent) !important; box-shadow: none !important; }
 .hc-head .hc-head-cal { margin-right: 2px; }
 .hc-add { display: inline-flex; justify-content: center; align-items: center; gap: 6px; padding: 13px; border: 0; border-radius: 20px; background: color-mix(in srgb, var(--home-deep, #4a6a3a) 16%, transparent); color: var(--home-ink, #2b2f55); font-size: 15px; font-weight: 800; }
+
+/* Hami dormindo e andando (o mesmo desenho novo) */
+.sleep-hami { position: relative; display: inline-flex; align-items: flex-end; justify-content: center; }
+.wk-hop { display: inline-block; transform-origin: 50% 100%; animation: wk-hop 0.62s cubic-bezier(0.3, 0, 0.4, 1) infinite; }
+.wk.is-still .wk-hop { animation: none; }
+@keyframes wk-hop { 0%, 100% { transform: translateY(0) scale(1.03, 0.97); } 45% { transform: translateY(-9%) scale(0.98, 1.03); } }
+@media (prefers-reduced-motion: reduce) { .wk-hop { animation: none; } }
+/* Cartão da área = só a ilustração (sem frase embaixo) */
+.arp-card { padding: 0; gap: 0; border: 3px solid transparent; background: transparent; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.1); border-radius: 26px; }
+.arp-card .ar-img { border-radius: 23px; }
+.arp-card.is-on { border-color: #3fae6b; }
+.ar-img { image-rendering: auto; }

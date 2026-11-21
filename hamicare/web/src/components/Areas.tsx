@@ -39,10 +39,6 @@ export function chosenAreas(list: LifeArea[] | undefined): LifeArea[] {
   return LIFE_ORDER.filter((a) => out.has(a));
 }
 
-/** Quantos hábitos da área a pessoa já tem. */
-function countIn(area: LifeArea, ids: Set<string>) {
-  return LIFE_AREAS[area].tasks.filter((id) => ids.has(id)).length;
-}
 
 /** Página das áreas: a grade de cartões e, ao tocar, a lista "Como você quer…?". */
 export function AreasPage({ open, onClose }: { open: LifeArea | 'todas' | null; onClose: () => void }) {
@@ -118,11 +114,9 @@ export function AreasPage({ open, onClose }: { open: LifeArea | 'todas' | null; 
             {LIFE_ORDER.map((a) => {
               const L = LIFE_AREAS[a];
               const on = mine.includes(a);
-              const n = countIn(a, ids);
               return (
                 <button key={a} className={`arp-card ${on ? 'is-on' : ''}`} style={{ ['--tone' as string]: L.tone }} onClick={() => setPicked(a)} aria-label={L.label}>
                   <AreaArt area={a} />
-                  <small>{on ? `${n} ${n === 1 ? 'hábito' : 'hábitos'}` : L.desc}</small>
                   {on && (
                     <span className="arp-check" aria-label="Área escolhida">
                       <Check size={14} strokeWidth={3.5} />

@@ -15,7 +15,7 @@ export interface Fur {
 }
 
 export const FURS: Fur[] = [
-  { id: 'caramelo', label: 'Caramelo', body: '#F2B46D', shade: '#D98E45', belly: '#FFF3E0', ear: '#FF9EAA' },
+  { id: 'caramelo', label: 'Caramelo', body: '#EFA46C', shade: '#D8864F', belly: '#FCE7D4', ear: '#F6A8B0' },
   { id: 'creme', label: 'Creme', body: '#F7DFB9', shade: '#E2C08E', belly: '#FFFBF3', ear: '#FFAAB5' },
   { id: 'nuvem', label: 'Cinza-nuvem', body: '#C9CDD6', shade: '#A3A9B6', belly: '#F4F5F8', ear: '#FFB0BE' },
   { id: 'panda', label: 'Panda', body: '#FBFAF7', shade: '#DCD8D0', belly: '#FFFFFF', ear: '#FFAAB5', pattern: 'panda', patch: '#4A4048' },
