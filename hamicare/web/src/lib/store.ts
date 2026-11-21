@@ -81,7 +81,7 @@ export function fresh(): State {
     journal: [],
     jar: [],
     // Os móveis do quartinho inicial já são da pessoa (pode guardar e recolocar).
-    inventory: { 'p-creme': 1, 'f-madeira': 1, cenoura: 3, maca: 2, semente: 3, rodinha: 1, caminha: 1, planta: 1, ...Object.fromEntries(arenaHouse(1).items.map((i) => [i.itemId, 1])) },
+    inventory: { 'p-menta': 1, 'f-pistache': 1, 'p-creme': 1, 'f-madeira': 1, cenoura: 3, maca: 2, semente: 3, rodinha: 1, caminha: 1, planta: 1, ...Object.fromEntries(arenaHouse(1).items.map((i) => [i.itemId, 1])) },
     wishlist: [],
     // Casa inicial: um quartinho já decorado (cama, criado-mudo, guarda-roupa, rodinha…).
     house: arenaHouse(1),
@@ -145,6 +145,9 @@ function upgradeHouses(input: State): State {
   const onlyNew = (before: State['house'], after: State['house']) => ({ ...after, items: after.items.filter((i) => !before.items.some((o) => o.itemId === i.itemId)) });
   const home = upgradeHouse(s.house, s.homeArena ?? 1);
   if (home !== s.house) s = withHouseFurniture({ ...s, house: home }, onlyNew(s.house, home));
+  // Parede e piso novos da casinha inicial também entram no inventário.
+  const wall = [s.house.wallpaper, s.house.floor].filter((id) => !s.inventory[id]);
+  if (wall.length) s = { ...s, inventory: { ...s.inventory, ...Object.fromEntries(wall.map((id) => [id, 1])) } };
   for (const [n, h] of Object.entries(s.houses ?? {})) {
     const up = upgradeHouse(h, Number(n));
     if (up !== h) s = withHouseFurniture({ ...s, houses: { ...s.houses, [n]: up } }, onlyNew(h, up));
@@ -900,6 +903,11 @@ export function addTask(input: TaskInput) {
   if (!title) return;
   const task: Task = { id: `t${uid()}`, title, emoji: input.emoji, cat: input.cat, freq: input.freq, energy: input.energy, reward: rewardFor(input.energy), createdAt: todayKey(), ...calFields(input) };
   commit({ ...state, tasks: [...state.tasks, task] });
+}
+
+/** Guarda as áreas escolhidas (sem mexer nas missões). */
+export function setLifeAreas(list: LifeArea[]) {
+  commit({ ...state, profile: { ...state.profile, lifeAreas: [...new Set(list)] } });
 }
 
 /** Adiciona uma área inteira (as missões dela que ainda não existem) e guarda a escolha no perfil. */

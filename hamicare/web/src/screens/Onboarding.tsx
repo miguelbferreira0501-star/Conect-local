@@ -11,6 +11,7 @@ import { fmtNum } from '../lib/util';
 import { Paywall } from './Paywall';
 import { StoryIntro } from '../components/StoryIntro';
 import { LIFE_AREAS, LIFE_ORDER } from '../data/tasks';
+import { AreaArt } from '../components/Areas';
 import { Glyph } from '../components/art';
 import { AREA_GOAL, AREAS, areaOf, areasFor } from '../logic/areas';
 
@@ -321,11 +322,8 @@ export function Onboarding() {
                       {on ? <Check size={16} strokeWidth={3.5} /> : <PlusIcon size={16} strokeWidth={3.5} />}
                     </span>
                     <span className="ob-area-name">{L.label}</span>
-                    <span className="ob-area-art icon-still" aria-hidden="true">
-                      <Hamster fur={a.fur} size={104} idle={false} growth={1} mood={ar === 'calma' ? 'calmo' : ar === 'estudo' ? 'feliz' : 'animado'} outfit={{ chapeu: null, oculos: ar === 'estudo' ? 'redondos' : null, roupa: null, acessorio: null }} label="" />
-                      <span className="ob-area-prop">
-                        <Glyph e={L.prop} size={40} />
-                      </span>
+                    <span className="ob-area-art">
+                      <AreaArt area={ar} fur={a.fur} size={104} />
                     </span>
                     <span className="ob-area-desc">{L.desc}</span>
                   </button>

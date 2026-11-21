@@ -561,6 +561,7 @@ export const ITEMS: Item[] = [
   W('espetinho', 'Espetinho de frutas', 'comida', 0, { emoji: '🍢', food: { saciedade: 35, felicidade: 25 }, souvenir: true }),
   W('bolinho', 'Bolinho de aniversário', 'comida', 0, { emoji: '🧁', food: { saciedade: 20, felicidade: 40 }, souvenir: true }),
   // Papéis de parede
+  W('p-menta', 'Menta com folhinhas', 'parede', 0),
   W('p-creme', 'Parede creme', 'parede', 0),
   W('p-listras', 'Listras de morango', 'parede', 30),
   W('p-bolinhas', 'Bolinhas de menta', 'parede', 30),
@@ -578,6 +579,7 @@ export const ITEMS: Item[] = [
   W('p-girassois', 'Girassóis', 'parede', 45),
   W('p-galaxia', 'Galáxia', 'parede', 80, { plus: true }),
   // Pisos
+  W('f-pistache', 'Tábua pistache', 'piso', 0),
   W('f-madeira', 'Madeira', 'piso', 0),
   W('f-clara', 'Madeira clara', 'piso', 25),
   W('f-carpete', 'Carpete rosinha', 'piso', 30),

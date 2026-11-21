@@ -20,7 +20,7 @@ export function TaskRow({ task, done, kcal, dir, sub, onToggle, onEdit }: {
   const ref = useRef<HTMLButtonElement>(null);
   return (
     <li className="task" data-done={done}>
-      <span className="task-emoji" aria-hidden="true">
+      <span className="task-emoji" data-cat={task.cat} aria-hidden="true">
         <Glyph e={task.emoji} size={40} />
       </span>
       <span className="min-w-0 flex-1">

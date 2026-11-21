@@ -7,8 +7,8 @@ type Spot = { itemId: string; x: number; y: number };
 export const ARENA_HOME: Record<number, { wallpaper: string; floor: string; items: Spot[] }> = {
   // Casinha Inicial: quartinho aconchegante
   1: {
-    wallpaper: 'p-creme',
-    floor: 'f-madeira',
+    wallpaper: 'p-menta',
+    floor: 'f-pistache',
     items: [
       { itemId: 'k-tapete-rosa', x: 50, y: 95 },
       { itemId: 'k-cama-rosa', x: 25, y: 71 },
@@ -227,7 +227,9 @@ const OLD_STARTER = ['caminha', 'planta', 'rodinha'];
 const same = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join() === [...b].sort().join();
 
 /** Casa ainda do jeito que veio (antes da reforma)? Então ganha a decoração nova da arena, com a parede e o piso de quem já escolheu. */
-export function upgradeHouse(h: House, n: number): House {
+export function upgradeHouse(input: House, n: number): House {
+  // A casinha inicial deixou de ser marrom: quem ainda está com a parede creme e o piso de madeira de fábrica ganha a casa verdinha.
+  const h = n === 1 && input.wallpaper === 'p-creme' && input.floor === 'f-madeira' ? { ...input, wallpaper: 'p-menta', floor: 'f-pistache' } : input;
   const ids = h.items.map((i) => i.itemId);
   const old = OLD_ARENA_ITEMS[n] ?? [];
   // Casa inicial de antes da banheira (sem ninguém ter mexido): ganha a banheira de madeira.

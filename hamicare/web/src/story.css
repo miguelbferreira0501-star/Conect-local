@@ -274,3 +274,87 @@ span.tcal-ico { background: transparent; }
 @media (prefers-reduced-motion: reduce) { .room-use, .use-pet-correr, .use-pet-balancar, .use-pet-banho, .use-bubbles i { animation: none; } }
 .care-use-say { position: absolute; left: 50%; top: 70px; z-index: 5; transform: translateX(-50%); max-width: 80%; padding: 10px 16px; border-radius: 18px; background: #fff; font-size: 15px; font-weight: 800; color: #3a2f55; text-align: center; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.08); animation: use-in 300ms ease both; }
 .care-scene { position: relative; }
+
+/* ================= Lá fora: quintal com paisagem viva ================= */
+.outdoors { position: relative; overflow: hidden; isolation: isolate; background: #7fcbff; }
+.od-art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.od-pet { position: absolute; left: 0; right: 0; bottom: 4%; z-index: 2; display: flex; justify-content: center; pointer-events: none; }
+.od-pet > * { pointer-events: auto; }
+.od-cloud { animation: od-cloud 80s linear infinite; }
+@keyframes od-cloud { from { transform: translateX(-140px); } to { transform: translateX(880px); } }
+.od-fly { animation: od-fly 9s ease-in-out infinite; }
+@keyframes od-fly { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(40px, -24px); } 50% { transform: translate(90px, 6px); } 75% { transform: translate(36px, 22px); } }
+.od-wing { transform-box: fill-box; transform-origin: 50% 50%; animation: od-wing 0.35s ease-in-out infinite alternate; }
+@keyframes od-wing { to { transform: scaleX(0.35); } }
+.od-firefly { animation: od-glow 2.6s ease-in-out infinite; filter: drop-shadow(0 0 4px #fff07a); }
+@keyframes od-glow { 0%, 100% { opacity: 0.15; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-8px); } }
+.od-star { animation: od-twinkle 3s ease-in-out infinite; }
+@keyframes od-twinkle { 50% { opacity: 0.3; } }
+.od-ripple { animation: od-ripple 3s ease-in-out infinite; }
+@keyframes od-ripple { 50% { transform: translateX(6px); opacity: 0.4; } }
+.outdoors.is-still .od-cloud, .outdoors.is-still .od-fly, .outdoors.is-still .od-wing, .outdoors.is-still .od-firefly, .outdoors.is-still .od-star, .outdoors.is-still .od-ripple { animation: none; }
+.hr-place { position: absolute; left: 12px; bottom: 40px; z-index: 5; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 3px solid #fff; border-radius: 99px; background: #4fb063; color: #fff; font-family: var(--font-display, inherit); font-size: 14px; font-weight: 800; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18); }
+.hr-place:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18); }
+@media (prefers-reduced-motion: reduce) { .od-cloud, .od-fly, .od-wing, .od-firefly, .od-star, .od-ripple { animation: none; } }
+
+/* ================= Meta do dia compacta ================= */
+.hc-goal { display: flex; gap: 8px; margin-top: -6px; }
+.hc-goal-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 9px 10px 9px 16px; border: 0; border-radius: 99px; background: #ffffff; color: #2b2f55; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12); }
+.hc-goal-label { font-family: var(--font-display, inherit); font-size: 15px; font-weight: 800; white-space: nowrap; }
+.hc-goal-bar { position: relative; flex: 1; min-width: 40px; height: 12px; border-radius: 99px; background: #e8ecf5; overflow: hidden; }
+.hc-goal-bar i { position: absolute; inset: 0 auto 0 0; border-radius: 99px; background: linear-gradient(90deg, #ffb347, #ff7fa8); transition: width 400ms cubic-bezier(0.23, 1, 0.32, 1); }
+.hc-goal-main b { font-family: var(--font-display, inherit); font-size: 15px; font-weight: 900; }
+.hc-goal-bag { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #fff3d6; }
+.hc-goal-streak { display: inline-flex; align-items: center; gap: 4px; padding: 0 14px; border: 0; border-radius: 99px; background: #ff8a3d; color: #fff; font-family: var(--font-display, inherit); font-size: 16px; font-weight: 900; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.14); }
+
+/* ================= Áreas da vida (cartões com o Hami) ================= */
+.ar-art { position: relative; display: block; line-height: 0; }
+.ar-prop { position: absolute; right: -10%; bottom: 2%; display: grid; place-items: center; width: 42%; aspect-ratio: 1; border-radius: 50%; background: rgba(255, 255, 255, 0.88); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.08); }
+.ar-row { display: grid; gap: 8px; }
+.ar-row-head { display: flex; align-items: center; justify-content: space-between; }
+.ar-row-head h3 { font-family: var(--font-display, inherit); font-size: 20px; font-weight: 800; color: var(--home-ink, #2b2f55); }
+.ar-row-head button { display: inline-flex; align-items: center; gap: 2px; padding: 6px 12px; border: 0; border-radius: 99px; background: rgba(255, 255, 255, 0.9); color: #2b2f55; font-size: 13px; font-weight: 800; }
+.ar-scroll { display: flex; gap: 10px; margin: 0 -16px; padding: 2px 16px 8px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; }
+.ar-scroll::-webkit-scrollbar { display: none; }
+.ar-mini { flex: 0 0 128px; scroll-snap-align: start; display: grid; justify-items: center; gap: 2px; padding: 10px 8px 10px; border: 3px solid #ffffff; border-radius: 24px; background: var(--tone); color: #2f2640; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12); text-align: center; }
+.ar-mini:active { transform: scale(0.97); }
+.ar-mini b { font-family: var(--font-display, inherit); font-size: 14px; font-weight: 800; line-height: 1.1; min-height: 31px; display: flex; align-items: center; }
+.ar-mini small { padding: 2px 8px; border-radius: 99px; background: rgba(255, 255, 255, 0.7); font-size: 11px; font-weight: 800; }
+.ar-mini:not(.is-on) small { background: #2f2640; color: #fff; }
+
+.arp { position: fixed; inset: 0; z-index: 70; overflow-y: auto; background: #fff8ef; color: #2f2640; }
+.arp-all { max-width: 520px; margin: 0 auto; padding: calc(14px + env(safe-area-inset-top, 0px)) 16px calc(28px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 12px; }
+.arp-top { display: flex; align-items: center; gap: 10px; }
+.arp-top h2 { font-family: var(--font-display, inherit); font-size: 24px; font-weight: 800; }
+.arp-ico { display: grid; place-items: center; width: 42px; height: 42px; border: 0; border-radius: 50%; background: #ffffff; color: #2f2640; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1); }
+.arp-sub { font-size: 14px; color: #6b6478; }
+.arp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.arp-card { position: relative; display: grid; justify-items: center; gap: 4px; padding: 12px 8px 12px; border: 3px solid #ffffff; border-radius: 26px; background: var(--tone); color: #2f2640; text-align: center; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.1); }
+.arp-card:active { transform: scale(0.97); }
+.arp-card.is-on { border-color: #3fae6b; }
+.arp-card-name { font-family: var(--font-display, inherit); font-size: 16px; font-weight: 800; line-height: 1.1; min-height: 36px; display: flex; align-items: center; }
+.arp-card small { font-size: 12px; font-weight: 700; opacity: 0.8; }
+.arp-check { position: absolute; left: 10px; top: 10px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #3fae6b; color: #fff; }
+.arp-area { min-height: 100%; background: var(--tone); }
+.arp-hero { position: relative; display: grid; justify-items: center; padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 8px; }
+.arp-hero .arp-ico { position: absolute; left: 16px; top: calc(14px + env(safe-area-inset-top, 0px)); }
+.arp-body { max-width: 560px; margin: 0 auto; display: grid; gap: 12px; min-height: 60vh; padding: 22px 16px calc(28px + env(safe-area-inset-bottom, 0px)); border-radius: 32px 32px 0 0; background: #fff8ef; }
+.arp-body h2 { font-family: var(--font-display, inherit); font-size: 24px; font-weight: 800; line-height: 1.15; text-align: center; }
+.arp-body .arp-sub { text-align: center; }
+.arp-list { display: grid; gap: 10px; }
+.arp-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 3px solid transparent; border-radius: 20px; background: #ffffff; color: #2f2640; text-align: left; font-size: 15px; font-weight: 800; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08); }
+.arp-item span { flex: 1; min-width: 0; line-height: 1.2; }
+.arp-item i { display: grid; place-items: center; flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; background: var(--tone); color: #2f2640; }
+.arp-item.is-on { border-color: #3fae6b; }
+.arp-item.is-on i { background: #3fae6b; color: #fff; }
+.arp-own { display: inline-flex; justify-content: center; align-items: center; gap: 6px; padding: 14px; border: 2px dashed #b9b1c7; border-radius: 20px; background: transparent; color: #2f2640; font-size: 15px; font-weight: 800; }
+:root[data-theme='dark'] .arp, :root[data-theme='dark'] .arp-body { background: #221d2e; color: #f4effa; }
+:root[data-theme='dark'] .arp-item { background: #2f2840; color: #f4effa; }
+:root[data-theme='dark'] .arp-sub { color: #b9b1c7; }
+/* Ícone da tarefa colorido pelo tipo (mais vivo, como os cartões das áreas) */
+.hc-tasks .task-emoji[data-cat='fitness'] { background: #ffb98a; }
+.hc-tasks .task-emoji[data-cat='autocuidado'] { background: #ffc0d0; }
+.hc-tasks .task-emoji[data-cat='habitos'] { background: #8fdcfa; }
+.hc-tasks .task-emoji[data-cat='emocional'] { background: #c7b5ff; }
+.arp-area { display: flex; flex-direction: column; }
+.arp-area .arp-body { flex: 1; width: 100%; }

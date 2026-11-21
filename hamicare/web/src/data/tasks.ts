@@ -31,15 +31,32 @@ export const CATEGORIES: Record<Category, { label: string; emoji: string; desc: 
 
 export const CAT_ORDER: Category[] = ['fitness', 'autocuidado', 'habitos', 'emocional'];
 
-/** Áreas da vida que a pessoa escolhe no começo (cartões ilustrados). Cada uma traz missões prontas. */
-export type LifeArea = 'saude' | 'estudo' | 'casa' | 'calma';
-export const LIFE_AREAS: Record<LifeArea, { label: string; tone: string; prop: string; tasks: string[]; focus: Category[]; desc: string }> = {
-  saude: { label: 'Saúde', tone: '#C8F2D2', prop: '💧', tasks: ['agua', 'dentes', 'alongar', 'sono', 'caminhada'], focus: ['fitness', 'habitos'], desc: 'Água, sono, corpo e movimento' },
-  estudo: { label: 'Trabalho e estudo', tone: '#FFD3DF', prop: '💻', tasks: ['planejar', 'tarefa-chave', 'estudar', 'pausa', 'ler'], focus: ['habitos'], desc: 'Foco, pausas e organização' },
-  casa: { label: 'Casa em ordem', tone: '#CFE2FF', prop: '🧹', tasks: ['cama-arrumar', 'louca', 'roupas', 'quarto', 'plantas'], focus: ['autocuidado'], desc: 'Pequenas arrumações do dia' },
-  calma: { label: 'Calma', tone: '#FFE2B8', prop: '🕯️', tasks: ['respirar', 'gratidao', 'sentir', 'meditar', 'diario'], focus: ['emocional'], desc: 'Respirar, sentir e desacelerar' },
+/** Áreas da vida (cartões ilustrados, como no começo). Cada uma traz hábitos prontos para adicionar. */
+export type LifeArea = 'calma' | 'sono' | 'movimento' | 'agua' | 'estudo' | 'casa' | 'carinho' | 'alegria' | 'saude';
+export interface LifeAreaInfo {
+  label: string;
+  /** Cor do cartão (viva). */
+  tone: string;
+  prop: string;
+  tasks: string[];
+  focus: Category[];
+  desc: string;
+  /** Pergunta da página da área ("Como você quer…?"). */
+  ask: string;
+}
+export const LIFE_AREAS: Record<LifeArea, LifeAreaInfo> = {
+  calma: { label: 'Calma', tone: '#C7B5FF', prop: '🕯️', tasks: ['respirar', 'meditar', 'sentir', 'diario', 'aterrar', 'preocupacao'], focus: ['emocional'], desc: 'Respirar, sentir e desacelerar', ask: 'Como você quer encontrar calma?' },
+  sono: { label: 'Sono e descanso', tone: '#A9BBFF', prop: '🌙', tasks: ['sono', 'sem-tela-noite', 'acordar-hora', 'descansar', 'musica'], focus: ['habitos'], desc: 'Dormir melhor e descansar sem culpa', ask: 'Como você quer descansar melhor?' },
+  movimento: { label: 'Movimento', tone: '#FFB98A', prop: '👟', tasks: ['caminhada', 'alongar', 'danca', 'yoga', 'mobilidade', 'levantar'], focus: ['fitness'], desc: 'Mexer o corpo do seu jeito', ask: 'Como você quer mexer o corpo?' },
+  agua: { label: 'Hidratação', tone: '#8FDCFA', prop: '💧', tasks: ['agua', 'agua-acordar', 'garrafa', 'garrafa-perto'], focus: ['habitos'], desc: 'Água ao longo do dia', ask: 'Como você quer se hidratar?' },
+  estudo: { label: 'Trabalho e estudo', tone: '#FFA9C6', prop: '📚', tasks: ['planejar', 'tarefa-chave', 'estudar', 'pausa', 'ler'], focus: ['habitos'], desc: 'Foco, pausas e organização', ask: 'Como você quer render nos estudos e no trabalho?' },
+  casa: { label: 'Casa em ordem', tone: '#9EE3A6', prop: '🧹', tasks: ['cama-arrumar', 'louca', 'roupas', 'quarto', 'plantas', 'lixo'], focus: ['autocuidado'], desc: 'Pequenas arrumações do dia', ask: 'Como você quer cuidar da sua casa?' },
+  carinho: { label: 'Carinho comigo', tone: '#FFC9D6', prop: '🧴', tasks: ['banho', 'pele', 'dentes', 'agradecer', 'gosto'], focus: ['autocuidado', 'emocional'], desc: 'Higiene e gentileza consigo', ask: 'Como você quer cuidar de você?' },
+  alegria: { label: 'Gratidão e alegria', tone: '#FFE07A', prop: '🌻', tasks: ['gratidao', 'conversar', 'sol', 'natureza', 'elogio'], focus: ['emocional'], desc: 'Coisas boas e gente querida', ask: 'Como você quer trazer mais alegria?' },
+  // Área antiga (quem escolheu "Saúde" no começo continua com ela; não aparece mais nos cartões).
+  saude: { label: 'Saúde', tone: '#9EE3A6', prop: '💧', tasks: ['agua', 'dentes', 'alongar', 'sono', 'caminhada'], focus: ['fitness', 'habitos'], desc: 'Água, sono, corpo e movimento', ask: 'Como você quer cuidar da saúde?' },
 };
-export const LIFE_ORDER: LifeArea[] = ['saude', 'estudo', 'casa', 'calma'];
+export const LIFE_ORDER: LifeArea[] = ['calma', 'sono', 'movimento', 'agua', 'estudo', 'casa', 'carinho', 'alegria'];
 
 export const LIBRARY: LibTask[] = [
   { id: 'caminhada', title: 'Caminhar 15 minutos', emoji: '🚶', cat: 'fitness', energy: 2, met: 3.5, min: 15, why: 'Caminhada em ritmo normal', for: ['perder', 'habitos', 'calma'] },
@@ -89,6 +106,10 @@ export const LIBRARY: LibTask[] = [
   { id: 'preocupacao', title: 'Anotar as preocupações e deixar no papel', emoji: '📝', cat: 'emocional', energy: 1, for: ['calma'] },
   { id: 'musica', title: 'Ouvir uma música calma', emoji: '🎵', cat: 'emocional', energy: 1, for: ['calma'] },
   { id: 'natureza', title: 'Ficar 10 minutos ao ar livre', emoji: '🌳', cat: 'habitos', energy: 1, for: ['calma', 'habitos'] },
+  { id: 'sem-tela-noite', title: 'Largar as telas 30 min antes de dormir', emoji: '📵', cat: 'habitos', energy: 2 },
+  { id: 'acordar-hora', title: 'Acordar sempre no mesmo horário', emoji: '⏰', cat: 'habitos', energy: 2 },
+  { id: 'garrafa-perto', title: 'Deixar a garrafinha de água por perto', emoji: '🚰', cat: 'habitos', energy: 1 },
+  { id: 'elogio', title: 'Fazer um elogio sincero a alguém', emoji: '💌', cat: 'emocional', energy: 1 },
 ];
 
 export const libById = (id: string) => LIBRARY.find((t) => t.id === id);
