@@ -412,3 +412,7 @@ span.tcal-ico { background: transparent; }
 .arp-card .ar-img { border-radius: 23px; }
 .arp-card.is-on { border-color: #3fae6b; }
 .ar-img { image-rendering: auto; }
+/* Sem linha entre o quarto e a página: o fundo atrás do quarto é a mesma cor do chão */
+.home-room { background: var(--home-floor, var(--home-page, var(--page))); }
+.hr-inner .room { background: var(--home-floor, var(--home-page, #e9d8c4)); }
+.hr-scroll, .hr-inner { display: block; line-height: 0; }
