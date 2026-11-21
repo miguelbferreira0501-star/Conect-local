@@ -16,7 +16,7 @@ export function pageShell(title: string, description: string, body: string, foot
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)} · HamiCare</title>
 <meta name="description" content="${esc(description)}">
-<link rel="icon" href="/icon-192.png">
+<link rel="icon" href="/hami-icon-192.png">
 <style>
   :root { --bg: #E9F6F1; --card: #ffffff; --ink: #24323A; --muted: #55656E; --accent: #2F9E83; --line: #CBE9DF; color-scheme: light dark; }
   @media (prefers-color-scheme: dark) { :root { --bg: #14211E; --card: #1C2C28; --ink: #E8F2EE; --muted: #A9BCB5; --accent: #6FD1B5; --line: #2C433D; } }
@@ -41,7 +41,7 @@ export function pageShell(title: string, description: string, body: string, foot
 </head>
 <body>
 <main>
-  <header><img src="/icon-192.png" alt=""><a href="/">HamiCare</a></header>
+  <header><img src="/hami-icon-192.png" alt=""><a href="/">HamiCare</a></header>
   <article class="card">
 ${body}
   </article>
