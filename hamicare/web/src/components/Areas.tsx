@@ -2,51 +2,39 @@
 // Cada área abre "Como você quer…?" com hábitos prontos para adicionar ou tirar, e "Criar a minha".
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Check, ChevronLeft, ChevronRight, Plus as PlusIcon, X } from 'lucide-react';
-import { Hamster } from './Hamster';
+import { Check, ChevronLeft, Plus as PlusIcon, X } from 'lucide-react';
 import { Glyph } from './art';
+import calma from '../assets/areas/calma.webp';
+import nutricao from '../assets/areas/nutricao.webp';
+import produtividade from '../assets/areas/produtividade.webp';
+import movimento from '../assets/areas/movimento.webp';
+import amorProprio from '../assets/areas/amor-proprio.webp';
+import sono from '../assets/areas/sono.webp';
+import gratidao from '../assets/areas/gratidao.webp';
+import higiene from '../assets/areas/higiene.webp';
 import { toast } from './ui';
 import { LIFE_AREAS, LIFE_ORDER, libById, type LifeArea } from '../data/tasks';
 import { addLibraryTask, deleteTask, setLifeAreas, useApp } from '../lib/store';
 import { TaskSheet } from '../screens/Activities';
-import type { Outfit, PetMood } from '../types';
 
-const NONE: Outfit = { chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null };
-/** Como o Hami aparece em cada cartão (humor e uma pecinha que combina com a área). */
-const LOOK: Record<LifeArea, { mood: PetMood; outfit?: Partial<Outfit> }> = {
-  calma: { mood: 'calmo' },
-  sono: { mood: 'sono', outfit: { roupa: 'pijama-nuvem-azul' } },
-  movimento: { mood: 'animado', outfit: { roupa: 'regata' } },
-  agua: { mood: 'feliz' },
-  estudo: { mood: 'feliz', outfit: { oculos: 'redondos' } },
-  casa: { mood: 'animado', outfit: { roupa: 'avental' } },
-  carinho: { mood: 'risada' },
-  alegria: { mood: 'animado' },
-  saude: { mood: 'feliz' },
-};
+/** Ilustração de cada área (cartão com o nome já desenhado). */
+const ART: Partial<Record<LifeArea, string>> = { calma, agua: nutricao, estudo: produtividade, movimento, carinho: amorProprio, sono, alegria: gratidao, higiene };
 
-/** O Hami da área com o objeto dela ao lado. */
-export function AreaArt({ area, fur, size = 96 }: { area: LifeArea; fur: string; size?: number }) {
-  const L = LIFE_AREAS[area];
-  const look = LOOK[area];
-  return (
-    <span className="ar-art icon-still" aria-hidden="true">
-      <Hamster fur={fur} size={size} idle={false} growth={1} mood={look.mood} outfit={{ ...NONE, ...look.outfit }} label="" />
-      <span className="ar-prop">
-        <Glyph e={L.prop} size={Math.round(size * 0.38)} />
-      </span>
-    </span>
-  );
+/** O cartão ilustrado da área. */
+export function AreaArt({ area, className = '' }: { area: LifeArea; className?: string }) {
+  const src = ART[area];
+  return src ? <img className={`ar-img ${className}`} src={src} alt={LIFE_AREAS[area].label} draggable={false} /> : <span className={`ar-img ar-img-none ${className}`}>{LIFE_AREAS[area].label}</span>;
 }
 
-/** Áreas que a pessoa escolheu (a antiga "Saúde" vale como Movimento e Hidratação). */
+/** Áreas que a pessoa escolheu (as antigas: "Saúde" vale como Movimento e Nutrição; "Casa" como Higiene). */
 export function chosenAreas(list: LifeArea[] | undefined): LifeArea[] {
   const out = new Set<LifeArea>();
   for (const a of list ?? []) {
     if (a === 'saude') {
       out.add('movimento');
       out.add('agua');
-    } else out.add(a);
+    } else if (a === 'casa') out.add('higiene');
+    else out.add(a);
   }
   return LIFE_ORDER.filter((a) => out.has(a));
 }
@@ -54,40 +42,6 @@ export function chosenAreas(list: LifeArea[] | undefined): LifeArea[] {
 /** Quantos hábitos da área a pessoa já tem. */
 function countIn(area: LifeArea, ids: Set<string>) {
   return LIFE_AREAS[area].tasks.filter((id) => ids.has(id)).length;
-}
-
-/** Fileira de cartões no Início: as áreas escolhidas primeiro, depois as outras. */
-export function AreaRow() {
-  const s = useApp();
-  const [open, setOpen] = useState<LifeArea | 'todas' | null>(null);
-  const mine = chosenAreas(s.profile.lifeAreas);
-  const order = [...mine, ...LIFE_ORDER.filter((a) => !mine.includes(a))];
-  const ids = new Set(s.tasks.map((t) => t.id));
-  return (
-    <section className="ar-row" aria-label="Áreas da sua vida">
-      <div className="ar-row-head">
-        <h3>Áreas da sua vida</h3>
-        <button onClick={() => setOpen('todas')}>
-          Ver todas <ChevronRight size={16} />
-        </button>
-      </div>
-      <div className="ar-scroll">
-        {order.map((a) => {
-          const L = LIFE_AREAS[a];
-          const n = countIn(a, ids);
-          const on = mine.includes(a);
-          return (
-            <button key={a} className={`ar-mini ${on ? 'is-on' : ''}`} style={{ ['--tone' as string]: L.tone }} onClick={() => setOpen(a)}>
-              <AreaArt area={a} fur={s.pet.fur} size={78} />
-              <b>{L.label}</b>
-              <small>{on ? `${n} ${n === 1 ? 'hábito' : 'hábitos'}` : 'Começar'}</small>
-            </button>
-          );
-        })}
-      </div>
-      <AreasPage open={open} onClose={() => setOpen(null)} />
-    </section>
-  );
 }
 
 /** Página das áreas: a grade de cartões e, ao tocar, a lista "Como você quer…?". */
@@ -126,11 +80,12 @@ export function AreasPage({ open, onClose }: { open: LifeArea | 'todas' | null; 
             <button className="arp-ico" onClick={back} aria-label="Voltar">
               {open === 'todas' ? <ChevronLeft size={22} /> : <X size={22} />}
             </button>
-            <AreaArt area={area} fur={s.pet.fur} size={150} />
+            <AreaArt area={area} className="arp-hero-img" />
           </div>
           <div className="arp-body">
             <h2>{LIFE_AREAS[area].ask}</h2>
             <p className="arp-sub">Escolha os hábitos que combinam com você. Dá para tirar quando quiser.</p>
+            {area === 'agua' && <p className="arp-note">As refeições ficam no Cardápio de hoje (Início, em “Mais para hoje”).</p>}
             <div className="arp-list">
               {LIFE_AREAS[area].tasks.map((id) => {
                 const lib = libById(id);
@@ -165,9 +120,8 @@ export function AreasPage({ open, onClose }: { open: LifeArea | 'todas' | null; 
               const on = mine.includes(a);
               const n = countIn(a, ids);
               return (
-                <button key={a} className={`arp-card ${on ? 'is-on' : ''}`} style={{ ['--tone' as string]: L.tone }} onClick={() => setPicked(a)}>
-                  <span className="arp-card-name">{L.label}</span>
-                  <AreaArt area={a} fur={s.pet.fur} size={100} />
+                <button key={a} className={`arp-card ${on ? 'is-on' : ''}`} style={{ ['--tone' as string]: L.tone }} onClick={() => setPicked(a)} aria-label={L.label}>
+                  <AreaArt area={a} />
                   <small>{on ? `${n} ${n === 1 ? 'hábito' : 'hábitos'}` : L.desc}</small>
                   {on && (
                     <span className="arp-check" aria-label="Área escolhida">

@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Copy } from 'lucide-react';
 import { Hamster } from './Hamster';
-import { AreaSheet } from './AreaSheet';
 import { openGuardian } from './Guardian';
 import { guardiansHere } from '../lib/native';
 import { openLegal } from './Legal';
@@ -19,7 +18,6 @@ import { copyText } from '../lib/util';
 export function MenuScreen({ open, onClose }: { open: boolean; onClose: () => void }) {
   const s = useApp();
   const [code, setCode] = useState<string | null>(null);
-  const [area, setArea] = useState(false);
   useEffect(() => {
     if (!open || code) return;
     let live = true;
@@ -45,7 +43,7 @@ export function MenuScreen({ open, onClose }: { open: boolean; onClose: () => vo
   const tiles: { ico: string; label: string; on: () => void; badge?: number }[] = [
     { ico: '💗', label: `Perfil do ${s.pet.name}`, on: () => go('hami') },
     { ico: '⚡', label: 'Missões', on: () => go('missoes') },
-    { ico: '🌈', label: 'Minha área de cuidado', on: () => setArea(true) },
+    { ico: '🌈', label: 'Áreas da vida', on: () => go('areas') },
     { ico: '📋', label: 'Temporada', on: () => go('temporada') },
     { ico: '📊', label: 'Evolução', on: () => go('evolucao') },
     { ico: '💌', label: 'Correio', on: () => go('correio'), badge: mail },
@@ -131,7 +129,6 @@ export function MenuScreen({ open, onClose }: { open: boolean; onClose: () => vo
           <Glyph e="🔒" size={30} /> <span className="menu-t">Privacidade</span> <ChevronRight size={22} />
         </button>
       </div>
-      <AreaSheet open={area} onClose={() => setArea(false)} />
     </div>
   );
 }

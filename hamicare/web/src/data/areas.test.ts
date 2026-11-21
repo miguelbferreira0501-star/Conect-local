@@ -17,8 +17,13 @@ describe('áreas da vida', () => {
     const food = /comer|fruta|lanche|refei|salada|almo[cç]|jantar/i;
     for (const a of LIFE_ORDER) for (const id of LIFE_AREAS[a].tasks) expect(food.test(libById(id)!.title), id).toBe(false);
   });
-  it('a antiga "Saúde" vale como Movimento e Hidratação', () => {
-    expect(chosenAreas(['saude', 'calma'])).toEqual(['calma', 'movimento', 'agua']);
+  it('as áreas antigas continuam valendo: "Saúde" = Movimento e Nutrição; "Casa" = Higiene', () => {
+    expect(chosenAreas(['saude', 'calma'])).toEqual(['calma', 'agua', 'movimento']);
+    expect(chosenAreas(['casa'])).toEqual(['higiene']);
+  });
+  it('as 8 áreas seguem a ordem das ilustrações', () => {
+    expect(LIFE_ORDER).toEqual(['calma', 'agua', 'estudo', 'movimento', 'carinho', 'sono', 'alegria', 'higiene']);
+    expect(LIFE_ORDER.map((a) => LIFE_AREAS[a].label)).toEqual(['Calma', 'Nutrição', 'Produtividade', 'Movimento', 'Amor-próprio', 'Sono', 'Gratidão', 'Higiene']);
   });
 });
 
@@ -37,5 +42,13 @@ describe('casa inicial colorida', () => {
     expect([up.wallpaper, up.floor]).toEqual(['p-menta', 'f-pistache']);
     const mine = { ...arenaHouse(1), wallpaper: 'p-lavanda', floor: 'f-madeira' };
     expect(upgradeHouse(mine, 1)).toBe(mine);
+  });
+  it('móveis no lugar antigo (espalhados) chegam mais perto do Hami; casa mexida fica como está', () => {
+    const OLD: Record<string, [number, number]> = { 'k-cama-rosa': [25, 71], 'k-guarda-roupa-rosa': [82, 68] };
+    const h = { ...arenaHouse(1), items: arenaHouse(1).items.filter((i) => OLD[i.itemId]).map((i) => ({ ...i, x: OLD[i.itemId][0], y: OLD[i.itemId][1] })) };
+    const up = upgradeHouse(h, 1);
+    expect(up.items.find((i) => i.itemId === 'k-guarda-roupa-rosa')!.x).toBe(68);
+    const moved = { ...h, items: h.items.map((i, n) => (n === 0 ? { ...i, x: 40 } : i)) };
+    expect(upgradeHouse(moved, 1).items).toEqual(moved.items);
   });
 });

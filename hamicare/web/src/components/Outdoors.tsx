@@ -92,6 +92,9 @@ function Cottage({ x, y, p }: { x: number; y: number; p: Pal }) {
   );
 }
 
+/** Cor do gramado da frente (a página do Início usa a mesma, para o chão se fundir com ela). */
+export const outdoorGround = (period: Period) => PAL[period].ground;
+
 export function Outdoors({ period = 'tarde', height = 430, children }: { period?: Period; height?: number; children?: ReactNode }) {
   const p = PAL[period];
   const night = p.dim > 0;
@@ -164,7 +167,6 @@ export function Outdoors({ period = 'tarde', height = 430, children }: { period?
         </g>
         {/* gramado da frente com caminho */}
         <path d="M0 300 Q200 286 370 296 T740 294 V430 H0Z" fill={p.ground} />
-        <path d="M0 330 Q180 312 380 326 T740 320 V430 H0Z" fill={p.meadow} opacity="0.55" />
         <path d="M190 302 Q220 330 300 350 Q370 368 370 430 H470 Q462 372 400 346 Q300 318 214 300Z" fill={p.path} opacity={night ? 0.5 : 1} />
         {[[230, 316], [282, 336], [352, 356], [412, 372], [438, 404]].map(([x, y], i) => (
           <ellipse key={i} cx={x} cy={y} rx="9" ry="4" fill="#FFFFFF" opacity={night ? 0.15 : 0.45} />

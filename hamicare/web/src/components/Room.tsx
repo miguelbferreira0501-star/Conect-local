@@ -2,7 +2,7 @@ import { useRef, useState, type ReactNode } from 'react';
 import type { House } from '../types';
 import { itemById } from '../data/items';
 import type { Period } from '../data/lines';
-import { FLOOR_CSS, Furniture, Garland, WALLPAPER_CSS } from './Furniture';
+import { FLOOR_TONE, Furniture, Garland, WALLPAPER_CSS } from './Furniture';
 import { Glyph } from './art';
 import { KIT_PLACE } from './room/kit';
 import { RoomWindow } from './room/RoomWindow';
@@ -89,7 +89,7 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
       </div>
       {/* Chão */}
       <div className="room-floor-wrap" style={{ perspective: `${height * 1.4}px`, perspectiveOrigin: `50% ${height * 0.3}px` }}>
-        <div data-room-bg="1" className="room-floor" style={{ height: floorH, background: FLOOR_CSS[house.floor] ?? FLOOR_CSS['f-madeira'] }} />
+        <div data-room-bg="1" className="room-floor" style={{ height: floorH, background: FLOOR_TONE[house.floor] ?? FLOOR_TONE['f-madeira'] }} />
       </div>
       <div className="room-floor-shade" style={{ top: `${WALL_H}%` }} />
       <div className="room-baseboard" style={{ top: `${WALL_H - 3.2}%`, ['--tr' as string]: trim.trim }} />

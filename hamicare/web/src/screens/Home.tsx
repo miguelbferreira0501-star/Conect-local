@@ -1,9 +1,8 @@
 import { PlusWeeklyCard } from '../components/PlusWeekly';
 import { MoonTeaser } from '../components/MoonTeaser';
-import { useGrowth } from '../components/Growth';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Flame, House as HouseIcon, Mail, Plus, Settings, Trees } from 'lucide-react';
-import { Outdoors } from '../components/Outdoors';
+import { Outdoors, outdoorGround } from '../components/Outdoors';
 import { Room } from '../components/Room';
 import { floorPalette, tonePalette } from '../components/Furniture';
 import { TREK_THEMES, Suitcase, TrekBar, TrekScene, TrekStart, TrekUnpack, WalkingHami, finishTrek, trekThemeOf } from '../components/Trek';
@@ -19,7 +18,7 @@ import { JourneyCard, useKcalPop } from '../components/Journey';
 import { TaskRow } from '../components/TaskRow';
 import { MealCard } from '../components/MealPlan';
 import { Coins, Modal, Sheet, toast } from '../components/ui';
-import { GREETING, MOODS, periodOf, petLine } from '../data/lines';
+import { MOODS, periodOf, petLine } from '../data/lines';
 import { placeById } from '../data/world';
 import { streakOf } from '../logic/streak';
 import { dayGoalOf, setDayGoal, dayOf, finishAdventure, getState, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
@@ -31,8 +30,6 @@ import { StreakRepairCard } from '../components/StreakRepair';
 import { requestTool } from './Wellbeing';
 import { CompanionBuddy } from './Companions';
 import { LivePet } from '../components/LivePet';
-import { AreaRow } from '../components/Areas';
-import { openUi } from '../lib/bus';
 import { useFurniturePlay } from '../components/FurniturePlay';
 import { TaskCalendar, byPart } from '../components/TaskCalendar';
 import { petMoodOf } from '../lib/petState';
@@ -108,7 +105,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
   useEffect(() => {
     // Na viagem, a página continua o chão do caminho.
     // Lá fora, a página continua o gramado.
-    const p = trekTheme ? tonePalette((TREK_THEMES[trekTheme] ?? TREK_THEMES.casinha).ground) : outside ? tonePalette(periodOf(new Date()) === 'noite' ? '#2F6A55' : '#7FCF6E') : floorPalette(floor);
+    const p = trekTheme ? tonePalette((TREK_THEMES[trekTheme] ?? TREK_THEMES.casinha).ground) : outside ? tonePalette(outdoorGround(periodOf(new Date()))) : floorPalette(floor);
     const root = document.documentElement.style;
     root.setProperty('--home-floor', p.tone);
     root.setProperty('--home-page', p.page);
@@ -122,6 +119,8 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
   const tasks = todayTasks(s, today);
   const done = tasks.filter((t) => t.id in day.done).length;
   const goal = dayGoalOf(s, tasks.length);
+  const nodes = Math.max(1, Math.min(5, goal));
+  const tripN = Object.values(s.trekCards ?? {}).reduce((a, b) => a + b, 0) + 1;
   const period = periodOf(new Date(now));
   const streak = streakOf(s.days, today, s.createdAt);
   const [result, setResult] = useState<AdventureResult | null>(null);
@@ -130,7 +129,6 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
   const [puff, setPuff] = useState<{ id: number; text: string } | null>(null);
   const { pop, layer } = useKcalPop();
   const dir = s.journey.dir;
-  const growthName = useGrowth(s).name;
 
   const line = useMemo(
     () => petLine({ period, battery: day.battery, done, total: tasks.length, user: s.profile.name, seed: s.seed + today.length + done, stats: s.pet.stats, sleeping: s.pet.sleeping }),
@@ -191,13 +189,13 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
     </div>
   ) : s.pet.sleeping ? (
     <button className="sleep-spot" onClick={() => toast(`${s.pet.name} está dormindo. Shhh…`)} aria-label={`${s.pet.name} dormindo`} data-sound="none">
-      <SleepingHami fur={s.pet.fur} size={205} outfit={s.pet.outfit} />
+      <SleepingHami fur={s.pet.fur} size={180} outfit={s.pet.outfit} />
     </button>
   ) : (
     <div className="relative">
       <div ref={petRef} style={{ transformOrigin: '50% 100%' }}>
         <LivePet
-          size={196}
+          size={168}
           mood={petMood}
           onTap={() => {
             if (s.pet.sleeping) {
@@ -208,7 +206,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
           }}
         />
       </div>
-      <CompanionBuddy hamster={196} />
+      <CompanionBuddy hamster={168} />
       {puff && (
         <span key={puff.id} className={`grams-puff ${dir === 'ganhar' ? 'is-gain' : ''}`} aria-live="polite">
           {puff.text}
@@ -238,24 +236,22 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
             </Room>
           </PanRoom>
         )}
-        {!s.trek && !adv && (
-          <button
-            className="hr-place"
-            onClick={() => {
-              if (furniture.use) furniture.stop();
-              setOutside(!outside);
-            }}
-            aria-label={outside ? `Levar o ${s.pet.name} para dentro de casa` : `Levar o ${s.pet.name} lá para fora`}
-          >
-            {outside ? <HouseIcon size={18} /> : <Trees size={18} />}
-            {outside ? 'Casa' : 'Lá fora'}
-          </button>
-        )}
         <div className="hr-top">
-          <button className="hr-hello" onClick={() => openUi('hami')} aria-label={`Perfil do ${s.pet.name}`}>
-            {GREETING[period]}
-            {s.profile.name ? `, ${s.profile.name}` : ''}
-          </button>
+          {!s.trek && !adv ? (
+            <button
+              className="hr-place"
+              onClick={() => {
+                if (furniture.use) furniture.stop();
+                setOutside(!outside);
+              }}
+              aria-label={outside ? `Levar o ${s.pet.name} para dentro de casa` : `Levar o ${s.pet.name} lá para fora`}
+            >
+              {outside ? <HouseIcon size={17} /> : <Trees size={17} />}
+              {outside ? 'Voltar pra casa' : 'Sair pra fora'}
+            </button>
+          ) : (
+            <span className="flex-1" />
+          )}
           <button className="hr-pill" onClick={() => setWallet(true)} aria-label={`Carteira: ${s.coins} sementes`}>
             <Coins value={s.coins} />
           </button>
@@ -289,22 +285,27 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
 
       <TrekBar now={now} />
 
-      {/* Meta do dia em uma linha: barrinha de progresso, a mala da viagem e a sequência. */}
-      <section className="hc-goal" aria-label="Meta do dia">
-        <button className="hc-goal-main" onClick={() => setAreaOpen(true)} aria-label={`Meta do dia: ${goalDone ? 'completa' : `${Math.min(done, goal)} de ${goal}`}. Ao completar, o ${s.pet.name} sai em viagem.`}>
-          <span className="hc-goal-label">Meta do dia</span>
-          <span className="hc-goal-bar" aria-hidden="true">
-            <i style={{ width: `${Math.min(100, (Math.min(done, goal) / Math.max(1, goal)) * 100)}%` }} />
-          </span>
-          <b>
-            {Math.min(done, goal)}/{goal}
-          </b>
-          <span className="hc-goal-bag" aria-hidden="true">
-            <Glyph e="🎒" size={22} />
+      {/* Aventura do dia (minimalista): bolinhas que acendem a cada tarefa; completa, o Hami sai em viagem. */}
+      <section className="hc-trip" aria-label="Aventura do dia">
+        <button className="hc-trip-top" onClick={() => setAreaOpen(true)} aria-label={`${tripN}ª aventura: ${Math.min(done, goal)} de ${goal} tarefas. Toque para mudar a meta.`}>
+          <b>{tripN}ª Aventura</b>
+          <span className="hc-trip-nodes" aria-hidden="true">
+            {Array.from({ length: nodes }, (_, i) => {
+              const on = done >= (goal / nodes) * (i + 1);
+              return (
+                <span key={i} className="hc-trip-step">
+                  {i > 0 && <i className={done >= (goal / nodes) * i ? 'is-on' : ''} />}
+                  <span className={`hc-trip-dot ${on ? 'is-on' : ''}`}>{on ? <Glyph e="🌼" size={22} /> : <span className="hc-trip-seed" />}</span>
+                </span>
+              );
+            })}
           </span>
         </button>
-        <button className="hc-goal-streak" onClick={onEvolution} aria-label={`${streak.count} ${streak.count === 1 ? 'dia seguido' : 'dias seguidos'}, ${growthName}`}>
-          <Flame size={16} /> {streak.count}
+        <button className="hc-trip-foot" onClick={onEvolution}>
+          <span>{goalDone || s.trek ? 'Meta cumprida, energia carregada: vamos lá!' : `Faltam ${Math.max(0, goal - done)} ${goal - done === 1 ? 'tarefa' : 'tarefas'} para o ${s.pet.name} sair em viagem`}</span>
+          <span className="hc-trip-streak">
+            <Flame size={14} /> {streak.count}
+          </span>
         </button>
       </section>
       <DayGoalSheet open={areaOpen} onClose={() => setAreaOpen(false)} total={tasks.length} />
@@ -312,12 +313,12 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
 
       <section className="grid gap-3 hc-tasks" aria-label="Suas tarefas de hoje">
         <div className="hc-head">
-          <h2>
-            Suas tarefas de hoje <b>{done}/{tasks.length}</b>
-          </h2>
-          <button className="hc-head-btn" onClick={() => setCal(true)} aria-label="Abrir o calendário de tarefas">
+          <button className="hc-head-btn hc-head-cal" onClick={() => setCal(true)} aria-label="Abrir o calendário de tarefas">
             <Glyph e="📅" size={24} />
           </button>
+          <h2>
+            Concluído hoje <b>{done}/{tasks.length}</b>
+          </h2>
           <button className="hc-head-btn" onClick={() => openCheckin()} aria-label="Como você está agora?">
             <Glyph e={day.mood ? MOODS[day.mood - 1].emoji : '😐'} size={24} />
           </button>
@@ -334,20 +335,10 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
           </div>
         ))}
         {!tasks.length && <p className="card p-4 text-center text-muted">Nenhuma tarefa para hoje. Que tal programar uma bem pequena no calendário?</p>}
-        <div className="hc-actions">
-          <button className="btn-page" onClick={() => setCal(true)}>
-            <span className="btn-page-ico" aria-hidden="true">
-              <Plus size={24} strokeWidth={3} />
-            </span>
-            <span className="min-w-0 flex-1">
-              Calendário e tarefas
-              <span className="block text-[13px] font-bold opacity-80">Programe dias, horários e lembretes</span>
-            </span>
-          </button>
-        </div>
+        <button className="hc-add" onClick={() => setCal(true)}>
+          <Plus size={18} strokeWidth={3} /> Adicionar ou programar tarefa
+        </button>
       </section>
-
-      <AreaRow />
 
       <details className="hc-more" open={moreOpen} onToggle={(e) => setMoreOpen((e.target as HTMLDetailsElement).open)}>
         <summary>

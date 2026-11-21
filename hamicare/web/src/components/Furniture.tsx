@@ -106,7 +106,7 @@ export function Garland({ id }: { id: string }) {
 
 /** Fundo da parede e do piso: padrões em CSS (cores de ilustração). */
 export const WALLPAPER_CSS: Record<string, string> = {
-  'p-menta': `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Cpath d='M10 14 q6 -8 12 0 q-6 5 -12 0Z' fill='%23FFFFFF' opacity='.75'/%3E%3Cpath d='M30 34 q6 -8 12 0 q-6 5 -12 0Z' fill='%23FFFFFF' opacity='.75'/%3E%3Ccircle cx='34' cy='10' r='2.2' fill='%23FFC2D4'/%3E%3Ccircle cx='12' cy='34' r='2.2' fill='%23FFE27A'/%3E%3C/svg%3E") 0 0/44px 44px,linear-gradient(180deg,#C9F0D2,#B3E8C2)`,
+  'p-menta': '#D3F1DA',
   'p-creme': 'linear-gradient(180deg,#FFF4E2,#FFEBD2)',
   'p-listras': 'repeating-linear-gradient(90deg,#FFE3EA 0 22px,#FFF2F5 22px 44px)',
   'p-bolinhas': 'radial-gradient(circle at 12px 12px,#BFEBD5 5px,transparent 6px) 0 0/28px 28px,#E9FAF1',

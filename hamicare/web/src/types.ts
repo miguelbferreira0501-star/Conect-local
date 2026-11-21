@@ -148,7 +148,7 @@ export interface Profile {
   incentive: Incentive;
   feeling: Mood;
   /** Áreas da vida escolhidas no começo: saude, estudo, casa, calma. */
-  lifeAreas?: ('calma' | 'sono' | 'movimento' | 'agua' | 'estudo' | 'casa' | 'carinho' | 'alegria' | 'saude')[];
+  lifeAreas?: ('calma' | 'agua' | 'estudo' | 'movimento' | 'carinho' | 'sono' | 'alegria' | 'higiene' | 'casa' | 'saude')[];
 }
 
 export interface HouseItem {

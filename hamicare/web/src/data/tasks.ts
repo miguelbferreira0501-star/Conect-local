@@ -31,11 +31,11 @@ export const CATEGORIES: Record<Category, { label: string; emoji: string; desc: 
 
 export const CAT_ORDER: Category[] = ['fitness', 'autocuidado', 'habitos', 'emocional'];
 
-/** Áreas da vida (cartões ilustrados, como no começo). Cada uma traz hábitos prontos para adicionar. */
-export type LifeArea = 'calma' | 'sono' | 'movimento' | 'agua' | 'estudo' | 'casa' | 'carinho' | 'alegria' | 'saude';
+/** Áreas da vida (cartões ilustrados). Cada uma traz hábitos prontos para adicionar. Missões nunca têm comida. */
+export type LifeArea = 'calma' | 'agua' | 'estudo' | 'movimento' | 'carinho' | 'sono' | 'alegria' | 'higiene' | 'casa' | 'saude';
 export interface LifeAreaInfo {
   label: string;
-  /** Cor do cartão (viva). */
+  /** Cor do cartão (a mesma do fundo da ilustração). */
   tone: string;
   prop: string;
   tasks: string[];
@@ -45,18 +45,19 @@ export interface LifeAreaInfo {
   ask: string;
 }
 export const LIFE_AREAS: Record<LifeArea, LifeAreaInfo> = {
-  calma: { label: 'Calma', tone: '#C7B5FF', prop: '🕯️', tasks: ['respirar', 'meditar', 'sentir', 'diario', 'aterrar', 'preocupacao'], focus: ['emocional'], desc: 'Respirar, sentir e desacelerar', ask: 'Como você quer encontrar calma?' },
-  sono: { label: 'Sono e descanso', tone: '#A9BBFF', prop: '🌙', tasks: ['sono', 'sem-tela-noite', 'acordar-hora', 'descansar', 'musica'], focus: ['habitos'], desc: 'Dormir melhor e descansar sem culpa', ask: 'Como você quer descansar melhor?' },
-  movimento: { label: 'Movimento', tone: '#FFB98A', prop: '👟', tasks: ['caminhada', 'alongar', 'danca', 'yoga', 'mobilidade', 'levantar'], focus: ['fitness'], desc: 'Mexer o corpo do seu jeito', ask: 'Como você quer mexer o corpo?' },
-  agua: { label: 'Hidratação', tone: '#8FDCFA', prop: '💧', tasks: ['agua', 'agua-acordar', 'garrafa', 'garrafa-perto'], focus: ['habitos'], desc: 'Água ao longo do dia', ask: 'Como você quer se hidratar?' },
-  estudo: { label: 'Trabalho e estudo', tone: '#FFA9C6', prop: '📚', tasks: ['planejar', 'tarefa-chave', 'estudar', 'pausa', 'ler'], focus: ['habitos'], desc: 'Foco, pausas e organização', ask: 'Como você quer render nos estudos e no trabalho?' },
+  calma: { label: 'Calma', tone: '#B0EFC0', prop: '🕯️', tasks: ['respirar', 'meditar', 'sentir', 'diario', 'aterrar', 'preocupacao'], focus: ['emocional'], desc: 'Respirar, sentir e desacelerar', ask: 'Como você quer encontrar calma?' },
+  agua: { label: 'Nutrição', tone: '#6FBF5F', prop: '💧', tasks: ['agua', 'agua-acordar', 'garrafa', 'garrafa-perto'], focus: ['habitos'], desc: 'Água ao longo do dia', ask: 'Como você quer se nutrir melhor?' },
+  estudo: { label: 'Produtividade', tone: '#FCEBC0', prop: '📚', tasks: ['planejar', 'tarefa-chave', 'estudar', 'pausa', 'ler'], focus: ['habitos'], desc: 'Foco, pausas e organização', ask: 'Como você quer render mais, sem se cansar?' },
+  movimento: { label: 'Movimento', tone: '#FBCB62', prop: '👟', tasks: ['caminhada', 'alongar', 'danca', 'yoga', 'mobilidade', 'levantar'], focus: ['fitness'], desc: 'Mexer o corpo do seu jeito', ask: 'Como você quer mexer o corpo?' },
+  carinho: { label: 'Amor-próprio', tone: '#A86FDC', prop: '💛', tasks: ['agradecer', 'gentil-comigo', 'gosto', 'descansar', 'pausa'], focus: ['emocional'], desc: 'Gentileza consigo', ask: 'Como você quer cuidar de você com carinho?' },
+  sono: { label: 'Sono', tone: '#3550B0', prop: '🌙', tasks: ['sono', 'sem-tela-noite', 'acordar-hora', 'descansar', 'musica'], focus: ['habitos'], desc: 'Dormir melhor e descansar', ask: 'Como você quer dormir melhor?' },
+  alegria: { label: 'Gratidão', tone: '#F77CB1', prop: '🌻', tasks: ['gratidao', 'elogio', 'conversar', 'sol', 'natureza'], focus: ['emocional'], desc: 'Coisas boas e gente querida', ask: 'Como você quer praticar a gratidão?' },
+  higiene: { label: 'Higiene', tone: '#6CD0C0', prop: '🛁', tasks: ['banho', 'dentes', 'pele', 'cama-arrumar', 'roupas', 'quarto'], focus: ['autocuidado'], desc: 'Banho, dentes e cantinho limpo', ask: 'Como você quer se cuidar no dia a dia?' },
+  // Áreas antigas (quem escolheu continua com elas; não aparecem mais nos cartões).
   casa: { label: 'Casa em ordem', tone: '#9EE3A6', prop: '🧹', tasks: ['cama-arrumar', 'louca', 'roupas', 'quarto', 'plantas', 'lixo'], focus: ['autocuidado'], desc: 'Pequenas arrumações do dia', ask: 'Como você quer cuidar da sua casa?' },
-  carinho: { label: 'Carinho comigo', tone: '#FFC9D6', prop: '🧴', tasks: ['banho', 'pele', 'dentes', 'agradecer', 'gosto'], focus: ['autocuidado', 'emocional'], desc: 'Higiene e gentileza consigo', ask: 'Como você quer cuidar de você?' },
-  alegria: { label: 'Gratidão e alegria', tone: '#FFE07A', prop: '🌻', tasks: ['gratidao', 'conversar', 'sol', 'natureza', 'elogio'], focus: ['emocional'], desc: 'Coisas boas e gente querida', ask: 'Como você quer trazer mais alegria?' },
-  // Área antiga (quem escolheu "Saúde" no começo continua com ela; não aparece mais nos cartões).
   saude: { label: 'Saúde', tone: '#9EE3A6', prop: '💧', tasks: ['agua', 'dentes', 'alongar', 'sono', 'caminhada'], focus: ['fitness', 'habitos'], desc: 'Água, sono, corpo e movimento', ask: 'Como você quer cuidar da saúde?' },
 };
-export const LIFE_ORDER: LifeArea[] = ['calma', 'sono', 'movimento', 'agua', 'estudo', 'casa', 'carinho', 'alegria'];
+export const LIFE_ORDER: LifeArea[] = ['calma', 'agua', 'estudo', 'movimento', 'carinho', 'sono', 'alegria', 'higiene'];
 
 export const LIBRARY: LibTask[] = [
   { id: 'caminhada', title: 'Caminhar 15 minutos', emoji: '🚶', cat: 'fitness', energy: 2, met: 3.5, min: 15, why: 'Caminhada em ritmo normal', for: ['perder', 'habitos', 'calma'] },
@@ -110,6 +111,7 @@ export const LIBRARY: LibTask[] = [
   { id: 'acordar-hora', title: 'Acordar sempre no mesmo horário', emoji: '⏰', cat: 'habitos', energy: 2 },
   { id: 'garrafa-perto', title: 'Deixar a garrafinha de água por perto', emoji: '🚰', cat: 'habitos', energy: 1 },
   { id: 'elogio', title: 'Fazer um elogio sincero a alguém', emoji: '💌', cat: 'emocional', energy: 1 },
+  { id: 'gentil-comigo', title: 'Falar comigo com a gentileza que falo com um amigo', emoji: '🫶', cat: 'emocional', energy: 1 },
 ];
 
 export const libById = (id: string) => LIBRARY.find((t) => t.id === id);

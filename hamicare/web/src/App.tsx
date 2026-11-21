@@ -29,6 +29,7 @@ import { syncProfile } from './lib/social';
 import { captureInvite } from './lib/social/invite';
 import { onUi } from './lib/bus';
 import { PetProfile } from './components/PetProfile';
+import { AreasPage } from './components/Areas';
 import { MenuScreen } from './components/Menu';
 import { MailScreen } from './components/Mail';
 import { SeasonPass } from './components/Season';
@@ -66,6 +67,7 @@ export default function App() {
   const [menu, setMenu] = useState(false);
   const [mail, setMail] = useState(false);
   const [petProfile, setPetProfile] = useState(false);
+  const [areasOpen, setAreasOpen] = useState(false);
   const [season, setSeason] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
   const [plus, setPlus] = useState(false);
@@ -136,6 +138,7 @@ export default function App() {
         else if (t === 'amigos') setTab('amigos');
         else if (t === 'missoes') setTab('atividades');
         else if (t === 'hami') setPetProfile(true);
+        else if (t === 'areas') setAreasOpen(true);
       }),
     [],
   );
@@ -222,6 +225,7 @@ export default function App() {
       <MenuScreen open={menu} onClose={() => setMenu(false)} />
       <MailScreen open={mail} onClose={() => setMail(false)} />
       <PetProfile open={petProfile} onClose={() => setPetProfile(false)} />
+      <AreasPage open={areasOpen ? 'todas' : null} onClose={() => setAreasOpen(false)} />
       <SeasonPass open={season} onClose={() => setSeason(false)} />
       <WalletSheet open={walletOpen} onClose={() => setWalletOpen(false)} />
       <SettingsSheet open={settings} onClose={() => setSettings(false)} onPlus={() => (setSettings(false), setPlus(true))} account={account} />

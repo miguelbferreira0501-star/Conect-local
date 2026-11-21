@@ -21,7 +21,9 @@ export function petStateOf(s: State, c: PetContext = {}): PetState {
   const st = s.pet.stats;
   if (s.pet.sleeping) return 'dormindo';
   if (c.celebrating) return 'comemorando';
-  if (st.energia < 20) return 'sonolento';
+  // Sono só quando está bem cansado, ou tarde da noite.
+  const late = (c.hour ?? 12) >= 22 || (c.hour ?? 12) < 6;
+  if (st.energia < 12 || (late && st.energia < 40)) return 'sonolento';
   if (st.saciedade < 25) return 'com-fome';
   if (st.limpeza < 25) return 'sujinho';
   if (c.hardDay && !c.done) return 'dia-dificil';
