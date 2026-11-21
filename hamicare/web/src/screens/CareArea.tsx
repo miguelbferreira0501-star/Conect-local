@@ -14,6 +14,7 @@ import { CareLayer, type CareMode } from './Care';
 import { useNow } from './Home';
 import type { CareId, PetMood, Photo } from '../types';
 import { Glyph } from '../components/art';
+import { useFurniturePlay } from '../components/FurniturePlay';
 
 type StatKey = 'felicidade' | 'energia' | 'saciedade' | 'limpeza';
 
@@ -72,6 +73,7 @@ export function CareArea({ onShare }: { onShare: (p: Photo) => void }) {
   const now = useNow(30_000);
   const [mode, setMode] = useState<CareMode>(null);
   const [panel, setPanel] = useState(false);
+  const furniture = useFurniturePlay(!!s.adventure);
   const [food, setFood] = useState(false);
   const [eating, setEating] = useState<PetMood | null>(null);
   const petBox = useRef<HTMLDivElement>(null);
@@ -116,8 +118,8 @@ export function CareArea({ onShare }: { onShare: (p: Photo) => void }) {
   return (
     <div className="care-page">
       <section className="care-scene scene-bleed" aria-label={`Casa do ${s.pet.name}`}>
-        <Room house={s.house} period={periodOf()} height={470}>
-          {adv ? (
+        <Room house={s.house} period={periodOf()} height={470} onUse={furniture.useItem} usage={furniture.usage}>
+          {furniture.use ? null : adv ? (
             <div className="mb-10 grid justify-items-center gap-1 rounded-3xl bg-surface/95 px-4 py-3 text-center">
               <Glyph e={place?.emoji} size={40} />
               <p className="font-display text-[17px] font-bold leading-tight">
@@ -140,6 +142,11 @@ export function CareArea({ onShare }: { onShare: (p: Photo) => void }) {
             </div>
           )}
         </Room>
+        {furniture.line && (
+          <p className="care-use-say" aria-live="polite">
+            {furniture.line}
+          </p>
+        )}
         <div className="care-hud" aria-label="Como o Hami está">
           {STATS.map((st) => {
             const v = Math.round(s.pet.stats[st.key]);
