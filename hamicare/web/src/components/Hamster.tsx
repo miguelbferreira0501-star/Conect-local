@@ -437,12 +437,11 @@ function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1 }: { mood: PetMood;
               return <path key={s} d={`M${x - 9} ${eyeY - 2} Q${x} ${eyeY + 5} ${x + 9} ${eyeY - 2}`} />;
             })}
           </g>
-          {/* sobrancelhas tristes e os rios de lágrimas escorrendo pelas bochechas */}
+          {/* rios de lágrimas escorrendo pelas bochechas */}
           {[-1, 1].map((s) => {
             const x = 100 + s * ex;
             return (
               <g key={`t${s}`}>
-                <path d={`M${x - s * 8} ${eyeY - 17} Q${x} ${eyeY - 15} ${x + s * 9} ${eyeY - 10}`} stroke={INK} strokeWidth="2.4" strokeLinecap="round" fill="none" />
                 <path className="tear-flow" d={`M${x + s * 7} ${eyeY + 2} C${x + s * 11} ${eyeY + 14} ${x + s * 7} ${eyeY + 24} ${x + s * 12} ${eyeY + 38}`} stroke="#8FD0FF" strokeWidth="6" strokeLinecap="round" fill="none" opacity="0.9" />
                 <path d={`M${x + s * 7} ${eyeY + 2} C${x + s * 11} ${eyeY + 14} ${x + s * 7} ${eyeY + 24} ${x + s * 12} ${eyeY + 38}`} stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity="0.7" />
                 <path className="tear-drop" style={{ animationDelay: s === 1 ? '0.35s' : '0s' }} d={`M${x + s * 13} ${eyeY - 2} q-3.2 5.4 0 8 q3.2 -2.6 0 -8 Z`} fill="#8FD0FF" stroke="#5BA9E8" strokeWidth="0.8" />
@@ -458,7 +457,6 @@ function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1 }: { mood: PetMood;
             const x = 100 + s * ex;
             return (
               <g key={s}>
-                <path d={`M${x - s * 8} ${eyeY - 18} Q${x} ${eyeY - 16} ${x + s * 9} ${eyeY - 11}`} stroke={INK} strokeWidth="2.3" strokeLinecap="round" fill="none" />
                 <ellipse cx={x} cy={eyeY} rx="7.4" ry="8.6" fill={INK} />
                 {/* lágrima acumulada no olhinho */}
                 <path d={`M${x - 6.6} ${eyeY + 2.6} Q${x} ${eyeY + 6.4} ${x + 6.6} ${eyeY + 2.6} Q${x + 5.6} ${eyeY + 7.6} ${x} ${eyeY + 8.4} Q${x - 5.6} ${eyeY + 7.6} ${x - 6.6} ${eyeY + 2.6} Z`} fill="#8FD0FF" opacity="0.85" />
@@ -503,7 +501,6 @@ function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1 }: { mood: PetMood;
               <ellipse cx={100 + s * ex} cy={eyeY} rx={face === 'medo' ? 6.4 : 5.8} ry={face === 'medo' ? 7.4 : 6.8} fill={INK} />
               <circle cx={100 + s * ex + 1.9} cy={eyeY - 2.4} r="2.1" fill="#FFFFFF" />
               <circle cx={100 + s * ex - 1.8} cy={eyeY + 2.4} r="1.1" fill="#FFFFFF" />
-              <path d={s === -1 ? `M${100 - ex - 8} ${eyeY - 9} q6 -4 12 -1` : `M${100 + ex + 8} ${eyeY - 9} q-6 -4 -12 -1`} stroke={INK} strokeWidth="2.2" strokeLinecap="round" fill="none" transform={`rotate(${s * -12} ${100 + s * ex} ${eyeY - 9})`} />
             </g>
           ))}
         </g>
