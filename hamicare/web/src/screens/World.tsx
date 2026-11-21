@@ -76,7 +76,7 @@ function HouseTab({ onArenas }: { onArenas: () => void }) {
           Trocar de casa
         </button>
       </div>
-      <Room house={s.house} period={periodOf()} height={400} editing={editing} selected={sel} onSelect={setSel} onMove={moveItem}>
+      <Room house={s.house} period={periodOf()} height={400} editing={editing} selected={sel} onSelect={setSel} onMove={moveItem} onRemove={(uid) => (storeItem(uid), setSel(null), toast('Guardado nos seus móveis'))} onFront={bringFront}>
         {!s.adventure && (
           <div className="relative">
             <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={s.pet.sleeping ? 'dormindo' : 'feliz'} size={150} label={s.pet.name} />
@@ -91,15 +91,18 @@ function HouseTab({ onArenas }: { onArenas: () => void }) {
       </div>
       {editing && (
         <>
-          <p className="text-[14px] text-muted">Arraste os móveis com o dedo. Toque num móvel para trazer pra frente ou guardar.</p>
+          <p className="text-[14px] text-muted">Arraste os móveis com o dedo. Toque num móvel para trazer pra frente ou tirar da casa (o Hami fica transparente para você alcançar o que está atrás dele).</p>
           {selItem && (
             <div className="flex items-center gap-2 rounded-2xl bg-accent-soft p-3">
-              <span className="min-w-0 flex-1 font-bold">{itemById(selItem.itemId)?.name}</span>
+              <span className="house-sel-icon" aria-label={itemById(selItem.itemId)?.name}>
+                {itemById(selItem.itemId) && <ItemIcon item={itemById(selItem.itemId)!} size={30} />}
+              </span>
+              <span className="flex-1" />
               <button className="btn btn-ghost btn-sm" onClick={() => bringFront(selItem.uid)}>
                 <ArrowUpToLine size={16} /> Frente
               </button>
               <button className="btn btn-ghost btn-sm" onClick={() => (storeItem(selItem.uid), setSel(null))}>
-                <PackageOpen size={16} /> Guardar
+                <PackageOpen size={16} /> Tirar da casa
               </button>
             </div>
           )}
@@ -108,8 +111,8 @@ function HouseTab({ onArenas }: { onArenas: () => void }) {
             {tray.length ? (
               <div className="grid grid-cols-4 gap-2">
                 {tray.map((i) => (
-                  <button key={i.id} className="tile !p-2" onClick={() => placeItem(i.id)} aria-label={`Colocar ${i.name}`}>
-                    <ItemIcon item={i} />
+                  <button key={i.id} className="tile house-tray-tile" onClick={() => placeItem(i.id)} aria-label={`Colocar ${i.name}`}>
+                    <ItemIcon item={i} size={40} />
                   </button>
                 ))}
               </div>
@@ -362,13 +365,12 @@ const FurTile = memo(function FurTile({ id, label, price, has, locked, on, coins
         if (locked) return toast('Pelagem exclusiva do HamiCare+');
         if (!has) {
           const r = buyFur(id);
-          return toast(r === 'ok' ? `Pelagem ${label} é sua!` : r === 'sem-sementes' ? `Faltam ${price! - coins} sementes` : 'Não deu agora.');
+          return toast(r === 'ok' ? 'Pelagem nova é sua!' : r === 'sem-sementes' ? `Faltam ${price! - coins} sementes` : 'Não deu agora.');
         }
         updatePet({ fur: id });
       }}
     >
-      <span className="icon-still"><Hamster fur={id} size={54} idle={false} label={label} /></span>
-      <span className="truncate text-[11px] font-extrabold">{label}</span>
+      <span className="icon-still"><Hamster fur={id} size={80} idle={false} label={label} /></span>
       {locked ? <Lock size={12} className="absolute right-1.5 top-1.5 text-muted" /> : !has && <span className="wardrobe-price">🌻{price}</span>}
     </button>
   );
@@ -377,8 +379,7 @@ const FurTile = memo(function FurTile({ id, label, price, has, locked, on, coins
 const WearTile = memo(function WearTile({ id, name, slot, fur, on }: { id: string; name: string; slot: WearSlot; fur: string; on: boolean }) {
   return (
     <button className="wardrobe-tile" aria-pressed={on} onClick={() => (on ? unwear(slot) : wear(id))} aria-label={on ? `Tirar ${name}` : `Vestir ${name}`}>
-      <span className="icon-still"><Hamster fur={fur} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null, [slot]: id }} size={66} idle={false} label={name} /></span>
-      <span className="line-clamp-2 text-[11px] font-extrabold leading-tight">{name}</span>
+      <span className="icon-still"><Hamster fur={fur} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null, [slot]: id }} size={88} idle={false} label={name} /></span>
       {on && <span className="care-tile-done !right-1.5 !top-1.5">✓</span>}
     </button>
   );

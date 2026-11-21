@@ -393,9 +393,11 @@ function TryOn({ item, list, onPick, onClose, onPlus, onGift }: { item: Item | n
         )}
       </div>
       <div className="fit-info">
-        <p className="fit-name">
-          {item.name} {item.plus && <Crown size={16} className="inline" />}
-        </p>
+        {item.plus && (
+          <p className="fit-name">
+            <Crown size={16} className="inline" /> HamiCare+
+          </p>
+        )}
         {res === 'ja-tem' ? (
           wear ? (
             <button className="fit-btn" onClick={() => (wearItem(item.id), toast('Vestido!'))}>
@@ -413,7 +415,7 @@ function TryOn({ item, list, onPick, onClose, onPlus, onGift }: { item: Item | n
             <Lock size={14} /> Libera no nível {item.level}
           </span>
         ) : (
-          <button className="fit-btn" disabled={res === 'sem-sementes'} onClick={() => buy(item.id) === 'ok' && toast(wear ? `${item.name}: já tá vestindo!` : `${item.name} é seu!`)}>
+          <button className="fit-btn" disabled={res === 'sem-sementes'} onClick={() => buy(item.id) === 'ok' && toast(wear ? 'Já tá vestindo!' : 'É seu!')}>
             <Seed size={16} /> {item.price}
           </button>
         )}
@@ -501,7 +503,6 @@ export function PlusShowcase({ onTry, onAll }: { onTry: (item: Item, list?: Item
                     <ItemIcon item={item} size={44} />
                   )}
                 </span>
-                <span className="plus-tile-name">{item.name}</span>
                 <span className="plus-tile-cta">{wear ? 'Provar' : 'Ver na casa'}</span>
               </button>
             </li>

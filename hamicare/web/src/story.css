@@ -496,3 +496,35 @@ span.tcal-ico { background: transparent; }
 .hfx-heart { position: absolute; top: 40%; width: 16px; height: 16px; opacity: 0; background: #ffb3cc; clip-path: path('M8 15 C-4 7 2 -1 8 4 C14 -1 20 7 8 15 Z'); animation: hfx-heart 3.4s ease-out infinite; }
 @keyframes hfx-heart { 0% { transform: translateY(0) scale(0.6); opacity: 0; } 20% { opacity: 0.9; } 100% { transform: translateY(-70px) scale(1.1); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .tear-flow, .tear-drop, .pout, .fx-sob, .hfx-heart { animation: none !important; } .tear-drop, .hfx-heart { opacity: 1; } }
+
+/* ================= Itens: só o desenho, grande, sem nome e sem branco em volta ================= */
+.inv-grid { grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); gap: 10px; }
+.inv-tile { padding: 0; gap: 0; aspect-ratio: 1; align-content: stretch; justify-items: stretch; overflow: hidden; background: color-mix(in srgb, var(--rc) 16%, var(--surface)); border-radius: 20px; box-shadow: inset 0 -5px 0 var(--rc), var(--shadow); }
+.inv-icon { width: 100%; height: 100%; border-radius: 0; background: transparent; padding: 6px 6px 10px; }
+.inv-icon .kit-icon { max-width: 100%; max-height: 100%; width: 100% !important; height: 100% !important; }
+.inv-icon .glyph, .inv-icon > svg, .inv-icon > span { max-width: 100%; max-height: 100%; }
+.inv-tile .inv-cost { position: absolute; left: 6px; bottom: 9px; padding: 1px 7px; border-radius: 99px; background: rgba(255, 255, 255, 0.92); }
+.inv-tile .inv-new { z-index: 2; }
+.wardrobe-tile { padding: 2px !important; gap: 0 !important; aspect-ratio: 1; overflow: hidden; place-items: center; }
+.house-tray-tile { padding: 2px !important; aspect-ratio: 1; display: grid; place-items: center; overflow: hidden; }
+.house-tray-tile .kit-icon { width: 100% !important; height: 100% !important; }
+.house-sel-icon { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 14px; background: rgba(255, 255, 255, 0.8); overflow: hidden; }
+.house-sel-icon .kit-icon { width: 46px !important; height: 46px !important; }
+
+/* Decorar: o Hami fica transparente (dá para tocar no que está atrás) e o móvel escolhido ganha botões */
+.room-pet-ghost { opacity: 0.35; }
+.room-sel-actions { position: absolute; right: -6px; top: -14px; z-index: 5; display: flex; gap: 4px; }
+.room-sel-actions button { display: grid; place-items: center; width: 30px; height: 30px; border: 2.5px solid #fff; border-radius: 50%; background: #5b6bd6; color: #fff; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18); }
+.room-sel-actions button.is-remove { background: #e2526a; }
+.inv-icon > .rounded-xl { width: 100% !important; height: 100% !important; border-radius: 14px; }
+/* o desenho inteiro cabe no quadradinho (sem cortar os móveis altos) */
+.inv-icon .kit-icon, .house-tray-tile .kit-icon, .house-sel-icon .kit-icon { display: flex; align-items: center; justify-content: center; overflow: visible; }
+.inv-icon .kit-icon svg, .house-tray-tile .kit-icon svg, .house-sel-icon .kit-icon svg { width: 100% !important; height: 100% !important; max-width: none !important; max-height: none !important; }
+.inv-icon { overflow: visible !important; contain: none !important; }
+.inv-icon .kit-icon svg, .house-tray-tile .kit-icon svg, .house-sel-icon .kit-icon svg { overflow: visible !important; }
+.inv-tile > .inv-icon { position: absolute; inset: 0; display: grid; place-items: center; padding: 8px 8px 12px; }
+.inv-tile > .inv-icon > * { max-width: 100%; max-height: 100%; }
+.house-tray-tile { position: relative; }
+.house-tray-tile > .kit-icon { position: absolute; inset: 4px; width: auto !important; height: auto !important; }
+.inv-tile > .inv-icon { display: flex !important; align-items: center; justify-content: center; }
+.inv-tile > .inv-icon > .kit-icon { flex: 0 0 auto; width: 100% !important; height: 100% !important; }
