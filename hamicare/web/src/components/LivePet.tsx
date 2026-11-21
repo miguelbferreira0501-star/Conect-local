@@ -5,7 +5,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Hamster } from './Hamster';
 import { play, type SoundId } from '../lib/sound';
 import { useApp } from '../lib/store';
-import type { PetMood } from '../types';
+import type { Outfit, PetMood } from '../types';
+import type { Condition, HamiProp } from '../lib/hamiDay';
 
 export type Trick = 'cabeca' | 'barriga' | 'pes' | 'tchau' | 'cafune';
 
@@ -29,11 +30,18 @@ interface Props {
   children?: ReactNode;
   label?: string;
   growth?: number;
+  /** Situação do dia (rostinho e efeitos) e roupinha que ela pede (gorro, cachecol…). */
+  cond?: Condition | null;
+  wear?: Partial<Outfit>;
+  /** Objeto da atividade de agora (livro, fones…). */
+  prop?: HamiProp;
+  /** Animação do corpo (tremendo de frio, dançando…). */
+  fx?: string;
 }
 
 let seq = 0;
 
-export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = '', children, label, growth }: Props) {
+export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = '', children, label, growth, cond, wear, prop, fx = '' }: Props) {
   const s = useApp();
   const [trick, setTrick] = useState<{ t: Trick; id: number } | null>(null);
   const hold = useRef<number | null>(null);
@@ -101,8 +109,8 @@ export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = ''
         onPointerLeave={() => hold.current && clearTimeout(hold.current)}
         onContextMenu={(e) => e.preventDefault()}
       >
-        <span key={trick?.id ?? 0} className={`live-body ${trick ? `gest-${trick.t}` : ''}`}>
-          <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={petMood} size={size} label={s.pet.name} pose={trick?.t === 'tchau' ? 'tchau' : undefined} growth={growth} />
+        <span key={trick?.id ?? 0} className={`live-body ${trick ? `gest-${trick.t}` : fx}`}>
+          <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={wear ? { ...s.pet.outfit, ...wear } : s.pet.outfit} mood={petMood} cond={cond ?? undefined} condFace={!trick} prop={trick?.t === 'tchau' ? undefined : prop} size={size} label={s.pet.name} pose={trick?.t === 'tchau' ? 'tchau' : undefined} growth={growth} />
         </span>
         {trick?.t === 'cafune' && <span className="live-glow" aria-hidden="true" />}
       </button>

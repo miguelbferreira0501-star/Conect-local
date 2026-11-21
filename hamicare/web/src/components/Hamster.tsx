@@ -4,6 +4,7 @@ import { itemById } from '../data/items';
 import { fluffOf } from '../logic/evolution';
 import { Accessory, AccessoryBack, Cape, Clothes, CostumeBack, CostumeFront, costumeOf, EffectBack, EffectFront, garmentColor, garmentShape, Glasses, Hat, sleeveOf } from './Wear';
 import type { Outfit, PetMood } from '../types';
+import type { Condition, HamiProp } from '../lib/hamiDay';
 
 const INK = '#3B2418';
 
@@ -35,6 +36,12 @@ export interface HamsterProps {
   growth?: number;
   /** Gesto do bracinho: 'tchau' levanta e acena. */
   pose?: 'tchau';
+  /** Situação do dia (frio, calor, gripado…): muda o rostinho e põe suor, sujeira, nariz vermelho etc. */
+  cond?: Condition;
+  /** Mostrar o rostinho da situação (desligado enquanto ele reage a um toque). */
+  condFace?: boolean;
+  /** O que ele segura na atividade (livro, fones, desenho, halteres, varinha de bolhas). */
+  prop?: HamiProp;
 }
 
 /** Tronco de pera: fininho acima da cintura, barriga e quadril largos e base redonda. */
@@ -110,7 +117,8 @@ const lighten = (hex: string, t: number) => mix(hex, '#FFFFFF', t);
  * narizinho rosa, bracinhos curtos na barriga e pezões com almofadinhas cor-de-rosa. O volume (meio 3D)
  * vem da luz por cima e da sombra nas bordas, sem contorno escuro. As roupas vestem o mesmo contorno do corpo.
  */
-export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', outfit = NO_OUTFIT, size = 180, idle = true, label, neutral, wet, shine, growth, pose }: HamsterProps) {
+export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', outfit = NO_OUTFIT, size = 180, idle = true, label, neutral, wet: wetProp, shine, growth, pose, cond, condFace = true, prop }: HamsterProps) {
+  const wet = wetProp || cond === 'chuva';
   const fur = furById(furId);
   const current = useContext(GrowthContext);
   const k = Math.min(1, Math.max(0.4, neutral ? 1 : (growth ?? current)));
@@ -207,6 +215,7 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
 
           {/* corpo (com a barriga creme) */}
           <path d={body} fill={costume ? fur.body : `url(#f${uid})`} />
+          {wet && <path d={body} fill="#5B8FD6" opacity="0.14" />}
           <g clipPath={`url(#b${uid})`}>
             <ellipse cx="100" cy="162" rx={bw * 0.62} ry="36" fill={`url(#m${uid})`} />
             {fur.pattern === 'manchas' && <ellipse cx={100 + bw * 0.62} cy="146" rx="15" ry="18" fill={fur.patch} opacity="0.85" />}
@@ -270,6 +279,14 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
               </g>
             );
           })}
+          {cond === 'terra' && (
+            <g fill="#8A5A3B" opacity="0.4">
+              <ellipse cx={100 - bw * 0.4} cy="168" rx="8" ry="5" />
+              <ellipse cx={100 + bw * 0.3} cy="178" rx="6" ry="4" />
+              <circle cx={100 + 40} cy="186" r="3" />
+            </g>
+          )}
+          <PropInHands prop={prop} cream={`url(#m${uid})`} paw={costume ? costume.paw : null} line={darken(cream, 0.28)} />
 
           {/* cabeça um pouquinho inclinada (como na ilustração), com as orelhas */}
           <g transform={`rotate(${tilt} 100 ${chin})`}>
@@ -291,6 +308,7 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
 
             {/* cabeça */}
             <path d={head} fill={costume ? fur.body : `url(#f${uid})`} />
+            {wet && <path d={head} fill="#5B8FD6" opacity="0.16" />}
             <g clipPath={`url(#h${uid})`}>
               {fur.pattern === 'manchas' && <ellipse cx={hcx - hrx * 0.45} cy={top + 16} rx="20" ry="14" fill={fur.patch} opacity="0.85" />}
               {phase === 2 && !outfit.chapeu && <rect x="0" y={top + 10} width="200" height="8" fill="#FF6F91" />}
@@ -315,11 +333,34 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
               </g>
             )}
             {fur.pattern === 'panda' && [-1, 1].map((s) => <ellipse key={s} cx={hcx + s * ex} cy={eyeY - 1} rx="14" ry="11" fill={fur.patch} opacity="0.9" />)}
-            <Face mood={mood} eyeY={eyeY} noseY={noseY} ex={ex} blush={fur.ear} eyeK={1 + young * 0.12} />
+            <Face mood={mood} cond={condFace ? cond : undefined} eyeY={eyeY} noseY={noseY} ex={ex} blush={fur.ear} eyeK={1 + young * 0.12} />
+            {/* efeitos da situação do dia no rosto e na cabeça */}
+            {cond === 'calor' &&
+              [
+                [-1, 0.2, 0],
+                [1, 0.05, 0.6],
+                [1, 0.62, 1.2],
+              ].map(([sd, dy, delay], i) => (
+                <path
+                  key={i}
+                  className="drip"
+                  style={{ animationDelay: `${delay}s` }}
+                  d={`M${100 + sd * (hrx - 6)} ${top + 18 + dy * 40} q-4 7 0 10.5 q4 -3.5 0 -10.5 Z`}
+                  fill="#BFE6FF"
+                  stroke="#7CC4F0"
+                  strokeWidth="1"
+                />
+              ))}
+            {cond === 'terra' && (
+              <g fill="#8A5A3B" opacity="0.45">
+                <ellipse cx={hcx + hrx * 0.42} cy={top + 18} rx="7" ry="4.5" transform={`rotate(-20 ${hcx + hrx * 0.42} ${top + 18})`} />
+                <ellipse cx={hcx - hrx * 0.62} cy={eyeY + 24} rx="5" ry="3.4" />
+                <circle cx={hcx - hrx * 0.3} cy={top + 10} r="2.6" />
+                <circle cx={hcx + hrx * 0.7} cy={eyeY + 14} r="2.2" />
+              </g>
+            )}
             {wet && (
               <g>
-                <path d={head} fill="#5B8FD6" opacity="0.16" />
-                <path d={body} fill="#5B8FD6" opacity="0.16" />
                 {[
                   [-0.5, 0.1],
                   [0.35, 0.05],
@@ -349,6 +390,17 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
             <CostumeFront id={outfit.roupa} geo={geo} />
             <Glasses id={outfit.oculos} eyeY={eyeY} ex={ex} />
             <Hat id={outfit.chapeu} geo={geo} />
+            {prop === 'fones' && (
+              <g>
+                <path d={`M${hcx - hrx + 4} ${eyeY - 4} C${hcx - hrx + 2} ${top - 18} ${hcx + hrx - 2} ${top - 18} ${hcx + hrx - 4} ${eyeY - 4}`} stroke="#5B6BD6" strokeWidth="5.5" strokeLinecap="round" fill="none" />
+                {[-1, 1].map((sd) => (
+                  <g key={sd}>
+                    <rect x={hcx + sd * (hrx - 4) - 8} y={eyeY - 16} width="16" height="22" rx="8" fill="#FF8FB1" />
+                    <rect x={hcx + sd * (hrx - 4) - 5} y={eyeY - 13} width="10" height="16" rx="5" fill="#FFFFFF" opacity="0.45" />
+                  </g>
+                ))}
+              </g>
+            )}
           </g>
           <Accessory id={outfit.acessorio} geo={{ ...geo, top: chin - 36, h: 64, w: bw - 8 }} paw={arm} head={{ cx: hcx, cy: hcy, rx: hrx, ry: hry }} />
           {phase >= 3 && <Sparkles top={top} w={hrx} />}
@@ -364,65 +416,189 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
   );
 }
 
-function Face({ mood, eyeY, noseY, ex, blush, eyeK = 1 }: { mood: PetMood; eyeY: number; noseY: number; ex: number; blush: string; eyeK?: number }) {
+function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1 }: { mood: PetMood; cond?: Condition; eyeY: number; noseY: number; ex: number; blush: string; eyeK?: number }) {
   // Como a referência: olhinhos sorrindo (^ ^) grossos e escuros, narizinho rosa e a boquinha ":3".
+  // A situação do dia troca o rostinho: > < tremendo de frio, olhinhos caídos de calor, nariz vermelho de gripe…
   const sleepy = mood === 'sono' || mood === 'dormindo';
-  const open = mood === 'surpreso' || mood === 'boca';
-  const laugh = mood === 'animado' || mood === 'risada';
+  const face = cond && cond !== 'terra' && !sleepy ? cond : null;
+  const open = !face && (mood === 'surpreso' || mood === 'boca');
+  const laugh = !face && (mood === 'animado' || mood === 'risada');
   const n = noseY;
-  return (
-    <g>
-      <g transform={eyeK !== 1 ? `translate(100 ${eyeY}) scale(${eyeK}) translate(-100 ${-eyeY})` : undefined}>
-        {open ? (
-          <g className="pet-eyes">
-            {[-1, 1].map((s) => (
+  const eyes = () => {
+    if (face === 'frio')
+      return (
+        <g stroke={INK} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none">
+          {[-1, 1].map((s) => {
+            const x = 100 + s * ex;
+            return <path key={s} d={`M${x - s * 7} ${eyeY - 5.5} L${x + s * 4} ${eyeY} L${x - s * 7} ${eyeY + 5.5}`} />;
+          })}
+        </g>
+      );
+    if (face === 'calor' || face === 'gripado' || face === 'tedio')
+      return (
+        <g>
+          {[-1, 1].map((s) => {
+            const x = 100 + s * ex;
+            return (
               <g key={s}>
-                <ellipse cx={100 + s * ex} cy={eyeY} rx="5.8" ry="6.8" fill={INK} />
-                <circle cx={100 + s * ex + 1.9} cy={eyeY - 2.4} r="2.1" fill="#FFFFFF" />
+                <path d={`M${x - 6.5} ${eyeY - 0.5} A6.5 6.5 0 0 0 ${x + 6.5} ${eyeY - 0.5} Z`} fill={INK} />
+                <path d={`M${x - 8.5} ${eyeY - 1} H${x + 8.5}`} stroke={INK} strokeWidth="3" strokeLinecap="round" />
+                {face === 'gripado' && s === 1 && <path d={`M${x + 5} ${eyeY + 4} q-2 4 0 6 q2 -2 0 -6 Z`} fill="#9FD6FF" />}
               </g>
-            ))}
-          </g>
-        ) : (
-          <g stroke={INK} strokeWidth="4.3" strokeLinecap="round" fill="none">
-            {[-1, 1].map((s) => {
-              const x = 100 + s * ex;
-              return sleepy ? (
-                <path key={s} d={`M${x - 9} ${eyeY - 1} Q${x} ${eyeY + 5.5} ${x + 9} ${eyeY - 1}`} />
-              ) : (
-                <path key={s} d={`M${x - 9.5} ${eyeY + 3.4} Q${x} ${eyeY - 8.5} ${x + 9.5} ${eyeY + 3.4}`} />
-              );
-            })}
-          </g>
-        )}
+            );
+          })}
+        </g>
+      );
+    if (face === 'chuva' || face === 'medo')
+      return (
+        <g className="pet-eyes">
+          {[-1, 1].map((s) => (
+            <g key={s}>
+              <ellipse cx={100 + s * ex} cy={eyeY} rx={face === 'medo' ? 6.4 : 5.8} ry={face === 'medo' ? 7.4 : 6.8} fill={INK} />
+              <circle cx={100 + s * ex + 1.9} cy={eyeY - 2.4} r="2.1" fill="#FFFFFF" />
+              <circle cx={100 + s * ex - 1.8} cy={eyeY + 2.4} r="1.1" fill="#FFFFFF" />
+              <path d={s === -1 ? `M${100 - ex - 8} ${eyeY - 9} q6 -4 12 -1` : `M${100 + ex + 8} ${eyeY - 9} q-6 -4 -12 -1`} stroke={INK} strokeWidth="2.2" strokeLinecap="round" fill="none" transform={`rotate(${s * -12} ${100 + s * ex} ${eyeY - 9})`} />
+            </g>
+          ))}
+        </g>
+      );
+    if (open)
+      return (
+        <g className="pet-eyes">
+          {[-1, 1].map((s) => (
+            <g key={s}>
+              <ellipse cx={100 + s * ex} cy={eyeY} rx="5.8" ry="6.8" fill={INK} />
+              <circle cx={100 + s * ex + 1.9} cy={eyeY - 2.4} r="2.1" fill="#FFFFFF" />
+            </g>
+          ))}
+        </g>
+      );
+    return (
+      <g stroke={INK} strokeWidth="4.3" strokeLinecap="round" fill="none">
+        {[-1, 1].map((s) => {
+          const x = 100 + s * ex;
+          return sleepy ? <path key={s} d={`M${x - 9} ${eyeY - 1} Q${x} ${eyeY + 5.5} ${x + 9} ${eyeY - 1}`} /> : <path key={s} d={`M${x - 9.5} ${eyeY + 3.4} Q${x} ${eyeY - 8.5} ${x + 9.5} ${eyeY + 3.4}`} />;
+        })}
       </g>
-      {/* rubor bem de leve */}
-      {[-1, 1].map((s) => (
-        <ellipse key={s} cx={100 + s * (ex + 14)} cy={eyeY + 12} rx="8" ry="4.6" fill={blush} opacity={laugh ? 0.35 : 0.16} />
-      ))}
-      {/* narizinho rosa arredondado */}
-      <path d={`M94.4 ${n - 3.4} Q100 ${n - 5} 105.6 ${n - 3.4} Q105 ${n + 0.6} 100 ${n + 2.2} Q95 ${n + 0.6} 94.4 ${n - 3.4} Z`} fill="#F4A3AE" />
-      <ellipse cx="98.6" cy={n - 2.6} rx="1.6" ry="0.9" fill="#FFFFFF" opacity="0.6" />
-      {laugh ? (
+    );
+  };
+  const mouth = () => {
+    if (face === 'frio')
+      return (
+        <g>
+          <path d={`M92.6 ${n + 5} q1.85 -2.4 3.7 0 q1.85 2.4 3.7 0 q1.85 -2.4 3.7 0 q1.85 2.4 3.7 0 L107.4 ${n + 10} Q100 ${n + 14} 92.6 ${n + 10} Z`} fill="#A8424E" />
+          <path d={`M93.6 ${n + 6.4} q1.6 -1.6 3.2 0 q1.6 1.6 3.2 0 q1.6 -1.6 3.2 0 q1.6 1.6 3.2 0`} stroke="#FFFFFF" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+        </g>
+      );
+    if (face === 'calor')
+      return (
+        <g>
+          <path d={`M93.6 ${n + 4} Q100 ${n + 3.4} 106.4 ${n + 4} Q105.4 ${n + 11.5} 100 ${n + 11.5} Q94.6 ${n + 11.5} 93.6 ${n + 4} Z`} fill="#A8424E" />
+          <path d={`M96.4 ${n + 8} Q100 ${n + 6.6} 103.6 ${n + 8} L103.4 ${n + 13.5} Q100 ${n + 16} 96.6 ${n + 13.5} Z`} fill="#FF8FA0" />
+        </g>
+      );
+    if (face === 'tedio') return <path d={`M95 ${n + 6} H105`} stroke={INK} strokeWidth="2.2" strokeLinecap="round" />;
+    if (face === 'chuva') return <path d={`M95 ${n + 8} Q100 ${n + 4} 105 ${n + 8}`} stroke={INK} strokeWidth="2.2" strokeLinecap="round" fill="none" />;
+    if (face === 'medo' || face === 'gripado')
+      return <path d={`M93.4 ${n + 7} q2.2 -2.2 4.4 0 q2.2 2.2 4.4 0 q2.2 -2.2 4.4 0`} stroke={INK} strokeWidth="2.1" strokeLinecap="round" fill="none" />;
+    if (laugh)
+      return (
         <g>
           <path d={`M100 ${n + 1.6} V${n + 3.6}`} stroke={INK} strokeWidth="2" strokeLinecap="round" />
           <path d={`M93.4 ${n + 3.8} Q100 ${n + 3.2} 106.6 ${n + 3.8} Q105.6 ${n + 12} 100 ${n + 12} Q94.4 ${n + 12} 93.4 ${n + 3.8} Z`} fill="#A8424E" />
           <path d={`M96 ${n + 9.2} Q100 ${n + 7} 104 ${n + 9.2} Q102.8 ${n + 11.4} 100 ${n + 11.4} Q97.2 ${n + 11.4} 96 ${n + 9.2} Z`} fill="#FF8FA0" />
         </g>
-      ) : open ? (
+      );
+    if (open)
+      return (
         <g>
           <path d={`M100 ${n + 1.6} V${n + 3.6}`} stroke={INK} strokeWidth="2" strokeLinecap="round" />
           <ellipse cx="100" cy={n + 8} rx={mood === 'boca' ? 4.4 : 3.2} ry={mood === 'boca' ? 4.8 : 3.8} fill="#A8424E" />
         </g>
+      );
+    return <path d={`M100 ${n + 1.6} V${n + 3.4} M93.2 ${n + 3} Q96.6 ${n + 7.6} 100 ${n + 3.6} Q103.4 ${n + 7.6} 106.8 ${n + 3}`} stroke={INK} strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" fill="none" />;
+  };
+  const cheek = face === 'frio' ? '#8FB4F0' : face === 'calor' ? '#FF6F6F' : face === 'gripado' ? '#FF8A8A' : blush;
+  const cheekOp = face === 'frio' ? 0.55 : face === 'calor' ? 0.5 : face === 'gripado' ? 0.4 : laugh ? 0.35 : 0.16;
+  return (
+    <g>
+      <g transform={eyeK !== 1 ? `translate(100 ${eyeY}) scale(${eyeK}) translate(-100 ${-eyeY})` : undefined}>{eyes()}</g>
+      {[-1, 1].map((s) => (
+        <g key={s}>
+          <ellipse cx={100 + s * (ex + 14)} cy={eyeY + 12} rx="8.5" ry="5" fill={cheek} opacity={cheekOp} />
+          {face === 'frio' && <path d={`M${100 + s * (ex + 14) - 5} ${eyeY + 15} l3 -6 M${100 + s * (ex + 14) - 1} ${eyeY + 15} l3 -6 M${100 + s * (ex + 14) + 3} ${eyeY + 15} l3 -6`} stroke="#6E93D6" strokeWidth="1.4" strokeLinecap="round" opacity="0.8" />}
+        </g>
+      ))}
+      {/* narizinho rosa arredondado (vermelhinho quando está gripado) */}
+      {face === 'gripado' ? (
+        <ellipse cx="100" cy={n - 1.4} rx="6.4" ry="4.8" fill="#FF6F7E" />
       ) : (
-        <path
-          d={`M100 ${n + 1.6} V${n + 3.4} M93.2 ${n + 3} Q96.6 ${n + 7.6} 100 ${n + 3.6} Q103.4 ${n + 7.6} 106.8 ${n + 3}`}
-          stroke={INK}
-          strokeWidth="2.1"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-        />
+        <path d={`M94.4 ${n - 3.4} Q100 ${n - 5} 105.6 ${n - 3.4} Q105 ${n + 0.6} 100 ${n + 2.2} Q95 ${n + 0.6} 94.4 ${n - 3.4} Z`} fill="#F4A3AE" />
       )}
+      <ellipse cx="98.6" cy={n - 2.6} rx="1.6" ry="0.9" fill="#FFFFFF" opacity="0.6" />
+      {mouth()}
+    </g>
+  );
+}
+
+/** O objeto da atividade, seguro pelas patinhas (as patinhas são redesenhadas por cima para "segurar"). */
+function PropInHands({ prop, cream, paw, line }: { prop?: HamiProp; cream: string; paw: string | null; line: string }) {
+  if (!prop || prop === 'fones') return null;
+  const paws = (
+    <g>
+      {[-1, 1].map((s) => (
+        <g key={s}>
+          <ellipse cx={100 + s * 19} cy="147" rx="8.6" ry="7.8" fill={paw ?? cream} />
+          <path d={`M${100 + s * 15.5} 151 v-2.2 M${100 + s * 19.5} 152 v-2.4`} stroke={line} strokeWidth="1.1" strokeLinecap="round" opacity="0.6" />
+        </g>
+      ))}
+    </g>
+  );
+  if (prop === 'livro')
+    return (
+      <g>
+        <g transform="rotate(-5 100 150)">
+          <path d="M74 136 Q100 131 126 136 L127 163 Q100 158 73 163 Z" fill="#5B8DEF" />
+          <path d="M77 136 Q89 133 100 137 L100 160 Q89 156 77 159 Z" fill="#FFFFFF" />
+          <path d="M123 136 Q111 133 100 137 L100 160 Q111 156 123 159 Z" fill="#F7F3EE" />
+          <path d="M81 142 Q89 140 96 142 M81 147 Q89 145 96 147 M104 142 Q111 140 119 142 M104 147 Q111 145 119 147" stroke="#C9CDD6" strokeWidth="1.4" strokeLinecap="round" fill="none" />
+          <path d="M100 137 V160" stroke="#D9DCE4" strokeWidth="1.2" />
+        </g>
+        {paws}
+      </g>
+    );
+  if (prop === 'desenho')
+    return (
+      <g>
+        <g transform="rotate(4 100 150)">
+          <rect x="78" y="132" width="44" height="32" rx="3" fill="#FFFFFF" stroke="#E6E1DA" strokeWidth="1" />
+          <path d="M93 146 c-5 -6 -12 0 -6 6 l6 5 l6 -5 c6 -6 -1 -12 -6 -6 Z" fill="#FF8FB1" />
+          <path d="M106 142 l8 0 M106 148 l10 0 M107 155 q4 3 8 0" stroke="#7FB8F0" strokeWidth="2" strokeLinecap="round" fill="none" />
+        </g>
+        <path d="M121 140 L131 128" stroke="#FFC94D" strokeWidth="5" strokeLinecap="round" />
+        <path d="M131 128 l2.6 -3.2" stroke="#3B2418" strokeWidth="3" strokeLinecap="round" />
+        {paws}
+      </g>
+    );
+  if (prop === 'halteres')
+    return (
+      <g>
+        {[-1, 1].map((s) => (
+          <g key={s}>
+            <rect x={100 + s * 19 - 12} y="145" width="24" height="4" rx="2" fill="#8E8C97" />
+            <rect x={100 + s * 19 - 15} y="139" width="6" height="16" rx="2.5" fill="#FF6F91" />
+            <rect x={100 + s * 19 + 9} y="139" width="6" height="16" rx="2.5" fill="#FF6F91" />
+          </g>
+        ))}
+        {paws}
+      </g>
+    );
+  // varinha de bolhas
+  return (
+    <g>
+      <path d="M117 147 L147 131" stroke="#B9A3F0" strokeWidth="3.2" strokeLinecap="round" />
+      <circle cx="153" cy="127" r="8.5" fill="#DDF3FF" fillOpacity="0.55" stroke="#9B84E6" strokeWidth="2.8" />
+      {paws}
     </g>
   );
 }
