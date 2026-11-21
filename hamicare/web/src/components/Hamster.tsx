@@ -45,15 +45,15 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
   const f = fluffOf(neutral ? 135 : grams);
   const eating = mood === 'comendo';
-  const asleep = mood === 'dormindo' || mood === 'sono';
+  const asleep = mood === 'dormindo';
   // Cabeça grande (a referência: mais larga nas bochechas, olhos baixos e afastados)
   const hcx = 100;
-  const hcy = 76;
-  const hrx = 60 + f * 6 + (eating ? 5 : 0);
-  const hry = 51 + f * 2;
+  const hcy = 85;
+  const hrx = 62 + f * 5 + (eating ? 5 : 0);
+  const hry = 41 + f * 2;
   const head = headPath(hcx, hcy, hrx, hry);
   // Corpo em formato de pera (o pescoço fica escondido atrás da cabeça)
-  const bw = 45 + f * 10;
+  const bw = 55 + f * 8;
   const body = `M${100 - 30} 104 C${100 - bw + 4} 114 ${100 - bw - 4} 146 ${100 - bw} 168 C${100 - bw + 3} 183 ${100 - bw * 0.5} 189 100 189 C${100 + bw * 0.5} 189 ${100 + bw - 3} 183 ${100 + bw} 168 C${100 + bw + 4} 146 ${100 + bw - 4} 114 ${100 + 30} 104 Z`;
   const top = hcy - hry;
   const h = 188 - top;
@@ -67,7 +67,7 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
   const sleeve = costume ? null : sleeveOf(outfit.roupa);
   const garment = costume ? null : garmentShape(outfit.roupa) ? garmentColor(outfit.roupa) : sleeve ?? (outfit.roupa ? itemById(outfit.roupa)?.c1 ?? null : null);
   // contorno suave, num tom quente do próprio pelo (a referência quase não tem linha escura)
-  const line = darken(fur.shade, 0.12);
+  const line = darken(fur.shade, 0.04);
   const arm = costume ? costume.paw : fur.body;
   const foot = costume ? costume.foot : fur.body;
   const chin = hcy + hry * 0.9;
@@ -131,13 +131,13 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
           {/* corpo */}
           <path d={body} fill={fur.body} />
           <g clipPath={`url(#b${uid})`}>
-            <ellipse cx="100" cy="178" rx={bw * 0.62} ry="26" fill={fur.belly} />
+            <ellipse cx="100" cy="168" rx={bw * 0.66} ry="32" fill={fur.belly} />
             {fur.pattern === 'manchas' && <ellipse cx={100 + bw * 0.6} cy="150" rx="15" ry="18" fill={fur.patch} opacity="0.85" />}
             {!costume && <path d={body} fill={`url(#f${uid})`} />}
             {!shape && <Clothes id={outfit.roupa} geo={geo} />}
             {garment && !shape && <rect x="0" y={chin - 14} width="200" height="100" fill={`url(#c${uid})`} />}
             {/* sombrinha da cabeça no corpo */}
-            <ellipse cx="100" cy={chin + 3} rx={hrx * 0.7} ry="9" fill="#000000" opacity="0.08" />
+            <ellipse cx="100" cy={chin + 3} rx={hrx * 0.7} ry="9" fill="#000000" opacity="0.04" />
           </g>
           <path d={body} fill="none" stroke={costume ? darken(costume.c1, 0.22) : garment && !shape ? darken(garment, 0.22) : line} strokeWidth="1.8" />
           {shape && garment && (
@@ -159,8 +159,8 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
           {!hidesHeart(outfit.roupa) && <Heart x={100} y={170} s={phase >= 3 ? 13 : 10} fill={phase >= 3 ? '#F6C445' : fur.ear} opacity={phase >= 3 ? 1 : 0.6} />}
           {/* sentado: perninhas para a frente, com a sola e os dedinhos cor-de-rosa aparecendo (como na imagem) */}
           {[-1, 1].map((s) => {
-            const tx = 100 + s * 31;
-            const fx = 100 + s * 37;
+            const tx = 100 + s * 33;
+            const fx = 100 + s * 39;
             const pad = '#F49AAE';
             const edge = costume ? darken(costume.foot, 0.22) : line;
             return (
@@ -230,7 +230,7 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
             {phase === 2 && !outfit.chapeu && <rect x="0" y={top + 16} width="200" height="8" fill="#FF6F91" />}
             {!costume && <path d={head} fill={`url(#f${uid})`} />}
             {/* brilho do pelo no alto da cabeça */}
-            {!costume && <ellipse cx={hcx - hrx * 0.28} cy={top + 15} rx={hrx * 0.3} ry="7" fill="#FFFFFF" opacity="0.22" transform={`rotate(-12 ${hcx - hrx * 0.28} ${top + 15})`} />}
+            {!costume && <ellipse cx={hcx - hrx * 0.28} cy={top + 15} rx={hrx * 0.3} ry="7" fill="#FFFFFF" opacity="0.12" transform={`rotate(-12 ${hcx - hrx * 0.28} ${top + 15})`} />}
           </g>
           <path d={head} fill="none" stroke={costume ? darken(costume.c1, 0.22) : line} strokeWidth="1.9" strokeLinejoin="round" />
           {costume && (
@@ -238,14 +238,24 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
               <Clothes id={outfit.roupa} geo={geo} />
             </g>
           )}
-          {/* topete: três mechinhas macias */}
-          {!costume && !outfit.chapeu && (
-            <g fill={fur.body} stroke={line} strokeWidth="1.7" strokeLinejoin="round" strokeLinecap="round">
-              <path d={`M${hcx - 16} ${top + 7} C${hcx - 20} ${top - 2} ${hcx - 13} ${top - 7} ${hcx - 6} ${top - 5} C${hcx - 11} ${top - 2} ${hcx - 10} ${top + 3} ${hcx - 7} ${top + 7}`} />
-              <path d={`M${hcx - 8} ${top + 7} C${hcx - 9} ${top - 6} ${hcx + 2} ${top - 12} ${hcx + 9} ${top - 8} C${hcx + 3} ${top - 6} ${hcx + 1} ${top} ${hcx + 3} ${top + 7}`} />
-              <path d={`M${hcx + 2} ${top + 7} C${hcx + 5} ${top - 2} ${hcx + 14} ${top - 4} ${hcx + 18} ${top + 1} C${hcx + 13} ${top + 1} ${hcx + 11} ${top + 4} ${hcx + 12} ${top + 8}`} />
-              <path d={`M${hcx - 17} ${top + 8.5} Q${hcx} ${top + 4} ${hcx + 13} ${top + 9}`} stroke={fur.body} strokeWidth="4" fill="none" />
+          {/* bochechas creme bem fofas, saindo um pouquinho para os lados (como a referência) */}
+          {!costume && (
+            <g fill={fur.belly}>
+              {[-1, 1].map((s) => (
+                <ellipse key={s} cx={hcx + s * hrx * 0.6} cy={eyeY + 16} rx={hrx * 0.43} ry="20" />
+              ))}
+              <ellipse cx={hcx} cy={eyeY + 21} rx={hrx * 0.5} ry="16" />
             </g>
+          )}
+          {/* um tufinho macio no alto da cabeça */}
+          {!costume && !outfit.chapeu && (
+            <path
+              d={`M${hcx - 9} ${top + 5} C${hcx - 10} ${top - 4} ${hcx - 1} ${top - 9} ${hcx + 6} ${top - 5} C${hcx + 1} ${top - 3} ${hcx} ${top + 1} ${hcx + 3} ${top + 5}`}
+              fill={fur.body}
+              stroke={line}
+              strokeWidth="1.6"
+              strokeLinejoin="round"
+            />
           )}
           {fur.pattern === 'panda' && [-1, 1].map((s) => <ellipse key={s} cx={hcx + s * ex} cy={eyeY} rx="15" ry="14" fill={fur.patch} opacity="0.9" transform={`rotate(${s * -18} ${hcx + s * ex} ${eyeY})`} />)}
           <Face mood={mood} eyeY={eyeY} noseY={noseY} ex={ex} cheekX={Math.round(hrx * 0.58)} cheek={fur.ear} brow={darken(fur.shade, 0.2)} eyeK={1 + young * 0.12} uid={uid} />
@@ -282,28 +292,24 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
   );
 }
 
-/** Cabeça de pãozinho: topo arredondado, mais larga nas bochechas, com três tufinhos macios de cada lado. */
+/** Cabeça de pãozinho: topo redondo e liso, bochechas fofas que saem para os lados e um queixo macio. */
 function headPath(cx: number, cy: number, rx: number, ry: number) {
   const T = cy - ry;
   const B = cy + ry;
   const side = (s: 1 | -1) => {
     const X = (k: number) => (cx + s * rx * k).toFixed(1);
     const Y = (k: number) => (cy + ry * k).toFixed(1);
-    // do topo até o começo das bochechas
-    let d = `C${X(0.6)} ${T.toFixed(1)} ${X(0.98)} ${Y(-0.66)} ${X(1)} ${Y(0.02)}`;
-    // tufinhos de pelo nas bochechas (pontinhas para fora e um pouco para baixo)
-    d += ` Q${X(1.03)} ${Y(0.12)} ${X(1.09)} ${Y(0.2)} Q${X(1.02)} ${Y(0.24)} ${X(1.02)} ${Y(0.3)}`;
-    d += ` Q${X(1.06)} ${Y(0.38)} ${X(1.1)} ${Y(0.47)} Q${X(1.02)} ${Y(0.5)} ${X(1)} ${Y(0.56)}`;
-    d += ` Q${X(1.02)} ${Y(0.64)} ${X(1.05)} ${Y(0.72)} Q${X(0.96)} ${Y(0.73)} ${X(0.92)} ${Y(0.74)}`;
+    // do topo até a altura dos olhos
+    let d = `C${X(0.7)} ${T.toFixed(1)} ${X(1.0)} ${Y(-0.55)} ${X(0.99)} ${Y(-0.04)}`;
+    // bochecha gordinha (sai para fora) com um tufinho macio
+    d += ` C${X(1.01)} ${Y(0.18)} ${X(1.09)} ${Y(0.38)} ${X(1.02)} ${Y(0.58)}`;
+    d += ` Q${X(1.03)} ${Y(0.68)} ${X(0.92)} ${Y(0.72)}`;
     // queixo arredondado
-    d += ` C${X(0.8)} ${Y(0.95)} ${X(0.5)} ${B.toFixed(1)} ${cx.toFixed(1)} ${B.toFixed(1)}`;
+    d += ` C${X(0.8)} ${Y(0.95)} ${X(0.48)} ${B.toFixed(1)} ${cx.toFixed(1)} ${B.toFixed(1)}`;
     return d;
   };
-  // lado direito (topo → queixo) e lado esquerdo espelhado (queixo → topo)
   const right = side(1);
-  const leftPts = side(-1);
-  // o lado esquerdo precisa ser percorrido ao contrário: refazemos na ordem inversa
-  const rev = reversePath(`M${cx} ${T} ${leftPts}`);
+  const rev = reversePath(`M${cx} ${T} ${side(-1)}`);
   return `M${cx} ${T} ${right} ${rev} Z`;
 }
 
@@ -354,7 +360,9 @@ function Heart({ x, y, s, fill, opacity = 1 }: { x: number; y: number; s: number
 
 function Face({ mood, eyeY, noseY, ex, cheekX, cheek, eyeK = 1 }: { mood: PetMood; eyeY: number; noseY: number; ex: number; cheekX: number; cheek: string; brow: string; eyeK?: number; uid: string }) {
   // Rosto minimalista: olhinhos pequenos com um brilho só, bochechas, narizinho e uma boquinha simples.
-  const closed = mood === 'calmo' || mood === 'sono' || mood === 'dormindo';
+  const closed = mood === 'sono' || mood === 'dormindo';
+  // olhinhos sorrindo (^ ^): contente e calmo, sem parecer sono
+  const smiley = mood === 'calmo' || mood === 'animado' || mood === 'risada';
   const happy = mood === 'animado' || mood === 'comendo' || mood === 'risada';
   const wide = mood === 'surpreso' || mood === 'boca';
   const n = noseY;
@@ -368,8 +376,8 @@ function Face({ mood, eyeY, noseY, ex, cheekX, cheek, eyeK = 1 }: { mood: PetMoo
               <path key={s} d={`M${100 + s * ex - 6} ${eyeY} Q${100 + s * ex} ${eyeY + 4.5} ${100 + s * ex + 6} ${eyeY}`} />
             ))}
           </g>
-        ) : happy ? (
-          <g stroke={ink} strokeWidth="3" strokeLinecap="round" fill="none">
+        ) : smiley ? (
+          <g stroke={ink} strokeWidth="3.2" strokeLinecap="round" fill="none">
             {[-1, 1].map((s) => (
               <path key={s} d={`M${100 + s * ex - 6} ${eyeY + 2} Q${100 + s * ex} ${eyeY - 5} ${100 + s * ex + 6} ${eyeY + 2}`} />
             ))}
@@ -381,8 +389,8 @@ function Face({ mood, eyeY, noseY, ex, cheekX, cheek, eyeK = 1 }: { mood: PetMoo
               const r = wide ? 1.15 : 1;
               return (
                 <g key={s}>
-                  <ellipse cx={x} cy={eyeY} rx={6.6 * r} ry={7.6 * r} fill={ink} />
-                  <circle cx={x + 2.2} cy={eyeY - 2.6} r={2.3 * r} fill="#FFFFFF" />
+                  <ellipse cx={x} cy={eyeY} rx={5.6 * r} ry={6.6 * r} fill={ink} />
+                  <circle cx={x + 1.9} cy={eyeY - 2.3} r={2 * r} fill="#FFFFFF" />
                 </g>
               );
             })}
@@ -394,7 +402,7 @@ function Face({ mood, eyeY, noseY, ex, cheekX, cheek, eyeK = 1 }: { mood: PetMoo
         <ellipse key={s} cx={100 + s * cheekX} cy={eyeY + 13} rx="10" ry="6.4" fill={cheek} opacity={mood === 'risada' ? 0.85 : 0.55} />
       ))}
       {/* narizinho */}
-      <ellipse cx="100" cy={n - 1.6} rx="3.6" ry="2.6" fill="#F28C9A" />
+      <path d={`M96 ${n - 3.6} Q100 ${n - 4.6} 104 ${n - 3.6} Q103 ${n - 0.4} 100 ${n + 0.6} Q97 ${n - 0.4} 96 ${n - 3.6} Z`} fill="#F28C9A" />
       {happy ? (
         <g>
           <path d={`M100 ${n + 1} V${n + 3.2}`} stroke={ink} strokeWidth="1.8" strokeLinecap="round" />
@@ -409,8 +417,7 @@ function Face({ mood, eyeY, noseY, ex, cheekX, cheek, eyeK = 1 }: { mood: PetMoo
         </g>
       ) : (
         <g>
-          <path d={`M100 ${n + 1} V${n + 3.6} M94.6 ${n + 3.8} q2.7 2.8 5.4 0 q2.7 2.8 5.4 0`} stroke={ink} strokeWidth="1.9" strokeLinecap="round" fill="none" />
-          <rect x="98.1" y={n + 4.6} width="3.8" height="3" rx="0.8" fill="#FFFFFF" stroke="#E8D8D8" strokeWidth="0.5" />
+          <path d={`M100 ${n + 0.6} V${n + 3} M94.4 ${n + 3} q2.8 3.2 5.6 0 q2.8 3.2 5.6 0`} stroke={ink} strokeWidth="1.9" strokeLinecap="round" fill="none" />
         </g>
       )}
     </g>

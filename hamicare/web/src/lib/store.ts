@@ -579,7 +579,7 @@ function commit(next: State) {
 
 // ---------- Manutenção (tempo passando) ----------
 
-const DECAY_PER_HOUR = { felicidade: 1.5, saciedade: 2.5, limpeza: 1, energia: 1.2 };
+const DECAY_PER_HOUR = { felicidade: 1.5, saciedade: 2.5, limpeza: 1, energia: 0.5 };
 
 export function decayStats(s: State, now = Date.now()): State {
   const hours = (now - s.pet.statsAt) / 3_600_000;
@@ -589,9 +589,13 @@ export function decayStats(s: State, now = Date.now()): State {
     felicidade: clamp(st.felicidade - DECAY_PER_HOUR.felicidade * hours, 5, 100),
     saciedade: clamp(st.saciedade - DECAY_PER_HOUR.saciedade * hours, 5, 100),
     limpeza: clamp(st.limpeza - DECAY_PER_HOUR.limpeza * hours, 5, 100),
-    energia: clamp(st.energia + (s.pet.sleeping ? 12 : -DECAY_PER_HOUR.energia) * hours, 5, 100),
+    // Acordado, o cansaço do tempo parado nunca passa de "um pouco cansado" (só brincar e viajar cansam mais).
+    energia: s.pet.sleeping ? clamp(st.energia + 12 * hours, 5, 100) : Math.max(Math.min(st.energia, 35), st.energia - DECAY_PER_HOUR.energia * hours),
   };
-  return { ...s, pet: { ...s.pet, stats, statsAt: now } };
+  // Ele acorda sozinho: descansou tudo, ou já é dia e ele está bem disposto.
+  const h = new Date(now).getHours();
+  const wake = s.pet.sleeping && (stats.energia >= 100 || (h >= 7 && h < 21 && stats.energia >= 60));
+  return { ...s, pet: { ...s.pet, stats, statsAt: now, sleeping: wake ? false : s.pet.sleeping } };
 }
 
 export function maintain(input: State): State {

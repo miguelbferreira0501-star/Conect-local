@@ -10,15 +10,16 @@ export const ARENA_HOME: Record<number, { wallpaper: string; floor: string; item
     wallpaper: 'p-menta',
     floor: 'f-pistache',
     items: [
-      { itemId: 'k-tapete-rosa', x: 50, y: 95 },
-      { itemId: 'k-cama-rosa', x: 25, y: 71 },
-      { itemId: 'k-criado-branco', x: 50.5, y: 68 },
-      { itemId: 'k-planta-grande-terracota', x: 63, y: 72 },
-      { itemId: 'k-guarda-roupa-rosa', x: 82, y: 68 },
-      { itemId: 'k-relogio-madeira', x: 17, y: 40 },
-      { itemId: 'k-rodinha-azul', x: 85, y: 93 },
-      { itemId: 'k-banheira-madeira', x: 68, y: 90 },
-      { itemId: 'k-ursinho-caramelo', x: 10, y: 97 },
+      // tudo juntinho no meio da tela, em volta do Hami (como um cantinho de verdade)
+      { itemId: 'k-tapete-rosa', x: 50, y: 94 },
+      { itemId: 'k-cama-rosa', x: 35, y: 71 },
+      { itemId: 'k-criado-branco', x: 49, y: 64 },
+      { itemId: 'k-planta-grande-terracota', x: 58.5, y: 66 },
+      { itemId: 'k-guarda-roupa-rosa', x: 68, y: 66 },
+      { itemId: 'k-relogio-madeira', x: 30, y: 36 },
+      { itemId: 'k-rodinha-azul', x: 69, y: 91 },
+      { itemId: 'k-banheira-madeira', x: 31, y: 92 },
+      { itemId: 'k-ursinho-caramelo', x: 41, y: 97 },
     ],
   },
   // Jardim: cantinho verde com casinha e flores
@@ -219,6 +220,11 @@ const OLD_ARENA_ITEMS: Record<number, string[]> = {
   11: ['cama-estrelas', 'luminaria-estrelas', 'mobile-planetas'],
   12: ['portal-celeste', 'fonte-celeste'],
 };
+/** Onde os móveis da casa inicial ficavam antes (espalhados pelas pontas). */
+const OLD_STARTER_POS: Record<string, [number, number]> = {
+  'k-tapete-rosa': [50, 95], 'k-cama-rosa': [25, 71], 'k-criado-branco': [50.5, 68], 'k-planta-grande-terracota': [63, 72], 'k-guarda-roupa-rosa': [82, 68],
+  'k-relogio-madeira': [17, 40], 'k-rodinha-azul': [85, 93], 'k-banheira-madeira': [68, 90], 'k-ursinho-caramelo': [10, 97],
+};
 /** A casa inicial antes de ganhar a banheira. */
 const STARTER_BEFORE_TUB = ['k-tapete-rosa', 'k-cama-rosa', 'k-criado-branco', 'k-planta-grande-terracota', 'k-guarda-roupa-rosa', 'k-relogio-madeira', 'k-rodinha-azul', 'k-ursinho-caramelo'];
 /** A casinha inicial de antes (rodinha, caminha e plantinha). */
@@ -232,6 +238,14 @@ export function upgradeHouse(input: House, n: number): House {
   const h = n === 1 && input.wallpaper === 'p-creme' && input.floor === 'f-madeira' ? { ...input, wallpaper: 'p-menta', floor: 'f-pistache' } : input;
   const ids = h.items.map((i) => i.itemId);
   const old = OLD_ARENA_ITEMS[n] ?? [];
+  // Casa inicial com os móveis ainda no lugar de fábrica antigo: chegam mais perto do Hami.
+  if (n === 1 && h.items.length && h.items.every((i) => OLD_STARTER_POS[i.itemId]?.[0] === i.x && OLD_STARTER_POS[i.itemId]?.[1] === i.y)) {
+    const fresh = arenaHouse(1).items;
+    return { ...h, items: h.items.map((i) => {
+      const f = fresh.find((x) => x.itemId === i.itemId);
+      return f ? { ...i, x: f.x, y: f.y } : i;
+    }) };
+  }
   // Casa inicial de antes da banheira (sem ninguém ter mexido): ganha a banheira de madeira.
   if (n === 1 && same(ids, STARTER_BEFORE_TUB) && !ids.includes('k-banheira-madeira')) {
     const tub = arenaHouse(1).items.find((i) => i.itemId === 'k-banheira-madeira')!;

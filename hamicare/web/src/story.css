@@ -358,3 +358,45 @@ span.tcal-ico { background: transparent; }
 .hc-tasks .task-emoji[data-cat='emocional'] { background: #c7b5ff; }
 .arp-area { display: flex; flex-direction: column; }
 .arp-area .arp-body { flex: 1; width: 100%; }
+
+/* Cartões das áreas com a ilustração (o nome já vem desenhado) */
+.ar-img { display: block; width: 100%; height: auto; aspect-ratio: 366 / 380; border-radius: 22px; object-fit: cover; user-select: none; -webkit-user-drag: none; }
+.ar-img-none { display: grid; place-items: center; background: var(--tone, #eee); font-family: var(--font-display, inherit); font-weight: 800; }
+.ob-area.ob-area-img { min-height: 0; padding: 0; gap: 0; background: transparent; border-radius: 26px; overflow: hidden; }
+.ob-area.ob-area-img .ob-area-check { left: auto; right: 10px; top: auto; bottom: 10px; }
+.arp-card { padding: 0 0 8px; gap: 6px; background: #ffffff; overflow: hidden; }
+.arp-card .ar-img { border-radius: 22px 22px 14px 14px; }
+.arp-card small { padding: 0 8px; color: #2f2640; }
+.arp-check { left: auto; right: 10px; top: 10px; }
+.arp-hero { padding-bottom: 18px; }
+.arp-hero-img { width: min(62vw, 250px); border-radius: 30px; box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12); }
+.arp-note { padding: 10px 12px; border-radius: 16px; background: #eef8e8; font-size: 13px; font-weight: 700; text-align: center; color: #3c6b34; }
+
+/* Chão de uma cor só, a mesma da página (sem bolinhas, sem degradê, sem sombra de canto) */
+.room-floor-shade, .room-light { display: none; }
+.home-room::after { display: none; }
+.room-item:not(.is-flat) > svg { filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.1)); }
+/* De noite só a parede escurece: o chão continua igual à página */
+.room-night { inset: 0 0 40% 0; }
+
+/* ================= Início minimalista (estilo do quarto do gatinho) ================= */
+.hr-top .hr-place { position: static; flex: 0 0 auto; margin-right: auto; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 0; border-radius: 99px; background: rgba(255, 255, 255, 0.9); color: #2b2f55; font-family: var(--font-display, inherit); font-size: 14px; font-weight: 800; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1); }
+.hr-top .hr-place:active { transform: translateY(1px); box-shadow: none; }
+
+.hc-trip { margin-top: -6px; border-radius: 22px; overflow: hidden; background: color-mix(in srgb, var(--home-deep, #4a6a3a) 20%, transparent); color: var(--home-ink, #fff); }
+.hc-trip-top { display: grid; justify-items: center; gap: 8px; width: 100%; padding: 12px 16px 12px; border: 0; background: none; color: inherit; }
+.hc-trip-top b { font-family: var(--font-display, inherit); font-size: 18px; font-weight: 800; }
+.hc-trip-nodes { display: flex; align-items: center; }
+.hc-trip-step { display: flex; align-items: center; }
+.hc-trip-step > i { display: block; width: 30px; height: 6px; margin: 0 -2px; background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.95) 0 4px, rgba(255, 255, 255, 0.45) 4px 8px); }
+.hc-trip-step > i.is-on { background: #ffd34d; }
+.hc-trip-dot { position: relative; z-index: 1; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.55); }
+.hc-trip-dot.is-on { background: #ffd34d; box-shadow: 0 0 0 3px rgba(255, 211, 77, 0.45); }
+.hc-trip-seed { width: 14px; height: 14px; border-radius: 50%; background: #d7dbe4; }
+.hc-trip-foot { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 16px; border: 0; background: color-mix(in srgb, var(--home-deep, #4a6a3a) 18%, transparent); color: inherit; font-size: 13.5px; font-weight: 700; text-align: left; }
+.hc-trip-foot > span:first-child { flex: 1; min-width: 0; }
+.hc-trip-streak { display: inline-flex; align-items: center; gap: 3px; padding: 2px 9px; border-radius: 99px; background: #ff8a3d; color: #fff; font-weight: 900; }
+
+.hc-head .hc-head-btn { border: 0 !important; background: color-mix(in srgb, var(--home-deep, #4a6a3a) 20%, transparent) !important; box-shadow: none !important; }
+.hc-head .hc-head-cal { margin-right: 2px; }
+.hc-add { display: inline-flex; justify-content: center; align-items: center; gap: 6px; padding: 13px; border: 0; border-radius: 20px; background: color-mix(in srgb, var(--home-deep, #4a6a3a) 16%, transparent); color: var(--home-ink, #2b2f55); font-size: 15px; font-weight: 800; }

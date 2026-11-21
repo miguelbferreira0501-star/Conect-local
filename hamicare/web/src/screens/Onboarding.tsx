@@ -309,7 +309,8 @@ export function Onboarding() {
                 return (
                   <button
                     key={ar}
-                    className={`ob-area ${on ? 'is-on' : ''}`}
+                    className={`ob-area ob-area-img ${on ? 'is-on' : ''}`}
+                    aria-label={L.label}
                     style={{ ['--tone' as string]: L.tone }}
                     aria-pressed={on}
                     onClick={() => {
@@ -318,14 +319,10 @@ export function Onboarding() {
                       up({ lifeAreas: list, focus: [...new Set(list.flatMap((x) => LIFE_AREAS[x].focus))] as Category[] });
                     }}
                   >
+                    <AreaArt area={ar} />
                     <span className="ob-area-check" aria-hidden="true">
                       {on ? <Check size={16} strokeWidth={3.5} /> : <PlusIcon size={16} strokeWidth={3.5} />}
                     </span>
-                    <span className="ob-area-name">{L.label}</span>
-                    <span className="ob-area-art">
-                      <AreaArt area={ar} fur={a.fur} size={104} />
-                    </span>
-                    <span className="ob-area-desc">{L.desc}</span>
                   </button>
                 );
               })}
