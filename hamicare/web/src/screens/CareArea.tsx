@@ -1,12 +1,12 @@
 // Aba Cuidar: o cantinho do Hami, com o que ele precisa agora, as barrinhas e todos os cuidados.
 import { useRef, useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, ChevronRight } from 'lucide-react';
 import { LivePet } from '../components/LivePet';
 import { CompanionBuddy } from './Companions';
 import { ITEMS, itemById } from '../data/items';
 import { play } from '../lib/sound';
 import { Room } from '../components/Room';
-import { Coins } from '../components/ui';
+import { Coins, Sheet } from '../components/ui';
 import { periodOf } from '../data/lines';
 import { placeById } from '../data/world';
 import { care, dayOf, feed, todayKey, useApp } from '../lib/store';
@@ -34,6 +34,13 @@ interface CareDef {
   desc: string;
   tone: string;
 }
+
+/** Cuidados agrupados no painel (no lugar da grade de oito botões). */
+const GROUPS: [string, Exclude<CareMode, null>[]][] = [
+  ['Corpo', ['comida', 'banho', 'escovar']],
+  ['Diversão e carinho', ['brincar', 'carinho', 'conversar']],
+  ['Descanso e memórias', ['dormir', 'foto']],
+];
 
 const CARES: CareDef[] = [
   { id: 'comida', care: 'comida', emoji: '🥕', label: 'Comida', desc: 'Lanchinho e cozinha', tone: '#FFE2B8' },
@@ -64,9 +71,9 @@ export function CareArea({ onShare }: { onShare: (p: Photo) => void }) {
   const s = useApp();
   const now = useNow(30_000);
   const [mode, setMode] = useState<CareMode>(null);
-  const [tray, setTray] = useState<'cuidar' | 'comer'>('cuidar');
+  const [panel, setPanel] = useState(false);
+  const [food, setFood] = useState(false);
   const [eating, setEating] = useState<PetMood | null>(null);
-  const [drag, setDrag] = useState<{ id: string; x: number; y: number; moved: boolean } | null>(null);
   const petBox = useRef<HTMLDivElement>(null);
   const day = dayOf(s, todayKey());
   const adv = s.adventure;
@@ -77,6 +84,9 @@ export function CareArea({ onShare }: { onShare: (p: Photo) => void }) {
   const blocked = (c: CareDef) => !!adv || (sleeping && c.id !== 'dormir' && c.id !== 'conversar');
   const foods = ITEMS.filter((i) => i.kind === 'comida' && (s.inventory[i.id] ?? 0) > 0);
   const [say, setSay] = useState<string | null>(null);
+  const foodCount = foods.reduce((n, f) => n + (s.inventory[f.id] ?? 0), 0);
+  const doneCount = CARES.filter((c) => day.care.includes(c.care)).length;
+  const open = (c: CareDef) => (c.id === 'comida' && foods.length ? setFood(true) : setMode(c.id));
 
   function talk(text: string) {
     setSay(text);
@@ -102,10 +112,6 @@ export function CareArea({ onShare }: { onShare: (p: Photo) => void }) {
     }, 1100);
   }
 
-  const overPet = (x: number, y: number) => {
-    const r = petBox.current?.getBoundingClientRect();
-    return !!r && x > r.left - 30 && x < r.right + 30 && y > r.top - 30 && y < r.bottom + 30;
-  };
 
   return (
     <div className="care-page">
@@ -123,7 +129,7 @@ export function CareArea({ onShare }: { onShare: (p: Photo) => void }) {
             <div ref={petBox} className="relative">
               <LivePet
                 size={230}
-                mood={eating ?? (drag?.moved ? 'boca' : need.mood)}
+                mood={eating ?? need.mood}
                 say={say ?? (need.care ? need.text : null)}
                 onTap={() => {
                   if (sleeping) return;
@@ -152,62 +158,76 @@ export function CareArea({ onShare }: { onShare: (p: Photo) => void }) {
         </div>
       </section>
 
-      <section className="care-tray" aria-label="Cuidados">
-        <div className="care-tray-tabs" role="tablist">
-          <button role="tab" aria-selected={tray === 'cuidar'} className={tray === 'cuidar' ? 'is-on' : ''} onClick={() => setTray('cuidar')}>
-            Cuidados
+      <section className="care-dock" aria-label="Cuidados">
+        {need.care && !blocked(need.care) && (
+          <button className="care-need" onClick={() => open(need.care!)}>
+            <Glyph e={need.care.emoji} size={30} />
+            <span className="min-w-0 flex-1">
+              <small>O {s.pet.name} precisa de</small>
+              <b>{need.care.label}</b>
+            </span>
+            <span className="care-need-go">Fazer agora</span>
           </button>
-          <button role="tab" aria-selected={tray === 'comer'} className={tray === 'comer' ? 'is-on' : ''} onClick={() => setTray('comer')}>
-            Comidinhas {foods.length ? `(${foods.reduce((n, f) => n + (s.inventory[f.id] ?? 0), 0)})` : ''}
+        )}
+        <div className="care-dock-row">
+          <button className="care-main" onClick={() => setPanel(true)} disabled={!!adv}>
+            <Glyph e="🧶" size={34} />
+            <span>
+              Cuidar do {s.pet.name}
+              <small>
+                {doneCount}/{CARES.length} cuidados hoje
+              </small>
+            </span>
+          </button>
+          <button className="care-side" onClick={() => setFood(true)} disabled={!!adv} aria-label={`Comidinhas: ${foodCount}`}>
+            <Glyph e="🍓" size={30} />
+            <span>{foodCount}</span>
           </button>
         </div>
-        {tray === 'cuidar' ? (
-          <div className="care-grid">
-            {CARES.map((c) => {
-              const done = day.care.includes(c.care);
-              const label = c.id === 'dormir' && sleeping ? 'Acordar' : c.label;
-              const emoji = c.id === 'dormir' && sleeping ? '☀️' : c.emoji;
-              const urgent = need.care?.id === c.id;
-              return (
-                <button key={c.id} className={`care-cell ${urgent ? 'is-urgent' : ''}`} disabled={blocked(c)} onClick={() => (c.id === 'comida' && foods.length ? setTray('comer') : setMode(c.id))} aria-label={`${label}: ${c.desc}`}>
-                  <Glyph e={emoji} size={40} />
-                  <span>{label}</span>
-                  {done && (
-                    <span className="care-cell-done" aria-label="Feito hoje">
-                      <Check size={12} strokeWidth={3.5} />
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        ) : foods.length ? (
+        <p className="care-tray-note">Cuidar do {s.pet.name} deixa ele feliz e rende sementes. O peso dele muda só com as suas missões saudáveis.</p>
+      </section>
+
+      <Sheet open={panel} onClose={() => setPanel(false)} title={`Cuidar do ${s.pet.name}`}>
+        <div className="care-groups">
+          {GROUPS.map(([title, ids]) => (
+            <section key={title}>
+              <h3>{title}</h3>
+              <div className="care-list">
+                {ids.map((id) => {
+                  const c = CARES.find((x) => x.id === id)!;
+                  const done = day.care.includes(c.care);
+                  const label = c.id === 'dormir' && sleeping ? 'Acordar' : c.label;
+                  return (
+                    <button key={c.id} className={`care-item ${need.care?.id === c.id ? 'is-urgent' : ''}`} style={{ ['--tone' as string]: c.tone }} disabled={blocked(c)} onClick={() => (setPanel(false), open(c))}>
+                      <span className="care-item-ico">
+                        <Glyph e={c.id === 'dormir' && sleeping ? '☀️' : c.emoji} size={34} />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <b>{label}</b>
+                        <small>{c.desc}</small>
+                      </span>
+                      {done ? (
+                        <span className="care-item-done" aria-label="Feito hoje">
+                          <Check size={14} strokeWidth={3.5} />
+                        </span>
+                      ) : (
+                        <ChevronRight size={18} className="opacity-40" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+        </div>
+      </Sheet>
+
+      <Sheet open={food} onClose={() => setFood(false)} title="Comidinhas">
+        {foods.length ? (
           <>
             <div className="care-grid">
               {foods.map((f) => (
-                <button
-                  key={f.id}
-                  className="care-cell is-food"
-                  style={{ touchAction: 'none', opacity: drag?.id === f.id && drag.moved ? 0.4 : 1 }}
-                  aria-label={`Dar ${f.name} (${s.inventory[f.id]})`}
-                  disabled={!!adv}
-                  onPointerDown={(e) => {
-                    e.currentTarget.setPointerCapture(e.pointerId);
-                    setDrag({ id: f.id, x: e.clientX, y: e.clientY, moved: false });
-                  }}
-                  onPointerMove={(e) => {
-                    if (!drag) return;
-                    const moved = drag.moved || Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 8;
-                    setDrag({ ...drag, x: e.clientX, y: e.clientY, moved });
-                  }}
-                  onPointerUp={(e) => {
-                    const d = drag;
-                    setDrag(null);
-                    if (!d) return;
-                    if (!d.moved || overPet(e.clientX, e.clientY)) eat(f.id);
-                  }}
-                  onPointerCancel={() => setDrag(null)}
-                >
+                <button key={f.id} className="care-cell is-food" aria-label={`Dar ${f.name} (${s.inventory[f.id]})`} onClick={() => (setFood(false), eat(f.id))}>
                   <span className="care-cell-count">x{s.inventory[f.id]}</span>
                   <Glyph e={f.emoji} size={40} />
                   <span className="care-cell-gain">
@@ -216,18 +236,12 @@ export function CareArea({ onShare }: { onShare: (p: Photo) => void }) {
                 </button>
               ))}
             </div>
-            <p className="care-tray-hint">Arraste até o {s.pet.name} ou toque para dar</p>
+            <p className="care-tray-hint !text-muted">Toque para dar ao {s.pet.name}.</p>
           </>
         ) : (
-          <p className="care-tray-hint">Acabaram as comidinhas. Tem mais na Cozinha da Loja (aba Mundo) e no presente do dia.</p>
+          <p className="text-[15px] text-muted">Acabaram as comidinhas. Tem mais na Cozinha da Loja (aba Mundo) e no presente do dia.</p>
         )}
-        <p className="care-tray-note">Cuidar do {s.pet.name} deixa ele feliz e rende sementes. O peso dele muda só com as suas missões saudáveis.</p>
-      </section>
-      {drag?.moved && (
-        <span className="food-ghost" style={{ left: drag.x, top: drag.y }} aria-hidden="true">
-          <Glyph e={itemById(drag.id)?.emoji} size={52} />
-        </span>
-      )}
+      </Sheet>
 
       <CareLayer mode={mode} onClose={() => setMode(null)} onShare={onShare} />
     </div>

@@ -31,6 +31,16 @@ export const CATEGORIES: Record<Category, { label: string; emoji: string; desc: 
 
 export const CAT_ORDER: Category[] = ['fitness', 'autocuidado', 'habitos', 'emocional'];
 
+/** Áreas da vida que a pessoa escolhe no começo (cartões ilustrados). Cada uma traz missões prontas. */
+export type LifeArea = 'saude' | 'estudo' | 'casa' | 'calma';
+export const LIFE_AREAS: Record<LifeArea, { label: string; tone: string; prop: string; tasks: string[]; focus: Category[]; desc: string }> = {
+  saude: { label: 'Saúde', tone: '#C8F2D2', prop: '💧', tasks: ['agua', 'dentes', 'alongar', 'sono', 'caminhada'], focus: ['fitness', 'habitos'], desc: 'Água, sono, corpo e movimento' },
+  estudo: { label: 'Trabalho e estudo', tone: '#FFD3DF', prop: '💻', tasks: ['planejar', 'tarefa-chave', 'estudar', 'pausa', 'ler'], focus: ['habitos'], desc: 'Foco, pausas e organização' },
+  casa: { label: 'Casa em ordem', tone: '#CFE2FF', prop: '🧹', tasks: ['cama-arrumar', 'louca', 'roupas', 'quarto', 'plantas'], focus: ['autocuidado'], desc: 'Pequenas arrumações do dia' },
+  calma: { label: 'Calma', tone: '#FFE2B8', prop: '🕯️', tasks: ['respirar', 'gratidao', 'sentir', 'meditar', 'diario'], focus: ['emocional'], desc: 'Respirar, sentir e desacelerar' },
+};
+export const LIFE_ORDER: LifeArea[] = ['saude', 'estudo', 'casa', 'calma'];
+
 export const LIBRARY: LibTask[] = [
   { id: 'caminhada', title: 'Caminhar 15 minutos', emoji: '🚶', cat: 'fitness', energy: 2, met: 3.5, min: 15, why: 'Caminhada em ritmo normal', for: ['perder', 'habitos', 'calma'] },
   { id: 'corrida', title: 'Corrida leve (20 min, no seu ritmo)', emoji: '🏃', cat: 'fitness', energy: 3, met: 7, min: 20, why: 'Trote leve', for: ['perder'] },
@@ -50,6 +60,14 @@ export const LIBRARY: LibTask[] = [
   { id: 'pele', title: 'Cuidar da pele', emoji: '🧴', cat: 'autocuidado', energy: 1, for: ['habitos'] },
   { id: 'dentes', title: 'Escovar os dentes', emoji: '🪥', cat: 'autocuidado', energy: 1, for: ['habitos'] },
   { id: 'quarto', title: 'Organizar o quarto (20 min)', emoji: '🧹', cat: 'autocuidado', energy: 3, met: 3.3, min: 20, why: 'Arrumar a casa também mexe o corpo', for: ['habitos'] },
+  { id: 'planejar', title: 'Planejar o dia em 3 passos', emoji: '📝', cat: 'habitos', energy: 1 },
+  { id: 'tarefa-chave', title: 'Fazer a tarefa mais importante do dia', emoji: '⭐', cat: 'habitos', energy: 2 },
+  { id: 'estudar', title: 'Estudar ou trabalhar focado (25 min)', emoji: '📚', cat: 'habitos', energy: 2 },
+  { id: 'ler', title: 'Ler 10 páginas', emoji: '📖', cat: 'habitos', energy: 1 },
+  { id: 'louca', title: 'Lavar a louça', emoji: '🍽️', cat: 'autocuidado', energy: 2 },
+  { id: 'roupas', title: 'Guardar as roupas', emoji: '👕', cat: 'autocuidado', energy: 1 },
+  { id: 'lixo', title: 'Tirar o lixo', emoji: '🗑️', cat: 'autocuidado', energy: 1 },
+  { id: 'plantas', title: 'Regar as plantas', emoji: '🪴', cat: 'autocuidado', energy: 1 },
   { id: 'cama-arrumar', title: 'Arrumar a cama', emoji: '🛏️', cat: 'autocuidado', energy: 1, for: ['habitos'] },
   { id: 'descansar', title: 'Descansar sem culpa (15 min)', emoji: '🛋️', cat: 'autocuidado', energy: 1 },
   { id: 'pausa', title: 'Fazer uma pausa longe da tela', emoji: '📵', cat: 'autocuidado', energy: 1, for: ['habitos', 'calma'] },

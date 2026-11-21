@@ -7,7 +7,6 @@ import { Room } from '../components/Room';
 import { floorPalette, tonePalette } from '../components/Furniture';
 import { TREK_THEMES, Suitcase, TrekBar, TrekScene, TrekStart, TrekUnpack, WalkingHami, finishTrek, trekThemeOf } from '../components/Trek';
 import type { TrekResult } from '../lib/store';
-import { openUi } from '../lib/bus';
 import { introDay, startTrek, trekReady } from '../lib/store';
 import { TrailCard, WeekReportCard } from '../components/Trail';
 import { unreadMail } from '../lib/mail';
@@ -31,6 +30,27 @@ import { StreakRepairCard } from '../components/StreakRepair';
 import { requestTool } from './Wellbeing';
 import { CompanionBuddy } from './Companions';
 import { LivePet } from '../components/LivePet';
+import { TaskCalendar, byPart } from '../components/TaskCalendar';
+import { petMoodOf } from '../lib/petState';
+import { setBattery } from '../lib/store';
+
+/** Diferencial: "Hoje está difícil" deixa só as tarefas leves e o Hami fica do seu lado, sem perder a sequência. */
+function HardDay({ hard, pet }: { hard: boolean; pet: string }) {
+  return hard ? (
+    <div className="hc-hard is-on" role="status">
+      <Glyph e="🫂" size={30} />
+      <span className="min-w-0 flex-1">
+        <b>Modo dia difícil</b>
+        <small>Só as tarefas leves ficaram. O {pet} está aqui com você, e a sua sequência está protegida.</small>
+      </span>
+      <button onClick={() => (setBattery(2), toast('Tudo bem! Voltaram todas as tarefas.'))}>Já melhorou</button>
+    </div>
+  ) : (
+    <button className="hc-hard" onClick={() => (setBattery(1), toast(`O ${pet} vai devagar com você hoje.`))}>
+      <Glyph e="🌧️" size={24} /> Hoje está difícil? <small>Deixe só o essencial</small>
+    </button>
+  );
+}
 
 export function useNow(ms: number) {
   const [now, setNow] = useState(Date.now());
@@ -41,9 +61,11 @@ export function useNow(ms: number) {
   return now;
 }
 
-export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, onWorld }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onArenas: () => void; onPlus: () => void; onTeam: () => void; onWorld?: (tab: 'casa' | 'armario' | 'loja') => void }) {
+export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onArenas: () => void; onPlus: () => void; onTeam: () => void; onWorld?: (tab: 'casa' | 'armario' | 'loja') => void }) {
   const [areaOpen, setAreaOpen] = useState(false);
   const [wallet, setWallet] = useState(false);
+  const [cal, setCal] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const s = useApp();
   const now = useNow(20_000);
   const today = todayKey();
@@ -128,7 +150,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
     }, 60);
   }
 
-  const petMood: PetMood = mood ?? (s.pet.sleeping ? 'dormindo' : s.pet.stats.energia < 20 ? 'sono' : day.battery === 1 && done === 0 ? 'calmo' : 'feliz');
+  const petMood: PetMood = mood ?? petMoodOf(s, { hardDay: day.battery === 1, done, total: tasks.length, hour: new Date(now).getHours() });
 
   const hami = adv ? (
     <div className="mb-6 grid justify-items-center gap-1 rounded-3xl bg-surface/95 px-4 py-3 text-center shadow-[var(--shadow)]">
@@ -195,38 +217,9 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
           <button className="hr-pill" onClick={() => setWallet(true)} aria-label={`Carteira: ${s.coins} sementes`}>
             <Coins value={s.coins} />
           </button>
-          <button className="hr-pill hr-round" onClick={onSettings} aria-label="Menu">
+          <button className="hr-pill hr-round" onClick={onSettings} aria-label={`Menu${mailN ? `: ${mailN} cartas novas` : ''}`}>
             <Settings size={18} />
-          </button>
-        </div>
-        <div className="hr-left">
-          <button className="hr-icon" onClick={() => onGo('atividades')} aria-label={`Missões: faltam ${Math.max(0, tasks.length - done)}`}>
-            <Glyph e="📅" size={34} />
-            {tasks.length - done > 0 && <span className="hr-badge">{tasks.length - done}</span>}
-          </button>
-          <button className="hr-icon" onClick={() => openUi('correio')} aria-label={`Correio${mailN ? `: ${mailN} novas` : ''}`}>
-            <Glyph e="💌" size={34} />
-            {mailN > 0 && <span className="hr-badge">{mailN}</span>}
-          </button>
-          <button className="hr-icon" onClick={onArenas} aria-label="Mapa das arenas">
-            <Glyph e="🗺️" size={32} />
-          </button>
-          <button className="hr-icon hr-rocket" onClick={onArenas} aria-label="Viajar para a Lua">
-            <Glyph e="🚀" size={32} />
-          </button>
-        </div>
-        <div className="hr-tools" role="toolbar" aria-label="Atalhos">
-          <button onClick={() => onWorld?.('armario')} aria-label="Roupas">
-            <Glyph e="👗" size={34} />
-          </button>
-          <button onClick={() => onWorld?.('casa')} aria-label="Decorar a casa">
-            <Glyph e="🏡" size={34} />
-          </button>
-          <button onClick={() => onGo('cuidar')} aria-label="Cuidar e brincar">
-            <Glyph e="🧶" size={34} />
-          </button>
-          <button onClick={onPlus} aria-label="HamiCare+">
-            <Glyph e="👑" size={32} />
+            {mailN > 0 && <span className="hr-dot" aria-hidden="true" />}
           </button>
         </div>
         {trekBack && (
@@ -254,11 +247,6 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
 
       <TrekBar now={now} />
 
-      <PlusWeeklyCard />
-      {/* Nos 3 primeiros dias o Início fica só com o essencial: meta, trilha, água e missões. */}
-      {introDay(s) > 3 && <MoonTeaser onGo={onArenas} />}
-      {introDay(s) > 3 && <StreakRepairCard />}
-
       <section className="hc-adv" aria-label="Meta do dia">
         <button className="hc-adv-title" onClick={() => setAreaOpen(true)}>
           Meta do dia · {Math.min(done, dayGoalOf(s, tasks.length))}/{dayGoalOf(s, tasks.length)}
@@ -281,46 +269,64 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
           <Flame size={14} /> {streak.count} {streak.count === 1 ? 'dia seguido' : 'dias seguidos'} · <button onClick={onEvolution}>{growthName}</button>
         </p>
       </section>
-      <TrailCard />
-      <WaterCard />
       <DayGoalSheet open={areaOpen} onClose={() => setAreaOpen(false)} total={tasks.length} />
       <WalletSheet open={wallet} onClose={() => setWallet(false)} />
 
-      <section className="grid gap-3 hc-tasks" aria-label="Missões de hoje">
+      <section className="grid gap-3 hc-tasks" aria-label="Suas tarefas de hoje">
         <div className="hc-head">
-          <span className="hc-head-ico" aria-hidden="true">
-            <Glyph e="📅" size={24} />
-          </span>
           <h2>
-            Concluído hoje <b>{done}/{tasks.length}</b>
+            Suas tarefas de hoje <b>{done}/{tasks.length}</b>
           </h2>
+          <button className="hc-head-btn" onClick={() => setCal(true)} aria-label="Abrir o calendário de tarefas">
+            <Glyph e="📅" size={24} />
+          </button>
           <button className="hc-head-btn" onClick={() => openCheckin()} aria-label="Como você está agora?">
             <Glyph e={day.mood ? MOODS[day.mood - 1].emoji : '😐'} size={24} />
           </button>
         </div>
-        <ul className="grid gap-3">
-          {tasks.map((t) => (
-            <TaskRow key={t.id} task={t} done={t.id in day.done} kcal={kcalOf(s, t)} dir={dir} onToggle={(el) => onToggle(t, el)} />
-          ))}
-        </ul>
-        {!tasks.length && <p className="card p-4 text-center text-muted">Nenhuma missão para hoje. Que tal uma bem pequena?</p>}
-        <button className="btn-page" onClick={() => onGo('atividades')}>
-          <span className="btn-page-ico" aria-hidden="true">
-            <Plus size={26} strokeWidth={3} />
-          </span>
-          <span className="min-w-0 flex-1">
-            Adicionar ou editar missões
-            <span className="block text-[13px] font-bold opacity-80">
-              {done} de {tasks.length} feitas hoje
+        <HardDay hard={day.battery === 1} pet={s.pet.name} />
+        {byPart(tasks).map(([id, label, items]) => (
+          <div key={id} className="grid gap-2">
+            <p className="hc-part">{label}</p>
+            <ul className="grid gap-2.5">
+              {items.map((t) => (
+                <TaskRow key={t.id} task={t} done={t.id in day.done} kcal={kcalOf(s, t)} dir={dir} sub={t.at} onToggle={(el) => onToggle(t, el)} />
+              ))}
+            </ul>
+          </div>
+        ))}
+        {!tasks.length && <p className="card p-4 text-center text-muted">Nenhuma tarefa para hoje. Que tal programar uma bem pequena no calendário?</p>}
+        <div className="hc-actions">
+          <button className="btn-page" onClick={() => setCal(true)}>
+            <span className="btn-page-ico" aria-hidden="true">
+              <Plus size={24} strokeWidth={3} />
             </span>
-          </span>
-        </button>
+            <span className="min-w-0 flex-1">
+              Calendário e tarefas
+              <span className="block text-[13px] font-bold opacity-80">Programe dias, horários e lembretes</span>
+            </span>
+          </button>
+        </div>
       </section>
 
-      {introDay(s) > 2 && <WeekReportCard />}
-      <MealCard s={s} />
-      <JourneyCard s={s} onOpen={onEvolution} onCalm={(a) => (requestTool(a), onGo('bem-estar'))} />
-      {introDay(s) > 3 && <TeamHomeCard onOpen={onTeam} />}
+      <details className="hc-more" open={moreOpen} onToggle={(e) => setMoreOpen((e.target as HTMLDetailsElement).open)}>
+        <summary>
+          <span>Mais para hoje</span>
+          <small>água, trilha, relatórios e mais</small>
+        </summary>
+        <div className="grid gap-4 pt-3">
+          <PlusWeeklyCard />
+          <WaterCard />
+          <TrailCard />
+          {introDay(s) > 3 && <MoonTeaser onGo={onArenas} />}
+          {introDay(s) > 3 && <StreakRepairCard />}
+          {introDay(s) > 2 && <WeekReportCard />}
+          <MealCard s={s} />
+          <JourneyCard s={s} onOpen={onEvolution} onCalm={(a) => (requestTool(a), onGo('bem-estar'))} />
+          {introDay(s) > 3 && <TeamHomeCard onOpen={onTeam} />}
+        </div>
+      </details>
+      <TaskCalendar open={cal} onClose={() => setCal(false)} />
 
       <AdventureModal result={result} onClose={() => setResult(null)} />
       <TrekStart open={trekStart} onClose={() => setTrekStart(false)} />
