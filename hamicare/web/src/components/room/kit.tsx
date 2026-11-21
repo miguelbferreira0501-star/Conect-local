@@ -272,6 +272,48 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
         </S>
       );
 
+    case 'k-banheira':
+      // banheira de madeira (ofurô) com água e uma frutinha boiando
+      return (
+        <S w={170} h={110}>
+          <ellipse cx="85" cy="22" rx="80" ry="18" fill={dk(c1, 0.35)} />
+          <path d="M6 22 Q10 96 30 102 Q85 112 140 102 Q160 96 164 22 Z" fill={c1} />
+          {[34, 60, 85, 110, 136].map((x) => (
+            <path key={x} d={`M${x} 34 Q${x + (x - 85) * 0.04} 70 ${x + (x - 85) * 0.08} 104`} stroke={dk(c1, 0.12)} strokeWidth="2.4" fill="none" />
+          ))}
+          <path d="M9 48 Q85 64 161 48" stroke={c2} strokeWidth="7" fill="none" />
+          <path d="M13 82 Q85 98 157 82" stroke={c2} strokeWidth="7" fill="none" />
+          <path d="M9 48 Q85 64 161 48" stroke="#fff" strokeOpacity="0.35" strokeWidth="2" fill="none" />
+          <ellipse cx="85" cy="22" rx="74" ry="14" fill={lt(c1, 0.15)} />
+          <ellipse cx="85" cy="24" rx="66" ry="10" fill="#8FD4F2" />
+          <ellipse cx="70" cy="22" rx="30" ry="4" fill="#fff" opacity="0.35" />
+          <circle cx="120" cy="22" r="6" fill="#FFA43A" />
+          <path d="M120 16 q2 -4 6 -4" stroke="#5DBB6E" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+        </S>
+      );
+    case 'k-cadeira':
+      return (
+        <S w={90} h={130}>
+          <rect x="16" y="6" width="58" height="54" rx="10" fill={c1} />
+          <rect x="24" y="14" width="42" height="10" rx="5" fill={lt(c1, 0.25)} />
+          <rect x="8" y="58" width="74" height="16" rx="6" fill={lt(c1, 0.12)} />
+          <rect x="8" y="70" width="74" height="8" rx="3" fill={dk(c1, 0.15)} />
+          <rect x="14" y="76" width="9" height="50" rx="3" fill={dk(c1, 0.2)} />
+          <rect x="67" y="76" width="9" height="50" rx="3" fill={dk(c1, 0.2)} />
+          <rect x="18" y="100" width="54" height="6" rx="3" fill={dk(c1, 0.12)} />
+        </S>
+      );
+    case 'k-banquinho':
+      return (
+        <S w={90} h={70}>
+          <ellipse cx="45" cy="16" rx="40" ry="12" fill={lt(c1, 0.15)} />
+          <rect x="5" y="14" width="80" height="12" rx="6" fill={c1} />
+          <rect x="14" y="26" width="9" height="40" rx="3" fill={dk(c1, 0.22)} />
+          <rect x="67" y="26" width="9" height="40" rx="3" fill={dk(c1, 0.22)} />
+          <rect x="40" y="26" width="9" height="34" rx="3" fill={dk(c1, 0.3)} />
+        </S>
+      );
+
     // ---------------- Sala ----------------
     case 'k-sofa':
       return (

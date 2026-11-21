@@ -80,6 +80,9 @@ const MAD: Cor = ['madeira', 'de madeira', '#C98A5B', '#F7D9A8'];
 export const KIT_ITEMS: Item[] = [
   // Quarto
   ...moveis('cama', 'Cama', 'movel', 130, 44, [['rosa', 'rosa', '#FF9FC2', '#FFE3EC'], ['azul', 'azul', '#7FB8F0', '#E6F1FB'], ['lilas', 'lilás', '#C3A6F2', '#F1E9FF'], ['menta', 'menta', '#7FD8BE', '#E9FAF1'], ['amarela', 'amarela', '#FFD66B', '#FFF7D6']]),
+  ...moveis('banheira', 'Banheira de madeira', 'movel', 90, 30, [MAD, ['clara', 'clara', '#E2B98C', '#C9CDD6'], ['rosa', 'rosa', '#F0A9B8', '#FFFFFF']]),
+  ...moveis('cadeira', 'Cadeira', 'movel', 40, 15, [MAD, ['branca', 'branca', '#F2EEE8', '#C98A5B'], ['menta', 'menta', '#9FE3CF', '#FFFFFF']]),
+  ...moveis('banquinho', 'Banquinho', 'movel', 25, 13, [MAD, ['rosa', 'rosa', '#FFB3CC', '#FFFFFF']]),
   ...moveis('criado', 'Criado-mudo com abajur', 'movel', 45, 14, [BR, MAD, ['rosa', 'rosa', '#FFC2D6', '#FFFFFF'], ['azul', 'azul', '#A9D4F5', '#FFF3B0']]),
   ...moveis('guarda-roupa', 'Guarda-roupa', 'movel', 140, 25, [BR, ['rosa', 'rosa', '#FFB3CC', '#FFFFFF'], MAD, ['lilas', 'lilás', '#C9B5F0', '#FFE27A']], { level: 2 }),
   ...moveis('comoda', 'Cômoda', 'movel', 100, 30, [BR, ['rosa', 'rosa', '#FFC2D6', '#7FB8F0'], MAD, ['menta', 'menta', '#9FE3CF', '#FF9FC2']]),

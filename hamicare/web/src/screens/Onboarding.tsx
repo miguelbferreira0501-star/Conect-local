@@ -6,7 +6,7 @@ import { INCENTIVES, LIKES, MOODS, PET_NAME_IDEAS, TRAITS } from '../data/lines'
 import { libById } from '../data/tasks';
 import { JOURNEY_GRAMS, KCAL_PER_KG, REF_KG, checkJourneyGoal, defaultGoalKg, directionOf, isMinor, taskKcal } from '../logic/evolution';
 import { completeOnboarding, getState, starterPlan, useApp, type OnboardingAnswers } from '../lib/store';
-import type { AgeGroup, Category, Incentive, Mood, TraitId } from '../types';
+import type { AgeGroup, Category, Incentive, Mood, PetGender, TraitId } from '../types';
 import { fmtNum } from '../lib/util';
 import { Paywall } from './Paywall';
 import { StoryIntro } from '../components/StoryIntro';
@@ -14,7 +14,7 @@ import { LIFE_AREAS, LIFE_ORDER } from '../data/tasks';
 import { Glyph } from '../components/art';
 import { AREA_GOAL, AREAS, areaOf, areasFor } from '../logic/areas';
 
-type StepId = 'intro' | 'age' | 'goal' | 'body-data' | 'journey' | 'focus' | 'minutes' | 'likes' | 'incentive' | 'feeling' | 'pet' | 'name' | 'you' | 'plan' | 'plus';
+type StepId = 'intro' | 'gender' | 'j1' | 'j2' | 'j3' | 'age' | 'goal' | 'body-data' | 'journey' | 'focus' | 'minutes' | 'likes' | 'incentive' | 'feeling' | 'pet' | 'name' | 'you' | 'plan' | 'plus';
 
 export function Onboarding() {
   const s = useApp();
@@ -34,9 +34,10 @@ export function Onboarding() {
 
   const steps: StepId[] = useMemo(() => {
     // Por enquanto só há a área de hábitos saudáveis: sem a pergunta de objetivo nem jornada de peso.
-    const list: StepId[] = ['intro', 'age'];
+    // Primeiro o Hami (menino ou menina, nome, jeitinho), depois você, as áreas e a nossa jornada.
+    const list: StepId[] = ['intro', 'gender', 'name', 'pet', 'you', 'age'];
     if (weightJourney) list.push('body-data', 'journey');
-    list.push('focus', 'minutes', 'likes', 'incentive', 'feeling', 'pet', 'name', 'you', 'plan', 'plus');
+    list.push('focus', 'minutes', 'feeling', 'j1', 'j2', 'j3', 'plan', 'plus');
     return list;
   }, [weightJourney]);
   const step = steps[Math.min(i, steps.length - 1)];
@@ -54,29 +55,29 @@ export function Onboarding() {
     completeOnboarding({ ...a, goalKg, tracking: a.tracking && consent && !minor });
   }
 
-  const say = (text: ReactNode) => <p className="bubble-pet text-[17px]">{text}</p>;
+  const say = (text: ReactNode) => <h2 className="obx-q">{text}</h2>;
+  const section = ['gender', 'name', 'pet'].includes(step) ? 'Sobre mim' : ['j1', 'j2', 'j3', 'plan'].includes(step) ? 'A nossa jornada' : 'Sobre você';
+  const showPet = !['plus', 'focus', 'j1', 'j2', 'j3', 'pet'].includes(step);
 
   // Quem chega pela primeira vez conhece o Hami numa pequena história antes das perguntas.
   if (step === 'intro' && !migrated) return <StoryIntro fur={a.fur} onDone={next} />;
 
   return (
-    <div className="shell grid content-start gap-4 !pb-10">
-      <div className="flex items-center gap-3">
-        <button className="icon-btn" onClick={back} disabled={i === 0} aria-label="Voltar" style={{ visibility: i === 0 ? 'hidden' : 'visible' }}>
+    <div className="shell obx grid content-start gap-4 !pb-10">
+      <div className="obx-top">
+        <button className="obx-back" onClick={back} disabled={i <= 1} aria-label="Voltar" style={{ visibility: i <= 1 ? 'hidden' : 'visible' }}>
           <ChevronLeft size={20} />
         </button>
-        <div className="bar flex-1" role="progressbar" aria-label="Progresso do começo" aria-valuemin={0} aria-valuemax={steps.length - 1} aria-valuenow={i}>
-          <div className="bar-fill bar-accent" style={{ transform: `scaleX(${i / (steps.length - 1)})` }} />
+        <div className="obx-bar" role="progressbar" aria-label="Progresso do começo" aria-valuemin={0} aria-valuemax={steps.length - 1} aria-valuenow={i}>
+          <span style={{ width: `${(i / (steps.length - 1)) * 100}%` }} />
         </div>
-        <span className="w-10 text-right text-[13px] font-bold tabular-nums text-muted">
-          {i + 1}/{steps.length}
-        </span>
       </div>
+      <p className="obx-section">{section}</p>
 
       {/* Na tela do Plus o Hami aparece lá dentro, de cartola: aqui em cima ficaria repetido. */}
-      {step !== 'plus' && step !== 'focus' && (
+      {showPet && (
         <div className="flex justify-center">
-          <Hamster fur={a.fur} grams={grams} phase={0} mood={step === 'intro' ? 'dormindo' : step === 'plan' ? 'animado' : 'feliz'} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null }} size={step === 'intro' ? 200 : 150} label={petName} />
+          <Hamster fur={a.fur} grams={grams} phase={0} mood={step === 'plan' ? 'animado' : 'feliz'} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null }} size={104} label={petName} />
         </div>
       )}
 
@@ -87,6 +88,87 @@ export function Onboarding() {
             <p className="text-center text-[14px] text-muted">São perguntas rápidas. Dá pra mudar tudo depois.</p>
             <button className="btn btn-primary" onClick={next}>
               {migrated ? 'Vamos lá' : 'Acordar o Hami'}
+            </button>
+          </>
+        )}
+
+        {step === 'gender' && (
+          <>
+            {say('Você quer que eu seja um menino ou uma menina?')}
+            {(
+              [
+                ['menino', 'Menino'],
+                ['menina', 'Menina'],
+                ['outro', 'Tanto faz, do meu jeitinho'],
+              ] as [PetGender, string][]
+            ).map(([g, t]) => (
+              <Opt key={g} on={a.petGender === g} onClick={() => (up({ petGender: g }), setTimeout(next, 220))} emoji="" title={t} />
+            ))}
+          </>
+        )}
+
+        {step === 'j1' && (
+          <>
+            {say(<>Vou montar com você uma lista de autocuidado de <b>passos pequenos</b></>)}
+            <div className="obx-art obx-board">
+              <svg viewBox="0 0 300 170" aria-hidden="true">
+                <rect x="6" y="6" width="288" height="158" rx="14" fill="#C98A5A" />
+                <rect x="16" y="16" width="268" height="138" rx="8" fill="#2F4A3E" />
+                {[0, 1, 2].map((k) => (
+                  <g key={k} transform={`translate(34 ${38 + k * 38})`}>
+                    <rect width="22" height="22" rx="5" fill="none" stroke="#F4F1E8" strokeWidth="3" />
+                    {k < 2 && <path d="M5 11 l5 5 l9 -11" stroke="#9FE3B1" strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />}
+                    <rect x="36" y="7" width={k === 1 ? 120 : 150} height="8" rx="4" fill="#F4F1E8" opacity="0.85" />
+                  </g>
+                ))}
+              </svg>
+              <span className="obx-board-pet">
+                <Hamster fur={a.fur} size={118} idle={false} growth={1} mood="feliz" outfit={{ chapeu: null, oculos: 'redondos', roupa: null, acessorio: null }} label="" />
+              </span>
+            </div>
+            <p className="obx-note">Hábitos curtinhos, feitos quase todo dia, são mais fáceis de manter do que mudanças grandes de uma vez. A gente vai no seu ritmo.</p>
+            <button className="btn btn-primary" onClick={next}>
+              Continuar
+            </button>
+          </>
+        )}
+
+        {step === 'j2' && (
+          <div className="obx-full" role="group" aria-label="Vamos juntos">
+            <h2>Vamos agir juntos e trazer de volta o seu brilho!</h2>
+            <span className="obx-full-pet">
+              <Hamster fur={a.fur} size={190} growth={1} mood="animado" outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: 'medalha' }} label="" />
+            </span>
+            <button className="obx-full-btn" onClick={next}>
+              Continuar
+            </button>
+          </div>
+        )}
+
+        {step === 'j3' && (
+          <>
+            {say('Vou te ajudar a ter mais calma, aos pouquinhos')}
+            <div className="obx-cmp">
+              <div className="obx-cmp-card is-before">
+                <svg className="obx-cmp-sky" viewBox="0 0 120 50" aria-hidden="true">
+                  <path d="M20 34 Q20 18 38 20 Q44 6 62 12 Q80 6 84 22 Q100 22 98 36Z" fill="#9AA0B4" />
+                  {[34, 52, 70, 86].map((x) => (
+                    <path key={x} d={`M${x} 40 l-3 8`} stroke="#8EA4D8" strokeWidth="2.4" strokeLinecap="round" />
+                  ))}
+                </svg>
+                <Hamster fur={a.fur} size={104} idle={false} growth={1} mood="calmo" outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null }} label="" />
+              </div>
+              <div className="obx-cmp-card is-after">
+                <svg className="obx-cmp-sky" viewBox="0 0 120 50" aria-hidden="true">
+                  <circle cx="92" cy="22" r="13" fill="#FFD25A" />
+                  <path d="M10 40 Q30 30 50 40" stroke="#fff" strokeWidth="5" fill="none" strokeLinecap="round" opacity="0.8" />
+                </svg>
+                <Hamster fur={a.fur} size={104} idle={false} growth={1} mood="animado" outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null }} label="" />
+              </div>
+            </div>
+            <p className="obx-note">Deixar para trás o estresse e a correria do dia, com respirações, pausas e um amigo do lado.</p>
+            <button className="btn btn-primary" onClick={next}>
+              Sim, posso
             </button>
           </>
         )}
@@ -314,7 +396,10 @@ export function Onboarding() {
 
         {step === 'pet' && (
           <>
-            {say('Agora me conhece direito! Qual pelagem é a minha?')}
+            {say('Qual é a cor do meu pelinho?')}
+            <div className="flex justify-center">
+              <Hamster fur={a.fur} size={120} growth={1} mood="feliz" outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null }} label="" />
+            </div>
             <div className="grid grid-cols-4 gap-2">
               {FURS.filter((f) => !f.price).map((f) => (
                 <button key={f.id} className="color-opt relative !p-1" aria-pressed={a.fur === f.id} aria-label={f.plus ? `${f.label} (Plus)` : f.label} disabled={f.plus} onClick={() => up({ fur: f.id })}>
@@ -340,21 +425,20 @@ export function Onboarding() {
 
         {step === 'name' && (
           <form className="grid gap-3" onSubmit={(e) => (e.preventDefault(), a.petName.trim() && next())}>
-            {say('Que nome você me dá?')}
+            {say('Me ajuda a escolher um nome que você goste?')}
             <label className="sr-only" htmlFor="ob-pet">
               Nome do hamster
             </label>
             <input id="ob-pet" className="field text-center text-[20px] font-bold" value={a.petName} maxLength={18} autoComplete="off" placeholder="Escreva um nome" onChange={(e) => up({ petName: e.target.value })} />
-            <div className="flex flex-wrap justify-center gap-2">
-              {PET_NAME_IDEAS.map((n) => (
-                <button type="button" key={n} className="chip chip-leaf" onClick={() => up({ petName: n })}>
-                  {n}
-                </button>
-              ))}
+            <p className="obx-hint">Você pode mudar quando quiser.</p>
+            <div className="obx-two">
+              <button type="button" className="obx-pick" onClick={() => up({ petName: PET_NAME_IDEAS.filter((n) => n !== a.petName)[Math.floor(Math.random() * (PET_NAME_IDEAS.length - 1))] })}>
+                Escolha por mim
+              </button>
+              <button className="btn btn-primary" type="submit" disabled={!a.petName.trim()}>
+                Bora!
+              </button>
             </div>
-            <button className="btn btn-primary" type="submit" disabled={!a.petName.trim()}>
-              Continuar
-            </button>
           </form>
         )}
 
@@ -397,7 +481,7 @@ export function Onboarding() {
 function Opt({ on, onClick, emoji, title, sub, big }: { on: boolean; onClick: () => void; emoji: string; title: string; sub?: string; big?: boolean }) {
   return (
     <button className={`opt ${big ? 'opt-big' : ''}`} aria-pressed={on} onClick={onClick}>
-      <Glyph e={emoji} size={big ? 44 : 34} />
+      {emoji && <Glyph e={emoji} size={big ? 44 : 34} />}
       <span className="min-w-0">
         <span className="block leading-tight">{title}</span>
         {sub && <span className="block text-[13px] font-semibold text-muted">{sub}</span>}

@@ -30,6 +30,40 @@ import { StreakRepairCard } from '../components/StreakRepair';
 import { requestTool } from './Wellbeing';
 import { CompanionBuddy } from './Companions';
 import { LivePet } from '../components/LivePet';
+import { openUi } from '../lib/bus';
+import { Hamster } from '../components/Hamster';
+import { play, type SoundId } from '../lib/sound';
+import type { UseKind } from '../components/Room';
+
+const USE_SOUND: Record<UseKind, SoundId> = { deitar: 'bocejo', banho: 'espuma', sentar: 'pulo', correr: 'pega', balancar: 'iii' };
+const USE_LINE: Record<UseKind, string> = {
+  deitar: 'Que caminha gostosa… vou tirar uma sonequinha.',
+  banho: 'Banho quentinho! Que delícia.',
+  sentar: 'Sentadinho aqui, descansando um pouco.',
+  correr: 'Corre, corre! Que divertido!',
+  balancar: 'Uiii, lá vou eu!',
+};
+
+/** O Hami usando o móvel (desenhado dentro dele, na largura do móvel). */
+function UsePet({ kind, w }: { kind: UseKind; w: number }) {
+  const s = useApp();
+  const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+  if (kind === 'deitar') return <SleepingHami fur={s.pet.fur} outfit={s.pet.outfit} size={clamp(w * 0.72, 90, 190)} />;
+  const size = kind === 'banho' ? clamp(w * 0.62, 80, 150) : kind === 'sentar' ? clamp(w * 0.5, 70, 140) : kind === 'correr' ? clamp(w * 0.58, 60, 130) : clamp(w * 0.45, 60, 120);
+  return (
+    <div className={`use-pet use-pet-${kind}`}>
+      <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={kind === 'banho' ? { ...s.pet.outfit, roupa: null } : s.pet.outfit} size={size} mood={kind === 'banho' ? 'calmo' : kind === 'sentar' ? 'feliz' : 'animado'} wet={kind === 'banho'} idle={kind === 'sentar'} growth={1} label="" />
+      {kind === 'banho' && (
+        <span className="use-bubbles" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+          <i />
+        </span>
+      )}
+    </div>
+  );
+}
 import { TaskCalendar, byPart } from '../components/TaskCalendar';
 import { petMoodOf } from '../lib/petState';
 import { setBattery } from '../lib/store';
@@ -65,6 +99,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
   const [areaOpen, setAreaOpen] = useState(false);
   const [wallet, setWallet] = useState(false);
   const [cal, setCal] = useState(false);
+  const [use, setUse] = useState<{ uid: string; kind: UseKind; id: number } | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const s = useApp();
   const now = useNow(20_000);
@@ -126,6 +161,19 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
         : [{ transform: 'translateY(0) scale(1,1)' }, { transform: 'translateY(0) scale(1.1,0.9)', offset: 0.15 }, { transform: 'translateY(-34px) scale(0.95,1.06)', offset: 0.45 }, { transform: 'translateY(0) scale(1.08,0.92)', offset: 0.8 }, { transform: 'translateY(0) scale(1,1)' }],
       { duration: kind === 'squish' ? 480 : 700, easing: 'cubic-bezier(0.23,1,0.32,1)' },
     );
+  }
+
+  /** Tocar num móvel: o Hami vai até lá e deita, toma banho, senta, corre ou balança por alguns segundos. */
+  function useItem(uid: string, kind: UseKind) {
+    if (s.pet.sleeping) return toast(`${s.pet.name} está dormindo. Shhh…`);
+    if (adv || s.trek) return toast(`${s.pet.name} está passeando agora.`);
+    if (use?.uid === uid) return setUse(null);
+    const id = Date.now();
+    setUse({ uid, kind, id });
+    play(USE_SOUND[kind]);
+    if (kind === 'banho') doCare('banho');
+    if (kind === 'correr' || kind === 'balancar') doCare('brincar');
+    setTimeout(() => setUse((cur) => (cur?.id === id ? null : cur)), kind === 'deitar' ? 9000 : 7000);
   }
 
   function onToggle(t: Task, el: HTMLElement) {
@@ -204,16 +252,16 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
           </TrekScene>
         ) : (
           <PanRoom>
-            <Room house={s.house} period={period} height={430} wide={1.9}>
-              {hami}
+            <Room house={s.house} period={period} height={430} wide={1.9} onUse={useItem} usage={use ? { uid: use.uid, kind: use.kind, node: (w) => <UsePet kind={use.kind} w={w} /> } : null}>
+              {use ? null : hami}
             </Room>
           </PanRoom>
         )}
         <div className="hr-top">
-          <span className="hr-hello">
+          <button className="hr-hello" onClick={() => openUi('hami')} aria-label={`Perfil do ${s.pet.name}`}>
             {GREETING[period]}
             {s.profile.name ? `, ${s.profile.name}` : ''}
-          </span>
+          </button>
           <button className="hr-pill" onClick={() => setWallet(true)} aria-label={`Carteira: ${s.coins} sementes`}>
             <Coins value={s.coins} />
           </button>
@@ -234,8 +282,8 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
         )}
         {!adv && !s.trek && (
           <div className="hr-bubble">
-            <p>{line}</p>
-            {!day.mood && (
+            <p>{use ? USE_LINE[use.kind] : line}</p>
+            {!day.mood && !use && (
               <button onClick={() => openCheckin()}>
                 Como você está agora? <ChevronRight size={18} />
               </button>

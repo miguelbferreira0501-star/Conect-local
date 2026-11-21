@@ -1,30 +1,27 @@
-// O Hami com personalidade: cada toque faz uma gracinha diferente (rola de barriga pra cima, pula dando
-// cambalhota, acena, dá risada, dança), e segurar o dedo nele vira cafuné (ronrona e solta coraçõezinhos).
+// O Hami reage ao toque com gestos simples e fofos, conforme o lugar tocado (sem emojis e sem cambalhotas):
+// cabeça = fecha os olhinhos e inclina; barriga = cócegas e dá risadinha; pezinhos = pulinho;
+// dois toques = acena "Oi!"; segurar o dedo = cafuné (ronrona e balança devagar).
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Hamster } from './Hamster';
-import { Glyph } from './art';
 import { play, type SoundId } from '../lib/sound';
 import { useApp } from '../lib/store';
 import type { PetMood } from '../types';
 
-export type Trick = 'rolar' | 'pular' | 'tchau' | 'risada' | 'dancar' | 'cafune';
+export type Trick = 'cabeca' | 'barriga' | 'pes' | 'tchau' | 'cafune';
 
-const TRICKS: Record<Trick, { mood: PetMood; sound: SoundId; ms: number; fx: string; say?: string }> = {
-  rolar: { mood: 'risada', sound: 'risada', ms: 1700, fx: '💗' },
-  pular: { mood: 'animado', sound: 'pulo', ms: 900, fx: '⭐' },
-  tchau: { mood: 'feliz', sound: 'iii', ms: 1500, fx: '💛', say: 'Oi!' },
-  risada: { mood: 'risada', sound: 'risada', ms: 1100, fx: '😄' },
-  dancar: { mood: 'animado', sound: 'brilho', ms: 1500, fx: '🎵' },
-  cafune: { mood: 'calmo', sound: 'ronrom', ms: 1600, fx: '💗' },
+const TRICKS: Record<Trick, { mood: PetMood; sound: SoundId; ms: number; say?: string }> = {
+  cabeca: { mood: 'calmo', sound: 'iii', ms: 1100 },
+  barriga: { mood: 'risada', sound: 'risada', ms: 1000 },
+  pes: { mood: 'animado', sound: 'pulo', ms: 700 },
+  tchau: { mood: 'feliz', sound: 'iii', ms: 1500, say: 'Oi!' },
+  cafune: { mood: 'calmo', sound: 'ronrom', ms: 1800 },
 };
-/** A ordem das gracinhas (a primeira é a do vídeo: rolar de barriga pra cima). */
-const ORDER: Trick[] = ['rolar', 'tchau', 'pular', 'risada', 'dancar'];
 
 interface Props {
   size?: number;
   /** Humor de quando ele está parado. */
   mood?: PetMood;
-  /** O que mais acontece no toque (ex.: contar o carinho). Devolva false para não fazer gracinha. */
+  /** O que mais acontece no toque (ex.: contar o carinho). Devolva false para não reagir. */
   onTap?: () => boolean | void;
   /** Fala de agora (aparece num balãozinho em cima dele). */
   say?: string | null;
@@ -34,39 +31,47 @@ interface Props {
   growth?: number;
 }
 
-let fxSeq = 0;
+let seq = 0;
 
 export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = '', children, label, growth }: Props) {
   const s = useApp();
   const [trick, setTrick] = useState<{ t: Trick; id: number } | null>(null);
-  const [fx, setFx] = useState<{ id: number; e: string; x: number; d: number }[]>([]);
-  const turn = useRef(0);
   const hold = useRef<number | null>(null);
   const held = useRef(false);
+  const lastTap = useRef(0);
+  const single = useRef<number | null>(null);
   const timers = useRef<number[]>([]);
   useEffect(() => () => timers.current.forEach((t) => clearTimeout(t)), []);
   const later = (fn: () => void, ms: number) => timers.current.push(window.setTimeout(fn, ms));
   const asleep = s.pet.sleeping;
 
   function run(t: Trick) {
-    const def = TRICKS[t];
-    const id = ++fxSeq;
+    const id = ++seq;
     setTrick({ t, id });
-    play(def.sound);
-    const burst = Array.from({ length: 5 }, (_, i) => ({ id: id * 10 + i, e: def.fx, x: 20 + Math.random() * 60, d: i * 90 }));
-    setFx((f) => [...f.slice(-10), ...burst]);
-    later(() => setFx((f) => f.filter((p) => Math.floor(p.id / 10) !== id)), 1500);
-    later(() => setTrick((cur) => (cur?.id === id ? null : cur)), def.ms);
+    play(TRICKS[t].sound);
+    later(() => setTrick((cur) => (cur?.id === id ? null : cur)), TRICKS[t].ms);
   }
 
-  function tap() {
+  function tap(e: React.MouseEvent<HTMLButtonElement>) {
     if (held.current) return;
     if (onTap?.() === false) return;
     if (asleep) {
       play('ronco');
       return;
     }
-    run(ORDER[turn.current++ % ORDER.length]);
+    const now = Date.now();
+    // Dois toques rápidos: ele acena.
+    if (now - lastTap.current < 320) {
+      if (single.current) clearTimeout(single.current);
+      lastTap.current = 0;
+      run('tchau');
+      return;
+    }
+    lastTap.current = now;
+    const r = e.currentTarget.getBoundingClientRect();
+    const y = (e.clientY - r.top) / Math.max(1, r.height);
+    const part: Trick = y < 0.52 ? 'cabeca' : y < 0.82 ? 'barriga' : 'pes';
+    single.current = window.setTimeout(() => run(part), 200);
   }
 
   const now = trick ? TRICKS[trick.t] : null;
@@ -96,15 +101,10 @@ export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = ''
         onPointerLeave={() => hold.current && clearTimeout(hold.current)}
         onContextMenu={(e) => e.preventDefault()}
       >
-        <span key={trick?.id ?? 0} className={`live-body ${trick ? `trick-${trick.t}` : ''}`}>
+        <span key={trick?.id ?? 0} className={`live-body ${trick ? `gest-${trick.t}` : ''}`}>
           <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={petMood} size={size} label={s.pet.name} pose={trick?.t === 'tchau' ? 'tchau' : undefined} growth={growth} />
         </span>
-        {trick?.t === 'rolar' && <span className="live-dust" aria-hidden="true" />}
-        {fx.map((p) => (
-          <span key={p.id} className="live-fx" style={{ left: `${p.x}%`, animationDelay: `${p.d}ms` }} aria-hidden="true">
-            <Glyph e={p.e} size={26} />
-          </span>
-        ))}
+        {trick?.t === 'cafune' && <span className="live-glow" aria-hidden="true" />}
       </button>
       {children}
     </div>

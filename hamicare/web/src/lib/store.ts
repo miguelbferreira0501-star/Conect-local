@@ -2,7 +2,7 @@
 import { careDays, growthOf } from '../logic/growth';
 import { useSyncExternalStore } from 'react';
 import { AREA_GOAL, AREA_PLAN, areaOf, isWeightArea, type Area } from '../logic/areas';
-import type { AgeGroup, Battery, BodyStart, CareId, Category, DayLog, DayPart, Direction, Freq, GoalId, Incentive, Journey, MealEntry, Mood, Outfit, PetMood, Photo, State, Task, TraitId, WearSlot } from '../types';
+import type { AgeGroup, Battery, BodyStart, CareId, Category, DayLog, DayPart, PetGender, Direction, Freq, GoalId, Incentive, Journey, MealEntry, Mood, Outfit, PetMood, Photo, State, Task, TraitId, WearSlot } from '../types';
 import { LIBRARY, LIFE_AREAS, libById, rewardFor, type LifeArea } from '../data/tasks';
 import { ITEMS, LOOKS, RECIPES, STYLES, WEARABLE_KINDS, itemById, stylePrice } from '../data/items';
 import { PLACES, placeById } from '../data/world';
@@ -141,11 +141,13 @@ function normalize(raw: State): State {
 
 function upgradeHouses(input: State): State {
   let s = input;
+  // Só ganha no inventário as peças que a casa não tinha (não duplica o que já estava lá).
+  const onlyNew = (before: State['house'], after: State['house']) => ({ ...after, items: after.items.filter((i) => !before.items.some((o) => o.itemId === i.itemId)) });
   const home = upgradeHouse(s.house, s.homeArena ?? 1);
-  if (home !== s.house) s = withHouseFurniture({ ...s, house: home }, home);
+  if (home !== s.house) s = withHouseFurniture({ ...s, house: home }, onlyNew(s.house, home));
   for (const [n, h] of Object.entries(s.houses ?? {})) {
     const up = upgradeHouse(h, Number(n));
-    if (up !== h) s = withHouseFurniture({ ...s, houses: { ...s.houses, [n]: up } }, up);
+    if (up !== h) s = withHouseFurniture({ ...s, houses: { ...s.houses, [n]: up } }, onlyNew(h, up));
   }
   return s;
 }
@@ -717,6 +719,7 @@ export interface OnboardingAnswers {
   body: BodyStart;
   /** Áreas escolhidas nos cartões do começo (Saúde, Trabalho e estudo, Casa, Calma). */
   lifeAreas?: LifeArea[];
+  petGender?: PetGender;
 }
 
 /** Plano inicial: 4 a 6 atividades escolhidas pelas respostas. */
@@ -776,7 +779,7 @@ export function completeOnboarding(a: OnboardingAnswers) {
     onboarded: true,
     journey,
     profile: { name: a.userName.trim(), ageGroup: a.ageGroup, goal, focus: a.focus, minutes: a.minutes, likes: a.likes, incentive: a.incentive, feeling: a.feeling, lifeAreas: a.lifeAreas },
-    pet: { ...base.pet, name: a.petName.trim() || 'Hami', fur: a.fur, trait: a.trait, body: bodyStart, grams, startGrams: grams, lastWeighIn: today, weighIns: [{ date: today, grams }] },
+    pet: { ...base.pet, name: a.petName.trim() || 'Hami', fur: a.fur, trait: a.trait, gender: a.petGender, body: bodyStart, grams, startGrams: grams, lastWeighIn: today, weighIns: [{ date: today, grams }] },
     body: {
       ...base.body,
       tracking,
@@ -1816,7 +1819,7 @@ export function buyFur(furId: string): BuyResult {
   return 'ok';
 }
 
-export function updatePet(patch: Partial<Pick<State['pet'], 'name' | 'fur' | 'trait'>>) {
+export function updatePet(patch: Partial<Pick<State['pet'], 'name' | 'fur' | 'trait' | 'gender'>>) {
   if (patch.fur && !furAvailable(state, patch.fur)) return;
   commit({ ...state, pet: { ...state.pet, ...patch } });
 }
