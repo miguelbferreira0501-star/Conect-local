@@ -24,9 +24,8 @@ const TileView = memo(function TileView({ item, fresh, fur, onOpen, dim }: { ite
     <button className={`inv-tile ${dim ? 'is-dim' : ''}`} style={{ ['--rc' as string]: rarityColor(r) }} onClick={() => onOpen(item)} aria-label={`${item.name}, ${rarityLabel(r)}${fresh ? ', novo' : ''}`}>
       {fresh && <span className="inv-new">Novo</span>}
       <span className="inv-icon">
-        <ItemIcon item={item} size={30} fur={fur} />
+        <ItemIcon item={item} size={46} fur={fur} />
       </span>
-      <span className="inv-name">{item.name}</span>
     </button>
   );
 });
@@ -96,7 +95,7 @@ export function InventoryView() {
       ) : (
         <p className="py-6 text-center text-muted">Nada por aqui com esses filtros.</p>
       )}
-      <Sheet open={!!open} onClose={() => setOpen(null)} title={open?.name ?? ''}>
+      <Sheet open={!!open} onClose={() => setOpen(null)} title={open ? (WEARABLE_KINDS.includes(open.kind) ? 'Para vestir' : 'Para a casa') : ''}>
         {open && (
           <div className="grid justify-items-center gap-3 text-center">
             <div className="chest-prize-icon" style={{ ['--rc' as string]: rarityColor(rarityOf(open)) }}>
@@ -108,12 +107,12 @@ export function InventoryView() {
               {meta?.at ? ` · ${new Date(meta.at).toLocaleDateString('pt-BR')}` : ''}
             </p>
             {WEARABLE_KINDS.includes(open.kind) && (
-              <button className="btn btn-primary w-full" onClick={() => (wear(open.id), toast(`${s.pet.name} está usando ${open.name}!`), setOpen(null))}>
+              <button className="btn btn-primary w-full" onClick={() => (wear(open.id), toast(`Ficou lindo no ${s.pet.name}!`), setOpen(null))}>
                 Vestir no {s.pet.name}
               </button>
             )}
             {HOUSE_KINDS.includes(open.kind) && (
-              <button className="btn btn-primary w-full" onClick={() => { const r = placeItem(open.id); toast(r === 'ja-esta' ? `${open.name} já está na casa.` : r === 'movido' ? `${open.name} se mudou para a casa de agora.` : `${open.name} foi para a casa.`); setOpen(null); }}>
+              <button className="btn btn-primary w-full" onClick={() => { const r = placeItem(open.id); toast(r === 'ja-esta' ? 'Já está na casa.' : r === 'movido' ? 'Foi para a casa de agora.' : 'Foi para a casa!'); setOpen(null); }}>
                 Colocar na casa
               </button>
             )}
@@ -223,7 +222,7 @@ export function WorkshopView() {
     const r = await craftNow(it.id);
     setBusy(false);
     if (r === 'ok') {
-      toast(`${it.name} fabricado!`);
+      toast('Fabricado!');
       setPick(null);
     } else toast(r === 'sem-fragmentos' ? 'Faltam fragmentos.' : r === 'rede' ? 'Sem conexão agora. Nada foi gasto.' : 'Não deu para fabricar este item.');
   }
@@ -282,7 +281,6 @@ export function WorkshopView() {
             <div className="chest-prize-icon" style={{ ['--rc' as string]: rarityColor(rarityOf(pick)) }}>
               <ItemIcon item={pick} size={70} fur={s.pet.fur} />
             </div>
-            <p className="font-display text-[22px] font-bold">{pick.name}</p>
             <RarityChip r={rarityOf(pick)} />
             <button className="btn btn-primary w-full" disabled={busy || s.game.fragments < cost(pick)} onClick={() => craft(pick)}>
               {s.game.fragments < cost(pick) ? `Faltam ${cost(pick) - s.game.fragments} fragmentos` : `Fabricar por ${cost(pick)} fragmentos`}
@@ -299,9 +297,8 @@ function CraftTile({ item, s, cost, onClick }: { item: Item; s: State; cost: num
   return (
     <button className={`inv-tile ${can ? '' : 'is-dim'}`} style={{ ['--rc' as string]: rarityColor(rarityOf(item)) }} onClick={onClick} aria-label={`${item.name}, ${cost} fragmentos`}>
       <span className="inv-icon">
-        <ItemIcon item={item} size={30} fur={s.pet.fur} />
+        <ItemIcon item={item} size={46} fur={s.pet.fur} />
       </span>
-      <span className="inv-name">{item.name}</span>
       <span className="inv-cost">
         <Glyph e="💎" size={12} /> {cost}
       </span>

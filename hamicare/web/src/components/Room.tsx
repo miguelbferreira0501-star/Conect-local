@@ -1,4 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react';
+import { ArrowUpToLine, X } from 'lucide-react';
 import type { House } from '../types';
 import { itemById } from '../data/items';
 import type { Period } from '../data/lines';
@@ -20,6 +21,9 @@ interface Props {
   onMove?: (uid: string, x: number, y: number) => void;
   /** Tocar num móvel que o Hami sabe usar (cama, banheira, sofá…). */
   onUse?: (uid: string, kind: UseKind) => void;
+  /** Modo de decorar: guardar o móvel selecionado ou trazer para a frente (botões em cima dele). */
+  onRemove?: (uid: string) => void;
+  onFront?: (uid: string) => void;
   /** O Hami usando um móvel agora: desenhado dentro dele, com a largura do móvel em px. */
   usage?: { uid: string; kind: UseKind; node: (w: number) => ReactNode } | null;
 }
@@ -54,7 +58,7 @@ const depth = (y: number) => 0.8 + 0.2 * Math.min(1, Math.max(0, (y - WALL_H) / 
  * A casa do Hami: um cômodo de verdade (parede com papel, lambri e rodapé, chão em perspectiva,
  * janela com cortina) e os móveis posicionados em % (arrastáveis no modo de edição).
  */
-export function Room({ house, period = 'tarde', height = 260, children, editing, selected, onSelect, onMove, onUse, usage, wide = 1 }: Props & { wide?: number }) {
+export function Room({ house, period = 'tarde', height = 260, children, editing, selected, onSelect, onMove, onRemove, onFront, onUse, usage, wide = 1 }: Props & { wide?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<{ uid: string; x: number; y: number } | null>(null);
   const trim = trimOf(house.wallpaper);
@@ -134,7 +138,7 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
               top: `${live.y}%`,
               width: `${(item.size ?? 12) / wide}%`,
               scale: k === 1 ? undefined : String(k),
-              zIndex: place === 'tapete' ? 3 : place === 'parede' ? 5 : 10 + Math.round(live.y),
+              zIndex: editing && selected === it.uid ? 300 : place === 'tapete' ? 3 : place === 'parede' ? 5 : 10 + Math.round(live.y),
               fontSize: `${((item.size ?? 12) * 0.82) / wide}cqw`,
             }}
             onPointerDown={(e) => {
@@ -154,6 +158,20 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
           >
             {item.svg ? <Furniture id={item.svg} c1={item.c1} c2={item.c2} /> : <Glyph e={item.art ?? item.emoji} size="fill" />}
             {use && <div className={`room-use use-${use.kind}`}>{use.node(px)}</div>}
+            {editing && selected === it.uid && (onRemove || onFront) && (
+              <span className="room-sel-actions">
+                {onFront && (
+                  <button aria-label={`Trazer ${item.name} pra frente`} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => (e.stopPropagation(), onFront(it.uid))}>
+                    <ArrowUpToLine size={16} />
+                  </button>
+                )}
+                {onRemove && (
+                  <button className="is-remove" aria-label={`Tirar ${item.name} da casa`} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => (e.stopPropagation(), onRemove(it.uid))}>
+                    <X size={17} strokeWidth={3} />
+                  </button>
+                )}
+              </span>
+            )}
             {use?.kind === 'banho' && item.svg && (
               <div className="room-use-front" aria-hidden="true">
                 <Furniture id={item.svg} c1={item.c1} c2={item.c2} />
@@ -163,8 +181,8 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
         );
       })}
       {children && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-[3%] flex justify-center" style={{ zIndex: 98 }}>
-          <div className="pointer-events-auto">{children}</div>
+        <div className={`pointer-events-none absolute inset-x-0 bottom-[3%] flex justify-center ${editing ? 'room-pet-ghost' : ''}`} style={{ zIndex: 98 }}>
+          <div className={editing ? 'pointer-events-none' : 'pointer-events-auto'}>{children}</div>
         </div>
       )}
       <div className="room-light" aria-hidden="true" />
