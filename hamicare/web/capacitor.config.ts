@@ -17,7 +17,7 @@ const config: CapacitorConfig = {
     CapacitorHttp: { enabled: true },
     CapacitorCookies: { enabled: true },
     LocalNotifications: { iconColor: '#FF6F91' },
-    SplashScreen: { launchShowDuration: 900, backgroundColor: '#FFF4E2', showSpinner: false },
+    SplashScreen: { launchShowDuration: 900, backgroundColor: '#AD73F5', showSpinner: false },
   },
 };
 

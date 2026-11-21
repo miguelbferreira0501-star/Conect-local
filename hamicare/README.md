@@ -1,6 +1,6 @@
 # HamiCare
 
-<img src="docs/logo/hamicare-logo-1024.png" alt="Logo do HamiCare: o Hami de pertinho com um girassol" width="160">
+<img src="docs/logo/hamicare-logo-1024.png" alt="Logo do HamiCare: o Hami sorrindo, de patinhas para a frente, num fundo roxo" width="160">
 
 **Sua jornada, seu mascote, sua evolução.** O **Hami**, um hamster, **emagrece ou ganha peso junto com você**: cada missão saudável (beber água no lugar do refrigerante, comer uma fruta, caminhar) tira ou soma as mesmas calorias de vocês dois. Em volta disso: cuidados animados, casa, aventuras, bem-estar e uma rede de amigos só de gentileza.
 
