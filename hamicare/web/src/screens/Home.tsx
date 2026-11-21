@@ -252,7 +252,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
       <section className="home-room" aria-label={`Casa do ${s.pet.name}`}>
         {s.trek && trekTheme ? (
           <TrekScene theme={trekTheme} height={430}>
-            <WalkingHami fur={s.pet.fur} outfit={s.pet.outfit} size={176} />
+            <WalkingHami fur={s.pet.fur} outfit={s.pet.outfit} size={215} />
           </TrekScene>
         ) : outside ? (
           <PanRoom>
