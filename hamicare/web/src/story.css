@@ -528,3 +528,13 @@ span.tcal-ico { background: transparent; }
 .house-tray-tile > .kit-icon { position: absolute; inset: 4px; width: auto !important; height: auto !important; }
 .inv-tile > .inv-icon { display: flex !important; align-items: center; justify-content: center; }
 .inv-tile > .inv-icon > .kit-icon { flex: 0 0 auto; width: 100% !important; height: 100% !important; }
+
+/* Hami de lado na viagem: rabinho, orelha e sacola balançando no ritmo dos passos */
+.wk-sack { transform-box: view-box !important; animation: wk-sack2 0.56s ease-in-out infinite !important; }
+@keyframes wk-sack2 { 0%, 100% { transform: rotate(5deg); } 50% { transform: rotate(-7deg); } }
+.wk-tail { transform-box: view-box; animation: wk-tail 0.56s ease-in-out infinite; }
+@keyframes wk-tail { 50% { transform: rotate(-18deg); } }
+.wk-ear { transform-box: view-box; animation: wk-ear2 0.56s ease-in-out infinite; }
+@keyframes wk-ear2 { 50% { transform: rotate(-6deg); } }
+.wk.is-still .wk-sack, .wk.is-still .wk-tail, .wk.is-still .wk-ear { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .wk-sack, .wk-tail, .wk-ear { animation: none !important; } }
