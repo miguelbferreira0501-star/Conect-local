@@ -2,7 +2,8 @@ import { PlusWeeklyCard } from '../components/PlusWeekly';
 import { MoonTeaser } from '../components/MoonTeaser';
 import { useGrowth } from '../components/Growth';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronRight, Flame, Mail, Plus, Settings } from 'lucide-react';
+import { ChevronRight, Flame, House as HouseIcon, Mail, Plus, Settings, Trees } from 'lucide-react';
+import { Outdoors } from '../components/Outdoors';
 import { Room } from '../components/Room';
 import { floorPalette, tonePalette } from '../components/Furniture';
 import { TREK_THEMES, Suitcase, TrekBar, TrekScene, TrekStart, TrekUnpack, WalkingHami, finishTrek, trekThemeOf } from '../components/Trek';
@@ -30,6 +31,7 @@ import { StreakRepairCard } from '../components/StreakRepair';
 import { requestTool } from './Wellbeing';
 import { CompanionBuddy } from './Companions';
 import { LivePet } from '../components/LivePet';
+import { AreaRow } from '../components/Areas';
 import { openUi } from '../lib/bus';
 import { useFurniturePlay } from '../components/FurniturePlay';
 import { TaskCalendar, byPart } from '../components/TaskCalendar';
@@ -68,6 +70,22 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
   const [wallet, setWallet] = useState(false);
   const [cal, setCal] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  // Dentro de casa ou lá fora, no quintal (fica lembrado neste aparelho).
+  const [outside, setOutsideRaw] = useState(() => {
+    try {
+      return localStorage.getItem('hamicare:fora') === '1';
+    } catch {
+      return false;
+    }
+  });
+  const setOutside = (v: boolean) => {
+    setOutsideRaw(v);
+    try {
+      localStorage.setItem('hamicare:fora', v ? '1' : '0');
+    } catch {
+      /* sem armazenamento: só nesta visita */
+    }
+  };
   const s = useApp();
   const now = useNow(20_000);
   const furniture = useFurniturePlay(!!(s.adventure || s.trek));
@@ -89,7 +107,8 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
   }, [goalDone]);
   useEffect(() => {
     // Na viagem, a página continua o chão do caminho.
-    const p = trekTheme ? tonePalette((TREK_THEMES[trekTheme] ?? TREK_THEMES.casinha).ground) : floorPalette(floor);
+    // Lá fora, a página continua o gramado.
+    const p = trekTheme ? tonePalette((TREK_THEMES[trekTheme] ?? TREK_THEMES.casinha).ground) : outside ? tonePalette(periodOf(new Date()) === 'noite' ? '#2F6A55' : '#7FCF6E') : floorPalette(floor);
     const root = document.documentElement.style;
     root.setProperty('--home-floor', p.tone);
     root.setProperty('--home-page', p.page);
@@ -98,10 +117,11 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
     root.setProperty('--home-page-dark', p.dark);
     root.setProperty('--home-ink', p.ink);
     return () => ['--home-floor', '--home-page', '--home-card', '--home-deep', '--home-page-dark', '--home-ink'].forEach((k) => root.removeProperty(k));
-  }, [floor, trekTheme]);
+  }, [floor, trekTheme, outside]);
   const day = dayOf(s, today);
   const tasks = todayTasks(s, today);
   const done = tasks.filter((t) => t.id in day.done).length;
+  const goal = dayGoalOf(s, tasks.length);
   const period = periodOf(new Date(now));
   const streak = streakOf(s.days, today, s.createdAt);
   const [result, setResult] = useState<AdventureResult | null>(null);
@@ -205,12 +225,31 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
           <TrekScene theme={trekTheme} height={430}>
             <WalkingHami fur={s.pet.fur} outfit={s.pet.outfit} size={176} />
           </TrekScene>
+        ) : outside ? (
+          <PanRoom>
+            <Outdoors period={period} height={430}>
+              {hami}
+            </Outdoors>
+          </PanRoom>
         ) : (
           <PanRoom>
             <Room house={s.house} period={period} height={430} wide={1.9} onUse={furniture.useItem} usage={furniture.usage}>
               {furniture.use ? null : hami}
             </Room>
           </PanRoom>
+        )}
+        {!s.trek && !adv && (
+          <button
+            className="hr-place"
+            onClick={() => {
+              if (furniture.use) furniture.stop();
+              setOutside(!outside);
+            }}
+            aria-label={outside ? `Levar o ${s.pet.name} para dentro de casa` : `Levar o ${s.pet.name} lá para fora`}
+          >
+            {outside ? <HouseIcon size={18} /> : <Trees size={18} />}
+            {outside ? 'Casa' : 'Lá fora'}
+          </button>
         )}
         <div className="hr-top">
           <button className="hr-hello" onClick={() => openUi('hami')} aria-label={`Perfil do ${s.pet.name}`}>
@@ -245,32 +284,28 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
             )}
           </div>
         )}
-        {!trekTheme && <span className="hr-hint" aria-hidden="true">‹ arraste para ver a casa ›</span>}
+        {!trekTheme && <span className="hr-hint" aria-hidden="true">{outside ? '‹ arraste para ver o quintal ›' : '‹ arraste para ver a casa ›'}</span>}
       </section>
 
       <TrekBar now={now} />
 
-      <section className="hc-adv" aria-label="Meta do dia">
-        <button className="hc-adv-title" onClick={() => setAreaOpen(true)}>
-          Meta do dia · {Math.min(done, dayGoalOf(s, tasks.length))}/{dayGoalOf(s, tasks.length)}
+      {/* Meta do dia em uma linha: barrinha de progresso, a mala da viagem e a sequência. */}
+      <section className="hc-goal" aria-label="Meta do dia">
+        <button className="hc-goal-main" onClick={() => setAreaOpen(true)} aria-label={`Meta do dia: ${goalDone ? 'completa' : `${Math.min(done, goal)} de ${goal}`}. Ao completar, o ${s.pet.name} sai em viagem.`}>
+          <span className="hc-goal-label">Meta do dia</span>
+          <span className="hc-goal-bar" aria-hidden="true">
+            <i style={{ width: `${Math.min(100, (Math.min(done, goal) / Math.max(1, goal)) * 100)}%` }} />
+          </span>
+          <b>
+            {Math.min(done, goal)}/{goal}
+          </b>
+          <span className="hc-goal-bag" aria-hidden="true">
+            <Glyph e="🎒" size={22} />
+          </span>
         </button>
-        <div className="hc-nodes" aria-hidden="true">
-          {Array.from({ length: Math.min(6, dayGoalOf(s, tasks.length)) }, (_, i) => {
-            const goal = dayGoalOf(s, tasks.length);
-            const n = Math.min(6, goal);
-            const step = (goal / n) * (i + 1);
-            return (
-              <span key={i} className="hc-node-wrap">
-                {i > 0 && <span className={`hc-link ${done >= (goal / n) * i ? 'is-on' : ''}`} />}
-                <span className={`hc-node ${done >= step ? 'is-on' : ''}`}>{done >= step ? '✓' : ''}</span>
-              </span>
-            );
-          })}
-        </div>
-        {!s.trek && s.trekDay !== today && <p className="hc-adv-trip">🎒 Complete a meta e o {s.pet.name} sai em viagem!</p>}
-        <p className="hc-adv-sub">
-          <Flame size={14} /> {streak.count} {streak.count === 1 ? 'dia seguido' : 'dias seguidos'} · <button onClick={onEvolution}>{growthName}</button>
-        </p>
+        <button className="hc-goal-streak" onClick={onEvolution} aria-label={`${streak.count} ${streak.count === 1 ? 'dia seguido' : 'dias seguidos'}, ${growthName}`}>
+          <Flame size={16} /> {streak.count}
+        </button>
       </section>
       <DayGoalSheet open={areaOpen} onClose={() => setAreaOpen(false)} total={tasks.length} />
       <WalletSheet open={wallet} onClose={() => setWallet(false)} />
@@ -311,6 +346,8 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
           </button>
         </div>
       </section>
+
+      <AreaRow />
 
       <details className="hc-more" open={moreOpen} onToggle={(e) => setMoreOpen((e.target as HTMLDetailsElement).open)}>
         <summary>

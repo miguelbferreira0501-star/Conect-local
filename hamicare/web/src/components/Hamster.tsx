@@ -71,14 +71,21 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
   const arm = costume ? costume.paw : fur.body;
   const foot = costume ? costume.foot : fur.body;
   const chin = hcy + hry * 0.9;
-  // A peça veste por cima: um pouco mais larga que o corpo (tecido fofinho) e termina antes das perninhas.
+  // A peça veste colada: segue o mesmo contorno do corpo (só cobre a linha dele) e termina numa barra
+  // arredondada que acompanha a barriga, como roupinha de bichinho de pelúcia. O vestido abre um pouco embaixo.
   const shape = costume ? null : garmentShape(outfit.roupa);
-  const hem = shape === 'dress' ? 185 : 177;
-  const cw = bw + 4;
+  const hem = shape === 'dress' ? 186 : 181;
+  const cw = bw + 1.2;
+  const L0 = 100 - cw;
+  const R0 = 100 + cw;
   const cloth =
     shape === 'dress'
-      ? `M${100 - 32} 104 C${100 - cw + 3} 112 ${100 - cw - 2} 134 ${100 - cw + 1} 148 C${100 - cw - 5} 162 ${100 - cw - 11} 176 ${100 - cw - 10} ${hem} Q100 ${hem + 7} ${100 + cw + 10} ${hem} C${100 + cw + 11} 176 ${100 + cw + 5} 162 ${100 + cw - 1} 148 C${100 + cw + 2} 134 ${100 + cw - 3} 112 ${100 + 32} 104 Z`
-      : `M${100 - 32} 104 C${100 - cw + 3} 113 ${100 - cw - 4} 146 ${100 - cw} 166 Q${100 - cw + 1} ${hem} ${100 - cw + 9} ${hem} Q100 ${hem + 4} ${100 + cw - 9} ${hem} Q${100 + cw - 1} ${hem} ${100 + cw} 166 C${100 + cw + 4} 146 ${100 + cw - 3} 113 ${100 + 32} 104 Z`;
+      ? `M${100 - 31} 103.4 C${L0 + 4} 113.4 ${L0 - 4} 140 ${L0 - 0.5} 156 C${L0 - 2} 168 ${L0 - 5} 178 ${L0 - 4} ${hem - 2} Q100 ${hem + 6} ${R0 + 4} ${hem - 2} C${R0 + 5} 178 ${R0 + 2} 168 ${R0 + 0.5} 156 C${R0 + 4} 140 ${R0 - 4} 113.4 ${100 + 31} 103.4 Z`
+      : `M${100 - 31} 103.4 C${L0 + 4} 113.4 ${L0 - 4} 146 ${L0} 168 C${L0 + 1.5} 176 ${100 - cw * 0.62} ${hem} 100 ${hem + 0.5} C${100 + cw * 0.62} ${hem} ${R0 - 1.5} 176 ${R0} 168 C${R0 + 4} 146 ${R0 - 4} 113.4 ${100 + 31} 103.4 Z`;
+  const hemSeam =
+    shape === 'dress'
+      ? `M${L0 - 5} ${hem - 5} Q100 ${hem + 2} ${R0 + 5} ${hem - 5}`
+      : `M${L0 + 3} ${172} C${L0 + 6} 178 ${100 - cw * 0.58} ${hem - 3.6} 100 ${hem - 3.2} C${100 + cw * 0.58} ${hem - 3.6} ${R0 - 6} 178 ${R0 - 3} ${172}`;
   return (
     <svg viewBox="0 0 200 200" width={size} height={size} role="img" aria-label={label ?? 'Hami'} className="block overflow-visible">
       <defs>
@@ -141,9 +148,9 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
                 <rect x="0" y={chin - 14} width="200" height="100" fill={`url(#c${uid})`} />
                 {/* sombra da cabeça no tecido e brilho de tecido no ombro */}
                 <ellipse cx="100" cy={chin + 3} rx={hrx * 0.72} ry="10" fill="#000000" opacity="0.12" />
-                <path d={`M${100 - cw + 6} 150 Q${100 - cw + 3} 160 ${100 - cw + 7} ${hem - 6}`} stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.18" />
-                {/* costura da barra */}
-                <path d={shape === 'dress' ? `M${100 - cw - 8} ${hem - 4} Q100 ${hem + 3} ${100 + cw + 8} ${hem - 4}` : `M${100 - cw + 6} ${hem - 4} Q100 ${hem} ${100 + cw - 6} ${hem - 4}`} stroke={darken(garment, 0.3)} strokeWidth="1.1" strokeDasharray="2.6 2.2" fill="none" opacity="0.5" />
+                <path d={`M${R0 - 7} 122 Q${R0 - 3} 140 ${R0 - 5} 160`} stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.2" />
+                {/* costura da barra, acompanhando a barriga */}
+                <path d={hemSeam} stroke={darken(garment, 0.3)} strokeWidth="1.1" strokeDasharray="2.6 2.2" fill="none" opacity="0.55" />
               </g>
               <path d={cloth} fill="none" stroke={darken(garment, 0.25)} strokeWidth="1.8" strokeLinejoin="round" />
             </g>

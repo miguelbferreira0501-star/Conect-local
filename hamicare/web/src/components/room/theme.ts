@@ -13,6 +13,7 @@ export interface WallTrim {
 const W = (wainscot: string | null, trim: string, curtain: string, curtain2: string, window: WallTrim['window'] = 'classica'): WallTrim => ({ wainscot, trim, curtain, curtain2, window });
 
 export const WALL_TRIM: Record<string, WallTrim> = {
+  'p-menta': W('#FFFFFF', '#8FD0A8', '#FF9FC2', '#FFE3EC', 'arco'),
   'p-creme': W('#FFFFFF', '#E9C7A6', '#FF9FC2', '#FFD6E4'),
   'p-listras': W('#FFFFFF', '#F4B6C8', '#FF86AC', '#FFE3EA', 'arco'),
   'p-bolinhas': W('#FFFFFF', '#9ED7BA', '#6FD8C0', '#E9FAF1'),
@@ -31,10 +32,10 @@ export const WALL_TRIM: Record<string, WallTrim> = {
   'p-galaxia': W('#2C2660', '#5A4FA6', '#B399F0', '#E6D2FF', 'vigia'),
   // Arenas
   'p-jardim': W('#FFFFFF', '#9ED08A', '#FF9FC2', '#FFF0F5', 'arco'),
-  'p-vila': W('#B98251', '#8E5E3C', '#F0525F', '#FFF1D6'),
-  'p-floresta': W('#8E5E3C', '#6A4229', '#7CC39A', '#E6F7E9', 'arco'),
+  'p-vila': W('#FFFFFF', '#E58A5C', '#F0525F', '#FFF1D6'),
+  'p-floresta': W('#EAF7E4', '#6DB97A', '#FFB347', '#FFF1D6', 'arco'),
   'p-tropical': W('#FFFFFF', '#E8C98E', '#FF8FB1', '#FFF0C2'),
-  'p-chale': W(null, '#5E3A22', '#D7263D', '#F7E3C8'),
+  'p-chale': W('#FFFFFF', '#D46F62', '#D7263D', '#F7E3C8'),
   'p-cidade': W('#2E3654', '#5A6390', '#FF6FD8', '#FFE3F7'),
   'p-mar': W('#2F7FB8', '#1F5E8C', '#FFFFFF', '#BFE9F5', 'vigia'),
   'p-sonhos': W('#FFFFFF', '#E8B3E0', '#FFB3D9', '#FFF0FA', 'arco'),
