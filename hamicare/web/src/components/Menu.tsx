@@ -43,6 +43,7 @@ export function MenuScreen({ open, onClose }: { open: boolean; onClose: () => vo
           : 'Segure a tela inicial, toque em Widgets e escolha HamiCare.',
     );
   const tiles: { ico: string; label: string; on: () => void; badge?: number }[] = [
+    { ico: '💗', label: `Perfil do ${s.pet.name}`, on: () => go('hami') },
     { ico: '⚡', label: 'Missões', on: () => go('missoes') },
     { ico: '🌈', label: 'Minha área de cuidado', on: () => setArea(true) },
     { ico: '📋', label: 'Temporada', on: () => go('temporada') },

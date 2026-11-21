@@ -18,6 +18,21 @@ interface Props {
   selected?: string | null;
   onSelect?: (uid: string | null) => void;
   onMove?: (uid: string, x: number, y: number) => void;
+  /** Tocar num móvel que o Hami sabe usar (cama, banheira, sofá…). */
+  onUse?: (uid: string, kind: UseKind) => void;
+  /** O Hami usando um móvel agora: desenhado dentro dele, com a largura do móvel em px. */
+  usage?: { uid: string; kind: UseKind; node: (w: number) => ReactNode } | null;
+}
+
+export type UseKind = 'deitar' | 'banho' | 'sentar' | 'correr' | 'balancar';
+/** O que o Hami faz em cada móvel. */
+export function useKindOf(itemId: string, svg?: string): UseKind | null {
+  if (svg === 'k-banheira') return 'banho';
+  if (svg === 'k-cama' || svg === 'k-cama-dossel' || svg === 'k-almofada' || svg === 'caminha' || /^cama/.test(itemId)) return 'deitar';
+  if (svg === 'k-sofa' || svg === 'k-poltrona' || svg === 'k-cadeira' || svg === 'k-banquinho' || /poltrona|cadeira|banco|trono|sofa/.test(itemId)) return 'sentar';
+  if (svg === 'k-rodinha' || svg === 'rodinha') return 'correr';
+  if (svg === 'k-balanco') return 'balancar';
+  return null;
 }
 
 const GARLANDS = new Set(['pisca', 'bandeirinhas']);
@@ -39,7 +54,7 @@ const depth = (y: number) => 0.8 + 0.2 * Math.min(1, Math.max(0, (y - WALL_H) / 
  * A casa do Hami: um cômodo de verdade (parede com papel, lambri e rodapé, chão em perspectiva,
  * janela com cortina) e os móveis posicionados em % (arrastáveis no modo de edição).
  */
-export function Room({ house, period = 'tarde', height = 260, children, editing, selected, onSelect, onMove, wide = 1 }: Props & { wide?: number }) {
+export function Room({ house, period = 'tarde', height = 260, children, editing, selected, onSelect, onMove, onUse, usage, wide = 1 }: Props & { wide?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<{ uid: string; x: number; y: number } | null>(null);
   const trim = trimOf(house.wallpaper);
@@ -103,13 +118,17 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
         }
         const place = placeOf(it.itemId, item.svg, live.y);
         const k = place === 'parede' ? 1 : depth(live.y);
+        const kind = !editing && onUse ? useKindOf(it.itemId, item.svg) : null;
+        const use = usage?.uid === it.uid ? usage : null;
+        const px = ((ref.current?.clientWidth ?? 390) * (item.size ?? 12)) / wide / 100;
         return (
           <div
             key={it.uid}
-            role={editing ? 'button' : 'img'}
-            aria-label={item.name}
-            tabIndex={editing ? 0 : -1}
-            className={`room-item ${place === 'tapete' ? 'is-flat' : ''} ${editing ? 'is-editable' : ''} ${selected === it.uid ? 'is-selected' : ''}`}
+            role={editing || kind ? 'button' : 'img'}
+            aria-label={kind ? `${item.name}: levar o Hami até lá` : item.name}
+            tabIndex={editing || kind ? 0 : -1}
+            onClick={kind ? () => onUse?.(it.uid, kind) : undefined}
+            className={`room-item ${place === 'tapete' ? 'is-flat' : ''} ${editing ? 'is-editable' : ''} ${selected === it.uid ? 'is-selected' : ''} ${kind ? 'is-usable' : ''}`}
             style={{
               left: `${live.x}%`,
               top: `${live.y}%`,
@@ -134,6 +153,12 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
             }}
           >
             {item.svg ? <Furniture id={item.svg} c1={item.c1} c2={item.c2} /> : <Glyph e={item.art ?? item.emoji} size="fill" />}
+            {use && <div className={`room-use use-${use.kind}`}>{use.node(px)}</div>}
+            {use?.kind === 'banho' && item.svg && (
+              <div className="room-use-front" aria-hidden="true">
+                <Furniture id={item.svg} c1={item.c1} c2={item.c2} />
+              </div>
+            )}
           </div>
         );
       })}

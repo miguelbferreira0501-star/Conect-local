@@ -17,6 +17,7 @@ export const ARENA_HOME: Record<number, { wallpaper: string; floor: string; item
       { itemId: 'k-guarda-roupa-rosa', x: 82, y: 68 },
       { itemId: 'k-relogio-madeira', x: 17, y: 40 },
       { itemId: 'k-rodinha-azul', x: 85, y: 93 },
+      { itemId: 'k-banheira-madeira', x: 68, y: 90 },
       { itemId: 'k-ursinho-caramelo', x: 10, y: 97 },
     ],
   },
@@ -218,6 +219,8 @@ const OLD_ARENA_ITEMS: Record<number, string[]> = {
   11: ['cama-estrelas', 'luminaria-estrelas', 'mobile-planetas'],
   12: ['portal-celeste', 'fonte-celeste'],
 };
+/** A casa inicial antes de ganhar a banheira. */
+const STARTER_BEFORE_TUB = ['k-tapete-rosa', 'k-cama-rosa', 'k-criado-branco', 'k-planta-grande-terracota', 'k-guarda-roupa-rosa', 'k-relogio-madeira', 'k-rodinha-azul', 'k-ursinho-caramelo'];
 /** A casinha inicial de antes (rodinha, caminha e plantinha). */
 const OLD_STARTER = ['caminha', 'planta', 'rodinha'];
 
@@ -227,6 +230,11 @@ const same = (a: string[], b: string[]) => a.length === b.length && [...a].sort(
 export function upgradeHouse(h: House, n: number): House {
   const ids = h.items.map((i) => i.itemId);
   const old = OLD_ARENA_ITEMS[n] ?? [];
+  // Casa inicial de antes da banheira (sem ninguém ter mexido): ganha a banheira de madeira.
+  if (n === 1 && same(ids, STARTER_BEFORE_TUB) && !ids.includes('k-banheira-madeira')) {
+    const tub = arenaHouse(1).items.find((i) => i.itemId === 'k-banheira-madeira')!;
+    return { ...h, items: [...h.items, { ...tub, uid: 'arena1-banheira', z: h.items.length + 1 }] };
+  }
   if (!(same(ids, old) || (n === 1 && same(ids, OLD_STARTER)))) return h;
   const fresh = arenaHouse(n);
   return { ...h, items: fresh.items };

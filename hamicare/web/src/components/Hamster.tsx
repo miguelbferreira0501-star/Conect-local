@@ -345,45 +345,37 @@ function Heart({ x, y, s, fill, opacity = 1 }: { x: number; y: number; s: number
   );
 }
 
-function Face({ mood, eyeY, noseY, ex, cheekX, cheek, brow, eyeK = 1, uid }: { mood: PetMood; eyeY: number; noseY: number; ex: number; cheekX: number; cheek: string; brow: string; eyeK?: number; uid: string }) {
+function Face({ mood, eyeY, noseY, ex, cheekX, cheek, eyeK = 1 }: { mood: PetMood; eyeY: number; noseY: number; ex: number; cheekX: number; cheek: string; brow: string; eyeK?: number; uid: string }) {
+  // Rosto minimalista: olhinhos pequenos com um brilho só, bochechas, narizinho e uma boquinha simples.
   const closed = mood === 'calmo' || mood === 'sono' || mood === 'dormindo';
   const happy = mood === 'animado' || mood === 'comendo' || mood === 'risada';
   const wide = mood === 'surpreso' || mood === 'boca';
   const n = noseY;
-  const smile = mood === 'feliz' || mood === 'animado' || mood === 'risada';
-  const big = mood === 'risada' ? 1.3 : mood === 'animado' ? 1.2 : 1.12;
+  const ink = '#3A2620';
   return (
     <g>
-      {/* sobrancelhinhas */}
-      {[-1, 1].map((s) => (
-        <path key={s} d={`M${100 + s * (ex + 6)} ${eyeY - 17} q${-s * 4.5} -3.4 ${-s * 9.5} -0.4`} stroke={brow} strokeWidth="3.2" strokeLinecap="round" fill="none" opacity="0.7" />
-      ))}
       <g transform={eyeK !== 1 ? `translate(100 ${eyeY}) scale(${eyeK}) translate(-100 ${-eyeY})` : undefined}>
         {closed ? (
-          <g stroke="#3A2016" strokeWidth="3.2" strokeLinecap="round" fill="none">
+          <g stroke={ink} strokeWidth="3" strokeLinecap="round" fill="none">
             {[-1, 1].map((s) => (
-              <path key={s} d={`M${100 + s * ex - 8} ${eyeY} Q${100 + s * ex} ${eyeY + 5.5} ${100 + s * ex + 8} ${eyeY}`} />
+              <path key={s} d={`M${100 + s * ex - 6} ${eyeY} Q${100 + s * ex} ${eyeY + 4.5} ${100 + s * ex + 6} ${eyeY}`} />
             ))}
           </g>
         ) : happy ? (
-          <g stroke="#3A2016" strokeWidth="3.4" strokeLinecap="round" fill="none">
+          <g stroke={ink} strokeWidth="3" strokeLinecap="round" fill="none">
             {[-1, 1].map((s) => (
-              <path key={s} d={`M${100 + s * ex - 8} ${eyeY + 3} Q${100 + s * ex} ${eyeY - 7.5} ${100 + s * ex + 8} ${eyeY + 3}`} />
+              <path key={s} d={`M${100 + s * ex - 6} ${eyeY + 2} Q${100 + s * ex} ${eyeY - 5} ${100 + s * ex + 6} ${eyeY + 2}`} />
             ))}
           </g>
         ) : (
           <g className="pet-eyes">
             {[-1, 1].map((s) => {
               const x = 100 + s * ex;
-              const r = wide ? 1.1 : 1;
+              const r = wide ? 1.15 : 1;
               return (
                 <g key={s}>
-                  <ellipse cx={x} cy={eyeY} rx={11 * r} ry={12 * r} fill={`url(#e${uid})`} />
-                  <ellipse cx={x} cy={eyeY} rx={11 * r} ry={12 * r} fill="none" stroke="#24110A" strokeWidth="1.1" />
-                  {/* reflexo grande em cima, pontinho embaixo e um brilho suave na íris */}
-                  <circle cx={x + 3.8} cy={eyeY - 4.4} r={4.4 * r} fill="#FFFFFF" />
-                  <circle cx={x - 4.2} cy={eyeY + 4.8} r={1.9 * r} fill="#FFFFFF" opacity="0.9" />
-                  <path d={`M${x - 7} ${eyeY + 5} Q${x} ${eyeY + 11} ${x + 7} ${eyeY + 5}`} stroke="#B87A52" strokeWidth="1.6" fill="none" opacity="0.45" strokeLinecap="round" />
+                  <ellipse cx={x} cy={eyeY} rx={6.6 * r} ry={7.6 * r} fill={ink} />
+                  <circle cx={x + 2.2} cy={eyeY - 2.6} r={2.3 * r} fill="#FFFFFF" />
                 </g>
               );
             })}
@@ -392,43 +384,26 @@ function Face({ mood, eyeY, noseY, ex, cheekX, cheek, brow, eyeK = 1, uid }: { m
       </g>
       {/* bochechas rosadas */}
       {[-1, 1].map((s) => (
-        <ellipse key={s} cx={100 + s * cheekX} cy={eyeY + 16} rx="11.5" ry="7.2" fill={cheek} opacity={mood === 'risada' ? 0.9 : 0.62} />
+        <ellipse key={s} cx={100 + s * cheekX} cy={eyeY + 13} rx="10" ry="6.4" fill={cheek} opacity={mood === 'risada' ? 0.85 : 0.55} />
       ))}
       {/* narizinho */}
-      <path d={`M95.8 ${n - 3.2} Q100 ${n - 5.4} 104.2 ${n - 3.2} Q103.4 ${n + 0.6} 100 ${n + 1.6} Q96.6 ${n + 0.6} 95.8 ${n - 3.2} Z`} fill="#F28C9A" stroke="#D96C7D" strokeWidth="0.9" />
-      <ellipse cx="98.6" cy={n - 2.8} rx="1.4" ry="0.8" fill="#FFFFFF" opacity="0.7" />
-      {smile ? (
-        // boca aberta: lábio em "w" saindo do nariz, dois dentinhos e a linguinha
-        <g transform={`translate(100 ${n}) scale(${big}) translate(-100 ${-n})`}>
-          <path d={`M89.5 ${n + 4.6} Q94.8 ${n + 9} 100 ${n + 5} Q105.2 ${n + 9} 110.5 ${n + 4.6} C110 ${n + 18.5} 90 ${n + 18.5} 89.5 ${n + 4.6} Z`} fill="#C23B49" />
-          <path d={`M92.6 ${n + 14} Q100 ${n + 9.4} 107.4 ${n + 14} Q104.6 ${n + 17.6} 100 ${n + 17.6} Q95.4 ${n + 17.6} 92.6 ${n + 14} Z`} fill="#FF8A9B" />
-          <path d={`M96 ${n + 6.2} L99.6 ${n + 5.6} L99.6 ${n + 11} Q99.6 ${n + 11.8} 98.8 ${n + 11.8} L96.8 ${n + 11.8} Q96 ${n + 11.8} 96 ${n + 11} Z`} fill="#FFFFFF" />
-          <path d={`M104 ${n + 6.2} L100.4 ${n + 5.6} L100.4 ${n + 11} Q100.4 ${n + 11.8} 101.2 ${n + 11.8} L103.2 ${n + 11.8} Q104 ${n + 11.8} 104 ${n + 11} Z`} fill="#FFFFFF" />
-          <path d={`M89.5 ${n + 4.6} Q94.8 ${n + 9} 100 ${n + 5} Q105.2 ${n + 9} 110.5 ${n + 4.6} C110 ${n + 18.5} 90 ${n + 18.5} 89.5 ${n + 4.6} Z`} fill="none" stroke="#7E2630" strokeWidth="1.5" strokeLinejoin="round" />
-          <path d={`M100 ${n + 1.6} V${n + 5}`} stroke="#7E2630" strokeWidth="1.4" strokeLinecap="round" />
-          <path d={`M89.5 ${n + 4.6} q-2.2 -0.4 -3.2 -2.4 M110.5 ${n + 4.6} q2.2 -0.4 3.2 -2.4`} stroke="#7E2630" strokeWidth="1.4" strokeLinecap="round" fill="none" />
-        </g>
-      ) : mood === 'boca' ? (
+      <ellipse cx="100" cy={n - 1.6} rx="3.6" ry="2.6" fill="#F28C9A" />
+      {happy ? (
         <g>
-          <path d={`M100 ${n + 1.6} V${n + 4}`} stroke="#7E2630" strokeWidth="1.4" strokeLinecap="round" />
-          <ellipse cx="100" cy={n + 11} rx="7" ry="8" fill="#C23B49" stroke="#7E2630" strokeWidth="1.4" />
-          <ellipse cx="100" cy={n + 14.5} rx="4.4" ry="3.2" fill="#FF8A9B" />
-          <rect x="97.2" y={n + 3.6} width="5.6" height="4" rx="1" fill="#FFFFFF" />
+          <path d={`M100 ${n + 1} V${n + 3.2}`} stroke={ink} strokeWidth="1.8" strokeLinecap="round" />
+          <path d={`M93.6 ${n + 3.4} Q100 ${n + 3} 106.4 ${n + 3.4} Q105.4 ${n + 11.6} 100 ${n + 11.6} Q94.6 ${n + 11.6} 93.6 ${n + 3.4} Z`} fill="#B9404D" />
+          <path d={`M96.2 ${n + 8.8} Q100 ${n + 6.6} 103.8 ${n + 8.8} Q102.6 ${n + 11} 100 ${n + 11} Q97.4 ${n + 11} 96.2 ${n + 8.8} Z`} fill="#FF8FA0" />
+          <rect x="98" y={n + 3.4} width="4" height="3" rx="0.8" fill="#FFFFFF" />
         </g>
-      ) : mood === 'surpreso' ? (
+      ) : mood === 'boca' || mood === 'surpreso' ? (
         <g>
-          <path d={`M100 ${n + 1.6} V${n + 4.5}`} stroke="#7E2630" strokeWidth="1.4" strokeLinecap="round" />
-          <ellipse cx="100" cy={n + 9.5} rx="3.8" ry="4.6" fill="#C23B49" stroke="#7E2630" strokeWidth="1.2" />
-        </g>
-      ) : mood === 'comendo' ? (
-        <g>
-          <path d={`M100 ${n + 1.6} V${n + 4.5} M92.5 ${n + 5} q3.75 4.4 7.5 0 q3.75 4.4 7.5 0`} stroke="#7E2630" strokeWidth="2.2" strokeLinecap="round" fill="none" />
-          <rect x="97.6" y={n + 5.6} width="4.8" height="4" rx="1" fill="#FFFFFF" stroke="#E8D8D8" strokeWidth="0.5" />
+          <path d={`M100 ${n + 1} V${n + 3.4}`} stroke={ink} strokeWidth="1.8" strokeLinecap="round" />
+          <ellipse cx="100" cy={n + 8} rx={mood === 'boca' ? 4.6 : 3.2} ry={mood === 'boca' ? 5 : 3.8} fill="#B9404D" />
         </g>
       ) : (
         <g>
-          <path d={`M100 ${n + 1.6} V${n + 4.5} M92.5 ${n + 4.6} q3.75 3.8 7.5 0 q3.75 3.8 7.5 0`} stroke="#7E2630" strokeWidth="2" strokeLinecap="round" fill="none" />
-          <rect x="97.7" y={n + 5.4} width="4.6" height="3.6" rx="1" fill="#FFFFFF" stroke="#E8D8D8" strokeWidth="0.5" />
+          <path d={`M100 ${n + 1} V${n + 3.6} M94.6 ${n + 3.8} q2.7 2.8 5.4 0 q2.7 2.8 5.4 0`} stroke={ink} strokeWidth="1.9" strokeLinecap="round" fill="none" />
+          <rect x="98.1" y={n + 4.6} width="3.8" height="3" rx="0.8" fill="#FFFFFF" stroke="#E8D8D8" strokeWidth="0.5" />
         </g>
       )}
     </g>

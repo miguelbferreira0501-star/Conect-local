@@ -121,7 +121,10 @@ export interface PetState {
   sleeping: boolean;
   outfit: Outfit;
   facts: string[];
+  /** Menino, menina ou outro (escolhido no começo; muda os pronomes do perfil). */
+  gender?: PetGender;
 }
+export type PetGender = 'menino' | 'menina' | 'outro';
 
 export interface BodyData {
   tracking: boolean;
