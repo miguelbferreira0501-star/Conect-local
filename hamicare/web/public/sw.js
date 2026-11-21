@@ -10,7 +10,7 @@ self.addEventListener('push', (event) => {
     /* mensagem sem JSON: usa o texto padrão */
   }
   // Cada tipo tem a sua etiqueta: um lembrete de água novo troca o anterior em vez de empilhar.
-  event.waitUntil(self.registration.showNotification(data.title, { body: data.body, icon: 'icon-192.png', badge: 'icon-192.png', tag: data.tag, data: { url: data.url } }));
+  event.waitUntil(self.registration.showNotification(data.title, { body: data.body, icon: 'hami-icon-192.png', badge: 'hami-icon-192.png', tag: data.tag, data: { url: data.url } }));
 });
 
 // Tocar no lembrete abre o app na tela certa (água → Missões, Hami → Cuidar, pausa → Bem-estar...).

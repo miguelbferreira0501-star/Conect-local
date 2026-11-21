@@ -47,7 +47,7 @@ export async function showNotification(text: string, fallback: (t: string) => vo
   try {
     if (permission() === 'granted') {
       const reg = await navigator.serviceWorker?.getRegistration?.();
-      if (reg) await reg.showNotification('HamiCare', { body: text, icon: 'icon-192.png', tag: 'hamicare' });
+      if (reg) await reg.showNotification('HamiCare', { body: text, icon: 'hami-icon-192.png', tag: 'hamicare' });
       else new Notification('HamiCare', { body: text });
       return;
     }
