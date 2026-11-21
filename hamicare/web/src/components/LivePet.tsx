@@ -8,7 +8,7 @@ import { useApp } from '../lib/store';
 import type { Outfit, PetMood } from '../types';
 import type { Condition, HamiProp } from '../lib/hamiDay';
 
-export type Trick = 'cabeca' | 'barriga' | 'pes' | 'tchau' | 'cafune';
+export type Trick = 'cabeca' | 'barriga' | 'pes' | 'tchau' | 'cafune' | 'choro';
 
 const TRICKS: Record<Trick, { mood: PetMood; sound: SoundId; ms: number; say?: string }> = {
   cabeca: { mood: 'calmo', sound: 'iii', ms: 1100 },
@@ -16,6 +16,8 @@ const TRICKS: Record<Trick, { mood: PetMood; sound: SoundId; ms: number; say?: s
   pes: { mood: 'animado', sound: 'pulo', ms: 700 },
   tchau: { mood: 'feliz', sound: 'iii', ms: 1500, say: 'Oi!' },
   cafune: { mood: 'calmo', sound: 'ronrom', ms: 1800 },
+  // chorão fofinho (sozinho, de tempos em tempos, quando ele precisa de ajuda)
+  choro: { mood: 'choro', sound: 'choro', ms: 2600 },
 };
 
 interface Props {
@@ -37,11 +39,13 @@ interface Props {
   prop?: HamiProp;
   /** Animação do corpo (tremendo de frio, dançando…). */
   fx?: string;
+  /** Chorar sozinho a cada tantos milissegundos (0 = não chora). */
+  cryEvery?: number;
 }
 
 let seq = 0;
 
-export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = '', children, label, growth, cond, wear, prop, fx = '' }: Props) {
+export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = '', children, label, growth, cond, wear, prop, fx = '', cryEvery = 0 }: Props) {
   const s = useApp();
   const [trick, setTrick] = useState<{ t: Trick; id: number } | null>(null);
   const hold = useRef<number | null>(null);
@@ -52,6 +56,16 @@ export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = ''
   useEffect(() => () => timers.current.forEach((t) => clearTimeout(t)), []);
   const later = (fn: () => void, ms: number) => timers.current.push(window.setTimeout(fn, ms));
   const asleep = s.pet.sleeping;
+  const trickRef = useRef<typeof trick>(null);
+  trickRef.current = trick;
+  // Chorinho de tempos em tempos (o primeiro logo depois de abrir, para a pessoa ver).
+  useEffect(() => {
+    if (!cryEvery || asleep) return;
+    const cry = () => !trickRef.current && run('choro');
+    const first = window.setTimeout(cry, 1800);
+    const id = window.setInterval(cry, cryEvery);
+    return () => (clearTimeout(first), clearInterval(id));
+  }, [cryEvery, asleep]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function run(t: Trick) {
     const id = ++seq;
@@ -109,7 +123,7 @@ export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = ''
         onPointerLeave={() => hold.current && clearTimeout(hold.current)}
         onContextMenu={(e) => e.preventDefault()}
       >
-        <span key={trick?.id ?? 0} className={`live-body ${trick ? `gest-${trick.t}` : fx}`}>
+        <span key={trick?.id ?? 0} className={`live-body ${trick ? (trick.t === 'choro' ? 'fx-sob' : `gest-${trick.t}`) : fx}`}>
           <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={wear ? { ...s.pet.outfit, ...wear } : s.pet.outfit} mood={petMood} cond={cond ?? undefined} condFace={!trick} prop={trick?.t === 'tchau' ? undefined : prop} size={size} label={s.pet.name} pose={trick?.t === 'tchau' ? 'tchau' : undefined} growth={growth} />
         </span>
         {trick?.t === 'cafune' && <span className="live-glow" aria-hidden="true" />}

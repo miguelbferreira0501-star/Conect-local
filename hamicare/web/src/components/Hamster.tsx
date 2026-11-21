@@ -420,11 +420,57 @@ function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1 }: { mood: PetMood;
   // Como a referência: olhinhos sorrindo (^ ^) grossos e escuros, narizinho rosa e a boquinha ":3".
   // A situação do dia troca o rostinho: > < tremendo de frio, olhinhos caídos de calor, nariz vermelho de gripe…
   const sleepy = mood === 'sono' || mood === 'dormindo';
-  const face = cond && cond !== 'terra' && !sleepy ? cond : null;
+  // Chorão fofinho: 'manha' = olhinhos marejados de dó; 'choro' = chorando de soluçar, com rios de lágrimas.
+  const cry = mood === 'choro';
+  const teary = mood === 'manha';
+  const face = cond && cond !== 'terra' && !sleepy && !cry && !teary ? cond : null;
   const open = !face && (mood === 'surpreso' || mood === 'boca');
   const laugh = !face && (mood === 'animado' || mood === 'risada');
   const n = noseY;
   const eyes = () => {
+    if (cry)
+      return (
+        <g>
+          <g stroke={INK} strokeWidth="4.2" strokeLinecap="round" fill="none">
+            {[-1, 1].map((s) => {
+              const x = 100 + s * ex;
+              return <path key={s} d={`M${x - 9} ${eyeY - 2} Q${x} ${eyeY + 5} ${x + 9} ${eyeY - 2}`} />;
+            })}
+          </g>
+          {/* sobrancelhas tristes e os rios de lágrimas escorrendo pelas bochechas */}
+          {[-1, 1].map((s) => {
+            const x = 100 + s * ex;
+            return (
+              <g key={`t${s}`}>
+                <path d={`M${x - s * 8} ${eyeY - 17} Q${x} ${eyeY - 15} ${x + s * 9} ${eyeY - 10}`} stroke={INK} strokeWidth="2.4" strokeLinecap="round" fill="none" />
+                <path className="tear-flow" d={`M${x + s * 7} ${eyeY + 2} C${x + s * 11} ${eyeY + 14} ${x + s * 7} ${eyeY + 24} ${x + s * 12} ${eyeY + 38}`} stroke="#8FD0FF" strokeWidth="6" strokeLinecap="round" fill="none" opacity="0.9" />
+                <path d={`M${x + s * 7} ${eyeY + 2} C${x + s * 11} ${eyeY + 14} ${x + s * 7} ${eyeY + 24} ${x + s * 12} ${eyeY + 38}`} stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity="0.7" />
+                <path className="tear-drop" style={{ animationDelay: s === 1 ? '0.35s' : '0s' }} d={`M${x + s * 13} ${eyeY - 2} q-3.2 5.4 0 8 q3.2 -2.6 0 -8 Z`} fill="#8FD0FF" stroke="#5BA9E8" strokeWidth="0.8" />
+              </g>
+            );
+          })}
+        </g>
+      );
+    if (teary)
+      return (
+        <g className="pet-eyes">
+          {[-1, 1].map((s) => {
+            const x = 100 + s * ex;
+            return (
+              <g key={s}>
+                <path d={`M${x - s * 8} ${eyeY - 18} Q${x} ${eyeY - 16} ${x + s * 9} ${eyeY - 11}`} stroke={INK} strokeWidth="2.3" strokeLinecap="round" fill="none" />
+                <ellipse cx={x} cy={eyeY} rx="7.4" ry="8.6" fill={INK} />
+                {/* lágrima acumulada no olhinho */}
+                <path d={`M${x - 6.6} ${eyeY + 2.6} Q${x} ${eyeY + 6.4} ${x + 6.6} ${eyeY + 2.6} Q${x + 5.6} ${eyeY + 7.6} ${x} ${eyeY + 8.4} Q${x - 5.6} ${eyeY + 7.6} ${x - 6.6} ${eyeY + 2.6} Z`} fill="#8FD0FF" opacity="0.85" />
+                <circle cx={x + 2.4} cy={eyeY - 3.2} r="2.9" fill="#FFFFFF" />
+                <circle cx={x - 2.6} cy={eyeY + 0.6} r="1.4" fill="#FFFFFF" />
+                <circle cx={x + 3.6} cy={eyeY + 1.8} r="0.9" fill="#FFFFFF" opacity="0.9" />
+              </g>
+            );
+          })}
+          <path className="tear-drop" d={`M${100 + ex + 6} ${eyeY + 8} q-3 5 0 7.6 q3 -2.6 0 -7.6 Z`} fill="#8FD0FF" stroke="#5BA9E8" strokeWidth="0.8" />
+        </g>
+      );
     if (face === 'frio')
       return (
         <g stroke={INK} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none">
@@ -483,6 +529,14 @@ function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1 }: { mood: PetMood;
     );
   };
   const mouth = () => {
+    if (cry)
+      return (
+        <g>
+          <path d={`M91.6 ${n + 9} Q93 ${n + 3} 100 ${n + 3} Q107 ${n + 3} 108.4 ${n + 9} Q108 ${n + 15.5} 100 ${n + 15.5} Q92 ${n + 15.5} 91.6 ${n + 9} Z`} fill="#A8424E" />
+          <path d={`M95 ${n + 12.6} Q100 ${n + 9.6} 105 ${n + 12.6} Q103.6 ${n + 15} 100 ${n + 15} Q96.4 ${n + 15} 95 ${n + 12.6} Z`} fill="#FF8FA0" />
+        </g>
+      );
+    if (teary) return <path className="pout" d={`M94.6 ${n + 8} Q97.3 ${n + 4.6} 100 ${n + 6.4} Q102.7 ${n + 4.6} 105.4 ${n + 8}`} stroke={INK} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />;
     if (face === 'frio')
       return (
         <g>
@@ -519,7 +573,7 @@ function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1 }: { mood: PetMood;
     return <path d={`M100 ${n + 1.6} V${n + 3.4} M93.2 ${n + 3} Q96.6 ${n + 7.6} 100 ${n + 3.6} Q103.4 ${n + 7.6} 106.8 ${n + 3}`} stroke={INK} strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" fill="none" />;
   };
   const cheek = face === 'frio' ? '#8FB4F0' : face === 'calor' ? '#FF6F6F' : face === 'gripado' ? '#FF8A8A' : blush;
-  const cheekOp = face === 'frio' ? 0.55 : face === 'calor' ? 0.5 : face === 'gripado' ? 0.4 : laugh ? 0.35 : 0.16;
+  const cheekOp = face === 'frio' ? 0.55 : face === 'calor' ? 0.5 : face === 'gripado' ? 0.4 : cry || teary ? 0.42 : laugh ? 0.35 : 0.16;
   return (
     <g>
       <g transform={eyeK !== 1 ? `translate(100 ${eyeY}) scale(${eyeK}) translate(-100 ${-eyeY})` : undefined}>{eyes()}</g>

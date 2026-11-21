@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ACTIVITY_ORDER, CONDITION_ORDER, CONDITIONS, askText, conditionNeed, conditionOf, pickActivity, type Activity } from './hamiDay';
+import { ACTIVITY_ORDER, CONDITION_ORDER, CONDITIONS, askText, conditionNeed, conditionOf, cryEvery, pickActivity, type Activity } from './hamiDay';
 import { itemById } from '../data/items';
 
 const days = Array.from({ length: 60 }, (_, i) => {
@@ -44,5 +44,13 @@ describe('atividade de cada visita', () => {
     expect(count(14)).toBeLessThan(80);
     expect(count(23)).toBeGreaterThan(300);
     expect(ACTIVITY_ORDER.length).toBeGreaterThanOrEqual(8);
+  });
+});
+
+describe('chorão fofinho', () => {
+  it('chora mais vezes de noite e as situações tristes deixam os olhinhos marejados', () => {
+    expect(cryEvery(20)).toBeLessThan(cryEvery(10));
+    expect(CONDITIONS.saudade.teary && CONDITIONS.medo.teary && CONDITIONS.chuva.teary).toBe(true);
+    expect(CONDITION_ORDER).toContain('saudade');
   });
 });

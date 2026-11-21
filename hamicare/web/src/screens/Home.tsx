@@ -33,7 +33,7 @@ import { LivePet } from '../components/LivePet';
 import { useFurniturePlay } from '../components/FurniturePlay';
 import { TaskCalendar, byPart } from '../components/TaskCalendar';
 import { petMoodOf } from '../lib/petState';
-import { ACTIVITIES, activityForVisit, askText, conditionNeed, conditionOf, CONDITIONS, type Activity } from '../lib/hamiDay';
+import { ACTIVITIES, activityForVisit, askText, conditionNeed, conditionOf, CONDITIONS, cryEvery, type Activity } from '../lib/hamiDay';
 import { ActivityFx, bodyFxClass, ConditionFx } from '../components/HamiFx';
 import { setBattery } from '../lib/store';
 
@@ -195,7 +195,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
   const [actLine] = useState(() => act.lines[Math.floor(Math.random() * act.lines.length)]);
   const busy = condOn || justFixed;
   const hardDay = day.battery === 1;
-  const petMood: PetMood = mood ?? (justFixed ? 'risada' : condOn ? 'feliz' : hardDay ? petMoodOf(s, { hardDay, done, total: tasks.length, hour: new Date(now).getHours() }) : act.mood);
+  const petMood: PetMood = mood ?? (justFixed ? 'risada' : condOn ? (CONDITIONS[cond].teary ? 'manha' : 'feliz') : hardDay ? petMoodOf(s, { hardDay, done, total: tasks.length, hour: new Date(now).getHours() }) : act.mood);
   const scrollToTasks = () => document.querySelector('.hc-tasks')?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
 
   const hami = adv ? (
@@ -226,6 +226,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
           wear={condOn ? CONDITIONS[cond].wear : undefined}
           prop={busy || hardDay || mood ? undefined : act.prop}
           fx={bodyFxClass(condOn ? cond : null, busy || hardDay ? null : activity)}
+          cryEvery={condOn && !mood ? cryEvery(new Date(now).getHours()) : 0}
           onTap={() => {
             if (s.pet.sleeping) {
               toast(`${s.pet.name} está dormindo. Shhh…`);
