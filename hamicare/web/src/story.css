@@ -483,3 +483,16 @@ span.tcal-ico { background: transparent; }
 .hfx-sun { top: 10%; right: 10%; width: 36px; height: 36px; }
 .hfx-snow svg g { stroke: #DDEBFF; }
 .hfx-snow { filter: drop-shadow(0 1px 1.5px rgba(60, 100, 190, 0.75)); }
+
+/* ================= Chorão fofinho ================= */
+.tear-flow { stroke-dasharray: 7 5; animation: tear-flow 0.6s linear infinite; }
+@keyframes tear-flow { to { stroke-dashoffset: -12; } }
+.tear-drop { transform-box: fill-box; transform-origin: 50% 0; animation: tear-drop 1.3s ease-in infinite; }
+@keyframes tear-drop { 0% { transform: translateY(0) scale(0.6); opacity: 0; } 20% { opacity: 1; transform: translateY(0) scale(1); } 100% { transform: translateY(16px) scale(0.9); opacity: 0; } }
+.pout { transform-box: fill-box; transform-origin: 50% 50%; animation: pout 0.5s ease-in-out infinite alternate; }
+@keyframes pout { to { transform: translateY(0.6px) scaleX(0.92); } }
+.fx-sob { display: inline-block; transform-origin: 50% 100%; animation: fx-sob 0.9s ease-in-out infinite; }
+@keyframes fx-sob { 0%, 100% { transform: none; } 20% { transform: scale(1.03, 0.97) translateY(1px); } 35% { transform: scale(0.99, 1.02) translateY(-2px); } 50% { transform: scale(1.02, 0.98); } }
+.hfx-heart { position: absolute; top: 40%; width: 16px; height: 16px; opacity: 0; background: #ffb3cc; clip-path: path('M8 15 C-4 7 2 -1 8 4 C14 -1 20 7 8 15 Z'); animation: hfx-heart 3.4s ease-out infinite; }
+@keyframes hfx-heart { 0% { transform: translateY(0) scale(0.6); opacity: 0; } 20% { opacity: 0.9; } 100% { transform: translateY(-70px) scale(1.1); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .tear-flow, .tear-drop, .pout, .fx-sob, .hfx-heart { animation: none !important; } .tear-drop, .hfx-heart { opacity: 1; } }

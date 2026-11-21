@@ -81,6 +81,14 @@ export function ConditionFx({ cond }: { cond: Condition }) {
           </span>
         </div>
       );
+    case 'saudade':
+      return (
+        <div className="hfx" aria-hidden="true">
+          {[18, 80, 34].map((x, i) => (
+            <span key={i} className="hfx-heart" style={{ left: `${x}%`, animationDelay: `${i * 1.1}s` }} />
+          ))}
+        </div>
+      );
     case 'terra':
       return (
         <div className="hfx" aria-hidden="true">
@@ -138,6 +146,7 @@ export function bodyFxClass(cond: Condition | null, act: Activity | null): strin
   if (cond === 'gripado') return 'fx-sneeze';
   if (cond === 'calor') return 'fx-melt';
   if (cond === 'tedio') return 'fx-sigh';
+  if (cond === 'saudade' || cond === 'chuva') return 'fx-sob';
   if (cond) return '';
   if (act === 'musica') return 'fx-sway';
   if (act === 'exercicio' || act === 'bolinha') return 'fx-bounce';

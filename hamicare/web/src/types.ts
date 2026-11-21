@@ -181,7 +181,7 @@ export interface PetSnap {
   mood: PetMood;
 }
 
-export type PetMood = 'feliz' | 'calmo' | 'sono' | 'animado' | 'dormindo' | 'comendo' | 'risada' | 'boca' | 'surpreso';
+export type PetMood = 'feliz' | 'calmo' | 'sono' | 'animado' | 'dormindo' | 'comendo' | 'risada' | 'boca' | 'surpreso' | 'manha' | 'choro';
 
 export interface CompanionState {
   /** Ovos e pets: quando o ovo chegou e quando chocou. */

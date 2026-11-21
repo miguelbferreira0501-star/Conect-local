@@ -16,7 +16,7 @@ export type SoundId =
   // Banho
   | 'shampoo' | 'espuma' | 'bolha' | 'toalha' | 'sacudir'
   // Hami
-  | 'nhac' | 'gole' | 'escova' | 'brilho' | 'iii' | 'risada' | 'ronrom' | 'coracao' | 'pulo' | 'bocejo' | 'ronco' | 'espreguicar'
+  | 'nhac' | 'gole' | 'escova' | 'brilho' | 'iii' | 'risada' | 'choro' | 'ronrom' | 'coracao' | 'pulo' | 'bocejo' | 'ronco' | 'espreguicar'
   // Brincadeiras
   | 'pega' | 'jogar' | 'quica' | 'tique' | 'fim-jogo'
   // Quarto e casa
@@ -400,6 +400,12 @@ const SOUNDS: Record<SoundId, (o: PlayOpts) => void> = {
     tone({ f: 1700, to: 2350, t: 0.11, d: 0.09, v: 0.06, vib: 30 });
   },
   risada: () => [2100, 1950, 1800, 1700].forEach((f, i) => tone({ f: jitter(f), to: f * 0.85, t: i * 0.075, d: 0.06, v: 0.055 })),
+  // chorinho fofo: dois "uá" descendo com tremidinho e uma fungadinha no fim
+  choro: () => {
+    tone({ f: 1250, to: 820, d: 0.32, v: 0.05, vib: 18 });
+    tone({ f: 1150, to: 760, t: 0.42, d: 0.36, v: 0.05, vib: 18 });
+    noise({ f: 2400, type: 'highpass', q: 0.6, t: 0.92, d: 0.12, v: 0.05, a: 0.03 });
+  },
   ronrom: () => {
     const c = ac!;
     const t0 = now();

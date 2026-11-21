@@ -1,12 +1,13 @@
 // A vida do Hami no Início, sem a pessoa precisar fazer nada:
 // 1) Situação do dia: cada dia novo ele acorda com alguma coisa (muito frio, muito calor, gripado, encharcado
-//    de chuva, entediado, sujinho de terra ou com medo do trovão) e pede algumas tarefas para melhorar.
+//    de chuva, entediado, sujinho de terra, com medo do trovão ou chorando de saudade) e pede algumas tarefas
+//    para melhorar. Enquanto espera, cai num chorinho fofo de tempos em tempos (para dar dó).
 //    É sempre a mesma o dia todo (sorteio fixo pelo dia) e nunca repete a de ontem.
 // 2) Atividade: cada vez que a pessoa abre o app, ele está fazendo uma coisa diferente (lendo, brincando
 //    de bolinha, ouvindo música, fazendo bolhas, tirando uma soneca…), sem repetir a da vez anterior.
 import type { Outfit, PetMood } from '../types';
 
-export type Condition = 'frio' | 'calor' | 'gripado' | 'chuva' | 'tedio' | 'terra' | 'medo';
+export type Condition = 'frio' | 'calor' | 'gripado' | 'chuva' | 'tedio' | 'terra' | 'medo' | 'saudade';
 
 export interface ConditionInfo {
   /** Nome curto (para o selinho). */
@@ -17,18 +18,21 @@ export interface ConditionInfo {
   fixed: string;
   /** Roupinha que ele veste enquanto está assim (por cima da escolhida). */
   wear?: Partial<Outfit>;
+  /** Fica de olhinhos marejados (chorão fofinho) enquanto espera ajuda. */
+  teary?: boolean;
 }
 
 export const CONDITIONS: Record<Condition, ConditionInfo> = {
   frio: { label: 'Muito frio', ask: 'Brrr! Acordei congelando… Faz {n} tarefas pra me esquentar?', fixed: 'Ufa, agora estou quentinho! Obrigado por cuidar de mim.', wear: { chapeu: 'gorro', acessorio: 'cachecol-azul' } },
   calor: { label: 'Muito calor', ask: 'Que calor! Estou derretendo… Faz {n} tarefas pra me refrescar?', fixed: 'Ahh, que fresquinho! Bem melhor agora.' },
   gripado: { label: 'Gripadinho', ask: 'Atchim! Acordei gripadinho… Faz {n} tarefas pra eu melhorar?', fixed: 'Sarei! Obrigado pelo carinho.', wear: { acessorio: 'cachecol-amarelo' } },
-  chuva: { label: 'Encharcado', ask: 'Peguei uma chuva no caminho e fiquei encharcado! Faz {n} tarefas pra me secar?', fixed: 'Sequinho e fofinho de novo!' },
+  chuva: { label: 'Encharcado', ask: 'Peguei uma chuva no caminho e fiquei encharcado! Faz {n} tarefas pra me secar?', fixed: 'Sequinho e fofinho de novo!', teary: true },
   tedio: { label: 'Entediado', ask: 'Que tédio… Faz {n} tarefas pra gente se animar?', fixed: 'Agora sim, que dia divertido!' },
   terra: { label: 'Sujinho', ask: 'Rolei na terra brincando e fiquei todo sujinho! Faz {n} tarefas pra eu ficar limpinho?', fixed: 'Limpinho e cheiroso!' },
-  medo: { label: 'Com medinho', ask: 'Teve trovão de noite e fiquei com medinho… Faz {n} tarefas pra eu me sentir seguro?', fixed: 'Com você aqui eu fico tranquilo.' },
+  medo: { label: 'Com medinho', ask: 'Teve trovão de noite e fiquei com medinho… Faz {n} tarefas pra eu me sentir seguro?', fixed: 'Com você aqui eu fico tranquilo.', teary: true },
+  saudade: { label: 'Com saudade', ask: 'Acordei chorando de saudade de você… Faz {n} tarefas pra me dar um abraço?', fixed: 'Que abraço gostoso! Agora estou feliz de novo.', teary: true },
 };
-export const CONDITION_ORDER: Condition[] = ['frio', 'calor', 'gripado', 'chuva', 'tedio', 'terra', 'medo'];
+export const CONDITION_ORDER: Condition[] = ['frio', 'calor', 'gripado', 'chuva', 'tedio', 'terra', 'medo', 'saudade'];
 
 /** Número estável a partir de um texto (o mesmo dia dá sempre o mesmo resultado). */
 function hash(text: string) {
@@ -56,6 +60,9 @@ export function conditionOf(seed: number, day: string): Condition {
 
 /** Quantas tarefas ele pede (2, ou menos se a pessoa tiver menos tarefas no dia). */
 export const conditionNeed = (tasksToday: number) => Math.max(1, Math.min(2, tasksToday));
+
+/** De quanto em quanto tempo ele chora enquanto espera ajuda (mais vezes de noite, se ninguém ajudou). */
+export const cryEvery = (hour: number) => (hour >= 18 ? 7000 : 11000);
 
 export const askText = (c: Condition, n: number) => CONDITIONS[c].ask.replace('{n}', String(n));
 
