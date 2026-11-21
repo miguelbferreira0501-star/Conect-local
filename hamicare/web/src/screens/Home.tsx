@@ -33,6 +33,8 @@ import { LivePet } from '../components/LivePet';
 import { useFurniturePlay } from '../components/FurniturePlay';
 import { TaskCalendar, byPart } from '../components/TaskCalendar';
 import { petMoodOf } from '../lib/petState';
+import { ACTIVITIES, activityForVisit, askText, conditionNeed, conditionOf, CONDITIONS, type Activity } from '../lib/hamiDay';
+import { ActivityFx, bodyFxClass, ConditionFx } from '../components/HamiFx';
 import { setBattery } from '../lib/store';
 
 /** Diferencial: "Hoje está difícil" deixa só as tarefas leves e o Hami fica do seu lado, sem perder a sequência. */
@@ -171,7 +173,30 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
     }, 60);
   }
 
-  const petMood: PetMood = mood ?? petMoodOf(s, { hardDay: day.battery === 1, done, total: tasks.length, hour: new Date(now).getHours() });
+  // Situação do dia: ele acorda com frio, calor, gripado… e pede algumas tarefas para melhorar.
+  const cond = conditionOf(s.seed, today);
+  const need = conditionNeed(tasks.length);
+  const condOn = tasks.length > 0 && done < need;
+  // Quando melhora agora (acabou de fazer a tarefa que faltava), ele comemora e agradece.
+  const wasOn = useRef(condOn);
+  const [justFixed, setJustFixed] = useState(false);
+  useEffect(() => {
+    if (wasOn.current && !condOn) {
+      setJustFixed(true);
+      const t = setTimeout(() => setJustFixed(false), 8000);
+      wasOn.current = condOn;
+      return () => clearTimeout(t);
+    }
+    wasOn.current = condOn;
+  }, [condOn]);
+  // O que ele está fazendo nesta visita (muda a cada vez que a pessoa abre o app).
+  const [activity] = useState<Activity>(() => activityForVisit(new Date().getHours()));
+  const act = ACTIVITIES[activity];
+  const [actLine] = useState(() => act.lines[Math.floor(Math.random() * act.lines.length)]);
+  const busy = condOn || justFixed;
+  const hardDay = day.battery === 1;
+  const petMood: PetMood = mood ?? (justFixed ? 'risada' : condOn ? 'feliz' : hardDay ? petMoodOf(s, { hardDay, done, total: tasks.length, hour: new Date(now).getHours() }) : act.mood);
+  const scrollToTasks = () => document.querySelector('.hc-tasks')?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
 
   const hami = adv ? (
     <div className="mb-6 grid justify-items-center gap-1 rounded-3xl bg-surface/95 px-4 py-3 text-center shadow-[var(--shadow)]">
@@ -197,6 +222,10 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
         <LivePet
           size={168}
           mood={petMood}
+          cond={condOn ? cond : null}
+          wear={condOn ? CONDITIONS[cond].wear : undefined}
+          prop={busy || hardDay || mood ? undefined : act.prop}
+          fx={bodyFxClass(condOn ? cond : null, busy || hardDay ? null : activity)}
           onTap={() => {
             if (s.pet.sleeping) {
               toast(`${s.pet.name} está dormindo. Shhh…`);
@@ -206,6 +235,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
           }}
         />
       </div>
+      {condOn ? <ConditionFx cond={cond} /> : justFixed ? <span className="hfx hfx-yay" aria-hidden="true" /> : !hardDay && <ActivityFx act={activity} />}
       <CompanionBuddy hamster={168} />
       {puff && (
         <span key={puff.id} className={`grams-puff ${dir === 'ganhar' ? 'is-gain' : ''}`} aria-live="polite">
@@ -271,9 +301,20 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
           </>
         )}
         {!adv && !s.trek && (
-          <div className="hr-bubble">
-            <p>{furniture.line ?? line}</p>
-            {!day.mood && !furniture.use && (
+          <div className={`hr-bubble ${condOn && !furniture.line ? 'is-need' : ''}`}>
+            <p>{furniture.line ?? (s.pet.sleeping ? line : justFixed ? CONDITIONS[cond].fixed : condOn ? askText(cond, need) : hardDay ? line : actLine)}</p>
+            {condOn && !furniture.line && !s.pet.sleeping && (
+              <button className="hr-need" onClick={scrollToTasks} aria-label={`${Math.min(done, need)} de ${need} tarefas feitas. Ver as tarefas`}>
+                <span className="hr-need-bar" aria-hidden="true">
+                  <i style={{ width: `${(Math.min(done, need) / need) * 100}%` }} />
+                </span>
+                <b>
+                  {Math.min(done, need)}/{need}
+                </b>
+                <ChevronRight size={16} />
+              </button>
+            )}
+            {!condOn && !day.mood && !furniture.use && (
               <button onClick={() => openCheckin()}>
                 Como você está agora? <ChevronRight size={18} />
               </button>
