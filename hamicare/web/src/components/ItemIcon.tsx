@@ -1,12 +1,21 @@
 // O desenho pequeno de um item: móvel, decoração, parede, piso ou roupa (vestida num Hami pequenininho).
 import { memo, useEffect, useRef } from 'react';
-import { Furniture, FLOOR_CSS, WALLPAPER_CSS } from './Furniture';
+import { Furniture, FLOOR_CSS, Garland, WALLPAPER_CSS } from './Furniture';
 import { KitLite } from './room/kit';
 import { Hamster } from './Hamster';
 import { Glyph } from './art';
 import { WEARABLE_KINDS, type Item } from '../data/items';
 
 export const ItemIcon = memo(function ItemIcon({ item, size = 34, fur = 'caramelo' }: { item: Item; size?: number; fur?: string }) {
+  // Enfeites que atravessam a parede (pisca-pisca, bandeirinhas): no quadradinho, um pedaço do varal.
+  if (item.svg === 'pisca' || item.svg === 'bandeirinhas')
+    return (
+      <span className="relative block overflow-hidden" style={{ width: size * 1.6, height: size * 0.9 }} aria-hidden="true">
+        <span className="absolute inset-x-0 top-[22%] block h-10">
+          <Garland id={item.svg} />
+        </span>
+      </span>
+    );
   if (item.svg) return <KitIcon item={item} size={size} />;
   return <OtherIcon item={item} size={size} fur={fur} />;
 });

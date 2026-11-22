@@ -1,5 +1,5 @@
 // Ícones ilustrados e coloridos da barra de abas (desenho próprio).
-export type TabId = 'inicio' | 'atividades' | 'cuidar' | 'mundo' | 'bem-estar' | 'amigos';
+export type TabId = 'inicio' | 'crescer' | 'cuidar' | 'loja' | 'bolsa' | 'mundo' | 'atividades' | 'bem-estar' | 'amigos';
 
 export function TabIcon({ id }: { id: TabId }) {
   return (
@@ -18,6 +18,32 @@ export function TabIcon({ id }: { id: TabId }) {
             <rect x="6" y="5" width="20" height="23" rx="5" fill="#7BD389" stroke="#3FA45E" strokeWidth="1.5" />
             <rect x="11" y="3" width="10" height="5" rx="2.5" fill="#FFFFFF" stroke="#3FA45E" strokeWidth="1.5" />
             <path d="M11 17 l3.5 3.5 L21.5 13" stroke="#FFFFFF" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+        )}
+        {id === 'crescer' && (
+          <g>
+            <path d="M16 18 C16 12 12 8 6 8 C6 14 10 18 16 18 Z" fill="#7BD389" stroke="#3FA45E" strokeWidth="1.5" strokeLinejoin="round" />
+            <path d="M16 16 C16 9 20 5 27 5 C27 12 22 16 16 16 Z" fill="#9BE58F" stroke="#3FA45E" strokeWidth="1.5" strokeLinejoin="round" />
+            <path d="M16 23 V15" stroke="#3FA45E" strokeWidth="2.2" strokeLinecap="round" />
+            <path d="M8 21 H24 L22 29 H10 Z" fill="#FF9F68" stroke="#D9733F" strokeWidth="1.5" strokeLinejoin="round" />
+            <rect x="7" y="19.5" width="18" height="3.5" rx="1.75" fill="#FFB98A" stroke="#D9733F" strokeWidth="1.5" />
+          </g>
+        )}
+        {id === 'loja' && (
+          <g>
+            <rect x="6" y="14" width="20" height="14" rx="2.5" fill="#FFE2B8" stroke="#D99A5B" strokeWidth="1.5" />
+            <path d="M4 13 L7 5 H25 L28 13 Z" fill="#FF6F91" stroke="#D94B70" strokeWidth="1.5" strokeLinejoin="round" />
+            <path d="M10.5 5 L9.5 13 M16 5 V13 M21.5 5 L22.5 13" stroke="#FFFFFF" strokeWidth="2.2" />
+            <path d="M4 13 q3 3 6 0 q3 3 6 0 q3 3 6 0 q3 3 6 0" fill="#FF8FA8" stroke="#D94B70" strokeWidth="1.5" strokeLinejoin="round" />
+            <rect x="13" y="19" width="6" height="9" rx="1.5" fill="#6FB7FF" />
+          </g>
+        )}
+        {id === 'bolsa' && (
+          <g>
+            <path d="M11 11 V9 a5 5 0 0 1 10 0 V11" fill="none" stroke="#8A63D2" strokeWidth="2.4" strokeLinecap="round" />
+            <path d="M6 12 Q6 10 8 10 H24 Q26 10 26 12 L27 26 Q27 29 24 29 H8 Q5 29 5 26 Z" fill="#B48CFF" stroke="#8A63D2" strokeWidth="1.5" strokeLinejoin="round" />
+            <rect x="11" y="17" width="10" height="6" rx="2" fill="#FFC75F" stroke="#D99A2B" strokeWidth="1.3" />
+            <ellipse cx="10" cy="14" rx="2.4" ry="1.4" fill="#FFFFFF" opacity="0.55" />
           </g>
         )}
         {id === 'cuidar' && (

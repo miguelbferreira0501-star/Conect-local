@@ -89,3 +89,12 @@ export async function copyText(text: string): Promise<boolean> {
 
 export const fmtNum = (n: number, digits = 1) =>
   n.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: digits });
+
+/** Quanto falta para a meia-noite, em HH:MM:SS (para contagens que renovam todo dia). */
+export function untilMidnight(now: number = Date.now()): string {
+  const d = new Date(now);
+  const end = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1).getTime();
+  const sec = Math.max(0, Math.floor((end - now) / 1000));
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${p(Math.floor(sec / 3600))}:${p(Math.floor((sec % 3600) / 60))}:${p(sec % 60)}`;
+}
