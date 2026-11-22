@@ -281,6 +281,10 @@ export interface State {
   earthHome?: number;
   /** Cartões de lembrança das viagens: quantos de cada lugar. */
   trekCards?: Record<string, number>;
+  /** Destino escolhido para as viagens (id de data/destinations). */
+  trekDest?: string;
+  /** Missões planejadas na aba Crescer (nome, área e as tarefas que fazem parte). */
+  plans?: QuestPlan[];
   /** Dia da última viagem (uma por dia). */
   trekDay?: string;
   /** Correio do Hami: cartas já lidas e cartas apagadas. */
@@ -331,4 +335,13 @@ export interface State {
   updatedAt: number;
   /** Veio do app antigo (Xodó): o onboarding mostra uma mensagem de boas-vindas. */
   from?: 'xodo';
+}
+
+/** Uma missão planejada: um nome e um grupinho de tarefas (as tarefas ficam na lista normal). */
+export interface QuestPlan {
+  id: string;
+  name: string;
+  area: string;
+  tasks: string[];
+  createdAt: string;
 }

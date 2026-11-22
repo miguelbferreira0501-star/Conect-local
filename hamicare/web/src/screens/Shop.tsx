@@ -297,7 +297,7 @@ function AisleBody({ kinds, looks, onTry, onPlus }: { kinds: ItemKind[]; looks?:
 }
 
 /** Looks prontos: o Hami vestido e o preço do conjunto (o nome do look aparece para leitores de tela). */
-function LookTiles({ onPlus }: { onPlus: () => void }) {
+export function LookTiles({ onPlus }: { onPlus: () => void }) {
   const s = useApp();
   const kids = s.profile.ageGroup === 'ate12';
   return (
@@ -351,7 +351,7 @@ function LookTiles({ onPlus }: { onPlus: () => void }) {
 /** Provador: o Hami com a roupa de agora + a peça escolhida, antes de comprar. */
 /** Provador no estilo jogo: o Hami grandão no meio (ou a peça dentro da sua casa), nome e preço,
  *  e um carrossel com as peças da prateleira para ir trocando. */
-function TryOn({ item, list, onPick, onClose, onPlus, onGift }: { item: Item | null; list: Item[]; onPick: (item: Item) => void; onClose: () => void; onPlus: () => void; onGift?: (itemId: string) => void }) {
+export function TryOn({ item, list, onPick, onClose, onPlus, onGift }: { item: Item | null; list: Item[]; onPick: (item: Item) => void; onClose: () => void; onPlus: () => void; onGift?: (itemId: string) => void }) {
   const s = useApp();
   const strip = useRef<HTMLDivElement>(null);
   useEffect(() => {

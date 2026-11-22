@@ -117,6 +117,22 @@ describe('compras no servidor', () => {
     const plus = await call('POST', '/game/ops', { ops: [{ op: 'spend', ref: 'loja:cartola:4', label: 'x', coins: 1 }] }, u.cookie);
     expect(plus.body.results[0].error).toBe('plus');
   });
+  it('destino de viagem: preço do catálogo, não compra duas vezes, Plus e casinha protegidos', async () => {
+    const u = await newUser('Iris');
+    await wallet(u.cookie);
+    await owner((c) => c.query('UPDATE game_wallet SET coins = 1000 WHERE user_id = $1', [u.id]));
+    const r = await call('POST', '/game/ops', { ops: [{ op: 'spend', ref: 'destino:jardim:1', label: 'x', coins: 1 }] }, u.cookie);
+    expect(r.body.results[0].ok).toBe(true);
+    expect(r.body.wallet.coins).toBe(600);
+    const again = await call('POST', '/game/ops', { ops: [{ op: 'spend', ref: 'destino:jardim:2', label: 'x', coins: 1 }] }, u.cookie);
+    expect(again.body.results[0].error).toBe('ja-tem');
+    const plus = await call('POST', '/game/ops', { ops: [{ op: 'spend', ref: 'destino:castelo:3', label: 'x', coins: 1 }] }, u.cookie);
+    expect(plus.body.results[0].error).toBe('plus');
+    const free = await call('POST', '/game/ops', { ops: [{ op: 'spend', ref: 'destino:casinha:4', label: 'x', coins: 1 }] }, u.cookie);
+    expect(free.body.results[0].error).toBe('invalido');
+    const inv = await call('GET', '/game/inventory', undefined, u.cookie);
+    expect(inv.body.items.map((i: { itemId: string }) => i.itemId)).toContain('destino:jardim');
+  });
 });
 
 describe('baús no servidor', () => {

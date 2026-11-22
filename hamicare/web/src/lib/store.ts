@@ -2,8 +2,9 @@
 import { careDays, growthOf } from '../logic/growth';
 import { useSyncExternalStore } from 'react';
 import { AREA_GOAL, AREA_PLAN, areaOf, isWeightArea, type Area } from '../logic/areas';
-import type { AgeGroup, Battery, BodyStart, CareId, Category, DayLog, DayPart, PetGender, Direction, Freq, GoalId, Incentive, Journey, MealEntry, Mood, Outfit, PetMood, Photo, State, Task, TraitId, WearSlot } from '../types';
+import type { AgeGroup, Battery, BodyStart, CareId, Category, DayLog, DayPart, PetGender, Direction, Freq, GoalId, Incentive, Journey, MealEntry, Mood, Outfit, PetMood, Photo, QuestPlan, State, Task, TraitId, WearSlot } from '../types';
 import { LIBRARY, LIFE_AREAS, libById, rewardFor, type LifeArea } from '../data/tasks';
+import { destById } from '../data/destinations';
 import { ITEMS, LOOKS, RECIPES, STYLES, WEARABLE_KINDS, itemById, stylePrice } from '../data/items';
 import { PLACES, placeById } from '../data/world';
 import { FACTS } from '../data/lines';
@@ -902,12 +903,52 @@ function calFields(input: Partial<TaskInput>) {
 }
 export const partOfTime = (at: string): DayPart => (at < '12:00' ? 'manha' : at < '18:00' ? 'tarde' : 'noite');
 
-export function addTask(input: TaskInput) {
+export function addTask(input: TaskInput): string | undefined {
   const title = input.title.trim();
   if (!title) return;
   const task: Task = { id: `t${uid()}`, title, emoji: input.emoji, cat: input.cat, freq: input.freq, energy: input.energy, reward: rewardFor(input.energy), createdAt: todayKey(), ...calFields(input) };
   commit({ ...state, tasks: [...state.tasks, task] });
+  return task.id;
 }
+
+/** Adiciona várias tarefas da biblioteca de uma vez (as que já existem ficam como estão). Devolve quantas entraram. */
+export function addRoutine(libIds: string[]): number {
+  let n = 0;
+  for (const id of libIds) {
+    if (state.tasks.some((t) => t.id === id)) continue;
+    const t = libTask(id, todayKey());
+    if (!t) continue;
+    commit({ ...state, tasks: [...state.tasks, t] });
+    n++;
+  }
+  return n;
+}
+
+/** Cria uma missão planejada: as tarefas (da biblioteca ou escritas pela pessoa) entram na lista e ficam agrupadas. */
+export function createPlan(name: string, area: string, entries: { lib?: string; title?: string; emoji?: string }[]): QuestPlan | null {
+  const clean = name.trim().slice(0, 40);
+  if (!clean || !entries.length) return null;
+  const ids: string[] = [];
+  for (const e of entries.slice(0, PLAN_MAX)) {
+    if (e.lib) {
+      addLibraryTask(e.lib);
+      if (state.tasks.some((t) => t.id === e.lib)) ids.push(e.lib);
+    } else if (e.title?.trim()) {
+      const id = addTask({ title: e.title.trim().slice(0, 60), emoji: e.emoji ?? '⭐', cat: 'autocuidado', freq: { kind: 'diaria' }, energy: 2 });
+      if (id) ids.push(id);
+    }
+  }
+  if (!ids.length) return null;
+  const plan: QuestPlan = { id: `pl${uid()}`, name: clean, area, tasks: [...new Set(ids)], createdAt: todayKey() };
+  commit({ ...state, plans: [plan, ...(state.plans ?? [])].slice(0, 20) });
+  return plan;
+}
+
+export function removePlan(id: string) {
+  commit({ ...state, plans: (state.plans ?? []).filter((p) => p.id !== id) });
+}
+
+export const PLAN_MAX = 50;
 
 /** Guarda as áreas escolhidas (sem mexer nas missões). */
 export function setLifeAreas(list: LifeArea[]) {
@@ -1500,10 +1541,40 @@ export const TREK_TALES: { s: string; q: string; a: [string, string]; r: [string
   { s: 'Duas trilhas se abrem: uma conhecida e uma que ninguém sabe onde vai dar.', q: 'precisa escolher.', a: ['A trilha conhecida.', 'A trilha nova.'], r: ['O que é familiar também acolhe.', 'Coragem é dar um passo no desconhecido.'] },
 ];
 
-/** Lugar da viagem: a arena onde o Hami mora, ou a Lua. */
-export function trekPlaceOf(s: State): string {
+/** Lugar onde o Hami mora (arena ou Lua). */
+export function homePlaceOf(s: State): string {
   const n = homeArenaOf(s);
   return n === MOON_N ? 'lua' : gameCfg().arenas.find((a) => a.n === n)?.id ?? 'casinha';
+}
+
+/** Destinos que a pessoa já tem: os das arenas liberadas, a Lua (se tem a casa lunar) e os comprados. */
+export function destinationOwned(s: State, id: string): boolean {
+  if (id === 'lua') return !!s.moon;
+  if (owned(s, `destino:${id}`)) return true;
+  const arena = gameCfg().arenas.find((a) => a.id === id);
+  return !!arena && arena.n <= currentArena(s);
+}
+
+/** Lugar da viagem: o destino escolhido (se a pessoa tem), senão onde o Hami mora. */
+export function trekPlaceOf(s: State): string {
+  return s.trekDest && destById(s.trekDest) && destinationOwned(s, s.trekDest) ? s.trekDest : homePlaceOf(s);
+}
+
+export function chooseDestination(id: string): boolean {
+  if (!destinationOwned(state, id)) return false;
+  commit({ ...state, trekDest: id });
+  return true;
+}
+
+/** Compra um destino com sementes (o servidor confere o preço e o Plus). */
+export function buyDestination(id: string): BuyResult | 'plus' {
+  const d = destById(id);
+  if (!d || !d.price || id === 'lua') return 'ja-tem';
+  if (destinationOwned(state, id)) return 'ja-tem';
+  if (d.plus && !isPremium(state)) return 'plus';
+  if (state.coins < d.price) return 'sem-sementes';
+  commit({ ...spend(state, d.price, `Destino ${d.name}`, `destino:${id}`), inventory: { ...state.inventory, [`destino:${id}`]: 1 }, trekDest: id });
+  return 'ok';
 }
 
 /** O Hami voltou: sementes, XP, uma comidinha, um cartão de lembrança e uma história. */

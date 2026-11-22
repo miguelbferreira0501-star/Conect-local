@@ -14,6 +14,7 @@ import {
 } from '../../../web/src/shared/game';
 import { ITEMS, LOOKS, STYLES, itemById, stylePrice } from '../../../web/src/data/items';
 import { FURS } from '../../../web/src/data/fur';
+import { DESTINATIONS } from '../../../web/src/data/destinations';
 import { LIBRARY } from '../../../web/src/data/tasks';
 import { PLACES } from '../../../web/src/data/world';
 import { MOON_ITEMS, MOON_PRICE } from '../../../web/src/data/arenas';
@@ -400,6 +401,14 @@ async function applySpend(db: pg.PoolClient, userId: string, w: WalletRow, op: {
   } else if (kind === 'martelinho') {
     // Martelinho que conserta a ofensiva: preço fixo do catálogo do jogo.
     price = HAMMER_PRICE;
+  } else if (kind === 'destino') {
+    // Destino de viagem: preço do catálogo; os "Premium" só para quem tem o HamiCare+.
+    const dest = DESTINATIONS.find((d) => d.id === id);
+    if (!dest || !dest.price || id === 'lua') return { w, ok: false, error: 'invalido' };
+    if (dest.plus && !premium) return { w, ok: false, error: 'plus' };
+    if (owned.has(`destino:${id}`)) return { w, ok: false, error: 'ja-tem' };
+    price = dest.price;
+    give.push(`destino:${id}`);
   } else if (kind === 'pelagem') {
     const fur = FURS.find((f) => f.id === id);
     if (!fur || !fur.price) return { w, ok: false, error: 'invalido' };

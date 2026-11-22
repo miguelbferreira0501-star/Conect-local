@@ -7,7 +7,9 @@ import { Room } from '../components/Room';
 import { floorPalette, tonePalette } from '../components/Furniture';
 import { TREK_THEMES, Suitcase, TrekBar, TrekScene, TrekStart, TrekUnpack, WalkingHami, finishTrek, trekThemeOf } from '../components/Trek';
 import type { TrekResult } from '../lib/store';
-import { introDay, startTrek, trekReady } from '../lib/store';
+import { introDay, startTrek, trekPlaceOf, trekReady } from '../lib/store';
+import { DestinationSheet, TrekGo } from '../components/Destinations';
+import { destById } from '../data/destinations';
 import { TrailCard, WeekReportCard } from '../components/Trail';
 import { unreadMail } from '../lib/mail';
 import { SleepingHami } from '../components/SleepingHami';
@@ -17,7 +19,7 @@ import { TeamHomeCard } from './social/Team';
 import { JourneyCard, useKcalPop } from '../components/Journey';
 import { TaskRow } from '../components/TaskRow';
 import { MealCard } from '../components/MealPlan';
-import { Coins, Modal, Sheet, toast } from '../components/ui';
+import { Modal, Sheet, toast } from '../components/ui';
 import { MOODS, periodOf, petLine } from '../data/lines';
 import { placeById } from '../data/world';
 import { streakOf } from '../logic/streak';
@@ -30,6 +32,7 @@ import { StreakRepairCard } from '../components/StreakRepair';
 import { requestTool } from './Wellbeing';
 import { CompanionBuddy } from './Companions';
 import { LivePet } from '../components/LivePet';
+import { AddTaskSheet } from '../components/AddTask';
 import { useFurniturePlay } from '../components/FurniturePlay';
 import { TaskCalendar, byPart } from '../components/TaskCalendar';
 import { petMoodOf } from '../lib/petState';
@@ -99,9 +102,12 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
   const [trekResult, setTrekResult] = useState<TrekResult | null>(null);
   // Meta do dia completa: o Hami sai em viagem sozinho.
   const goalDone = trekReady(s);
+  // Meta cumprida: aparece a tela "Ir para…" com o destino (a pessoa pode trocar antes de sair).
+  const [trekGo, setTrekGo] = useState(false);
+  const [destOpen, setDestOpen] = useState(false);
   useEffect(() => {
     if (!goalDone) return;
-    const t = setTimeout(() => startTrek() && setTrekStart(true), 1200);
+    const t = setTimeout(() => setTrekGo(true), 1000);
     return () => clearTimeout(t);
   }, [goalDone]);
   useEffect(() => {
@@ -128,6 +134,8 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
   const [result, setResult] = useState<AdventureResult | null>(null);
   const petRef = useRef<HTMLDivElement>(null);
   const [mood, setMoodAnim] = useState<PetMood | null>(null);
+  const [leaving, setLeaving] = useState<string[]>([]);
+  const [addOpen, setAddOpen] = useState(false);
   const [puff, setPuff] = useState<{ id: number; text: string } | null>(null);
   const { pop, layer } = useKcalPop();
   const dir = s.journey.dir;
@@ -153,6 +161,11 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
 
   function onToggle(t: Task, el: HTMLElement) {
     const wasDone = t.id in day.done;
+    // A tarefa feita sai da lista com uma animaçãozinha (fica um instante na tela).
+    if (!wasDone) {
+      setLeaving((l) => [...l, t.id]);
+      setTimeout(() => setLeaving((l) => l.filter((x) => x !== t.id)), 700);
+    }
     const before = s.pet.grams;
     const r = toggleTask(t.id);
     if (!r || wasDone) return;
@@ -261,8 +274,8 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
             </Outdoors>
           </PanRoom>
         ) : (
-          <PanRoom>
-            <Room house={s.house} period={period} height={430} wide={1.9} onUse={furniture.useItem} usage={furniture.usage}>
+          <PanRoom width={1.45}>
+            <Room house={s.house} period={period} height={430} wide={1.45} onUse={furniture.useItem} usage={furniture.usage}>
               {furniture.use ? null : hami}
             </Room>
           </PanRoom>
@@ -283,9 +296,6 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
           ) : (
             <span className="flex-1" />
           )}
-          <button className="hr-pill" onClick={() => setWallet(true)} aria-label={`Carteira: ${s.coins} sementes`}>
-            <Coins value={s.coins} />
-          </button>
           <button className="hr-pill hr-round" onClick={onSettings} aria-label={`Menu${mailN ? `: ${mailN} cartas novas` : ''}`}>
             <Settings size={18} />
             {mailN > 0 && <span className="hr-dot" aria-hidden="true" />}
@@ -343,13 +353,17 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
             })}
           </span>
         </button>
-        <button className="hc-trip-foot" onClick={onEvolution}>
-          <span>{goalDone || s.trek ? 'Meta cumprida, energia carregada: vamos lá!' : `Faltam ${Math.max(0, goal - done)} ${goal - done === 1 ? 'tarefa' : 'tarefas'} para o ${s.pet.name} sair em viagem`}</span>
+        <button className="hc-trip-foot" onClick={() => (goalDone ? setTrekGo(true) : setDestOpen(true))}>
+          <span>
+            {goalDone ? 'Meta cumprida! Toque para escolher o destino e viajar' : s.trek ? `${s.pet.name} está em ${destById(trekPlaceOf(s))?.name ?? 'viagem'}` : `Faltam ${Math.max(0, goal - done)} ${goal - done === 1 ? 'tarefa' : 'tarefas'} · Destino: ${destById(trekPlaceOf(s))?.name ?? ''}`}
+          </span>
           <span className="hc-trip-streak">
             <Flame size={14} /> {streak.count}
           </span>
         </button>
       </section>
+      <TrekGo open={trekGo && !s.trek} onClose={() => setTrekGo(false)} onGo={() => (setTrekGo(false), startTrek() && setTrekStart(true))} />
+      <DestinationSheet open={destOpen} onClose={() => setDestOpen(false)} />
       <DayGoalSheet open={areaOpen} onClose={() => setAreaOpen(false)} total={tasks.length} />
       <WalletSheet open={wallet} onClose={() => setWallet(false)} />
 
@@ -359,26 +373,53 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
             <Glyph e="📅" size={24} />
           </button>
           <h2>
-            Concluído hoje <b>{done}/{tasks.length}</b>
+            {tasks.length - done > 0 ? (
+              <>
+                Faltam hoje <b>{tasks.length - done}</b>
+              </>
+            ) : (
+              <>
+                Concluído hoje <b>{done}/{tasks.length}</b>
+              </>
+            )}
           </h2>
           <button className="hc-head-btn" onClick={() => openCheckin()} aria-label="Como você está agora?">
             <Glyph e={day.mood ? MOODS[day.mood - 1].emoji : '😐'} size={24} />
           </button>
         </div>
         <HardDay hard={day.battery === 1} pet={s.pet.name} />
-        {byPart(tasks).map(([id, label, items]) => (
+        {byPart(tasks.filter((t) => !(t.id in day.done) || leaving.includes(t.id))).map(([id, label, items]) => (
           <div key={id} className="grid gap-2">
             <p className="hc-part">{label}</p>
             <ul className="grid gap-2.5">
               {items.map((t) => (
-                <TaskRow key={t.id} task={t} done={t.id in day.done} kcal={kcalOf(s, t)} dir={dir} sub={t.at} onToggle={(el) => onToggle(t, el)} />
+                <TaskRow key={t.id} task={t} done={t.id in day.done} kcal={kcalOf(s, t)} dir={dir} sub={t.at} onToggle={(el) => onToggle(t, el)} className={leaving.includes(t.id) ? 'is-leaving' : ''} />
               ))}
             </ul>
           </div>
         ))}
-        {!tasks.length && <p className="card p-4 text-center text-muted">Nenhuma tarefa para hoje. Que tal programar uma bem pequena no calendário?</p>}
-        <button className="hc-add" onClick={() => setCal(true)}>
-          <Plus size={18} strokeWidth={3} /> Adicionar ou programar tarefa
+        {tasks.length > 0 && done >= tasks.length && !leaving.length && (
+          <div className="hc-alldone">
+            <Glyph e="🎉" size={64} />
+            <p>
+              <b>Uhuul!</b> Tarefas de hoje concluídas!
+            </p>
+            <button className="hc-alldone-add" onClick={() => setAddOpen(true)} aria-label="Adicionar mais tarefas">
+              <Plus size={30} strokeWidth={3} />
+            </button>
+          </div>
+        )}
+        {!tasks.length && (
+          <div className="hc-alldone">
+            <p>Nenhuma tarefa para hoje ainda.</p>
+            <button className="hc-alldone-add" onClick={() => setAddOpen(true)} aria-label="Adicionar tarefa">
+              <Plus size={30} strokeWidth={3} />
+            </button>
+          </div>
+        )}
+        <AddTaskSheet open={addOpen} onClose={() => setAddOpen(false)} />
+        <button className="hc-add" onClick={() => setAddOpen(true)}>
+          <Plus size={18} strokeWidth={3} /> Adicionar tarefa
         </button>
       </section>
 
@@ -409,7 +450,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
 }
 
 /** A casa é mais larga que a tela: arrasta para os lados (com o dedo ou o mouse). Começa no meio. */
-function PanRoom({ children }: { children: React.ReactNode }) {
+function PanRoom({ children, width = 1.9 }: { children: React.ReactNode; width?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const drag = useRef<{ x: number; left: number } | null>(null);
   useEffect(() => {
@@ -431,7 +472,7 @@ function PanRoom({ children }: { children: React.ReactNode }) {
       onPointerUp={() => (drag.current = null)}
       onPointerLeave={() => (drag.current = null)}
     >
-      <div className="hr-inner">{children}</div>
+      <div className="hr-inner" style={{ width: `${width * 100}%` }}>{children}</div>
     </div>
   );
 }

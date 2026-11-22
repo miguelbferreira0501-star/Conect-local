@@ -1,37 +1,31 @@
 import { MOON_N } from '../data/arenas';
-import { memo, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowUpToLine, Lock, PackageOpen, Pencil, Sparkles } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
-import { ShopHub } from './Shop';
 import { TripDepart } from '../components/TripDepart';
 import { ISLAND_AT, MAP_H, MAP_W, TripMapArt } from '../components/TripMap';
 import { CompanionBuddy } from './Companions';
 import { Room } from '../components/Room';
 import { FLOOR_CSS, WALLPAPER_CSS } from '../components/Furniture';
-import { Coins, Seed, Seg, Sheet, toast } from '../components/ui';
-import { HOUSE_KINDS, ITEMS, KIND_LABEL, STYLES, WEARABLE_KINDS, itemById, stylePrice } from '../data/items';
-import { FURS } from '../data/fur';
+import { Seg, Sheet, toast } from '../components/ui';
+import { HOUSE_KINDS, ITEMS, itemById } from '../data/items';
 import { ALL_FINDS, PLACES, placeById } from '../data/world';
 import { periodOf } from '../data/lines';
 import { levelOf } from '../logic/progress';
 import {
-  bringFront, buyFur, homeArenaOf, buyStyle, finishAdventure, isPremium, moveItem, owned, placeItem, placeLocked, setFloor, setWallpaper, startAdventure, storeItem, unwear, updatePet, useApp, wear, type AdventureResult,
+  bringFront, homeArenaOf, finishAdventure, moveItem, owned, placeItem, placeLocked, setFloor, setWallpaper, startAdventure, storeItem, useApp, type AdventureResult,
 } from '../lib/store';
 import { AdventureModal } from './Home';
-import type { WearSlot } from '../types';
 import { Glyph } from '../components/art';
 import { ArenasTab, arenaByN } from './Arenas';
 import { ItemIcon } from '../components/ItemIcon';
-import { PLUS_COUNTS, PlusCard } from '../components/PlusCard';
-import { AlbumView, InventoryView, WalletSheet, WorkshopView } from './Collection';
 
 export type WorldTab = 'arenas' | 'casa' | 'mapa' | 'loja' | 'armario';
 type Tab = WorldTab;
 
-export function World({ onPlus, onGift, initialTab }: { onPlus: () => void; onGift: (itemId: string) => void; initialTab?: Tab }) {
+export function World({ onPlus, initialTab }: { onPlus: () => void; onGift?: (itemId: string) => void; initialTab?: Tab }) {
   const s = useApp();
   const [tab, setTab] = useState<Tab>(initialTab ?? 'casa');
-  const [wallet, setWallet] = useState(false);
   return (
     <div className="grid gap-4">
       <header className="flex items-end justify-between gap-3">
@@ -39,17 +33,11 @@ export function World({ onPlus, onGift, initialTab }: { onPlus: () => void; onGi
           <p className="eyebrow">Nível {levelOf(s.xp)}</p>
           <h1 className="font-display text-[30px] font-bold leading-tight">Mundo</h1>
         </div>
-        <button className="coins-btn" onClick={() => setWallet(true)} aria-label={`Carteira: ${s.coins} sementes`}>
-          <Coins value={s.coins} />
-        </button>
       </header>
-      <WalletSheet open={wallet} onClose={() => setWallet(false)} />
-      <Seg value={tab} onChange={setTab} label="Seções do mundo" options={[{ id: 'arenas', label: 'Arenas' }, { id: 'casa', label: 'Casa' }, { id: 'mapa', label: 'Passeios' }, { id: 'loja', label: 'Loja' }, { id: 'armario', label: 'Armário' }]} />
+      <Seg value={tab} onChange={setTab} label="Seções do mundo" options={[{ id: 'arenas', label: 'Arenas' }, { id: 'casa', label: 'Casa' }, { id: 'mapa', label: 'Passeios' }]} />
       {tab === 'arenas' && <ArenasTab onHouse={() => setTab('casa')} />}
       {tab === 'casa' && <HouseTab onArenas={() => setTab('arenas')} />}
       {tab === 'mapa' && <MapTab onPlus={onPlus} />}
-      {tab === 'loja' && <ShopHub onPlus={onPlus} onGift={onGift} />}
-      {tab === 'armario' && <WardrobeTab onPlus={onPlus} />}
     </div>
   );
 }
@@ -134,38 +122,6 @@ function HouseTab({ onArenas }: { onArenas: () => void }) {
           </section>
         </>
       )}
-      <section className="grid gap-2" aria-label="Estilos de casa">
-        <h2 className="font-display text-[19px] font-bold">Estilos prontos</h2>
-        <p className="text-[14px] text-muted">Compre a coleção inteira com 25% de desconto e a casa já fica arrumada.</p>
-        <div className="grid grid-cols-2 gap-2">
-          {STYLES.map((st) => {
-            const price = stylePrice(st, (id) => owned(s, id));
-            const locked = st.plus && !isPremium(s);
-            return (
-              <div key={st.id} className="card grid gap-2 overflow-hidden p-0">
-                <div className="h-16" style={{ background: `${WALLPAPER_CSS[st.wallpaper]}` }}>
-                  <div className="mt-11 h-5" style={{ background: FLOOR_CSS[st.floor] }} />
-                </div>
-                <div className="grid gap-2 px-3 pb-3">
-                  <p className="font-bold leading-tight">
-                    {st.name} {st.plus && <Sparkles size={14} className="inline text-accent" />}
-                  </p>
-                  <button
-                    className="btn btn-soft btn-sm"
-                    disabled={locked}
-                    onClick={() => {
-                      const r = buyStyle(st.id);
-                      toast(r === 'ok' ? `Casa no estilo ${st.name}!` : r === 'sem-sementes' ? 'Faltam sementes para essa coleção.' : 'Esse estilo é do HamiCare+.');
-                    }}
-                  >
-                    {locked ? <Lock size={14} /> : <Seed />} {price}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
     </div>
   );
 }
@@ -333,97 +289,6 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
       </Sheet>
       <AdventureModal result={result} onClose={() => setResult(null)} />
       <TripDepart place={trip} onDone={() => (setTrip(null), toast(`${s.pet.name} saiu para a aventura!`))} />
-    </div>
-  );
-}
-
-// ---------- Armário ----------
-
-function WardrobeTab({ onPlus }: { onPlus: () => void }) {
-  const s = useApp();
-  const fresh = Object.values(s.itemMeta ?? {}).filter((m) => !m.seen).length;
-  const [sec, setSec] = useState<'vestir' | 'itens' | 'album' | 'oficina'>('vestir');
-  return (
-    <div className="grid gap-4">
-      <Seg value={sec} onChange={setSec} label="Seções do armário" options={[{ id: 'vestir', label: 'Vestir' }, { id: 'itens', label: fresh ? `Itens (${fresh})` : 'Itens' }, { id: 'album', label: 'Álbum' }, { id: 'oficina', label: 'Oficina' }]} />
-      {sec === 'vestir' && <DressUp onPlus={onPlus} />}
-      {sec === 'itens' && <InventoryView />}
-      {sec === 'album' && <AlbumView onWorkshop={() => setSec('oficina')} />}
-      {sec === 'oficina' && <WorkshopView />}
-    </div>
-  );
-}
-
-// Quadradinhos do armário: só redesenham quando mudam e ficam paradinhos (dezenas de Hamis animados travavam).
-const FurTile = memo(function FurTile({ id, label, price, has, locked, on, coins }: { id: string; label: string; price?: number; has: boolean; locked: boolean; on: boolean; coins: number }) {
-  return (
-    <button
-      className="wardrobe-tile"
-      aria-pressed={on}
-      aria-label={`${label}${locked ? ' (Plus)' : !has ? ` por ${price} sementes` : ''}`}
-      onClick={() => {
-        if (locked) return toast('Pelagem exclusiva do HamiCare+');
-        if (!has) {
-          const r = buyFur(id);
-          return toast(r === 'ok' ? 'Pelagem nova é sua!' : r === 'sem-sementes' ? `Faltam ${price! - coins} sementes` : 'Não deu agora.');
-        }
-        updatePet({ fur: id });
-      }}
-    >
-      <span className="icon-still"><Hamster fur={id} size={80} idle={false} label={label} /></span>
-      {locked ? <Lock size={12} className="absolute right-1.5 top-1.5 text-muted" /> : !has && <span className="wardrobe-price">🌻{price}</span>}
-    </button>
-  );
-});
-
-const WearTile = memo(function WearTile({ id, name, slot, fur, on }: { id: string; name: string; slot: WearSlot; fur: string; on: boolean }) {
-  return (
-    <button className="wardrobe-tile" aria-pressed={on} onClick={() => (on ? unwear(slot) : wear(id))} aria-label={on ? `Tirar ${name}` : `Vestir ${name}`}>
-      <span className="icon-still"><Hamster fur={fur} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null, [slot]: id }} size={88} idle={false} label={name} /></span>
-      {on && <span className="care-tile-done !right-1.5 !top-1.5">✓</span>}
-    </button>
-  );
-});
-
-function DressUp({ onPlus }: { onPlus: () => void }) {
-  const s = useApp();
-  const mine = ITEMS.filter((i) => WEARABLE_KINDS.includes(i.kind) && owned(s, i.id));
-  const premium = isPremium(s);
-  const SLOTS: WearSlot[] = ['chapeu', 'oculos', 'roupa', 'acessorio', 'efeito'];
-  return (
-    <div className="grid gap-4">
-      <div className="grid place-items-center rounded-[26px] py-3" style={{ background: 'color-mix(in srgb, var(--surface) 55%, transparent)' }}>
-        <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} size={190} label={s.pet.name} />
-      </div>
-      <PlusCard onOpen={onPlus} title="Pelagens e roupas especiais" text={`${PLUS_COUNTS.furs} pelagens e ${PLUS_COUNTS.items} itens exclusivos para o ${s.pet.name}.`} />
-      <section className="grid gap-2" aria-label="Pelagens">
-        <h2 className="section-label px-1">Pelagem</h2>
-        <div className="grid grid-cols-4 gap-2">
-          {FURS.map((f) => (
-            <FurTile key={f.id} id={f.id} label={f.label} price={f.price} has={!f.price || owned(s, `fur:${f.id}`)} locked={!!f.plus && !premium} on={s.pet.fur === f.id} coins={s.coins} />
-          ))}
-        </div>
-      </section>
-      {mine.length ? (
-        SLOTS.map((slot) => {
-          const items = mine.filter((i) => i.kind === slot);
-          if (!items.length) return null;
-          return (
-            <section key={slot} className="grid gap-2">
-              <h2 className="section-label px-1">
-                {KIND_LABEL[slot]} ({items.length})
-              </h2>
-              <div className="grid grid-cols-3 gap-2">
-                {items.map((i) => {
-                  return <WearTile key={i.id} id={i.id} name={i.name} slot={slot} fur={s.pet.fur} on={s.pet.outfit[slot] === i.id} />;
-                })}
-              </div>
-            </section>
-          );
-        })
-      ) : (
-        <p className="rounded-2xl border-2 border-dashed border-line p-5 text-center text-muted">Ainda não tem roupinhas. Que tal escolher a primeira na Loja? Tem looks completos com desconto.</p>
-      )}
     </div>
   );
 }

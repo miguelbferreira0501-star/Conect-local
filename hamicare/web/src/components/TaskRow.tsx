@@ -8,7 +8,7 @@ import { burstConfetti } from '../lib/confetti';
 import type { Direction, Task } from '../types';
 import { Glyph } from './art';
 
-export function TaskRow({ task, done, kcal, dir, sub, onToggle, onEdit }: {
+export function TaskRow({ task, done, kcal, dir, sub, onToggle, onEdit, className = '' }: {
   task: Task;
   done: boolean;
   kcal: number;
@@ -16,10 +16,11 @@ export function TaskRow({ task, done, kcal, dir, sub, onToggle, onEdit }: {
   sub?: string;
   onToggle: (el: HTMLElement) => void;
   onEdit?: () => void;
+  className?: string;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
   return (
-    <li className="task" data-done={done}>
+    <li className={`task ${className}`} data-done={done}>
       <span className="task-emoji" data-cat={task.cat} aria-hidden="true">
         <Glyph e={task.emoji} size={40} />
       </span>

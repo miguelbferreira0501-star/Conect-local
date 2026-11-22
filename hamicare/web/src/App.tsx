@@ -13,6 +13,9 @@ import { Activities } from './screens/Activities';
 import { World, type WorldTab } from './screens/World';
 import type { FriendsTab } from './screens/Friends';
 import { Wellbeing } from './screens/Wellbeing';
+import { Grow } from './screens/Grow';
+import { StoreTab } from './screens/StoreTab';
+import { BagTab } from './screens/BagTab';
 import { Friends, type ShareDraft } from './screens/Friends';
 import { Onboarding } from './screens/Onboarding';
 import { SettingsSheet } from './screens/Settings';
@@ -40,12 +43,16 @@ type Tab = TabId;
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'inicio', label: 'Início' },
-  { id: 'atividades', label: 'Missões' },
+  { id: 'crescer', label: 'Crescer' },
   { id: 'cuidar', label: 'Cuidar' },
+  { id: 'loja', label: 'Loja' },
+  { id: 'bolsa', label: 'Bolsa' },
   { id: 'mundo', label: 'Mundo' },
-  { id: 'bem-estar', label: 'Bem-estar' },
-  { id: 'amigos', label: 'Amigos' },
 ];
+/** Telas que não ficam na barra (abrem pelo Crescer, pelo menu ou por atalhos). */
+const HIDDEN: Tab[] = ['atividades', 'bem-estar', 'amigos'];
+/** Qual aba fica acesa na barra quando a tela é uma das escondidas. */
+const LIT: Partial<Record<Tab, Tab>> = { atividades: 'crescer', 'bem-estar': 'crescer', amigos: 'crescer' };
 
 captureRef();
 
@@ -53,7 +60,7 @@ function initialTab(): Tab {
   // Link de convite (#amigo=HAMI-…): vai para Amigos com o código guardado.
   if (captureInvite()) return 'amigos';
   const h = location.hash.slice(1);
-  return TABS.some((t) => t.id === h) ? (h as Tab) : 'inicio';
+  return TABS.some((t) => t.id === h) || HIDDEN.includes(h as Tab) ? (h as Tab) : 'inicio';
 }
 
 export default function App() {
@@ -137,6 +144,7 @@ export default function App() {
         else if (t === 'carteira') setWalletOpen(true);
         else if (t === 'amigos') setTab('amigos');
         else if (t === 'missoes') setTab('atividades');
+        else if (t === 'bemestar') setTab('bem-estar');
         else if (t === 'hami') setPetProfile(true);
         else if (t === 'areas') setAreasOpen(true);
       }),
@@ -156,6 +164,9 @@ export default function App() {
   }, []);
 
   function go(next: Tab, sub?: WorldTab, friendsSub?: FriendsTab) {
+    // Loja e armário saíram do Mundo: agora são abas próprias.
+    if (next === 'mundo' && sub === 'loja') (next = 'loja'), (sub = undefined);
+    if (next === 'mundo' && sub === 'armario') (next = 'bolsa'), (sub = undefined);
     setTab(next);
     setWorldTab(sub);
     setFriendsTab(friendsSub);
@@ -207,6 +218,9 @@ export default function App() {
         {tab === 'inicio' && <Home onGo={go} onSettings={() => setMenu(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} onPlus={() => setPlus(true)} onTeam={() => go('amigos', undefined, 'turma')} onWorld={(sub) => go('mundo', sub)} />}
         {tab === 'cuidar' && <CareArea onShare={(photo) => shareTo({ kind: 'foto', photo })} />}
         {tab === 'atividades' && <Activities onShareTask={(task) => shareTo({ kind: 'atividade', task })} onPlus={() => setPlus(true)} onHome={() => go('inicio')} />}
+        {tab === 'crescer' && <Grow onGo={(t) => go(t)} onPlus={() => setPlus(true)} />}
+        {tab === 'loja' && <StoreTab onPlus={() => setPlus(true)} onGift={(id) => (setGift(id), go('amigos'))} />}
+        {tab === 'bolsa' && <BagTab onStore={() => go('loja')} onDecorate={() => go('mundo', 'casa')} />}
         {tab === 'mundo' && <World key={worldTab ?? 'mundo'} initialTab={worldTab} onPlus={() => setPlus(true)} onGift={(id) => (setGift(id), go('amigos'))} />}
         {tab === 'bem-estar' && <Wellbeing onPlus={() => setPlus(true)} />}
         {tab === 'amigos' && <Friends key={friendsTab ?? 'amigos'} initialTab={friendsTab} share={share} onShareDone={() => setShare(null)} giftItem={gift} onGiftDone={() => setGift(null)} account={account} />}
@@ -214,7 +228,7 @@ export default function App() {
       <nav className="tabbar" aria-label="Seções do app">
         <div className="tabbar-inner">
           {TABS.map(({ id, label }) => (
-            <button key={id} className="tab" aria-current={tab === id ? 'page' : undefined} onClick={() => go(id)}>
+            <button key={id} className="tab" aria-current={(LIT[tab] ?? tab) === id ? 'page' : undefined} onClick={() => go(id)}>
               <TabIcon id={id} />
               <span className="tab-label">{label}</span>
             </button>
