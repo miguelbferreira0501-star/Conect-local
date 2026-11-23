@@ -9,7 +9,7 @@ import { Hamster } from '../components/Hamster';
 import { PlusCard } from '../components/PlusCard';
 import { toast } from '../components/ui';
 import type { TabId } from '../components/TabIcon';
-import { ROUTINES, ROUTINE_CATS, routineById, type Routine, type RoutineCat } from '../data/routines';
+import { ROUTINE_CATS, routineById, routinesFor, type Routine, type RoutineCat } from '../data/routines';
 import { ANSWERS, SELF_TESTS, isHeavy, testResult, type SelfTest } from '../data/selftests';
 import { LIFE_AREAS, LIFE_ORDER, libById, type LifeArea } from '../data/tasks';
 import { activeQuests, claimKey, questProgress, questReward, type QuestDef } from '../logic/progress';
@@ -54,7 +54,7 @@ function useFavorites() {
 }
 
 const isKid = (s: State) => s.profile.ageGroup === 'ate12';
-const visibleRoutines = (s: State) => ROUTINES.filter((r) => !(r.plus && isKid(s)));
+const visibleRoutines = (s: State) => routinesFor(s.profile.ageGroup);
 
 // ---------- Missão do dia ----------
 
@@ -132,29 +132,26 @@ function DailyMission({ onGo }: { onGo: Go }) {
 
 // ---------- Rotinas ----------
 
-function RoutineCard({ r, big, fav, onOpen }: { r: Routine; big?: boolean; fav?: boolean; onOpen: (r: Routine) => void }) {
+/** Cartão como no vídeo: imagem quadrada em cima e a legenda embaixo. */
+function RoutineCard({ r, fav, onOpen }: { r: Routine; fav?: boolean; onOpen: (r: Routine) => void }) {
   const s = useApp();
   const locked = r.plus && !isPremium(s);
   return (
-    <button className={`gw-rt ${big ? 'is-big' : ''}`} style={{ background: r.tone }} onClick={() => onOpen(r)} aria-label={r.title}>
-      <span className="gw-rt-art" aria-hidden="true">
-        <RoutineArt r={r} glyph={big ? 74 : 54} />
+    <button className="gw-rc" onClick={() => onOpen(r)} aria-label={r.title}>
+      <span className="gw-rc-img" style={{ background: r.tone }}>
+        <RoutineArt r={r} glyph={56} />
+        {locked && (
+          <span className="gw-rc-lock" aria-label="HamiCare+">
+            <Lock size={12} strokeWidth={3} />
+          </span>
+        )}
+        {fav && (
+          <span className="gw-rc-fav" aria-label="Favorita">
+            <Heart size={12} fill="#FF5C8A" color="#FF5C8A" />
+          </span>
+        )}
       </span>
-      <span className="gw-rt-txt">
-        <b>{r.title}</b>
-        <small>{r.tasks.length} tarefas</small>
-      </span>
-      {(r.fresh || locked || fav) && (
-        <span className="gw-rt-badges">
-          {r.fresh && <em>Novo</em>}
-          {locked && (
-            <em className="is-plus">
-              <Lock size={11} /> Plus
-            </em>
-          )}
-          {fav && <Heart size={14} fill="#FF5C8A" color="#FF5C8A" />}
-        </span>
-      )}
+      <span className="gw-rc-txt">{r.title}</span>
     </button>
   );
 }
@@ -177,20 +174,25 @@ function RoutineSheet({ r, fav, onFav, onClose, onPlus }: { r: Routine | null; f
     <div className="gw-sheet" role="dialog" aria-modal="true" aria-label={r.title} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="gw-sheet-panel">
         <div className="gw-sheet-top" style={{ background: r.tone }}>
+          <span className="gw-sheet-pic">
+            <RoutineArt r={r} glyph={96} />
+          </span>
           <button className="gw-round" onClick={onClose} aria-label="Fechar">
             <X size={20} />
           </button>
           <button className="gw-round" onClick={onFav} aria-pressed={fav} aria-label={fav ? 'Tirar das favoritas' : 'Favoritar'}>
             <Heart size={20} fill={fav ? '#FF5C8A' : 'none'} color={fav ? '#FF5C8A' : 'currentColor'} />
           </button>
-          <span className="gw-sheet-art">
-            <RoutineArt r={r} fit="contain" glyph={96} />
-          </span>
         </div>
         <div className="gw-sheet-body">
           <p className="gw-sheet-cat">{ROUTINE_CATS.find((c) => c.id === r.cat)?.label}</p>
           <h2>{r.title}</h2>
           <p className="gw-sheet-desc">{r.desc}</p>
+          {r.help && (
+            <p className="gw-help">
+              <Phone size={14} /> Se estiver muito difícil, fale com alguém de confiança. O CVV atende de graça, 24 horas, no <a href="tel:188">188</a>.
+            </p>
+          )}
           <ul className="gw-sheet-tasks">
             {tasks.map((t) => (
               <li key={t.id}>
@@ -242,7 +244,7 @@ function RoutinesPage({ open, start, onClose, onOpen, fav }: { open: boolean; st
           </button>
         ))}
       </div>
-      <div className="gw-rt-grid">
+      <div className="gw-rc-grid">
         {list.map((r) => (
           <RoutineCard key={r.id} r={r} fav={fav.includes(r.id)} onOpen={onOpen} />
         ))}
@@ -550,7 +552,6 @@ export function Grow({ onGo, onPlus }: { onGo: Go; onPlus: () => void }) {
   const [planner, setPlanner] = useState(false);
   const [tests, setTests] = useState(false);
   const all = useMemo(() => visibleRoutines(s), [s]);
-  const fresh = all.filter((r) => r.fresh);
 
   const FOR_YOU: { id: string; label: string; emoji: string; tone: string; act: () => void }[] = [
     { id: 'rotinas', label: 'Rotinas', emoji: '📋', tone: '#FFD36B', act: () => setPage('todas') },
@@ -573,12 +574,11 @@ export function Grow({ onGo, onPlus }: { onGo: Go; onPlus: () => void }) {
       <DailyMission onGo={onGo} />
 
       <section aria-label="Para você">
-        <h2 className="gw-h">Para você</h2>
         <div className="gw-foryou">
           {FOR_YOU.map((f) => (
             <button key={f.id} onClick={f.act}>
               <span style={{ background: f.tone }}>
-                <Glyph e={f.emoji} size={34} />
+                <Glyph e={f.emoji} size={30} />
               </span>
               {f.label}
             </button>
@@ -588,33 +588,14 @@ export function Grow({ onGo, onPlus }: { onGo: Go; onPlus: () => void }) {
 
       <Plans />
 
-      <section aria-label="Novidades">
-        <div className="gw-row-head">
-          <h2 className="gw-h">Novidades</h2>
-          <button onClick={() => setPage('todas')}>
-            Ver tudo <ChevronRight size={16} />
-          </button>
-        </div>
-        <div className="gw-scroll">
-          {fresh.map((r) => (
-            <RoutineCard key={r.id} r={r} big fav={fav.includes(r.id)} onOpen={setRoutine} />
-          ))}
-        </div>
-      </section>
-
       {ROUTINE_CATS.map((c) => {
         const list = all.filter((r) => r.cat === c.id);
         if (!list.length) return null;
         return (
-          <section key={c.id} aria-label={c.label}>
-            <div className="gw-row-head">
-              <h2 className="gw-h">
-                <Glyph e={c.emoji} size={22} /> {c.label}
-              </h2>
-              <button onClick={() => setPage(c.id)}>
-                Ver tudo <ChevronRight size={16} />
-              </button>
-            </div>
+          <section key={c.id} className="gw-sec" aria-label={c.label}>
+            <button className="gw-sec-head" onClick={() => setPage(c.id)}>
+              {c.label} <ChevronRight size={18} strokeWidth={2.6} />
+            </button>
             <div className="gw-scroll">
               {list.map((r) => (
                 <RoutineCard key={r.id} r={r} fav={fav.includes(r.id)} onOpen={setRoutine} />
@@ -624,7 +605,7 @@ export function Grow({ onGo, onPlus }: { onGo: Go; onPlus: () => void }) {
         );
       })}
 
-      {!isKid(s) && <PlusCard onOpen={onPlus} title="Rotinas exclusivas" text="Yoga e respiração, Dormir melhor, Trabalho com pausas e muito mais no HamiCare+." />}
+      {!isKid(s) && <PlusCard onOpen={onPlus} title="Rotinas exclusivas" text="Plano de academia iniciante, Deixe sua carteira incrível e muito mais no HamiCare+." />}
 
       <RoutinesPage open={page !== null} start={page ?? 'todas'} onClose={() => setPage(null)} onOpen={setRoutine} fav={fav} />
       <Planner open={planner} onClose={() => setPlanner(false)} />

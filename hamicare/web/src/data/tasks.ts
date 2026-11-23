@@ -111,6 +111,10 @@ export const LIBRARY: LibTask[] = [
   { id: 'acordar-hora', title: 'Acordar sempre no mesmo horário', emoji: '⏰', cat: 'habitos', energy: 2 },
   { id: 'garrafa-perto', title: 'Deixar a garrafinha de água por perto', emoji: '🚰', cat: 'habitos', energy: 1 },
   { id: 'elogio', title: 'Fazer um elogio sincero a alguém', emoji: '💌', cat: 'emocional', energy: 1 },
+  { id: 'gastos', title: 'Anotar os gastos do dia', emoji: '📝', cat: 'habitos', energy: 1 },
+  { id: 'cofrinho', title: 'Guardar um dinheirinho no cofrinho', emoji: '🫙', cat: 'habitos', energy: 1 },
+  { id: 'assinaturas', title: 'Rever as assinaturas e cortar o que não usa', emoji: '🔍', cat: 'habitos', energy: 2 },
+  { id: 'esperar-compra', title: 'Esperar um dia antes de comprar por impulso', emoji: '⏰', cat: 'habitos', energy: 1 },
   { id: 'gentil-comigo', title: 'Falar comigo com a gentileza que falo com um amigo', emoji: '🫶', cat: 'emocional', energy: 1 },
 ];
 
