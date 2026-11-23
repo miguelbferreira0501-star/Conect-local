@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { addRoutine, buyDestination, chooseDestination, createPlan, destinationOwned, fresh, getState, homePlaceOf, removePlan, replaceState, todayKey, trekPlaceOf, PLAN_MAX } from './store';
 import { DESTINATIONS, souvenirPieces, SOUVENIR_GOAL } from '../data/destinations';
-import { ROUTINES } from '../data/routines';
+import { ROUTINES, ROUTINE_CATS, routinesFor } from '../data/routines';
 import { SELF_TESTS, isHeavy, testResult } from '../data/selftests';
 import { libById } from '../data/tasks';
 import type { Task } from '../types';
@@ -56,9 +56,9 @@ describe('rotinas e missões planejadas', () => {
   });
   it('adicionar uma rotina não duplica o que a pessoa já tem', () => {
     start({ tasks: [T('agua-acordar')] });
-    const n = addRoutine(ROUTINES.find((r) => r.id === 'manha')!.tasks);
-    expect(n).toBe(4);
-    expect(addRoutine(ROUTINES.find((r) => r.id === 'manha')!.tasks)).toBe(0);
+    const n = addRoutine(ROUTINES.find((r) => r.id === 'boost-manha')!.tasks);
+    expect(n).toBe(3);
+    expect(addRoutine(ROUTINES.find((r) => r.id === 'boost-manha')!.tasks)).toBe(0);
     expect(getState().tasks.filter((t) => t.id === 'agua-acordar')).toHaveLength(1);
   });
   it('uma missão planejada junta tarefas da biblioteca e escritas pela pessoa', () => {
@@ -79,6 +79,20 @@ describe('rotinas e missões planejadas', () => {
     start();
     const many = Array.from({ length: 70 }, (_, i) => ({ title: `Tarefa ${i}` }));
     expect(createPlan('Grande', 'estudo', many)!.tasks).toHaveLength(PLAN_MAX);
+  });
+});
+
+describe('seções do Crescer (iguais ao vídeo)', () => {
+  it('nove seções, cada rotina numa seção que existe, sem ids repetidos', () => {
+    expect(ROUTINE_CATS.map((c) => c.label)).toEqual(['Novidades e tendências', 'Cuidados pessoais', 'TDAH e ansiedade', 'Treinos', 'Relaxamento', 'Plano de limpeza', 'Trabalho e estudos', 'Começo fácil', 'Estilo de vida saudável']);
+    for (const r of ROUTINES) expect(ROUTINE_CATS.some((c) => c.id === r.cat)).toBe(true);
+    expect(new Set(ROUTINES.map((r) => r.id)).size).toBe(ROUTINES.length);
+    for (const c of ROUTINE_CATS) expect(ROUTINES.filter((r) => r.cat === c.id).length).toBeGreaterThanOrEqual(2);
+  });
+  it('criança não vê Plus; rotinas de peso só para maiores de 18', () => {
+    expect(routinesFor('ate12').some((r) => r.plus || r.adult)).toBe(false);
+    expect(routinesFor('13a17').some((r) => r.adult)).toBe(false);
+    expect(routinesFor('18mais').length).toBe(ROUTINES.length);
   });
 });
 
