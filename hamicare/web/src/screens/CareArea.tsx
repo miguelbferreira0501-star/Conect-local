@@ -6,7 +6,7 @@ import { CompanionBuddy } from './Companions';
 import { ITEMS, itemById } from '../data/items';
 import { play } from '../lib/sound';
 import { Room } from '../components/Room';
-import { Coins, Sheet } from '../components/ui';
+import { Sheet } from '../components/ui';
 import { periodOf } from '../data/lines';
 import { placeById } from '../data/world';
 import { care, dayOf, feed, todayKey, useApp } from '../lib/store';
@@ -159,9 +159,6 @@ export function CareArea({ onShare }: { onShare: (p: Photo) => void }) {
               </span>
             );
           })}
-          <span className="care-coins">
-            <Coins value={s.coins} />
-          </span>
         </div>
       </section>
 

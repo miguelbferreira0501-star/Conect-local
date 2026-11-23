@@ -87,7 +87,6 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
       {trim.wainscot && (
         <div data-room-bg="1" className="room-wainscot" style={{ top: `${WALL_H - 17}%`, height: '17%', ['--wc' as string]: trim.wainscot, ['--tr' as string]: trim.trim }} />
       )}
-      <div className="room-crown" style={{ ['--tr' as string]: trim.trim }} />
       <div className="room-window" aria-hidden="true">
         <RoomWindow trim={trim} period={period} lunar={house.wallpaper === 'p-lua' || house.floor === 'f-lua'} />
       </div>

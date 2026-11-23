@@ -778,3 +778,8 @@ span.tcal-ico { background: transparent; }
 .st-style-art > div { width: 100%; height: 20px; }
 .st-style-buy { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 36px; border: 0; border-radius: 99px; background: color-mix(in srgb, #ffd78a 60%, var(--surface)); color: #7a4a1e; font-weight: 900; }
 .st-style-buy:disabled { opacity: 0.6; }
+
+/* Ilustrações das rotinas */
+.rt-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 78%; user-select: none; -webkit-user-drag: none; }
+.rt-art.is-contain { object-fit: contain; object-position: 50% 100%; }
+.gw-sheet-top { height: 210px; }

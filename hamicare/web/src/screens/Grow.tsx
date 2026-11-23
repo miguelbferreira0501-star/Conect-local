@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ChevronLeft, ChevronRight, Heart, Lock, Phone, Plus, Sparkles, Trash2, Wand2, X } from 'lucide-react';
 import { Glyph } from '../components/art';
+import { RoutineArt } from '../components/RoutineArt';
 import { Hamster } from '../components/Hamster';
 import { PlusCard } from '../components/PlusCard';
 import { toast } from '../components/ui';
@@ -137,8 +138,7 @@ function RoutineCard({ r, big, fav, onOpen }: { r: Routine; big?: boolean; fav?:
   return (
     <button className={`gw-rt ${big ? 'is-big' : ''}`} style={{ background: r.tone }} onClick={() => onOpen(r)} aria-label={r.title}>
       <span className="gw-rt-art" aria-hidden="true">
-        <span className="gw-rt-blob" />
-        <Glyph e={r.emoji} size={big ? 74 : 54} />
+        <RoutineArt r={r} glyph={big ? 74 : 54} />
       </span>
       <span className="gw-rt-txt">
         <b>{r.title}</b>
@@ -184,7 +184,7 @@ function RoutineSheet({ r, fav, onFav, onClose, onPlus }: { r: Routine | null; f
             <Heart size={20} fill={fav ? '#FF5C8A' : 'none'} color={fav ? '#FF5C8A' : 'currentColor'} />
           </button>
           <span className="gw-sheet-art">
-            <Glyph e={r.emoji} size={96} />
+            <RoutineArt r={r} fit="contain" glyph={96} />
           </span>
         </div>
         <div className="gw-sheet-body">
