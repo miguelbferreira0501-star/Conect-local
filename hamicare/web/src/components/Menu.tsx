@@ -43,7 +43,7 @@ export function MenuScreen({ open, onClose }: { open: boolean; onClose: () => vo
   const tiles: { ico: string; label: string; on: () => void; badge?: number }[] = [
     { ico: '💗', label: `Perfil do ${s.pet.name}`, on: () => go('hami') },
     { ico: '⚡', label: 'Missões', on: () => go('missoes') },
-    { ico: '💛', label: 'Amigos', on: () => go('amigos') },
+    { ico: '🌍', label: 'Mundo', on: () => go('mundo') },
     { ico: '🌬️', label: 'Bem-estar', on: () => go('bemestar') },
     { ico: '🌈', label: 'Áreas da vida', on: () => go('areas') },
     { ico: '📋', label: 'Temporada', on: () => go('temporada') },
