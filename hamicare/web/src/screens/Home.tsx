@@ -1,7 +1,7 @@
 import { PlusWeeklyCard } from '../components/PlusWeekly';
 import { MoonTeaser } from '../components/MoonTeaser';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronRight, Flame, House as HouseIcon, Mail, Plus, Settings, Trees } from 'lucide-react';
+import { ChevronRight, Flame, Globe, House as HouseIcon, Mail, Plus, Settings, Trees } from 'lucide-react';
 import { Outdoors, outdoorGround } from '../components/Outdoors';
 import { Room } from '../components/Room';
 import { floorPalette, tonePalette } from '../components/Furniture';
@@ -67,7 +67,7 @@ export function useNow(ms: number) {
   return now;
 }
 
-export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onArenas: () => void; onPlus: () => void; onTeam: () => void; onWorld?: (tab: 'casa' | 'armario' | 'loja') => void }) {
+export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onArenas: () => void; onPlus: () => void; onTeam: () => void; onWorld?: (tab?: 'arenas' | 'casa' | 'mapa') => void }) {
   const [areaOpen, setAreaOpen] = useState(false);
   const [wallet, setWallet] = useState(false);
   const [cal, setCal] = useState(false);
@@ -295,6 +295,11 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam }: { onGo
             </button>
           ) : (
             <span className="flex-1" />
+          )}
+          {onWorld && (
+            <button className="hr-pill hr-round hr-world" onClick={() => onWorld()} aria-label="Mundo: arenas, casa e passeios">
+              <Globe size={18} />
+            </button>
           )}
           <button className="hr-pill hr-round" onClick={onSettings} aria-label={`Menu${mailN ? `: ${mailN} cartas novas` : ''}`}>
             <Settings size={18} />

@@ -55,7 +55,7 @@ function placeOf(itemId: string, svg: string | undefined, y: number): 'tapete' |
 const depth = (y: number) => 0.8 + 0.2 * Math.min(1, Math.max(0, (y - WALL_H) / (100 - WALL_H)));
 
 /**
- * A casa do Hami: um cômodo de verdade (parede com papel, lambri e rodapé, chão em perspectiva,
+ * A casa do Hami: um cômodo de verdade (parede lisa de uma cor só até o chão, chão em perspectiva,
  * janela com cortina) e os móveis posicionados em % (arrastáveis no modo de edição).
  */
 export function Room({ house, period = 'tarde', height = 260, children, editing, selected, onSelect, onMove, onRemove, onFront, onUse, usage, wide = 1 }: Props & { wide?: number }) {
@@ -69,7 +69,7 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
   }
 
   const items = [...house.items].sort((a, b) => a.z - b.z);
-  // Chão em perspectiva: um plano deitado para trás que termina exatamente na linha do rodapé.
+  // Chão em perspectiva: um plano deitado para trás que termina exatamente onde a parede acaba.
   // (perspectiva 1,4×altura, olho a 30% da altura, plano a 60°: a borda de trás cai em WALL_H = 60%)
   const floorH = height * 0.5833;
 
@@ -84,9 +84,6 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
     >
       {/* Parede */}
       <div data-room-bg="1" className="absolute inset-x-0 top-0" style={{ height: `${WALL_H}%`, background: WALLPAPER_CSS[house.wallpaper] ?? WALLPAPER_CSS['p-creme'] }} />
-      {trim.wainscot && (
-        <div data-room-bg="1" className="room-wainscot" style={{ top: `${WALL_H - 17}%`, height: '17%', ['--wc' as string]: trim.wainscot, ['--tr' as string]: trim.trim }} />
-      )}
       <div className="room-window" aria-hidden="true">
         <RoomWindow trim={trim} period={period} lunar={house.wallpaper === 'p-lua' || house.floor === 'f-lua'} />
       </div>
@@ -94,8 +91,6 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
       <div className="room-floor-wrap" style={{ perspective: `${height * 1.4}px`, perspectiveOrigin: `50% ${height * 0.3}px` }}>
         <div data-room-bg="1" className="room-floor" style={{ height: floorH, background: FLOOR_TONE[house.floor] ?? FLOOR_TONE['f-madeira'] }} />
       </div>
-      <div className="room-floor-shade" style={{ top: `${WALL_H}%` }} />
-      <div className="room-baseboard" style={{ top: `${WALL_H - 3.2}%`, ['--tr' as string]: trim.trim }} />
 
       {/* Sombras dos móveis no chão */}
       {items.map((it) => {
@@ -185,7 +180,6 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
         </div>
       )}
       <div className="room-light" aria-hidden="true" />
-      {period === 'noite' && <div className="room-night" aria-hidden="true" />}
     </div>
   );
 }

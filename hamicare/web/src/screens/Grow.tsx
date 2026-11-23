@@ -559,7 +559,7 @@ export function Grow({ onGo, onPlus }: { onGo: Go; onPlus: () => void }) {
     { id: 'diario', label: 'Diário', emoji: '📔', tone: '#FFB3CF', act: () => (requestTool('diario'), onGo('bem-estar')) },
     { id: 'calma', label: 'Bem-estar', emoji: '🌬️', tone: '#A8E6C4', act: () => onGo('bem-estar') },
     { id: 'missoes', label: 'Missões', emoji: '🏁', tone: '#FFC49A', act: () => onGo('atividades') },
-    { id: 'amigos', label: 'Amigos', emoji: '💛', tone: '#FFE59A', act: () => onGo('amigos') },
+    { id: 'mundo', label: 'Mundo', emoji: '🌍', tone: '#BFE6FF', act: () => onGo('mundo') },
     { id: 'evolucao', label: 'Evolução', emoji: '📈', tone: '#B8E3A0', act: () => openUi('evolucao') },
   ];
 

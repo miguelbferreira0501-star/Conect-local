@@ -1,6 +1,6 @@
 import { MOON_N } from '../data/arenas';
 import { useEffect, useState } from 'react';
-import { ArrowUpToLine, Lock, PackageOpen, Pencil, Sparkles } from 'lucide-react';
+import { ArrowUpToLine, ChevronLeft, Lock, PackageOpen, Pencil, Sparkles } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
 import { TripDepart } from '../components/TripDepart';
 import { ISLAND_AT, MAP_H, MAP_W, TripMapArt } from '../components/TripMap';
@@ -23,12 +23,17 @@ import { ItemIcon } from '../components/ItemIcon';
 export type WorldTab = 'arenas' | 'casa' | 'mapa' | 'loja' | 'armario';
 type Tab = WorldTab;
 
-export function World({ onPlus, initialTab }: { onPlus: () => void; onGift?: (itemId: string) => void; initialTab?: Tab }) {
+export function World({ onPlus, initialTab, onBack }: { onPlus: () => void; onGift?: (itemId: string) => void; initialTab?: Tab; onBack?: () => void }) {
   const s = useApp();
   const [tab, setTab] = useState<Tab>(initialTab ?? 'casa');
   return (
     <div className="grid gap-4">
-      <header className="flex items-end justify-between gap-3">
+      <header className="flex items-end gap-3">
+        {onBack && (
+          <button className="world-back" onClick={onBack} aria-label="Voltar para o Início">
+            <ChevronLeft size={24} />
+          </button>
+        )}
         <div>
           <p className="eyebrow">Nível {levelOf(s.xp)}</p>
           <h1 className="font-display text-[30px] font-bold leading-tight">Mundo</h1>

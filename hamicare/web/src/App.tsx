@@ -47,12 +47,12 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'cuidar', label: 'Cuidar' },
   { id: 'loja', label: 'Loja' },
   { id: 'bolsa', label: 'Bolsa' },
-  { id: 'mundo', label: 'Mundo' },
+  { id: 'amigos', label: 'Amigos' },
 ];
-/** Telas que não ficam na barra (abrem pelo Crescer, pelo menu ou por atalhos). */
-const HIDDEN: Tab[] = ['atividades', 'bem-estar', 'amigos'];
+/** Telas que não ficam na barra (abrem pelo Início, pelo Crescer, pelo menu ou por atalhos). */
+const HIDDEN: Tab[] = ['atividades', 'bem-estar', 'mundo'];
 /** Qual aba fica acesa na barra quando a tela é uma das escondidas. */
-const LIT: Partial<Record<Tab, Tab>> = { atividades: 'crescer', 'bem-estar': 'crescer', amigos: 'crescer' };
+const LIT: Partial<Record<Tab, Tab>> = { atividades: 'crescer', 'bem-estar': 'crescer', mundo: 'inicio' };
 
 captureRef();
 
@@ -145,6 +145,7 @@ export default function App() {
         else if (t === 'amigos') setTab('amigos');
         else if (t === 'missoes') setTab('atividades');
         else if (t === 'bemestar') setTab('bem-estar');
+        else if (t === 'mundo') setTab('mundo');
         else if (t === 'hami') setPetProfile(true);
         else if (t === 'areas') setAreasOpen(true);
       }),
@@ -215,13 +216,13 @@ export default function App() {
   return (
     <GrowthContext.Provider value={growth.scale}>
       <main className="shell">
-        {tab === 'inicio' && <Home onGo={go} onSettings={() => setMenu(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} onPlus={() => setPlus(true)} onTeam={() => go('amigos', undefined, 'turma')} onWorld={(sub) => go('mundo', sub)} />}
+        {tab === 'inicio' && <Home onGo={go} onSettings={() => setMenu(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} onPlus={() => setPlus(true)} onTeam={() => go('amigos', undefined, 'turma')} onWorld={(sub) => go('mundo', sub ?? 'casa')} />}
         {tab === 'cuidar' && <CareArea onShare={(photo) => shareTo({ kind: 'foto', photo })} />}
         {tab === 'atividades' && <Activities onShareTask={(task) => shareTo({ kind: 'atividade', task })} onPlus={() => setPlus(true)} onHome={() => go('inicio')} />}
         {tab === 'crescer' && <Grow onGo={(t) => go(t)} onPlus={() => setPlus(true)} />}
         {tab === 'loja' && <StoreTab onPlus={() => setPlus(true)} onGift={(id) => (setGift(id), go('amigos'))} />}
         {tab === 'bolsa' && <BagTab onStore={() => go('loja')} onDecorate={() => go('mundo', 'casa')} />}
-        {tab === 'mundo' && <World key={worldTab ?? 'mundo'} initialTab={worldTab} onPlus={() => setPlus(true)} onGift={(id) => (setGift(id), go('amigos'))} />}
+        {tab === 'mundo' && <World key={worldTab ?? 'mundo'} initialTab={worldTab} onBack={() => go('inicio')} onPlus={() => setPlus(true)} onGift={(id) => (setGift(id), go('amigos'))} />}
         {tab === 'bem-estar' && <Wellbeing onPlus={() => setPlus(true)} />}
         {tab === 'amigos' && <Friends key={friendsTab ?? 'amigos'} initialTab={friendsTab} share={share} onShareDone={() => setShare(null)} giftItem={gift} onGiftDone={() => setGift(null)} account={account} />}
       </main>

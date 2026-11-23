@@ -783,3 +783,9 @@ span.tcal-ico { background: transparent; }
 .rt-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 78%; user-select: none; -webkit-user-drag: none; }
 .rt-art.is-contain { object-fit: contain; object-position: 50% 100%; }
 .gw-sheet-top { height: 210px; }
+
+/* Parede lisa, de uma cor só, até o chão: sem lambri, rodapé, sombra no chão nem escurecer à noite ou no modo escuro. */
+.room-wainscot, .room-baseboard, .room-floor-shade, .room-night, .room-crown { display: none !important; }
+.room::after { content: none; }
+
+.world-back { display: grid; place-items: center; width: 42px; height: 42px; flex: none; margin-bottom: 4px; border: 0; border-radius: 50%; background: var(--surface); color: var(--ink); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.08); }
