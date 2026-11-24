@@ -1,7 +1,7 @@
 // O mascote reage ao toque de um jeito natural: um latidinho, pulinho, rabo abanando e os bracinhos batendo.
 // Sozinho, ele respira, pisca, mexe a cabeça e as orelhas e abana o rabo.
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Hamster } from './Hamster';
+import { Hamster, type DogPose } from './Hamster';
 import { SleepingHami } from './SleepingHami';
 import { play, type SoundId } from '../lib/sound';
 import { useApp } from '../lib/store';
@@ -36,13 +36,15 @@ interface Props {
   prop?: HamiProp;
   /** Animação do corpo (tremendo de frio, dançando…). */
   fx?: string;
+  /** Gesto contínuo do corpo (ex.: 'lua' = pulinhos lentos; a sombra fica no chão). */
+  pose?: DogPose;
   /** Chorar sozinho a cada tantos milissegundos (0 = não chora). */
   cryEvery?: number;
 }
 
 let seq = 0;
 
-export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = '', children, label, growth, cond, wear, prop, fx = '', cryEvery = 0 }: Props) {
+export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = '', children, label, growth, cond, wear, prop, pose, fx = '', cryEvery = 0 }: Props) {
   const s = useApp();
   const [trick, setTrick] = useState<{ t: Trick; id: number } | null>(null);
   const timers = useRef<number[]>([]);
@@ -102,7 +104,7 @@ export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = ''
               prop={trick?.t === 'carinho' ? undefined : prop}
               size={size}
               label={s.pet.name}
-              pose={undefined}
+              pose={trick ? undefined : pose}
               growth={growth}
             />
           )}

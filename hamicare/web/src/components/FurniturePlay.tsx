@@ -38,7 +38,7 @@ export function UsePet({ kind, w }: { kind: UseKind; w: number }) {
       {kind === 'sentar' ? (
         <DogPose kind="senta" fur={s.pet.fur} outfit={s.pet.outfit} width={size} label="" />
       ) : kind === 'correr' ? (
-        <DogPose kind="anda" fur={s.pet.fur} outfit={s.pet.outfit} width={size} label="" />
+        <DogPose kind="anda" fur={s.pet.fur} outfit={s.pet.outfit} width={size} label="" flip />
       ) : (
         <Hamster fur={s.pet.fur} outfit={s.pet.outfit} mood="risada" pose="festa" size={size} label="" growth={1} />
       )}

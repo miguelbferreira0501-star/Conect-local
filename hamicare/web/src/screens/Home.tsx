@@ -223,7 +223,8 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
           cond={condOn ? cond : null}
           wear={condOn ? CONDITIONS[cond].wear : undefined}
           prop={busy || hardDay || mood ? undefined : act.prop}
-          fx={moonHop ? 'fx-moonhop' : bodyFxClass(condOn ? cond : null, busy || hardDay ? null : activity)}
+          pose={moonHop ? 'lua' : undefined}
+          fx={moonHop ? '' : bodyFxClass(condOn ? cond : null, busy || hardDay ? null : activity)}
           cryEvery={condOn && !mood ? cryEvery(new Date(now).getHours()) : 0}
           onTap={() => {
             if (s.pet.sleeping) {

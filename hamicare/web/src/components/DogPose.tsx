@@ -39,6 +39,7 @@ export function DogPose({
   still = false,
   wet,
   label,
+  flip,
 }: {
   kind: DogPoseKind;
   fur: string;
@@ -47,6 +48,8 @@ export function DogPose({
   still?: boolean;
   wet?: boolean;
   label?: string;
+  /** Virado para a direita (o desenho original olha para a esquerda). */
+  flip?: boolean;
 }) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
   const S = SPRITES[kind];
@@ -65,7 +68,7 @@ export function DogPose({
   const tail = kind === 'senta' ? { href: sentaRabo, box: SPRITES.senta.rabo, piv: [150, 150] } : kind === 'anda' ? { href: andaRabo, box: SPRITES.anda.rabo, piv: SPRITES.anda.pivRabo } : null;
 
   return (
-    <svg viewBox={`0 0 ${S.w} ${S.h}`} width={width} height={height} role="img" aria-label={label ?? 'Mascote'} className="block overflow-visible">
+    <svg viewBox={`0 0 ${S.w} ${S.h}`} width={width} height={height} role="img" aria-label={label ?? 'Mascote'} className="block overflow-visible" style={flip ? { transform: 'scaleX(-1)' } : undefined}>
       <defs>
         {colors && <FurFilter id={`f${uid}`} c={colors} />}
         <clipPath id={`cl${uid}`}>
