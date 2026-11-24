@@ -61,7 +61,7 @@ const visibleRoutines = (s: State) => routinesFor(s.profile.ageGroup);
 const QUEST_LOOK: Record<string, { emoji: string; go: (go: Go) => void }> = {
   tarefas3: { emoji: '🏁', go: (go) => go('inicio') },
   mover1: { emoji: '🏃', go: (go) => go('inicio') },
-  cuidar2: { emoji: '🐹', go: (go) => go('cuidar') },
+  cuidar2: { emoji: '🐶', go: () => openUi('interacoes') },
   humor: { emoji: '🫶', go: (go) => (requestTool('humor'), go('bem-estar')) },
   pote: { emoji: '🫙', go: (go) => (requestTool('pote'), go('bem-estar')) },
   vibe: { emoji: '💛', go: (go) => go('amigos') },

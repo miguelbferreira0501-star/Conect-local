@@ -87,7 +87,7 @@ export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = ''
         </p>
       )}
       <button className="live-pet-btn" data-sound="none" aria-label={label ?? `Fazer carinho no ${s.pet.name}`} onClick={tap} onContextMenu={(e) => e.preventDefault()}>
-        <span key={trick?.id ?? 0} className={`live-body ${trick ? (trick.t === 'choro' ? 'fx-sob' : 'gest-carinho') : fx}`}>
+        <span key={trick?.id ?? 0} className={`live-body ${trick ? (trick.t === 'choro' ? 'fx-sob' : 'gest-pat') : fx}`}>
           {asleep ? (
             <SleepingHami fur={s.pet.fur} size={size * 0.72} place="chao" outfit={s.pet.outfit} />
           ) : (
@@ -102,7 +102,7 @@ export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = ''
               prop={trick?.t === 'carinho' ? undefined : prop}
               size={size}
               label={s.pet.name}
-              pose={trick?.t === 'carinho' ? 'festa' : undefined}
+              pose={undefined}
               growth={growth}
             />
           )}

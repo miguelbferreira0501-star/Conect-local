@@ -9,6 +9,7 @@ import { formatDay } from '../lib/util';
 import { socialBlocked, syncProfile, useSocial } from '../lib/social';
 import { clearInvite, pendingInvite, shareInvite } from '../lib/social/invite';
 import { isNativeApp } from '../lib/native';
+import { openUi } from '../lib/bus';
 import { codeKey, isServerKey } from '../shared/friendCode';
 import { RankingTab, VisitsCard } from './social/Ranking';
 import { TeamTab } from './social/Team';
@@ -147,8 +148,28 @@ function Shell({ children }: { children: React.ReactNode }) {
         <p className="eyebrow">Só vale gentileza por aqui</p>
         <h1 className="font-display text-[30px] font-bold leading-tight">Amigos</h1>
       </header>
+      <PlayCard />
       {children}
     </div>
+  );
+}
+
+/** Brincar com o seu cachorrinho (área de Interações): o melhor amigo fica aqui também. */
+function PlayCard() {
+  const s = useApp();
+  return (
+    <button className="play-card" onClick={() => openUi('interacoes')}>
+      <span className="play-card-pet" aria-hidden="true">
+        <Hamster fur={s.pet.fur} outfit={s.pet.outfit} mood="risada" size={86} idle={false} growth={1} label="" />
+      </span>
+      <span className="min-w-0 flex-1 text-left">
+        <b>Brincar com o {s.pet.name}</b>
+        <small>Carinho e petiscos rendem corações</small>
+      </span>
+      <span className="play-card-n" aria-label={`${s.pet.hearts ?? 0} corações`}>
+        ♥ {s.pet.hearts ?? 0}
+      </span>
+    </button>
   );
 }
 

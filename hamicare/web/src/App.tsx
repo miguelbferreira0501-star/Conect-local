@@ -8,7 +8,6 @@ import { TabIcon, type TabId } from './components/TabIcon';
 import { Home } from './screens/Home';
 import { GrowthContext } from './components/Hamster';
 import { careDays, growthOf } from './logic/growth';
-import { CareArea } from './screens/CareArea';
 import { Activities } from './screens/Activities';
 import { World, type WorldTab } from './screens/World';
 import type { FriendsTab } from './screens/Friends';
@@ -45,15 +44,15 @@ type Tab = TabId;
 const TABS: { id: Tab; label: string }[] = [
   { id: 'inicio', label: 'Início' },
   { id: 'crescer', label: 'Crescer' },
-  { id: 'cuidar', label: 'Cuidar' },
+  { id: 'bem-estar', label: 'Bem-estar' },
   { id: 'loja', label: 'Loja' },
   { id: 'bolsa', label: 'Bolsa' },
   { id: 'amigos', label: 'Amigos' },
 ];
 /** Telas que não ficam na barra (abrem pelo Início, pelo Crescer, pelo menu ou por atalhos). */
-const HIDDEN: Tab[] = ['atividades', 'bem-estar', 'mundo'];
+const HIDDEN: Tab[] = ['atividades', 'mundo'];
 /** Qual aba fica acesa na barra quando a tela é uma das escondidas. */
-const LIT: Partial<Record<Tab, Tab>> = { atividades: 'crescer', 'bem-estar': 'crescer', mundo: 'inicio' };
+const LIT: Partial<Record<Tab, Tab>> = { atividades: 'crescer', mundo: 'inicio' };
 
 captureRef();
 
@@ -221,7 +220,6 @@ export default function App() {
     <GrowthContext.Provider value={growth.scale}>
       <main className="shell">
         {tab === 'inicio' && <Home onGo={go} onSettings={() => setMenu(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} onPlus={() => setPlus(true)} onTeam={() => go('amigos', undefined, 'turma')} onWorld={(sub) => go('mundo', sub ?? 'casa')} />}
-        {tab === 'cuidar' && <CareArea onShare={(photo) => shareTo({ kind: 'foto', photo })} />}
         {tab === 'atividades' && <Activities onShareTask={(task) => shareTo({ kind: 'atividade', task })} onPlus={() => setPlus(true)} onHome={() => go('inicio')} />}
         {tab === 'crescer' && <Grow onGo={(t) => go(t)} onPlus={() => setPlus(true)} />}
         {tab === 'loja' && <StoreTab onPlus={() => setPlus(true)} onGift={(id) => (setGift(id), go('amigos'))} />}

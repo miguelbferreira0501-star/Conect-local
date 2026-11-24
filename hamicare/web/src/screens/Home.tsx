@@ -16,6 +16,7 @@ import { destById } from '../data/destinations';
 import { TrailCard, WeekReportCard } from '../components/Trail';
 import { unreadMail } from '../lib/mail';
 import { SleepingHami } from '../components/SleepingHami';
+import { DogPose } from '../components/DogPose';
 import { openCheckin } from '../components/MoodCheckin';
 import { WalletSheet } from './Collection';
 import { TeamHomeCard } from './social/Team';
@@ -173,6 +174,9 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
   const napping = !awake && !busy && !hardDay && !adv && !s.trek && (activity === 'soneca' || activity === 'cama');
   const bed = s.house.items.find((h) => useKindOf(h.itemId, itemById(h.itemId)?.svg) === 'deitar');
   const inBed = napping && activity === 'cama' && !!bed && !outside;
+  // Sentadinho (um toque e ele levanta). Na Lua ele não senta: fica pulando devagarinho, com a gravidade baixa.
+  const sittingNow = !awake && !busy && !hardDay && !adv && !s.trek && activity === 'sentado' && !onMoon;
+  const moonHop = onMoon && !busy && !hardDay && !mood && !s.trek;
   useEffect(() => {
     if (inBed && bed) furniture.useItem(bed.uid, 'deitar', true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -206,16 +210,20 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
     <button className="sleep-spot" onClick={wake} aria-label={`${s.pet.name} cochilando. Toque para acordar`} data-sound="none">
       <SleepingHami fur={s.pet.fur} size={136} place="chao" outfit={s.pet.outfit} />
     </button>
+  ) : sittingNow ? (
+    <button className="sleep-spot sit-spot" onClick={() => (setAwake(true), play('squeak'))} aria-label={`${s.pet.name} sentadinho. Toque para ele levantar`} data-sound="none">
+      <DogPose kind="senta" fur={s.pet.fur} outfit={s.pet.outfit} width={132} label="" />
+    </button>
   ) : (
     <div className="relative">
       <div ref={petRef} style={{ transformOrigin: '50% 100%' }}>
         <LivePet
           size={168}
-          mood={petMood}
+          mood={moonHop ? 'surpreso' : petMood}
           cond={condOn ? cond : null}
           wear={condOn ? CONDITIONS[cond].wear : undefined}
           prop={busy || hardDay || mood ? undefined : act.prop}
-          fx={bodyFxClass(condOn ? cond : null, busy || hardDay ? null : activity)}
+          fx={moonHop ? 'fx-moonhop' : bodyFxClass(condOn ? cond : null, busy || hardDay ? null : activity)}
           cryEvery={condOn && !mood ? cryEvery(new Date(now).getHours()) : 0}
           onTap={() => {
             if (s.pet.sleeping) {
@@ -294,7 +302,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
         )}
         {!adv && !s.trek && (
           <div className={`hr-bubble ${condOn && !furniture.line ? 'is-need' : ''}`}>
-            <p>{napping ? actLine : furniture.line ?? (s.pet.sleeping ? line : justFixed ? CONDITIONS[cond].fixed : condOn ? askText(cond, need) : hardDay ? line : actLine)}</p>
+            <p>{napping || sittingNow ? actLine : moonHop && !furniture.line ? 'Uau! Aqui na Lua eu pulo bem alto e caio devagarinho!' : furniture.line ?? (s.pet.sleeping ? line : justFixed ? CONDITIONS[cond].fixed : condOn ? askText(cond, need) : hardDay ? line : actLine)}</p>
             {condOn && !furniture.line && !s.pet.sleeping && (
               <button className="hr-need" onClick={scrollToTasks} aria-label={`${Math.min(done, need)} de ${need} tarefas feitas. Ver as tarefas`}>
                 <span className="hr-need-bar" aria-hidden="true">

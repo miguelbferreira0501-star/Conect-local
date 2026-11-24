@@ -1,7 +1,7 @@
-// Área de Interações: abre com uma cortina, mostra o cachorrinho na varanda (vista da cidade, árvore, piso de
-// madeira e cortinas leves) e a pessoa brinca com ele: tocar faz ele rolar, pular, acenar ou dar festa, com
-// corações voando para o contador; arrastar um petisco da bandeja até ele faz ele comer (olhinhos de coração).
-// Se ele já estiver no meio de uma brincadeira, ele avisa num balãozinho. Aqui ele tira a roupinha por um tempo.
+// Área de Interações: o cachorrinho no quintal dele (grama, cerca branca, casinha com o nome dele, árvore com
+// balanço, flores e borboletas). Tocar faz ele rolar, pular, acenar ou dar festa, com corações voando para o
+// contador; arrastar um petisco da cesta até ele faz ele comer (olhinhos de coração). Se ele já estiver no meio de
+// uma brincadeira, ele avisa num balãozinho. De vez em quando ele anda pelo quintal ou senta.
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as RPE } from 'react';
 import { ChevronLeft, Info, Store } from 'lucide-react';
 import { Hamster, type DogPose as Pose } from './Hamster';
@@ -23,49 +23,20 @@ const TRICKS: Act[] = [
   { pose: 'tchau', mood: 'feliz', ms: 1700 },
   { mood: 'amor', ms: 1600 },
 ];
-const E = { chapeu: null, oculos: null, roupa: null, acessorio: null, efeito: null };
 let hid = 0;
 
 export function Interactions({ open, onClose, onStore }: { open: boolean; onClose: () => void; onStore?: () => void }) {
-  const [mounted, setMounted] = useState(open);
-  const [curtain, setCurtain] = useState<'closed' | 'opening' | 'gone' | 'closing'>('closed');
   useEffect(() => {
-    if (!open) return;
-    setMounted(true);
-    setCurtain('closed');
-    play('abrir');
-    const a = window.setTimeout(() => setCurtain('opening'), 420);
-    const b = window.setTimeout(() => setCurtain('gone'), 1500);
-    return () => (clearTimeout(a), clearTimeout(b));
+    if (open) play('abrir');
   }, [open]);
-  if (!open || !mounted) return null;
+  if (!open) return null;
   const close = () => {
-    setCurtain('closing');
     play('fechar');
-    window.setTimeout(() => (setMounted(false), onClose()), 560);
+    onClose();
   };
   return (
     <div className="ia-root" role="dialog" aria-modal="true" aria-label="Interações">
       <Playground onBack={close} onStore={onStore ? () => (onClose(), onStore()) : undefined} />
-      {curtain !== 'gone' && <Curtain state={curtain} />}
-    </div>
-  );
-}
-
-/** A cortina da entrada (e da saída): fecha no meio e abre para os lados. */
-function Curtain({ state }: { state: 'closed' | 'opening' | 'closing' }) {
-  return (
-    <div className={`ia-curtain is-${state}`} aria-hidden="true">
-      <div className="ia-curtain-rod" />
-      {(['l', 'r'] as const).map((s) => (
-        <svg key={s} className={`ia-curtain-panel is-${s}`} viewBox="0 0 120 220" preserveAspectRatio="none">
-          <path d="M0 0 H120 V196 Q112 206 100 198 Q90 208 80 198 Q70 208 60 198 Q50 208 40 198 Q30 208 20 198 Q10 208 0 198 Z" fill="#FFF4E2" />
-          {[14, 34, 54, 74, 94].map((x) => (
-            <path key={x} d={`M${x} 4 V196`} stroke="#F1DDBF" strokeWidth="6" strokeLinecap="round" opacity="0.8" />
-          ))}
-          <path d="M0 186 Q10 196 20 188 Q30 196 40 188 Q50 196 60 188 Q70 196 80 188 Q90 196 100 188 Q110 196 120 186" stroke="#F4C9A0" strokeWidth="5" fill="none" />
-        </svg>
-      ))}
     </div>
   );
 }
@@ -236,11 +207,11 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
   const mood: PetMood = asleep ? 'dormindo' : (act?.mood ?? (drag?.moved ? 'boca' : 'feliz'));
   const showWalk = !!walk && !act && !asleep;
   const showSit = sitting && !act && !walk && !asleep;
-  const dogW = 'min(56vw, 250px)';
+  const dogW = 'min(54vw, 240px)';
 
   return (
     <div className="ia-play">
-      <Balcony />
+      <Backyard name={name} />
       <header className="ia-top">
         <button className="ia-back" onClick={onBack} aria-label="Voltar">
           <ChevronLeft size={22} strokeWidth={2.6} />
@@ -255,7 +226,7 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
           </div>
           <button className="ia-widget" onClick={widget} aria-label="Widget">
             <span className="ia-widget-pet">
-              <Hamster fur={s.pet.fur} outfit={E} mood="feliz" size={40} idle={false} growth={1} label="" />
+              <Hamster fur={s.pet.fur} outfit={s.pet.outfit} mood="feliz" size={40} idle={false} growth={1} label="" />
             </span>
             <small>Widget</small>
           </button>
@@ -278,29 +249,29 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
           data-sound="none"
         >
           {asleep ? (
-            <DogPose kind="dorme" fur={s.pet.fur} outfit={E} width={250} label="" />
+            <DogPose kind="dorme" fur={s.pet.fur} outfit={s.pet.outfit} width={250} label="" />
           ) : showWalk ? (
             <span className="ia-walk" style={{ transform: walk!.dir > 0 ? 'scaleX(-1)' : undefined }}>
-              <DogPose kind="anda" fur={s.pet.fur} outfit={E} width={190} label="" />
+              <DogPose kind="anda" fur={s.pet.fur} outfit={s.pet.outfit} width={190} label="" />
             </span>
           ) : showSit ? (
-            <DogPose kind="senta" fur={s.pet.fur} outfit={E} width={230} label="" />
+            <DogPose kind="senta" fur={s.pet.fur} outfit={s.pet.outfit} width={230} label="" />
           ) : (
-            <Hamster key={act?.id ?? 'idle'} fur={s.pet.fur} outfit={E} mood={mood} pose={pose} size={250} growth={1} label="" />
+            <Hamster key={act?.id ?? 'idle'} fur={s.pet.fur} outfit={s.pet.outfit} mood={mood} pose={pose} size={250} growth={1} label="" />
           )}
         </button>
       </div>
 
-      <div className="ia-note">
-        <p>Nesta página, o {name} tira a roupinha por um tempo~</p>
-        {onStore && (
-          <button className="ia-shop" onClick={onStore} aria-label="Comprar petiscos na Loja">
-            <Store size={20} strokeWidth={2.4} />
-          </button>
-        )}
-      </div>
-
-      <div className="ia-tray" aria-label="Petiscos">
+      <div className="ia-tray" aria-label="Cesta de petiscos">
+        <div className="ia-tray-head">
+          <span>Cesta de petiscos</span>
+          {onStore && (
+            <button className="ia-shop" onClick={onStore}>
+              <Store size={15} strokeWidth={2.6} /> Loja
+            </button>
+          )}
+        </div>
+        <div className="ia-tray-row">
         {foods.length ? (
           foods.map((f) => (
             <button key={f.id} className="ia-food" style={{ touchAction: 'none', opacity: drag?.id === f.id && drag.moved ? 0.35 : fly?.id === f.id ? 0.35 : 1 }} aria-label={`Dar ${f.name}`} {...tileEvents(f.id)}>
@@ -317,6 +288,7 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
             <span>Petiscos na Loja</span>
           </button>
         )}
+        </div>
       </div>
 
       {drag?.moved && (
@@ -361,101 +333,129 @@ function HeartIcon({ size = 24 }: { size?: number }) {
   );
 }
 
-/** A varanda: céu, cidade com morros ao longe, sol, árvore, mureta, piso de madeira e cortinas leves. */
-function Balcony() {
-  const planks = Array.from({ length: 11 }, (_, i) => i);
+/** O quintal: céu, morrinhos, árvore com balanço, cerca branca, casinha com o nome dele, grama, flores e borboletas. */
+function Backyard({ name }: { name: string }) {
+  const tufts = [
+    [40, 560], [118, 600], [300, 584], [360, 640], [70, 690], [214, 548], [262, 700], [150, 728],
+  ];
   return (
     <svg className="ia-scene" viewBox="0 0 400 760" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
       <defs>
-        <linearGradient id="ia-sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#4CC0F1" />
-          <stop offset="1" stopColor="#A8E4FB" />
+        <linearGradient id="yd-sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#9FDBFF" />
+          <stop offset="1" stopColor="#E8F7FF" />
         </linearGradient>
-        <linearGradient id="ia-floor" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#F0A86F" />
-          <stop offset="1" stopColor="#E39457" />
+        <linearGradient id="yd-grass" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#A7DC7E" />
+          <stop offset="1" stopColor="#86C866" />
         </linearGradient>
-        <linearGradient id="ia-glass" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.5" />
-          <stop offset="1" stopColor="#FFFFFF" stopOpacity="0.15" />
-        </linearGradient>
+        <radialGradient id="yd-sun">
+          <stop offset="0.55" stopColor="#FFE58A" />
+          <stop offset="1" stopColor="#FFE58A" stopOpacity="0" />
+        </radialGradient>
       </defs>
-      <rect width="400" height="760" fill="url(#ia-sky)" />
-      {/* nuvenzinhas */}
-      <g fill="#FFFFFF" opacity="0.85">
-        <path d="M40 150 q8 -16 26 -10 q10 -14 28 -4 q16 -2 16 12 q0 10 -12 10 h-50 q-12 0 -8 -8 Z" />
-        <path d="M250 110 q6 -12 20 -8 q8 -10 22 -3 q12 -1 12 9 q0 8 -9 8 h-38 q-10 0 -7 -6 Z" />
-      </g>
-      {/* sol */}
-      <g transform="translate(316 268)">
-        {Array.from({ length: 12 }, (_, i) => (
-          <path key={i} d="M0 -40 L5 -30 L-5 -30 Z" fill="#FFC93D" transform={`rotate(${i * 30})`} />
-        ))}
-        <circle r="26" fill="#FFD449" />
-      </g>
-      {/* morros ao longe (com o bondinho) */}
-      <path d="M-10 440 L-10 380 Q20 300 62 296 Q104 300 122 372 L136 400 Q150 344 172 340 Q194 344 204 400 L230 440 Z" fill="#83C9A9" />
-      <path d="M62 296 Q104 300 122 372" fill="none" stroke="#9FD7BC" strokeWidth="6" strokeLinecap="round" opacity="0.7" />
-      <path d="M66 300 L170 342" stroke="#5E7A87" strokeWidth="1.2" />
-      <rect x="112" y="314" width="9" height="7" rx="2" fill="#F05A5A" />
-      {/* prédios */}
-      <g>
-        <rect x="150" y="372" width="38" height="70" fill="#E6F5FB" />
-        <rect x="190" y="350" width="30" height="92" fill="#D2ECF7" />
-        <rect x="222" y="384" width="54" height="58" fill="#F6C9AE" />
-        <path d="M218 384 L249 362 L280 384 Z" fill="#E98E6F" />
-        <rect x="278" y="364" width="34" height="78" fill="#EAF7FC" />
-        {[0, 1, 2, 3].map((r) =>
-          [0, 1].map((c) => <rect key={`${r}${c}`} x={156 + c * 14} y={380 + r * 15} width="8" height="9" fill="#9FD3EC" opacity="0.8" />),
-        )}
-        {[0, 1, 2, 3, 4].map((r) => <rect key={r} x="198" y={360 + r * 15} width="14" height="8" fill="#9FD3EC" opacity="0.75" />)}
-        {[0, 1].map((r) => [0, 1, 2].map((c) => <rect key={`${r}${c}`} x={230 + c * 15} y={396 + r * 18} width="9" height="11" fill="#FFF3E6" />))}
-      </g>
-      {/* árvore */}
-      <g>
-        <path d="M352 470 C350 420 344 380 330 350 L340 346 C356 376 366 420 368 470 Z" fill="#8A5A3C" />
-        <path d="M346 380 C362 366 380 364 396 368" stroke="#8A5A3C" strokeWidth="8" strokeLinecap="round" fill="none" />
-        <circle cx="330" cy="318" r="56" fill="#3E9B7C" />
-        <circle cx="384" cy="300" r="52" fill="#348A6D" />
-        <circle cx="300" cy="350" r="34" fill="#46A585" />
-        <path d="M300 300 q14 8 26 0 M340 280 q14 8 26 0 M318 336 q12 7 24 0" stroke="#5FBF9C" strokeWidth="5" strokeLinecap="round" fill="none" />
-      </g>
-      {/* mureta e vidro */}
-      <rect x="0" y="432" width="400" height="16" fill="#F9D9C6" />
-      <rect x="0" y="446" width="400" height="66" fill="#EFAE8E" />
-      <rect x="0" y="446" width="400" height="8" fill="#E19C7B" opacity="0.6" />
-      <rect x="0" y="396" width="400" height="38" fill="url(#ia-glass)" />
-      <path d="M0 396 H400" stroke="#FFFFFF" strokeWidth="3" opacity="0.8" />
-      {/* piso de madeira em perspectiva */}
-      <rect x="0" y="510" width="400" height="250" fill="url(#ia-floor)" />
-      {planks.map((i) => {
-        const t = i / (planks.length - 1);
-        const xTop = 40 + t * 320;
-        const xBot = -160 + t * 720;
-        return <path key={i} d={`M${xTop} 510 L${xBot} 760`} stroke="#D98A50" strokeWidth="2.2" />;
-      })}
-      {[548, 600, 668].map((y, i) => (
-        <path key={y} d={`M0 ${y} H400`} stroke="#DC8E55" strokeWidth={1.6 + i * 0.4} opacity="0.6" />
-      ))}
-      {/* bolinha de tênis e cordinha */}
-      <g transform="translate(58 566)">
-        <ellipse cx="0" cy="22" rx="22" ry="5" fill="#000" opacity="0.1" />
-        <circle r="21" fill="#D6F04F" />
-        <path d="M-15 -14 Q0 0 -15 14 M15 -14 Q0 0 15 14" stroke="#FFFFFF" strokeWidth="3" fill="none" />
-      </g>
-      <g transform="translate(338 602) rotate(-14)">
-        <rect x="-26" y="-5" width="52" height="10" rx="5" fill="#F07C7C" />
-        <rect x="-26" y="-5" width="52" height="10" rx="5" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeDasharray="4 4" />
-        <circle cx="-30" cy="0" r="9" fill="#6AB7F0" />
-        <circle cx="30" cy="0" r="9" fill="#6AB7F0" />
-      </g>
-      {/* cortinas leves dos lados */}
+      <rect width="400" height="760" fill="url(#yd-sky)" />
+      <circle cx="84" cy="150" r="64" fill="url(#yd-sun)" />
+      <circle cx="84" cy="150" r="30" fill="#FFD95A" />
       <g fill="#FFFFFF">
-        <path d="M0 0 H86 C70 120 60 260 74 400 C82 470 64 540 46 600 L0 600 Z" opacity="0.42" />
-        <path d="M400 0 H314 C330 120 340 260 326 400 C318 470 336 540 354 600 L400 600 Z" opacity="0.42" />
-        <path d="M0 0 H40 C34 160 30 360 24 600 L0 600 Z" opacity="0.35" />
-        <path d="M400 0 H360 C366 160 370 360 376 600 L400 600 Z" opacity="0.35" />
+        <g className="yd-cloud">
+          <ellipse cx="270" cy="120" rx="44" ry="17" />
+          <ellipse cx="248" cy="108" rx="20" ry="16" />
+          <ellipse cx="284" cy="102" rx="24" ry="20" />
+        </g>
+        <g className="yd-cloud is-slow">
+          <ellipse cx="170" cy="200" rx="30" ry="11" />
+          <ellipse cx="182" cy="191" rx="16" ry="12" />
+        </g>
       </g>
+      {/* morrinhos */}
+      <path d="M-20 420 Q60 330 150 380 Q230 320 320 372 Q370 344 420 360 L420 470 L-20 470 Z" fill="#C3E7A9" />
+      <path d="M-20 450 Q90 384 200 430 Q300 392 420 420 L420 480 L-20 480 Z" fill="#B0DD92" />
+      {/* árvore com balanço */}
+      <g>
+        <path d="M42 470 C44 420 48 380 40 330 L58 330 C64 380 62 420 64 470 Z" fill="#9A6A48" />
+        <path d="M52 352 C78 334 108 330 128 336" stroke="#9A6A48" strokeWidth="9" strokeLinecap="round" fill="none" />
+        <circle cx="40" cy="282" r="62" fill="#5DB37E" />
+        <circle cx="96" cy="300" r="48" fill="#6BC08A" />
+        <circle cx="6" cy="320" r="40" fill="#52A773" />
+        <circle cx="70" cy="250" r="36" fill="#7CCB97" />
+        {[[30, 260], [70, 300], [100, 280], [12, 300]].map(([x, y], i) => (
+          <circle key={i} cx={x} cy={y} r="5" fill="#FF8FA3" />
+        ))}
+        <g className="yd-swing">
+          <path d="M108 338 V420 M132 338 V420" stroke="#C9A27A" strokeWidth="2.6" />
+          <rect x="100" y="418" width="40" height="8" rx="4" fill="#E97A5C" />
+        </g>
+      </g>
+      {/* cerca branca */}
+      <g>
+        <rect x="0" y="438" width="400" height="9" fill="#F2EFEA" />
+        <rect x="0" y="470" width="400" height="9" fill="#F2EFEA" />
+        {Array.from({ length: 15 }, (_, i) => {
+          const x = i * 28 - 4;
+          return <path key={i} d={`M${x} 498 V430 L${x + 9} 418 L${x + 18} 430 V498 Z`} fill="#FFFFFF" stroke="#E4DED6" strokeWidth="1.5" />;
+        })}
+      </g>
+      {/* casinha com o nome dele */}
+      <g transform="translate(300 392)">
+        <ellipse cx="44" cy="118" rx="62" ry="10" fill="#000" opacity="0.08" />
+        <rect x="-6" y="40" width="100" height="78" rx="6" fill="#F6B56B" />
+        <path d="M-18 46 L44 -8 L106 46 Z" fill="#E4574F" />
+        <path d="M-18 46 L44 -8 L106 46" stroke="#C9423C" strokeWidth="6" strokeLinejoin="round" fill="none" />
+        <path d="M22 118 V82 a22 22 0 0 1 44 0 V118 Z" fill="#7A4A2C" />
+        <rect x="18" y="50" width="52" height="16" rx="5" fill="#FFF4E0" />
+        <text x="44" y="62" textAnchor="middle" fontSize={name.length > 7 ? 8 : 10} fontWeight="900" fill="#9A5A2F">
+          {name.slice(0, 12)}
+        </text>
+      </g>
+      {/* grama */}
+      <rect x="0" y="496" width="400" height="264" fill="url(#yd-grass)" />
+      <path d="M0 496 Q100 506 200 498 Q300 490 400 500" stroke="#97D06F" strokeWidth="6" fill="none" />
+      {tufts.map(([x, y], i) => (
+        <path key={i} d={`M${x} ${y} l4 -10 l3 9 l4 -12 l3 13`} stroke="#6EB451" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      ))}
+      {/* caminho de pedrinhas */}
+      {[[330, 530, 16], [302, 560, 18], [282, 598, 20], [270, 642, 22]].map(([x, y, r], i) => (
+        <ellipse key={i} cx={x} cy={y} rx={r} ry={r * 0.45} fill="#E9E3D6" />
+      ))}
+      {/* flores */}
+      {[[24, 520, '#FF8FA3'], [52, 528, '#FFD34D'], [370, 520, '#B79CF2'], [20, 640, '#FFFFFF'], [380, 700, '#FF8FA3'], [196, 520, '#FFD34D']].map(([x, y, c], i) => (
+        <g key={i} transform={`translate(${x} ${y})`}>
+          <path d="M0 0 V12" stroke="#5FA548" strokeWidth="2" />
+          {[0, 72, 144, 216, 288].map((a) => (
+            <ellipse key={a} cx="0" cy="-5" rx="3.2" ry="5" fill={c as string} transform={`rotate(${a})`} />
+          ))}
+          <circle r="2.6" fill="#FFB547" />
+        </g>
+      ))}
+      {/* tigela de água e brinquedos */}
+      <g transform="translate(66 610)">
+        <ellipse cx="0" cy="10" rx="28" ry="7" fill="#000" opacity="0.08" />
+        <path d="M-24 -2 Q-22 12 0 12 Q22 12 24 -2 Z" fill="#5B9BF0" />
+        <ellipse cx="0" cy="-2" rx="24" ry="6" fill="#BFE6FF" />
+        <text x="0" y="9" textAnchor="middle" fontSize="7" fontWeight="900" fill="#FFFFFF">
+          ÁGUA
+        </text>
+      </g>
+      <g transform="translate(340 690) rotate(-18)">
+        <path d="M-20 -4 h40 a6 6 0 1 1 0 8 h-40 a6 6 0 1 1 0 -8 Z" fill="#FFF6E6" stroke="#E8D8BD" strokeWidth="2" />
+        <circle cx="-24" cy="-5" r="6" fill="#FFF6E6" stroke="#E8D8BD" strokeWidth="2" />
+        <circle cx="-24" cy="5" r="6" fill="#FFF6E6" stroke="#E8D8BD" strokeWidth="2" />
+        <circle cx="24" cy="-5" r="6" fill="#FFF6E6" stroke="#E8D8BD" strokeWidth="2" />
+        <circle cx="24" cy="5" r="6" fill="#FFF6E6" stroke="#E8D8BD" strokeWidth="2" />
+      </g>
+      <g transform="translate(118 702)">
+        <circle r="15" fill="#FF7A6B" />
+        <path d="M-15 0 H15 M0 -15 V15" stroke="#FFFFFF" strokeWidth="3" opacity="0.8" />
+      </g>
+      {/* borboletas */}
+      {[[150, 300, 0], [250, 250, 1.4]].map(([x, y, d], i) => (
+        <g key={i} className="yd-fly" style={{ animationDelay: `${d}s` }} transform={`translate(${x} ${y})`}>
+          <ellipse cx="-5" cy="-2" rx="6" ry="8" fill={i ? '#FFB3C7' : '#B9A3F0'} className="yd-wing" />
+          <ellipse cx="5" cy="-2" rx="6" ry="8" fill={i ? '#FFB3C7' : '#B9A3F0'} className="yd-wing is-r" />
+          <rect x="-1" y="-7" width="2" height="12" rx="1" fill="#5A4A6A" />
+        </g>
+      ))}
     </svg>
   );
 }
