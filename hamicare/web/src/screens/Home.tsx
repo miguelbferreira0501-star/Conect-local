@@ -23,8 +23,8 @@ import { Modal, Sheet, toast } from '../components/ui';
 import { MOODS, periodOf, petLine } from '../data/lines';
 import { placeById } from '../data/world';
 import { streakOf } from '../logic/streak';
-import { dayGoalOf, setDayGoal, dayOf, finishAdventure, getState, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
-import { prefersReducedMotion, fmtNum } from '../lib/util';
+import { dayGoalOf, setDayGoal, dayOf, finishAdventure, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
+import { prefersReducedMotion } from '../lib/util';
 import type { PetMood, Task } from '../types';
 import { Glyph } from '../components/art';
 import { WaterCard } from '../components/WaterCard';
@@ -40,23 +40,6 @@ import { ACTIVITIES, activityForVisit, askText, conditionNeed, conditionOf, COND
 import { ActivityFx, bodyFxClass, ConditionFx } from '../components/HamiFx';
 import { setBattery } from '../lib/store';
 
-/** Diferencial: "Hoje está difícil" deixa só as tarefas leves e o Hami fica do seu lado, sem perder a sequência. */
-function HardDay({ hard, pet }: { hard: boolean; pet: string }) {
-  return hard ? (
-    <div className="hc-hard is-on" role="status">
-      <Glyph e="🫂" size={30} />
-      <span className="min-w-0 flex-1">
-        <b>Modo dia difícil</b>
-        <small>Só as tarefas leves ficaram. O {pet} está aqui com você, e a sua sequência está protegida.</small>
-      </span>
-      <button onClick={() => (setBattery(2), toast('Tudo bem! Voltaram todas as tarefas.'))}>Já melhorou</button>
-    </div>
-  ) : (
-    <button className="hc-hard" onClick={() => (setBattery(1), toast(`O ${pet} vai devagar com você hoje.`))}>
-      <Glyph e="🌧️" size={24} /> Hoje está difícil? <small>Deixe só o essencial</small>
-    </button>
-  );
-}
 
 export function useNow(ms: number) {
   const [now, setNow] = useState(Date.now());
@@ -133,11 +116,9 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
   const streak = streakOf(s.days, today, s.createdAt);
   const [result, setResult] = useState<AdventureResult | null>(null);
   const petRef = useRef<HTMLDivElement>(null);
-  const [mood, setMoodAnim] = useState<PetMood | null>(null);
-  const [leaving, setLeaving] = useState<string[]>([]);
+  const mood: PetMood | null = null;
   const [addOpen, setAddOpen] = useState(false);
-  const [puff, setPuff] = useState<{ id: number; text: string } | null>(null);
-  const { pop, layer } = useKcalPop();
+  const { layer } = useKcalPop();
   const dir = s.journey.dir;
 
   const line = useMemo(
@@ -149,42 +130,14 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
   const advPlace = adv ? placeById(adv.placeId) : null;
   const advLeft = adv ? Math.max(0, Math.ceil((adv.endsAt - now) / 60_000)) : 0;
 
-  function bounce(kind: 'squish' | 'hop') {
-    if (prefersReducedMotion()) return;
-    petRef.current?.animate(
-      kind === 'squish'
-        ? [{ transform: 'scale(1,1)' }, { transform: 'scale(1.08,0.92)', offset: 0.3 }, { transform: 'scale(0.96,1.05)', offset: 0.65 }, { transform: 'scale(1,1)' }]
-        : [{ transform: 'translateY(0) scale(1,1)' }, { transform: 'translateY(0) scale(1.1,0.9)', offset: 0.15 }, { transform: 'translateY(-34px) scale(0.95,1.06)', offset: 0.45 }, { transform: 'translateY(0) scale(1.08,0.92)', offset: 0.8 }, { transform: 'translateY(0) scale(1,1)' }],
-      { duration: kind === 'squish' ? 480 : 700, easing: 'cubic-bezier(0.23,1,0.32,1)' },
-    );
+  // Apertou, a tarefa sai na hora: sem animação, sem esperar.
+  function onToggle(t: Task) {
+    toggleTask(t.id);
   }
-
-  function onToggle(t: Task, el: HTMLElement) {
-    const wasDone = t.id in day.done;
-    // A tarefa feita sai da lista com uma animaçãozinha (fica um instante na tela).
-    if (!wasDone) {
-      setLeaving((l) => [...l, t.id]);
-      setTimeout(() => setLeaving((l) => l.filter((x) => x !== t.id)), 700);
-    }
-    const before = s.pet.grams;
-    const r = toggleTask(t.id);
-    if (!r || wasDone) return;
-    const gain = dir === 'ganhar';
-    if (r.kcal > 0 && dir !== 'manter') pop(el, `${gain ? '+' : '−'}${r.kcal} kcal`, gain);
-    else pop(el, `+${r.reward} sementes`);
-    setMoodAnim('animado');
-    setTimeout(() => setMoodAnim(null), 1400);
-    bounce('hop');
-    // Mostra o quanto o Hami mudou (aparece logo depois do novo peso ser calculado).
-    setTimeout(() => {
-      const after = getState().pet.grams;
-      const diff = Math.round((after - before) * 10) / 10;
-      if (diff !== 0 && !s.body.hideNumbers) {
-        setPuff({ id: Date.now(), text: `${diff > 0 ? '+' : '−'}${fmtNum(Math.abs(diff))} g` });
-        setTimeout(() => setPuff(null), 1600);
-      }
-    }, 60);
-  }
+  // O "Hoje está difícil?" saiu do Início: se estava ligado hoje, volta ao normal para nenhuma tarefa ficar escondida.
+  useEffect(() => {
+    if (day.battery === 1) setBattery(2);
+  }, [day.battery]);
 
   // Situação do dia: ele acorda com frio, calor, gripado… e pede algumas tarefas para melhorar.
   const cond = conditionOf(s.seed, today);
@@ -251,11 +204,6 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
       </div>
       {condOn ? <ConditionFx cond={cond} /> : justFixed ? <span className="hfx hfx-yay" aria-hidden="true" /> : !hardDay && <ActivityFx act={activity} />}
       <CompanionBuddy hamster={168} />
-      {puff && (
-        <span key={puff.id} className={`grams-puff ${dir === 'ganhar' ? 'is-gain' : ''}`} aria-live="polite">
-          {puff.text}
-        </span>
-      )}
     </div>
   );
 
@@ -392,18 +340,17 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
             <Glyph e={day.mood ? MOODS[day.mood - 1].emoji : '😐'} size={24} />
           </button>
         </div>
-        <HardDay hard={day.battery === 1} pet={s.pet.name} />
-        {byPart(tasks.filter((t) => !(t.id in day.done) || leaving.includes(t.id))).map(([id, label, items]) => (
+        {byPart(tasks.filter((t) => !(t.id in day.done))).map(([id, label, items]) => (
           <div key={id} className="grid gap-2">
             <p className="hc-part">{label}</p>
             <ul className="grid gap-2.5">
               {items.map((t) => (
-                <TaskRow key={t.id} task={t} done={t.id in day.done} kcal={kcalOf(s, t)} dir={dir} sub={t.at} onToggle={(el) => onToggle(t, el)} className={leaving.includes(t.id) ? 'is-leaving' : ''} />
+                <TaskRow key={t.id} task={t} done={t.id in day.done} kcal={kcalOf(s, t)} dir={dir} sub={t.at} onToggle={() => onToggle(t)} quiet />
               ))}
             </ul>
           </div>
         ))}
-        {tasks.length > 0 && done >= tasks.length && !leaving.length && (
+        {tasks.length > 0 && done >= tasks.length && (
           <div className="hc-alldone">
             <Glyph e="🎉" size={64} />
             <p>
@@ -423,9 +370,6 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
           </div>
         )}
         <AddTaskSheet open={addOpen} onClose={() => setAddOpen(false)} />
-        <button className="hc-add" onClick={() => setAddOpen(true)}>
-          <Plus size={18} strokeWidth={3} /> Adicionar tarefa
-        </button>
       </section>
 
       <details className="hc-more" open={moreOpen} onToggle={(e) => setMoreOpen((e.target as HTMLDetailsElement).open)}>
