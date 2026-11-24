@@ -850,25 +850,19 @@ span.tcal-ico { background: transparent; }
 /* acena como quem dá "oi": levanta de lado, balança e abaixa (a cada 11 s) */
 .hami-arm-idle-l { animation: hami-arm-l 11s cubic-bezier(0.45, 0, 0.3, 1) infinite; }
 @keyframes hami-arm-l {
-  0%, 8% { transform: rotate(0deg); }
-  11% { transform: rotate(150deg); }
-  14% { transform: rotate(172deg); }
-  17% { transform: rotate(146deg); }
-  20% { transform: rotate(172deg); }
-  23% { transform: rotate(150deg); }
-  27%, 56% { transform: rotate(0deg); }
-  58% { transform: rotate(26deg); }
+  0%, 56% { transform: rotate(0deg); }
+  58% { transform: rotate(22deg); }
   60% { transform: rotate(0deg); }
-  62% { transform: rotate(26deg); }
+  62% { transform: rotate(22deg); }
   64%, 100% { transform: rotate(0deg); }
 }
 /* o outro bracinho só bate junto, de alegria (como um passarinho batendo as asas) */
 .hami-arm-idle-r { animation: hami-arm-r 11s cubic-bezier(0.45, 0, 0.3, 1) infinite; }
 @keyframes hami-arm-r {
   0%, 56% { transform: rotate(0deg); }
-  58% { transform: rotate(-26deg); }
+  58% { transform: rotate(-22deg); }
   60% { transform: rotate(0deg); }
-  62% { transform: rotate(-26deg); }
+  62% { transform: rotate(-22deg); }
   64%, 100% { transform: rotate(0deg); }
 }
 .hami-wave { animation: hami-wave 0.9s ease-in-out infinite; }
@@ -891,20 +885,49 @@ span.tcal-ico { background: transparent; }
 @media (prefers-reduced-motion: reduce) { .sleep-breathe, .sleep-blanket, .zz-float text { animation: none; opacity: 0.8; } }
 
 /* ---------- Fotos do Hami: dormindo de barriguinha e no banho de espuma ---------- */
+/* (a respiração é feita dentro do desenho: só as costas sobem; aqui ficam a caminha, as sombras e os "z") */
 .sleep-photo { position: relative; display: inline-block; }
-.sleep-photo .sleep-breathe { position: relative; z-index: 1; display: block; transform-origin: 50% 96%; animation: photo-breathe 4.6s ease-in-out infinite; }
-@keyframes photo-breathe { 0%, 100% { transform: scale(1, 1); } 45% { transform: scale(1.012, 1.032); } }
-.sleep-photo .sleep-zzz { position: absolute; left: 54%; top: -24%; z-index: 2; pointer-events: none; }
-.sleep-cushion { position: absolute; left: -5%; right: -3%; bottom: -9%; height: 30%; border-radius: 50%; background: radial-gradient(ellipse at 50% 30%, #fff1f6 0%, #f8c6d6 62%, #ee9fb9 100%); box-shadow: 0 7px 12px rgba(59, 42, 90, 0.18), inset 0 -5px 8px rgba(190, 90, 130, 0.18); }
-.sleep-photo.is-cama::after { content: ''; position: absolute; left: 6%; right: 6%; bottom: 1%; height: 10%; border-radius: 50%; background: rgba(60, 40, 70, 0.16); filter: blur(4px); }
+.sleep-photo > * { position: absolute; }
+.sleep-photo.is-cama > svg { position: relative; z-index: 1; }
+.sleep-photo .sleep-zzz { left: 50%; top: -22%; z-index: 6; pointer-events: none; }
+.sleep-photo.is-chao .sleep-zzz { left: 52%; top: -26%; }
+.sleep-contact { left: 6%; right: 4%; bottom: -3%; height: 16%; border-radius: 50%; background: radial-gradient(closest-side, rgba(70, 40, 60, 0.34), rgba(70, 40, 60, 0)); z-index: 0; }
+.nap-floor-shadow { left: 2%; right: 2%; bottom: -6%; height: 22%; border-radius: 50%; background: radial-gradient(closest-side, rgba(40, 30, 50, 0.22), rgba(40, 30, 50, 0)); }
+.nap-layer { left: 0; right: 0; bottom: 0; display: block; }
+.nap-layer > svg { width: 100%; height: 100%; }
+.nap-contact { border-radius: 50%; background: radial-gradient(closest-side, rgba(150, 70, 100, 0.32), rgba(150, 70, 100, 0)); }
+.nap-hami { display: block; }
 .bath-photo { position: relative; display: inline-block; }
-.bath-photo-bob { display: block; transform-origin: 50% 100%; animation: bath-breathe 3.4s ease-in-out infinite; }
-@keyframes bath-breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.006, 1.014); } }
 .photo-bubbles { position: absolute; inset: 0; pointer-events: none; }
 .photo-bubbles i { position: absolute; bottom: 52%; border-radius: 50%; background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.95) 0 16%, rgba(255, 255, 255, 0.2) 38%, rgba(190, 215, 255, 0.28) 68%, rgba(255, 185, 230, 0.55) 100%); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.75); opacity: 0; animation: photo-bubble 3s ease-out infinite; }
 @keyframes photo-bubble { 0% { opacity: 0; transform: translate(0, 0) scale(0.4); } 15% { opacity: 0.95; } 80% { opacity: 0.85; transform: translate(6px, -70px) scale(1); } 100% { opacity: 0; transform: translate(9px, -84px) scale(1.25); } }
 .room-item.is-bathing > svg:first-child { opacity: 0; }
 .room-item.is-bathing .use-banho { bottom: 2%; }
 .room-item.is-bathing .room-use { z-index: 4; }
-@media (prefers-reduced-motion: reduce) { .sleep-photo .sleep-breathe, .bath-photo-bob, .photo-bubbles i { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .photo-bubbles i { animation: none; } }
 .room-use > .sleep-photo, .room-use > .bath-photo { display: block; }
+
+/* Carinho (toque): amassa de leve, dá um pulinho, balança feliz, bate os bracinhos e solta coraçõezinhos */
+.gest-carinho { display: inline-block; transform-origin: 50% 100%; animation: gest-carinho 1.35s cubic-bezier(0.3, 0.7, 0.4, 1) both; }
+@keyframes gest-carinho {
+  0% { transform: scale(1, 1); }
+  11% { transform: scale(1.07, 0.91); }
+  25% { transform: translateY(-5%) scale(0.97, 1.05); }
+  37% { transform: translateY(0) scale(1.03, 0.97); }
+  47% { transform: rotate(-3.5deg); }
+  60% { transform: rotate(3.5deg); }
+  73% { transform: rotate(-2deg); }
+  86% { transform: rotate(1deg); }
+  100% { transform: none; }
+}
+.hami-cheer-l { animation: hami-cheer-l 0.34s ease-in-out 0.12s 3 both; }
+.hami-cheer-r { animation: hami-cheer-r 0.34s ease-in-out 0.12s 3 both; }
+@keyframes hami-cheer-l { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(28deg); } }
+@keyframes hami-cheer-r { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-28deg); } }
+.pet-hearts { position: absolute; left: 50%; top: 4%; width: 0; height: 0; pointer-events: none; z-index: 3; }
+.pet-hearts i { position: absolute; left: -9px; top: 0; width: 18px; height: 16px; opacity: 0; background: no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 22'%3E%3Cpath d='M12 21C4 15 0 11 0 6.5A6 6 0 0 1 12 4a6 6 0 0 1 12 2.5C24 11 20 15 12 21Z' fill='%23FF6F9A' stroke='%23fff' stroke-width='1.6'/%3E%3C/svg%3E"); animation: pet-heart 1.2s ease-out both; }
+.pet-hearts i:nth-child(1) { --dx: -34px; animation-delay: 0.1s; }
+.pet-hearts i:nth-child(2) { --dx: 4px; animation-delay: 0.28s; width: 22px; height: 20px; left: -11px; }
+.pet-hearts i:nth-child(3) { --dx: 36px; animation-delay: 0.46s; width: 15px; height: 13px; left: -7px; }
+@keyframes pet-heart { 0% { opacity: 0; transform: translate(0, 10px) scale(0.4); } 25% { opacity: 1; transform: translate(calc(var(--dx) * 0.5), -6px) scale(1.05); } 100% { opacity: 0; transform: translate(var(--dx), -46px) scale(0.9); } }
+@media (prefers-reduced-motion: reduce) { .gest-carinho, .hami-cheer-l, .hami-cheer-r, .pet-hearts i { animation: none; } .pet-hearts { display: none; } }

@@ -47,8 +47,8 @@ export interface HamsterProps {
   shine?: boolean;
   /** Tamanho (0,5 = recém-nascido, 1 = adulto). Sem valor, usa o tamanho atual do Hami da pessoa. */
   growth?: number;
-  /** Gesto do bracinho: 'tchau' levanta e acena. */
-  pose?: 'tchau';
+  /** Gesto dos bracinhos: 'tchau' levanta e acena; 'festa' bate os dois de alegria (no carinho). */
+  pose?: 'tchau' | 'festa';
   /** Situação do dia (frio, calor, gripado…): muda o rostinho e põe suor, sujeira, nariz vermelho etc. */
   cond?: Condition;
   /** Mostrar o rostinho da situação (desligado enquanto ele reage a um toque). */
@@ -131,7 +131,7 @@ export function Hamster({ fur: furId, mood = 'feliz', outfit = NO_OUTFIT, size =
   const sleeve = costume ? costume.c1 : outfit.roupa && !NO_SLEEVE.has(itemById(outfit.roupa)?.base ?? '') ? garment : null;
   // bracinhos: acenam de vez em quando (como dando "oi"), batem de alegria e acenam quando pedem; seguram as coisas paradinhos
   const armsBusy = holds || (!!outfit.acessorio && itemById(outfit.acessorio)?.base === 'segurar');
-  const armClass = (side: 'l' | 'r') => (pose === 'tchau' ? (side === 'l' ? 'hami-arm hami-wave' : 'hami-arm') : idle && !asleep && !armsBusy ? `hami-arm hami-arm-idle-${side}` : 'hami-arm');
+  const armClass = (side: 'l' | 'r') => (pose === 'festa' ? `hami-arm hami-cheer-${side}` : pose === 'tchau' ? (side === 'l' ? 'hami-arm hami-wave' : 'hami-arm') : idle && !asleep && !armsBusy ? `hami-arm hami-arm-idle-${side}` : 'hami-arm');
   const img = (href: string, style?: CSSProperties) => <image href={href} x={IMG.x} y={IMG.y} width={IMG.w} height={IMG.h} preserveAspectRatio="xMidYMid meet" style={style} />;
 
   return (
