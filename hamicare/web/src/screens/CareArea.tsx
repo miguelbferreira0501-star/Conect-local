@@ -15,6 +15,7 @@ import { useNow } from './Home';
 import type { CareId, PetMood, Photo } from '../types';
 import { Glyph } from '../components/art';
 import { useFurniturePlay } from '../components/FurniturePlay';
+import { openUi } from '../lib/bus';
 
 type StatKey = 'felicidade' | 'energia' | 'saciedade' | 'limpeza';
 
@@ -188,6 +189,18 @@ export function CareArea({ onShare }: { onShare: (p: Photo) => void }) {
             <span>{foodCount}</span>
           </button>
         </div>
+        <button className="care-inter" onClick={() => openUi('interacoes')} disabled={!!adv}>
+          <span className="care-inter-ico" aria-hidden="true">
+            <Glyph e="🎾" size={30} />
+          </span>
+          <span className="min-w-0 flex-1 text-left">
+            Interações
+            <small>Carinho, petiscos e corações</small>
+          </span>
+          <span className="care-inter-n" aria-label={`${s.pet.hearts ?? 0} corações`}>
+            ♥ {s.pet.hearts ?? 0}
+          </span>
+        </button>
         <p className="care-tray-note">Cuidar do {s.pet.name} deixa ele feliz e rende sementes. O peso dele muda só com as suas missões saudáveis.</p>
       </section>
 

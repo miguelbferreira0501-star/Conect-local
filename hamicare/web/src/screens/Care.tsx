@@ -3,7 +3,6 @@
 import { useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { GrowthContext, Hamster } from '../components/Hamster';
-import { Hami3D } from '../components/Hami3D';
 import { Room } from '../components/Room';
 import { Sheet, toast } from '../components/ui';
 import { ITEMS, RECIPES, itemById } from '../data/items';
@@ -241,7 +240,7 @@ function DoneCard({ title, text, onClose, children }: { title: string; text: Rea
 
 function PetView({ mood, size = 220, wet, idle = true }: { mood: PetMood; size?: number; wet?: boolean; shine?: boolean; idle?: boolean }) {
   const s = useApp();
-  return <Hami3D fur={s.pet.fur} outfit={wet ? { ...s.pet.outfit, roupa: null } : s.pet.outfit} mood={mood} size={size} label={s.pet.name} wet={wet} still={!idle} />;
+  return <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={wet ? { ...s.pet.outfit, roupa: null } : s.pet.outfit} mood={mood} size={size} label={s.pet.name} wet={wet} idle={idle} />;
 }
 
 // ---------- Cafuné ----------

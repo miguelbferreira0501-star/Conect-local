@@ -42,6 +42,7 @@ export function MenuScreen({ open, onClose }: { open: boolean; onClose: () => vo
     );
   const tiles: { ico: string; label: string; on: () => void; badge?: number }[] = [
     { ico: '💗', label: `Perfil do ${s.pet.name}`, on: () => go('hami') },
+    { ico: '🎾', label: 'Interações', on: () => go('interacoes') },
     { ico: '⚡', label: 'Missões', on: () => go('missoes') },
     { ico: '🌍', label: 'Mundo', on: () => go('mundo') },
     { ico: '🌬️', label: 'Bem-estar', on: () => go('bemestar') },

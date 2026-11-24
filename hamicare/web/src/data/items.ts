@@ -192,7 +192,7 @@ export const KIT_ITEMS: Item[] = [
     ['azul', 'azul', '#7FB8F0', '#FFD66B'],
     ['verde', 'verde', '#7FD8BE', '#FF9FC2'],
   ]),
-  ...moveis('casinha', 'Casinha de hamster', 'movel', 80, 22, [
+  ...moveis('casinha', 'Casinha de cachorro', 'movel', 80, 22, [
     ['vermelha', 'vermelha', '#E2547A', '#FFD66B'],
     ['azul', 'azul', '#5B8DEF', '#FF9FC2'],
     ['verde', 'verde', '#5FBF77', '#FFD66B'],
@@ -304,7 +304,7 @@ export const KIT_ITEMS: Item[] = [
   ),
   ...moveis(
     'castelinho',
-    'Castelinho do hamster',
+    'Castelinho do cachorrinho',
     'movel',
     180,
     24,
@@ -744,7 +744,7 @@ export const ITEMS: Item[] = [
   ...KIT_ITEMS,
   // Móveis
   W('rodinha', 'Rodinha de exercício', 'movel', 30, { svg: 'rodinha', size: 26 }),
-  W('caminha', 'Caminha de hamster', 'movel', 35, { svg: 'caminha', size: 26 }),
+  W('caminha', 'Caminha de cachorro', 'movel', 35, { svg: 'caminha', size: 26 }),
   W('casinha', 'Casinha de madeira', 'movel', 50, { svg: 'casinha', size: 28 }),
   W('mesa', 'Mesinha', 'movel', 30, { svg: 'mesa', size: 22 }),
   W('luminaria', 'Luminária de pé', 'movel', 35, { svg: 'luminaria', size: 12 }),
@@ -1112,7 +1112,7 @@ export const STYLES: StyleSet[] = [
   },
   {
     id: 'cantinho-hamster',
-    name: 'Cantinho do hamster',
+    name: 'Cantinho do cachorrinho',
     wallpaper: 'p-bolinhas',
     floor: 'f-grama',
     items: [

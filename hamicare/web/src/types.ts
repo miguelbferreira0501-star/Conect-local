@@ -123,6 +123,10 @@ export interface PetState {
   facts: string[];
   /** Menino, menina ou outro (escolhido no começo; muda os pronomes do perfil). */
   gender?: PetGender;
+  /** Corações ganhos na área de Interações (carinho e petiscos). */
+  hearts?: number;
+  /** Corações do carinho de hoje (o toque rende até um limite por dia). */
+  heartsDay?: { date: string; n: number };
 }
 export type PetGender = 'menino' | 'menina' | 'outro';
 
@@ -181,7 +185,7 @@ export interface PetSnap {
   mood: PetMood;
 }
 
-export type PetMood = 'feliz' | 'calmo' | 'sono' | 'animado' | 'dormindo' | 'comendo' | 'risada' | 'boca' | 'surpreso' | 'manha' | 'choro';
+export type PetMood = 'feliz' | 'calmo' | 'sono' | 'animado' | 'dormindo' | 'comendo' | 'risada' | 'boca' | 'surpreso' | 'manha' | 'choro' | 'amor';
 
 export interface CompanionState {
   /** Ovos e pets: quando o ovo chegou e quando chocou. */

@@ -32,6 +32,7 @@ import { syncProfile } from './lib/social';
 import { captureInvite } from './lib/social/invite';
 import { onUi } from './lib/bus';
 import { PetProfile } from './components/PetProfile';
+import { Interactions } from './components/Interactions';
 import { AreasPage } from './components/Areas';
 import { MenuScreen } from './components/Menu';
 import { MailScreen } from './components/Mail';
@@ -75,6 +76,7 @@ export default function App() {
   const [mail, setMail] = useState(false);
   const [petProfile, setPetProfile] = useState(false);
   const [areasOpen, setAreasOpen] = useState(false);
+  const [inter, setInter] = useState(false);
   const [season, setSeason] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
   const [plus, setPlus] = useState(false);
@@ -148,6 +150,8 @@ export default function App() {
         else if (t === 'mundo') setTab('mundo');
         else if (t === 'hami') setPetProfile(true);
         else if (t === 'areas') setAreasOpen(true);
+        else if (t === 'loja') setTab('loja');
+        else if (t === 'interacoes') setInter(true);
       }),
     [],
   );
@@ -241,6 +245,7 @@ export default function App() {
       <MailScreen open={mail} onClose={() => setMail(false)} />
       <PetProfile open={petProfile} onClose={() => setPetProfile(false)} />
       <AreasPage open={areasOpen ? 'todas' : null} onClose={() => setAreasOpen(false)} />
+      <Interactions open={inter} onClose={() => setInter(false)} onStore={() => go('loja')} />
       <SeasonPass open={season} onClose={() => setSeason(false)} />
       <WalletSheet open={walletOpen} onClose={() => setWalletOpen(false)} />
       <SettingsSheet open={settings} onClose={() => setSettings(false)} onPlus={() => (setSettings(false), setPlus(true))} account={account} />

@@ -395,43 +395,40 @@ const SOUNDS: Record<SoundId, (o: PlayOpts) => void> = {
   },
   escova: () => noise({ f: 2600, type: 'highpass', q: 0.6, d: 0.09, v: 0.09, a: 0.02, pan: Math.random() * 0.6 - 0.3 }),
   brilho: () => [2093, 2637, 3136, 4186].forEach((f, i) => bell(f, i * 0.04, 0.045, 0.3, 0.45)),
-  // guinchinho de hamster de verdade: dois ou três "iik" bem agudos e curtinhos, com um tremido rápido
+  // latidinho de filhote: um ou dois "au!" curtinhos (voz rouquinha que cai no fim) com um soprinho no começo
   squeak: () => {
     const c = ac!;
-    const n = Math.random() < 0.5 ? 2 : 3;
-    const base = 2700 + Math.random() * 500;
+    const n = Math.random() < 0.55 ? 2 : 1;
+    const base = 620 + Math.random() * 120;
     for (let i = 0; i < n; i++) {
-      const t0 = now() + i * (0.085 + Math.random() * 0.03);
-      const f0 = base * (1 + i * 0.04);
+      const t0 = now() + i * (0.17 + Math.random() * 0.04);
+      const f0 = base * (1 - i * 0.05);
       const osc = c.createOscillator();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(f0 * 0.82, t0);
-      osc.frequency.exponentialRampToValueAtTime(f0 * 1.18, t0 + 0.025);
-      osc.frequency.exponentialRampToValueAtTime(f0 * 0.95, t0 + 0.065);
-      // tremido rápido (garganta pequenininha)
-      const lfo = c.createOscillator();
-      const depth = c.createGain();
-      lfo.frequency.value = 55 + Math.random() * 15;
-      depth.gain.value = f0 * 0.05;
-      lfo.connect(depth);
-      depth.connect(osc.frequency);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(f0 * 0.9, t0);
+      osc.frequency.exponentialRampToValueAtTime(f0 * 1.12, t0 + 0.02);
+      osc.frequency.exponentialRampToValueAtTime(f0 * 0.62, t0 + 0.11);
+      // boquinha: formante do "a" e do "u"
+      const f1 = c.createBiquadFilter();
+      f1.type = 'bandpass';
+      f1.frequency.setValueAtTime(1500, t0);
+      f1.frequency.exponentialRampToValueAtTime(800, t0 + 0.11);
+      f1.Q.value = 2.2;
+      const lp = c.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 3200;
       const g = c.createGain();
-      env(g, t0, 0.05, 0.006, 0.07);
-      const hp = c.createBiquadFilter();
-      hp.type = 'highpass';
-      hp.frequency.value = 1400;
-      osc.connect(hp);
-      hp.connect(g);
-      route(g, 0.08, (Math.random() - 0.5) * 0.2);
-      lfo.start(t0);
+      env(g, t0, 0.16, 0.008, 0.13);
+      osc.connect(f1);
+      f1.connect(lp);
+      lp.connect(g);
+      route(g, 0.06, (Math.random() - 0.5) * 0.2);
       osc.start(t0);
-      osc.stop(t0 + 0.1);
-      lfo.stop(t0 + 0.1);
+      osc.stop(t0 + 0.16);
       voices++;
       osc.onended = () => voices--;
+      noise({ f: 1800, type: 'bandpass', q: 0.8, t: i * 0.17, d: 0.04, v: 0.03, a: 0.004 });
     }
-    // respiradinha do focinho no fim
-    noise({ f: 5200, type: 'bandpass', q: 1.2, t: n * 0.1, d: 0.05, v: 0.018, a: 0.01 });
   },
   iii: () => {
     tone({ f: 1500, to: 2100, d: 0.09, v: 0.06, vib: 30 });

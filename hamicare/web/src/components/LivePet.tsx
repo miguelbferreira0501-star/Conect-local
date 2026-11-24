@@ -1,7 +1,7 @@
-// O Hami reage ao toque de um jeito natural: um guinchinho de hamster, um pulinho e ele dá "oi" com a mãozinha.
-// Sozinho, ele respira, pisca, acena de vez em quando e bate os bracinhos (no próprio desenho do Hami).
+// O mascote reage ao toque de um jeito natural: um latidinho, pulinho, rabo abanando e os bracinhos batendo.
+// Sozinho, ele respira, pisca, mexe a cabeça e as orelhas e abana o rabo.
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Hami3D } from './Hami3D';
+import { Hamster } from './Hamster';
 import { SleepingHami } from './SleepingHami';
 import { play, type SoundId } from '../lib/sound';
 import { useApp } from '../lib/store';
@@ -42,7 +42,7 @@ interface Props {
 
 let seq = 0;
 
-export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = '', children, label, wear, fx = '', cryEvery = 0 }: Props) {
+export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = '', children, label, growth, cond, wear, prop, fx = '', cryEvery = 0 }: Props) {
   const s = useApp();
   const [trick, setTrick] = useState<{ t: Trick; id: number } | null>(null);
   const timers = useRef<number[]>([]);
@@ -91,7 +91,20 @@ export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = ''
           {asleep ? (
             <SleepingHami fur={s.pet.fur} size={size * 0.72} place="chao" outfit={s.pet.outfit} />
           ) : (
-            <Hami3D fur={s.pet.fur} outfit={wear ? { ...s.pet.outfit, ...wear } : s.pet.outfit} mood={petMood} action={trick?.t === 'carinho' ? 'festa' : 'parado'} size={size} label={s.pet.name} />
+            <Hamster
+              fur={s.pet.fur}
+              grams={s.pet.grams}
+              phase={s.pet.phase}
+              outfit={wear ? { ...s.pet.outfit, ...wear } : s.pet.outfit}
+              mood={petMood}
+              cond={cond ?? undefined}
+              condFace={!trick}
+              prop={trick?.t === 'carinho' ? undefined : prop}
+              size={size}
+              label={s.pet.name}
+              pose={trick?.t === 'carinho' ? 'festa' : undefined}
+              growth={growth}
+            />
           )}
         </span>
         {trick?.t === 'carinho' && (

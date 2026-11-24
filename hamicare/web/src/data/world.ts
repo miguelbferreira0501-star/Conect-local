@@ -86,7 +86,7 @@ export const PLACES: Place[] = [
     missions: [
       m('cha', 'Tomar um chazinho', 15, 'Pedi um chá de camomila. Esquentou a barriga e o coração.'),
       m('bolo', 'Ajudar a fazer bolo', 45, 'Ajudei a mexer a massa. Ganhei a colher pra lamber!'),
-      m('livro', 'Ler um livro inteiro', 120, 'Li a história de um hamster que deu a volta ao mundo. Fiquei inspirado.'),
+      m('livro', 'Ler um livro inteiro', 120, 'Li a história de um cachorrinho que deu a volta ao mundo. Fiquei inspirado.'),
     ],
     finds: [{ id: 'xicara', name: 'Xicrinha', emoji: '☕' }, { id: 'croissant', name: 'Croissant', emoji: '🥐' }, { id: 'cupcake', name: 'Cupcake', emoji: '🧁' }],
   },
@@ -135,7 +135,7 @@ export const PLACES: Place[] = [
     desc: 'Flutuar entre estrelas e dar tchau pra Terra.',
     missions: [
       m('flutuar', 'Flutuar sem gravidade', 15, 'Dei cambalhotas no ar! Minhas bochechas flutuaram junto.'),
-      m('lua', 'Pisar na Lua', 45, 'Deixei pegadinhas de hamster na Lua. Vão ficar lá pra sempre.'),
+      m('lua', 'Pisar na Lua', 45, 'Deixei pegadinhas de patinha na Lua. Vão ficar lá pra sempre.'),
       m('cometa', 'Pegar carona num cometa', 120, 'O cometa tinha um rabo brilhante. Fiz um pedido: que você esteja bem.'),
     ],
     finds: [{ id: 'estrelinha', name: 'Estrelinha cadente', emoji: '🌠' }, { id: 'planeta', name: 'Planetinha', emoji: '🪐' }, { id: 'alien', name: 'Amigo alienígena', emoji: '👽' }],
