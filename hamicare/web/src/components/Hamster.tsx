@@ -4,7 +4,6 @@ import hamiBody from '../assets/hami/hami-corpo.webp';
 import hamiBodyBlank from '../assets/hami/hami-corpo-sem-rosto.webp';
 import hamiArmL from '../assets/hami/hami-braco-l.webp';
 import hamiArmR from '../assets/hami/hami-braco-r.webp';
-import turnMap from '../assets/hami/hami-virar.png';
 import { furById } from '../data/fur';
 import { itemById } from '../data/items';
 import { NECK_ITEMS, Accessory, AccessoryBack, Cape, Clothes, CostumeBack, CostumeFront, costumeOf, EffectBack, EffectFront, garmentColor, garmentShape, Glasses, Hat, sleeveOf } from './Wear';
@@ -59,8 +58,6 @@ export interface HamsterProps {
   condFace?: boolean;
   /** O que ele segura na atividade (livro, fones, desenho, halteres, varinha de bolhas). */
   prop?: HamiProp;
-  /** Meio de lado (três quartos), como um bichinho de verdade no quarto, em vez de olhar reto para a tela. */
-  turn?: boolean;
 }
 
 // ---------- O Hami realista (foto) ----------
@@ -130,7 +127,6 @@ export function Hamster({
   condFace = true,
   prop,
   phase = 0,
-  turn = false,
 }: HamsterProps) {
   const wet = wetProp || cond === 'chuva';
   const fur = furById(furId);
@@ -233,209 +229,197 @@ export function Hamster({
         </radialGradient>
         <FabricFilter id={`t${uid}`} />
       </defs>
-      {turn && (
-        <defs>
-          {/* virar meio de lado: a cabeça e o corpo giram como bolinhas (o rosto vai para o lado, a bochecha do
-              outro lado some atrás), com roupa, chapéu e expressão juntos */}
-          <filter id={`tn${uid}`} filterUnits="userSpaceOnUse" x={-20} y={-40} width={240} height={260} colorInterpolationFilters="sRGB">
-            <feImage href={turnMap} x={-20} y={-40} width={240} height={260} preserveAspectRatio="none" result="map" />
-            <feDisplacementMap in="SourceGraphic" in2="map" scale="65.88" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-        </defs>
-      )}
       <g transform={k < 1 ? `translate(100 192) scale(${k}) translate(-100 -192)` : undefined}>
-        <g filter={turn ? `url(#tn${uid})` : undefined}>
-          {phase >= 3 && <circle cx="100" cy="110" r="94" fill={`url(#g${uid})`} />}
-          <EffectBack id={outfit.efeito} geo={BODY_GEO} uid={uid} />
-          <ellipse cx="99" cy="192.5" rx="50" ry="5.5" fill="rgba(60,30,40,0.16)" />
-          <g className={idle && !asleep ? 'hami-breathe' : asleep ? 'hami-sleep' : ''} style={{ transformOrigin: '100px 192px' }}>
-            <g filter={`url(#t${uid})`}>
-              <Cape id={outfit.roupa} geo={BODY_GEO} />
-              <AccessoryBack id={outfit.acessorio} geo={BODY_GEO} />
-            </g>
+        {phase >= 3 && <circle cx="100" cy="110" r="94" fill={`url(#g${uid})`} />}
+        <EffectBack id={outfit.efeito} geo={BODY_GEO} uid={uid} />
+        <ellipse cx="99" cy="192.5" rx="50" ry="5.5" fill="rgba(60,30,40,0.16)" />
+        <g className={idle && !asleep ? 'hami-breathe' : asleep ? 'hami-sleep' : ''} style={{ transformOrigin: '100px 192px' }}>
+          <g filter={`url(#t${uid})`}>
+            <Cape id={outfit.roupa} geo={BODY_GEO} />
+            <AccessoryBack id={outfit.acessorio} geo={BODY_GEO} />
+          </g>
 
-            {/* a foto do Hami (com o rosto da foto, ou sem rosto para desenhar outra expressão por cima) */}
-            {img(photoFace ? hamiBody : hamiBodyBlank, wet ? { filter: 'saturate(0.85) brightness(0.93)' } : undefined)}
-            {recolor && (
-              <g mask={`url(#m${uid})`}>
-                <rect x="0" y="0" width="200" height="200" fill={fur.body} style={{ mixBlendMode: 'color' }} />
-                <rect x="0" y="0" width="200" height="200" fill={fur.body} opacity="0.32" />
+          {/* a foto do Hami (com o rosto da foto, ou sem rosto para desenhar outra expressão por cima) */}
+          {img(photoFace ? hamiBody : hamiBodyBlank, wet ? { filter: 'saturate(0.85) brightness(0.93)' } : undefined)}
+          {recolor && (
+            <g mask={`url(#m${uid})`}>
+              <rect x="0" y="0" width="200" height="200" fill={fur.body} style={{ mixBlendMode: 'color' }} />
+              <rect x="0" y="0" width="200" height="200" fill={fur.body} opacity="0.32" />
+            </g>
+          )}
+          {wet && <path d={HOOD} fill="#5B8FD6" opacity="0.08" />}
+
+          {/* roupa vestindo o contorno do corpo, com cara de tecido */}
+          <g filter={`url(#t${uid})`}>
+            {costume ? (
+              <g clipPath={`url(#b${uid})`}>
+                <Clothes id={outfit.roupa} geo={{ top: 30, w: 66, h: 158, eyeY: 77.5, hole: { cx: 101.5, cy: 89, rx: 50, ry: 35 } }} />
+                <rect x="0" y="0" width="200" height="200" fill={`url(#c${uid})`} />
+              </g>
+            ) : null}
+            {costume && (
+              <g transform={FACE_T}>
+                <CostumeBack id={outfit.roupa} geo={{ ...HEAD_GEO, top: 37, w: 62 }} />
               </g>
             )}
-            {wet && <path d={HOOD} fill="#5B8FD6" opacity="0.08" />}
-
-            {/* roupa vestindo o contorno do corpo, com cara de tecido */}
-            <g filter={`url(#t${uid})`}>
-              {costume ? (
-                <g clipPath={`url(#b${uid})`}>
-                  <Clothes id={outfit.roupa} geo={{ top: 30, w: 66, h: 158, eyeY: 77.5, hole: { cx: 101.5, cy: 89, rx: 50, ry: 35 } }} />
-                  <rect x="0" y="0" width="200" height="200" fill={`url(#c${uid})`} />
+            {costume ? null : shape && garment ? (
+              <g>
+                <path d={cloth} fill={garment} />
+                <g clipPath={`url(#k${uid})`}>
+                  <Clothes id={outfit.roupa} geo={BODY_GEO} />
+                  <rect x="0" y="110" width="200" height="90" fill={`url(#c${uid})`} />
                 </g>
-              ) : null}
-              {costume && (
-                <g transform={FACE_T}>
-                  <CostumeBack id={outfit.roupa} geo={{ ...HEAD_GEO, top: 37, w: 62 }} />
+              </g>
+            ) : (
+              outfit.roupa && (
+                <g clipPath={`url(#k${uid})`}>
+                  <Clothes id={outfit.roupa} geo={BODY_GEO} />
+                  <rect x="0" y="110" width="200" height="90" fill={`url(#c${uid})`} />
+                </g>
+              )
+            )}
+          </g>
+          {outfit.roupa && !costume && (
+            <g clipPath={`url(#k${uid})`}>
+              {/* sombra macia do queixo na roupa */}
+              <ellipse cx="100" cy="128" rx="54" ry="9" fill={`url(#s${uid})`} />
+            </g>
+          )}
+
+          {cond === 'terra' && (
+            <g fill="#8A5A3B" opacity="0.4">
+              <ellipse cx="70" cy="166" rx="8" ry="5" />
+              <ellipse cx="122" cy="176" rx="6" ry="4" />
+              <circle cx="140" cy="160" r="3" />
+              <ellipse cx="128" cy="44" rx="7" ry="4.5" transform="rotate(-20 128 44)" />
+              <circle cx="78" cy="38" r="2.6" />
+            </g>
+          )}
+          <PropInHands prop={prop} />
+          {/* as patinhas da foto ficam por cima da roupa e do que ele segura */}
+          {/* os bracinhos da foto, por cima da roupa e do que ele segura (com a manga, se estiver vestido) */}
+          {ARMS.map((arm, i) => (
+            <g key={arm.side} className={armClass(arm.side)} style={{ transformOrigin: arm.pivot }}>
+              <image href={arm.href} x={arm.x} y={arm.y} width={arm.w} height={arm.h} preserveAspectRatio="none" style={wet ? { filter: 'saturate(0.85) brightness(0.93)' } : undefined} />
+              {recolor && (
+                <g mask={`url(#am${i}${uid})`}>
+                  <rect x={arm.x} y={arm.y} width={arm.w} height={arm.h} fill={fur.body} style={{ mixBlendMode: 'color' }} />
+                  <rect x={arm.x} y={arm.y} width={arm.w} height={arm.h} fill={fur.body} opacity="0.32" />
                 </g>
               )}
-              {costume ? null : shape && garment ? (
-                <g>
-                  <path d={cloth} fill={garment} />
-                  <g clipPath={`url(#k${uid})`}>
-                    <Clothes id={outfit.roupa} geo={BODY_GEO} />
-                    <rect x="0" y="110" width="200" height="90" fill={`url(#c${uid})`} />
-                  </g>
+              {sleeve && (
+                <g filter={`url(#t${uid})`}>
+                  <path d={arm.path} fill={sleeve} mask={`url(#sl${i}${uid})`} />
+                  {/* punho: arco em volta do pulso, por cima do comecinho da patinha */}
+                  <path
+                    d={`M${PAWS[i].cx - PAWS[i].rx - 1.2} ${PAWS[i].cy - 1} A${PAWS[i].rx + 1.2} ${PAWS[i].ry + 0.6} 0 0 1 ${PAWS[i].cx + PAWS[i].rx + 1.2} ${PAWS[i].cy - 1}`}
+                    stroke={cuff ?? sleeve}
+                    strokeWidth="3.4"
+                    strokeLinecap="round"
+                    fill="none"
+                    mask={`url(#sa${i}${uid})`}
+                  />
                 </g>
-              ) : (
-                outfit.roupa && (
-                  <g clipPath={`url(#k${uid})`}>
-                    <Clothes id={outfit.roupa} geo={BODY_GEO} />
-                    <rect x="0" y="110" width="200" height="90" fill={`url(#c${uid})`} />
-                  </g>
-                )
               )}
             </g>
-            {outfit.roupa && !costume && (
-              <g clipPath={`url(#k${uid})`}>
-                {/* sombra macia do queixo na roupa */}
-                <ellipse cx="100" cy="128" rx="54" ry="9" fill={`url(#s${uid})`} />
-              </g>
-            )}
+          ))}
 
-            {cond === 'terra' && (
-              <g fill="#8A5A3B" opacity="0.4">
-                <ellipse cx="70" cy="166" rx="8" ry="5" />
-                <ellipse cx="122" cy="176" rx="6" ry="4" />
-                <circle cx="140" cy="160" r="3" />
-                <ellipse cx="128" cy="44" rx="7" ry="4.5" transform="rotate(-20 128 44)" />
-                <circle cx="78" cy="38" r="2.6" />
+          {/* piscadinha de vez em quando (no rosto da foto) */}
+          {photoFace && idle && (
+            <g className="hami-blink">
+              <g clipPath={`url(#ey${uid})`}>{img(hamiBodyBlank)}</g>
+              <g transform={FACE_T}>
+                {[-1, 1].map((sd) => (
+                  <path
+                    key={sd}
+                    d={`M${100 + sd * 25 - 9} ${FACE.eyeY - 1} Q${100 + sd * 25} ${FACE.eyeY + 5.5} ${100 + sd * 25 + 9} ${FACE.eyeY - 1}`}
+                    stroke={INK}
+                    strokeWidth="3.6"
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                ))}
               </g>
-            )}
-            <PropInHands prop={prop} />
-            {/* as patinhas da foto ficam por cima da roupa e do que ele segura */}
-            {/* os bracinhos da foto, por cima da roupa e do que ele segura (com a manga, se estiver vestido) */}
-            {ARMS.map((arm, i) => (
-              <g key={arm.side} className={armClass(arm.side)} style={{ transformOrigin: arm.pivot }}>
-                <image href={arm.href} x={arm.x} y={arm.y} width={arm.w} height={arm.h} preserveAspectRatio="none" style={wet ? { filter: 'saturate(0.85) brightness(0.93)' } : undefined} />
-                {recolor && (
-                  <g mask={`url(#am${i}${uid})`}>
-                    <rect x={arm.x} y={arm.y} width={arm.w} height={arm.h} fill={fur.body} style={{ mixBlendMode: 'color' }} />
-                    <rect x={arm.x} y={arm.y} width={arm.w} height={arm.h} fill={fur.body} opacity="0.32" />
-                  </g>
-                )}
-                {sleeve && (
-                  <g filter={`url(#t${uid})`}>
-                    <path d={arm.path} fill={sleeve} mask={`url(#sl${i}${uid})`} />
-                    {/* punho: arco em volta do pulso, por cima do comecinho da patinha */}
-                    <path
-                      d={`M${PAWS[i].cx - PAWS[i].rx - 1.2} ${PAWS[i].cy - 1} A${PAWS[i].rx + 1.2} ${PAWS[i].ry + 0.6} 0 0 1 ${PAWS[i].cx + PAWS[i].rx + 1.2} ${PAWS[i].cy - 1}`}
-                      stroke={cuff ?? sleeve}
-                      strokeWidth="3.4"
-                      strokeLinecap="round"
-                      fill="none"
-                      mask={`url(#sa${i}${uid})`}
-                    />
-                  </g>
-                )}
-              </g>
+            </g>
+          )}
+          {/* expressão desenhada por cima do rosto (quando não é a da foto) */}
+          {!photoFace && (
+            <g transform={FACE_T}>
+              <Face mood={mood} cond={faceCond} eyeY={FACE.eyeY} noseY={FACE.eyeY + 8.2} ex={FACE.ex} blush={fur.ear} eyeK={1 + young * 0.08} uid={uid} photoBlush />
+            </g>
+          )}
+          {cond === 'calor' &&
+            [
+              [-1, 0.2, 0],
+              [1, 0.05, 0.6],
+              [1, 0.62, 1.2],
+            ].map(([sd, dy, delay], i) => (
+              <path
+                key={i}
+                className="drip"
+                style={{ animationDelay: `${delay}s` }}
+                d={`M${HEAD.cx + sd * (HEAD.rx - 8)} ${HEAD.top + 24 + dy * 40} q-4 7 0 10.5 q4 -3.5 0 -10.5 Z`}
+                fill="#BFE6FF"
+                stroke="#7CC4F0"
+                strokeWidth="1"
+              />
             ))}
+          {wet &&
+            [
+              [-0.5, 0.1],
+              [0.35, 0.05],
+              [0.62, 0.42],
+              [-0.7, 0.5],
+              [0.1, 0.0],
+            ].map(([dx, dy], i) => (
+              <path
+                key={i}
+                className="drip"
+                style={{ animationDelay: `${i * 0.3}s` }}
+                d={`M${HEAD.cx + dx * HEAD.rx} ${HEAD.top + 12 + dy * 90} q-3.5 6 0 9 q3.5 -3 0 -9 Z`}
+                fill="#8FD0FF"
+                stroke="#5BA9E8"
+                strokeWidth="0.8"
+              />
+            ))}
+          {shine && (
+            <g fill="#FFF3A6">
+              <path className="sparkle" d={`M${HEAD.cx - HEAD.rx - 4} ${HEAD.top + 34} l2.5 6 6 2.5 -6 2.5 -2.5 6 -2.5 -6 -6 -2.5 6 -2.5 Z`} />
+              <path className="sparkle" style={{ animationDelay: '0.5s' }} d={`M${HEAD.cx + HEAD.rx + 4} ${HEAD.top + 74} l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z`} />
+              <path className="sparkle" style={{ animationDelay: '1s' }} d={`M${HEAD.cx + 30} ${HEAD.top - 2} l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z`} />
+            </g>
+          )}
 
-            {/* piscadinha de vez em quando (no rosto da foto) */}
-            {photoFace && idle && (
-              <g className="hami-blink">
-                <g clipPath={`url(#ey${uid})`}>{img(hamiBodyBlank)}</g>
-                <g transform={FACE_T}>
+          {/* acessórios da cabeça e do pescoço, com cara de tecido/objeto de verdade */}
+          <g filter={`url(#t${uid})`}>
+            <g transform={FACE_T}>
+              <CostumeFront id={outfit.roupa} geo={HEAD_GEO} />
+              <Glasses id={outfit.oculos} eyeY={FACE.eyeY} ex={FACE.ex} />
+              <Hat id={outfit.chapeu} geo={HEAD_GEO} />
+              {prop === 'fones' && (
+                <g>
+                  <path
+                    d={`M${100 - 56} ${FACE.eyeY - 4} C${100 - 58} ${HEAD_GEO.top - 22} ${100 + 58} ${HEAD_GEO.top - 22} ${100 + 56} ${FACE.eyeY - 4}`}
+                    stroke="#5B6BD6"
+                    strokeWidth="5.5"
+                    strokeLinecap="round"
+                    fill="none"
+                  />
                   {[-1, 1].map((sd) => (
-                    <path
-                      key={sd}
-                      d={`M${100 + sd * 25 - 9} ${FACE.eyeY - 1} Q${100 + sd * 25} ${FACE.eyeY + 5.5} ${100 + sd * 25 + 9} ${FACE.eyeY - 1}`}
-                      stroke={INK}
-                      strokeWidth="3.6"
-                      strokeLinecap="round"
-                      fill="none"
-                    />
+                    <g key={sd}>
+                      <rect x={100 + sd * 56 - 8} y={FACE.eyeY - 16} width="16" height="22" rx="8" fill="#FF8FB1" />
+                      <rect x={100 + sd * 56 - 5} y={FACE.eyeY - 13} width="10" height="16" rx="5" fill="#FFFFFF" opacity="0.45" />
+                    </g>
                   ))}
                 </g>
-              </g>
-            )}
-            {/* expressão desenhada por cima do rosto (quando não é a da foto) */}
-            {!photoFace && (
-              <g transform={FACE_T}>
-                <Face mood={mood} cond={faceCond} eyeY={FACE.eyeY} noseY={FACE.eyeY + 8.2} ex={FACE.ex} blush={fur.ear} eyeK={1 + young * 0.08} uid={uid} photoBlush />
-              </g>
-            )}
-            {cond === 'calor' &&
-              [
-                [-1, 0.2, 0],
-                [1, 0.05, 0.6],
-                [1, 0.62, 1.2],
-              ].map(([sd, dy, delay], i) => (
-                <path
-                  key={i}
-                  className="drip"
-                  style={{ animationDelay: `${delay}s` }}
-                  d={`M${HEAD.cx + sd * (HEAD.rx - 8)} ${HEAD.top + 24 + dy * 40} q-4 7 0 10.5 q4 -3.5 0 -10.5 Z`}
-                  fill="#BFE6FF"
-                  stroke="#7CC4F0"
-                  strokeWidth="1"
-                />
-              ))}
-            {wet &&
-              [
-                [-0.5, 0.1],
-                [0.35, 0.05],
-                [0.62, 0.42],
-                [-0.7, 0.5],
-                [0.1, 0.0],
-              ].map(([dx, dy], i) => (
-                <path
-                  key={i}
-                  className="drip"
-                  style={{ animationDelay: `${i * 0.3}s` }}
-                  d={`M${HEAD.cx + dx * HEAD.rx} ${HEAD.top + 12 + dy * 90} q-3.5 6 0 9 q3.5 -3 0 -9 Z`}
-                  fill="#8FD0FF"
-                  stroke="#5BA9E8"
-                  strokeWidth="0.8"
-                />
-              ))}
-            {shine && (
-              <g fill="#FFF3A6">
-                <path className="sparkle" d={`M${HEAD.cx - HEAD.rx - 4} ${HEAD.top + 34} l2.5 6 6 2.5 -6 2.5 -2.5 6 -2.5 -6 -6 -2.5 6 -2.5 Z`} />
-                <path className="sparkle" style={{ animationDelay: '0.5s' }} d={`M${HEAD.cx + HEAD.rx + 4} ${HEAD.top + 74} l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z`} />
-                <path className="sparkle" style={{ animationDelay: '1s' }} d={`M${HEAD.cx + 30} ${HEAD.top - 2} l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z`} />
-              </g>
-            )}
-
-            {/* acessórios da cabeça e do pescoço, com cara de tecido/objeto de verdade */}
-            <g filter={`url(#t${uid})`}>
-              <g transform={FACE_T}>
-                <CostumeFront id={outfit.roupa} geo={HEAD_GEO} />
-                <Glasses id={outfit.oculos} eyeY={FACE.eyeY} ex={FACE.ex} />
-                <Hat id={outfit.chapeu} geo={HEAD_GEO} />
-                {prop === 'fones' && (
-                  <g>
-                    <path
-                      d={`M${100 - 56} ${FACE.eyeY - 4} C${100 - 58} ${HEAD_GEO.top - 22} ${100 + 58} ${HEAD_GEO.top - 22} ${100 + 56} ${FACE.eyeY - 4}`}
-                      stroke="#5B6BD6"
-                      strokeWidth="5.5"
-                      strokeLinecap="round"
-                      fill="none"
-                    />
-                    {[-1, 1].map((sd) => (
-                      <g key={sd}>
-                        <rect x={100 + sd * 56 - 8} y={FACE.eyeY - 16} width="16" height="22" rx="8" fill="#FF8FB1" />
-                        <rect x={100 + sd * 56 - 5} y={FACE.eyeY - 13} width="10" height="16" rx="5" fill="#FFFFFF" opacity="0.45" />
-                      </g>
-                    ))}
-                  </g>
-                )}
-              </g>
-              <g clipPath={neckItem ? `url(#n${uid})` : undefined}>
-                <Accessory id={outfit.acessorio} geo={{ top: 86, h: 64, w: neckItem ? 52 : 39, eyeY: 72 }} paw="#FFF4EE" head={{ cx: HEAD.cx, cy: 78, rx: HEAD.rx, ry: 45 }} />
-              </g>
+              )}
             </g>
-            {phase >= 3 && <Sparkles top={HEAD.top} w={HEAD.rx} />}
-            <EffectFront id={outfit.efeito} geo={BODY_GEO} />
+            <g clipPath={neckItem ? `url(#n${uid})` : undefined}>
+              <Accessory id={outfit.acessorio} geo={{ top: 86, h: 64, w: neckItem ? 52 : 39, eyeY: 72 }} paw="#FFF4EE" head={{ cx: HEAD.cx, cy: 78, rx: HEAD.rx, ry: 45 }} />
+            </g>
           </g>
+          {phase >= 3 && <Sparkles top={HEAD.top} w={HEAD.rx} />}
+          <EffectFront id={outfit.efeito} geo={BODY_GEO} />
         </g>
       </g>
       {asleep && (

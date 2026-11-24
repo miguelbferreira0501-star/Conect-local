@@ -72,7 +72,7 @@ function HouseTab({ onArenas }: { onArenas: () => void }) {
       <Room house={s.house} period={periodOf()} height={400} editing={editing} selected={sel} onSelect={setSel} onMove={moveItem} onRemove={(uid) => (storeItem(uid), setSel(null), toast('Guardado nos seus móveis'))} onFront={bringFront}>
         {!s.adventure && (
           <div className="relative">
-            <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={s.pet.sleeping ? 'dormindo' : 'feliz'} size={150} label={s.pet.name} turn />
+            <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={s.pet.sleeping ? 'dormindo' : 'feliz'} size={150} label={s.pet.name} />
             {!editing && <CompanionBuddy hamster={150} />}
           </div>
         )}
