@@ -1,6 +1,6 @@
-// Viagem do dia (estilo Finch): o Hami anda de lado carregando uma trouxinha, com o cenário da arena
+// Viagem do dia (estilo Finch): o Hami anda de lado carregando uma cestinha, com o cenário da arena
 // onde mora (ou da Lua) passando atrás. Barra de progresso até o "?" e presente na volta.
-import { Hamster } from './Hamster';
+import { WalkingHami } from './WalkingHami';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Zap } from 'lucide-react';
 import { furById } from '../data/fur';
@@ -10,32 +10,37 @@ import { finishTrek, startTrek, trekMissing, trekPlaceOf, trekReady, useApp, TRE
 import { shade } from './Furniture';
 import { Glyph } from './art';
 import { Seed } from './ui';
-import type { Outfit, State } from '../types';
+import type { State } from '../types';
 
-// ---------- Hami andando com a sacolinha ----------
-
-
-/** O Hami realista viajando: anda aos pulinhos, de frente, com a sacolinha balançando na patinha. */
-export function WalkingHami({ fur, outfit, size = 170, still = false }: { fur: string; outfit?: Outfit; size?: number; still?: boolean }) {
-  const h = (size * 200) / 220;
-  return (
-    <span className={`wk wk-real ${still ? 'is-still' : ''}`} style={{ width: size, height: h }} role="img" aria-label="Hami andando com a sacolinha">
-      <span className="wk-hop">
-        <Hamster fur={fur} outfit={outfit} size={h} idle={false} label="" />
-        <svg className="wk-sack" viewBox="0 0 40 46" width={h * 0.2} height={h * 0.23} aria-hidden="true">
-          <path d="M12 12 C11 -1 29 -1 28 12" stroke="#D9487A" strokeWidth="3" strokeLinecap="round" fill="none" />
-          <path d="M3 10 H37 L34 40 Q33 44 29 44 H11 Q7 44 6 40 Z" fill="#FF8FB1" />
-          <path d="M3 10 H37 L36.4 16 H3.6 Z" fill="#F06A98" />
-          <path d="M20 37 c-5 -4 -9 -7 -9 -10.5 c0 -2.6 2 -4.2 4.4 -4.2 c2 0 3.6 1.2 4.6 2.8 c1 -1.6 2.6 -2.8 4.6 -2.8 c2.4 0 4.4 1.6 4.4 4.2 c0 3.5 -4 6.5 -9 10.5 Z" fill="#FFFFFF" opacity="0.92" />
-        </svg>
-      </span>
-    </span>
-  );
-}
+// O Hami de lado passeando com a cestinha (desenho em WalkingHami.tsx).
+export { WalkingHami };
 
 // ---------- Cenários de viagem: um por arena, mais a Lua ----------
 
-type Prop = 'arvore' | 'arbusto' | 'flor' | 'casa' | 'pinheiro' | 'cogumelo' | 'pedra' | 'palmeira' | 'concha' | 'pinheiro-neve' | 'boneco' | 'predio' | 'poste' | 'coral' | 'alga' | 'nuvem' | 'estrela' | 'torre' | 'bandeira' | 'planeta' | 'cratera' | 'foguete' | 'templo';
+type Prop =
+  | 'arvore'
+  | 'arbusto'
+  | 'flor'
+  | 'casa'
+  | 'pinheiro'
+  | 'cogumelo'
+  | 'pedra'
+  | 'palmeira'
+  | 'concha'
+  | 'pinheiro-neve'
+  | 'boneco'
+  | 'predio'
+  | 'poste'
+  | 'coral'
+  | 'alga'
+  | 'nuvem'
+  | 'estrela'
+  | 'torre'
+  | 'bandeira'
+  | 'planeta'
+  | 'cratera'
+  | 'foguete'
+  | 'templo';
 interface Theme {
   sky: [string, string];
   far: string;
@@ -68,51 +73,193 @@ function PropArt({ kind, x, t }: { kind: Prop; x: number; t: Theme }) {
   const dark = shade(t.far, 0.25);
   switch (kind) {
     case 'arvore':
-      return g(<><rect x="-6" y="-70" width="12" height="70" rx="4" fill="#8C5A3A" /><circle cx="0" cy="-92" r="36" fill="#5FA85A" /><circle cx="-22" cy="-74" r="22" fill="#6FB868" /><circle cx="22" cy="-76" r="24" fill="#4F9A52" /></>);
+      return g(
+        <>
+          <rect x="-6" y="-70" width="12" height="70" rx="4" fill="#8C5A3A" />
+          <circle cx="0" cy="-92" r="36" fill="#5FA85A" />
+          <circle cx="-22" cy="-74" r="22" fill="#6FB868" />
+          <circle cx="22" cy="-76" r="24" fill="#4F9A52" />
+        </>,
+      );
     case 'arbusto':
-      return g(<><circle cx="-14" cy="-12" r="16" fill="#5FA85A" /><circle cx="6" cy="-18" r="20" fill="#6FB868" /><circle cx="24" cy="-10" r="14" fill="#4F9A52" /></>);
+      return g(
+        <>
+          <circle cx="-14" cy="-12" r="16" fill="#5FA85A" />
+          <circle cx="6" cy="-18" r="20" fill="#6FB868" />
+          <circle cx="24" cy="-10" r="14" fill="#4F9A52" />
+        </>,
+      );
     case 'flor':
-      return g(<><rect x="-1.5" y="-26" width="3" height="26" fill="#4F9A52" /><circle cx="0" cy="-30" r="9" fill="#FF9FC2" /><circle cx="0" cy="-30" r="4" fill="#FFE27A" /><rect x="16" y="-18" width="3" height="18" fill="#4F9A52" /><circle cx="17.5" cy="-22" r="7" fill="#FFE27A" /><circle cx="17.5" cy="-22" r="3" fill="#FF9F6B" /></>);
+      return g(
+        <>
+          <rect x="-1.5" y="-26" width="3" height="26" fill="#4F9A52" />
+          <circle cx="0" cy="-30" r="9" fill="#FF9FC2" />
+          <circle cx="0" cy="-30" r="4" fill="#FFE27A" />
+          <rect x="16" y="-18" width="3" height="18" fill="#4F9A52" />
+          <circle cx="17.5" cy="-22" r="7" fill="#FFE27A" />
+          <circle cx="17.5" cy="-22" r="3" fill="#FF9F6B" />
+        </>,
+      );
     case 'casa':
-      return g(<><rect x="-34" y="-52" width="68" height="52" rx="6" fill="#FFE9C9" /><path d="M-42 -50 L0 -88 L42 -50 Z" fill="#E0685F" /><rect x="-10" y="-30" width="20" height="30" rx="4" fill="#B97A4A" /><rect x="14" y="-40" width="14" height="14" rx="3" fill="#9FD6FF" /></>);
+      return g(
+        <>
+          <rect x="-34" y="-52" width="68" height="52" rx="6" fill="#FFE9C9" />
+          <path d="M-42 -50 L0 -88 L42 -50 Z" fill="#E0685F" />
+          <rect x="-10" y="-30" width="20" height="30" rx="4" fill="#B97A4A" />
+          <rect x="14" y="-40" width="14" height="14" rx="3" fill="#9FD6FF" />
+        </>,
+      );
     case 'pinheiro':
-      return g(<><rect x="-5" y="-30" width="10" height="30" fill="#7A4F33" /><path d="M0 -130 L34 -70 H-34 Z" fill="#3F8A54" /><path d="M0 -100 L40 -34 H-40 Z" fill="#357A4A" /></>);
+      return g(
+        <>
+          <rect x="-5" y="-30" width="10" height="30" fill="#7A4F33" />
+          <path d="M0 -130 L34 -70 H-34 Z" fill="#3F8A54" />
+          <path d="M0 -100 L40 -34 H-40 Z" fill="#357A4A" />
+        </>,
+      );
     case 'cogumelo':
-      return g(<><rect x="-6" y="-20" width="12" height="20" rx="5" fill="#FFF3E0" /><path d="M-22 -18 C-22 -42 22 -42 22 -18 Z" fill="#E0554F" /><circle cx="-8" cy="-28" r="4" fill="#FFF" /><circle cx="8" cy="-24" r="3" fill="#FFF" /></>);
+      return g(
+        <>
+          <rect x="-6" y="-20" width="12" height="20" rx="5" fill="#FFF3E0" />
+          <path d="M-22 -18 C-22 -42 22 -42 22 -18 Z" fill="#E0554F" />
+          <circle cx="-8" cy="-28" r="4" fill="#FFF" />
+          <circle cx="8" cy="-24" r="3" fill="#FFF" />
+        </>,
+      );
     case 'pedra':
-      return g(<><path d="M-26 0 C-28 -20 -8 -30 8 -26 C24 -22 30 -10 26 0 Z" fill={t.night ? '#6D7392' : '#A9A9B4'} /><path d="M-14 -16 C-8 -22 4 -22 10 -18" stroke="#FFF" strokeOpacity="0.35" strokeWidth="4" strokeLinecap="round" fill="none" /></>);
+      return g(
+        <>
+          <path d="M-26 0 C-28 -20 -8 -30 8 -26 C24 -22 30 -10 26 0 Z" fill={t.night ? '#6D7392' : '#A9A9B4'} />
+          <path d="M-14 -16 C-8 -22 4 -22 10 -18" stroke="#FFF" strokeOpacity="0.35" strokeWidth="4" strokeLinecap="round" fill="none" />
+        </>,
+      );
     case 'palmeira':
-      return g(<><path d="M-4 0 C-10 -40 0 -80 8 -110" stroke="#B98251" strokeWidth="12" strokeLinecap="round" fill="none" /><path d="M8 -110 C-20 -130 -44 -118 -54 -100 M8 -110 C30 -136 58 -124 66 -104 M8 -110 C-6 -140 -30 -146 -44 -138 M8 -110 C26 -140 48 -146 60 -138" stroke="#3FA060" strokeWidth="10" strokeLinecap="round" fill="none" /></>);
+      return g(
+        <>
+          <path d="M-4 0 C-10 -40 0 -80 8 -110" stroke="#B98251" strokeWidth="12" strokeLinecap="round" fill="none" />
+          <path
+            d="M8 -110 C-20 -130 -44 -118 -54 -100 M8 -110 C30 -136 58 -124 66 -104 M8 -110 C-6 -140 -30 -146 -44 -138 M8 -110 C26 -140 48 -146 60 -138"
+            stroke="#3FA060"
+            strokeWidth="10"
+            strokeLinecap="round"
+            fill="none"
+          />
+        </>,
+      );
     case 'concha':
-      return g(<><path d="M-14 0 C-18 -18 18 -18 14 0 Z" fill="#FFC6DD" /><path d="M0 0 V-13 M-7 0 L-5 -11 M7 0 L5 -11" stroke="#F072A8" strokeWidth="2" /></>);
+      return g(
+        <>
+          <path d="M-14 0 C-18 -18 18 -18 14 0 Z" fill="#FFC6DD" />
+          <path d="M0 0 V-13 M-7 0 L-5 -11 M7 0 L5 -11" stroke="#F072A8" strokeWidth="2" />
+        </>,
+      );
     case 'pinheiro-neve':
-      return g(<><rect x="-5" y="-30" width="10" height="30" fill="#7A4F33" /><path d="M0 -130 L34 -70 H-34 Z" fill="#4F8F7A" /><path d="M0 -100 L40 -34 H-40 Z" fill="#437F6C" /><path d="M0 -130 L16 -102 H-16 Z M-22 -70 H22 L30 -58 H-30 Z" fill="#FFFFFF" /></>);
+      return g(
+        <>
+          <rect x="-5" y="-30" width="10" height="30" fill="#7A4F33" />
+          <path d="M0 -130 L34 -70 H-34 Z" fill="#4F8F7A" />
+          <path d="M0 -100 L40 -34 H-40 Z" fill="#437F6C" />
+          <path d="M0 -130 L16 -102 H-16 Z M-22 -70 H22 L30 -58 H-30 Z" fill="#FFFFFF" />
+        </>,
+      );
     case 'boneco':
-      return g(<><circle cx="0" cy="-18" r="20" fill="#FFFFFF" /><circle cx="0" cy="-48" r="14" fill="#FFFFFF" /><circle cx="-4" cy="-50" r="2" fill="#3A2016" /><circle cx="5" cy="-50" r="2" fill="#3A2016" /><path d="M0 -46 l12 3 l-12 3 Z" fill="#FF9F4D" /><rect x="-12" y="-40" width="24" height="5" rx="2.5" fill="#E0554F" /></>);
+      return g(
+        <>
+          <circle cx="0" cy="-18" r="20" fill="#FFFFFF" />
+          <circle cx="0" cy="-48" r="14" fill="#FFFFFF" />
+          <circle cx="-4" cy="-50" r="2" fill="#3A2016" />
+          <circle cx="5" cy="-50" r="2" fill="#3A2016" />
+          <path d="M0 -46 l12 3 l-12 3 Z" fill="#FF9F4D" />
+          <rect x="-12" y="-40" width="24" height="5" rx="2.5" fill="#E0554F" />
+        </>,
+      );
     case 'predio':
-      return g(<><rect x="-30" y="-140" width="60" height="140" rx="6" fill={dark} />{[0, 1, 2, 3].map((r) => [0, 1].map((c) => <rect key={`${r}${c}`} x={-20 + c * 24} y={-128 + r * 30} width="16" height="18" rx="3" fill="#FFE9A8" opacity={(r + c) % 2 ? 0.9 : 0.45} />))}</>);
+      return g(
+        <>
+          <rect x="-30" y="-140" width="60" height="140" rx="6" fill={dark} />
+          {[0, 1, 2, 3].map((r) => [0, 1].map((c) => <rect key={`${r}${c}`} x={-20 + c * 24} y={-128 + r * 30} width="16" height="18" rx="3" fill="#FFE9A8" opacity={(r + c) % 2 ? 0.9 : 0.45} />))}
+        </>,
+      );
     case 'poste':
-      return g(<><rect x="-3" y="-90" width="6" height="90" rx="3" fill="#5A5F78" /><circle cx="0" cy="-96" r="11" fill="#FFE9A8" /><circle cx="0" cy="-96" r="18" fill="#FFE9A8" opacity="0.3" /></>);
+      return g(
+        <>
+          <rect x="-3" y="-90" width="6" height="90" rx="3" fill="#5A5F78" />
+          <circle cx="0" cy="-96" r="11" fill="#FFE9A8" />
+          <circle cx="0" cy="-96" r="18" fill="#FFE9A8" opacity="0.3" />
+        </>,
+      );
     case 'coral':
-      return g(<><path d="M0 0 V-50 M0 -24 C-16 -30 -20 -46 -18 -58 M0 -34 C16 -40 22 -54 20 -68 M0 -50 C-4 -62 0 -74 4 -80" stroke="#FF8FA8" strokeWidth="10" strokeLinecap="round" fill="none" /></>);
+      return g(
+        <>
+          <path d="M0 0 V-50 M0 -24 C-16 -30 -20 -46 -18 -58 M0 -34 C16 -40 22 -54 20 -68 M0 -50 C-4 -62 0 -74 4 -80" stroke="#FF8FA8" strokeWidth="10" strokeLinecap="round" fill="none" />
+        </>,
+      );
     case 'alga':
-      return g(<><path d="M-8 0 C-18 -24 2 -40 -8 -70 M8 0 C18 -20 0 -36 10 -56" stroke="#3FB88A" strokeWidth="8" strokeLinecap="round" fill="none" /></>);
+      return g(
+        <>
+          <path d="M-8 0 C-18 -24 2 -40 -8 -70 M8 0 C18 -20 0 -36 10 -56" stroke="#3FB88A" strokeWidth="8" strokeLinecap="round" fill="none" />
+        </>,
+      );
     case 'nuvem':
-      return g(<><circle cx="-20" cy="-70" r="18" fill="#FFFFFF" /><circle cx="2" cy="-80" r="24" fill="#FFFFFF" /><circle cx="26" cy="-70" r="18" fill="#FFFFFF" /><rect x="-36" y="-72" width="78" height="20" rx="10" fill="#FFFFFF" /></>);
+      return g(
+        <>
+          <circle cx="-20" cy="-70" r="18" fill="#FFFFFF" />
+          <circle cx="2" cy="-80" r="24" fill="#FFFFFF" />
+          <circle cx="26" cy="-70" r="18" fill="#FFFFFF" />
+          <rect x="-36" y="-72" width="78" height="20" rx="10" fill="#FFFFFF" />
+        </>,
+      );
     case 'estrela':
       return g(<path d="M0 -120 l6 14 15 2 -11 10 3 15 -13 -8 -13 8 3 -15 -11 -10 15 -2 Z" fill="#FFE27A" />);
     case 'torre':
-      return g(<><rect x="-20" y="-110" width="40" height="110" fill="#E9DDFF" /><path d="M-26 -108 L0 -150 L26 -108 Z" fill="#7E5BD9" /><rect x="-7" y="-80" width="14" height="22" rx="7" fill="#5A4196" /><path d="M-20 -110 h8 v-8 h8 v8 h8 v-8 h8 v8 h8" stroke="#C9B6FF" strokeWidth="4" fill="none" /></>);
+      return g(
+        <>
+          <rect x="-20" y="-110" width="40" height="110" fill="#E9DDFF" />
+          <path d="M-26 -108 L0 -150 L26 -108 Z" fill="#7E5BD9" />
+          <rect x="-7" y="-80" width="14" height="22" rx="7" fill="#5A4196" />
+          <path d="M-20 -110 h8 v-8 h8 v8 h8 v-8 h8 v8 h8" stroke="#C9B6FF" strokeWidth="4" fill="none" />
+        </>,
+      );
     case 'bandeira':
-      return g(<><rect x="-2" y="-70" width="4" height="70" fill={t.night ? '#D5D8E6' : '#8C5A3A'} /><path d="M2 -70 H34 L26 -58 L34 -46 H2 Z" fill="#FF8FA8" /></>);
+      return g(
+        <>
+          <rect x="-2" y="-70" width="4" height="70" fill={t.night ? '#D5D8E6' : '#8C5A3A'} />
+          <path d="M2 -70 H34 L26 -58 L34 -46 H2 Z" fill="#FF8FA8" />
+        </>,
+      );
     case 'planeta':
-      return g(<><circle cx="0" cy="-110" r="22" fill="#FFB86B" /><ellipse cx="0" cy="-110" rx="36" ry="8" fill="none" stroke="#FFE27A" strokeWidth="4" transform="rotate(-16 0 -110)" /></>);
+      return g(
+        <>
+          <circle cx="0" cy="-110" r="22" fill="#FFB86B" />
+          <ellipse cx="0" cy="-110" rx="36" ry="8" fill="none" stroke="#FFE27A" strokeWidth="4" transform="rotate(-16 0 -110)" />
+        </>,
+      );
     case 'cratera':
-      return g(<><ellipse cx="0" cy="-4" rx="34" ry="9" fill={shade(t.ground, 0.22)} /><ellipse cx="0" cy="-6" rx="24" ry="5" fill={shade(t.ground, 0.38)} /></>);
+      return g(
+        <>
+          <ellipse cx="0" cy="-4" rx="34" ry="9" fill={shade(t.ground, 0.22)} />
+          <ellipse cx="0" cy="-6" rx="24" ry="5" fill={shade(t.ground, 0.38)} />
+        </>,
+      );
     case 'foguete':
-      return g(<><path d="M0 -96 C16 -76 16 -40 12 -16 H-12 C-16 -40 -16 -76 0 -96 Z" fill="#F4F5F8" /><circle cx="0" cy="-58" r="8" fill="#7FB8F0" /><path d="M-12 -30 L-26 -8 H-12 Z M12 -30 L26 -8 H12 Z" fill="#E0554F" /><path d="M0 -96 C8 -86 10 -80 11 -74 H-11 C-10 -80 -8 -86 0 -96 Z" fill="#E0554F" /></>);
+      return g(
+        <>
+          <path d="M0 -96 C16 -76 16 -40 12 -16 H-12 C-16 -40 -16 -76 0 -96 Z" fill="#F4F5F8" />
+          <circle cx="0" cy="-58" r="8" fill="#7FB8F0" />
+          <path d="M-12 -30 L-26 -8 H-12 Z M12 -30 L26 -8 H12 Z" fill="#E0554F" />
+          <path d="M0 -96 C8 -86 10 -80 11 -74 H-11 C-10 -80 -8 -86 0 -96 Z" fill="#E0554F" />
+        </>,
+      );
     case 'templo':
-      return g(<><rect x="-36" y="-14" width="72" height="14" fill="#FFF7E2" /><path d="M-40 -70 L0 -96 L40 -70 Z" fill="#FFE7A3" />{[-28, -10, 8, 26].map((cx) => <rect key={cx} x={cx - 4} y="-70" width="8" height="56" fill="#FFFFFF" />)}</>);
+      return g(
+        <>
+          <rect x="-36" y="-14" width="72" height="14" fill="#FFF7E2" />
+          <path d="M-40 -70 L0 -96 L40 -70 Z" fill="#FFE7A3" />
+          {[-28, -10, 8, 26].map((cx) => (
+            <rect key={cx} x={cx - 4} y="-70" width="8" height="56" fill="#FFFFFF" />
+          ))}
+        </>,
+      );
   }
 }
 
@@ -125,17 +272,36 @@ export function TrekScene({ theme, height = 430, children, still = false }: { th
     <>
       {/* fileira de trás (menor) e fileira da frente */}
       <g transform="scale(0.72)" opacity="0.8">
-        {[...t.props].reverse().map((k, i) => <PropArt key={i} kind={k} x={(190 + i * 200) / 0.72} t={t} />)}
+        {[...t.props].reverse().map((k, i) => (
+          <PropArt key={i} kind={k} x={(190 + i * 200) / 0.72} t={t} />
+        ))}
       </g>
-      {t.props.map((k, i) => <PropArt key={i} kind={k} x={90 + i * 200} t={t} />)}
+      {t.props.map((k, i) => (
+        <PropArt key={i} kind={k} x={90 + i * 200} t={t} />
+      ))}
     </>
   );
   return (
     <div className={`trek ${still ? 'is-still' : ''}`} style={{ height, ['--tg' as string]: t.ground, background: `linear-gradient(180deg, ${t.sky[0]}, ${t.sky[1]} 62%)` }}>
       {t.extra === 'estrelas' || t.extra === 'terra' ? <div className="trek-stars" aria-hidden="true" /> : null}
       {t.extra === 'terra' && <div className="trek-earth" aria-hidden="true" />}
-      {t.extra === 'bolhas' && <div className="trek-bubbles" aria-hidden="true"><i /><i /><i /><i /></div>}
-      {t.extra === 'neve' && <div className="trek-snow" aria-hidden="true"><i /><i /><i /><i /><i /></div>}
+      {t.extra === 'bolhas' && (
+        <div className="trek-bubbles" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+          <i />
+        </div>
+      )}
+      {t.extra === 'neve' && (
+        <div className="trek-snow" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+          <i />
+          <i />
+        </div>
+      )}
       {!t.night && t.extra !== 'bolhas' && <div className="trek-sun" aria-hidden="true" />}
       {/* morros ao fundo */}
       <div className="trek-layer trek-far" aria-hidden="true">
@@ -177,10 +343,13 @@ export function TrekTrack({ pct, fur }: { pct: number; fur: string }) {
   const f = furById(fur);
   return (
     <div className="trek-track" aria-hidden="true">
-      <span className="trek-energy"><Zap size={18} fill="#fff" strokeWidth={0} /></span>
+      <span className="trek-energy">
+        <Zap size={18} fill="#fff" strokeWidth={0} />
+      </span>
       <span className="trek-dots">
         <span className="trek-head" style={{ left: `${Math.min(100, Math.max(0, pct * 100))}%`, background: f.body }}>
-          <i /><i />
+          <i />
+          <i />
         </span>
       </span>
       <span className="trek-q">?</span>
@@ -224,7 +393,9 @@ export function TrekCard({ onStarted }: { onStarted: () => void }) {
         <small>{ready ? 'Ele sai andando e volta com um presente para você.' : `Faça mais ${missing} ${missing === 1 ? 'missão' : 'missões'} hoje para ele sair em viagem.`}</small>
         {!ready && (
           <span className="trek-card-steps" aria-hidden="true">
-            {Array.from({ length: TREK.needs }, (_, i) => <i key={i} className={i < TREK.needs - missing ? 'is-on' : ''} />)}
+            {Array.from({ length: TREK.needs }, (_, i) => (
+              <i key={i} className={i < TREK.needs - missing ? 'is-on' : ''} />
+            ))}
           </span>
         )}
       </span>
@@ -286,8 +457,11 @@ export function Suitcase({ size = 90 }: { size?: number }) {
       <path d="M28 34 C34 30 44 30 50 33" stroke="#fff" strokeOpacity="0.45" strokeWidth="4" strokeLinecap="round" fill="none" />
       <rect x="20" y="68" width="60" height="6" rx="3" fill="#FFB36B" />
       <rect x="20" y="80" width="60" height="6" rx="3" fill="#FFB36B" />
-      <circle cx="30" cy="77" r="3" fill="#C0562B" /><circle cx="50" cy="77" r="3" fill="#C0562B" /><circle cx="70" cy="77" r="3" fill="#C0562B" />
-      <rect x="22" y="94" width="14" height="8" rx="4" fill="#5A4636" /><rect x="64" y="94" width="14" height="8" rx="4" fill="#5A4636" />
+      <circle cx="30" cy="77" r="3" fill="#C0562B" />
+      <circle cx="50" cy="77" r="3" fill="#C0562B" />
+      <circle cx="70" cy="77" r="3" fill="#C0562B" />
+      <rect x="22" y="94" width="14" height="8" rx="4" fill="#5A4636" />
+      <rect x="64" y="94" width="14" height="8" rx="4" fill="#5A4636" />
     </svg>
   );
 }
@@ -341,7 +515,9 @@ export function TrekUnpack({ result, onClose }: { result: TrekResult | null; onC
       {step === 'mala' && (
         <button className="unp-body unp-tap" onClick={() => setStep('verso')}>
           <h2>{s.pet.name} voltou com a mala cheia!</h2>
-          <span className="unp-mala is-big"><Suitcase size={150} /></span>
+          <span className="unp-mala is-big">
+            <Suitcase size={150} />
+          </span>
           <p>Toque na mala para abrir</p>
         </button>
       )}
@@ -353,8 +529,12 @@ export function TrekUnpack({ result, onClose }: { result: TrekResult | null; onC
             <span>🐹</span>
             <i>HamiCare</i>
           </div>
-          <p className="unp-plus">Cartão de lembrança +1 · você tem {result.cards} de {placeName(result.place)}</p>
-          <span className="unp-mala"><Suitcase size={70} /></span>
+          <p className="unp-plus">
+            Cartão de lembrança +1 · você tem {result.cards} de {placeName(result.place)}
+          </p>
+          <span className="unp-mala">
+            <Suitcase size={70} />
+          </span>
           <button className="unp-btn" data-sound="conquista" onClick={() => setStep('frente')}>
             Virar
           </button>
@@ -394,7 +574,9 @@ export function TrekUnpack({ result, onClose }: { result: TrekResult | null; onC
           <h2>Parabéns!</h2>
           <span className="unp-prize">{food && <Glyph e={food.art ?? food.emoji} size={72} />}</span>
           <p className="unp-plus">{food?.name ?? 'Comidinha'} +1</p>
-          <span className="unp-mala"><Suitcase size={84} /></span>
+          <span className="unp-mala">
+            <Suitcase size={84} />
+          </span>
           <button className="unp-btn" data-sound="conquista" onClick={() => setStep('sementes')}>
             Continuar
           </button>
@@ -404,9 +586,13 @@ export function TrekUnpack({ result, onClose }: { result: TrekResult | null; onC
         <div className="unp-body">
           <Confetti />
           <h2>Parabéns!</h2>
-          <span className="unp-prize"><Seed size={64} /></span>
+          <span className="unp-prize">
+            <Seed size={64} />
+          </span>
           <p className="unp-plus">+{result.coins} sementes</p>
-          <span className="unp-mala"><Suitcase size={84} /></span>
+          <span className="unp-mala">
+            <Suitcase size={84} />
+          </span>
           <button className="unp-btn" data-sound="conquista" onClick={onClose}>
             OK
           </button>
