@@ -89,7 +89,7 @@ export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = ''
       <button className="live-pet-btn" data-sound="none" aria-label={label ?? `Fazer carinho no ${s.pet.name}`} onClick={tap} onContextMenu={(e) => e.preventDefault()}>
         <span key={trick?.id ?? 0} className={`live-body ${trick ? (trick.t === 'choro' ? 'fx-sob' : 'gest-carinho') : fx}`}>
           {asleep ? (
-            <SleepingHami fur={s.pet.fur} size={size * 0.72} place="chao" />
+            <SleepingHami fur={s.pet.fur} size={size * 0.72} place="chao" outfit={s.pet.outfit} />
           ) : (
             <Hamster
               fur={s.pet.fur}

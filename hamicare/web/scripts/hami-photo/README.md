@@ -19,3 +19,10 @@ laranja (`hami-pelo.webp`) serve para trocar a cor da pelagem.
   semitransparentes de verdade.
 - `furmask.py <foto> <saida> [limite_y] [cx,cy,rx,ry ...]`: faz a máscara do pelo caramelo (`*-pelo.webp`) para trocar a
   cor da pelagem; `limite_y` corta abaixo de uma altura (a tina) e as elipses tiram partes amarelas (patinho, miolo da flor).
+
+## Hami passeando de mochilinha (`hami-anda-*.webp`)
+
+A imagem dele andando foi separada em partes para animar a caminhada: `perna-frente`, `perna-tras` e `braco`
+(recortadas por polígonos com borda macia), e o `corpo` com o pelo de trás dessas partes refeito no LaMa. A camada
+`frente` (mochila, alças e o bracinho que segura a alça) fica por cima da roupa quando ele está vestido. As máscaras
+`*-pelo.webp` (furmask.py) trocam a cor da pelagem, sem pegar a flor, os olhinhos e a mochila.

@@ -525,7 +525,8 @@ export const ITEMS: Item[] = [
   W('coroa', 'Coroa de flores', 'chapeu', 40),
   W('chef', 'Chapéu de chef', 'chapeu', 45, { level: 3 }),
   W('cartola', 'Cartola', 'chapeu', 60, { plus: true }),
-  W('capacete', 'Capacete espacial', 'chapeu', 80, { plus: true }),
+  // saiu da loja (quem já tem continua com ele)
+  W('capacete', 'Capacete espacial', 'chapeu', 80, { plus: true, souvenir: true }),
   W('palha', 'Chapéu de palha', 'chapeu', 30, { season: 'junina' }),
   W('gorro-natal', 'Gorro de Natal', 'chapeu', 30, { season: 'natal' }),
   // Óculos
@@ -1011,7 +1012,7 @@ export const LOOKS: Look[] = [
   { id: 'gala', name: 'Noite de gala', emoji: '🎩', items: ['cartola', 'monoculo', 'smoking', 'gravata'] },
   { id: 'fada', name: 'Fadinha', emoji: '🧚', items: ['tiara', 'tutu-lilas', 'asas-fada', 'fx-brilhos'] },
   { id: 'realeza', name: 'Realeza', emoji: '👑', items: ['coroa-rei', 'capa-roxo', 'colar-perolas', 'fx-aura-dourada'] },
-  { id: 'espaco', name: 'Astronauta', emoji: '🚀', items: ['capacete', 'astronauta', 'fx-estrelas'] },
+  { id: 'espaco', name: 'Astronauta', emoji: '🚀', items: ['astronauta', 'fx-estrelas'] },
   { id: 'formando', name: 'Formatura', emoji: '🎓', items: ['formatura', 'smoking', 'medalha'] },
   { id: 'construtor', name: 'Construtor', emoji: '🪜', items: ['capacete-obra', 'colete-obra', 'm-martelo'] },
   { id: 'cozinheiro', name: 'Mestre-cuca', emoji: '🍳', items: ['chef', 'dolma', 'm-frigideira'] },

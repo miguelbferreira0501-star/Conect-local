@@ -200,11 +200,11 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
     </div>
   ) : s.pet.sleeping ? (
     <button className="sleep-spot" onClick={() => toast(`${s.pet.name} está dormindo. Shhh…`)} aria-label={`${s.pet.name} dormindo`} data-sound="none">
-      <SleepingHami fur={s.pet.fur} size={136} place="chao" />
+      <SleepingHami fur={s.pet.fur} size={136} place="chao" outfit={s.pet.outfit} />
     </button>
   ) : napping && !inBed ? (
     <button className="sleep-spot" onClick={wake} aria-label={`${s.pet.name} cochilando. Toque para acordar`} data-sound="none">
-      <SleepingHami fur={s.pet.fur} size={136} place="chao" />
+      <SleepingHami fur={s.pet.fur} size={136} place="chao" outfit={s.pet.outfit} />
     </button>
   ) : (
     <div className="relative">
