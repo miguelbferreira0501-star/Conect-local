@@ -4,69 +4,18 @@
 import type { ReactNode } from 'react';
 import type { Period } from '../data/lines';
 import { prefersReducedMotion } from '../lib/util';
+import { Bench, Birch, Bush, Duck, Fence, Flower, Garden, Grass, Hive, Lamp, Mailbox, Mushroom, Picnic, Pine, Rock, RoundTree, Sunflower, SwingTree, Tulip, Willow, Windmill, type YardPal } from './yardArt';
 
-type Pal = { sky: [string, string]; far: string; hill1: string; hill2: string; ground: string; meadow: string; path: string; leaf: string; leaf2: string; leafHi: string; pine: string; trunk: string; water: string; sun: string; dim: number };
+/** Largura do quintal (o Início mostra numa faixa que arrasta para os lados). */
+export const OUTDOOR_W = 1300;
+
+type Pal = YardPal;
 
 const PAL: Record<Period, Pal> = {
   manha: { sky: ['#7FCBFF', '#DDF4FF'], far: '#BFE6F5', hill1: '#A8E092', hill2: '#86D27A', ground: '#7FCF6E', meadow: '#9BDD82', path: '#F6E7B8', leaf: '#4FB063', leaf2: '#3E9E58', leafHi: '#7DD488', pine: '#3A9A5C', trunk: '#A0714F', water: '#7FD3F7', sun: '#FFE066', dim: 0 },
   tarde: { sky: ['#8EC5FF', '#FFE2BC'], far: '#C9DDF0', hill1: '#B3DE8C', hill2: '#8FD176', ground: '#86CF6C', meadow: '#A4DC80', path: '#F8E2B0', leaf: '#56B062', leaf2: '#449F55', leafHi: '#86D58A', pine: '#3F9A5A', trunk: '#A0714F', water: '#86CDF2', sun: '#FFC36B', dim: 0 },
   noite: { sky: ['#17204E', '#3B3C84'], far: '#2E3A72', hill1: '#2C5A5E', hill2: '#24504F', ground: '#2F6A55', meadow: '#377A5E', path: '#7C8AA8', leaf: '#2E6B55', leaf2: '#245A49', leafHi: '#3E8268', pine: '#1F4F45', trunk: '#5E4A52', water: '#3E5FA8', sun: '#FFF3C2', dim: 1 },
 };
-
-/** Árvore redonda (copa de três bolas) com tronco. */
-function Tree({ x, y, s = 1, p }: { x: number; y: number; s?: number; p: Pal }) {
-  return (
-    <g transform={`translate(${x} ${y}) scale(${s})`}>
-      <ellipse cx="0" cy="2" rx="30" ry="6" fill="#000" opacity="0.1" />
-      <path d="M-6 0 L-4 -40 Q0 -44 4 -40 L6 0Z" fill={p.trunk} />
-      <circle cx="-20" cy="-52" r="24" fill={p.leaf2} />
-      <circle cx="20" cy="-54" r="24" fill={p.leaf2} />
-      <circle cx="0" cy="-74" r="30" fill={p.leaf} />
-      <circle cx="-14" cy="-58" r="22" fill={p.leaf} />
-      <circle cx="16" cy="-60" r="22" fill={p.leaf} />
-      <circle cx="-10" cy="-84" r="11" fill={p.leafHi} opacity="0.8" />
-      <circle cx="10" cy="-66" r="3" fill="#FF8FB8" />
-      <circle cx="-18" cy="-60" r="3" fill="#FFE066" />
-    </g>
-  );
-}
-
-/** Pinheiro de três andares. */
-function Pine({ x, y, s = 1, p }: { x: number; y: number; s?: number; p: Pal }) {
-  return (
-    <g transform={`translate(${x} ${y}) scale(${s})`}>
-      <rect x="-4" y="-14" width="8" height="16" rx="2" fill={p.trunk} />
-      <path d="M0 -96 L26 -50 H-26Z" fill={p.pine} />
-      <path d="M0 -76 L32 -30 H-32Z" fill={p.pine} />
-      <path d="M0 -56 L38 -10 H-38Z" fill={p.pine} />
-      <path d="M0 -96 L10 -78 L-4 -70Z M0 -76 L12 -58 L-4 -52Z" fill="#FFFFFF" opacity="0.12" />
-    </g>
-  );
-}
-
-function Bush({ x, y, s = 1, p }: { x: number; y: number; s?: number; p: Pal }) {
-  return (
-    <g transform={`translate(${x} ${y}) scale(${s})`}>
-      <circle cx="-18" cy="-12" r="16" fill={p.leaf2} />
-      <circle cx="16" cy="-12" r="16" fill={p.leaf2} />
-      <circle cx="0" cy="-22" r="20" fill={p.leaf} />
-      <circle cx="-8" cy="-28" r="6" fill={p.leafHi} opacity="0.8" />
-    </g>
-  );
-}
-
-/** Florzinha de cinco pétalas. */
-function Flower({ x, y, c, s = 1 }: { x: number; y: number; c: string; s?: number }) {
-  return (
-    <g transform={`translate(${x} ${y}) scale(${s})`}>
-      <path d="M0 0 V10" stroke="#3E9E58" strokeWidth="2" strokeLinecap="round" />
-      {[0, 72, 144, 216, 288].map((a) => (
-        <ellipse key={a} cx="0" cy="-4.5" rx="3.4" ry="4.6" fill={c} transform={`rotate(${a})`} />
-      ))}
-      <circle r="2.6" fill="#FFD34D" />
-    </g>
-  );
-}
 
 /** A casinha do Hami lá no fundo: parede creme, telhado coral, porta redonda amarela. */
 function Cottage({ x, y, p }: { x: number; y: number; p: Pal }) {
@@ -222,9 +171,16 @@ export function Outdoors({ period = 'tarde', height = 430, children }: { period?
   const p = PAL[period];
   const night = p.dim > 0;
   const still = prefersReducedMotion();
+  const W = OUTDOOR_W;
+  const flowers: [number, number, string][] = [
+    [96, 352, '#FF8FB8'], [180, 396, '#FFFFFF'], [228, 418, '#FFD34D'], [344, 330, '#FF8FB8'], [390, 382, '#B9A3F0'], [452, 410, '#FFFFFF'],
+    [560, 352, '#FFD34D'], [596, 404, '#FF8FB8'], [716, 338, '#FFFFFF'], [742, 410, '#B9A3F0'], [880, 336, '#FF8FB8'], [960, 412, '#FFD34D'],
+    [1046, 400, '#FFFFFF'], [1104, 420, '#FF8FB8'], [1236, 400, '#FFD34D'], [1290, 376, '#B9A3F0'], [30, 330, '#FFD34D'], [640, 330, '#B9A3F0'],
+  ];
+  const tufts: [number, number][] = [[70, 424], [200, 420], [316, 414], [470, 428], [610, 420], [700, 426], [820, 424], [990, 426], [1130, 426], [1250, 420], [260, 344], [430, 352], [780, 350], [940, 352], [1160, 332]];
   return (
     <div className={`outdoors ${night ? 'is-night' : ''} ${still ? 'is-still' : ''}`} style={{ height }}>
-      <svg className="od-art" viewBox="0 0 740 430" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <svg className="od-art" viewBox={`0 0 ${W} 430`} preserveAspectRatio="xMidYMax slice" aria-hidden="true">
         <defs>
           <linearGradient id="od-sky" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor={p.sky[0]} />
@@ -234,107 +190,179 @@ export function Outdoors({ period = 'tarde', height = 430, children }: { period?
             <stop offset="0.55" stopColor={p.sun} />
             <stop offset="1" stopColor={p.sun} stopOpacity="0" />
           </radialGradient>
+          <linearGradient id="od-haze" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor={p.sky[1]} stopOpacity="0" />
+            <stop offset="1" stopColor={p.sky[1]} stopOpacity={night ? 0.15 : 0.55} />
+          </linearGradient>
         </defs>
-        <rect width="740" height="430" fill="url(#od-sky)" />
+        <rect width={W} height="430" fill="url(#od-sky)" />
         {/* sol ou lua, estrelas */}
         {night ? (
           <g>
-            {[[60, 40], [140, 90], [230, 30], [330, 70], [420, 24], [520, 60], [640, 30], [700, 96], [600, 110], [90, 130]].map(([x, y], i) => (
+            {Array.from({ length: 26 }, (_, i) => [((i * 211) % W) + 10, ((i * 67) % 150) + 14] as const).map(([x, y], i) => (
               <circle key={i} className="od-star" style={{ animationDelay: `${(i % 5) * 0.6}s` }} cx={x} cy={y} r={i % 3 ? 1.6 : 2.4} fill="#FFFFFF" />
             ))}
-            <circle cx="560" cy="70" r="26" fill="#FFF3C2" />
-            <circle cx="572" cy="62" r="23" fill={p.sky[0]} />
+            <circle cx="1010" cy="74" r="28" fill="#FFF3C2" />
+            <circle cx="1022" cy="66" r="25" fill={p.sky[0]} />
           </g>
         ) : (
           <g>
-            <circle cx="580" cy="78" r="58" fill="url(#od-sun)" opacity="0.6" />
-            <circle cx="580" cy="78" r="30" fill={p.sun} />
+            <circle cx="1010" cy="80" r="70" fill="url(#od-sun)" opacity="0.6" />
+            <circle cx="1010" cy="80" r="32" fill={p.sun} />
           </g>
         )}
-        {/* nuvens andando */}
-        <g className="od-clouds" opacity={night ? 0.25 : 0.95}>
-          <g className="od-cloud" style={{ animationDuration: '70s' }}>
-            <ellipse cx="120" cy="80" rx="46" ry="16" fill="#FFFFFF" />
-            <ellipse cx="140" cy="68" rx="26" ry="18" fill="#FFFFFF" />
-          </g>
-          <g className="od-cloud" style={{ animationDuration: '95s', animationDelay: '-30s' }}>
-            <ellipse cx="380" cy="54" rx="56" ry="17" fill="#FFFFFF" />
-            <ellipse cx="400" cy="40" rx="30" ry="20" fill="#FFFFFF" />
-            <ellipse cx="364" cy="46" rx="20" ry="14" fill="#FFFFFF" />
-          </g>
-          <g className="od-cloud" style={{ animationDuration: '80s', animationDelay: '-55s' }}>
-            <ellipse cx="660" cy="140" rx="40" ry="13" fill="#FFFFFF" />
-            <ellipse cx="676" cy="130" rx="22" ry="14" fill="#FFFFFF" />
-          </g>
-        </g>
-        {/* montanhas e morros */}
-        <path d="M0 230 L80 170 L150 214 L240 150 L330 210 L420 160 L520 220 L610 168 L740 222 V300 H0Z" fill={p.far} />
-        {!night && <path d="M240 150 L262 166 L250 170 L240 162 L228 170 L220 166Z M420 160 L440 175 L428 178 L420 172 L410 178 L402 174Z" fill="#FFFFFF" opacity="0.8" />}
-        <path d="M0 262 Q90 214 190 246 T380 236 T560 244 T740 230 V320 H0Z" fill={p.hill1} />
-        <path d="M0 290 Q120 254 250 280 T500 272 T740 268 V340 H0Z" fill={p.hill2} />
-        {/* fileira de árvores ao fundo */}
-        <Pine x={30} y={292} s={0.7} p={p} />
-        <Pine x={70} y={286} s={0.85} p={p} />
-        <Tree x={330} y={280} s={0.6} p={p} />
-        <Pine x={420} y={282} s={0.7} p={p} />
-        <Tree x={470} y={278} s={0.55} p={p} />
-        <Pine x={700} y={282} s={0.8} p={p} />
-        <Pine x={736} y={290} s={0.65} p={p} />
-        {/* casinha do Hami com cerquinha */}
-        <Cottage x={190} y={300} p={p} />
-        <g stroke={night ? '#A9A6C2' : '#FFFFFF'} strokeWidth="5" strokeLinecap="round">
-          {[96, 112, 128, 252, 268, 284].map((fx) => (
-            <path key={fx} d={`M${fx} 306 V284`} />
+        {/* nuvens andando e passarinhos */}
+        <g opacity={night ? 0.25 : 0.95}>
+          {[
+            [120, 80, 1, '90s', '0s'],
+            [420, 54, 1.2, '120s', '-40s'],
+            [760, 120, 0.8, '100s', '-70s'],
+            [1100, 150, 0.9, '110s', '-20s'],
+            [1240, 60, 1.1, '130s', '-90s'],
+          ].map(([x, y, s, d, dl], i) => (
+            <g key={i} className="od-cloud od-cloud-wide" style={{ animationDuration: d as string, animationDelay: dl as string }}>
+              <g transform={`translate(${x} ${y}) scale(${s})`}>
+                <ellipse cx="0" cy="0" rx="50" ry="16" fill="#FFFFFF" />
+                <ellipse cx="18" cy="-12" rx="28" ry="19" fill="#FFFFFF" />
+                <ellipse cx="-18" cy="-6" rx="20" ry="14" fill="#FFFFFF" />
+              </g>
+            </g>
           ))}
-          <path d="M92 292 H132 M248 292 H288" strokeWidth="4" />
         </g>
-        {/* gramado da frente com caminho */}
-        <path d="M0 300 Q200 286 370 296 T740 294 V430 H0Z" fill={p.ground} />
-        <path d="M190 302 Q220 330 300 350 Q370 368 370 430 H470 Q462 372 400 346 Q300 318 214 300Z" fill={p.path} opacity={night ? 0.5 : 1} />
-        {[[230, 316], [282, 336], [352, 356], [412, 372], [438, 404]].map(([x, y], i) => (
+        {!night &&
+          [
+            [300, 120, 0],
+            [330, 108, 0.4],
+            [860, 90, 1.2],
+          ].map(([x, y, d], i) => (
+            <g key={i} className="od-bird" style={{ animationDelay: `-${d}s` }}>
+              <path d={`M${x - 8} ${y} q4 -5 8 0 q4 -5 8 0`} stroke="#4E5570" strokeWidth="2" fill="none" strokeLinecap="round" />
+            </g>
+          ))}
+        {/* montanhas com neve e cachoeira */}
+        <path d="M0 232 L70 186 L140 222 L230 148 L320 214 L420 168 L520 222 L640 160 L760 218 L860 172 L960 222 L1080 156 L1190 216 L1300 180 V310 H0Z" fill={p.far} />
+        {!night && (
+          <path d="M230 148 L252 166 L242 170 L230 162 L218 170 L210 166Z M640 160 L662 177 L650 180 L640 172 L630 180 L620 176Z M1080 156 L1102 173 L1090 176 L1080 168 L1070 176 L1060 172Z" fill="#FFFFFF" opacity="0.85" />
+        )}
+        <path d="M226 172 Q222 210 230 250 L246 250 Q240 210 238 172Z" fill={night ? '#6C86C4' : '#E8F7FF'} />
+        <path className="od-fall" d="M232 176 V250 M240 176 V250" stroke={night ? '#9FB4E8' : '#FFFFFF'} strokeWidth="2.4" strokeDasharray="10 12" />
+        <rect width={W} height="430" fill="url(#od-haze)" />
+        {/* floresta lá no fundo */}
+        <path d="M0 262 Q120 214 260 246 T520 236 T780 244 T1040 232 T1300 240 V330 H0Z" fill={p.hill1} />
+        {Array.from({ length: 30 }, (_, i) => {
+          const x = 10 + i * 44 + ((i * 13) % 17);
+          if (x > 190 && x < 290) return null;
+          const y = 246 - Math.sin(i * 0.9) * 8;
+          return <circle key={i} cx={x} cy={y} r={14 + (i % 3) * 4} fill={p.leaf2} opacity={night ? 0.6 : 0.45} />;
+        })}
+        <Windmill x={1080} y={250} s={0.8} night={night} />
+        <path d="M0 292 Q160 256 330 282 T660 274 T990 280 T1300 270 V340 H0Z" fill={p.hill2} />
+        {/* fileira de árvores ao fundo */}
+        <Pine x={20} y={300} s={0.75} p={p} />
+        <Pine x={60} y={292} s={0.9} p={p} />
+        <RoundTree x={150} y={296} s={0.6} p={p} sway={false} />
+        <Birch x={330} y={292} s={0.7} p={p} />
+        <Pine x={372} y={288} s={0.7} p={p} />
+        <RoundTree x={640} y={286} s={0.55} p={p} sway={false} />
+        <Birch x={700} y={284} s={0.65} p={p} />
+        <Pine x={900} y={290} s={0.75} p={p} />
+        <RoundTree x={950} y={292} s={0.6} p={p} sway={false} />
+        <Pine x={1240} y={286} s={0.85} p={p} />
+        <Pine x={1290} y={292} s={0.7} p={p} />
+        {/* campo de lavanda */}
+        {[0, 1, 2, 3].map((r) => (
+          <path key={r} d={`M${1150 + r * 6} ${300 + r * 8} Q1220 ${292 + r * 8} 1300 ${296 + r * 8}`} stroke={night ? '#6C5A9E' : '#B99AF0'} strokeWidth="6" strokeLinecap="round" strokeDasharray="3 5" fill="none" />
+        ))}
+        {/* gramado da frente */}
+        <path d="M0 300 Q300 286 650 296 T1300 294 V430 H0Z" fill={p.ground} />
+        <path d="M0 336 Q260 322 520 332 T1040 330 T1300 334 V430 H0Z" fill={p.meadow} opacity="0.35" />
+        {/* riacho que desce da cachoeira, com ponte */}
+        <path d="M228 250 Q214 280 240 300 Q270 322 236 350 Q200 380 230 430 H300 Q272 386 302 352 Q330 320 298 296 Q270 276 250 250Z" fill={night ? '#2B4A86' : '#5FB8E8'} />
+        <path d="M236 262 Q228 284 252 300 Q280 322 248 350 Q218 380 244 430 H286 Q262 384 290 352 Q316 322 286 298 Q262 280 246 262Z" fill={p.water} />
+        <path className="od-flow" d="M244 300 q12 8 0 18 M262 348 q-10 10 2 20 M254 392 q-6 10 4 20" stroke="#FFFFFF" strokeOpacity="0.7" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeDasharray="6 10" />
+        <Rock x={212} y={300} s={0.7} />
+        <Rock x={312} y={360} s={0.8} />
+        <Rock x={206} y={410} s={0.9} />
+        <g transform="translate(266 346)">
+          <path d="M-46 6 Q0 -26 46 6 L46 14 Q0 -16 -46 14Z" fill={night ? '#8A6A58' : '#C98A5B'} />
+          {Array.from({ length: 9 }, (_, i) => (
+            <path key={i} d={`M${-40 + i * 10} ${8 - Math.sin(((i + 0.5) / 9) * Math.PI) * 18} v8`} stroke={night ? '#6E5246' : '#A9713F'} strokeWidth="2" />
+          ))}
+          <path d="M-46 -4 Q0 -36 46 -4" stroke={night ? '#8A6A58' : '#C98A5B'} strokeWidth="3.4" fill="none" />
+          {[-40, -20, 0, 20, 40].map((xx) => (
+            <path key={xx} d={`M${xx} ${-4 - Math.cos((xx / 46) * (Math.PI / 2)) * 26} V${8 - Math.cos((xx / 46) * (Math.PI / 2)) * 18}`} stroke={night ? '#8A6A58' : '#C98A5B'} strokeWidth="3" />
+          ))}
+        </g>
+        {/* pomar à esquerda, com colmeia */}
+        <RoundTree x={70} y={340} s={0.85} p={p} fruit="#FF6F6F" />
+        <RoundTree x={150} y={330} s={0.7} p={p} fruit="#FFB347" />
+        <Hive x={108} y={276} />
+        {/* casinha com cerquinha, caixa de correio e poste */}
+        <Cottage x={500} y={304} p={p} />
+        <Fence x={386} y={318} n={4} night={night} />
+        <Fence x={566} y={318} n={4} night={night} />
+        <Mailbox x={640} y={320} />
+        <Lamp x={420} y={340} night={night} />
+        {/* caminho até a frente */}
+        <path d="M486 306 Q520 336 590 356 Q650 374 640 430 H730 Q730 370 660 346 Q580 322 516 304Z" fill={p.path} opacity={night ? 0.5 : 1} />
+        {[[512, 316], [560, 336], [610, 352], [664, 372], [690, 404]].map(([x, y], i) => (
           <ellipse key={i} cx={x} cy={y} rx="9" ry="4" fill="#FFFFFF" opacity={night ? 0.15 : 0.45} />
         ))}
-        {/* laguinho com vitórias-régias */}
-        <g transform="translate(600 352)">
-          <ellipse cx="0" cy="0" rx="78" ry="22" fill={night ? '#2B4A86' : '#5FB8E8'} />
-          <ellipse cx="0" cy="-3" rx="72" ry="18" fill={p.water} />
-          <path className="od-ripple" d="M-30 -4 q10 -4 20 0 M10 6 q10 -4 20 0" stroke="#FFFFFF" strokeOpacity="0.6" strokeWidth="2" fill="none" strokeLinecap="round" />
-          <path d="M-46 2 a10 5 0 1 0 14 -6 L-40 0Z" fill="#4FB063" />
-          <path d="M30 -6 a9 4.5 0 1 0 12 -5 L36 -6Z" fill="#4FB063" />
-          <Flower x={-40} y={-2} c="#FFB3C7" s={0.8} />
+        {/* horta com espantalho e girassóis */}
+        <Garden x={760} y={316} p={p} night={night} />
+        {/* lago com patinhos, salgueiro e banquinho */}
+        <Bench x={1066} y={334} night={night} />
+        <g transform="translate(1150 372)">
+          <ellipse cx="0" cy="0" rx="96" ry="26" fill={night ? '#2B4A86' : '#5FB8E8'} />
+          <ellipse cx="0" cy="-3" rx="88" ry="21" fill={p.water} />
+          <path className="od-ripple" d="M-40 -4 q10 -4 20 0 M10 6 q10 -4 20 0 M40 -8 q8 -3 16 0" stroke="#FFFFFF" strokeOpacity="0.6" strokeWidth="2" fill="none" strokeLinecap="round" />
+          <path d="M-60 2 a10 5 0 1 0 14 -6 L-54 0Z M46 -8 a9 4.5 0 1 0 12 -5 L52 -8Z" fill="#4FB063" />
+          <Flower x={-54} y={-2} c="#FFB3C7" s={0.8} />
+          <Duck x={-6} y={-2} />
+          <Duck x={18} y={4} s={0.7} />
+          {[-80, -72, 76, 84].map((rx) => (
+            <path key={rx} d={`M${rx} 10 q-2 -18 2 -26`} stroke="#4E9A4A" strokeWidth="3" fill="none" strokeLinecap="round" />
+          ))}
         </g>
-        {/* árvores grandes nas pontas (moldura) e arbustos */}
-        <Tree x={44} y={372} s={1.25} p={p} />
-        <Tree x={690} y={380} s={1.15} p={p} />
-        <Bush x={120} y={400} s={1.1} p={p} />
-        <Bush x={560} y={410} s={1} p={p} />
-        <Bush x={470} y={300} s={0.6} p={p} />
-        {/* cogumelos */}
-        {[[150, 404, 1], [168, 410, 0.7]].map(([x, y, s], i) => (
-          <g key={i} transform={`translate(${x} ${y}) scale(${s})`}>
-            <rect x="-4" y="-12" width="8" height="12" rx="3" fill="#FFF4E2" />
-            <path d="M-13 -11 Q0 -28 13 -11Z" fill="#FF6F6F" />
-            <circle cx="-4" cy="-17" r="2" fill="#FFFFFF" />
-            <circle cx="5" cy="-14" r="1.6" fill="#FFFFFF" />
-          </g>
+        <Willow x={1250} y={360} s={0.95} p={p} />
+        <SwingTree x={1000} y={392} s={0.85} p={p} />
+        {[0, 1, 2].map((i) => (
+          <Sunflower key={i} x={946 + i * 22} y={350 + (i % 2) * 8} s={0.9 - i * 0.05} h={56 + (i % 2) * 10} />
         ))}
-        {/* flores espalhadas */}
-        {[
-          [300, 318, '#FF8FB8'], [326, 384, '#FFFFFF'], [250, 396, '#FFD34D'], [212, 360, '#FF8FB8'], [480, 330, '#B9A3F0'], [508, 394, '#FFFFFF'],
-          [530, 360, '#FF8FB8'], [96, 330, '#FFD34D'], [150, 350, '#FFFFFF'], [640, 404, '#FFD34D'], [700, 330, '#FF8FB8'], [410, 316, '#FFFFFF'],
-        ].map(([x, y, c], i) => (
-          <Flower key={i} x={x as number} y={y as number} c={c as string} s={0.9 + (i % 3) * 0.15} />
+        {/* piquenique */}
+        <Picnic x={856} y={404} />
+        {/* moldura: árvores grandes nas pontas, moitas, pedras e cogumelos */}
+        <RoundTree x={26} y={420} s={1.35} p={p} />
+        <Bush x={150} y={424} s={1.1} p={p} berry="#E2547A" />
+        <Bush x={372} y={428} s={0.95} p={p} />
+        <Bush x={940} y={430} s={0.9} p={p} berry="#5B8DEF" />
+        <Bush x={1180} y={430} s={1.05} p={p} />
+        <Rock x={520} y={422} s={0.8} />
+        <Rock x={1290} y={430} s={1.1} />
+        <Mushroom x={176} y={402} />
+        <Mushroom x={192} y={408} s={0.7} c="#FF9F4D" />
+        <Mushroom x={1210} y={410} s={0.8} />
+        {flowers.map(([x, y, c], i) => (
+          <Flower key={i} x={x} y={y} c={c} s={0.9 + (i % 3) * 0.15} />
         ))}
-        {/* tufinhos de grama */}
-        {[[80, 420], [200, 418], [340, 412], [520, 424], [620, 418], [260, 340], [460, 352]].map(([x, y], i) => (
-          <path key={i} d={`M${x - 6} ${y} q2 -10 4 0 q2 -14 4 0 q2 -9 4 0`} fill={p.leaf2} />
+        {[[300, 418, '#FF7FA0'], [330, 424, '#FFD34D'], [770, 422, '#FF9D5C'], [790, 426, '#E2547A'], [1070, 424, '#B48CFF']].map(([x, y, c], i) => (
+          <Tulip key={i} x={x as number} y={y as number} c={c as string} />
+        ))}
+        {tufts.map(([x, y], i) => (
+          <Grass key={i} x={x} y={y} c={p.leaf2} s={0.9 + (i % 3) * 0.2} />
         ))}
         {/* borboletas de dia, vagalumes de noite */}
         {night
-          ? [[120, 300], [260, 260], [400, 330], [520, 280], [640, 320], [330, 380], [580, 250]].map(([x, y], i) => (
-              <circle key={i} className="od-firefly" style={{ animationDelay: `${i * 0.7}s` }} cx={x} cy={y} r="3" fill="#FFF07A" />
+          ? Array.from({ length: 14 }, (_, i) => [60 + i * 92 + ((i * 37) % 40), 250 + ((i * 53) % 130)] as const).map(([x, y], i) => (
+              <circle key={i} className="od-firefly" style={{ animationDelay: `${(i % 7) * 0.7}s` }} cx={x} cy={y} r="3" fill="#FFF07A" />
             ))
-          : [[260, 250, '#FF9FC2', 0], [470, 230, '#FFD34D', 2.5], [600, 290, '#B9A3F0', 5]].map(([x, y, c, d], i) => (
+          : [
+              [180, 250, '#FF9FC2', 0],
+              [470, 230, '#FFD34D', 2.5],
+              [820, 270, '#B9A3F0', 5],
+              [1100, 250, '#FF9FC2', 3.5],
+              [1230, 300, '#FFD34D', 1.2],
+            ].map(([x, y, c, d], i) => (
               <g key={i} className="od-fly" style={{ animationDelay: `-${d}s` }}>
                 <g transform={`translate(${x} ${y})`}>
                   <g className="od-wing">

@@ -455,7 +455,9 @@ export function Hamster({
               ? "dog-hop-shadow"
               : pose === "lua"
                 ? "dog-moon-shadow"
-                : undefined
+                : pose === "rolar"
+                  ? "dog-roll-shadow"
+                  : undefined
           }
           cx="100"
           cy="192.5"

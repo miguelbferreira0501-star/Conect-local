@@ -5,7 +5,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Gift, Lock, RefreshCw, Shirt, Sofa, Sparkles } from 'lucide-react';
 import { FLOOR_CSS, WALLPAPER_CSS } from '../components/Furniture';
 import { play } from '../lib/sound';
-import { ITEMS, KIND_LABEL, STYLES, WEARABLE_KINDS, HOUSE_KINDS, stylePrice, type Item, type ItemKind } from '../data/items';
+import { ITEMS, KIND_LABEL, STYLES, WEARABLE_KINDS, HOUSE_KINDS, itemById, stylePrice, type Item, type ItemKind, type StyleSet } from '../data/items';
+import { Room } from '../components/Room';
+import { Hamster } from '../components/Hamster';
+import type { House } from '../types';
 
 const GOLD: ItemKind[] = ['efeito', 'decor', 'piso'];
 import { ItemIcon } from '../components/ItemIcon';
@@ -52,12 +55,71 @@ function Tile({ item, onOpen }: { item: Item; onOpen: (i: Item) => void }) {
   );
 }
 
+/** Coleção temática: o quarto inteiro do tema (móveis desenhados para combinar) e a roupinha igual. */
+function ThemeCard({ st }: { st: StyleSet }) {
+  const s = useApp();
+  const price = stylePrice(st, (id) => owned(s, id));
+  const house: House = { wallpaper: st.wallpaper, floor: st.floor, items: st.items.map((it, i) => ({ uid: `${st.id}-${i}`, itemId: it.itemId, x: it.x, y: it.y, z: i + 1 })) };
+  const outfit = { ...s.pet.outfit, roupa: st.outfit!.roupa, chapeu: st.outfit!.chapeu ?? s.pet.outfit.chapeu };
+  const pieces = [st.outfit!.roupa, st.outfit!.chapeu, ...st.items.map((i) => i.itemId)].filter((id): id is string => !!id);
+  const buy = () => {
+    const r = buyStyle(st.id);
+    if (r === 'ok') play('compra');
+    else play('erro');
+    toast(r === 'ok' ? `${st.name}: casa arrumada e roupinha vestida!` : r === 'sem-sementes' ? `Faltam ${price - s.coins} sementes para essa coleção.` : 'Essa coleção é do HamiCare+.');
+  };
+  return (
+    <article className="st-theme" style={{ background: st.tone }}>
+      <div className="st-theme-room">
+        <Room house={house} period="tarde" height={200}>
+          <Hamster fur={s.pet.fur} outfit={outfit} mood="feliz" size={86} growth={1} label={s.pet.name} />
+        </Room>
+      </div>
+      <div className="st-theme-info">
+        <b>{st.name}</b>
+        <small>
+          {st.items.length} móveis + roupinha combinando · 25% off
+        </small>
+        <div className="st-theme-pieces">
+          {pieces.map((id) => {
+            const it = itemById(id);
+            return it ? (
+              <span key={id} className={owned(s, id) ? 'is-own' : ''} title={it.name}>
+                <ItemIcon item={it} size={30} fur={s.pet.fur} />
+              </span>
+            ) : null;
+          })}
+        </div>
+        <button className="st-theme-buy" disabled={!price} onClick={buy}>
+          {price ? (
+            <>
+              <Seed size={18} /> {price}
+            </>
+          ) : (
+            'Coleção completa'
+          )}
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function ThemeCollections() {
+  return (
+    <div className="st-themes">
+      {STYLES.filter((st) => st.outfit).map((st) => (
+        <ThemeCard key={st.id} st={st} />
+      ))}
+    </div>
+  );
+}
+
 /** Casas prontas: a coleção inteira (parede, piso e móveis) com desconto. */
 function HouseStyles() {
   const s = useApp();
   return (
     <div className="grid grid-cols-2 gap-2">
-      {STYLES.map((st) => {
+      {STYLES.filter((st) => !st.outfit).map((st) => {
         const price = stylePrice(st, (id) => owned(s, id));
         const locked = st.plus && !isPremium(s);
         if (locked && s.profile.ageGroup === 'ate12') return null;
@@ -122,6 +184,11 @@ export function StoreTab({ onPlus, onGift }: { onPlus: () => void; onGift: (item
       {sec === 'itens' && (
         <>
           <section className="st-card">
+            <span className="st-ribbon is-pink">Coleções temáticas</span>
+            <p className="st-refresh">Móveis do mesmo tema e a roupinha combinando</p>
+            <ThemeCollections />
+          </section>
+          <section className="st-card">
             <span className="st-ribbon">Especial de hoje</span>
             <p className="st-refresh">
               <RefreshCw size={14} /> Renova em <b className="tabular-nums">{untilMidnight(now)}</b>
@@ -163,6 +230,10 @@ export function StoreTab({ onPlus, onGift }: { onPlus: () => void; onGift: (item
           <section className="st-card">
             <span className="st-ribbon is-pink">Coleções com desconto</span>
             <LookTiles onPlus={onPlus} />
+          </section>
+          <section className="st-card">
+            <span className="st-ribbon is-pink">Coleções temáticas</span>
+            <ThemeCollections />
           </section>
           <section className="st-card">
             <span className="st-ribbon">Casas prontas</span>

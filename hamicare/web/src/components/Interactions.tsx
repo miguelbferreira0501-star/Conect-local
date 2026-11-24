@@ -15,13 +15,20 @@ import { isNativeApp, nativePlatform } from '../lib/native';
 import { prefersReducedMotion } from '../lib/util';
 import type { PetMood } from '../types';
 
-type Act = { pose?: Pose; mood: PetMood; ms: number; walk?: number; sit?: boolean };
+type Act = {
+  pose?: Pose;
+  mood: PetMood;
+  ms: number;
+  walk?: number;
+  sit?: boolean;
+};
 const TRICKS: Act[] = [
-  { pose: 'rolar', mood: 'risada', ms: 2600 },
+  { pose: 'rolar', mood: 'risada', ms: 2900 },
   { pose: 'pular', mood: 'animado', ms: 1700 },
   { pose: 'festa', mood: 'risada', ms: 1500 },
   { pose: 'tchau', mood: 'feliz', ms: 1700 },
   { mood: 'amor', ms: 1600 },
+  { mood: 'feliz', ms: 2600, sit: true },
 ];
 let hid = 0;
 
@@ -47,13 +54,42 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
   const [act, setAct] = useState<(Act & { id: number }) | null>(null);
   const [say, setSay] = useState<{ text: string; id: number } | null>(null);
   const [x, setX] = useState(50);
+  const xRef = useRef(50);
+  xRef.current = x;
   const [walk, setWalk] = useState<{ dir: 1 | -1; id: number } | null>(null);
   const [sitting, setSitting] = useState(false);
   const [hearts, setHearts] = useState<{ id: number; x: number; y: number; tx: number; ty: number; d: number }[]>([]);
   const [bump, setBump] = useState(0);
   const [help, setHelp] = useState(false);
-  const [drag, setDrag] = useState<{ id: string; x: number; y: number; moved: boolean } | null>(null);
-  const [fly, setFly] = useState<{ id: string; from: { x: number; y: number }; to: { x: number; y: number } } | null>(null);
+  const [drag, setDrag] = useState<{
+    id: string;
+    x: number;
+    y: number;
+    moved: boolean;
+  } | null>(null);
+  const [fly, setFly] = useState<{
+    id: string;
+    from: { x: number; y: number };
+    to: { x: number; y: number };
+  } | null>(null);
+  // graveto: parado no chão (x %, y % de baixo), na mão da pessoa, voando ou na boca dele
+  const [stick, setStick] = useState<{
+    x: number;
+    y: number;
+    mode: 'chao' | 'boca';
+  }>({ x: 17, y: 5, mode: 'chao' });
+  const [stickDrag, setStickDrag] = useState<{ x: number; y: number } | null>(null);
+  const [stickFly, setStickFly] = useState<{
+    from: { x: number; y: number };
+    dx: number;
+    dy: number;
+    id: number;
+  } | null>(null);
+  const [runMs, setRunMs] = useState(0);
+  const [pick, setPick] = useState(false);
+  const samples = useRef<{ x: number; y: number; t: number }[]>([]);
+  const fetching = useRef(false);
+  const floorRef = useRef<HTMLDivElement>(null);
   const dogRef = useRef<HTMLButtonElement>(null);
   const counterRef = useRef<HTMLDivElement>(null);
   const timers = useRef<number[]>([]);
@@ -64,7 +100,7 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
   const later = (fn: () => void, ms: number) => timers.current.push(window.setTimeout(fn, ms));
   const asleep = s.pet.sleeping;
   const foods = ITEMS.filter((i) => i.kind === 'comida' && (s.inventory[i.id] ?? 0) > 0);
-  const busy = () => performance.now() < busyUntil.current || !!walk;
+  const busy = () => performance.now() < busyUntil.current || !!walk || fetching.current;
 
   const talk = (text: string) => {
     const id = ++hid;
@@ -80,7 +116,14 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
     const items = Array.from({ length: Math.min(8, Math.max(3, n * 2)) }, (_, i) => {
       const x0 = d.left + d.width * (0.3 + Math.random() * 0.4);
       const y0 = d.top + d.height * (0.15 + Math.random() * 0.25);
-      return { id: ++hid, x: x0, y: y0, tx: c.left + c.width * 0.22 - x0, ty: c.top + c.height / 2 - y0, d: i * 90 };
+      return {
+        id: ++hid,
+        x: x0,
+        y: y0,
+        tx: c.left + c.width * 0.22 - x0,
+        ty: c.top + c.height / 2 - y0,
+        d: i * 90,
+      };
     });
     setHearts((h) => [...h, ...items]);
     items.forEach((it) => later(() => setHearts((h) => h.filter((y) => y.id !== it.id)), 1500 + it.d));
@@ -91,6 +134,7 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
     const id = ++hid;
     setSitting(false);
     setAct({ ...a, id });
+    if (a.sit) play('pulo');
     busyUntil.current = performance.now() + a.ms;
     later(() => setAct((cur) => (cur?.id === id ? null : cur)), a.ms);
   }
@@ -102,7 +146,13 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
     }
     if (busy()) {
       play('iii');
-      return talk(act?.pose === 'comer' || act?.mood === 'comendo' ? 'Au~ Estou comendo agora, só um segundinho~' : 'Au~ Estou brincando agora, só um segundinho~');
+      return talk(
+        fetching.current
+          ? 'Au~ Tô buscando o graveto, já volto~'
+          : act?.pose === 'comer' || act?.mood === 'comendo'
+            ? 'Au~ Estou comendo agora, só um segundinho~'
+            : 'Au~ Estou brincando agora, só um segundinho~',
+      );
     }
     let i = Math.floor(Math.random() * TRICKS.length);
     if (i === lastTrick.current) i = (i + 1) % TRICKS.length;
@@ -157,6 +207,102 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
     return () => clearInterval(tick);
   }, [asleep, x, drag, fly]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ---------- buscar o graveto ----------
+  /** Ele corre até um ponto (x em %) e chama `then` quando chega. */
+  function runTo(to: number, then: () => void) {
+    const from = xRef.current;
+    const dir: 1 | -1 = to > from ? 1 : -1;
+    const ms = Math.max(500, Math.abs(to - from) * 22);
+    const id = ++hid;
+    setSitting(false);
+    setRunMs(ms);
+    setWalk({ dir, id });
+    setX(to);
+    later(() => then(), ms);
+  }
+  function fetchStick(tx: number) {
+    if (asleep) return talk(`Zzz… ${name} está dormindo. Depois eu busco~`);
+    if (performance.now() < busyUntil.current || fetching.current) return talk('Au~ Estou brincando agora, só um segundinho~');
+    fetching.current = true;
+    play('squeak');
+    talk('Au! Vou buscar!');
+    later(
+      () =>
+        runTo(tx, () => {
+          // pega com a boca
+          play('pega');
+          setPick(true);
+          setStick((st) => ({ ...st, mode: 'boca' }));
+          later(
+            () => (
+              setPick(false),
+              runTo(50, () => {
+                setWalk(null);
+                setRunMs(0);
+                setStick({ x: 67, y: 3, mode: 'chao' });
+                fetching.current = false;
+                run({ mood: 'amor', ms: 1500 });
+                play('coracao');
+                care('brincar');
+                const got = addHearts(1, 'toque');
+                if (got) burst(1);
+                talk('Trouxe! Joga de novo?');
+              })
+            ),
+            420,
+          );
+        }),
+      350,
+    );
+  }
+  const stickEvents = {
+    onPointerDown: (e: RPE<HTMLButtonElement>) => {
+      if (fetching.current || stick.mode !== 'chao') return;
+      e.currentTarget.setPointerCapture(e.pointerId);
+      samples.current = [{ x: e.clientX, y: e.clientY, t: performance.now() }];
+      setStickDrag({ x: e.clientX, y: e.clientY });
+    },
+    onPointerMove: (e: RPE<HTMLButtonElement>) => {
+      if (!stickDrag) return;
+      samples.current = [...samples.current.slice(-5), { x: e.clientX, y: e.clientY, t: performance.now() }];
+      setStickDrag({ x: e.clientX, y: e.clientY });
+    },
+    onPointerUp: (e: RPE<HTMLButtonElement>) => {
+      if (!stickDrag) return;
+      setStickDrag(null);
+      const f = floorRef.current?.getBoundingClientRect();
+      if (!f) return;
+      const a = samples.current[0];
+      const dt = Math.max(16, performance.now() - a.t);
+      const vx = (e.clientX - a.x) / dt;
+      const vy = (e.clientY - a.y) / dt;
+      const moved = Math.hypot(e.clientX - a.x, e.clientY - a.y) > 12;
+      if (!moved) return talk('Arraste o graveto e solte para jogar!');
+      // onde ele cai: segue a direção do arremesso (mais forte = mais longe), sempre dentro do quintal
+      const landX = Math.max(8, Math.min(92, ((e.clientX - f.left + vx * 420) / f.width) * 100));
+      const landY = Math.max(2, Math.min(7, 100 - ((e.clientY - f.top + vy * 120) / f.height) * 100));
+      const to = {
+        x: f.left + (landX / 100) * f.width,
+        y: f.top + f.height * (1 - landY / 100),
+      };
+      const id = ++hid;
+      play('jogar');
+      setStick({ x: landX, y: landY, mode: 'chao' });
+      setStickFly({
+        from: { x: e.clientX, y: e.clientY },
+        dx: to.x - e.clientX,
+        dy: to.y - e.clientY,
+        id,
+      });
+      later(() => {
+        setStickFly((cur) => (cur?.id === id ? null : cur));
+        play('quica');
+        fetchStick(landX);
+      }, 700);
+    },
+    onPointerCancel: () => setStickDrag(null),
+  };
+
   // arrastar o petisco
   const near = (cx: number, cy: number) => {
     const d = dogRef.current?.getBoundingClientRect();
@@ -182,7 +328,11 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
         const r = e.currentTarget.getBoundingClientRect();
         const t = dogRef.current?.getBoundingClientRect();
         if (!t) return;
-        setFly({ id, from: { x: r.left + r.width / 2, y: r.top + r.height / 2 }, to: { x: t.left + t.width / 2, y: t.top + t.height * 0.42 } });
+        setFly({
+          id,
+          from: { x: r.left + r.width / 2, y: r.top + r.height / 2 },
+          to: { x: t.left + t.width / 2, y: t.top + t.height * 0.42 },
+        });
         play('jogar');
         later(() => (setFly(null), eat(id)), 520);
         return;
@@ -206,7 +356,7 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
   const pose = act?.pose;
   const mood: PetMood = asleep ? 'dormindo' : (act?.mood ?? (drag?.moved ? 'boca' : 'feliz'));
   const showWalk = !!walk && !act && !asleep;
-  const showSit = sitting && !act && !walk && !asleep;
+  const showSit = ((sitting && !act) || !!act?.sit) && !walk && !asleep;
   const dogW = 'min(54vw, 240px)';
 
   return (
@@ -239,11 +389,32 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
         </p>
       )}
 
-      <div className="ia-floor">
+      <div className="ia-floor" ref={floorRef}>
+        {stick.mode === 'chao' && !stickFly && (
+          <button
+            className={`ia-stick ${stickDrag ? 'is-held' : ''}`}
+            style={{
+              left: `${stick.x}%`,
+              bottom: `${stick.y}%`,
+              touchAction: 'none',
+            }}
+            aria-label="Graveto: arraste e solte para jogar"
+            data-sound="none"
+            {...stickEvents}
+          >
+            <StickArt />
+          </button>
+        )}
         <button
           ref={dogRef}
           className={`ia-dog ${walk ? 'is-walking' : ''}`}
-          style={{ left: `${x}%`, width: dogW } as CSSProperties}
+          style={
+            {
+              left: `${x}%`,
+              width: dogW,
+              ...(runMs ? { transition: `left ${runMs}ms linear` } : {}),
+            } as CSSProperties
+          }
           onClick={tapDog}
           aria-label={`Fazer carinho no ${name}`}
           data-sound="none"
@@ -251,8 +422,8 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
           {asleep ? (
             <DogPose kind="dorme" fur={s.pet.fur} outfit={s.pet.outfit} width={250} label="" />
           ) : showWalk ? (
-            <span className="ia-walk" style={{ transform: walk!.dir > 0 ? 'scaleX(-1)' : undefined }}>
-              <DogPose kind="anda" fur={s.pet.fur} outfit={s.pet.outfit} width={190} label="" />
+            <span className={`ia-walk ${pick ? 'is-pick' : ''}`}>
+              <DogPose kind="anda" fur={s.pet.fur} outfit={s.pet.outfit} width={190} label="" flip={walk!.dir > 0} carry={stick.mode === 'boca'} fast={!!runMs} still={pick} />
             </span>
           ) : showSit ? (
             <DogPose kind="senta" fur={s.pet.fur} outfit={s.pet.outfit} width={230} label="" />
@@ -272,22 +443,31 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
           )}
         </div>
         <div className="ia-tray-row">
-        {foods.length ? (
-          foods.map((f) => (
-            <button key={f.id} className="ia-food" style={{ touchAction: 'none', opacity: drag?.id === f.id && drag.moved ? 0.35 : fly?.id === f.id ? 0.35 : 1 }} aria-label={`Dar ${f.name}`} {...tileEvents(f.id)}>
-              <span className="ia-food-n">x{s.inventory[f.id]}</span>
-              <Glyph e={f.emoji} size={40} />
-              <span className="ia-food-h">
-                <HeartIcon size={14} /> +{heartsOf(f.id)}
-              </span>
+          {foods.length ? (
+            foods.map((f) => (
+              <button
+                key={f.id}
+                className="ia-food"
+                style={{
+                  touchAction: 'none',
+                  opacity: drag?.id === f.id && drag.moved ? 0.35 : fly?.id === f.id ? 0.35 : 1,
+                }}
+                aria-label={`Dar ${f.name}`}
+                {...tileEvents(f.id)}
+              >
+                <span className="ia-food-n">x{s.inventory[f.id]}</span>
+                <Glyph e={f.emoji} size={40} />
+                <span className="ia-food-h">
+                  <HeartIcon size={14} /> +{heartsOf(f.id)}
+                </span>
+              </button>
+            ))
+          ) : (
+            <button className="ia-food is-empty" onClick={onStore} disabled={!onStore}>
+              <Store size={26} strokeWidth={2.2} />
+              <span>Petiscos na Loja</span>
             </button>
-          ))
-        ) : (
-          <button className="ia-food is-empty" onClick={onStore} disabled={!onStore}>
-            <Store size={26} strokeWidth={2.2} />
-            <span>Petiscos na Loja</span>
-          </button>
-        )}
+          )}
         </div>
       </div>
 
@@ -297,12 +477,49 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
         </span>
       )}
       {fly && (
-        <span className="ia-ghost is-fly" style={{ left: fly.from.x, top: fly.from.y, ['--fx' as string]: `${fly.to.x - fly.from.x}px`, ['--fy' as string]: `${fly.to.y - fly.from.y}px` }}>
+        <span
+          className="ia-ghost is-fly"
+          style={{
+            left: fly.from.x,
+            top: fly.from.y,
+            ['--fx' as string]: `${fly.to.x - fly.from.x}px`,
+            ['--fy' as string]: `${fly.to.y - fly.from.y}px`,
+          }}
+        >
           <Glyph e={itemById(fly.id)?.emoji} size={44} />
         </span>
       )}
+      {stickDrag && (
+        <span className="ia-ghost" style={{ left: stickDrag.x, top: stickDrag.y }}>
+          <StickArt />
+        </span>
+      )}
+      {stickFly && (
+        <span
+          key={stickFly.id}
+          className="ia-ghost is-throw"
+          style={{
+            left: stickFly.from.x,
+            top: stickFly.from.y,
+            ['--fx' as string]: `${stickFly.dx}px`,
+            ['--fy' as string]: `${stickFly.dy}px`,
+          }}
+        >
+          <StickArt />
+        </span>
+      )}
       {hearts.map((h) => (
-        <span key={h.id} className="ia-heart" style={{ left: h.x, top: h.y, animationDelay: `${h.d}ms`, ['--tx' as string]: `${h.tx}px`, ['--ty' as string]: `${h.ty}px` }}>
+        <span
+          key={h.id}
+          className="ia-heart"
+          style={{
+            left: h.x,
+            top: h.y,
+            animationDelay: `${h.d}ms`,
+            ['--tx' as string]: `${h.tx}px`,
+            ['--ty' as string]: `${h.ty}px`,
+          }}
+        >
           <HeartIcon size={28} />
         </span>
       ))}
@@ -315,11 +532,26 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
           <li>
             <b>Arraste um petisco</b> da bandeja até ele (ou só toque no petisco). Cada petisco vale os corações que aparecem nele.
           </li>
+          <li>
+            <b>Arraste o graveto</b> e solte com um movimento para jogar: ele corre, pega com a boca e traz de volta.
+          </li>
           <li>Se ele estiver brincando ou comendo, ele avisa: é só esperar um segundinho.</li>
           <li>Os corações mostram o quanto vocês são amigos. Petiscos novos ficam na Loja.</li>
         </ul>
       </Sheet>
     </div>
+  );
+}
+
+/** O graveto (com uma folhinha). */
+export function StickArt({ w = 70 }: { w?: number }) {
+  return (
+    <svg viewBox="0 0 70 24" width={w} height={(w * 24) / 70} aria-hidden="true">
+      <path d="M4 15 C18 12 34 13 50 9 C56 8 62 7 66 6" stroke="#8B5A35" strokeWidth="6" strokeLinecap="round" fill="none" />
+      <path d="M4 15 C18 12 34 13 50 9" stroke="#A9713F" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      <path d="M38 12 L46 20" stroke="#8B5A35" strokeWidth="4" strokeLinecap="round" />
+      <path d="M50 9 C52 2 60 1 62 4 C58 8 54 9 50 9 Z" fill="#7CC765" />
+    </svg>
   );
 }
 
@@ -336,7 +568,14 @@ function HeartIcon({ size = 24 }: { size?: number }) {
 /** O quintal: céu, morrinhos, árvore com balanço, cerca branca, casinha com o nome dele, grama, flores e borboletas. */
 function Backyard({ name }: { name: string }) {
   const tufts = [
-    [40, 560], [118, 600], [300, 584], [360, 640], [70, 690], [214, 548], [262, 700], [150, 728],
+    [40, 560],
+    [118, 600],
+    [300, 584],
+    [360, 640],
+    [70, 690],
+    [214, 548],
+    [262, 700],
+    [150, 728],
   ];
   return (
     <svg className="ia-scene" viewBox="0 0 400 760" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
@@ -379,7 +618,12 @@ function Backyard({ name }: { name: string }) {
         <circle cx="96" cy="300" r="48" fill="#6BC08A" />
         <circle cx="6" cy="320" r="40" fill="#52A773" />
         <circle cx="70" cy="250" r="36" fill="#7CCB97" />
-        {[[30, 260], [70, 300], [100, 280], [12, 300]].map(([x, y], i) => (
+        {[
+          [30, 260],
+          [70, 300],
+          [100, 280],
+          [12, 300],
+        ].map(([x, y], i) => (
           <circle key={i} cx={x} cy={y} r="5" fill="#FF8FA3" />
         ))}
         <g className="yd-swing">
@@ -415,11 +659,23 @@ function Backyard({ name }: { name: string }) {
         <path key={i} d={`M${x} ${y} l4 -10 l3 9 l4 -12 l3 13`} stroke="#6EB451" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
       ))}
       {/* caminho de pedrinhas */}
-      {[[330, 530, 16], [302, 560, 18], [282, 598, 20], [270, 642, 22]].map(([x, y, r], i) => (
+      {[
+        [330, 530, 16],
+        [302, 560, 18],
+        [282, 598, 20],
+        [270, 642, 22],
+      ].map(([x, y, r], i) => (
         <ellipse key={i} cx={x} cy={y} rx={r} ry={r * 0.45} fill="#E9E3D6" />
       ))}
       {/* flores */}
-      {[[24, 520, '#FF8FA3'], [52, 528, '#FFD34D'], [370, 520, '#B79CF2'], [20, 640, '#FFFFFF'], [380, 700, '#FF8FA3'], [196, 520, '#FFD34D']].map(([x, y, c], i) => (
+      {[
+        [24, 520, '#FF8FA3'],
+        [52, 528, '#FFD34D'],
+        [370, 520, '#B79CF2'],
+        [20, 640, '#FFFFFF'],
+        [380, 700, '#FF8FA3'],
+        [196, 520, '#FFD34D'],
+      ].map(([x, y, c], i) => (
         <g key={i} transform={`translate(${x} ${y})`}>
           <path d="M0 0 V12" stroke="#5FA548" strokeWidth="2" />
           {[0, 72, 144, 216, 288].map((a) => (
@@ -449,7 +705,10 @@ function Backyard({ name }: { name: string }) {
         <path d="M-15 0 H15 M0 -15 V15" stroke="#FFFFFF" strokeWidth="3" opacity="0.8" />
       </g>
       {/* borboletas */}
-      {[[150, 300, 0], [250, 250, 1.4]].map(([x, y, d], i) => (
+      {[
+        [150, 300, 0],
+        [250, 250, 1.4],
+      ].map(([x, y, d], i) => (
         <g key={i} className="yd-fly" style={{ animationDelay: `${d}s` }} transform={`translate(${x} ${y})`}>
           <ellipse cx="-5" cy="-2" rx="6" ry="8" fill={i ? '#FFB3C7' : '#B9A3F0'} className="yd-wing" />
           <ellipse cx="5" cy="-2" rx="6" ry="8" fill={i ? '#FFB3C7' : '#B9A3F0'} className="yd-wing is-r" />

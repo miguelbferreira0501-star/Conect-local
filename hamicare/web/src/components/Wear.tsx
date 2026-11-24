@@ -967,6 +967,74 @@ export function Clothes({ id, geo }: { id: string | null; geo: Geo }) {
         </g>
       );
     }
+    case 'pijama-patos': {
+      // pijama de patinhos (coleção Inverno): golinha, botões e patinhos amarelos espalhados
+      const cc = c1 ?? '#6F9BE8';
+      const duck = (x: number, yy: number, k: number, flip = false) => (
+        <g key={`${x}-${yy}`} transform={`translate(${x} ${yy}) scale(${flip ? -1 : 1} 1)`}>
+          <ellipse cx="0" cy="2" rx={5.6 * k} ry={3.8 * k} fill="#FFD34D" />
+          <circle cx={-3.6 * k} cy={-2.6 * k} r={2.8 * k} fill="#FFD34D" />
+          <path d={`M${-6.2 * k} ${-2.4 * k} l${-2.6 * k} ${0.8 * k} l${2.6 * k} ${1.2 * k} Z`} fill="#FF8A3D" />
+          <circle cx={-4 * k} cy={-3.2 * k} r={0.7 * k} fill="#3B2A2A" />
+        </g>
+      );
+      return (
+        <g>
+          {full(cc)}
+          {[duck(70, y + 18, 1.1), duck(128, y + 14, 1, true), duck(84, y + 40, 1, true), duck(122, y + 42, 1.1), duck(60, y + 56, 0.9), duck(142, y + 58, 0.9, true)]}
+          {[y + 16, y + 30, y + 44].map((yy) => <circle key={yy} cx="100" cy={yy} r="2.6" fill={c2 ?? '#FFFFFF'} />)}
+          <path d={`M76 ${y - 2} Q88 ${y + 12} 100 ${y + 4} Q112 ${y + 12} 124 ${y - 2}`} fill={c2 ?? '#FFFFFF'} />
+        </g>
+      );
+    }
+    case 'camisa-praia': {
+      // camisa de praia (coleção Praia): folhas de coqueiro e hibiscos, gola aberta
+      const cc = c1 ?? '#3CC6C9';
+      const leaf = (x: number, yy: number, a: number) => (
+        <g key={`l${x}${yy}`} transform={`translate(${x} ${yy}) rotate(${a})`}>
+          <path d="M0 0 C4 -5 12 -5 16 0 C12 5 4 5 0 0 Z" fill="#2FA36B" />
+          <path d="M1 0 H14" stroke="#7FD8A6" strokeWidth="1" />
+        </g>
+      );
+      const hib = (x: number, yy: number) => (
+        <g key={`h${x}${yy}`}>
+          {[0, 72, 144, 216, 288].map((a) => (
+            <circle key={a} cx={x + Math.cos(((a - 90) * Math.PI) / 180) * 3.4} cy={yy + Math.sin(((a - 90) * Math.PI) / 180) * 3.4} r="3" fill={c2 ?? '#FF7A8A'} />
+          ))}
+          <circle cx={x} cy={yy} r="1.6" fill="#FFE27A" />
+        </g>
+      );
+      return (
+        <g>
+          {full(cc)}
+          {[leaf(64, y + 16, -20), leaf(120, y + 26, 30), leaf(82, y + 46, -40), leaf(132, y + 52, 10)]}
+          {[hib(78, y + 24), hib(134, y + 12), hib(110, y + 44), hib(62, y + 46)]}
+          <path d={`M84 ${y - 2} L100 ${y + 16} L116 ${y - 2}`} fill="#FFFFFF" opacity="0.92" />
+          <path d={`M100 ${y + 16} V${y + 60}`} stroke={darkenHex(cc, 0.14)} strokeWidth="1.6" />
+        </g>
+      );
+    }
+    case 'blusa-jardim': {
+      // blusa de jardim (coleção Jardim): florzinhas, folhinhas e bolsinho com broto
+      const cc = c1 ?? '#A8D88A';
+      const fl = (x: number, yy: number, col: string) => (
+        <g key={`f${x}${yy}`}>
+          {[0, 72, 144, 216, 288].map((a) => (
+            <circle key={a} cx={x + Math.cos(((a - 90) * Math.PI) / 180) * 2.8} cy={yy + Math.sin(((a - 90) * Math.PI) / 180) * 2.8} r="2.4" fill={col} />
+          ))}
+          <circle cx={x} cy={yy} r="1.4" fill="#FFD34D" />
+        </g>
+      );
+      return (
+        <g>
+          {full(cc)}
+          {[fl(70, y + 16, '#FFFFFF'), fl(130, y + 20, c2 ?? '#FF9FC2'), fl(92, y + 36, c2 ?? '#FF9FC2'), fl(140, y + 46, '#FFFFFF'), fl(62, y + 50, c2 ?? '#FF9FC2')]}
+          <rect x="104" y={y + 30} width="20" height="16" rx="4" fill={darkenHex(cc, 0.1)} />
+          <path d={`M114 ${y + 30} V${y + 22} M114 ${y + 24} q-6 -4 -8 2 M114 ${y + 22} q6 -6 9 0`} stroke="#4E9A4A" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+          <path d={`M80 ${y - 2} Q100 ${y + 12} 120 ${y - 2}`} fill="#FFFFFF" opacity="0.9" />
+        </g>
+      );
+    }
     case 'pijama-nuvem': {
       const cc = c1 ?? '#A9D4F5';
       return (
@@ -1738,7 +1806,7 @@ const COSTUMES = new Set(['fantasia-coelho', 'fantasia-urso', 'fantasia-gato', '
 
 /** A roupa é uma fantasia de corpo inteiro? Então o Hami fica de capuz (sem as orelhinhas dele) e com patinhas da cor da fantasia. */
 /** Roupas de cima com manga: o bracinho do Hami fica da cor da roupa (com a patinha aparecendo). */
-const SLEEVED = new Set(['moletom', 'camiseta', 'listrada', 'jaqueta', 'kimono', 'florida', 'futebol', 'dolma', 'casaco-capitao', 'sueter', 'xadrez', 'smoking', 'astronauta', 'pijama', 'jardineira', 'vestido', 'princesa', 'babado', 'estrelado', 'manto-mago', 'pijama-nuvem']);
+const SLEEVED = new Set(['pijama-patos', 'camisa-praia', 'blusa-jardim', 'moletom', 'camiseta', 'listrada', 'jaqueta', 'kimono', 'florida', 'futebol', 'dolma', 'casaco-capitao', 'sueter', 'xadrez', 'smoking', 'astronauta', 'pijama', 'jardineira', 'vestido', 'princesa', 'babado', 'estrelado', 'manto-mago', 'pijama-nuvem']);
 export function sleeveOf(roupa: string | null | undefined): string | null {
   if (!roupa) return null;
   const it = itemById(roupa);
@@ -1749,7 +1817,7 @@ export function sleeveOf(roupa: string | null | undefined): string | null {
 }
 
 /** Cor principal das peças que não têm cor no catálogo (a mesma que o desenho usa). */
-const GARMENT_DEFAULT: Record<string, string> = { moletom: '#8FA8E8', smoking: '#2B2224', pijama: '#3E4C8A', regata: '#FF6F91', camiseta: '#FFFFFF', vestido: '#FFB3CF', jaqueta: '#3A3440', kimono: '#F0525F', florida: '#5B8DEF', futebol: '#FFD34D', abelha: '#FFD34D', astronauta: '#F4F6FA', princesa: '#FFB3CF', sueter: '#D7263D', abobora: '#FF9A3D', xadrez: '#F0525F', 'manto-mago': '#5B3FA8', sereia: '#4FC3B8', 'pijama-nuvem': '#A9D4F5', 'arco-iris': '#B9A3F0', babado: '#FF9FC2', estrelado: '#7E57D6', 'colete-obra': '#5E7FB8', dolma: '#FFFFFF', 'casaco-capitao': '#3B4F8C', listrada: '#FFFFFF' };
+const GARMENT_DEFAULT: Record<string, string> = { 'pijama-patos': '#6F9BE8', 'camisa-praia': '#3CC6C9', 'blusa-jardim': '#A8D88A', moletom: '#8FA8E8', smoking: '#2B2224', pijama: '#3E4C8A', regata: '#FF6F91', camiseta: '#FFFFFF', vestido: '#FFB3CF', jaqueta: '#3A3440', kimono: '#F0525F', florida: '#5B8DEF', futebol: '#FFD34D', abelha: '#FFD34D', astronauta: '#F4F6FA', princesa: '#FFB3CF', sueter: '#D7263D', abobora: '#FF9A3D', xadrez: '#F0525F', 'manto-mago': '#5B3FA8', sereia: '#4FC3B8', 'pijama-nuvem': '#A9D4F5', 'arco-iris': '#B9A3F0', babado: '#FF9FC2', estrelado: '#7E57D6', 'colete-obra': '#5E7FB8', dolma: '#FFFFFF', 'casaco-capitao': '#3B4F8C', listrada: '#FFFFFF' };
 /** Cor da peça (para a "casca" de tecido que veste por cima do corpo). */
 export function garmentColor(roupa: string | null | undefined): string | null {
   if (!roupa) return null;
@@ -1760,7 +1828,7 @@ export function garmentColor(roupa: string | null | undefined): string | null {
   return it?.c1 ?? GARMENT_DEFAULT[base] ?? null;
 }
 
-const TOPS = new Set(['moletom', 'camiseta', 'listrada', 'jaqueta', 'kimono', 'florida', 'futebol', 'dolma', 'casaco-capitao', 'sueter', 'xadrez', 'smoking', 'astronauta', 'pijama', 'pijama-nuvem', 'regata', 'abelha', 'abobora', 'colete-obra']);
+const TOPS = new Set(['pijama-patos', 'camisa-praia', 'blusa-jardim', 'moletom', 'camiseta', 'listrada', 'jaqueta', 'kimono', 'florida', 'futebol', 'dolma', 'casaco-capitao', 'sueter', 'xadrez', 'smoking', 'astronauta', 'pijama', 'pijama-nuvem', 'regata', 'abelha', 'abobora', 'colete-obra']);
 const DRESSES = new Set(['vestido', 'princesa', 'babado', 'estrelado', 'arco-iris', 'sereia', 'manto-mago']);
 /**
  * Formato da peça por cima do corpo: 'top' (blusa/moletom, termina acima das perninhas) ou

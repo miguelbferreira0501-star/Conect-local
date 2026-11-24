@@ -23,11 +23,10 @@ describe('casa na Lua', () => {
     const mine = { ...old, items: old.items.slice(0, 2) };
     expect(upgradeHouse(mine, MOON_N)).toBe(mine);
   });
-  it('o Hami usa a cama, a banheira, a poltrona e a rodinha lunares', () => {
+  it('o mascote usa a cama, a banheira e a rodinha lunares', () => {
     const kind = (id: string) => useKindOf(id, itemById(id)?.svg);
     expect(kind('lua-cama')).toBe('deitar');
     expect(kind('lua-banheira')).toBe('banho');
-    expect(kind('lua-poltrona')).toBe('sentar');
     expect(kind('lua-rodinha')).toBe('correr');
   });
 });

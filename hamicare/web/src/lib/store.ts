@@ -5,7 +5,7 @@ import { AREA_GOAL, AREA_PLAN, areaOf, isWeightArea, type Area } from '../logic/
 import type { AgeGroup, Battery, BodyStart, CareId, Category, DayLog, DayPart, PetGender, Direction, Freq, GoalId, Incentive, Journey, MealEntry, Mood, Outfit, PetMood, Photo, QuestPlan, State, Task, TraitId, WearSlot } from '../types';
 import { LIBRARY, LIFE_AREAS, libById, rewardFor, type LifeArea } from '../data/tasks';
 import { destById } from '../data/destinations';
-import { ITEMS, LOOKS, RECIPES, STYLES, WEARABLE_KINDS, itemById, stylePrice } from '../data/items';
+import { ITEMS, LOOKS, RECIPES, STYLES, WEARABLE_KINDS, itemById, stylePrice, styleIds } from '../data/items';
 import { PLACES, placeById } from '../data/world';
 import { FACTS } from '../data/lines';
 import { FURS } from '../data/fur';
@@ -1281,9 +1281,12 @@ export function buyStyle(styleId: string): BuyResult {
   if (style.plus && !isPremium(state)) return 'plus';
   const price = stylePrice(style, (id) => owned(state, id));
   if (state.coins < price) return 'sem-sementes';
-  const { inventory, itemMeta } = gainItems(state, [style.wallpaper, style.floor, ...style.items.map((i) => i.itemId)], 'loja');
+  const { inventory, itemMeta } = gainItems(state, styleIds(style), 'loja');
   const items = style.items.map((it, i) => ({ uid: uid(), itemId: it.itemId, x: it.x, y: it.y, z: i + 1 }));
-  commit({ ...spend(state, price, `Comprou o estilo ${style.name}`, `estilo:${styleId}:${Date.now()}`), inventory, itemMeta, house: { wallpaper: style.wallpaper, floor: style.floor, items } });
+  const next = { ...spend(state, price, `Comprou o estilo ${style.name}`, `estilo:${styleId}:${Date.now()}`), inventory, itemMeta, house: { wallpaper: style.wallpaper, floor: style.floor, items } };
+  // coleção temática: ele já veste a roupinha do tema
+  if (style.outfit) next.pet = { ...next.pet, outfit: { ...next.pet.outfit, roupa: style.outfit.roupa, ...(style.outfit.chapeu ? { chapeu: style.outfit.chapeu } : {}) } };
+  commit(next);
   return 'ok';
 }
 

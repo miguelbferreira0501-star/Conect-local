@@ -1,5 +1,6 @@
 // Os cenários das 12 arenas: cada uma com casa própria, paisagem, clima e bichinhos.
 // O céu acompanha a hora do dia. Toque em árvores, flores, cogumelos e na casa: eles reagem.
+import { ArenaWings } from './arenaWings';
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode, type MouseEvent } from 'react';
 import { skyOf, type SkyTime } from './Scene';
 import { ARENA_DETAILS } from './arenaDetails';
@@ -1066,10 +1067,18 @@ interface Props {
   /** 'meet' mostra o cenário inteiro (sem cortar as laterais). */
   fit?: 'slice' | 'meet';
   className?: string;
+  /** Paisagem larga (o dobro): laterais com vegetação e decoração do tema. Padrão: sim (menos na miniatura e no 'meet'). */
+  wide?: boolean;
 }
 
-export function ArenaScene({ arena, time = skyOf(), height = 300, children, overlay, fade, mini, locked, fit = 'slice', className = '' }: Props) {
+/** Estrelinhas a mais nas laterais (de noite). */
+const WING_STARS: [number, number][] = [[-180, 30], [-140, 80], [-90, 24], [-40, 60], [430, 40], [480, 90], [530, 28], [580, 70], [-160, 120], [560, 120]];
+
+export function ArenaScene({ arena, time = skyOf(), height = 300, children, overlay, fade, mini, locked, fit = 'slice', className = '', wide }: Props) {
   const look = LOOKS[arena] ?? LOOKS.casinha;
+  const isWide = wide ?? (!mini && fit === 'slice');
+  const X0 = isWide ? -200 : 0;
+  const VW = isWide ? 800 : 400;
   const uid = useId().replace(/:/g, '');
   const night = time === 'noite';
   const [top, bottom] = skyFor(look, time);
@@ -1124,7 +1133,7 @@ export function ArenaScene({ arena, time = skyOf(), height = 300, children, over
 
   return (
     <div className={`scene arena-scene ${locked ? 'is-locked' : ''} ${className}`} style={{ height }} data-arena={arena}>
-      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 400 300" preserveAspectRatio={`xMidYMax ${fit}`} aria-hidden="true" onClick={mini ? undefined : onTap}>
+      <svg className="absolute inset-0 h-full w-full" viewBox={`${X0} 0 ${VW} 300`} preserveAspectRatio={`xMidYMax ${fit}`} aria-hidden="true" onClick={mini ? undefined : onTap}>
         <defs>
           <linearGradient id={`sky-${uid}`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor={top} />
@@ -1139,12 +1148,14 @@ export function ArenaScene({ arena, time = skyOf(), height = 300, children, over
             <stop offset="1" stopColor="#1A1430" stopOpacity={night ? 0.26 : 0.1} />
           </linearGradient>
         </defs>
-        <rect width="400" height="300" fill={`url(#sky-${uid})`} />
-        {night && !look.fixedSky && look.ambient !== 'celeste' && <Stars list={NIGHT_STARS} />}
+        <rect x={X0} width={VW} height="300" fill={`url(#sky-${uid})`} />
+        {night && !look.fixedSky && look.ambient !== 'celeste' && <Stars list={isWide ? [...NIGHT_STARS, ...WING_STARS] : NIGHT_STARS} />}
+        {isWide && look.ambient === 'estrelas' && !night && <Stars list={WING_STARS} />}
+        {isWide && <ArenaWings arena={arena} night={night} />}
         {look.draw({ night, time, id: uid })}
         {ARENA_DETAILS[arena]?.(night)}
-        <rect width="400" height="300" fill={`url(#lt-${uid})`} pointerEvents="none" />
-        <rect width="400" height="300" fill={`url(#vg-${uid})`} pointerEvents="none" />
+        <rect x={X0} width={VW} height="300" fill={`url(#lt-${uid})`} pointerEvents="none" />
+        <rect x={X0} width={VW} height="300" fill={`url(#vg-${uid})`} pointerEvents="none" />
         {!mini && <Ambient kind={look.ambient} night={night} />}
         {!mini && peek && <PeekPet arenaN={arenaN} peek={peek} />}
         {!mini && bursts.map((b) => <BurstFx key={b.id} b={b} />)}

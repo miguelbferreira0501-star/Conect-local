@@ -12,7 +12,7 @@ import {
   CHEST_ORDER, DEFAULT_GAME, FRIEND_LADDER, GAMES, HAMMER_PRICE, JOGO, PLUS_GAMES, SEASON_PLUS, addUsage, arenaItemsOf, canCraft, arenaOf, baseGrant, capGrant, chestOdds, chestPool, emptyPity, emptyUsage, isChest, levelOf, levelUps, openChest, pityInfo, rarityOf, xpAt,
   type ChestId, type DayUsage, type GameConfig, type Pity, type Rarity, type Source,
 } from '../../../web/src/shared/game';
-import { ITEMS, LOOKS, STYLES, itemById, stylePrice } from '../../../web/src/data/items';
+import { ITEMS, LOOKS, STYLES, itemById, stylePrice, styleIds } from '../../../web/src/data/items';
 import { FURS } from '../../../web/src/data/fur';
 import { DESTINATIONS } from '../../../web/src/data/destinations';
 import { LIBRARY } from '../../../web/src/data/tasks';
@@ -392,7 +392,8 @@ async function applySpend(db: pg.PoolClient, userId: string, w: WalletRow, op: {
     if (!style) return { w, ok: false, error: 'invalido' };
     if (style.plus && !premium) return { w, ok: false, error: 'plus' };
     price = stylePrice(style, (x) => owned.has(x));
-    give.push(...[style.wallpaper, style.floor, ...style.items.map((i) => i.itemId)].filter((x) => !owned.has(x)));
+    // coleções temáticas trazem também a roupinha do tema
+    give.push(...[...new Set(styleIds(style))].filter((x) => !owned.has(x)));
   } else if (kind === 'lua') {
     // Casa na Lua: preço fixo e os itens da casa lunar.
     if (MOON_ITEMS.every((x) => owned.has(x))) return { w, ok: false, error: 'ja-tem' };

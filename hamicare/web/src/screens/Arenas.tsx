@@ -137,6 +137,24 @@ function Rewards({ a, fur }: { a: ArenaDef; fur: string }) {
   );
 }
 
+const PAN_H = 240;
+/** A paisagem da arena inteira (bem larga): arrasta para os lados e abre no meio, onde ele está. */
+function ArenaPan({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (el) el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+  }, []);
+  return (
+    <div ref={ref} className="arena-pan">
+      <div style={{ width: (PAN_H * 800) / 300 }}>{children}</div>
+      <span className="arena-pan-hint" aria-hidden="true">
+        ‹ arraste para ver a arena ›
+      </span>
+    </div>
+  );
+}
+
 function ArenaSheet({ n, onClose, onHouse }: { n: number | null; onClose: () => void; onHouse: () => void }) {
   const s = useApp();
   const [peek, setPeek] = useState(false);
@@ -160,14 +178,16 @@ function ArenaSheet({ n, onClose, onHouse }: { n: number | null; onClose: () => 
             <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={124} label={s.pet.name} />
           </Room>
         ) : (
-          <ArenaScene arena={a.id} height={220} locked={!unlocked}>
-            {unlocked && (
-              <div className="relative">
-                <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={104} label={s.pet.name} />
-                <CompanionBuddy hamster={104} />
-              </div>
-            )}
-          </ArenaScene>
+          <ArenaPan>
+            <ArenaScene arena={a.id} height={PAN_H} locked={!unlocked} wide>
+              {unlocked && (
+                <div className="relative">
+                  <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={104} label={s.pet.name} />
+                  <CompanionBuddy hamster={104} />
+                </div>
+              )}
+            </ArenaScene>
+          </ArenaPan>
         )}
         <p className="text-[15px] leading-snug">{a.desc}</p>
         <section className="grid gap-2">

@@ -4598,6 +4598,7 @@
 .trek-layer svg { display: block; width: 100%; height: auto; }
 .trek-far { width: 300%; animation: trek-scroll 70s linear infinite; opacity: 0.9; }
 .trek-mid { width: 420%; animation: trek-scroll 26s linear infinite; }
+.trek-near { z-index: 4; bottom: -1%; width: 300%; animation: trek-scroll 11s linear infinite; pointer-events: none; }
 @keyframes trek-scroll { to { transform: translateX(-50%); } }
 .trek-ground { position: absolute; left: 0; right: 0; bottom: 0; height: 24%; background: var(--tg); }
 .trek-marks { position: absolute; inset: 0; background-image: radial-gradient(ellipse 16px 5px at 30px 30px, rgba(0, 0, 0, 0.1) 98%, transparent), radial-gradient(ellipse 10px 4px at 150px 62px, rgba(255, 255, 255, 0.22) 98%, transparent); background-size: 240px 90px; animation: trek-marks 3.2s linear infinite; }
