@@ -3,6 +3,7 @@
 import { useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { GrowthContext, Hamster } from '../components/Hamster';
+import { Hami3D } from '../components/Hami3D';
 import { Room } from '../components/Room';
 import { Sheet, toast } from '../components/ui';
 import { ITEMS, RECIPES, itemById } from '../data/items';
@@ -80,11 +81,51 @@ function useParticles(max = 60) {
 type Move = 'squish' | 'hop' | 'shake' | 'stretch' | 'chew' | 'wiggle' | 'nod';
 const MOVES: Record<Move, { k: Keyframe[]; ms: number }> = {
   squish: { k: [{ transform: 'scale(1,1)' }, { transform: 'scale(1.1,0.9)', offset: 0.3 }, { transform: 'scale(0.96,1.05)', offset: 0.65 }, { transform: 'scale(1,1)' }], ms: 460 },
-  hop: { k: [{ transform: 'translateY(0) scale(1,1)' }, { transform: 'translateY(0) scale(1.12,0.88)', offset: 0.15 }, { transform: 'translateY(-40px) scale(0.94,1.08)', offset: 0.45 }, { transform: 'translateY(0) scale(1.1,0.9)', offset: 0.8 }, { transform: 'translateY(0) scale(1,1)' }], ms: 680 },
-  shake: { k: [{ transform: 'rotate(0)' }, { transform: 'rotate(-10deg)' }, { transform: 'rotate(10deg)' }, { transform: 'rotate(-8deg)' }, { transform: 'rotate(7deg)' }, { transform: 'rotate(-4deg)' }, { transform: 'rotate(0)' }], ms: 620 },
+  hop: {
+    k: [
+      { transform: 'translateY(0) scale(1,1)' },
+      { transform: 'translateY(0) scale(1.12,0.88)', offset: 0.15 },
+      { transform: 'translateY(-40px) scale(0.94,1.08)', offset: 0.45 },
+      { transform: 'translateY(0) scale(1.1,0.9)', offset: 0.8 },
+      { transform: 'translateY(0) scale(1,1)' },
+    ],
+    ms: 680,
+  },
+  shake: {
+    k: [
+      { transform: 'rotate(0)' },
+      { transform: 'rotate(-10deg)' },
+      { transform: 'rotate(10deg)' },
+      { transform: 'rotate(-8deg)' },
+      { transform: 'rotate(7deg)' },
+      { transform: 'rotate(-4deg)' },
+      { transform: 'rotate(0)' },
+    ],
+    ms: 620,
+  },
   stretch: { k: [{ transform: 'scale(1,1)' }, { transform: 'scale(0.9,1.14)', offset: 0.5 }, { transform: 'scale(1.04,0.97)', offset: 0.8 }, { transform: 'scale(1,1)' }], ms: 900 },
-  chew: { k: [{ transform: 'scale(1,1)' }, { transform: 'scale(1.06,0.94)' }, { transform: 'scale(1,1)' }, { transform: 'scale(1.06,0.94)' }, { transform: 'scale(1,1)' }, { transform: 'scale(1.06,0.94)' }, { transform: 'scale(1,1)' }], ms: 1100 },
-  wiggle: { k: [{ transform: 'translateX(0)' }, { transform: 'translateX(-6px) rotate(-3deg)' }, { transform: 'translateX(6px) rotate(3deg)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(0)' }], ms: 420 },
+  chew: {
+    k: [
+      { transform: 'scale(1,1)' },
+      { transform: 'scale(1.06,0.94)' },
+      { transform: 'scale(1,1)' },
+      { transform: 'scale(1.06,0.94)' },
+      { transform: 'scale(1,1)' },
+      { transform: 'scale(1.06,0.94)' },
+      { transform: 'scale(1,1)' },
+    ],
+    ms: 1100,
+  },
+  wiggle: {
+    k: [
+      { transform: 'translateX(0)' },
+      { transform: 'translateX(-6px) rotate(-3deg)' },
+      { transform: 'translateX(6px) rotate(3deg)' },
+      { transform: 'translateX(-4px)' },
+      { transform: 'translateX(0)' },
+    ],
+    ms: 420,
+  },
   nod: { k: [{ transform: 'rotate(0)' }, { transform: 'rotate(-6deg)' }, { transform: 'rotate(6deg)' }, { transform: 'rotate(0)' }], ms: 500 },
 };
 
@@ -169,7 +210,17 @@ function Confetti() {
   return (
     <div className="pointer-events-none absolute inset-0 z-[6] overflow-hidden" aria-hidden="true">
       {Array.from({ length: 28 }, (_, i) => (
-        <span key={i} className="confetti" style={{ left: `${(i * 37) % 100}%`, background: CONFETTI[i % CONFETTI.length], animationDelay: `${(i % 7) * 0.08}s`, ['--x' as string]: `${((i * 53) % 120) - 60}px`, ['--r' as string]: `${(i * 67) % 360}deg` }} />
+        <span
+          key={i}
+          className="confetti"
+          style={{
+            left: `${(i * 37) % 100}%`,
+            background: CONFETTI[i % CONFETTI.length],
+            animationDelay: `${(i % 7) * 0.08}s`,
+            ['--x' as string]: `${((i * 53) % 120) - 60}px`,
+            ['--r' as string]: `${(i * 67) % 360}deg`,
+          }}
+        />
       ))}
     </div>
   );
@@ -188,9 +239,9 @@ function DoneCard({ title, text, onClose, children }: { title: string; text: Rea
   );
 }
 
-function PetView({ mood, size = 220, wet, shine, idle = true }: { mood: PetMood; size?: number; wet?: boolean; shine?: boolean; idle?: boolean }) {
+function PetView({ mood, size = 220, wet, idle = true }: { mood: PetMood; size?: number; wet?: boolean; shine?: boolean; idle?: boolean }) {
   const s = useApp();
-  return <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={mood} size={size} label={s.pet.name} wet={wet} shine={shine} idle={idle} />;
+  return <Hami3D fur={s.pet.fur} outfit={wet ? { ...s.pet.outfit, roupa: null } : s.pet.outfit} mood={mood} size={size} label={s.pet.name} wet={wet} still={!idle} />;
 }
 
 // ---------- Cafuné ----------
@@ -573,7 +624,8 @@ function BathGame({ onClose }: { onClose: () => void }) {
     }
   }
 
-  const toolIcon = cur.id === 'molhar' || cur.id === 'enxaguar' ? <Glyph e="🚿" size={56} /> : cur.id === 'esfregar' ? <Glyph e="🧽" size={56} /> : cur.id === 'secar' ? <span className="towel" /> : null;
+  const toolIcon =
+    cur.id === 'molhar' || cur.id === 'enxaguar' ? <Glyph e="🚿" size={56} /> : cur.id === 'esfregar' ? <Glyph e="🧽" size={56} /> : cur.id === 'secar' ? <span className="towel" /> : null;
 
   return (
     <CareShell title="Hora do banho" step={done ? 'Cheirosinho!' : `${step + 1}/6 · ${cur.hint}`} onClose={onClose}>
@@ -658,7 +710,15 @@ function BathGame({ onClose }: { onClose: () => void }) {
         </button>
       )}
       {done && (
-        <DoneCard title="Cheirosinho!" text={<>O {s.pet.name} está limpinho e fofo. Curiosidade: hamster de verdade toma banho de <b>areia</b>, não de água. O banho de espuma é só aqui no HamiCare.</>} onClose={onClose} />
+        <DoneCard
+          title="Cheirosinho!"
+          text={
+            <>
+              O {s.pet.name} está limpinho e fofo. Curiosidade: hamster de verdade toma banho de <b>areia</b>, não de água. O banho de espuma é só aqui no HamiCare.
+            </>
+          }
+          onClose={onClose}
+        />
       )}
     </CareShell>
   );
@@ -816,7 +876,15 @@ function SeedRain({ onClose, onBack }: { onClose: () => void; onBack: () => void
         {over && <Confetti />}
       </div>
       {over && (
-        <DoneCard title={`Você fez ${score} ${score === 1 ? 'ponto' : 'pontos'}!`} text={<>O {s.pet.name} ficou muito mais feliz.{prizeText(coins)} Brincar também é se mexer: que tal levantar e se alongar um pouquinho?</>} onClose={onClose}>
+        <DoneCard
+          title={`Você fez ${score} ${score === 1 ? 'ponto' : 'pontos'}!`}
+          text={
+            <>
+              O {s.pet.name} ficou muito mais feliz.{prizeText(coins)} Brincar também é se mexer: que tal levantar e se alongar um pouquinho?
+            </>
+          }
+          onClose={onClose}
+        >
           <button className="btn btn-soft" onClick={onBack}>
             Jogar outra brincadeira
           </button>
@@ -863,7 +931,11 @@ function Fetch({ onClose, onBack }: { onClose: () => void; onBack: () => void })
     animate(pet.current, 'squish');
     play('jogar');
     setBall({ x: tx, y: ty, flying: true, held: false });
-    if (ballRef.current && !prefersReducedMotion()) ballRef.current.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-110px) scale(1.25)', offset: 0.45 }, { transform: 'translateY(0) scale(1)' }], { duration: 650, easing: 'ease-in-out' });
+    if (ballRef.current && !prefersReducedMotion())
+      ballRef.current.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-110px) scale(1.25)', offset: 0.45 }, { transform: 'translateY(0) scale(1)' }], {
+        duration: 650,
+        easing: 'ease-in-out',
+      });
     setTimeout(() => {
       setBall((b) => ({ ...b, flying: false }));
       play('quica');
@@ -895,7 +967,10 @@ function Fetch({ onClose, onBack }: { onClose: () => void; onBack: () => void })
     <CareShell title="Busca a bolinha!" step={done ? 'Que parceria!' : phase === 'idle' ? 'Toque em qualquer lugar do campo para jogar' : `${s.pet.name} está correndo…`} onClose={onClose}>
       <Meter value={(count / FETCH_GOAL) * 100} tone="leaf" icon="🎾" label="Bolinhas trazidas" />
       <div ref={stage} className="stage stage-field" onPointerDown={throwTo}>
-        <div className={`absolute bottom-3 ${phase === 'correndo' || phase === 'voltando' ? 'running' : ''}`} style={{ left: `${hx}%`, transform: `translateX(-50%) scaleX(${face})`, transition: 'left 0.9s cubic-bezier(0.45,0,0.25,1)' }}>
+        <div
+          className={`absolute bottom-3 ${phase === 'correndo' || phase === 'voltando' ? 'running' : ''}`}
+          style={{ left: `${hx}%`, transform: `translateX(-50%) scaleX(${face})`, transition: 'left 0.9s cubic-bezier(0.45,0,0.25,1)' }}
+        >
           <div ref={pet} style={{ transformOrigin: '50% 100%' }}>
             <PetView mood={mood} size={130} idle={false} />
           </div>
@@ -904,7 +979,12 @@ function Fetch({ onClose, onBack }: { onClose: () => void; onBack: () => void })
         {!(ball.held && phase === 'voltando') && (
           <span
             className="ball-wrap"
-            style={{ left: `${ball.held ? hx + 8 : ball.x}%`, top: ball.held ? 'auto' : `${ball.y}%`, bottom: ball.held ? 26 : 'auto', transition: ball.flying ? 'left 0.65s linear, top 0.65s linear' : 'none' }}
+            style={{
+              left: `${ball.held ? hx + 8 : ball.x}%`,
+              top: ball.held ? 'auto' : `${ball.y}%`,
+              bottom: ball.held ? 26 : 'auto',
+              transition: ball.flying ? 'left 0.65s linear, top 0.65s linear' : 'none',
+            }}
             aria-hidden="true"
           >
             <span ref={ballRef} className="ball" />
@@ -914,7 +994,15 @@ function Fetch({ onClose, onBack }: { onClose: () => void; onBack: () => void })
         {done && <Confetti />}
       </div>
       {done && (
-        <DoneCard title={`${FETCH_GOAL} bolinhas!`} text={<>O {s.pet.name} correu tanto que ficou sem fôlego (e muito feliz).{prizeText(coins)}</>} onClose={onClose}>
+        <DoneCard
+          title={`${FETCH_GOAL} bolinhas!`}
+          text={
+            <>
+              O {s.pet.name} correu tanto que ficou sem fôlego (e muito feliz).{prizeText(coins)}
+            </>
+          }
+          onClose={onClose}
+        >
           <button className="btn btn-soft" onClick={onBack}>
             Jogar outra brincadeira
           </button>
@@ -927,7 +1015,13 @@ function Fetch({ onClose, onBack }: { onClose: () => void; onBack: () => void })
 // ---------- Escovar os nós do pelo ----------
 
 const KNOTS = [
-  { x: 35, y: 52 }, { x: 65, y: 50 }, { x: 27, y: 68 }, { x: 74, y: 66 }, { x: 43, y: 80 }, { x: 59, y: 86 }, { x: 50, y: 45 },
+  { x: 35, y: 52 },
+  { x: 65, y: 50 },
+  { x: 27, y: 68 },
+  { x: 74, y: 66 },
+  { x: 43, y: 80 },
+  { x: 59, y: 86 },
+  { x: 50, y: 45 },
 ];
 
 function BrushGame({ onClose }: { onClose: () => void }) {
@@ -1003,7 +1097,15 @@ function BrushGame({ onClose }: { onClose: () => void }) {
           <PetView mood={mood} shine={done} />
           {knots.map((k) =>
             k.hp > 0 ? (
-              <svg key={k.id} className="knot" style={{ left: `${k.x}%`, top: `${k.y}%`, opacity: 0.35 + (k.hp / 100) * 0.65, transform: `translate(-50%,-50%) scale(${0.6 + (k.hp / 100) * 0.4})` }} viewBox="0 0 30 30" width="30" height="30" aria-hidden="true">
+              <svg
+                key={k.id}
+                className="knot"
+                style={{ left: `${k.x}%`, top: `${k.y}%`, opacity: 0.35 + (k.hp / 100) * 0.65, transform: `translate(-50%,-50%) scale(${0.6 + (k.hp / 100) * 0.4})` }}
+                viewBox="0 0 30 30"
+                width="30"
+                height="30"
+                aria-hidden="true"
+              >
                 <path d="M4 16 q4 -10 8 0 q4 10 8 0 q4 -10 7 -2 M6 10 q5 6 9 -1 q5 -6 9 2" stroke="#8A5A3B" strokeWidth="2.6" fill="none" strokeLinecap="round" />
               </svg>
             ) : null,
@@ -1111,7 +1213,11 @@ function SleepGame({ onClose }: { onClose: () => void }) {
   const dark = waking ? !curtain : !light;
 
   return (
-    <CareShell title={waking ? 'Bom dia, dorminhoco!' : 'Hora de nanar'} step={finished ? (waking ? `${s.pet.name} acordou cheio de energia` : 'Boa noite! Energia recarregando…') : `${step + 1}/${steps.length} · ${steps[step]}`} onClose={onClose}>
+    <CareShell
+      title={waking ? 'Bom dia, dorminhoco!' : 'Hora de nanar'}
+      step={finished ? (waking ? `${s.pet.name} acordou cheio de energia` : 'Boa noite! Energia recarregando…') : `${step + 1}/${steps.length} · ${steps[step]}`}
+      onClose={onClose}
+    >
       <div
         ref={stage}
         className={`stage stage-bedroom ${dark ? 'is-dark' : ''}`}
@@ -1127,11 +1233,23 @@ function SleepGame({ onClose }: { onClose: () => void }) {
           }
         }}
       >
-        <button className={`window ${dark ? 'is-night' : ''} ${waking && curtain ? 'is-open' : ''}`} data-sound="none" onClick={() => waking && (setCurtain(true), play('cortina'))} aria-label={waking ? 'Abrir a cortina' : 'Janela'} disabled={!waking || curtain}>
+        <button
+          className={`window ${dark ? 'is-night' : ''} ${waking && curtain ? 'is-open' : ''}`}
+          data-sound="none"
+          onClick={() => waking && (setCurtain(true), play('cortina'))}
+          aria-label={waking ? 'Abrir a cortina' : 'Janela'}
+          disabled={!waking || curtain}
+        >
           <span className="curtain curtain-l" />
           <span className="curtain curtain-r" />
         </button>
-        <button className={`lamp ${light ? 'is-on' : ''}`} data-sound="none" onClick={() => !waking && light && (setLight(false), play('interruptor'))} aria-label="Apagar a luz" disabled={waking || !light}>
+        <button
+          className={`lamp ${light ? 'is-on' : ''}`}
+          data-sound="none"
+          onClick={() => !waking && light && (setLight(false), play('interruptor'))}
+          aria-label="Apagar a luz"
+          disabled={waking || !light}
+        >
           <span className="lamp-shade" />
           <span className="lamp-foot" />
         </button>
@@ -1171,7 +1289,13 @@ function SleepGame({ onClose }: { onClose: () => void }) {
       {finished && (
         <DoneCard
           title={waking ? 'Bom dia! ☀️' : 'Boa noite 🌙'}
-          text={waking ? <>O {s.pet.name} se espreguiçou todinho. E você, dormiu bem? Um copo d’água agora cai bem.</> : <>Enquanto dorme, o {s.pet.name} recupera a energia. Que tal você também desligar a tela um pouquinho antes de dormir?</>}
+          text={
+            waking ? (
+              <>O {s.pet.name} se espreguiçou todinho. E você, dormiu bem? Um copo d’água agora cai bem.</>
+            ) : (
+              <>Enquanto dorme, o {s.pet.name} recupera a energia. Que tal você também desligar a tela um pouquinho antes de dormir?</>
+            )
+          }
           onClose={onClose}
         />
       )}
@@ -1238,7 +1362,10 @@ const POSES: { id: PetMood; label: string }[] = [
 
 function PhotoSheet({ open, onClose, onShare }: { open: boolean; onClose: () => void; onShare?: (p: Photo) => void }) {
   const s = useApp();
-  const scenes = [{ id: 'casa', name: 'Em casa', colors: ['#FFE6C2', '#FFF6E8'] as [string, string] }, ...PLACES.filter((p) => (s.placesDone[p.id] ?? 0) > 0).map((p) => ({ id: p.id, name: p.name, colors: p.colors }))];
+  const scenes = [
+    { id: 'casa', name: 'Em casa', colors: ['#FFE6C2', '#FFF6E8'] as [string, string] },
+    ...PLACES.filter((p) => (s.placesDone[p.id] ?? 0) > 0).map((p) => ({ id: p.id, name: p.name, colors: p.colors })),
+  ];
   const [scene, setScene] = useState('casa');
   const [pose, setPose] = useState<PetMood>('animado');
   const [caption, setCaption] = useState('');

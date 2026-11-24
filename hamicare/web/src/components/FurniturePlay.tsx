@@ -1,9 +1,9 @@
 // O Hami usando os móveis (Início e aba Cuidar): tocar na cama, banheira, sofá, cadeira ou rodinha faz ele
 // ir até lá e deitar, tomar banho, sentar ou correr por alguns segundos. Banho e brincar contam como cuidado.
 import { useRef, useState } from 'react';
-import { Hamster } from './Hamster';
 import { SleepingHami } from './SleepingHami';
-import { BathPhoto } from './HamiPhoto';
+import { BathBubbles } from './HamiPhoto';
+import { Hami3D } from './Hami3D';
 import { toast } from './ui';
 import type { UseKind } from './Room';
 import { care, useApp } from '../lib/store';
@@ -23,12 +23,25 @@ export function UsePet({ kind, w }: { kind: UseKind; w: number }) {
   const s = useApp();
   const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
   if (kind === 'deitar') return <SleepingHami fur={s.pet.fur} size={clamp(w * 0.66, 80, 180)} outfit={s.pet.outfit} />;
-  // No banho, a foto (tina de madeira, espuma, patinho e toalha) fica no lugar da banheira.
-  if (kind === 'banho') return <BathPhoto fur={s.pet.fur} width={clamp(w * 1.22, 130, 300)} />;
-  const size = kind === 'sentar' ? clamp(w * 0.5, 70, 140) : kind === 'correr' ? clamp(w * 0.58, 60, 130) : clamp(w * 0.45, 60, 120);
+  // No banho, ele entra na banheira (a frente dela fica por cima) molhadinho e feliz, com bolhinhas subindo.
+  if (kind === 'banho')
+    return (
+      <div className="use-pet use-pet-banho">
+        <Hami3D fur={s.pet.fur} outfit={{ ...s.pet.outfit, roupa: null }} mood="risada" action="parado" wet size={clamp(w * 0.78, 90, 190)} label="" />
+        <BathBubbles />
+      </div>
+    );
+  const size = kind === 'sentar' ? clamp(w * 0.62, 80, 170) : kind === 'correr' ? clamp(w * 0.72, 70, 160) : clamp(w * 0.58, 70, 150);
   return (
     <div className={`use-pet use-pet-${kind}`}>
-      <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} size={size} mood={kind === 'sentar' ? 'feliz' : 'animado'} idle={kind === 'sentar'} growth={1} label="" />
+      <Hami3D
+        fur={s.pet.fur}
+        outfit={s.pet.outfit}
+        mood={kind === 'sentar' ? 'feliz' : 'risada'}
+        action={kind === 'correr' ? 'andar' : kind === 'balancar' ? 'festa' : 'parado'}
+        size={size}
+        label=""
+      />
     </div>
   );
 }

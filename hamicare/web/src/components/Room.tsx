@@ -126,7 +126,7 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
             aria-label={kind ? `${item.name}: levar o Hami até lá` : item.name}
             tabIndex={editing || kind ? 0 : -1}
             onClick={kind ? () => onUse?.(it.uid, kind) : undefined}
-            className={`room-item ${place === 'tapete' ? 'is-flat' : ''} ${editing ? 'is-editable' : ''} ${selected === it.uid ? 'is-selected' : ''} ${kind ? 'is-usable' : ''} ${use?.kind === 'banho' ? 'is-bathing' : ''}`}
+            className={`room-item ${place === 'tapete' ? 'is-flat' : ''} ${editing ? 'is-editable' : ''} ${selected === it.uid ? 'is-selected' : ''} ${kind ? 'is-usable' : ''}`}
             style={{
               left: `${live.x}%`,
               top: `${live.y}%`,
@@ -152,6 +152,11 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
           >
             {item.svg ? <Furniture id={item.svg} c1={item.c1} c2={item.c2} /> : <Glyph e={item.art ?? item.emoji} size="fill" />}
             {use && <div className={`room-use use-${use.kind}`}>{use.node(px)}</div>}
+            {use?.kind === 'banho' && item.svg && (
+              <div className="room-use-front" aria-hidden="true">
+                <Furniture id={item.svg} c1={item.c1} c2={item.c2} />
+              </div>
+            )}
             {editing && selected === it.uid && (onRemove || onFront) && (
               <span className="room-sel-actions">
                 {onFront && (

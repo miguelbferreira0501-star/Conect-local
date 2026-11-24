@@ -5,6 +5,7 @@
 import { memo, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Blocks, BrickWall, Camera, Check, Crown, Eye, EyeOff, Gem, Glasses, Grid2x2, Heart, Lamp, LayoutGrid, Library, Palette, PawPrint, Shirt, Sofa, Sparkles, ToyBrick, X } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
+import { Hami3D } from '../components/Hami3D';
 import { Room } from '../components/Room';
 import { ItemIcon } from '../components/ItemIcon';
 import { FLOOR_CSS, WALLPAPER_CSS } from '../components/Furniture';
@@ -254,11 +255,11 @@ function Closet({ part, onStore, onDecorate }: { part: 'roupas' | 'casa'; onStor
       <div className={`bag2-stage ${showRoom ? '' : 'is-plain'}`}>
         {showRoom ? (
           <Room house={s.house} period={periodOf()} height={300}>
-            {!s.adventure && <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={132} label={s.pet.name} />}
+            {!s.adventure && <Hami3D fur={s.pet.fur} outfit={s.pet.outfit} mood="feliz" size={150} label={s.pet.name} />}
           </Room>
         ) : (
           <div className="bag2-plain">
-            <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={190} label={s.pet.name} />
+            <Hami3D fur={s.pet.fur} outfit={s.pet.outfit} mood="feliz" size={220} label={s.pet.name} />
           </div>
         )}
         {part === 'casa' && (

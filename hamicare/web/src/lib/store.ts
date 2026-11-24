@@ -82,7 +82,7 @@ export function fresh(): State {
     journal: [],
     jar: [],
     // Os móveis do quartinho inicial já são da pessoa (pode guardar e recolocar).
-    inventory: { 'p-menta': 1, 'f-pistache': 1, 'p-creme': 1, 'f-madeira': 1, cenoura: 3, maca: 2, semente: 3, rodinha: 1, caminha: 1, planta: 1, ...Object.fromEntries(arenaHouse(1).items.map((i) => [i.itemId, 1])) },
+    inventory: { 'p-azulzinho': 1, 'f-creme': 1, 'p-menta': 1, 'f-pistache': 1, 'p-creme': 1, 'f-madeira': 1, cenoura: 3, maca: 2, semente: 3, rodinha: 1, caminha: 1, planta: 1, ...Object.fromEntries(arenaHouse(1).items.map((i) => [i.itemId, 1])) },
     wishlist: [],
     // Casa inicial: um quartinho já decorado (cama, criado-mudo, guarda-roupa, rodinha…).
     house: arenaHouse(1),

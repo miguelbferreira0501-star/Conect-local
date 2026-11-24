@@ -34,8 +34,8 @@ const GOLD = '#F2C14E';
 const INK = '#5A3B2E';
 
 /**
- * Moldura de toda peça: contorno marrom macio por fora (estilo adesivo), luz em cima, sombrinha embaixo
- * e um pouco de volume. Vale para todos os móveis de uma vez.
+ * Acabamento de toda peça: sem contorno (desenho liso, como os quartos dos apps de pet), com luz em cima,
+ * sombrinha embaixo e um pouco de volume. Vale para todos os móveis de uma vez.
  */
 export function S({ w, h, children }: { w: number; h: number; children: ReactNode }) {
   const id = `kf${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
@@ -56,10 +56,6 @@ export function S({ w, h, children }: { w: number; h: number; children: ReactNod
           <feComponentTransfer in="SourceAlpha" result="solid">
             <feFuncA type="discrete" tableValues="0 0 1 1" />
           </feComponentTransfer>
-          {/* contorno */}
-          <feMorphology in="solid" operator="dilate" radius={r} result="grow" />
-          <feFlood floodColor="#4A2E22" floodOpacity="0.72" />
-          <feComposite in2="grow" operator="in" result="line" />
           {/* luz na borda de cima */}
           <feOffset in="solid" dy={r * 1.4} result="down" />
           <feComposite in="solid" in2="down" operator="out" result="topRim" />
@@ -71,7 +67,6 @@ export function S({ w, h, children }: { w: number; h: number; children: ReactNod
           <feFlood floodColor="#2B1A14" floodOpacity="0.2" />
           <feComposite in2="botRim" operator="in" result="dark" />
           <feMerge>
-            <feMergeNode in="line" />
             <feMergeNode in="SourceGraphic" />
             <feMergeNode in="light" />
             <feMergeNode in="dark" />
