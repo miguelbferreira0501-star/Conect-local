@@ -1040,15 +1040,17 @@ export function Accessory({ id, geo, paw, head }: { id: string | null; geo: Geo;
   const base = it?.base ?? id;
   // Colares, cordões, lenços e gravatas ficam no pescoço: logo abaixo do queixo (a cabeça do Hami é grande).
   const neck = !!head && NECK_ITEMS.has(base ?? '');
-  const y = neck ? head!.cy + head!.ry + 5 : top + h * 0.6;
+  const y = neck ? head!.cy + head!.ry + 3 : top + h * 0.6;
   const c1 = it?.c1;
   const c2 = it?.c2;
+  // No pescoço, o colar dá a volta: sai de trás da cabeça de um lado, desce no peito e volta para trás do outro lado
+  // (as pontas ficam escondidas debaixo do queixo).
   const arc = (n: number, depth: number) =>
     Array.from({ length: n }, (_, i) => {
       const t = i / (n - 1);
-      const span = neck ? 0.4 : 0.55;
-      const x = 100 - w * span + t * w * span * 2;
-      const yy = y - 6 + Math.sin(t * Math.PI) * depth;
+      const hw = neck ? head!.rx * 0.72 : w * 0.55;
+      const x = 100 - hw + t * hw * 2;
+      const yy = neck ? y - 12 + Math.sin(t * Math.PI) * (depth + 8) : y - 6 + Math.sin(t * Math.PI) * depth;
       return [x, yy] as const;
     });
   switch (base) {

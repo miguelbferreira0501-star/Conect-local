@@ -92,8 +92,131 @@ function Cottage({ x, y, p }: { x: number; y: number; p: Pal }) {
   );
 }
 
+/** Chão da Lua (a página do Início usa a mesma cor quando a casa é na Lua). */
+export const MOON_GROUND = '#A9AEC6';
+
 /** Cor do gramado da frente (a página do Início usa a mesma, para o chão se fundir com ela). */
-export const outdoorGround = (period: Period) => PAL[period].ground;
+export const outdoorGround = (period: Period, moon = false) => (moon ? MOON_GROUND : PAL[period].ground);
+
+/** Lá fora na Lua: céu de estrelas, a Terra enorme, a base lunar (a casa do Hami) ao fundo, crateras, foguete e bandeira. */
+export function MoonOutdoors({ height = 430, children }: { height?: number; children?: ReactNode }) {
+  const still = prefersReducedMotion();
+  const stars = Array.from({ length: 46 }, (_, i) => [((i * 157) % 740) + ((i * 7) % 11), ((i * 89) % 230) + 6, i % 4 === 0 ? 2.2 : i % 3 ? 1.2 : 1.7]);
+  return (
+    <div className={`outdoors is-night is-moon ${still ? 'is-still' : ''}`} style={{ height, background: '#0D1030' }}>
+      <svg className="od-art" viewBox="0 0 740 430" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="mo-sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#090B26" />
+            <stop offset="0.7" stopColor="#1E2257" />
+            <stop offset="1" stopColor="#2E3170" />
+          </linearGradient>
+          <radialGradient id="mo-earth" cx="40%" cy="35%" r="70%">
+            <stop offset="0" stopColor="#8FD3FF" />
+            <stop offset="0.7" stopColor="#3E8FE0" />
+            <stop offset="1" stopColor="#2A5FB0" />
+          </radialGradient>
+          <radialGradient id="mo-glow">
+            <stop offset="0.6" stopColor="#7FC4FF" stopOpacity="0.35" />
+            <stop offset="1" stopColor="#7FC4FF" stopOpacity="0" />
+          </radialGradient>
+          <linearGradient id="mo-ground" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#C9CDE0" />
+            <stop offset="1" stopColor={MOON_GROUND} />
+          </linearGradient>
+          <linearGradient id="mo-dome" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#F4F6FF" />
+            <stop offset="1" stopColor="#B9BEDA" />
+          </linearGradient>
+          <radialGradient id="mo-glass" cx="35%" cy="30%" r="80%">
+            <stop offset="0" stopColor="#FFF6C9" />
+            <stop offset="1" stopColor="#FFC870" />
+          </radialGradient>
+        </defs>
+        <rect width="740" height="430" fill="url(#mo-sky)" />
+        {stars.map(([x, y, r], i) => (
+          <circle key={i} className="od-star" style={{ animationDelay: `${(i % 7) * 0.5}s` }} cx={x} cy={y} r={r} fill="#FFFFFF" />
+        ))}
+        {/* estrela cadente */}
+        <path className="mo-shoot" d="M520 40 l-70 26" stroke="#FFFFFF" strokeWidth="2.4" strokeLinecap="round" opacity="0.8" />
+        {/* a Terra */}
+        <circle cx="600" cy="92" r="78" fill="url(#mo-glow)" />
+        <circle cx="600" cy="92" r="48" fill="url(#mo-earth)" />
+        <path d="M570 70 q14 -10 26 0 q8 10 -4 18 q-14 6 -10 18 q-16 -6 -12 -36Z M612 104 q12 -4 20 4 q-2 14 -14 18 q-10 -10 -6 -22Z M616 58 q12 0 20 10 q-12 4 -20 -10Z" fill="#6FCF7C" />
+        <path d="M556 92 a44 44 0 0 0 88 0 a48 48 0 0 1 -88 0Z" fill="#1E4A8F" opacity="0.35" />
+        <ellipse cx="584" cy="70" rx="14" ry="7" fill="#FFFFFF" opacity="0.35" transform="rotate(-25 584 70)" />
+        {/* planetinha com anel */}
+        <g transform="translate(110 78)">
+          <circle r="16" fill="#FFB3CF" />
+          <ellipse rx="28" ry="7" fill="none" stroke="#FFE07A" strokeWidth="3" transform="rotate(-18)" />
+        </g>
+        {/* morros lunares ao fundo */}
+        <path d="M0 250 Q80 214 170 236 Q260 206 360 232 Q460 204 560 230 Q650 210 740 228 V300 H0Z" fill="#7C82A8" />
+        <path d="M0 272 Q120 246 240 264 Q380 240 520 262 Q640 246 740 258 V320 H0Z" fill="#9499BC" />
+        {/* a base lunar: a casa do Hami */}
+        <g transform="translate(212 300)">
+          <ellipse cx="0" cy="2" rx="96" ry="12" fill="#000" opacity="0.18" />
+          <rect x="-96" y="-18" width="192" height="20" rx="8" fill="#9EA4C4" />
+          <path d="M-86 -16 A86 76 0 0 1 86 -16Z" fill="url(#mo-dome)" />
+          <path d="M-86 -16 A86 76 0 0 1 86 -16" fill="none" stroke="#8E94B8" strokeWidth="3" />
+          <path d="M-60 -16 A60 66 0 0 1 0 -88 M60 -16 A60 66 0 0 0 0 -88 M-86 -40 H86" stroke="#C6CAE2" strokeWidth="2.5" fill="none" />
+          {/* janelas redondas acesas */}
+          {[[-48, -40], [0, -54], [48, -40]].map(([x, y], i) => (
+            <g key={i}>
+              <circle cx={x} cy={y} r="13" fill="#7A80A6" />
+              <circle cx={x} cy={y} r="10" fill="url(#mo-glass)" />
+              <circle cx={x - 3} cy={y - 3} r="3" fill="#FFFFFF" opacity="0.7" />
+            </g>
+          ))}
+          {/* porta */}
+          <path d="M-14 0 V-22 a14 14 0 0 1 28 0 V0Z" fill="#FF8FB1" />
+          <circle cx="0" cy="-22" r="6" fill="#FFE2EC" />
+          {/* antena */}
+          <path d="M40 -76 L52 -104" stroke="#8E94B8" strokeWidth="3" />
+          <circle cx="53" cy="-106" r="5" className="mo-blink" fill="#FF6F91" />
+          {/* túnel até a garagem do foguete */}
+          <rect x="86" y="-14" width="60" height="16" rx="8" fill="#B4B9D6" />
+          <path d="M98 -14 v16 M114 -14 v16 M130 -14 v16" stroke="#9EA4C4" strokeWidth="2" />
+        </g>
+        {/* foguete */}
+        <g transform="translate(400 300)">
+          <ellipse cx="0" cy="2" rx="34" ry="6" fill="#000" opacity="0.18" />
+          <path className="mo-flame" d="M-8 -6 Q0 22 8 -6Z" fill="#FFB347" opacity="0" />
+          <path d="M-18 -6 L-30 2 L-22 -26Z M18 -6 L30 2 L22 -26Z" fill="#FF6F91" />
+          <path d="M0 -108 C22 -86 24 -40 18 -6 H-18 C-24 -40 -22 -86 0 -108Z" fill="#F7F8FF" />
+          <path d="M0 -108 C10 -98 15 -88 17 -78 H-17 C-15 -88 -10 -98 0 -108Z" fill="#FF6F91" />
+          <circle cx="0" cy="-54" r="11" fill="#8E94B8" />
+          <circle cx="0" cy="-54" r="8" fill="#8FD3FF" />
+          <circle cx="-3" cy="-57" r="2.5" fill="#FFFFFF" opacity="0.8" />
+        </g>
+        {/* chão da Lua com crateras */}
+        <path d="M0 300 Q200 286 370 296 T740 292 V430 H0Z" fill="url(#mo-ground)" />
+        {[[90, 340, 40, 10], [300, 410, 58, 13], [520, 350, 44, 10], [660, 404, 52, 12], [180, 392, 26, 7], [620, 322, 22, 5], [440, 384, 20, 5]].map(([x, y, rx, ry], i) => (
+          <g key={i}>
+            <ellipse cx={x} cy={y} rx={rx} ry={ry} fill="#8E93B2" />
+            <ellipse cx={x} cy={y + ry * 0.25} rx={rx * 0.82} ry={ry * 0.7} fill="#9DA2C0" />
+            <path d={`M${x - rx} ${y} A${rx} ${ry} 0 0 0 ${x + rx} ${y}`} fill="none" stroke="#D5D8EA" strokeWidth="2" opacity="0.7" />
+          </g>
+        ))}
+        {/* pedrinhas */}
+        {[[40, 380], [250, 330], [470, 322], [560, 420], [720, 360], [150, 312]].map(([x, y], i) => (
+          <ellipse key={i} cx={x} cy={y} rx={7 + (i % 3) * 3} ry={4 + (i % 2) * 2} fill="#8A8FAE" />
+        ))}
+        {/* bandeirinha do Hami */}
+        <g transform="translate(560 318)">
+          <path d="M0 0 V-46" stroke="#C6CAE2" strokeWidth="3" />
+          <path className="mo-flag" d="M0 -46 h30 l-6 9 6 9 h-30Z" fill="#FF8FB1" />
+          <path d="M12 -38 c-3 -3 -7 0 -3 4 l3 3 3 -3 c4 -4 0 -7 -3 -4Z" fill="#FFFFFF" />
+        </g>
+        {/* pegadinhas no chão */}
+        {[[300, 350], [318, 362], [336, 352], [354, 366], [372, 356]].map(([x, y], i) => (
+          <ellipse key={i} cx={x} cy={y} rx="5" ry="2.6" fill="#8E93B2" opacity="0.7" />
+        ))}
+      </svg>
+      {children && <div className="od-pet">{children}</div>}
+    </div>
+  );
+}
 
 export function Outdoors({ period = 'tarde', height = 430, children }: { period?: Period; height?: number; children?: ReactNode }) {
   const p = PAL[period];

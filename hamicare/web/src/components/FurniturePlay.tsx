@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { Hamster } from './Hamster';
 import { SleepingHami } from './SleepingHami';
+import { BathPhoto } from './HamiPhoto';
 import { toast } from './ui';
 import type { UseKind } from './Room';
 import { care, useApp } from '../lib/store';
@@ -21,19 +22,13 @@ const USE_LINE: Record<UseKind, string> = {
 export function UsePet({ kind, w }: { kind: UseKind; w: number }) {
   const s = useApp();
   const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
-  if (kind === 'deitar') return <SleepingHami fur={s.pet.fur} outfit={s.pet.outfit} size={clamp(w * 0.72, 90, 190)} />;
-  const size = kind === 'banho' ? clamp(w * 0.62, 80, 150) : kind === 'sentar' ? clamp(w * 0.5, 70, 140) : kind === 'correr' ? clamp(w * 0.58, 60, 130) : clamp(w * 0.45, 60, 120);
+  if (kind === 'deitar') return <SleepingHami fur={s.pet.fur} size={clamp(w * 0.78, 90, 210)} />;
+  // No banho, a foto (tina de madeira, espuma, patinho e toalha) fica no lugar da banheira.
+  if (kind === 'banho') return <BathPhoto fur={s.pet.fur} width={clamp(w * 1.22, 130, 300)} />;
+  const size = kind === 'sentar' ? clamp(w * 0.5, 70, 140) : kind === 'correr' ? clamp(w * 0.58, 60, 130) : clamp(w * 0.45, 60, 120);
   return (
     <div className={`use-pet use-pet-${kind}`}>
-      <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={kind === 'banho' ? { ...s.pet.outfit, roupa: null } : s.pet.outfit} size={size} mood={kind === 'banho' ? 'calmo' : kind === 'sentar' ? 'feliz' : 'animado'} wet={kind === 'banho'} idle={kind === 'sentar'} growth={1} label="" />
-      {kind === 'banho' && (
-        <span className="use-bubbles" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-          <i />
-        </span>
-      )}
+      <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} size={size} mood={kind === 'sentar' ? 'feliz' : 'animado'} idle={kind === 'sentar'} growth={1} label="" />
     </div>
   );
 }
@@ -42,12 +37,17 @@ export function useFurniturePlay(busy: boolean) {
   const s = useApp();
   const [use, setUse] = useState<{ uid: string; kind: UseKind; id: number } | null>(null);
   const timer = useRef<number | undefined>(undefined);
-  function useItem(uid: string, kind: UseKind) {
-    if (s.pet.sleeping) return toast(`${s.pet.name} está dormindo. Shhh…`);
-    if (busy) return toast(`${s.pet.name} está passeando agora.`);
-    if (use?.uid === uid) return setUse(null);
+  /** `quiet`: ele já estava assim quando a pessoa abriu o app (sem som, sem contar cuidado, fica até tocar). */
+  function useItem(uid: string, kind: UseKind, quiet = false) {
+    if (!quiet && s.pet.sleeping) return toast(`${s.pet.name} está dormindo. Shhh…`);
+    if (busy) return quiet ? undefined : toast(`${s.pet.name} está passeando agora.`);
+    if (use?.uid === uid) {
+      if (use.kind === 'deitar') play('squeak');
+      return setUse(null);
+    }
     const id = Date.now();
     setUse({ uid, kind, id });
+    if (quiet) return;
     play(USE_SOUND[kind]);
     if (kind === 'banho') care('banho');
     if (kind === 'correr' || kind === 'balancar') care('brincar');

@@ -42,6 +42,7 @@ export const WALL_TRIM: Record<string, WallTrim> = {
   'p-castelo': W('#B9AFD0', '#8E83AE', '#B3263D', '#F6C445', 'arco'),
   'p-espaco': W('#2A2F66', '#5A5FA6', '#A57CF0', '#E6D2FF', 'vigia'),
   'p-celeste': W('#FFFFFF', '#F2C94C', '#FFF3C9', '#FFFFFF', 'arco'),
+  'p-lua': W(null, '#A7AACB', '#A7AACB', '#D9DCEF', 'vigia'),
 };
 
 export const trimOf = (wallpaper: string) => WALL_TRIM[wallpaper] ?? WALL_TRIM['p-creme'];

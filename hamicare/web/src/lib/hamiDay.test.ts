@@ -39,9 +39,9 @@ describe('atividade de cada visita', () => {
       last = a;
     }
   });
-  it('de dia a soneca é rara; de noite é mais comum', () => {
-    const count = (hour: number) => Array.from({ length: 1000 }, (_, i) => pickActivity(null, hour, (i + 0.5) / 1000)).filter((a) => a === 'soneca').length;
-    expect(count(14)).toBeLessThan(80);
+  it('de dia a soneca (no chão ou na cama) é rara; de noite é mais comum', () => {
+    const count = (hour: number) => Array.from({ length: 1000 }, (_, i) => pickActivity(null, hour, (i + 0.5) / 1000)).filter((a) => a === 'soneca' || a === 'cama').length;
+    expect(count(14)).toBeLessThan(120);
     expect(count(23)).toBeGreaterThan(300);
     expect(ACTIVITY_ORDER.length).toBeGreaterThanOrEqual(8);
   });

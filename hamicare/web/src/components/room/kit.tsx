@@ -12,7 +12,13 @@ export type Place = 'chao' | 'parede' | 'tapete';
 export function mix(a: string, b: string, t: number) {
   const p = (h: string) => {
     const x = h.replace('#', '');
-    const f = x.length === 3 ? x.split('').map((c) => c + c).join('') : x;
+    const f =
+      x.length === 3
+        ? x
+            .split('')
+            .map((c) => c + c)
+            .join('')
+        : x;
     return [0, 2, 4].map((i) => parseInt(f.slice(i, i + 2), 16));
   };
   const [r1, g1, b1] = p(a);
@@ -335,14 +341,24 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
         <S w={120} h={180}>
           <rect x="6" y="6" width="108" height="164" rx="12" fill={c1} />
           <rect x="16" y="16" width="88" height="144" rx="6" fill={dk(c1, 0.12)} />
-          {[56, 104].map((y) => <rect key={y} x="16" y={y} width="88" height="7" fill={c1} />)}
+          {[56, 104].map((y) => (
+            <rect key={y} x="16" y={y} width="88" height="7" fill={c1} />
+          ))}
           {/* livros simples e uma plantinha */}
-          {[[22, '#E9A0A8'], [32, '#9CC8E8'], [42, '#F2D27A'], [52, '#A8D8B0']].map(([x, c]) => (
+          {[
+            [22, '#E9A0A8'],
+            [32, '#9CC8E8'],
+            [42, '#F2D27A'],
+            [52, '#A8D8B0'],
+          ].map(([x, c]) => (
             <rect key={x as number} x={x as number} y="26" width="9" height="30" rx="2" fill={c as string} />
           ))}
           <rect x="74" y="40" width="20" height="16" rx="5" fill="#D9895E" />
           <path d="M84 40 Q74 30 76 20 Q84 28 86 38Z M84 40 Q92 28 100 26 Q96 36 86 40Z" fill="#6CB884" />
-          {[[24, '#B9A8E8'], [36, '#F4B183']].map(([x, c]) => (
+          {[
+            [24, '#B9A8E8'],
+            [36, '#F4B183'],
+          ].map(([x, c]) => (
             <rect key={x as number} x={x as number} y="72" width="10" height="32" rx="2" fill={c as string} />
           ))}
           <rect x="58" y="88" width="36" height="16" rx="4" fill="#F7F1E8" />
@@ -366,7 +382,9 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <rect x="14" y="94" width="44" height="18" rx="3" fill={lt(c1, 0.22)} />
           <rect x="63" y="94" width="44" height="18" rx="3" fill={lt(c1, 0.22)} />
           <rect x="112" y="94" width="44" height="18" rx="3" fill={lt(c1, 0.22)} />
-          {[36, 85, 134].map((x) => <rect key={x} x={x - 6} y="101" width="12" height="4" rx="2" fill={GOLD} />)}
+          {[36, 85, 134].map((x) => (
+            <rect key={x} x={x - 6} y="101" width="12" height="4" rx="2" fill={GOLD} />
+          ))}
           <Plant x={154} y={80} s={0.7} pot={c2} />
           <Legs xs={[12, 151]} y={117} h={10} c={dk(c1, 0.35)} />
         </S>
@@ -436,10 +454,14 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <rect x="44" y="20" width="36" height="20" rx="5" fill={c2} />
           <rect x="40" y="18" width="44" height="5" rx="2.5" fill={dk(c2, 0.15)} />
           <rect x="4" y="38" width="122" height="10" rx="4" fill="#D6DBE3" />
-          {[30, 98].map((x) => <ellipse key={x} cx={x} cy="42" rx="12" ry="3" fill="#3A3A48" />)}
+          {[30, 98].map((x) => (
+            <ellipse key={x} cx={x} cy="42" rx="12" ry="3" fill="#3A3A48" />
+          ))}
           <rect x="8" y="46" width="114" height="84" rx="6" fill={c1} />
           <rect x="16" y="52" width="98" height="10" rx="3" fill={lt(c1, 0.25)} />
-          {[30, 52, 74, 96].map((x) => <circle key={x} cx={x} cy="57" r="3.5" fill={dk(c1, 0.25)} />)}
+          {[30, 52, 74, 96].map((x) => (
+            <circle key={x} cx={x} cy="57" r="3.5" fill={dk(c1, 0.25)} />
+          ))}
           <rect x="18" y="68" width="94" height="52" rx="6" fill={dk(c1, 0.15)} />
           <rect x="28" y="78" width="74" height="34" rx="5" fill="#3A3A48" />
           <rect x="34" y="84" width="22" height="6" rx="3" fill="#FF9A4D" opacity="0.7" />
@@ -459,7 +481,9 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           {[26, 104].map((x) => (
             <g key={x}>
               <rect x={x - 6} y="54" width="12" height="134" rx="4" fill="#E8C99B" />
-              {Array.from({ length: 12 }, (_, i) => <path key={i} d={`M${x - 6} ${62 + i * 10} L${x + 6} ${58 + i * 10}`} stroke="#C9A06A" strokeWidth="2" />)}
+              {Array.from({ length: 12 }, (_, i) => (
+                <path key={i} d={`M${x - 6} ${62 + i * 10} L${x + 6} ${58 + i * 10}`} stroke="#C9A06A" strokeWidth="2" />
+              ))}
             </g>
           ))}
           {/* plataformas */}
@@ -469,7 +493,9 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <rect x="2" y="186" width="126" height="10" rx="5" fill={dk(c1, 0.12)} />
           {/* escadinha */}
           <path d="M78 156 L96 114 M88 158 L106 116" stroke={WOOD} strokeWidth="3" />
-          {[0, 1, 2, 3].map((i) => <path key={i} d={`M${82 + i * 4.5} ${148 - i * 10} H${92 + i * 4.5}`} stroke={WOOD} strokeWidth="3" />)}
+          {[0, 1, 2, 3].map((i) => (
+            <path key={i} d={`M${82 + i * 4.5} ${148 - i * 10} H${92 + i * 4.5}`} stroke={WOOD} strokeWidth="3" />
+          ))}
           {/* bolinha pendurada */}
           <path d="M30 114 V134" stroke="#8A6A4F" strokeWidth="1.5" />
           <circle cx="30" cy="138" r="7" fill={c2} />
@@ -549,7 +575,9 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <Books x={44} y={60} n={5} seed={2} h={24} />
           <rect x="94" y="36" width="22" height="24" rx="6" fill="#BFE3FF" opacity="0.85" />
           <rect x="96" y="32" width="18" height="6" rx="2" fill={c1} />
-          {[0, 1, 2].map((i) => <circle key={i} cx={100 + i * 5} cy={50 - (i % 2) * 4} r="3" fill={['#FF8FB4', '#FFD34D', '#7CC39A'][i]} />)}
+          {[0, 1, 2].map((i) => (
+            <circle key={i} cx={100 + i * 5} cy={50 - (i % 2) * 4} r="3" fill={['#FF8FB4', '#FFD34D', '#7CC39A'][i]} />
+          ))}
           <rect x="122" y="34" width="26" height="26" rx="3" fill={GOLD} />
           <rect x="126" y="38" width="18" height="18" rx="2" fill={lt(c1, 0.4)} />
           <path d="M135 52 c-5 -6 -9 -1 -5 3 l5 4 5 -4 c4 -4 0 -9 -5 -3 Z" fill={c1} />
@@ -601,15 +629,31 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <path d="M40 0 V60 M40 4 L22 70 M40 4 L58 70" stroke="#C9A06A" strokeWidth="2" />
           <path d="M18 66 H62 L56 92 H24 Z" fill={c1} />
           <rect x="16" y="62" width="48" height="8" rx="4" fill={dk(c1, 0.12)} />
-          {[[24, 1], [40, 0], [56, 1], [32, 2], [50, 2]].map(([x, k], i) => (
+          {[
+            [24, 1],
+            [40, 0],
+            [56, 1],
+            [32, 2],
+            [50, 2],
+          ].map(([x, k], i) => (
             <g key={i}>
               <path d={`M${x} 70 C${x - 8} ${100 + k * 10} ${x + 6} ${120 + k * 12} ${x - 2} ${150 + k * 6}`} stroke="#5FAE84" strokeWidth="2.5" fill="none" />
               {[0, 1, 2, 3].map((j) => (
-                <ellipse key={j} cx={x - 2 + (j % 2 ? 5 : -5)} cy={86 + j * 16 + k * 6} rx="6" ry="4" fill={j % 2 ? '#7CC39A' : '#4F9A63'} transform={`rotate(${j % 2 ? 30 : -30} ${x - 2 + (j % 2 ? 5 : -5)} ${86 + j * 16 + k * 6})`} />
+                <ellipse
+                  key={j}
+                  cx={x - 2 + (j % 2 ? 5 : -5)}
+                  cy={86 + j * 16 + k * 6}
+                  rx="6"
+                  ry="4"
+                  fill={j % 2 ? '#7CC39A' : '#4F9A63'}
+                  transform={`rotate(${j % 2 ? 30 : -30} ${x - 2 + (j % 2 ? 5 : -5)} ${86 + j * 16 + k * 6})`}
+                />
               ))}
             </g>
           ))}
-          {[30, 46].map((x) => <ellipse key={x} cx={x} cy="62" rx="10" ry="6" fill="#5FAE84" />)}
+          {[30, 46].map((x) => (
+            <ellipse key={x} cx={x} cy="62" rx="10" ry="6" fill="#5FAE84" />
+          ))}
         </S>
       );
     case 'k-luminaria-teto':
@@ -657,7 +701,13 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
     case 'k-vaso-flores':
       return (
         <S w={70} h={100}>
-          {[[20, '#FF8FB4'], [35, c2], [50, '#FFD34D'], [28, '#FF6F91'], [44, '#FF8FB4']].map(([x, c], i) => (
+          {[
+            [20, '#FF8FB4'],
+            [35, c2],
+            [50, '#FFD34D'],
+            [28, '#FF6F91'],
+            [44, '#FF8FB4'],
+          ].map(([x, c], i) => (
             <g key={i}>
               <path d={`M35 62 Q${x} 40 ${x} ${18 + (i % 2) * 10}`} stroke="#5FAE84" strokeWidth="2.5" fill="none" />
               <path d={`M${(x as number) - 6} ${18 + (i % 2) * 10} q6 -14 12 0 q-6 6 -12 0 Z`} fill={c as string} />
@@ -686,7 +736,9 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <path d="M52 16 H208 L234 62 H26 Z" fill={c2} />
           <path d="M70 26 H190 L206 52 H54 Z" fill={lt(c1, 0.25)} />
           <path d="M130 28 L150 39 L130 50 L110 39 Z" fill={c1} />
-          {Array.from({ length: 22 }, (_, i) => <path key={i} d={`M${12 + i * 11} 70 v8`} stroke={lt(c2, 0.2)} strokeWidth="2.5" strokeLinecap="round" />)}
+          {Array.from({ length: 22 }, (_, i) => (
+            <path key={i} d={`M${12 + i * 11} 70 v8`} stroke={lt(c2, 0.2)} strokeWidth="2.5" strokeLinecap="round" />
+          ))}
         </S>
       );
     case 'k-tapete-coracao':
@@ -725,8 +777,12 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <path d="M52 22 q10 -4 20 6" stroke={lt(c2, 0.4)} strokeWidth="2" fill="none" />
           <path d="M70 36 q14 10 6 30" stroke={c2} strokeWidth="1.5" fill="none" />
           <path d="M6 38 H94 L84 80 H16 Z" fill="#D9A766" />
-          {[48, 58, 68].map((y) => <path key={y} d={`M${8 + (y - 38) * 0.2} ${y} H${92 - (y - 38) * 0.2}`} stroke="#B8854A" strokeWidth="2.5" />)}
-          {Array.from({ length: 8 }, (_, i) => <path key={i} d={`M${16 + i * 10} 40 L${20 + i * 8.5} 78`} stroke="#C9965A" strokeWidth="2" />)}
+          {[48, 58, 68].map((y) => (
+            <path key={y} d={`M${8 + (y - 38) * 0.2} ${y} H${92 - (y - 38) * 0.2}`} stroke="#B8854A" strokeWidth="2.5" />
+          ))}
+          {Array.from({ length: 8 }, (_, i) => (
+            <path key={i} d={`M${16 + i * 10} 40 L${20 + i * 8.5} 78`} stroke="#C9965A" strokeWidth="2" />
+          ))}
           <rect x="4" y="34" width="92" height="8" rx="4" fill="#E8BC80" />
         </S>
       );
@@ -753,7 +809,9 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <rect x="4" y="22" width="72" height="38" rx="16" fill={c1} />
           <ellipse cx="40" cy="22" rx="36" ry="12" fill={lt(c1, 0.25)} />
           <circle cx="40" cy="22" r="3.5" fill={c2} />
-          {[16, 28, 52, 64].map((x) => <path key={x} d={`M40 22 L${x} ${x < 40 ? 16 : 28}`} stroke={lt(c1, 0.05)} strokeWidth="1.5" />)}
+          {[16, 28, 52, 64].map((x) => (
+            <path key={x} d={`M40 22 L${x} ${x < 40 ? 16 : 28}`} stroke={lt(c1, 0.05)} strokeWidth="1.5" />
+          ))}
           <path d="M10 40 H70" stroke={c2} strokeWidth="4" opacity="0.7" />
         </S>
       );
@@ -766,14 +824,18 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <rect x="179" y="14" width="9" height="186" rx="4" fill={dk(c2, 0.1)} />
           <rect x="6" y="8" width="188" height="12" rx="6" fill={dk(c2, 0.05)} />
           <path d={`M8 18 H192 V30 ${Array.from({ length: 9 }, (_, i) => `Q${181 - i * 20} 42 ${171 - i * 20} 30`).join(' ')} Q14 42 8 30 Z`} fill={c1} />
-          {Array.from({ length: 12 }, (_, i) => <circle key={i} cx={16 + i * 15.5} cy={36 + (i % 2) * 4} r="2.6" fill="#FFE27A" className="bulb" style={{ animationDelay: `${(i % 4) * 0.3}s` }} />)}
+          {Array.from({ length: 12 }, (_, i) => (
+            <circle key={i} cx={16 + i * 15.5} cy={36 + (i % 2) * 4} r="2.6" fill="#FFE27A" className="bulb" style={{ animationDelay: `${(i % 4) * 0.3}s` }} />
+          ))}
           <path d="M14 30 Q8 90 34 132 Q28 90 30 32 Z" fill={lt(c1, 0.35)} opacity="0.92" />
           <path d="M186 30 Q192 90 166 132 Q172 90 170 32 Z" fill={lt(c1, 0.35)} opacity="0.92" />
           <ellipse cx="30" cy="104" rx="7" ry="4" fill={c1} />
           <ellipse cx="170" cy="104" rx="7" ry="4" fill={c1} />
           <g transform="translate(0 58)">
             <path d="M24 78 V38 Q24 18 46 18 H154 Q176 18 176 38 V78 Z" fill={c2} />
-            {[64, 100, 136].map((x) => <circle key={x} cx={x} cy="44" r="2.6" fill={dk(c2, 0.18)} />)}
+            {[64, 100, 136].map((x) => (
+              <circle key={x} cx={x} cy="44" r="2.6" fill={dk(c2, 0.18)} />
+            ))}
             <path d="M26 74 H174 L188 104 H12 Z" fill="#FFFFFF" />
             <rect x="40" y="58" width="52" height="26" rx="12" fill="#FFFFFF" stroke="#EEE" strokeWidth="2" />
             <rect x="108" y="58" width="52" height="26" rx="12" fill="#FFFFFF" stroke="#EEE" strokeWidth="2" />
@@ -781,7 +843,9 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
             <path d={heart(134, 71, 7)} fill={c1} />
             <path d="M18 88 H182 L194 116 H6 Z" fill={c1} />
             <path d="M22 86 H178 L182 96 H18 Z" fill={lt(c1, 0.45)} />
-            {[40, 80, 120, 160].map((x) => <path key={x} d={sparkleD(x, 106, 4)} fill="#FFFFFF" opacity="0.8" />)}
+            {[40, 80, 120, 160].map((x) => (
+              <path key={x} d={sparkleD(x, 106, 4)} fill="#FFFFFF" opacity="0.8" />
+            ))}
             <rect x="4" y="116" width="192" height="18" rx="6" fill={dk(c1, 0.12)} />
             <rect x="4" y="132" width="192" height="8" rx="4" fill={dk(c2, 0.1)} />
           </g>
@@ -790,7 +854,10 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
     case 'k-castelinho':
       return (
         <S w={150} h={180}>
-          {[[22, 40], [128, 40]].map(([x, y]) => (
+          {[
+            [22, 40],
+            [128, 40],
+          ].map(([x, y]) => (
             <g key={x}>
               <rect x={x - 16} y={y + 18} width="32" height={150 - y} fill={lt(c2, 0.1)} />
               <path d={`M${x - 20} ${y + 20} L${x} ${y - 26} L${x + 20} ${y + 20} Z`} fill={c1} />
@@ -800,8 +867,12 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
             </g>
           ))}
           <rect x="34" y="70" width="82" height="100" fill={c2} />
-          {[0, 1, 2, 3, 4].map((i) => <rect key={i} x={34 + i * 18} y="60" width="10" height="12" fill={c2} />)}
-          {[86, 102, 118, 134, 150].map((y) => <path key={y} d={`M34 ${y} H116`} stroke={dk(c2, 0.08)} strokeWidth="1.5" />)}
+          {[0, 1, 2, 3, 4].map((i) => (
+            <rect key={i} x={34 + i * 18} y="60" width="10" height="12" fill={c2} />
+          ))}
+          {[86, 102, 118, 134, 150].map((y) => (
+            <path key={y} d={`M34 ${y} H116`} stroke={dk(c2, 0.08)} strokeWidth="1.5" />
+          ))}
           <path d="M58 170 V132 Q75 112 92 132 V170 Z" fill="#6A4229" />
           <circle cx="75" cy="94" r="10" fill="#FFF3B0" stroke={dk(c2, 0.15)} strokeWidth="3" />
           <path d={heart(75, 96, 7)} fill={c1} />
@@ -814,8 +885,12 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <path d="M14 168 L40 8 L66 168 M74 168 L100 8 L126 168" stroke={WOOD} strokeWidth="8" strokeLinecap="round" fill="none" />
           <rect x="30" y="4" width="80" height="10" rx="5" fill={dk(WOOD, 0.1)} />
           <path d="M50 12 V118 M90 12 V118" stroke="#C9A06A" strokeWidth="2.5" />
-          {[30, 60, 90].map((y) => <circle key={y} cx="50" cy={y} r="4" fill={['#FF8FB4', '#FFD34D', '#7CC39A'][y / 30 - 1]} />)}
-          {[45, 75].map((y) => <circle key={y} cx="90" cy={y} r="4" fill={['#FFD34D', '#FF8FB4'][(y - 45) / 30]} />)}
+          {[30, 60, 90].map((y) => (
+            <circle key={y} cx="50" cy={y} r="4" fill={['#FF8FB4', '#FFD34D', '#7CC39A'][y / 30 - 1]} />
+          ))}
+          {[45, 75].map((y) => (
+            <circle key={y} cx="90" cy={y} r="4" fill={['#FFD34D', '#FF8FB4'][(y - 45) / 30]} />
+          ))}
           <rect x="40" y="116" width="60" height="10" rx="4" fill={WOOD} />
           <rect x="44" y="106" width="52" height="12" rx="6" fill={c1} />
           <path d={heart(70, 113, 5)} fill={c2} />
@@ -825,7 +900,9 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
       return (
         <S w={160} h={130}>
           <path d="M18 126 V20 M48 126 V20" stroke={c2} strokeWidth="6" strokeLinecap="round" />
-          {[36, 58, 80, 102].map((y) => <path key={y} d={`M18 ${y} H48`} stroke={c2} strokeWidth="5" strokeLinecap="round" />)}
+          {[36, 58, 80, 102].map((y) => (
+            <path key={y} d={`M18 ${y} H48`} stroke={c2} strokeWidth="5" strokeLinecap="round" />
+          ))}
           <rect x="10" y="14" width="46" height="10" rx="5" fill={dk(c2, 0.1)} />
           <path d="M50 20 Q90 24 110 80 Q122 112 156 118 L156 128 Q112 126 98 86 Q82 36 50 32 Z" fill={c1} />
           <path d="M54 24 Q88 30 104 78" stroke={lt(c1, 0.45)} strokeWidth="4" fill="none" strokeLinecap="round" />
@@ -838,7 +915,9 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <ellipse cx="100" cy="174" rx="18" ry="5" fill="#9AA2B4" />
           <path d="M60 6 V30" stroke="#8A90A0" strokeWidth="3" />
           <ellipse cx="54" cy="96" rx="46" ry="62" fill="#D9A766" />
-          {Array.from({ length: 7 }, (_, i) => <path key={i} d={`M${16 + i * 13} 52 Q54 ${96 + (i - 3) * 4} ${16 + i * 13} 146`} stroke="#B8854A" strokeWidth="1.5" fill="none" opacity="0.7" />)}
+          {Array.from({ length: 7 }, (_, i) => (
+            <path key={i} d={`M${16 + i * 13} 52 Q54 ${96 + (i - 3) * 4} ${16 + i * 13} 146`} stroke="#B8854A" strokeWidth="1.5" fill="none" opacity="0.7" />
+          ))}
           <ellipse cx="54" cy="104" rx="34" ry="44" fill={dk('#D9A766', 0.25)} />
           <ellipse cx="54" cy="122" rx="32" ry="20" fill={c1} />
           <ellipse cx="44" cy="96" rx="14" ry="12" fill={c2} />
@@ -851,20 +930,40 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
         <S w={150} h={160}>
           <path d="M60 4 L74 24 M90 4 L76 24" stroke={WOOD} strokeWidth="4" strokeLinecap="round" />
           <path d="M75 20 L8 154 H142 Z" fill={c1} />
-          {[0.35, 0.6, 0.85].map((t) => <path key={t} d={`M${75 - 67 * t} ${20 + 134 * t} H${75 + 67 * t}`} stroke={c2} strokeWidth="5" />)}
+          {[0.35, 0.6, 0.85].map((t) => (
+            <path key={t} d={`M${75 - 67 * t} ${20 + 134 * t} H${75 + 67 * t}`} stroke={c2} strokeWidth="5" />
+          ))}
           <path d="M75 52 L44 154 H106 Z" fill="#4A3B5A" />
           <path d="M75 52 L40 154 L30 154 Q48 110 75 52 Z" fill={lt(c1, 0.2)} />
           <path d="M75 52 L110 154 L120 154 Q102 110 75 52 Z" fill={lt(c1, 0.2)} />
           <ellipse cx="75" cy="146" rx="24" ry="7" fill={c2} />
-          {Array.from({ length: 8 }, (_, i) => <circle key={i} cx={58 + i * 5} cy={70 + Math.abs(i - 3.5) * 3} r="2" fill="#FFE27A" className="bulb" style={{ animationDelay: `${(i % 4) * 0.3}s` }} />)}
-          {[0, 1, 2, 3, 4].map((i) => <path key={i} d={`M${32 + i * 22} 104 l9 0 -4.5 10 Z`} fill={['#FF8FB4', '#FFD34D', '#7FB8F0', '#7CC39A', '#B399F0'][i]} />)}
+          {Array.from({ length: 8 }, (_, i) => (
+            <circle key={i} cx={58 + i * 5} cy={70 + Math.abs(i - 3.5) * 3} r="2" fill="#FFE27A" className="bulb" style={{ animationDelay: `${(i % 4) * 0.3}s` }} />
+          ))}
+          {[0, 1, 2, 3, 4].map((i) => (
+            <path key={i} d={`M${32 + i * 22} 104 l9 0 -4.5 10 Z`} fill={['#FF8FB4', '#FFD34D', '#7FB8F0', '#7CC39A', '#B399F0'][i]} />
+          ))}
         </S>
       );
     case 'k-sofa-nuvem':
       return (
         <S w={200} h={120}>
-          {[[34, 46, 26], [70, 34, 30], [110, 30, 32], [150, 36, 30], [176, 52, 22]].map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} fill={c1} />)}
-          {[[60, 30, 10], [104, 22, 12], [146, 28, 10]].map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} fill="#FFFFFF" opacity="0.45" />)}
+          {[
+            [34, 46, 26],
+            [70, 34, 30],
+            [110, 30, 32],
+            [150, 36, 30],
+            [176, 52, 22],
+          ].map(([x, y, r], i) => (
+            <circle key={i} cx={x} cy={y} r={r} fill={c1} />
+          ))}
+          {[
+            [60, 30, 10],
+            [104, 22, 12],
+            [146, 28, 10],
+          ].map(([x, y, r], i) => (
+            <circle key={i} cx={x} cy={y} r={r} fill="#FFFFFF" opacity="0.45" />
+          ))}
           <rect x="10" y="56" width="180" height="40" rx="20" fill={lt(c1, 0.2)} />
           <circle cx="20" cy="70" r="20" fill={c1} />
           <circle cx="180" cy="70" r="20" fill={c1} />
@@ -907,13 +1006,22 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <path d="M20 54 Q20 28 60 28 H130 Q190 28 190 70 V96 H20 Z" fill={c1} />
           <path d="M20 54 Q20 40 50 40" stroke={lt(c1, 0.5)} strokeWidth="3" fill="none" />
           <rect x="16" y="94" width="120" height="20" rx="3" fill="#FFFFFF" />
-          {Array.from({ length: 14 }, (_, i) => <path key={i} d={`M${24 + i * 8} 94 V114`} stroke="#D6DBE3" strokeWidth="1" />)}
-          {[0, 1, 3, 4, 5, 7, 8, 10, 11, 12].map((i) => <rect key={i} x={29 + i * 8} y="94" width="5" height="12" fill="#2B2224" />)}
+          {Array.from({ length: 14 }, (_, i) => (
+            <path key={i} d={`M${24 + i * 8} 94 V114`} stroke="#D6DBE3" strokeWidth="1" />
+          ))}
+          {[0, 1, 3, 4, 5, 7, 8, 10, 11, 12].map((i) => (
+            <rect key={i} x={29 + i * 8} y="94" width="5" height="12" fill="#2B2224" />
+          ))}
           <rect x="16" y="112" width="174" height="10" rx="3" fill={dk(c1, 0.15)} />
           <Legs xs={[24, 120, 178]} y={120} h={36} c={dk(c1, 0.3)} />
           <rect x="40" y="132" width="70" height="10" rx="4" fill={c2} />
           <Legs xs={[46, 98]} y={140} h={16} c={dk(c1, 0.3)} />
-          {[[150, 20], [168, 8]].map(([x, y], i) => <path key={i} d={`M${x} ${y} v12 a4 3 0 1 1 -3 -3`} stroke={dk(c1, 0.5)} strokeWidth="2" fill="none" />)}
+          {[
+            [150, 20],
+            [168, 8],
+          ].map(([x, y], i) => (
+            <path key={i} d={`M${x} ${y} v12 a4 3 0 1 1 -3 -3`} stroke={dk(c1, 0.5)} strokeWidth="2" fill="none" />
+          ))}
         </S>
       );
     case 'k-aquario':
@@ -922,15 +1030,26 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <rect x="6" y="4" width="118" height="80" rx="8" fill="#BFE9F5" opacity="0.9" />
           <rect x="6" y="4" width="118" height="12" rx="6" fill="#DDF4FB" />
           <path d="M6 68 Q36 60 66 68 T124 66 V84 H6 Z" fill="#F2DDA8" />
-          {[22, 40, 96, 110].map((x, i) => <path key={x} d={`M${x} 72 Q${x - 6} ${52 - i * 2} ${x + 2} ${34 + i * 4}`} stroke="#5FAE84" strokeWidth="3" fill="none" />)}
-          {[[60, 36, '#FF9A4D'], [86, 54, c2]].map(([x, y, col], i) => (
+          {[22, 40, 96, 110].map((x, i) => (
+            <path key={x} d={`M${x} 72 Q${x - 6} ${52 - i * 2} ${x + 2} ${34 + i * 4}`} stroke="#5FAE84" strokeWidth="3" fill="none" />
+          ))}
+          {[
+            [60, 36, '#FF9A4D'],
+            [86, 54, c2],
+          ].map(([x, y, col], i) => (
             <g key={i}>
               <ellipse cx={x as number} cy={y as number} rx="9" ry="6" fill={col as string} />
               <path d={`M${(x as number) + 8} ${y} l8 -6 v12 Z`} fill={col as string} />
               <circle cx={(x as number) - 4} cy={(y as number) - 1} r="1.4" fill={INK} />
             </g>
           ))}
-          {[[48, 26], [52, 18], [50, 10]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r={2 + i * 0.5} fill="none" stroke="#FFFFFF" strokeWidth="1.2" />)}
+          {[
+            [48, 26],
+            [52, 18],
+            [50, 10],
+          ].map(([x, y], i) => (
+            <circle key={i} cx={x} cy={y} r={2 + i * 0.5} fill="none" stroke="#FFFFFF" strokeWidth="1.2" />
+          ))}
           <path d="M14 14 L30 30" stroke="#FFFFFF" strokeWidth="3" opacity="0.6" strokeLinecap="round" />
           <rect x="2" y="84" width="126" height="10" rx="4" fill={dk(c1, 0.1)} />
           <rect x="8" y="92" width="114" height="56" rx="4" fill={c1} />
@@ -1004,7 +1123,9 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
             return (
               <g key={i}>
                 <ellipse cx={x - 7} cy={y + 4} rx="6" ry="3" fill="#7CC39A" transform={`rotate(-30 ${x - 7} ${y + 4})`} />
-                {[0, 72, 144, 216, 288].map((r) => <circle key={r} cx={x + Math.cos((r * Math.PI) / 180) * 4.5} cy={y + Math.sin((r * Math.PI) / 180) * 4.5} r="4" fill={col} />)}
+                {[0, 72, 144, 216, 288].map((r) => (
+                  <circle key={r} cx={x + Math.cos((r * Math.PI) / 180) * 4.5} cy={y + Math.sin((r * Math.PI) / 180) * 4.5} r="4" fill={col} />
+                ))}
                 <circle cx={x} cy={y} r="2.6" fill="#FFD34D" />
               </g>
             );
@@ -1015,8 +1136,21 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
     case 'k-tapete-nuvem':
       return (
         <S w={220} h={80}>
-          {[[50, 40, 34], [92, 30, 36], [140, 30, 34], [178, 42, 30], [110, 52, 34]].map(([x, y, r], i) => <ellipse key={i} cx={x} cy={y} rx={r * 1.4} ry={r * 0.6} fill={c1} />)}
-          {[[92, 34, 26], [140, 34, 22]].map(([x, y, r], i) => <ellipse key={i} cx={x} cy={y} rx={r * 1.4} ry={r * 0.5} fill={lt(c1, 0.5)} />)}
+          {[
+            [50, 40, 34],
+            [92, 30, 36],
+            [140, 30, 34],
+            [178, 42, 30],
+            [110, 52, 34],
+          ].map(([x, y, r], i) => (
+            <ellipse key={i} cx={x} cy={y} rx={r * 1.4} ry={r * 0.6} fill={c1} />
+          ))}
+          {[
+            [92, 34, 26],
+            [140, 34, 22],
+          ].map(([x, y, r], i) => (
+            <ellipse key={i} cx={x} cy={y} rx={r * 1.4} ry={r * 0.5} fill={lt(c1, 0.5)} />
+          ))}
           <path d={starD(118, 40, 8)} fill={c2} />
         </S>
       );
@@ -1027,7 +1161,9 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
             <path key={col} d={`M${10 + i * 14} 86 A${110 - i * 14} ${80 - i * 12} 0 0 1 ${230 - i * 14} 86 Z`} fill={col} />
           ))}
           <path d="M94 86 A26 18 0 0 1 146 86 Z" fill={c1} />
-          {Array.from({ length: 16 }, (_, i) => <path key={i} d={`M${16 + i * 14} 86 v4`} stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />)}
+          {Array.from({ length: 16 }, (_, i) => (
+            <path key={i} d={`M${16 + i * 14} 86 v4`} stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+          ))}
         </S>
       );
     case 'k-pufe-gato':
@@ -1052,7 +1188,9 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
       return (
         <S w={80} h={80}>
           <circle cx="40" cy="40" r="38" fill={dk(WOOD, 0.2)} />
-          {[34, 27, 20, 13, 6].map((r, i) => <circle key={r} cx="40" cy="40" r={r} fill={i % 2 ? '#FFF8EC' : c1} />)}
+          {[34, 27, 20, 13, 6].map((r, i) => (
+            <circle key={r} cx="40" cy="40" r={r} fill={i % 2 ? '#FFF8EC' : c1} />
+          ))}
           <circle cx="40" cy="40" r="2.6" fill={INK} />
           <g transform="rotate(-30 40 40)">
             <path d="M40 40 L66 40" stroke="#8A90A0" strokeWidth="2.4" />
@@ -1080,13 +1218,24 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
     case 'k-colmeia':
       return (
         <S w={120} h={90}>
-          {[[30, 26], [62, 26], [46, 54], [78, 54], [94, 26]].map(([x, y], i) => {
+          {[
+            [30, 26],
+            [62, 26],
+            [46, 54],
+            [78, 54],
+            [94, 26],
+          ].map(([x, y], i) => {
             const hex = `M${x} ${y - 18} L${x + 15} ${y - 9} L${x + 15} ${y + 9} L${x} ${y + 18} L${x - 15} ${y + 9} L${x - 15} ${y - 9} Z`;
             return (
               <g key={i}>
                 <path d={hex} fill={lt(c1, 0.15)} stroke={dk(c1, 0.15)} strokeWidth="3" strokeLinejoin="round" />
                 {i === 0 && <path d={`M${x - 6} ${y + 9} v-12 h4 v12 M${x} ${y + 9} v-15 h4 v15 M${x + 6} ${y + 9} v-10 h4 v10`} stroke={c2} strokeWidth="3" />}
-                {i === 1 && <><circle cx={x} cy={y + 2} r="7" fill="#7CC39A" /><rect x={x - 5} y={y + 6} width="10" height="7" rx="2" fill="#D9825B" /></>}
+                {i === 1 && (
+                  <>
+                    <circle cx={x} cy={y + 2} r="7" fill="#7CC39A" />
+                    <rect x={x - 5} y={y + 6} width="10" height="7" rx="2" fill="#D9825B" />
+                  </>
+                )}
                 {i === 2 && <path d={`M${x - 7} ${y + 8} Q${x} ${y - 10} ${x + 7} ${y + 8} Z`} fill={GOLD} />}
                 {i === 3 && <circle cx={x} cy={y + 2} r="6" fill="#FF9FC2" />}
                 {i === 4 && <rect x={x - 6} y={y - 4} width="12" height="14" rx="2" fill="#7FB8F0" />}
@@ -1135,6 +1284,232 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
           <ellipse cx="50" cy="30" rx="10" ry="5" fill={c2} />
         </S>
       );
+    // ---------- Casa na Lua: móveis lunares ----------
+    case 'k-lua-cama': {
+      // cama flutuante com cabeceira de lua crescente (de carinha dormindo) e coberta de estrelas
+      const moon = c2;
+      return (
+        <S w={200} h={160}>
+          <ellipse cx="100" cy="152" rx="78" ry="6" fill="#7FE3FF" opacity="0.45" />
+          <path d="M70 4 C22 8 2 54 18 92 C30 120 74 132 108 118 C74 116 46 94 44 62 C42 36 52 16 70 4 Z" fill={moon} />
+          <path d="M60 14 C34 24 22 52 30 80" stroke={lt(moon, 0.55)} strokeWidth="5" fill="none" strokeLinecap="round" opacity="0.8" />
+          <path d="M24 66 q5 4 10 0 M40 84 q5 4 10 0" stroke={dk(moon, 0.55)} strokeWidth="2.6" fill="none" strokeLinecap="round" />
+          <ellipse cx="34" cy="80" rx="4.5" ry="3" fill="#FF9FB8" opacity="0.7" />
+          <path d={starD(150, 28, 9)} fill={moon} />
+          <path d={starD(178, 54, 6)} fill={lt(moon, 0.25)} />
+          <path d={sparkleD(126, 14, 6)} fill="#FFFFFF" />
+          {/* base flutuante */}
+          <rect x="14" y="116" width="178" height="22" rx="11" fill="#D9DCEF" />
+          <rect x="14" y="116" width="178" height="7" rx="3.5" fill="#F4F5FB" />
+          <rect x="40" y="130" width="126" height="5" rx="2.5" fill="#7FE3FF" />
+          {/* colchão, travesseiro e coberta */}
+          <rect x="20" y="92" width="170" height="28" rx="12" fill="#FFFFFF" />
+          <rect x="52" y="74" width="58" height="28" rx="13" fill="#FFFFFF" />
+          <path d="M68 86 q10 -6 20 0" stroke="#E4E6F2" strokeWidth="3" fill="none" strokeLinecap="round" />
+          <rect x="70" y="98" width="122" height="32" rx="13" fill={c1} />
+          <rect x="70" y="98" width="122" height="10" rx="5" fill={lt(c1, 0.3)} />
+          {[
+            [96, 116, 5],
+            [130, 112, 4],
+            [160, 120, 5.5],
+            [178, 108, 3.5],
+            [112, 124, 3],
+          ].map(([x, y, r], i) => (
+            <path key={i} d={starD(x, y, r)} fill="#FFE27A" />
+          ))}
+        </S>
+      );
+    }
+    case 'k-lua-poltrona':
+      // poltrona-ovo de nave, com almofada fofinha e pé cromado
+      return (
+        <S w={120} h={160}>
+          <ellipse cx="60" cy="64" rx="54" ry="60" fill="#F4F5FB" />
+          <path d="M60 4 C92 4 114 30 114 64" stroke="#FFFFFF" strokeWidth="6" fill="none" strokeLinecap="round" opacity="0.9" />
+          <path d="M18 70 C18 38 36 22 60 22 C84 22 102 38 102 70 C102 98 84 112 60 112 C36 112 18 98 18 70 Z" fill={dk(c1, 0.28)} />
+          <path d="M24 72 C24 44 40 30 60 30 C80 30 96 44 96 72 C96 94 82 104 60 104 C38 104 24 94 24 72 Z" fill={c1} />
+          <ellipse cx="60" cy="96" rx="36" ry="12" fill={lt(c1, 0.28)} />
+          <ellipse cx="44" cy="64" rx="10" ry="12" fill={lt(c1, 0.18)} />
+          <path d={starD(74, 58, 6)} fill={c2} />
+          <rect x="55" y="122" width="10" height="24" rx="4" fill="#A9AECB" />
+          <ellipse cx="60" cy="148" rx="30" ry="8" fill="#C9CDE3" />
+          <ellipse cx="60" cy="146" rx="22" ry="4" fill="#E9EBF6" />
+        </S>
+      );
+    case 'k-lua-mesa':
+      // mesinha com tampo de meteorito (crateras) num pé de cristal que brilha
+      return (
+        <S w={130} h={110}>
+          <ellipse cx="65" cy="58" rx="20" ry="8" fill="#7FE3FF" opacity="0.4" />
+          <path d="M52 50 L46 100 H84 L78 50 Z" fill="#B7F0FF" />
+          <path d="M60 50 L58 100 M70 50 L72 100" stroke="#FFFFFF" strokeWidth="2.5" opacity="0.7" />
+          <ellipse cx="65" cy="102" rx="34" ry="7" fill="#C9CDE3" />
+          <path d="M8 34 C6 18 26 8 48 10 C62 4 86 6 100 12 C118 12 128 24 122 36 C126 48 108 56 88 54 C70 60 40 58 24 52 C10 50 4 42 8 34 Z" fill={c1} />
+          <path d="M10 34 C14 26 30 20 50 20 C76 18 104 20 120 32" stroke={lt(c1, 0.3)} strokeWidth="4" fill="none" strokeLinecap="round" />
+          <ellipse cx="38" cy="36" rx="11" ry="5" fill={dk(c1, 0.2)} />
+          <ellipse cx="38" cy="35" rx="8" ry="3.4" fill={dk(c1, 0.08)} />
+          <ellipse cx="84" cy="40" rx="8" ry="3.6" fill={dk(c1, 0.2)} />
+          <ellipse cx="104" cy="28" rx="5" ry="2.4" fill={dk(c1, 0.2)} />
+          <ellipse cx="64" cy="26" rx="4" ry="2" fill={dk(c1, 0.16)} />
+          <path d={sparkleD(110, 6, 5)} fill="#FFFFFF" />
+        </S>
+      );
+    case 'k-lua-luminaria':
+      // luminária de pé com um planetinha de anel que brilha
+      return (
+        <S w={90} h={180}>
+          <circle cx="45" cy="40" r="38" fill={c2} opacity="0.22" />
+          <rect x="42" y="66" width="6" height="96" rx="3" fill="#A9AECB" />
+          <ellipse cx="45" cy="166" rx="26" ry="8" fill="#C9CDE3" />
+          <ellipse cx="45" cy="164" rx="18" ry="4" fill="#E9EBF6" />
+          <circle cx="45" cy="40" r="24" fill={c1} />
+          <path d="M26 34 Q45 28 64 36 M24 46 Q45 40 66 48" stroke={lt(c1, 0.35)} strokeWidth="4" fill="none" strokeLinecap="round" />
+          <ellipse cx="45" cy="42" rx="42" ry="10" fill="none" stroke={c2} strokeWidth="5" transform="rotate(-14 45 42)" />
+          <path d="M14 40 A42 10 -14 0 0 86 32" stroke={lt(c2, 0.45)} strokeWidth="2" fill="none" />
+          <ellipse cx="36" cy="30" rx="7" ry="4" fill="#FFFFFF" opacity="0.5" transform="rotate(-30 36 30)" />
+        </S>
+      );
+    case 'k-lua-estante':
+      // estante em forma de foguete, com vigias cheias de livros e pedrinhas da Lua
+      return (
+        <S w={120} h={210}>
+          <path d="M60 4 C84 22 96 52 96 86 V172 H24 V86 C24 52 36 22 60 4 Z" fill="#F4F5FB" />
+          <path d="M60 4 C74 14 84 30 90 48 H30 C36 30 46 14 60 4 Z" fill={c1} />
+          <path d="M24 150 L4 186 L24 182 Z M96 150 L116 186 L96 182 Z" fill={c1} />
+          <rect x="44" y="172" width="32" height="12" rx="3" fill="#A9AECB" />
+          <path d="M48 184 Q60 204 72 184 Z" fill="#FFB347" />
+          <path d="M53 184 Q60 196 67 184 Z" fill="#FFE27A" />
+          <circle cx="60" cy="76" r="20" fill="#A9AECB" />
+          <circle cx="60" cy="76" r="15" fill="#2C2F66" />
+          <Books x={48} y={86} n={3} h={18} seed={2} />
+          <circle cx="60" cy="126" r="20" fill="#A9AECB" />
+          <circle cx="60" cy="126" r="15" fill="#2C2F66" />
+          <ellipse cx="54" cy="134" rx="6" ry="4.5" fill="#B9BDCB" />
+          <ellipse cx="66" cy="133" rx="5" ry="4" fill="#9DA2BC" />
+          <path d={starD(62, 120, 5)} fill="#FFE27A" />
+          <rect x="24" y="100" width="72" height="5" fill={c2} />
+          <path d="M32 58 C34 46 40 36 46 28" stroke="#FFFFFF" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.7" />
+        </S>
+      );
+    case 'k-lua-tapete':
+      // tapete de cratera, com anéis e pegadinhas
+      return (
+        <S w={220} h={70}>
+          <ellipse cx="110" cy="36" rx="106" ry="30" fill={c1} />
+          <ellipse cx="110" cy="36" rx="84" ry="22" fill={dk(c1, 0.1)} />
+          <ellipse cx="110" cy="38" rx="60" ry="14" fill={lt(c1, 0.12)} />
+          <ellipse cx="110" cy="40" rx="34" ry="7" fill={dk(c1, 0.08)} />
+          {[
+            [40, 30, 7, 3],
+            [178, 44, 6, 2.6],
+            [150, 20, 4, 1.8],
+            [64, 52, 5, 2.2],
+          ].map(([x, y, rx, ry], i) => (
+            <ellipse key={i} cx={x} cy={y} rx={rx} ry={ry} fill={dk(c1, 0.16)} />
+          ))}
+          <path d={starD(196, 26, 5)} fill={c2} />
+          <path d={starD(24, 44, 4)} fill={c2} />
+        </S>
+      );
+    case 'k-lua-banheira':
+      // banheira-cápsula de nave, com faixa que brilha e água cheia de bolhas
+      return (
+        <S w={170} h={120}>
+          <path d="M8 30 Q8 108 52 108 H118 Q162 108 162 30 Z" fill="#F4F5FB" />
+          <path d="M14 62 Q85 74 156 62" stroke={c1} strokeWidth="6" fill="none" />
+          <path d="M14 62 Q85 74 156 62" stroke="#FFFFFF" strokeWidth="1.6" fill="none" opacity="0.6" />
+          <ellipse cx="85" cy="30" rx="78" ry="14" fill="#D9DCEF" />
+          <ellipse cx="85" cy="31" rx="70" ry="10" fill="#8FD4F2" />
+          {[
+            [40, 26, 6],
+            [56, 22, 4],
+            [120, 27, 7],
+            [104, 22, 4],
+            [136, 22, 3.5],
+          ].map(([x, y, r], i) => (
+            <circle key={i} cx={x} cy={y} r={r} fill="#FFFFFF" opacity="0.9" />
+          ))}
+          <path d="M150 28 V8 Q150 2 142 2 H130" stroke="#A9AECB" strokeWidth="5" fill="none" strokeLinecap="round" />
+          <circle cx="128" cy="2" r="4" fill={c2} />
+          <rect x="34" y="104" width="12" height="12" rx="4" fill="#A9AECB" />
+          <rect x="124" y="104" width="12" height="12" rx="4" fill="#A9AECB" />
+        </S>
+      );
+    case 'k-lua-planta':
+      // plantinha espacial numa redoma de vidro
+      return (
+        <S w={90} h={140}>
+          <path d="M14 104 V58 C14 30 28 14 45 14 C62 14 76 30 76 58 V104 Z" fill="#DDF4FF" opacity="0.55" />
+          <path d="M45 104 C30 88 22 70 30 56 C38 66 42 82 45 104 Z" fill="#43C6B0" />
+          <path d="M45 104 C58 86 70 72 62 54 C54 66 48 84 45 104 Z" fill="#6FD8C0" />
+          <path d="M45 104 C42 84 44 60 48 44 C52 62 50 84 45 104 Z" fill="#2FA894" />
+          <circle cx="30" cy="54" r="6" fill={c1} />
+          <circle cx="62" cy="52" r="7" fill={c1} />
+          <circle cx="48" cy="42" r="5" fill={lt(c1, 0.3)} />
+          <circle cx="62" cy="52" r="12" fill={c1} opacity="0.18" />
+          <path d="M22 50 C24 34 32 24 42 20" stroke="#FFFFFF" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.8" />
+          <rect x="8" y="100" width="74" height="16" rx="7" fill="#C9CDE3" />
+          <rect x="14" y="114" width="62" height="18" rx="6" fill="#A9AECB" />
+          <rect x="22" y="121" width="46" height="4" rx="2" fill="#7FE3FF" />
+        </S>
+      );
+    case 'k-lua-telescopio':
+      // telescópio no tripé, apontado para as estrelas
+      return (
+        <S w={120} h={160}>
+          <g transform="rotate(-32 60 62)">
+            <rect x="18" y="48" width="88" height="26" rx="12" fill="#F4F5FB" />
+            <rect x="96" y="44" width="16" height="34" rx="7" fill={c1} />
+            <rect x="40" y="48" width="9" height="26" fill={c1} />
+            <rect x="10" y="54" width="12" height="14" rx="4" fill="#A9AECB" />
+            <rect x="24" y="52" width="70" height="5" rx="2.5" fill="#FFFFFF" opacity="0.8" />
+          </g>
+          <circle cx="60" cy="74" r="7" fill="#A9AECB" />
+          <path d="M60 78 L30 150 M60 78 L90 150 M60 78 V146" stroke="#A9AECB" strokeWidth="6" strokeLinecap="round" />
+          <path d={starD(16, 18, 7)} fill={c2} />
+          <path d={sparkleD(40, 8, 5)} fill={c2} />
+        </S>
+      );
+    case 'k-lua-quadro':
+      // quadro redondo com a Terra vista da Lua
+      return (
+        <S w={90} h={90}>
+          <circle cx="45" cy="45" r="42" fill={c1} />
+          <circle cx="45" cy="45" r="34" fill="#1B1F4A" />
+          <circle cx="50" cy="40" r="16" fill="#5FB4F5" />
+          <path d="M42 32 q8 -5 12 2 q-3 7 -11 4 Z M52 46 q7 -1 8 4 q-5 4 -9 0 Z" fill="#6FC46A" />
+          <path d="M14 66 Q32 54 50 62 T80 60 V74 H14 Z" fill="#B9BDCB" />
+          {[
+            [22, 26],
+            [70, 22],
+            [28, 46],
+            [72, 50],
+          ].map(([x, y], i) => (
+            <circle key={i} cx={x} cy={y} r="1.6" fill="#FFFFFF" />
+          ))}
+        </S>
+      );
+    case 'k-lua-rodinha':
+      // rodinha de corrida como um planeta com anel de órbita
+      return (
+        <S w={140} h={140}>
+          <path d="M40 132 L70 70 L100 132" stroke="#A9AECB" strokeWidth="7" fill="none" strokeLinecap="round" />
+          <ellipse cx="70" cy="134" rx="40" ry="5" fill="#C9CDE3" />
+          <circle cx="70" cy="64" r="56" fill="none" stroke={c1} strokeWidth="11" />
+          <circle cx="70" cy="64" r="56" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeDasharray="5 9" opacity="0.8" />
+          <circle cx="70" cy="64" r="46" fill="#2C2F66" opacity="0.12" />
+          {[0, 60, 120].map((a) => (
+            <path
+              key={a}
+              d={`M${70 - Math.cos((a * Math.PI) / 180) * 50} ${64 - Math.sin((a * Math.PI) / 180) * 50} L${70 + Math.cos((a * Math.PI) / 180) * 50} ${64 + Math.sin((a * Math.PI) / 180) * 50}`}
+              stroke={lt(c1, 0.25)}
+              strokeWidth="3"
+            />
+          ))}
+          <circle cx="70" cy="64" r="10" fill={c2} />
+          <ellipse cx="70" cy="64" rx="20" ry="5" fill="none" stroke={lt(c2, 0.3)} strokeWidth="2.5" transform="rotate(-20 70 64)" />
+        </S>
+      );
     default:
       return null;
   }
@@ -1142,6 +1517,8 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
 
 /** Onde cada peça fica: na parede, no chão ou estendida no chão (tapetes). */
 export const KIT_PLACE: Record<string, Place> = {
+  'k-lua-tapete': 'tapete',
+  'k-lua-quadro': 'parede',
   'k-relogio': 'parede',
   'k-prateleira': 'parede',
   'k-quadro': 'parede',

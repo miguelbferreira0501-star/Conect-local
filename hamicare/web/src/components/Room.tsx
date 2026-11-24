@@ -31,10 +31,10 @@ interface Props {
 export type UseKind = 'deitar' | 'banho' | 'sentar' | 'correr' | 'balancar';
 /** O que o Hami faz em cada móvel. */
 export function useKindOf(itemId: string, svg?: string): UseKind | null {
-  if (svg === 'k-banheira') return 'banho';
-  if (svg === 'k-cama' || svg === 'k-cama-dossel' || svg === 'k-almofada' || svg === 'caminha' || /^cama/.test(itemId)) return 'deitar';
+  if (svg === 'k-banheira' || svg === 'k-lua-banheira') return 'banho';
+  if (svg === 'k-cama' || svg === 'k-lua-cama' || svg === 'k-cama-dossel' || svg === 'k-almofada' || svg === 'caminha' || /^cama/.test(itemId)) return 'deitar';
   if (svg === 'k-sofa' || svg === 'k-poltrona' || svg === 'k-cadeira' || svg === 'k-banquinho' || /poltrona|cadeira|banco|trono|sofa/.test(itemId)) return 'sentar';
-  if (svg === 'k-rodinha' || svg === 'rodinha') return 'correr';
+  if (svg === 'k-rodinha' || svg === 'k-lua-rodinha' || svg === 'rodinha') return 'correr';
   if (svg === 'k-balanco') return 'balancar';
   return null;
 }
@@ -126,7 +126,7 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
             aria-label={kind ? `${item.name}: levar o Hami até lá` : item.name}
             tabIndex={editing || kind ? 0 : -1}
             onClick={kind ? () => onUse?.(it.uid, kind) : undefined}
-            className={`room-item ${place === 'tapete' ? 'is-flat' : ''} ${editing ? 'is-editable' : ''} ${selected === it.uid ? 'is-selected' : ''} ${kind ? 'is-usable' : ''}`}
+            className={`room-item ${place === 'tapete' ? 'is-flat' : ''} ${editing ? 'is-editable' : ''} ${selected === it.uid ? 'is-selected' : ''} ${kind ? 'is-usable' : ''} ${use?.kind === 'banho' ? 'is-bathing' : ''}`}
             style={{
               left: `${live.x}%`,
               top: `${live.y}%`,
@@ -165,11 +165,6 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
                   </button>
                 )}
               </span>
-            )}
-            {use?.kind === 'banho' && item.svg && (
-              <div className="room-use-front" aria-hidden="true">
-                <Furniture id={item.svg} c1={item.c1} c2={item.c2} />
-              </div>
             )}
           </div>
         );

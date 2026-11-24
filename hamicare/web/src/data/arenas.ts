@@ -187,16 +187,42 @@ export const ARENA_HOME: Record<number, { wallpaper: string; floor: string; item
 /** Casa na Lua (fora das arenas: comprada com 5.000 sementes). */
 export const MOON_N = 13;
 export const MOON_PRICE = 5000;
-export const MOON_ITEMS = ['p-lua', 'f-lua', 'foguete-hami', 'bandeira-lua', 'cama-cratera', 'mobile-planetas', 'luminaria-lua'];
+export const MOON_ITEMS = [
+  'p-lua',
+  'f-lua',
+  'foguete-hami',
+  'bandeira-lua',
+  'cama-cratera',
+  'mobile-planetas',
+  'luminaria-lua',
+  'lua-cama',
+  'lua-poltrona',
+  'lua-mesa',
+  'lua-luminaria',
+  'lua-estante',
+  'lua-tapete',
+  'lua-banheira',
+  'lua-rodinha',
+  'lua-planta',
+  'lua-telescopio',
+  'lua-quadro',
+];
+// Base lunar: paredes de painéis com rebites, janela redonda para a Terra e móveis lunares juntinhos em volta do Hami.
 ARENA_HOME[MOON_N] = {
   wallpaper: 'p-lua',
   floor: 'f-lua',
   items: [
-    { itemId: 'cama-cratera', x: 24, y: 86 },
-    { itemId: 'foguete-hami', x: 84, y: 76 },
-    { itemId: 'bandeira-lua', x: 64, y: 72 },
-    { itemId: 'mobile-planetas', x: 30, y: 30 },
-    { itemId: 'luminaria-lua', x: 46, y: 70 },
+    { itemId: 'lua-tapete', x: 50, y: 94 },
+    { itemId: 'lua-cama', x: 35, y: 71 },
+    { itemId: 'lua-luminaria', x: 49.5, y: 66 },
+    { itemId: 'lua-estante', x: 59, y: 66 },
+    { itemId: 'lua-poltrona', x: 68.5, y: 70 },
+    { itemId: 'lua-quadro', x: 30, y: 34 },
+    { itemId: 'lua-telescopio', x: 77, y: 74 },
+    { itemId: 'lua-rodinha', x: 69, y: 91 },
+    { itemId: 'lua-banheira', x: 31, y: 92 },
+    { itemId: 'lua-planta', x: 41.5, y: 97 },
+    { itemId: 'lua-mesa', x: 22, y: 80 },
   ],
 };
 
@@ -219,11 +245,20 @@ const OLD_ARENA_ITEMS: Record<number, string[]> = {
   10: ['tapete-vermelho', 'trono'],
   11: ['cama-estrelas', 'luminaria-estrelas', 'mobile-planetas'],
   12: ['portal-celeste', 'fonte-celeste'],
+  // a casa lunar de antes (céu estrelado e poucos enfeites) vira a base lunar com móveis
+  13: ['cama-cratera', 'foguete-hami', 'bandeira-lua', 'mobile-planetas', 'luminaria-lua'],
 };
 /** Onde os móveis da casa inicial ficavam antes (espalhados pelas pontas). */
 const OLD_STARTER_POS: Record<string, [number, number]> = {
-  'k-tapete-rosa': [50, 95], 'k-cama-rosa': [25, 71], 'k-criado-branco': [50.5, 68], 'k-planta-grande-terracota': [63, 72], 'k-guarda-roupa-rosa': [82, 68],
-  'k-relogio-madeira': [17, 40], 'k-rodinha-azul': [85, 93], 'k-banheira-madeira': [68, 90], 'k-ursinho-caramelo': [10, 97],
+  'k-tapete-rosa': [50, 95],
+  'k-cama-rosa': [25, 71],
+  'k-criado-branco': [50.5, 68],
+  'k-planta-grande-terracota': [63, 72],
+  'k-guarda-roupa-rosa': [82, 68],
+  'k-relogio-madeira': [17, 40],
+  'k-rodinha-azul': [85, 93],
+  'k-banheira-madeira': [68, 90],
+  'k-ursinho-caramelo': [10, 97],
 };
 /** A casa inicial antes de ganhar a banheira. */
 const STARTER_BEFORE_TUB = ['k-tapete-rosa', 'k-cama-rosa', 'k-criado-branco', 'k-planta-grande-terracota', 'k-guarda-roupa-rosa', 'k-relogio-madeira', 'k-rodinha-azul', 'k-ursinho-caramelo'];
@@ -241,10 +276,13 @@ export function upgradeHouse(input: House, n: number): House {
   // Casa inicial com os móveis ainda no lugar de fábrica antigo: chegam mais perto do Hami.
   if (n === 1 && h.items.length && h.items.every((i) => OLD_STARTER_POS[i.itemId]?.[0] === i.x && OLD_STARTER_POS[i.itemId]?.[1] === i.y)) {
     const fresh = arenaHouse(1).items;
-    return { ...h, items: h.items.map((i) => {
-      const f = fresh.find((x) => x.itemId === i.itemId);
-      return f ? { ...i, x: f.x, y: f.y } : i;
-    }) };
+    return {
+      ...h,
+      items: h.items.map((i) => {
+        const f = fresh.find((x) => x.itemId === i.itemId);
+        return f ? { ...i, x: f.x, y: f.y } : i;
+      }),
+    };
   }
   // Casa inicial de antes da banheira (sem ninguém ter mexido): ganha a banheira de madeira.
   if (n === 1 && same(ids, STARTER_BEFORE_TUB) && !ids.includes('k-banheira-madeira')) {
