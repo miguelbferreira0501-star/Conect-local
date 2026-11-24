@@ -49,6 +49,14 @@ export function WalkingHami({ fur: furId, outfit, size = 170, still = false }: {
         <clipPath id={`${id}b`}>
           <ellipse cx="100" cy="146" rx="54" ry="39" />
         </clipPath>
+        <filter id={`${id}r`} x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2.4" />
+        </filter>
+        <radialGradient id={`${id}e`} cx="50%" cy="30%" r="75%">
+          <stop offset="0%" stopColor="#1E0F08" />
+          <stop offset="62%" stopColor="#3A1F12" />
+          <stop offset="100%" stopColor="#6A3B22" />
+        </radialGradient>
         <clipPath id={`${id}h`}>
           <ellipse cx="148" cy="104" rx="42" ry="38" />
         </clipPath>
@@ -80,14 +88,18 @@ export function WalkingHami({ fur: furId, outfit, size = 170, still = false }: {
         {/* cabeça com focinho e bochecha creme */}
         <ellipse cx="148" cy="104" rx="42" ry="38" fill={`url(#${id}f)`} />
         <g clipPath={`url(#${id}h)`}>
-          <ellipse cx="168" cy="120" rx="30" ry="22" fill={`url(#${id}m)`} />
-          <ellipse cx="150" cy="124" rx="22" ry="15" fill={`url(#${id}m)`} />
+          {/* rosto branquinho embaixo, pelo da cor do hamster no alto (passagem macia) */}
+          <ellipse cx="160" cy="124" rx="40" ry="28" fill={`url(#${id}m)`} filter={`url(#${id}r)`} />
           <ellipse cx="138" cy="80" rx="20" ry="9" fill="#FFFFFF" opacity="0.22" />
         </g>
         <ellipse cx="148" cy="104" rx="42" ry="38" fill="none" stroke={edge} strokeOpacity="0.35" strokeWidth="1.2" />
         {/* olhinho feliz, rubor, narizinho e boquinha */}
-        <path d="M152 99 Q159 91 166 99" stroke={INK} strokeWidth="3.8" strokeLinecap="round" fill="none" />
-        <ellipse cx="160" cy="112" rx="7.5" ry="4.2" fill={f.ear} opacity="0.4" />
+        {/* olhão castanho brilhando e bochecha rosada com brilhinho */}
+        <ellipse cx="160" cy="99" rx="7.4" ry="8.4" fill={`url(#${id}e)`} />
+        <circle cx="162.4" cy="96" r="2.7" fill="#FFFFFF" />
+        <circle cx="157.6" cy="102.2" r="1.2" fill="#FFFFFF" />
+        <ellipse cx="164" cy="114" rx="8" ry="5" fill={f.ear} opacity="0.55" />
+        <path d="M160.6 115.4 l1.8 -3 M163.8 115.4 l1.8 -3" stroke="#FFFFFF" strokeWidth="1.2" strokeLinecap="round" opacity="0.75" />
         <ellipse cx="188" cy="109" rx="4.6" ry="3.6" fill="#F4A3AE" />
         <path d="M184 116 Q181 120 177 118" stroke={INK} strokeWidth="2" strokeLinecap="round" fill="none" />
         {/* patinhas da frente (deste lado) */}
