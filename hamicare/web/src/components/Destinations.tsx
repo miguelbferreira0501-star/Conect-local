@@ -162,7 +162,7 @@ export function TrekGo({ open, onClose, onGo }: { open: boolean; onClose: () => 
       </div>
       <p className="tgo-say">{d.line}</p>
       <div className="tgo-pet">
-        <WalkingHami fur={s.pet.fur} outfit={s.pet.outfit} size={190} still />
+        <WalkingHami fur={s.pet.fur} outfit={s.pet.outfit} size={140} still />
       </div>
       <h2 className="tgo-title">Ir para {d.name}</h2>
       <div className="tgo-card">

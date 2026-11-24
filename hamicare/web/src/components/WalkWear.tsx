@@ -2,8 +2,10 @@
 // roupa do Hami de pé (estampa, capuz, barrado…), só que encaixada no corpo da foto — recortada pelo contorno do
 // pelo (até a pontinha) e começando logo abaixo do queixo, com cara de tecido (luz, volume e sombrinha).
 import type { ReactNode } from 'react';
-import walkBody from '../assets/hami/hami-anda-corpo.webp';
+import walkBody from '../assets/hami/hami-anda.webp';
 import sleepSrc from '../assets/hami/hami-dormindo.webp';
+import walkShade from '../assets/hami/hami-anda-sombra.webp';
+import sleepShade from '../assets/hami/hami-dormindo-sombra.webp';
 import walkFront from '../assets/hami/hami-anda-frente.webp';
 import walkFrontFur from '../assets/hami/hami-anda-frente-pelo.webp';
 import { itemById } from '../data/items';
@@ -46,11 +48,14 @@ export function PhotoClothes({
   torso,
   place,
   collar,
+  shade,
   children,
 }: {
   roupa: string | null | undefined;
   uid: string;
   src: string;
+  /** Luz e sombra do próprio corpo da foto (multiplicada na roupa, para ela ter o volume do corpo). */
+  shade?: string;
   w: number;
   h: number;
   torso: string;
@@ -100,6 +105,7 @@ export function PhotoClothes({
           <g transform={place}>
             <Clothes id={roupa} geo={STAND_GEO} />
           </g>
+          {shade && <image href={shade} x="0" y="0" width={w} height={h} style={{ mixBlendMode: 'multiply' }} />}
           <rect x="0" y="0" width={w} height={h} fill={`url(#pg${uid})`} />
           {collar && <path d={collar} stroke={shadeHex(color, 0.18)} strokeWidth={w / 48} fill="none" strokeLinecap="round" />}
         </g>
@@ -120,10 +126,11 @@ export function WalkClothes({ outfit, uid, fur }: { outfit?: Outfit; uid: string
       roupa={roupa}
       uid={`w${uid}`}
       src={walkBody}
+      shade={walkShade}
       w={524}
       h={617}
-      torso="M0 350 C100 372 200 374 300 366 C360 362 400 352 444 340 L524 340 V617 H0 Z"
-      collar="M40 356 C120 374 210 376 300 368 C360 362 400 352 440 342"
+      torso="M0 350 C100 372 200 374 300 366 C350 362 390 358 420 356 C450 354 486 360 524 372 V526 C470 520 420 512 372 522 C330 532 300 548 262 552 C226 556 200 546 170 542 C130 538 90 540 0 548 Z"
+      collar="M40 356 C120 374 210 376 300 368 C350 363 390 359 420 357 C450 355 480 360 500 366"
       place="translate(262 368) scale(3.6) translate(-100 -128)"
     >
       {/* mochila, alças e o bracinho que segura a alça ficam por cima da roupa */}
@@ -151,6 +158,7 @@ export function SleepClothes({ outfit, uid }: { outfit?: Outfit; uid: string }) 
       roupa={outfit?.roupa}
       uid={`s${uid}`}
       src={sleepSrc}
+      shade={sleepShade}
       w={841}
       h={520}
       torso="M512 118 C556 188 568 276 580 356 C590 428 606 488 622 540 L900 540 L900 70 Z"

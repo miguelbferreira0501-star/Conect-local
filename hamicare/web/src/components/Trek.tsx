@@ -1,4 +1,4 @@
-// Viagem do dia (estilo Finch): o Hami anda de lado carregando uma cestinha, com o cenário da arena
+// Viagem do dia (estilo Finch): o Hami passeia de mochilinha, com o cenário da arena
 // onde mora (ou da Lua) passando atrás. Barra de progresso até o "?" e presente na volta.
 import { WalkingHami } from './WalkingHami';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -12,7 +12,7 @@ import { Glyph } from './art';
 import { Seed } from './ui';
 import type { State } from '../types';
 
-// O Hami de lado passeando com a cestinha (desenho em WalkingHami.tsx).
+// O Hami passeando de mochilinha (WalkingHami.tsx).
 export { WalkingHami };
 
 // ---------- Cenários de viagem: um por arena, mais a Lua ----------
@@ -423,7 +423,7 @@ export function TrekStart({ open, onClose }: { open: boolean; onClose: () => voi
   return (
     <div className="trek-start" role="dialog" aria-modal="true" aria-label="Nova aventura começou" style={{ background: t.ground, color: inkOn(t.ground) }}>
       <TrekScene theme={theme} height={Math.round(window.innerHeight * 0.48)}>
-        <WalkingHami fur={s.pet.fur} outfit={s.pet.outfit} size={170} />
+        <WalkingHami fur={s.pet.fur} outfit={s.pet.outfit} size={130} />
       </TrekScene>
       <div className="trek-start-body">
         <h2>Nova aventura começou!</h2>

@@ -1,17 +1,17 @@
 // O Hami passeando de mochilinha, igualzinho à imagem de referência (olhinhos fechados de alegria, florzinha e
-// mochila rosa de patinha). A imagem foi separada em partes — corpo, as duas perninhas e o bracinho levantado —
-// e o pelo que ficava atrás delas foi refeito, para ele andar de verdade: as perninhas dão o passo (a de trás vem
-// para a frente levantando o pezinho), o bracinho balança, o corpo sobe e desce a cada passo e solta tracinhos de
-// alegria. A cor da pelagem escolhida pinta só o pelo caramelo (máscara de cada parte).
-import { useId, type ReactNode } from 'react';
-import body from '../assets/hami/hami-anda-corpo.webp';
-import bodyFur from '../assets/hami/hami-anda-corpo-pelo.webp';
-import legF from '../assets/hami/hami-anda-perna-frente.webp';
-import legFFur from '../assets/hami/hami-anda-perna-frente-pelo.webp';
-import legB from '../assets/hami/hami-anda-perna-tras.webp';
-import legBFur from '../assets/hami/hami-anda-perna-tras-pelo.webp';
-import arm from '../assets/hami/hami-anda-braco.webp';
-import armFur from '../assets/hami/hami-anda-braco-pelo.webp';
+// mochila rosa de patinha) — e andando como personagem de verdade, sem peças duras girando: a imagem inteira é
+// deformada aos pouquinhos (do jeito dos personagens 2D animados), com mapas de deformação suaves:
+// - passo: o quadril fica parado e só a perninha dobra (o pezinho vai para trás e o outro vem para a frente),
+//   e o bracinho balança junto;
+// - pezinho: o que vem para a frente levanta do chão;
+// - corpo: estica quando o pé sai do chão e amassa quando pisa, as orelhinhas pulam e a cabeça balança um tiquinho.
+// A cor da pelagem escolhida pinta só o pelo caramelo, e a roupa vestida deforma junto com o corpo.
+import { useId } from 'react';
+import photo from '../assets/hami/hami-anda.webp';
+import photoFur from '../assets/hami/hami-anda-pelo.webp';
+import mapStep from '../assets/hami/hami-anda-passo.png';
+import mapFoot from '../assets/hami/hami-anda-pe.png';
+import mapBody from '../assets/hami/hami-anda-corpo-mapa.png';
 import { furById } from '../data/fur';
 import { WalkClothes } from './WalkWear';
 import type { Outfit } from '../types';
@@ -19,60 +19,72 @@ import type { Outfit } from '../types';
 /** Quadro da imagem (pontos). */
 const W = 524;
 const H = 617;
-/** Partes: onde ficam no quadro e onde giram (quadril e ombro). */
-const PARTS = {
-  legB: { href: legB, fur: legBFur, x: 94, y: 534, w: 124, h: 82, pivot: '154px 548px' },
-  legF: { href: legF, fur: legFFur, x: 308, y: 511, w: 133, h: 105, pivot: '357px 535px' },
-  arm: { href: arm, fur: armFur, x: 403, y: 350, w: 84, h: 102, pivot: '420px 398px' },
-};
+/** Um passo inteiro (as duas perninhas), em segundos. */
+const BEAT = 0.9;
+const still = () => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-function Layer({ href, fur, x, y, w, h, color, id }: { href: string; fur: string; x: number; y: number; w: number; h: number; color: string | null; id: string }) {
+/** Uma camada de deformação: mapa suave (com margem neutra em volta) + quanto ele empurra ao longo do passo. */
+function Warp({ map, values, keyTimes, inId, out, moving }: { map: string; values: string; keyTimes: string; inId: string; out: string; moving: boolean }) {
   return (
     <>
-      <image href={href} x={x} y={y} width={w} height={h} />
-      {color && (
-        <>
-          <mask id={id} maskUnits="userSpaceOnUse" x={x} y={y} width={w} height={h}>
-            <image href={fur} x={x} y={y} width={w} height={h} />
-          </mask>
-          <g mask={`url(#${id})`}>
-            <rect x={x} y={y} width={w} height={h} fill={color} style={{ mixBlendMode: 'color' }} />
-            <rect x={x} y={y} width={w} height={h} fill={color} opacity="0.32" />
-          </g>
-        </>
-      )}
+      <feImage href={map} x={-48} y={-48} width={W + 96} height={H + 80} preserveAspectRatio="none" result={`${out}m`} />
+      <feDisplacementMap in={inId} in2={`${out}m`} scale="0" xChannelSelector="R" yChannelSelector="G" result={out}>
+        {moving && (
+          <animate
+            attributeName="scale"
+            values={values}
+            keyTimes={keyTimes}
+            dur={`${BEAT}s`}
+            repeatCount="indefinite"
+            calcMode="spline"
+            keySplines={keyTimes
+              .split(';')
+              .slice(1)
+              .map(() => '0.45 0 0.55 1')
+              .join(';')}
+          />
+        )}
+      </feDisplacementMap>
     </>
   );
 }
 
-export function WalkingHami({ fur: furId, outfit, size = 170, still = false }: { fur: string; outfit?: Outfit; size?: number; still?: boolean }) {
+export function WalkingHami({ fur: furId, outfit, size = 150, still: stopped = false }: { fur: string; outfit?: Outfit; size?: number; still?: boolean }) {
   const f = furById(furId);
   const uid = useId().replace(/:/g, '');
   const color = f.id === 'caramelo' ? null : f.body;
-  const part = (k: keyof typeof PARTS, cls: string, extra?: ReactNode) => {
-    const p = PARTS[k];
-    return (
-      <g className={cls} style={{ transformOrigin: p.pivot }}>
-        <Layer {...p} color={color} id={`${k}${uid}`} />
-        {extra}
-      </g>
-    );
-  };
+  const moving = !stopped && !still();
   const h = (size * H) / W;
   return (
-    <span className={`wkp ${still ? 'is-still' : ''}`} style={{ width: size, height: h }} role="img" aria-label="Hami passeando de mochilinha">
+    <span className={`wkp ${moving ? '' : 'is-still'}`} style={{ width: size, height: h }} role="img" aria-label="Hami passeando de mochilinha">
       <svg viewBox={`0 0 ${W} ${H}`} width={size} height={h} aria-hidden="true" style={{ overflow: 'visible', display: 'block' }}>
-        <ellipse className="wkp-shadow" cx="268" cy="612" rx="168" ry="12" fill="rgba(40,30,50,0.2)" style={{ transformOrigin: '268px 612px' }} />
-        <g className="wkp-bob" style={{ transformOrigin: '268px 610px' }}>
-          {/* perninha de trás (dá o passo para a frente) */}
-          {part('legB', 'wkp-leg-b')}
-          <g>
-            <Layer href={body} fur={bodyFur} x={0} y={0} w={W} h={H} color={color} id={`b${uid}`} />
+        <defs>
+          <filter id={`wk${uid}`} filterUnits="userSpaceOnUse" x={-44} y={-44} width={W + 88} height={H + 72} colorInterpolationFilters="sRGB">
+            {/* passo: perna da frente e bracinho vão para trás enquanto a de trás vem para a frente (e volta) */}
+            <Warp map={mapStep} inId="SourceGraphic" out="a" values="0;56;0" keyTimes="0;0.5;1" moving={moving} />
+            {/* o pezinho que vem para a frente levanta (o de trás na 1ª metade, o da frente na 2ª) */}
+            <Warp map={mapFoot} inId="a" out="b" values="0;-34;0;34;0" keyTimes="0;0.25;0.5;0.75;1" moving={moving} />
+            {/* corpo estica no meio do passo e amassa ao pisar; orelhinhas pulam */}
+            <Warp map={mapBody} inId="b" out="c" values="-10;22;-10;22;-10" keyTimes="0;0.25;0.5;0.75;1" moving={moving} />
+          </filter>
+          {color && (
+            <mask id={`wf${uid}`} maskUnits="userSpaceOnUse" x="0" y="0" width={W} height={H}>
+              <image href={photoFur} x="0" y="0" width={W} height={H} />
+            </mask>
+          )}
+        </defs>
+        <ellipse className="wkp-shadow" cx="262" cy="612" rx="150" ry="11" fill="rgba(40,30,50,0.2)" style={{ transformOrigin: '262px 612px' }} />
+        <g className="wkp-bob" style={{ transformOrigin: '262px 612px' }}>
+          <g filter={`url(#wk${uid})`}>
+            <image href={photo} x="0" y="0" width={W} height={H} />
+            {color && (
+              <g mask={`url(#wf${uid})`}>
+                <rect width={W} height={H} fill={color} style={{ mixBlendMode: 'color' }} />
+                <rect width={W} height={H} fill={color} opacity="0.32" />
+              </g>
+            )}
             <WalkClothes outfit={outfit} uid={uid} fur={furId} />
           </g>
-          {/* perninha da frente e o bracinho que balança */}
-          {part('legF', 'wkp-leg-f')}
-          {part('arm', 'wkp-arm')}
           {/* tracinhos de alegria */}
           <g className="wkp-joy" style={{ transformOrigin: '470px 150px' }}>
             <path d="M474 96 L486 128" stroke="#FFD45C" strokeWidth="13" strokeLinecap="round" />
