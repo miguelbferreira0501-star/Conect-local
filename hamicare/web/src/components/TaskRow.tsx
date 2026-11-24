@@ -8,7 +8,7 @@ import { burstConfetti } from '../lib/confetti';
 import type { Direction, Task } from '../types';
 import { Glyph } from './art';
 
-export function TaskRow({ task, done, kcal, dir, sub, onToggle, onEdit, className = '' }: {
+export function TaskRow({ task, done, kcal, dir, sub, onToggle, onEdit, className = '', quiet }: {
   task: Task;
   done: boolean;
   kcal: number;
@@ -17,6 +17,8 @@ export function TaskRow({ task, done, kcal, dir, sub, onToggle, onEdit, classNam
   onToggle: (el: HTMLElement) => void;
   onEdit?: () => void;
   className?: string;
+  /** Sem animação nem confete (no Início a tarefa sai na hora). */
+  quiet?: boolean;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
   return (
@@ -45,11 +47,11 @@ export function TaskRow({ task, done, kcal, dir, sub, onToggle, onEdit, classNam
         aria-pressed={done}
         aria-label={done ? `Desfazer: ${task.title}` : `Concluir: ${task.title}`}
         onClick={() => {
-          if (!done && ref.current && !prefersReducedMotion()) {
+          if (!quiet && !done && ref.current && !prefersReducedMotion()) {
             ref.current.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25) rotate(-8deg)' }, { transform: 'scale(0.92)' }, { transform: 'scale(1)' }], { duration: 420, easing: 'cubic-bezier(0.23,1,0.32,1)' });
           }
           // Confete a cada missão concluída.
-          if (!done) burstConfetti(ref.current);
+          if (!quiet && !done) burstConfetti(ref.current);
           onToggle(ref.current!);
         }}
       >

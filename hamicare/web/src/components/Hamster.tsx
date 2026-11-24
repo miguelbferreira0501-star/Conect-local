@@ -1,7 +1,9 @@
 import { createContext, useContext, useId } from 'react';
+import hamiPhoto from '../assets/hami/hami.webp';
+import hamiBlank from '../assets/hami/hami-sem-rosto.webp';
+import hamiFurMask from '../assets/hami/hami-pelo.webp';
 import { furById } from '../data/fur';
 import { itemById } from '../data/items';
-import { fluffOf } from '../logic/evolution';
 import { Accessory, AccessoryBack, Cape, Clothes, CostumeBack, CostumeFront, costumeOf, EffectBack, EffectFront, garmentColor, garmentShape, Glasses, Hat, sleeveOf } from './Wear';
 import type { Outfit, PetMood } from '../types';
 import type { Condition, HamiProp } from '../lib/hamiDay';
@@ -44,431 +46,245 @@ export interface HamsterProps {
   prop?: HamiProp;
 }
 
-/** Tronco de pera: fininho acima da cintura, barriga e quadril largos e base redonda. */
-function torso(w: number, bottom: number, flare = 0) {
-  const L = (k: number) => (100 - k).toFixed(1);
-  const R = (k: number) => (100 + k).toFixed(1);
-  return (
-    `M${L(w * 0.48)} 104 C${L(w * 0.78)} 114 ${L(w * 1.04)} 140 ${L(w + flare * 0.5)} 164 ` +
-    `C${L(w * 0.98 + flare)} ${bottom - 10} ${L(w * 0.62 + flare)} ${bottom} 100 ${bottom} ` +
-    `C${R(w * 0.62 + flare)} ${bottom} ${R(w * 0.98 + flare)} ${bottom - 10} ${R(w + flare * 0.5)} 164 ` +
-    `C${R(w * 1.04)} 140 ${R(w * 0.78)} 114 ${R(w * 0.48)} 104 Z`
-  );
-}
 
-/** Cabeça de pãozinho: testa mais estreita em cima e bochechas largas embaixo. */
-function headPath(cx: number, cy: number, rx: number, ry: number) {
-  const T = cy - ry;
-  const B = cy + ry;
-  return (
-    `M${cx} ${T} C${cx + rx * 0.46} ${T} ${cx + rx * 0.84} ${cy - ry * 0.52} ${cx + rx} ${cy + ry * 0.12} ` +
-    `C${cx + rx * 1.02} ${cy + ry * 0.66} ${cx + rx * 0.62} ${B} ${cx} ${B} ` +
-    `C${cx - rx * 0.62} ${B} ${cx - rx * 1.02} ${cy + ry * 0.66} ${cx - rx} ${cy + ry * 0.12} ` +
-    `C${cx - rx * 0.84} ${cy - ry * 0.52} ${cx - rx * 0.46} ${T} ${cx} ${T} Z`
-  );
-}
 
-/**
- * Focinho e bochechas creme: sobe num montinho entre os olhos (até o nariz), passa por baixo de cada olho
- * e incha para os lados em duas bochechas bem fofas, sempre por dentro do contorno da cabeça.
- */
-function muzzlePath(eyeY: number, ex: number, rx: number, puff: number) {
-  const pts = (s: 1 | -1): number[][] => {
-    const X = (d: number) => 100 + s * d;
-    return [
-      [X(7), eyeY + 1, X(ex * 0.5), eyeY + 8, X(ex), eyeY + 8],
-      [X(ex * 1.55), eyeY + 8, X(rx * 0.74), eyeY - 1, X(rx * (0.88 + puff)), eyeY + 6],
-      [X(rx * (0.97 + puff)), eyeY + 16, X(rx * (0.92 + puff)), eyeY + 35, X(rx * 0.66), eyeY + 44],
-      [X(rx * 0.42), eyeY + 52, X(18), eyeY + 52, 100, eyeY + 52],
-    ];
-  };
-  const fmt = (n: number) => n.toFixed(1);
-  const start = [100, eyeY + 1];
-  const right = pts(1)
-    .map((c) => `C${c.map(fmt).join(' ')}`)
-    .join(' ');
-  // lado esquerdo percorrido de volta (do queixo ao topo), para fechar o contorno
-  const left = pts(-1);
-  const ends = [start, ...left.map((c) => [c[4], c[5]])];
-  const back = left
-    .map((c, i) => `C${fmt(c[2])} ${fmt(c[3])} ${fmt(c[0])} ${fmt(c[1])} ${fmt(ends[i][0])} ${fmt(ends[i][1])}`)
-    .reverse()
-    .join(' ');
-  return `M${start[0]} ${start[1]} ${right} ${back} Z`;
-}
 
-function mix(hex: string, to: string, t: number) {
-  const a = /^#?([0-9a-f]{6})$/i.exec(hex);
-  const b = /^#?([0-9a-f]{6})$/i.exec(to);
-  if (!a || !b) return hex;
-  const n = parseInt(a[1], 16);
-  const m = parseInt(b[1], 16);
-  const ch = (sh: number) =>
-    Math.round(((n >> sh) & 255) * (1 - t) + ((m >> sh) & 255) * t)
-      .toString(16)
-      .padStart(2, '0');
-  return `#${ch(16)}${ch(8)}${ch(0)}`;
-}
-const darken = (hex: string, t: number) => mix(hex, '#000000', t);
-const lighten = (hex: string, t: number) => mix(hex, '#FFFFFF', t);
 
-/** Pelo da cor do hamster no alto da cabeça, descendo pelos lados até a altura dos olhos (o rosto fica branquinho). */
-function patchPath(hcx: number, hcy: number, hrx: number, top: number, eyeY: number) {
-  const P = (x: number, y: number) => `${x.toFixed(1)} ${y.toFixed(1)}`;
-  return (
-    `M${P(hcx - hrx - 4, hcy + 6)} C${P(hcx - hrx - 4, top - 10)} ${P(hcx + hrx + 4, top - 10)} ${P(hcx + hrx + 4, hcy + 6)} ` +
-    `C${P(hcx + hrx * 0.8, eyeY - 8)} ${P(hcx + hrx * 0.45, top + 29)} ${P(hcx, top + 28)} ` +
-    `C${P(hcx - hrx * 0.45, top + 29)} ${P(hcx - hrx * 0.8, eyeY - 8)} ${P(hcx - hrx - 4, hcy + 6)} Z`
-  );
-}
+// ---------- O Hami realista (foto) ----------
+// A foto fica no quadro 0–200: pezinhos em y≈192, centro do corpo em x≈99.
+const IMG = { x: 27.8, y: 14, w: 144.4, h: 180 };
+/** Quadro do rosto: os olhos da foto ficam em (72, 77) e (132, 81), levemente inclinados. Dentro dele o rosto é "reto",
+ *  com os olhos em 100 ± 25 e na altura 80 — é onde desenhamos expressões, óculos e chapéus. */
+const FACE = { cx: 101.9, cy: 78.8, rot: 4.2, k: 1.2, eyeY: 80, ex: 25 };
+const FACE_T = `translate(${FACE.cx} ${FACE.cy}) rotate(${FACE.rot}) scale(${FACE.k}) translate(-100 ${-FACE.eyeY})`;
+/** Cabeça (no quadro do rosto) para chapéus, orelhas de fantasia e fones. */
+const HEAD_GEO = { top: 40, w: 46, h: 150, eyeY: 70 };
+/** Corpo (no quadro normal) para roupas, colares, capas e efeitos. */
+const BODY_GEO = { top: 30, w: 52, h: 163, eyeY: 72 };
+/** Contorno da barriga (logo abaixo do queixo até em cima dos pezinhos): as roupas vestem este contorno. */
+const BODY = 'M52 125 Q99 135 145 125 C152 131 154 140 153.5 150 C153 161 150 170 139 177.5 C127 184.5 113 185.5 99 185.5 C85 185.5 71 184.5 59 177.5 C48 170 45 161 44.5 150 C44 140 46 131 52 125 Z';
+const DRESS = 'M52 125 Q99 135 145 125 C152 131 154 140 154.5 150 C156 163 160 175 158.5 183.5 C138 188.5 60 188.5 39.5 183.5 C38 175 42 163 43.5 150 C44 140 46 131 52 125 Z';
+/** Cabeça inteira com as orelhas (para o capuz das fantasias e efeitos na cabeça). */
+const HOOD = 'M99 20 C141 20 169 42 167 76 C166 104 148 124 99 127 C50 124 32 104 31 76 C29 42 57 20 99 20 Z';
+/** Corpo inteiro da fantasia (até os pezinhos). */
+const SUIT = 'M50 122 Q99 132 148 122 C156 130 158 142 157.5 152 C157 165 152 176 140 183 C126 190 112 191 99 191 C86 191 72 190 58 183 C46 176 41 165 40.5 152 C40 142 42 130 50 122 Z';
+const HEAD = { cx: 99, cy: 76, rx: 66, ry: 48, top: 27 };
+/** As patinhas da foto: são redesenhadas por cima das roupas e dos objetos, como se segurassem. */
+const PAWS = [
+  { cx: 61, cy: 142, rx: 11.5, ry: 12.5 },
+  { cx: 136.5, cy: 141.5, rx: 11.5, ry: 12.5 },
+];
+/** Expressões que usam o rosto da própria foto (olhões e a boquinha aberta). */
+const PHOTO_MOODS: PetMood[] = ['feliz', 'animado', 'comendo'];
 
 /**
- * O Hami: um hamster gordinho em pé, de cabeça de pãozinho e corpo de feijão (como um bonequinho de pelúcia),
- * rosto branquinho com a mancha da cor do pelo no alto da cabeça, olhões castanhos brilhando, bochechas rosadas
- * e a boquinha "ω". O volume (bem 3D) vem da luz por cima, da sombra nas bordas e do pelo felpudo no contorno.
- * As roupas vestem o mesmo contorno do corpo.
+ * O Hami: o hamster realista da foto, com pelo de verdade. A expressão padrão é a da própria foto; as outras
+ * (sono, choro, frio…) são desenhadas por cima do rosto. A cor da pelagem muda só no pelo laranja.
+ * As roupas vestem o contorno do corpo, e as patinhas ficam por cima delas.
  */
-export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', outfit = NO_OUTFIT, size = 180, idle = true, label, neutral, wet: wetProp, shine, growth, pose, cond, condFace = true, prop }: HamsterProps) {
+export function Hamster({ fur: furId, mood = 'feliz', outfit = NO_OUTFIT, size = 180, idle = true, label, neutral, wet: wetProp, shine, growth, pose, cond, condFace = true, prop, phase = 0 }: HamsterProps) {
   const wet = wetProp || cond === 'chuva';
   const fur = furById(furId);
   const current = useContext(GrowthContext);
   const k = Math.min(1, Math.max(0.4, neutral ? 1 : (growth ?? current)));
   const young = Math.min(1, Math.max(0, (1 - k) / 0.3));
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
-  const f = fluffOf(neutral ? 135 : grams);
-  const eating = mood === 'comendo';
   const asleep = mood === 'dormindo';
-  // Pelo felpudo no contorno só nos desenhos grandes (nos quadradinhos pequenos não aparece e pesa no celular).
-  const fuzzy = size >= 110;
-
-  // Cabeça de pãozinho (larga, base reta); olhos no meio do rosto, como na referência.
-  const hcx = 100;
-  const hcy = 80;
-  const hrx = 60 + f * 3;
-  const hry = 46;
-  const top = hcy - hry;
-  const head = headPath(hcx, hcy, hrx, hry);
-  const eyeY = 82;
-  const ex = 25;
-  const noseY = eyeY + 11;
-  const muzzle = muzzlePath(eyeY - 10, ex, hrx, eating ? 0.05 : 0);
-  const patch = patchPath(hcx, hcy, hrx, top, eyeY);
-  const chin = 118;
-  // inclinação da cabecinha (fica reta dormindo)
-  const tilt = asleep ? 0 : 5;
-  // Corpo de feijão, em pé
-  const bw = 55 + f * 7;
-  const body = torso(bw, 190);
-  const geo = { top, w: hrx * 0.86, h: 188 - top, eyeY: eyeY - 10 };
+  const faceCond = condFace && cond && cond !== 'terra' ? cond : undefined;
+  const photoFace = PHOTO_MOODS.includes(mood) && !faceCond;
+  const recolor = fur.id !== 'caramelo';
 
   const costume = costumeOf(outfit.roupa);
-  const holding = !!outfit.acessorio && itemById(outfit.acessorio)?.base === 'segurar';
-  const sleeve = costume ? null : sleeveOf(outfit.roupa);
   const shape = costume ? null : garmentShape(outfit.roupa);
-  const garment = costume ? null : shape ? garmentColor(outfit.roupa) : (sleeve ?? (outfit.roupa ? (itemById(outfit.roupa)?.c1 ?? null) : null));
-  const cloth = shape === 'dress' ? torso(bw + 1.4, 189, 6) : torso(bw + 1.4, 183);
-  const hem = shape === 'dress' ? 189 : 183;
-  const reach = !!prop && prop !== 'fones';
-
-  // Cores com volume: luz por cima à esquerda, borda mais funda.
-  const furLight = lighten(fur.body, 0.26);
-  const furEdge = darken(fur.shade, 0.06);
-  const cream = lighten(fur.belly, 0.35);
-  const creamEdge = darken(fur.belly, 0.12);
-  const arm = costume ? costume.paw : fur.body;
-  const foot = costume ? costume.foot : fur.body;
-  const edge = (c: string) => darken(c, 0.16);
-  const fz = fuzzy ? `url(#z${uid})` : undefined;
+  const garment = costume ? null : shape ? garmentColor(outfit.roupa) : (sleeveOf(outfit.roupa) ?? (outfit.roupa ? (itemById(outfit.roupa)?.c1 ?? null) : null));
+  const cloth = shape === 'dress' ? DRESS : BODY;
+  const holds = !!prop && prop !== 'fones';
+  const pawsOnTop = !!outfit.roupa || holds;
+  const img = (href: string, extra?: Record<string, string>) => <image href={href} x={IMG.x} y={IMG.y} width={IMG.w} height={IMG.h} preserveAspectRatio="xMidYMid meet" {...extra} />;
 
   return (
     <svg viewBox="0 0 200 200" width={size} height={size} role="img" aria-label={label ?? 'Hami'} className="block overflow-visible">
       <defs>
         <clipPath id={`b${uid}`}>
-          <path d={body} />
-          {costume && <path d={head} />}
+          <path d={costume ? SUIT : BODY} />
+          {costume && <path d={HOOD} />}
         </clipPath>
         <clipPath id={`k${uid}`}>
           <path d={cloth} />
         </clipPath>
-        <clipPath id={`h${uid}`}>
-          <path d={head} />
+        <clipPath id={`p${uid}`}>
+          {PAWS.map((p, i) => (
+            <ellipse key={i} cx={p.cx} cy={p.cy} rx={p.rx} ry={p.ry} />
+          ))}
         </clipPath>
-        <radialGradient id={`f${uid}`} cx="36%" cy="22%" r="88%">
-          <stop offset="0%" stopColor={furLight} />
-          <stop offset="50%" stopColor={fur.body} />
-          <stop offset="100%" stopColor={fur.shade} />
-        </radialGradient>
-        <radialGradient id={`m${uid}`} cx="45%" cy="28%" r="78%">
-          <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="62%" stopColor={cream} />
-          <stop offset="100%" stopColor={darken(fur.belly, 0.05)} />
-        </radialGradient>
-        {/* volume: brilho no alto e sombra macia nas bordas, por cima de tudo */}
-        <radialGradient id={`v${uid}`} cx="36%" cy="26%" r="82%">
-          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.42" />
-          <stop offset="42%" stopColor="#FFFFFF" stopOpacity="0" />
-          <stop offset="78%" stopColor="#7A4022" stopOpacity="0.05" />
-          <stop offset="100%" stopColor="#7A4022" stopOpacity="0.22" />
-        </radialGradient>
+        <mask id={`m${uid}`} maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200">
+          {img(hamiFurMask)}
+        </mask>
         <radialGradient id={`e${uid}`} cx="50%" cy="30%" r="75%">
-          <stop offset="0%" stopColor="#1E0F08" />
-          <stop offset="62%" stopColor="#3A1F12" />
-          <stop offset="100%" stopColor="#6A3B22" />
-        </radialGradient>
-        <radialGradient id={`p${uid}`} cx="50%" cy="45%" r="60%">
-          <stop offset="0%" stopColor={lighten(fur.ear, 0.15)} />
-          <stop offset="100%" stopColor={fur.ear} />
+          <stop offset="0%" stopColor="#1A0C06" />
+          <stop offset="60%" stopColor="#331A0E" />
+          <stop offset="100%" stopColor="#7A4526" />
         </radialGradient>
         <radialGradient id={`s${uid}`}>
-          <stop offset="0%" stopColor="#5A2E14" stopOpacity="0.24" />
+          <stop offset="0%" stopColor="#5A2E14" stopOpacity="0.22" />
           <stop offset="100%" stopColor="#5A2E14" stopOpacity="0" />
         </radialGradient>
         <linearGradient id={`c${uid}`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#000000" stopOpacity="0.16" />
+          <stop offset="0" stopColor="#000000" stopOpacity="0.18" />
           <stop offset="0.3" stopColor="#000000" stopOpacity="0" />
           <stop offset="0.68" stopColor="#FFFFFF" stopOpacity="0.1" />
-          <stop offset="1" stopColor="#000000" stopOpacity="0.18" />
+          <stop offset="1" stopColor="#000000" stopOpacity="0.2" />
         </linearGradient>
         <radialGradient id={`g${uid}`}>
           <stop offset="0%" stopColor="#FFE07A" stopOpacity="0.55" />
           <stop offset="100%" stopColor="#FFE07A" stopOpacity="0" />
         </radialGradient>
-        {fuzzy && (
-          <filter id={`z${uid}`} x="-8%" y="-8%" width="116%" height="116%">
-            <feTurbulence type="fractalNoise" baseFrequency="1.05" numOctaves="2" seed="7" result="n" />
-            <feDisplacementMap in="SourceGraphic" in2="n" scale="2.3" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-        )}
-        <filter id={`r${uid}`} x="-10%" y="-10%" width="120%" height="120%">
-          <feGaussianBlur stdDeviation={fuzzy ? 2.6 : 1.6} />
-        </filter>
-        {fuzzy && (
-          /* textura de pelo: fiozinhos bem de leve, por cima da pelagem */
-          <filter id={`t${uid}`} x="0" y="0" width="100%" height="100%">
-            <feTurbulence type="fractalNoise" baseFrequency="1.6 0.55" numOctaves="2" seed="3" result="n" />
-            <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.35  0 0 0 0 0.2  0 0 0 0 0.1  0 0 0 -1.6 1.05" />
-          </filter>
-        )}
+        <FabricFilter id={`t${uid}`} />
       </defs>
       <g transform={k < 1 ? `translate(100 192) scale(${k}) translate(-100 -192)` : undefined}>
         {phase >= 3 && <circle cx="100" cy="110" r="94" fill={`url(#g${uid})`} />}
-        <EffectBack id={outfit.efeito} geo={geo} uid={uid} />
-        <ellipse cx="100" cy="195" rx={bw * 1.02} ry="6" fill="rgba(60,30,40,0.16)" />
-        <g className={idle && !asleep ? 'pet-idle' : asleep ? 'pet-sleep' : undefined}>
-          <Cape id={outfit.roupa} geo={geo} />
-          <AccessoryBack id={outfit.acessorio} geo={geo} />
-
-          {/* pezinhos embaixo do corpo (ele fica em pé) */}
-          {[-1, 1].map((s) => {
-            const fx = 100 + s * 23;
-            return (
-              <g key={`pe${s}`} filter={fz}>
-                <ellipse cx={fx} cy="189" rx="15" ry="8.5" fill={costume ? foot : `url(#f${uid})`} />
-                <ellipse cx={fx} cy="190.5" rx="11" ry="5.6" fill={costume ? lighten(foot, 0.55) : `url(#m${uid})`} />
-                <path d={`M${fx - 4} 193.4 v-2.6 M${fx} 194 v-2.8 M${fx + 4} 193.4 v-2.6`} stroke={creamEdge} strokeWidth="1.1" strokeLinecap="round" opacity="0.55" />
-              </g>
-            );
-          })}
-
-          {/* corpo de feijão (com a barriga branquinha) */}
-          <g filter={fz}>
-            <path d={body} fill={costume ? fur.body : `url(#f${uid})`} />
-            <g clipPath={`url(#b${uid})`}>
-              <ellipse cx="100" cy="158" rx={bw * 0.7} ry="40" fill={`url(#m${uid})`} />
-              {fur.pattern === 'manchas' && <ellipse cx={100 + bw * 0.66} cy="146" rx="15" ry="18" fill={fur.patch} opacity="0.85" />}
-            </g>
-            <path d={body} fill={`url(#v${uid})`} />
+        <EffectBack id={outfit.efeito} geo={BODY_GEO} uid={uid} />
+        <ellipse cx="99" cy="192.5" rx="50" ry="5.5" fill="rgba(60,30,40,0.16)" />
+        <g className={`${idle && !asleep ? 'pet-idle' : asleep ? 'pet-sleep' : ''} ${pose === 'tchau' ? 'pet-hello' : ''}`} style={{ transformOrigin: '100px 190px' }}>
+          <g filter={`url(#t${uid})`}>
+            <Cape id={outfit.roupa} geo={BODY_GEO} />
+            <AccessoryBack id={outfit.acessorio} geo={BODY_GEO} />
           </g>
-          {fuzzy && (
-            <g clipPath={`url(#b${uid})`} opacity="0.13">
-              <rect x="20" y="96" width="160" height="100" filter={`url(#t${uid})`} />
+
+          {/* a foto do Hami (com o rosto da foto, ou sem rosto para desenhar outra expressão por cima) */}
+          {img(photoFace ? hamiPhoto : hamiBlank, wet ? { style: 'filter: saturate(0.85) brightness(0.93)' } as Record<string, string> : undefined)}
+          {recolor && (
+            <g mask={`url(#m${uid})`}>
+              <rect x="0" y="0" width="200" height="200" fill={fur.body} style={{ mixBlendMode: 'color' }} />
+              <rect x="0" y="0" width="200" height="200" fill={fur.body} opacity="0.32" />
             </g>
           )}
-          {wet && <path d={body} fill="#5B8FD6" opacity="0.14" />}
-          <g clipPath={`url(#b${uid})`}>
-            {!shape && <Clothes id={outfit.roupa} geo={geo} />}
-            {garment && !shape && <rect x="0" y={chin - 14} width="200" height="100" fill={`url(#c${uid})`} />}
-            {/* sombra macia da cabeça no corpo */}
-            <ellipse cx="100" cy={chin + 6} rx={hrx * 0.86} ry="12" fill={`url(#s${uid})`} />
-          </g>
-          {(garment || costume) && <path d={body} fill="none" stroke={costume ? edge(costume.c1) : edge(garment!)} strokeOpacity="0.9" strokeWidth="1.3" />}
-          {shape && garment && (
+          {wet && <path d={HOOD} fill="#5B8FD6" opacity="0.08" />}
+
+          {/* roupa vestindo o contorno do corpo, com cara de tecido */}
+          <g filter={`url(#t${uid})`}>
+            {costume ? (
+              <g clipPath={`url(#b${uid})`}>
+                <Clothes id={outfit.roupa} geo={{ top: 30, w: 66, h: 158, eyeY: 77.5, hole: { cx: 101.5, cy: 89, rx: 50, ry: 35 } }} />
+                <rect x="0" y="0" width="200" height="200" fill={`url(#c${uid})`} />
+              </g>
+            ) : null}
+            {costume && (
+              <g transform={FACE_T}>
+                <CostumeBack id={outfit.roupa} geo={{ ...HEAD_GEO, top: 37, w: 62 }} />
+              </g>
+            )}
+            {costume ? null : shape && garment ? (
             <g>
-              <path d={cloth} fill={garment} />
-              <g clipPath={`url(#k${uid})`}>
-                <Clothes id={outfit.roupa} geo={geo} />
-                <rect x="0" y={chin - 14} width="200" height="100" fill={`url(#c${uid})`} />
-                <ellipse cx="100" cy={chin + 6} rx={hrx * 0.86} ry="12" fill={`url(#s${uid})`} />
-                <path
-                  d={`M${100 - bw * 0.62} ${hem - 4} Q100 ${hem + 3} ${100 + bw * 0.62} ${hem - 4}`}
-                  stroke={darken(garment, 0.3)}
-                  strokeWidth="1.1"
-                  strokeDasharray="2.6 2.2"
-                  fill="none"
-                  opacity="0.5"
-                />
+                <path d={cloth} fill={garment} />
+                <g clipPath={`url(#k${uid})`}>
+                  <Clothes id={outfit.roupa} geo={BODY_GEO} />
+                  <rect x="0" y="110" width="200" height="90" fill={`url(#c${uid})`} />
+                </g>
               </g>
-              <path d={cloth} fill="none" stroke={edge(garment)} strokeWidth="1.5" strokeLinejoin="round" />
+            ) : (
+              outfit.roupa && (
+                <g clipPath={`url(#k${uid})`}>
+                  <Clothes id={outfit.roupa} geo={BODY_GEO} />
+                  <rect x="0" y="110" width="200" height="90" fill={`url(#c${uid})`} />
+                </g>
+              )
+            )}
+          </g>
+          {outfit.roupa && !costume && (
+            <g clipPath={`url(#k${uid})`}>
+              {/* sombra macia do queixo na roupa */}
+              <ellipse cx="100" cy="128" rx="54" ry="9" fill={`url(#s${uid})`} />
             </g>
           )}
 
-          {/* bracinhos curtos ao lado do corpo (ou segurando o objeto na frente); o esquerdo acena no "tchau" */}
-          {[-1, 1].map((s) => {
-            if (s === 1 && holding) return null;
-            const fill = sleeve ?? arm;
-            const line = sleeve ? darken(sleeve, 0.22) : costume ? edge(costume.c1) : furEdge;
-            const sx = 100 + s * (bw - 13);
-            const px = reach ? 100 + s * 19 : 100 + s * (bw - 4);
-            const py = reach ? 147 : 152;
-            const d = reach ? `M${sx} 124 C${sx + s * 6} 136 ${100 + s * (bw - 18)} 146 ${px} ${py}` : `M${sx} 124 C${sx + s * 9} 132 ${px + s * 3} 142 ${px} ${py}`;
-            return (
-              <g key={s} className={s === -1 ? (pose === 'tchau' ? 'pet-wave' : 'pet-arm') : undefined} style={{ transformOrigin: `${sx}px 124px` }}>
-                <path d={d} stroke={line} strokeOpacity={sleeve || costume ? 0.8 : 0.28} strokeWidth="17.5" strokeLinecap="round" fill="none" />
-                <path d={d} stroke={sleeve ? fill : costume ? fill : `url(#f${uid})`} strokeWidth="15.8" strokeLinecap="round" fill="none" />
-                {sleeve && <ellipse cx={px - s * 1} cy={py - 5} rx="6.5" ry="5" fill={darken(sleeve, 0.1)} />}
-                <ellipse cx={px} cy={py} rx="8.4" ry="7.8" fill={costume ? costume.paw : `url(#m${uid})`} />
-                <path d={`M${px - 3} ${py + 4.6} v-2.4 M${px + 1.5} ${py + 5.2} v-2.6`} stroke={creamEdge} strokeWidth="1.1" strokeLinecap="round" opacity="0.6" />
-              </g>
-            );
-          })}
           {cond === 'terra' && (
             <g fill="#8A5A3B" opacity="0.4">
-              <ellipse cx={100 - bw * 0.4} cy="168" rx="8" ry="5" />
-              <ellipse cx={100 + bw * 0.3} cy="178" rx="6" ry="4" />
-              <circle cx={100 + 30} cy="184" r="3" />
+              <ellipse cx="70" cy="166" rx="8" ry="5" />
+              <ellipse cx="122" cy="176" rx="6" ry="4" />
+              <circle cx="140" cy="160" r="3" />
+              <ellipse cx="128" cy="44" rx="7" ry="4.5" transform="rotate(-20 128 44)" />
+              <circle cx="78" cy="38" r="2.6" />
             </g>
           )}
-          <PropInHands prop={prop} cream={`url(#m${uid})`} paw={costume ? costume.paw : null} line={creamEdge} />
+          <PropInHands prop={prop} />
+          {/* as patinhas da foto ficam por cima da roupa e do que ele segura */}
+          {pawsOnTop && <g clipPath={`url(#p${uid})`}>{img(photoFace ? hamiPhoto : hamiBlank)}</g>}
 
-          {/* cabeça um pouquinho inclinada, com as orelhas */}
-          <g transform={`rotate(${tilt} 100 ${chin})`}>
-            <CostumeBack id={outfit.roupa} geo={geo} />
-            {!costume &&
-              [-1, 1].map((s) => {
-                const cx = hcx + s * hrx * 0.66;
-                const cy = top + 9;
-                return (
-                  <g key={s} className={s === 1 ? 'pet-ear' : undefined} style={{ transformOrigin: `${cx}px ${cy + 14}px` }}>
-                    <g filter={fz}>
-                      <circle cx={cx} cy={cy} r="17" fill={`url(#f${uid})`} />
-                      <circle cx={cx} cy={cy} r="17" fill={`url(#v${uid})`} />
-                    </g>
-                    <ellipse cx={cx - s * 1.2} cy={cy + 1.6} rx="10" ry="9.6" fill={fur.pattern === 'panda' ? fur.patch : `url(#p${uid})`} />
-                    <ellipse cx={cx - s * 2.6} cy={cy - 2.6} rx="4" ry="2.4" fill="#FFFFFF" opacity="0.35" />
-                  </g>
-                );
-              })}
-
-            {/* cabeça: rosto branquinho, mancha da cor do pelo no alto e o volume por cima */}
-            <g filter={fz}>
-              <path d={head} fill={costume ? fur.body : `url(#m${uid})`} />
-              {!costume && (
-                <g clipPath={`url(#h${uid})`}>
-                  <path d={patch} fill={`url(#f${uid})`} filter={`url(#r${uid})`} />
-                  {fur.pattern === 'manchas' && <ellipse cx={hcx - hrx * 0.5} cy={top + 18} rx="20" ry="14" fill={fur.patch} opacity="0.85" />}
-                </g>
-              )}
-              {costume && (
-                <g clipPath={`url(#h${uid})`}>
-                  <path d={muzzle} fill={`url(#m${uid})`} />
-                </g>
-              )}
-              <path d={head} fill={`url(#v${uid})`} />
-              <path d={head} fill="none" stroke={costume ? edge(costume.c1) : creamEdge} strokeOpacity={costume ? 0.9 : 0.45} strokeWidth="1.2" />
+          {/* expressão desenhada por cima do rosto (quando não é a da foto) */}
+          {!photoFace && (
+            <g transform={FACE_T}>
+              <Face mood={mood} cond={faceCond} eyeY={FACE.eyeY} noseY={FACE.eyeY + 8.2} ex={FACE.ex} blush={fur.ear} eyeK={1 + young * 0.08} uid={uid} photoBlush />
             </g>
-            {fuzzy && !costume && (
-              <g clipPath={`url(#h${uid})`} opacity="0.11">
-                <rect x="30" y={top - 2} width="140" height="100" filter={`url(#t${uid})`} />
-              </g>
-            )}
-            {wet && <path d={head} fill="#5B8FD6" opacity="0.16" />}
-            {phase === 2 && !outfit.chapeu && (
-              <g clipPath={`url(#h${uid})`}>
-                <rect x="0" y={top + 10} width="200" height="8" fill="#FF6F91" />
-              </g>
-            )}
-            {costume && (
-              <g clipPath={`url(#h${uid})`}>
-                <Clothes id={outfit.roupa} geo={geo} />
-              </g>
-            )}
-            {fur.pattern === 'panda' && [-1, 1].map((s) => <ellipse key={s} cx={hcx + s * ex} cy={eyeY - 1} rx="15" ry="13" fill={fur.patch} opacity="0.9" />)}
-            <Face mood={mood} cond={condFace ? cond : undefined} eyeY={eyeY} noseY={noseY} ex={ex} blush={fur.ear} eyeK={1 + young * 0.1} uid={uid} />
-            {/* efeitos da situação do dia no rosto e na cabeça */}
-            {cond === 'calor' &&
-              [
-                [-1, 0.2, 0],
-                [1, 0.05, 0.6],
-                [1, 0.62, 1.2],
-              ].map(([sd, dy, delay], i) => (
-                <path
-                  key={i}
-                  className="drip"
-                  style={{ animationDelay: `${delay}s` }}
-                  d={`M${100 + sd * (hrx - 6)} ${top + 18 + dy * 40} q-4 7 0 10.5 q4 -3.5 0 -10.5 Z`}
-                  fill="#BFE6FF"
-                  stroke="#7CC4F0"
-                  strokeWidth="1"
-                />
-              ))}
-            {cond === 'terra' && (
-              <g fill="#8A5A3B" opacity="0.45">
-                <ellipse cx={hcx + hrx * 0.42} cy={top + 18} rx="7" ry="4.5" transform={`rotate(-20 ${hcx + hrx * 0.42} ${top + 18})`} />
-                <ellipse cx={hcx - hrx * 0.62} cy={eyeY + 22} rx="5" ry="3.4" />
-                <circle cx={hcx - hrx * 0.3} cy={top + 10} r="2.6" />
-                <circle cx={hcx + hrx * 0.7} cy={eyeY + 14} r="2.2" />
-              </g>
-            )}
-            {wet && (
-              <g>
-                {[
-                  [-0.5, 0.1],
-                  [0.35, 0.05],
-                  [0.62, 0.42],
-                  [-0.7, 0.5],
-                  [0.1, 0.0],
-                ].map(([dx, dy], i) => (
-                  <path
-                    key={i}
-                    className="drip"
-                    style={{ animationDelay: `${i * 0.3}s` }}
-                    d={`M${100 + dx * hrx} ${top + 10 + dy * 90} q-3.5 6 0 9 q3.5 -3 0 -9 Z`}
-                    fill="#8FD0FF"
-                    stroke="#5BA9E8"
-                    strokeWidth="0.8"
-                  />
-                ))}
-              </g>
-            )}
-            {shine && (
-              <g fill="#FFFFFF">
-                <ellipse cx={hcx + hrx * 0.42} cy={hcy - hry * 0.5} rx="8" ry="4" opacity="0.55" transform={`rotate(30 ${hcx + hrx * 0.42} ${hcy - hry * 0.5})`} />
-                <path className="sparkle" d={`M${100 - hrx - 2} ${top + 30} l2.5 6 6 2.5 -6 2.5 -2.5 6 -2.5 -6 -6 -2.5 6 -2.5 Z`} fill="#FFF3A6" />
-                <path className="sparkle" style={{ animationDelay: '0.5s' }} d={`M${100 + hrx + 4} ${top + 70} l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z`} fill="#FFF3A6" />
-              </g>
-            )}
-            <CostumeFront id={outfit.roupa} geo={geo} />
-            <Glasses id={outfit.oculos} eyeY={eyeY} ex={ex} />
-            <Hat id={outfit.chapeu} geo={geo} />
-            {prop === 'fones' && (
-              <g>
-                <path d={`M${hcx - hrx + 4} ${eyeY - 6} C${hcx - hrx + 2} ${top - 18} ${hcx + hrx - 2} ${top - 18} ${hcx + hrx - 4} ${eyeY - 6}`} stroke="#5B6BD6" strokeWidth="5.5" strokeLinecap="round" fill="none" />
-                {[-1, 1].map((sd) => (
-                  <g key={sd}>
-                    <rect x={hcx + sd * (hrx - 4) - 8} y={eyeY - 18} width="16" height="22" rx="8" fill="#FF8FB1" />
-                    <rect x={hcx + sd * (hrx - 4) - 5} y={eyeY - 15} width="10" height="16" rx="5" fill="#FFFFFF" opacity="0.45" />
-                  </g>
-                ))}
-              </g>
-            )}
+          )}
+          {cond === 'calor' &&
+            [
+              [-1, 0.2, 0],
+              [1, 0.05, 0.6],
+              [1, 0.62, 1.2],
+            ].map(([sd, dy, delay], i) => (
+              <path
+                key={i}
+                className="drip"
+                style={{ animationDelay: `${delay}s` }}
+                d={`M${HEAD.cx + sd * (HEAD.rx - 8)} ${HEAD.top + 24 + dy * 40} q-4 7 0 10.5 q4 -3.5 0 -10.5 Z`}
+                fill="#BFE6FF"
+                stroke="#7CC4F0"
+                strokeWidth="1"
+              />
+            ))}
+          {wet &&
+            [
+              [-0.5, 0.1],
+              [0.35, 0.05],
+              [0.62, 0.42],
+              [-0.7, 0.5],
+              [0.1, 0.0],
+            ].map(([dx, dy], i) => (
+              <path
+                key={i}
+                className="drip"
+                style={{ animationDelay: `${i * 0.3}s` }}
+                d={`M${HEAD.cx + dx * HEAD.rx} ${HEAD.top + 12 + dy * 90} q-3.5 6 0 9 q3.5 -3 0 -9 Z`}
+                fill="#8FD0FF"
+                stroke="#5BA9E8"
+                strokeWidth="0.8"
+              />
+            ))}
+          {shine && (
+            <g fill="#FFF3A6">
+              <path className="sparkle" d={`M${HEAD.cx - HEAD.rx - 4} ${HEAD.top + 34} l2.5 6 6 2.5 -6 2.5 -2.5 6 -2.5 -6 -6 -2.5 6 -2.5 Z`} />
+              <path className="sparkle" style={{ animationDelay: '0.5s' }} d={`M${HEAD.cx + HEAD.rx + 4} ${HEAD.top + 74} l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z`} />
+              <path className="sparkle" style={{ animationDelay: '1s' }} d={`M${HEAD.cx + 30} ${HEAD.top - 2} l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z`} />
+            </g>
+          )}
+
+          {/* acessórios da cabeça e do pescoço, com cara de tecido/objeto de verdade */}
+          <g filter={`url(#t${uid})`}>
+            <g transform={FACE_T}>
+              <CostumeFront id={outfit.roupa} geo={HEAD_GEO} />
+              <Glasses id={outfit.oculos} eyeY={FACE.eyeY} ex={FACE.ex} />
+              <Hat id={outfit.chapeu} geo={HEAD_GEO} />
+              {prop === 'fones' && (
+                <g>
+                  <path d={`M${100 - 56} ${FACE.eyeY - 4} C${100 - 58} ${HEAD_GEO.top - 22} ${100 + 58} ${HEAD_GEO.top - 22} ${100 + 56} ${FACE.eyeY - 4}`} stroke="#5B6BD6" strokeWidth="5.5" strokeLinecap="round" fill="none" />
+                  {[-1, 1].map((sd) => (
+                    <g key={sd}>
+                      <rect x={100 + sd * 56 - 8} y={FACE.eyeY - 16} width="16" height="22" rx="8" fill="#FF8FB1" />
+                      <rect x={100 + sd * 56 - 5} y={FACE.eyeY - 13} width="10" height="16" rx="5" fill="#FFFFFF" opacity="0.45" />
+                    </g>
+                  ))}
+                </g>
+              )}
+            </g>
+            <Accessory id={outfit.acessorio} geo={{ top: 86, h: 64, w: 39, eyeY: 72 }} paw="#FFF4EE" head={{ cx: HEAD.cx, cy: 78, rx: HEAD.rx, ry: 45 }} />
           </g>
-          <Accessory id={outfit.acessorio} geo={{ ...geo, top: chin - 36, h: 64, w: bw - 8 }} paw={arm} head={{ cx: hcx, cy: hcy, rx: hrx, ry: hry }} />
-          {phase >= 3 && <Sparkles top={top} w={hrx} />}
-          <EffectFront id={outfit.efeito} geo={geo} />
+          {phase >= 3 && <Sparkles top={HEAD.top} w={HEAD.rx} />}
+          <EffectFront id={outfit.efeito} geo={BODY_GEO} />
         </g>
       </g>
       {asleep && (
-        <text x={100 + hrx * 0.8} y={top} className="zzz" fontSize="18" fontWeight="800" fill={INK} opacity="0.6">
+        <text x="150" y={HEAD.top + 4} className="zzz" fontSize="18" fontWeight="800" fill={INK} opacity="0.6">
           z z
         </text>
       )}
@@ -476,7 +292,35 @@ export function Hamster({ fur: furId, grams = 135, phase = 0, mood = 'feliz', ou
   );
 }
 
-function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1, uid }: { mood: PetMood; cond?: Condition; eyeY: number; noseY: number; ex: number; blush: string; eyeK?: number; uid: string }) {
+/**
+ * Acabamento de tecido para roupas e acessórios: textura de feltro bem fininha, volume macio nas bordas
+ * (como pano estofado) e uma sombrinha no pelo — para combinar com o Hami realista.
+ */
+function FabricFilter({ id }: { id: string }) {
+  return (
+    <filter id={id} x="-10%" y="-10%" width="120%" height="120%" colorInterpolationFilters="sRGB">
+      {/* volume de pano estofado: luz de cima à esquerda e borda que afunda (sem escurecer a cor) */}
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3.2" result="blur" />
+      <feDiffuseLighting in="blur" surfaceScale="3" diffuseConstant="1" lightingColor="#FFFFFF" result="light">
+        <feDistantLight azimuth="235" elevation="58" />
+      </feDiffuseLighting>
+      <feComposite in="SourceGraphic" in2="light" operator="arithmetic" k1="0.92" k2="0.2" k3="0" k4="0" result="lit" />
+      <feSpecularLighting in="blur" surfaceScale="3" specularConstant="0.42" specularExponent="22" lightingColor="#FFFFFF" result="spec">
+        <feDistantLight azimuth="235" elevation="58" />
+      </feSpecularLighting>
+      <feComposite in="lit" in2="spec" operator="arithmetic" k1="0" k2="1" k3="0.22" k4="0" result="shiny" />
+      {/* trama do tecido: bem de leve, só para não parecer plástico */}
+      <feTurbulence type="fractalNoise" baseFrequency="1.5 0.55" numOctaves="2" seed="5" result="noise" />
+      <feColorMatrix in="noise" type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0 0.16" result="knit" />
+      <feBlend in="knit" in2="shiny" mode="overlay" result="tex" />
+      <feComposite in="tex" in2="SourceAlpha" operator="in" result="fabric" />
+      {/* sombrinha macia no pelo */}
+      <feDropShadow in="fabric" dx="0" dy="1.8" stdDeviation="1.8" floodColor="#5A2E14" floodOpacity="0.28" />
+    </filter>
+  );
+}
+
+function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1, uid, photoBlush }: { mood: PetMood; cond?: Condition; eyeY: number; noseY: number; ex: number; blush: string; eyeK?: number; uid: string; photoBlush?: boolean }) {
   // Olhões castanhos redondos e brilhantes, bochechas rosadas com brilhinho e a boquinha "ω".
   // A situação do dia troca o rostinho: > < tremendo de frio, olhinhos caídos de calor, nariz vermelho de gripe…
   const sleepy = mood === 'sono' || mood === 'dormindo';
@@ -635,8 +479,8 @@ function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1, uid }: { mood: Pet
   return (
     <g>
       <g transform={eyeK !== 1 ? `translate(100 ${eyeY}) scale(${eyeK}) translate(-100 ${-eyeY})` : undefined}>{eyes()}</g>
-      {/* bochechas rosadas com risquinhos de brilho */}
-      {[-1, 1].map((s) => {
+      {/* bochechas rosadas com risquinhos de brilho (na foto elas já existem: só muda a cor no frio, calor e gripe) */}
+      {(!photoBlush || face === 'frio' || face === 'calor' || face === 'gripado') && [-1, 1].map((s) => {
         const cx = 100 + s * (ex + 16);
         const cy = eyeY + 13;
         return (
@@ -657,64 +501,48 @@ function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1, uid }: { mood: Pet
   );
 }
 
-/** O objeto da atividade, seguro pelas patinhas (as patinhas são redesenhadas por cima para "segurar"). */
-function PropInHands({ prop, cream, paw, line }: { prop?: HamiProp; cream: string; paw: string | null; line: string }) {
+/** O objeto da atividade, seguro entre as patinhas (as patinhas da foto são redesenhadas por cima dele). */
+function PropInHands({ prop }: { prop?: HamiProp }) {
   if (!prop || prop === 'fones') return null;
-  const paws = (
-    <g>
-      {[-1, 1].map((s) => (
-        <g key={s}>
-          <ellipse cx={100 + s * 19} cy="147" rx="8.6" ry="7.8" fill={paw ?? cream} />
-          <path d={`M${100 + s * 15.5} 151 v-2.2 M${100 + s * 19.5} 152 v-2.4`} stroke={line} strokeWidth="1.1" strokeLinecap="round" opacity="0.6" />
-        </g>
-      ))}
-    </g>
-  );
   if (prop === 'livro')
     return (
-      <g>
-        <g transform="rotate(-5 100 150)">
-          <path d="M74 136 Q100 131 126 136 L127 163 Q100 158 73 163 Z" fill="#5B8DEF" />
-          <path d="M77 136 Q89 133 100 137 L100 160 Q89 156 77 159 Z" fill="#FFFFFF" />
-          <path d="M123 136 Q111 133 100 137 L100 160 Q111 156 123 159 Z" fill="#F7F3EE" />
-          <path d="M81 142 Q89 140 96 142 M81 147 Q89 145 96 147 M104 142 Q111 140 119 142 M104 147 Q111 145 119 147" stroke="#C9CDD6" strokeWidth="1.4" strokeLinecap="round" fill="none" />
-          <path d="M100 137 V160" stroke="#D9DCE4" strokeWidth="1.2" />
-        </g>
-        {paws}
+      <g transform="rotate(-4 99 146)">
+        <path d="M58 132 Q99 125 140 132 L141 162 Q99 155 57 162 Z" fill="#5B8DEF" />
+        <path d="M62 132 Q81 128 99 133 L99 158 Q81 153 62 157 Z" fill="#FFFFFF" />
+        <path d="M136 132 Q117 128 99 133 L99 158 Q117 153 136 157 Z" fill="#F7F3EE" />
+        <path d="M68 139 Q81 136 93 139 M68 145 Q81 142 93 145 M105 139 Q117 136 130 139 M105 145 Q117 142 130 145" stroke="#C9CDD6" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+        <path d="M99 133 V158" stroke="#D9DCE4" strokeWidth="1.2" />
       </g>
     );
   if (prop === 'desenho')
     return (
       <g>
-        <g transform="rotate(4 100 150)">
-          <rect x="78" y="132" width="44" height="32" rx="3" fill="#FFFFFF" stroke="#E6E1DA" strokeWidth="1" />
-          <path d="M93 146 c-5 -6 -12 0 -6 6 l6 5 l6 -5 c6 -6 -1 -12 -6 -6 Z" fill="#FF8FB1" />
-          <path d="M106 142 l8 0 M106 148 l10 0 M107 155 q4 3 8 0" stroke="#7FB8F0" strokeWidth="2" strokeLinecap="round" fill="none" />
+        <g transform="rotate(4 99 146)">
+          <rect x="64" y="128" width="70" height="40" rx="4" fill="#FFFFFF" stroke="#E6E1DA" strokeWidth="1" />
+          <path d="M86 146 c-6 -7 -15 0 -7 7 l7 6 l7 -6 c8 -7 -1 -14 -7 -7 Z" fill="#FF8FB1" />
+          <path d="M104 140 l14 0 M104 147 l17 0 M105 156 q6 4 12 0" stroke="#7FB8F0" strokeWidth="2.4" strokeLinecap="round" fill="none" />
         </g>
-        <path d="M121 140 L131 128" stroke="#FFC94D" strokeWidth="5" strokeLinecap="round" />
-        <path d="M131 128 l2.6 -3.2" stroke="#3B2418" strokeWidth="3" strokeLinecap="round" />
-        {paws}
+        <path d="M134 150 L148 130" stroke="#FFC94D" strokeWidth="5" strokeLinecap="round" />
+        <path d="M148 130 l2.6 -3.4" stroke="#3B2418" strokeWidth="3" strokeLinecap="round" />
       </g>
     );
   if (prop === 'halteres')
     return (
       <g>
-        {[-1, 1].map((s) => (
-          <g key={s}>
-            <rect x={100 + s * 19 - 12} y="145" width="24" height="4" rx="2" fill="#8E8C97" />
-            <rect x={100 + s * 19 - 15} y="139" width="6" height="16" rx="2.5" fill="#FF6F91" />
-            <rect x={100 + s * 19 + 9} y="139" width="6" height="16" rx="2.5" fill="#FF6F91" />
+        {[61, 136.5].map((x) => (
+          <g key={x}>
+            <rect x={x - 15} y="140" width="30" height="5" rx="2.5" fill="#8E8C97" />
+            <rect x={x - 19} y="132" width="7" height="21" rx="3" fill="#7A5AE0" />
+            <rect x={x + 12} y="132" width="7" height="21" rx="3" fill="#7A5AE0" />
           </g>
         ))}
-        {paws}
       </g>
     );
   // varinha de bolhas
   return (
     <g>
-      <path d="M117 147 L147 131" stroke="#B9A3F0" strokeWidth="3.2" strokeLinecap="round" />
-      <circle cx="153" cy="127" r="8.5" fill="#DDF3FF" fillOpacity="0.55" stroke="#9B84E6" strokeWidth="2.8" />
-      {paws}
+      <path d="M138 146 L164 124" stroke="#B9A3F0" strokeWidth="3.2" strokeLinecap="round" />
+      <circle cx="170" cy="119" r="9" fill="#DDF3FF" fillOpacity="0.55" stroke="#9B84E6" strokeWidth="2.8" />
     </g>
   );
 }

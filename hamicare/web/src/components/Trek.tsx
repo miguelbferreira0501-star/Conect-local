@@ -1,5 +1,6 @@
 // Viagem do dia (estilo Finch): o Hami anda de lado carregando uma trouxinha, com o cenário da arena
 // onde mora (ou da Lua) passando atrás. Barra de progresso até o "?" e presente na volta.
+import { Hamster } from './Hamster';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Zap } from 'lucide-react';
 import { furById } from '../data/fur';
@@ -8,120 +9,27 @@ import { gameCfg } from '../lib/game';
 import { finishTrek, startTrek, trekMissing, trekPlaceOf, trekReady, useApp, TREK, TREK_TALES, type TrekResult } from '../lib/store';
 import { shade } from './Furniture';
 import { Glyph } from './art';
-import { costumeOf, garmentColor } from './Wear';
 import { Seed } from './ui';
 import type { Outfit, State } from '../types';
 
-// ---------- Hami de lado, andando com a trouxinha ----------
+// ---------- Hami andando com a sacolinha ----------
 
-const lighten = (hex: string, t: number) => {
-  const n = parseInt(hex.slice(1), 16);
-  const f = (v: number) => Math.round(v + (255 - v) * t).toString(16).padStart(2, '0');
-  return `#${f(n >> 16)}${f((n >> 8) & 255)}${f(n & 255)}`;
-};
-let wkSeq = 0;
 
-/**
- * O Hami de lado (virado para a direita), andando pelo caminho com uma sacolinha na patinha:
- * patinhas que alternam, corpo que balança, rabinho e orelha mexendo e a sacola balançando.
- * Mesmo estilo do Hami novo: bochechas creme, olhinho ^ e volume com luz e sombra.
- */
-export function WalkingHami({ fur: furId, outfit, size = 170, still = false }: { fur: string; outfit?: Outfit; size?: number; still?: boolean }) {
-  const f = furById(furId);
-  const id = `wk${(wkSeq = (wkSeq + 1) % 1e6)}`;
-  const costume = costumeOf(outfit?.roupa);
-  const cloth = costume ? costume.c1 : garmentColor(outfit?.roupa);
-  const edge = shade(f.shade, 0.05);
-  const pad = '#F6A9B3';
-  const INK = '#3B2418';
+/** O Hami realista viajando: anda aos pulinhos, de frente, com a sacolinha balançando na patinha. */
+export function WalkingHami({ fur, outfit, size = 170, still = false }: { fur: string; outfit?: Outfit; size?: number; still?: boolean }) {
+  const h = (size * 200) / 220;
   return (
-    <svg viewBox="0 0 220 200" width={size} height={(size * 200) / 220} className={`wk ${still ? 'is-still' : ''}`} role="img" aria-label="Hami andando com a sacolinha">
-      <defs>
-        <radialGradient id={`${id}f`} cx="55%" cy="25%" r="85%">
-          <stop offset="0%" stopColor={lighten(f.body, 0.22)} />
-          <stop offset="50%" stopColor={f.body} />
-          <stop offset="100%" stopColor={f.shade} />
-        </radialGradient>
-        <radialGradient id={`${id}m`} cx="50%" cy="30%" r="80%">
-          <stop offset="0%" stopColor={lighten(f.belly, 0.4)} />
-          <stop offset="100%" stopColor={f.belly} />
-        </radialGradient>
-        <clipPath id={`${id}b`}>
-          <ellipse cx="100" cy="146" rx="54" ry="39" />
-        </clipPath>
-        <filter id={`${id}r`} x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="2.4" />
-        </filter>
-        <radialGradient id={`${id}e`} cx="50%" cy="30%" r="75%">
-          <stop offset="0%" stopColor="#1E0F08" />
-          <stop offset="62%" stopColor="#3A1F12" />
-          <stop offset="100%" stopColor="#6A3B22" />
-        </radialGradient>
-        <clipPath id={`${id}h`}>
-          <ellipse cx="148" cy="104" rx="42" ry="38" />
-        </clipPath>
-      </defs>
-      <ellipse cx="112" cy="192" rx="62" ry="6" fill="rgba(40,30,60,0.16)" />
-      <g className="wk-bob">
-        {/* patinhas do outro lado (mais escurinhas) */}
-        <g className="wk-leg wk-leg-b">
-          <ellipse cx="88" cy="179" rx="12" ry="9" fill={shade(f.body, 0.12)} />
-          <ellipse cx="132" cy="180" rx="11" ry="8.5" fill={shade(f.body, 0.12)} />
-        </g>
-        {/* rabinho */}
-        <circle className="wk-tail" cx="50" cy="146" r="8" fill={`url(#${id}f)`} style={{ transformOrigin: '56px 148px' }} />
-        {/* corpo */}
-        <ellipse cx="100" cy="146" rx="54" ry="39" fill={`url(#${id}f)`} />
-        <g clipPath={`url(#${id}b)`}>
-          <ellipse cx="116" cy="168" rx="38" ry="22" fill={`url(#${id}m)`} />
-          {cloth && <rect x="40" y="120" width="130" height="80" fill={cloth} />}
-          {cloth && <rect x="40" y="120" width="130" height="80" fill="#000" opacity="0.06" />}
-          <ellipse cx="132" cy="122" rx="34" ry="10" fill="#5A2E14" opacity="0.05" />
-        </g>
-        <ellipse cx="100" cy="146" rx="54" ry="39" fill="none" stroke={cloth ? shade(cloth, 0.18) : edge} strokeOpacity="0.4" strokeWidth="1.3" />
-        {/* orelhas */}
-        <g className="wk-ear" style={{ transformOrigin: '132px 80px' }}>
-          <circle cx="146" cy="66" r="11" fill={shade(f.body, 0.1)} />
-          <circle cx="128" cy="70" r="14" fill={costume ? costume.c1 : `url(#${id}f)`} />
-          <ellipse cx="129" cy="71" rx="8.5" ry="8" fill={lighten(f.ear, 0.3)} />
-        </g>
-        {/* cabeça com focinho e bochecha creme */}
-        <ellipse cx="148" cy="104" rx="42" ry="38" fill={`url(#${id}f)`} />
-        <g clipPath={`url(#${id}h)`}>
-          {/* rosto branquinho embaixo, pelo da cor do hamster no alto (passagem macia) */}
-          <ellipse cx="160" cy="124" rx="40" ry="28" fill={`url(#${id}m)`} filter={`url(#${id}r)`} />
-          <ellipse cx="138" cy="80" rx="20" ry="9" fill="#FFFFFF" opacity="0.22" />
-        </g>
-        <ellipse cx="148" cy="104" rx="42" ry="38" fill="none" stroke={edge} strokeOpacity="0.35" strokeWidth="1.2" />
-        {/* olhinho feliz, rubor, narizinho e boquinha */}
-        {/* olhão castanho brilhando e bochecha rosada com brilhinho */}
-        <ellipse cx="160" cy="99" rx="7.4" ry="8.4" fill={`url(#${id}e)`} />
-        <circle cx="162.4" cy="96" r="2.7" fill="#FFFFFF" />
-        <circle cx="157.6" cy="102.2" r="1.2" fill="#FFFFFF" />
-        <ellipse cx="164" cy="114" rx="8" ry="5" fill={f.ear} opacity="0.55" />
-        <path d="M160.6 115.4 l1.8 -3 M163.8 115.4 l1.8 -3" stroke="#FFFFFF" strokeWidth="1.2" strokeLinecap="round" opacity="0.75" />
-        <ellipse cx="188" cy="109" rx="4.6" ry="3.6" fill="#F4A3AE" />
-        <path d="M184 116 Q181 120 177 118" stroke={INK} strokeWidth="2" strokeLinecap="round" fill="none" />
-        {/* patinhas da frente (deste lado) */}
-        <g className="wk-leg">
-          <ellipse cx="72" cy="180" rx="13" ry="9.5" fill={costume ? costume.foot : `url(#${id}f)`} />
-          <ellipse cx="76" cy="184" rx="6" ry="3.6" fill={pad} opacity="0.85" />
-          <ellipse cx="120" cy="182" rx="12" ry="9" fill={costume ? costume.foot : `url(#${id}f)`} />
-          <ellipse cx="124" cy="186" rx="5.6" ry="3.4" fill={pad} opacity="0.85" />
-        </g>
-        {/* sacolinha balançando na patinha */}
-        <g className="wk-sack" style={{ transformOrigin: '156px 150px' }}>
-          <path d="M146 166 C145 148 167 148 166 166" stroke="#D9487A" strokeWidth="3.2" strokeLinecap="round" fill="none" />
-          <path d="M138 163 H174 L171 188 Q170 192 166 192 H146 Q142 192 141 188 Z" fill="#FF8FB1" />
-          <path d="M138 163 H174 L173.4 169 H138.6 Z" fill="#F06A98" />
-          <path d="M156 186 c-5 -4 -9 -7 -9 -10.5 c0 -2.6 2 -4.2 4.4 -4.2 c2 0 3.6 1.2 4.6 2.8 c1 -1.6 2.6 -2.8 4.6 -2.8 c2.4 0 4.4 1.6 4.4 4.2 c0 3.5 -4 6.5 -9 10.5 Z" fill="#FFFFFF" opacity="0.92" />
-          <path d="M143 166 L144 184" stroke="#FFFFFF" strokeOpacity="0.35" strokeWidth="2.4" strokeLinecap="round" />
-        </g>
-        {/* bracinho segurando a sacola */}
-        <path d="M128 128 C138 136 146 142 152 150" stroke={costume ? costume.paw : cloth ?? f.body} strokeWidth="13" strokeLinecap="round" fill="none" />
-        <circle cx="154" cy="152" r="7" fill={costume ? costume.paw : `url(#${id}m)`} />
-      </g>
-    </svg>
+    <span className={`wk wk-real ${still ? 'is-still' : ''}`} style={{ width: size, height: h }} role="img" aria-label="Hami andando com a sacolinha">
+      <span className="wk-hop">
+        <Hamster fur={fur} outfit={outfit} size={h} idle={false} label="" />
+        <svg className="wk-sack" viewBox="0 0 40 46" width={h * 0.2} height={h * 0.23} aria-hidden="true">
+          <path d="M12 12 C11 -1 29 -1 28 12" stroke="#D9487A" strokeWidth="3" strokeLinecap="round" fill="none" />
+          <path d="M3 10 H37 L34 40 Q33 44 29 44 H11 Q7 44 6 40 Z" fill="#FF8FB1" />
+          <path d="M3 10 H37 L36.4 16 H3.6 Z" fill="#F06A98" />
+          <path d="M20 37 c-5 -4 -9 -7 -9 -10.5 c0 -2.6 2 -4.2 4.4 -4.2 c2 0 3.6 1.2 4.6 2.8 c1 -1.6 2.6 -2.8 4.6 -2.8 c2.4 0 4.4 1.6 4.4 4.2 c0 3.5 -4 6.5 -9 10.5 Z" fill="#FFFFFF" opacity="0.92" />
+        </svg>
+      </span>
+    </span>
   );
 }
 

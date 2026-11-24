@@ -3,7 +3,7 @@
 import { itemById } from '../data/items';
 
 const INK = '#2B2224';
-export type Geo = { top: number; w: number; h: number; eyeY: number };
+export type Geo = { top: number; w: number; h: number; eyeY: number; hole?: { cx: number; cy: number; rx: number; ry: number } };
 
 function look(id: string | null | undefined, c1: string, c2: string) {
   const it = id ? itemById(id) : undefined;
@@ -891,10 +891,10 @@ export function Clothes({ id, geo }: { id: string | null; geo: Geo }) {
       const belly = base === 'fantasia-panda' || base === 'fantasia-vaca' ? '#FFFFFF' : base === 'fantasia-abacate' ? '#E9F5B8' : c2 ?? '#FFFFFF';
       const rim = base === 'fantasia-panda' ? '#E6E6EE' : base === 'fantasia-vaca' ? '#FFD6E0' : base === 'fantasia-abacate' ? '#4E9A47' : belly;
       const { eyeY, w } = geo;
-      const fx = 100;
-      const fy = eyeY + 9;
-      const rx = Math.min(44, w * 0.66);
-      const ry = 27;
+      const fx = geo.hole?.cx ?? 100;
+      const fy = geo.hole?.cy ?? eyeY + 9;
+      const rx = geo.hole?.rx ?? Math.min(44, w * 0.66);
+      const ry = geo.hole?.ry ?? 27;
       const hole = `M0 0 H200 V200 H0 Z M${fx - rx} ${fy} A${rx} ${ry} 0 1 0 ${fx + rx} ${fy} A${rx} ${ry} 0 1 0 ${fx - rx} ${fy} Z`;
       return (
         <g>
