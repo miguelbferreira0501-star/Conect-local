@@ -28,18 +28,19 @@ describe('áreas da vida', () => {
 });
 
 describe('casa inicial colorida', () => {
-  it('a casa nova começa verdinha', () => {
+  it('a casa nova começa azul clarinha com piso creme', () => {
     const h = arenaHouse(1);
-    expect(h.wallpaper).toBe('p-menta');
-    expect(h.floor).toBe('f-pistache');
+    expect(h.wallpaper).toBe('p-azulzinho');
+    expect(h.floor).toBe('f-creme');
     for (const id of [h.wallpaper, h.floor]) expect(itemById(id)).toBeTruthy();
-    expect(WALLPAPER_CSS['p-menta']).toBeTruthy();
-    expect(FLOOR_CSS['f-pistache'] && FLOOR_TONE['f-pistache']).toBeTruthy();
+    expect(WALLPAPER_CSS['p-azulzinho']).toBeTruthy();
+    expect(FLOOR_CSS['f-creme'] && FLOOR_TONE['f-creme']).toBeTruthy();
   });
-  it('quem estava com a casa marrom de fábrica ganha a verde; quem escolheu outra parede fica como está', () => {
-    const old = { ...arenaHouse(1), wallpaper: 'p-creme', floor: 'f-madeira' };
-    const up = upgradeHouse(old, 1);
-    expect([up.wallpaper, up.floor]).toEqual(['p-menta', 'f-pistache']);
+  it('quem estava com a casa de fábrica (marrom ou verdinha) ganha a nova; quem escolheu outra parede fica como está', () => {
+    for (const [wallpaper, floor] of [['p-creme', 'f-madeira'], ['p-menta', 'f-pistache']]) {
+      const up = upgradeHouse({ ...arenaHouse(1), wallpaper, floor }, 1);
+      expect([up.wallpaper, up.floor]).toEqual(['p-azulzinho', 'f-creme']);
+    }
     const mine = { ...arenaHouse(1), wallpaper: 'p-lavanda', floor: 'f-madeira' };
     expect(upgradeHouse(mine, 1)).toBe(mine);
   });

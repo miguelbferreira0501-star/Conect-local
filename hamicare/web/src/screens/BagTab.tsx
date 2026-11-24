@@ -254,11 +254,11 @@ function Closet({ part, onStore, onDecorate }: { part: 'roupas' | 'casa'; onStor
       <div className={`bag2-stage ${showRoom ? '' : 'is-plain'}`}>
         {showRoom ? (
           <Room house={s.house} period={periodOf()} height={300}>
-            {!s.adventure && <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={132} label={s.pet.name} />}
+            {!s.adventure && <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={132} label={s.pet.name} turn />}
           </Room>
         ) : (
           <div className="bag2-plain">
-            <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={190} label={s.pet.name} />
+            <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={190} label={s.pet.name} turn />
           </div>
         )}
         {part === 'casa' && (

@@ -106,6 +106,7 @@ export function Garland({ id }: { id: string }) {
 
 /** Fundo da parede e do piso: padrões em CSS (cores de ilustração). */
 export const WALLPAPER_CSS: Record<string, string> = {
+  'p-azulzinho': '#BBD9EC',
   'p-menta': '#D3F1DA',
   'p-creme': 'linear-gradient(180deg,#FFF4E2,#FFEBD2)',
   'p-listras': 'repeating-linear-gradient(90deg,#FFE3EA 0 22px,#FFF2F5 22px 44px)',
@@ -141,7 +142,7 @@ export const WALLPAPER_CSS: Record<string, string> = {
 
 /** Cor "de fundo" de cada piso: o Início continua o chão nessa cor (degradê e página). */
 export const FLOOR_TONE: Record<string, string> = {
-  'f-pistache': '#9FD48C', 'f-madeira': '#C79F75', 'f-clara': '#E2CBAE', 'f-carpete': '#F2BCC8', 'f-azulejo': '#C9DCEE', 'f-grama': '#7FC47A', 'f-marmore': '#D6D7DE',
+  'f-creme': '#EFEADF', 'f-pistache': '#9FD48C', 'f-madeira': '#C79F75', 'f-clara': '#E2CBAE', 'f-carpete': '#F2BCC8', 'f-azulejo': '#C9DCEE', 'f-grama': '#7FC47A', 'f-marmore': '#D6D7DE',
   'f-areia': '#E9CF97', 'f-tabuleiro': '#D9D2EC', 'f-hexagono': '#F2CD6A', 'f-azul': '#A9CBF2', 'f-nuvem': '#BCDCFA', 'f-ladrilho': '#F6C3B6',
   'f-musgo': '#7BC46C', 'f-tacos': '#E58A5C', 'f-folhas': '#7FC46A', 'f-chale': '#D46F62', 'f-concreto': '#9AA2B4', 'f-areia-mar': '#CDB57A',
   'f-algodao': '#F0C2DD', 'f-real': '#E3CB93', 'f-metal': '#9AA3BC', 'f-ouro': '#E8B83A', 'f-lua': '#C2C5DB',
@@ -180,6 +181,7 @@ export function tonePalette(tone: string) {
 }
 
 export const FLOOR_CSS: Record<string, string> = {
+  'f-creme': '#EFEADF',
   'f-pistache': 'repeating-linear-gradient(90deg,#B8E3A6 0 46px,#9FD48C 46px 48px)',
   'f-madeira': 'repeating-linear-gradient(90deg,#D8B48C 0 46px,#C79F75 46px 48px)',
   'f-clara': 'repeating-linear-gradient(90deg,#EFDCC3 0 46px,#E2CBAE 46px 48px)',

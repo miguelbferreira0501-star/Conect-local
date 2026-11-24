@@ -13,6 +13,7 @@ export interface WallTrim {
 const W = (wainscot: string | null, trim: string, curtain: string, curtain2: string, window: WallTrim['window'] = 'classica'): WallTrim => ({ wainscot, trim, curtain, curtain2, window });
 
 export const WALL_TRIM: Record<string, WallTrim> = {
+  'p-azulzinho': W(null, '#9CC3DD', '#FFFFFF', '#FFFFFF'),
   'p-menta': W('#FFFFFF', '#8FD0A8', '#FF9FC2', '#FFE3EC', 'arco'),
   'p-creme': W('#FFFFFF', '#E9C7A6', '#FF9FC2', '#FFD6E4'),
   'p-listras': W('#FFFFFF', '#F4B6C8', '#FF86AC', '#FFE3EA', 'arco'),

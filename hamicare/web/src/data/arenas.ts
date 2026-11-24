@@ -7,8 +7,9 @@ type Spot = { itemId: string; x: number; y: number };
 export const ARENA_HOME: Record<number, { wallpaper: string; floor: string; items: Spot[] }> = {
   // Casinha Inicial: quartinho aconchegante
   1: {
-    wallpaper: 'p-menta',
-    floor: 'f-pistache',
+    // parede azul clarinha e piso creme, lisinhos (como os quartos dos apps de pet)
+    wallpaper: 'p-azulzinho',
+    floor: 'f-creme',
     items: [
       // tudo juntinho no meio da tela, em volta do Hami (como um cantinho de verdade)
       { itemId: 'k-tapete-rosa', x: 50, y: 94 },
@@ -270,7 +271,10 @@ const same = (a: string[], b: string[]) => a.length === b.length && [...a].sort(
 /** Casa ainda do jeito que veio (antes da reforma)? Então ganha a decoração nova da arena, com a parede e o piso de quem já escolheu. */
 export function upgradeHouse(input: House, n: number): House {
   // A casinha inicial deixou de ser marrom: quem ainda está com a parede creme e o piso de madeira de fábrica ganha a casa verdinha.
-  const h = n === 1 && input.wallpaper === 'p-creme' && input.floor === 'f-madeira' ? { ...input, wallpaper: 'p-menta', floor: 'f-pistache' } : input;
+  // A casinha inicial de fábrica (a marrom antiga e a verdinha) ganha a parede azul clarinha e o piso creme;
+  // quem escolheu outra parede ou piso fica como está.
+  const factory = (input.wallpaper === 'p-creme' && input.floor === 'f-madeira') || (input.wallpaper === 'p-menta' && input.floor === 'f-pistache');
+  const h = n === 1 && factory ? { ...input, wallpaper: 'p-azulzinho', floor: 'f-creme' } : input;
   const ids = h.items.map((i) => i.itemId);
   const old = OLD_ARENA_ITEMS[n] ?? [];
   // Casa inicial com os móveis ainda no lugar de fábrica antigo: chegam mais perto do Hami.

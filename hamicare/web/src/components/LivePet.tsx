@@ -104,6 +104,7 @@ export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = ''
               label={s.pet.name}
               pose={trick?.t === 'carinho' ? 'festa' : undefined}
               growth={growth}
+              turn
             />
           )}
         </span>

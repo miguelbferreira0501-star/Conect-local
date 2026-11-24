@@ -1,4 +1,5 @@
-// Janela da casa com cortinas: o céu acompanha a hora do dia.
+// Janela da casa: moldura branca simples com quatro vidrinhos (sem cortina), no jeito dos quartos dos apps de
+// pet; o vidro acompanha a hora do dia. Na casa lunar é a escotilha redonda de nave.
 import { useId } from 'react';
 import type { Period } from '../../data/lines';
 import { mix } from './kit';
@@ -12,6 +13,7 @@ const SKY: Record<Period, [string, string]> = {
 
 export function RoomWindow({ trim, period, lunar = false }: { trim: WallTrim; period: Period; lunar?: boolean }) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
+  if (!lunar) return <SimpleWindow period={period} />;
   // Na casa lunar, a janela dá para o espaço: sempre noite, com a Terra no céu e chão de Lua.
   const [a, b] = lunar ? (['#0D1030', '#262A5C'] as [string, string]) : SKY[period];
   const night = lunar || period === 'noite';
@@ -148,6 +150,39 @@ export function RoomWindow({ trim, period, lunar = false }: { trim: WallTrim; pe
           <path d="M6 6 H114 V9 H6 Z" fill={mix(c2, '#2B1A14', 0.08)} />
         </>
       )}
+    </svg>
+  );
+}
+
+/** Janela branca de quatro vidrinhos com peitoril, sem cortina. */
+function SimpleWindow({ period }: { period: Period }) {
+  const night = period === 'noite';
+  const glass = night ? '#3B4A86' : period === 'tarde' ? '#D6EEF2' : '#CDEDF2';
+  const glassDeep = night ? '#2E3A70' : '#B5E0E8';
+  const panes = [
+    [22, 14],
+    [62, 14],
+    [22, 54],
+    [62, 54],
+  ];
+  return (
+    <svg viewBox="0 0 120 120" className="block h-auto w-full overflow-visible" aria-hidden="true">
+      {/* moldura */}
+      <rect x="12" y="4" width="96" height="94" rx="7" fill="#FFFFFF" />
+      <rect x="12" y="4" width="96" height="94" rx="7" fill="none" stroke="#E3E8EC" strokeWidth="1.5" />
+      <rect x="17" y="9" width="86" height="84" rx="4" fill="#EEF3F5" />
+      {panes.map(([x, y], i) => (
+        <g key={i}>
+          <rect x={x} y={y} width="36" height="36" rx="4" fill={glass} />
+          <rect x={x} y={y} width="36" height="36" rx="4" fill="none" stroke={glassDeep} strokeWidth="2.4" />
+          {!night && <path d={`M${x + 6} ${y + 26} L${x + 26} ${y + 6}`} stroke="#FFFFFF" strokeOpacity="0.55" strokeWidth="3" strokeLinecap="round" />}
+          {night && i === 1 && <circle cx={x + 22} cy={y + 14} r="5" fill="#FFF3C2" />}
+          {night && i !== 1 && <circle cx={x + 10 + i * 4} cy={y + 12 + i * 3} r="1.3" fill="#FFFFFF" opacity="0.8" />}
+        </g>
+      ))}
+      {/* peitoril */}
+      <rect x="6" y="96" width="108" height="9" rx="4.5" fill="#FFFFFF" />
+      <rect x="6" y="102" width="108" height="3" rx="1.5" fill="#E1E6EA" />
     </svg>
   );
 }
