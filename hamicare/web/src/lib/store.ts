@@ -1407,6 +1407,25 @@ export function placeItem(itemId: string): 'ok' | 'movido' | 'ja-esta' | 'sem-it
   return res;
 }
 
+/** Compra (se ainda não tiver) e põe o móvel no lugar escolhido na prévia da Loja. Se todas as unidades já
+ *  estão na casa, a primeira vai para o lugar novo. */
+export function placeAt(itemId: string, x: number, y: number, flip = false): BuyResult {
+  if (!owned(state, itemId)) {
+    const r = buy(itemId);
+    if (r !== 'ok') return r;
+  }
+  const spot = { x: clamp(x, 3, 97), y: clamp(y, 6, 99), ...(flip ? { flip: true } : { flip: undefined }) };
+  const here = state.house.items.filter((i) => i.itemId === itemId);
+  const n = state.inventory[itemId] ?? 0;
+  if (here.length >= n && here.length) {
+    commit({ ...state, house: { ...state.house, items: state.house.items.map((i) => (i.uid === here[0].uid ? { ...i, ...spot } : i)) } });
+    return 'ok';
+  }
+  const z = Math.max(0, ...state.house.items.map((i) => i.z)) + 1;
+  commit({ ...state, house: { ...state.house, items: [...state.house.items, { uid: uid(), itemId, z, ...spot }] } });
+  return 'ok';
+}
+
 /** Viagem para a Lua: compra a casa lunar (5.000 sementes) e o Hami se muda para lá. */
 export function buyMoon(): 'ok' | 'sem-sementes' | 'ja-tem' {
   if (state.moon) return 'ja-tem';

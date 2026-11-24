@@ -26,6 +26,12 @@ interface Props {
   onFront?: (uid: string) => void;
   /** O Hami usando um móvel agora: desenhado dentro dele, com a largura do móvel em px. */
   usage?: { uid: string; kind: UseKind; node: (w: number) => ReactNode } | null;
+  /** Só este móvel pode ser arrastado (prévia da compra na Loja). */
+  only?: string;
+  /** O móvel da prévia: fica transparente, com a marca no chão verde (lugar livre) ou vermelha (ocupado). */
+  ghost?: { uid: string; ok: boolean };
+  /** Enquanto arrasta (para a marca mudar de cor na hora). */
+  onDrag?: (uid: string, x: number, y: number) => void;
 }
 
 export type UseKind = 'deitar' | 'banho' | 'sentar' | 'correr' | 'balancar';
@@ -44,7 +50,7 @@ const GARLANDS = new Set(['pisca', 'bandeirinhas']);
 const FLAT = /^tapete/;
 
 /** Onde a peça está: tapete (deitado no chão), parede (pendurado) ou chão (em pé, com sombra). */
-function placeOf(itemId: string, svg: string | undefined, y: number): 'tapete' | 'parede' | 'chao' {
+export function placeOf(itemId: string, svg: string | undefined, y: number): 'tapete' | 'parede' | 'chao' {
   const kit = svg ? KIT_PLACE[svg] : undefined;
   if (kit === 'tapete' || FLAT.test(itemId)) return 'tapete';
   if (kit === 'parede') return 'parede';
@@ -58,9 +64,10 @@ const depth = (y: number) => 0.8 + 0.2 * Math.min(1, Math.max(0, (y - WALL_H) / 
  * A casa do Hami: um cômodo de verdade (parede lisa de uma cor só até o chão, chão em perspectiva,
  * janela com cortina) e os móveis posicionados em % (arrastáveis no modo de edição).
  */
-export function Room({ house, period = 'tarde', height = 260, children, editing, selected, onSelect, onMove, onRemove, onFront, onUse, usage, wide = 1 }: Props & { wide?: number }) {
+export function Room({ house, period = 'tarde', height = 260, children, editing, selected, onSelect, onMove, onRemove, onFront, onUse, usage, only, ghost, onDrag, wide = 1 }: Props & { wide?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<{ uid: string; x: number; y: number } | null>(null);
+  const grab = useRef({ dx: 0, dy: 0 });
   const trim = trimOf(house.wallpaper);
 
   function pos(e: React.PointerEvent) {
@@ -97,8 +104,12 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
         const item = itemById(it.itemId);
         if (!item || GARLANDS.has(it.itemId)) return null;
         const live = drag?.uid === it.uid ? drag : it;
-        if (placeOf(it.itemId, item.svg, live.y) !== 'chao') return null;
         const k = depth(live.y);
+        if (ghost?.uid === it.uid) {
+          const wall = placeOf(it.itemId, item.svg, live.y) === 'parede';
+          return <span key={`s${it.uid}`} className={`room-foot ${ghost.ok ? 'is-ok' : 'is-bad'} ${wall ? 'is-wall' : ''}`} style={{ left: `${live.x}%`, top: `${live.y}%`, width: `${((item.size ?? 12) * (wall ? 1 : 1.05) * k) / wide}%` }} />;
+        }
+        if (placeOf(it.itemId, item.svg, live.y) !== 'chao') return null;
         return <span key={`s${it.uid}`} className="room-shadow" style={{ left: `${live.x}%`, top: `${live.y}%`, width: `${((item.size ?? 12) * 0.95 * k) / wide}%` }} />;
       })}
 
@@ -119,6 +130,7 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
         const kind = !editing && onUse ? useKindOf(it.itemId, item.svg) : null;
         const use = usage?.uid === it.uid ? usage : null;
         const px = ((ref.current?.clientWidth ?? 390) * (item.size ?? 12)) / wide / 100;
+        const movable = editing && (!only || only === it.uid);
         return (
           <div
             key={it.uid}
@@ -126,31 +138,40 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
             aria-label={kind ? `${item.name}: levar o Hami até lá` : item.name}
             tabIndex={editing || kind ? 0 : -1}
             onClick={kind ? () => onUse?.(it.uid, kind) : undefined}
-            className={`room-item ${place === 'tapete' ? 'is-flat' : ''} ${editing ? 'is-editable' : ''} ${selected === it.uid ? 'is-selected' : ''} ${kind ? 'is-usable' : ''}`}
+            className={`room-item ${place === 'tapete' ? 'is-flat' : ''} ${movable ? 'is-editable' : ''} ${selected === it.uid ? 'is-selected' : ''} ${kind ? 'is-usable' : ''} ${ghost?.uid === it.uid ? 'is-ghost' : ''}`}
             style={{
               left: `${live.x}%`,
               top: `${live.y}%`,
               width: `${(item.size ?? 12) / wide}%`,
               scale: k === 1 ? undefined : String(k),
-              zIndex: editing && selected === it.uid ? 300 : place === 'tapete' ? 3 : place === 'parede' ? 5 : 10 + Math.round(live.y),
+              zIndex: ghost?.uid === it.uid ? 300 : editing && selected === it.uid ? 300 : place === 'tapete' ? 3 : place === 'parede' ? 5 : 10 + Math.round(live.y),
               fontSize: `${((item.size ?? 12) * 0.82) / wide}cqw`,
             }}
             onPointerDown={(e) => {
-              if (!editing) return;
+              if (!movable) return;
               e.preventDefault();
               (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
               onSelect?.(it.uid);
-              setDrag({ uid: it.uid, ...pos(e) });
+              // segura pelo ponto onde tocou (o móvel não pula para baixo do dedo)
+              const p = pos(e);
+              grab.current = { dx: it.x - p.x, dy: it.y - p.y };
+              setDrag({ uid: it.uid, x: it.x, y: it.y });
             }}
             onPointerMove={(e) => {
-              if (drag?.uid === it.uid) setDrag({ uid: it.uid, ...pos(e) });
+              if (drag?.uid !== it.uid) return;
+              const p = pos(e);
+              const next = { uid: it.uid, x: p.x + grab.current.dx, y: p.y + grab.current.dy };
+              setDrag(next);
+              onDrag?.(it.uid, next.x, next.y);
             }}
             onPointerUp={() => {
               if (drag?.uid === it.uid) onMove?.(it.uid, drag.x, drag.y);
               setDrag(null);
             }}
           >
-            {item.svg ? <Furniture id={item.svg} c1={item.c1} c2={item.c2} /> : <Glyph e={item.art ?? item.emoji} size="fill" />}
+            <div className="room-item-art" style={it.flip ? { transform: 'scaleX(-1)' } : undefined}>
+              {item.svg ? <Furniture id={item.svg} c1={item.c1} c2={item.c2} /> : <Glyph e={item.art ?? item.emoji} size="fill" />}
+            </div>
             {use && <div className={`room-use use-${use.kind}`}>{use.node(px)}</div>}
             {use?.kind === 'banho' && item.svg && (
               <div className="room-use-front" aria-hidden="true">
@@ -175,7 +196,7 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
         );
       })}
       {children && (
-        <div className={`pointer-events-none absolute inset-x-0 bottom-[3%] flex justify-center ${editing ? 'room-pet-ghost' : ''}`} style={{ zIndex: 98 }}>
+        <div className={`pointer-events-none absolute inset-x-0 bottom-[3%] flex justify-center ${editing && !only ? 'room-pet-ghost' : ''}`} style={{ zIndex: 98 }}>
           <div className={editing ? 'pointer-events-none' : 'pointer-events-auto'}>{children}</div>
         </div>
       )}

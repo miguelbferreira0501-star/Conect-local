@@ -68,8 +68,8 @@ export const askText = (c: Condition, n: number) => CONDITIONS[c].ask.replace('{
 
 // ---------- Atividades ----------
 
-export type Activity = 'lendo' | 'bolinha' | 'musica' | 'bolhas' | 'soneca' | 'cama' | 'meditando' | 'desenhando' | 'exercicio';
-/** O que ele segura enquanto faz a atividade (desenhado no próprio Hami). */
+export type Activity = 'parado' | 'sentado' | 'soneca' | 'cama';
+/** O que ele segura enquanto faz a atividade (desenhado no próprio mascote). */
 export type HamiProp = 'livro' | 'fones' | 'desenho' | 'halteres' | 'varinha';
 
 export interface ActivityInfo {
@@ -78,19 +78,15 @@ export interface ActivityInfo {
   lines: string[];
 }
 
+/** Ao abrir o app ele está tranquilo: em pé, sentadinho ou tirando uma soneca (nada de agitação). */
 export const ACTIVITIES: Record<Activity, ActivityInfo> = {
-  lendo: { mood: 'calmo', prop: 'livro', lines: ['Estou lendo uma história de aventura!', 'Esse livro é muito bom. Quer que eu conte o final?', 'Shh… chegou a parte mais legal do livro!'] },
-  bolinha: { mood: 'animado', lines: ['Olha a bolinha! Brinca comigo?', 'Peguei! Agora é sua vez!', 'Quica, quica, quica!'] },
-  musica: { mood: 'calmo', prop: 'fones', lines: ['Essa música é a minha favorita!', 'Dança comigo um pouquinho?', 'Tum, tum, tum… que ritmo bom!'] },
-  bolhas: { mood: 'animado', prop: 'varinha', lines: ['Olha quantas bolhinhas!', 'Consegue estourar uma?', 'Fiz uma bolha gigante!'] },
-  // soneca no chão (enroladinho na mantinha) ou na caminha (coberto até o pescoço)
-  soneca: { mood: 'dormindo', lines: ['Zzz… (uma sonequinha rapidinha)', 'Zzz… sonhando com sementinhas…'] },
+  parado: { mood: 'feliz', lines: ['Oi! Que bom te ver!', 'Tô aqui te esperando!', 'Vamos fazer as tarefas juntos?'] },
+  sentado: { mood: 'feliz', lines: ['Sentadinho aqui, curtindo o dia.', 'Sentei pra te esperar!', 'Tô de boa, só sentadinho.'] },
+  // soneca no chão (enroladinho) ou na caminha
+  soneca: { mood: 'dormindo', lines: ['Zzz… (uma sonequinha rapidinha)', 'Zzz… sonhando com petiscos…'] },
   cama: { mood: 'dormindo', lines: ['Zzz… que caminha gostosa…', 'Zzz… (abraçadinho no travesseiro)'] },
-  meditando: { mood: 'calmo', lines: ['Respira comigo… inspira… solta…', 'Estou meditando. Que paz!'] },
-  desenhando: { mood: 'feliz', prop: 'desenho', lines: ['Fiz um desenho de você!', 'Olha meu desenho! Ficou bonito?'] },
-  exercicio: { mood: 'animado', prop: 'halteres', lines: ['Um, dois, um, dois! Me exercitando!', 'Ficando fortinho!'] },
 };
-export const ACTIVITY_ORDER: Activity[] = ['lendo', 'bolinha', 'musica', 'bolhas', 'soneca', 'cama', 'meditando', 'desenhando', 'exercicio'];
+export const ACTIVITY_ORDER: Activity[] = ['parado', 'sentado', 'soneca', 'cama'];
 
 /**
  * Sorteia o que ele está fazendo agora, sem repetir a anterior. De noite a soneca é mais provável;
@@ -98,14 +94,14 @@ export const ACTIVITY_ORDER: Activity[] = ['lendo', 'bolinha', 'musica', 'bolhas
  */
 export function pickActivity(last: Activity | null, hour: number, rnd: number): Activity {
   const night = hour >= 21 || hour < 7;
-  const weights: number[] = ACTIVITY_ORDER.map((a) => (a === last ? 0 : a === 'soneca' || a === 'cama' ? (night ? 3 : 0.45) : 1));
+  const weights: number[] = ACTIVITY_ORDER.map((a) => (a === last ? 0 : a === 'soneca' || a === 'cama' ? (night ? 3 : 0.1) : 1));
   const total = weights.reduce((x, y) => x + y, 0);
   let r = rnd * total;
   for (let i = 0; i < ACTIVITY_ORDER.length; i++) {
     r -= weights[i];
     if (r < 0) return ACTIVITY_ORDER[i];
   }
-  return ACTIVITY_ORDER.find((a) => a !== last) ?? 'lendo';
+  return ACTIVITY_ORDER.find((a) => a !== last) ?? 'parado';
 }
 
 const KEY = 'hamicare:atividade';

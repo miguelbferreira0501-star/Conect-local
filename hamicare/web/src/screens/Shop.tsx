@@ -7,6 +7,7 @@ import { Check, ChevronLeft, ChevronRight, Crown, Gift, Heart, Lock } from 'luci
 import { Hamster } from '../components/Hamster';
 import { Room } from '../components/Room';
 import { ItemIcon } from '../components/ItemIcon';
+import { PlaceFurniture } from '../components/PlaceFurniture';
 import { Glyph } from '../components/art';
 import { Coins, Seed, toast } from '../components/ui';
 import { SHOP_COLORS, SHOPS, ShopFront, ShopIcon, type ShopId } from '../components/ShopFront';
@@ -358,6 +359,8 @@ export function TryOn({ item, list, onPick, onClose, onPlus, onGift }: { item: I
     strip.current?.querySelector('.fit-pick.is-on')?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
   }, [item]);
   if (!item) return null;
+  // Móvel: abre a casa com a peça para arrastar até o lugar, escolher a cor e comprar.
+  if (['movel', 'decor', 'brinquedo'].includes(item.kind) && !['pisca', 'bandeirinhas'].includes(item.id)) return <PlaceFurniture item={item} onPick={onPick} onClose={onClose} onPlus={onPlus} />;
   const res = canBuy(s, item.id);
   const wear = WEARABLE_KINDS.includes(item.kind);
   const outfit = wear ? { ...s.pet.outfit, [item.kind]: item.id } : s.pet.outfit;

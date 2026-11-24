@@ -162,6 +162,8 @@ export interface HouseItem {
   x: number;
   y: number;
   z: number;
+  /** Virado para o outro lado (espelhado). */
+  flip?: boolean;
 }
 
 export interface House {

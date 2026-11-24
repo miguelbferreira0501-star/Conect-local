@@ -101,43 +101,9 @@ export function ConditionFx({ cond }: { cond: Condition }) {
 }
 
 /** Detalhes da atividade (o objeto que ele segura já vem desenhado no próprio Hami). */
-export function ActivityFx({ act }: { act: Activity }) {
-  switch (act) {
-    case 'bolinha':
-      return (
-        <div className="hfx" aria-hidden="true">
-          <span className="hfx-ball" />
-        </div>
-      );
-    case 'bolhas':
-      return (
-        <div className="hfx" aria-hidden="true">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <span key={i} className="hfx-bubble" style={{ animationDelay: `${i * 0.7}s`, width: 10 + (i % 3) * 6, height: 10 + (i % 3) * 6 }} />
-          ))}
-        </div>
-      );
-    case 'musica':
-      return (
-        <div className="hfx" aria-hidden="true">
-          {['♪', '♫', '♪'].map((n, i) => (
-            <span key={i} className="hfx-note" style={{ left: `${i % 2 ? 80 : 14}%`, animationDelay: `${i * 0.9}s` }}>
-              {n}
-            </span>
-          ))}
-        </div>
-      );
-    case 'meditando':
-      return (
-        <div className="hfx" aria-hidden="true">
-          {[12, 86, 24, 76].map((x, i) => (
-            <span key={i} className="hfx-spark" style={{ left: `${x}%`, top: `${20 + (i % 2) * 30}%`, animationDelay: `${i * 0.6}s` }} />
-          ))}
-        </div>
-      );
-    default:
-      return null;
-  }
+/** As atividades agora são tranquilas (em pé, sentado, dormindo): sem efeitos em volta. */
+export function ActivityFx(_: { act: Activity }) {
+  return null;
 }
 
 /** Animação do corpo inteiro para cada situação ou atividade. */
@@ -147,9 +113,6 @@ export function bodyFxClass(cond: Condition | null, act: Activity | null): strin
   if (cond === 'calor') return 'fx-melt';
   if (cond === 'tedio') return 'fx-sigh';
   if (cond === 'saudade' || cond === 'chuva') return 'fx-sob';
-  if (cond) return '';
-  if (act === 'musica') return 'fx-sway';
-  if (act === 'exercicio' || act === 'bolinha') return 'fx-bounce';
-  if (act === 'meditando') return 'fx-float';
+  void act;
   return '';
 }
