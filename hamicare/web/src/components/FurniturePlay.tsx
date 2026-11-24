@@ -3,7 +3,8 @@
 import { useRef, useState } from 'react';
 import { SleepingHami } from './SleepingHami';
 import { BathBubbles } from './HamiPhoto';
-import { Hami3D } from './Hami3D';
+import { Hamster } from './Hamster';
+import { DogPose } from './DogPose';
 import { toast } from './ui';
 import type { UseKind } from './Room';
 import { care, useApp } from '../lib/store';
@@ -27,21 +28,20 @@ export function UsePet({ kind, w }: { kind: UseKind; w: number }) {
   if (kind === 'banho')
     return (
       <div className="use-pet use-pet-banho">
-        <Hami3D fur={s.pet.fur} outfit={{ ...s.pet.outfit, roupa: null }} mood="risada" action="parado" wet size={clamp(w * 0.78, 90, 190)} label="" />
+        <Hamster fur={s.pet.fur} outfit={{ ...s.pet.outfit, roupa: null }} mood="risada" wet size={clamp(w * 0.78, 90, 190)} label="" growth={1} />
         <BathBubbles />
       </div>
     );
-  const size = kind === 'sentar' ? clamp(w * 0.62, 80, 170) : kind === 'correr' ? clamp(w * 0.72, 70, 160) : clamp(w * 0.58, 70, 150);
+  const size = kind === 'sentar' ? clamp(w * 0.66, 80, 170) : kind === 'correr' ? clamp(w * 0.72, 70, 160) : clamp(w * 0.58, 70, 150);
   return (
     <div className={`use-pet use-pet-${kind}`}>
-      <Hami3D
-        fur={s.pet.fur}
-        outfit={s.pet.outfit}
-        mood={kind === 'sentar' ? 'feliz' : 'risada'}
-        action={kind === 'correr' ? 'andar' : kind === 'balancar' ? 'festa' : 'parado'}
-        size={size}
-        label=""
-      />
+      {kind === 'sentar' ? (
+        <DogPose kind="senta" fur={s.pet.fur} outfit={s.pet.outfit} width={size} label="" />
+      ) : kind === 'correr' ? (
+        <DogPose kind="anda" fur={s.pet.fur} outfit={s.pet.outfit} width={size} label="" />
+      ) : (
+        <Hamster fur={s.pet.fur} outfit={s.pet.outfit} mood="risada" pose="festa" size={size} label="" growth={1} />
+      )}
     </div>
   );
 }

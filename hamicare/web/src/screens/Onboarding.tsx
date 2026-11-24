@@ -85,7 +85,7 @@ export function Onboarding() {
       <div className="grid gap-3" key={step}>
         {step === 'intro' && (
           <>
-            {say(migrated ? <>Oi de novo! O {s.pet.name || 'Xodó'} virou um hamster: o <b>Hami</b>. Seus pontos, itens e diário vieram junto. Me responde umas perguntinhas?</> : <>Zzz… Oi! Eu sou o <b>Hami</b>. A gente cuida um do outro: posso <b>emagrecer ou ganhar peso junto com você</b>, te ajudar com <b>hábitos saudáveis</b> ou com a <b>ansiedade</b>. Você escolhe.</>)}
+            {say(migrated ? <>Oi de novo! O {s.pet.name || 'Xodó'} virou um cachorrinho: o <b>Hami</b>. Seus pontos, itens e diário vieram junto. Me responde umas perguntinhas?</> : <>Zzz… Oi! Eu sou o <b>Hami</b>. A gente cuida um do outro: posso <b>emagrecer ou ganhar peso junto com você</b>, te ajudar com <b>hábitos saudáveis</b> ou com a <b>ansiedade</b>. Você escolhe.</>)}
             <p className="text-center text-[14px] text-muted">São perguntas rápidas. Dá pra mudar tudo depois.</p>
             <button className="btn btn-primary" onClick={next}>
               {migrated ? 'Vamos lá' : 'Acordar o Hami'}

@@ -1177,6 +1177,21 @@ export function feed(foodId: string): boolean {
   return true;
 }
 
+/** Carinho na área de Interações: cada toque rende 1 coração, até este tanto por dia. */
+export const HEART_TAP_CAP = 40;
+/** Corações que um petisco rende (os mais gostosos valem mais). */
+export const heartsOf = (foodId: string) => Math.max(1, Math.round((itemById(foodId)?.food?.felicidade ?? 4) / 5));
+
+/** Soma corações do carinho (toque, com limite diário) ou do petisco. Devolve quantos entraram. */
+export function addHearts(n: number, from: 'toque' | 'petisco'): number {
+  const key = todayKey();
+  const today = state.pet.heartsDay?.date === key ? state.pet.heartsDay.n : 0;
+  const add = from === 'toque' ? Math.max(0, Math.min(n, HEART_TAP_CAP - today)) : Math.max(0, n);
+  if (!add) return 0;
+  commit({ ...state, pet: { ...state.pet, hearts: (state.pet.hearts ?? 0) + add, heartsDay: from === 'toque' ? { date: key, n: today + add } : state.pet.heartsDay } });
+  return add;
+}
+
 export function toggleSleep() {
   const s = decayStats(state);
   const sleeping = !s.pet.sleeping;
