@@ -8,10 +8,11 @@ import { useApp } from '../lib/store';
 import type { Outfit, PetMood } from '../types';
 import type { Condition, HamiProp } from '../lib/hamiDay';
 
-export type Trick = 'oi' | 'choro';
+export type Trick = 'carinho' | 'choro';
 
 const TRICKS: Record<Trick, { mood: PetMood; sound: SoundId; ms: number; say?: string }> = {
-  oi: { mood: 'feliz', sound: 'squeak', ms: 1500, say: 'Oi!' },
+  // carinho: amassadinho, pulinho, olhinhos fechados de alegria, bracinhos batendo e coraçõezinhos
+  carinho: { mood: 'risada', sound: 'squeak', ms: 1400 },
   // chorão fofinho (sozinho, de tempos em tempos, quando ele precisa de ajuda)
   choro: { mood: 'choro', sound: 'choro', ms: 2600 },
 };
@@ -72,11 +73,11 @@ export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = ''
       play('ronco');
       return;
     }
-    run('oi');
+    run('carinho');
   }
 
   const now = trick ? TRICKS[trick.t] : null;
-  const petMood: PetMood = asleep ? 'dormindo' : now?.mood ?? mood;
+  const petMood: PetMood = asleep ? 'dormindo' : (now?.mood ?? mood);
   const bubble = now?.say ?? say;
   return (
     <div className={`live-pet ${className}`}>
@@ -85,20 +86,34 @@ export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = ''
           {bubble}
         </p>
       )}
-      <button
-        className="live-pet-btn"
-        data-sound="none"
-        aria-label={label ?? `Fazer carinho no ${s.pet.name}`}
-        onClick={tap}
-        onContextMenu={(e) => e.preventDefault()}
-      >
-        <span key={trick?.id ?? 0} className={`live-body ${trick ? (trick.t === 'choro' ? 'fx-sob' : 'gest-oi') : fx}`}>
+      <button className="live-pet-btn" data-sound="none" aria-label={label ?? `Fazer carinho no ${s.pet.name}`} onClick={tap} onContextMenu={(e) => e.preventDefault()}>
+        <span key={trick?.id ?? 0} className={`live-body ${trick ? (trick.t === 'choro' ? 'fx-sob' : 'gest-carinho') : fx}`}>
           {asleep ? (
-            <SleepingHami fur={s.pet.fur} size={size * 0.92} place="chao" />
+            <SleepingHami fur={s.pet.fur} size={size * 0.72} place="chao" />
           ) : (
-            <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={wear ? { ...s.pet.outfit, ...wear } : s.pet.outfit} mood={petMood} cond={cond ?? undefined} condFace={!trick} prop={trick?.t === 'oi' ? undefined : prop} size={size} label={s.pet.name} pose={trick?.t === 'oi' ? 'tchau' : undefined} growth={growth} />
+            <Hamster
+              fur={s.pet.fur}
+              grams={s.pet.grams}
+              phase={s.pet.phase}
+              outfit={wear ? { ...s.pet.outfit, ...wear } : s.pet.outfit}
+              mood={petMood}
+              cond={cond ?? undefined}
+              condFace={!trick}
+              prop={trick?.t === 'carinho' ? undefined : prop}
+              size={size}
+              label={s.pet.name}
+              pose={trick?.t === 'carinho' ? 'festa' : undefined}
+              growth={growth}
+            />
           )}
         </span>
+        {trick?.t === 'carinho' && (
+          <span key={`h${trick.id}`} className="pet-hearts" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+        )}
       </button>
       {children}
     </div>
