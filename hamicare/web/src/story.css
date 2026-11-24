@@ -888,15 +888,10 @@ span.tcal-ico { background: transparent; }
 /* (a respiração é feita dentro do desenho: só as costas sobem; aqui ficam a caminha, as sombras e os "z") */
 .sleep-photo { position: relative; display: inline-block; }
 .sleep-photo > * { position: absolute; }
-.sleep-photo.is-cama > svg { position: relative; z-index: 1; }
+.sleep-photo > svg { position: relative; z-index: 1; }
 .sleep-photo .sleep-zzz { left: 50%; top: -22%; z-index: 6; pointer-events: none; }
-.sleep-photo.is-chao .sleep-zzz { left: 52%; top: -26%; }
 .sleep-contact { left: 6%; right: 4%; bottom: -3%; height: 16%; border-radius: 50%; background: radial-gradient(closest-side, rgba(70, 40, 60, 0.34), rgba(70, 40, 60, 0)); z-index: 0; }
-.nap-floor-shadow { left: 2%; right: 2%; bottom: -6%; height: 22%; border-radius: 50%; background: radial-gradient(closest-side, rgba(40, 30, 50, 0.22), rgba(40, 30, 50, 0)); }
-.nap-layer { left: 0; right: 0; bottom: 0; display: block; }
-.nap-layer > svg { width: 100%; height: 100%; }
-.nap-contact { border-radius: 50%; background: radial-gradient(closest-side, rgba(150, 70, 100, 0.32), rgba(150, 70, 100, 0)); }
-.nap-hami { display: block; }
+.sleep-floor { left: -4%; right: -6%; bottom: -7%; height: 22%; border-radius: 50%; background: radial-gradient(closest-side, rgba(40, 30, 50, 0.2), rgba(40, 30, 50, 0)); z-index: 0; }
 .bath-photo { position: relative; display: inline-block; }
 .photo-bubbles { position: absolute; inset: 0; pointer-events: none; }
 .photo-bubbles i { position: absolute; bottom: 52%; border-radius: 50%; background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.95) 0 16%, rgba(255, 255, 255, 0.2) 38%, rgba(190, 215, 255, 0.28) 68%, rgba(255, 185, 230, 0.55) 100%); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.75); opacity: 0; animation: photo-bubble 3s ease-out infinite; }
@@ -931,3 +926,23 @@ span.tcal-ico { background: transparent; }
 .pet-hearts i:nth-child(3) { --dx: 36px; animation-delay: 0.46s; width: 15px; height: 13px; left: -7px; }
 @keyframes pet-heart { 0% { opacity: 0; transform: translate(0, 10px) scale(0.4); } 25% { opacity: 1; transform: translate(calc(var(--dx) * 0.5), -6px) scale(1.05); } 100% { opacity: 0; transform: translate(var(--dx), -46px) scale(0.9); } }
 @media (prefers-reduced-motion: reduce) { .gest-carinho, .hami-cheer-l, .hami-cheer-r, .pet-hearts i { animation: none; } .pet-hearts { display: none; } }
+
+/* ---------- Hami de lado passeando com a cestinha ---------- */
+.wkh { display: inline-block; }
+.wkh g { transform-box: view-box; }
+.wkh-bob { animation: wkh-bob 0.7s ease-in-out infinite; transform-origin: 130px 200px; }
+@keyframes wkh-bob { 0%, 50%, 100% { transform: translateY(0) rotate(0deg); } 25% { transform: translateY(-4px) rotate(-1.2deg); } 75% { transform: translateY(-4px) rotate(1deg); } }
+.wkh-foot.wkh-a { animation: wkh-step 0.7s linear infinite; }
+.wkh-foot.wkh-b { animation: wkh-step 0.7s linear -0.35s infinite; }
+@keyframes wkh-step { 0% { transform: translate(-7px, 0); } 20% { transform: translate(-2px, -6px); } 40% { transform: translate(5px, -1px); } 50% { transform: translate(7px, 0); } 100% { transform: translate(-7px, 0); } }
+.wkh-basket { animation: wkh-swing 0.7s ease-in-out infinite; }
+@keyframes wkh-swing { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(6deg); } }
+.wkh-arm { animation: wkh-arm 0.7s ease-in-out infinite; }
+@keyframes wkh-arm { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+.wkh-ear { animation: wkh-ear 0.35s ease-in-out infinite; }
+.wkh-ear2 { animation: wkh-ear 0.35s ease-in-out -0.1s infinite; }
+@keyframes wkh-ear { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-5deg); } }
+.wkh-eye { animation: wkh-blink 4.2s steps(1) infinite; }
+@keyframes wkh-blink { 0%, 92%, 96%, 100% { transform: scaleY(1); } 94% { transform: scaleY(0.12); } }
+.wkh.is-still .wkh-bob, .wkh.is-still .wkh-foot, .wkh.is-still .wkh-basket, .wkh.is-still .wkh-arm, .wkh.is-still .wkh-ear, .wkh.is-still .wkh-ear2 { animation: none; }
+@media (prefers-reduced-motion: reduce) { .wkh-bob, .wkh-foot, .wkh-basket, .wkh-arm, .wkh-ear, .wkh-ear2, .wkh-eye { animation: none; } }

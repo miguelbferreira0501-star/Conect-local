@@ -24,8 +24,10 @@ export function CompanionBuddy({ hamster = 176 }: { hamster?: number }) {
   const [hop, setHop] = useState(0);
   if (!pet) return null;
   const size = Math.round(hamster * (0.3 + 0.14 * k));
-  const half = 67 * k * (hamster / 200);
-  const style = { left: `calc(50% - ${Math.round(half + 2 + size * 0.8)}px)`, bottom: Math.round(0.07 * (hamster - size)) };
+  // Dormindo, o Hami fica deitado (bem mais comprido): o pet fica do lado, sem encostar nele.
+  const asleep = s.pet.sleeping;
+  const half = asleep ? hamster * 0.36 : 67 * k * (hamster / 200);
+  const style = { left: `calc(50% - ${Math.round(half + (asleep ? size + 6 : 2 + size * 0.8))}px)`, bottom: Math.round(0.07 * (hamster - size)) };
   return (
     <button
       className="buddy"
@@ -60,7 +62,15 @@ export function CompanionsCard() {
     <>
       <button className={`card pets-card ${ready ? 'is-ready' : ''}`} onClick={() => setOpen(true)} aria-label={`Pets companheiros: ${born} de ${list.length}`}>
         <span className={`pets-card-art ${ready ? 'egg-wobble' : ''}`}>
-          {ready ? <Egg colors={ready.pet.egg} warmth={HATCH_DAYS} size={64} /> : active ? <CompanionArt pet={active} size={64} /> : egg ? <Egg colors={egg.pet.egg} warmth={egg.warmth} size={64} /> : <Egg colors={['#EEE', '#DDD']} locked size={64} />}
+          {ready ? (
+            <Egg colors={ready.pet.egg} warmth={HATCH_DAYS} size={64} />
+          ) : active ? (
+            <CompanionArt pet={active} size={64} />
+          ) : egg ? (
+            <Egg colors={egg.pet.egg} warmth={egg.warmth} size={64} />
+          ) : (
+            <Egg colors={['#EEE', '#DDD']} locked size={64} />
+          )}
         </span>
         <span className="min-w-0 flex-1 text-left">
           <span className="eyebrow block">
@@ -94,7 +104,9 @@ function CompanionsSheet({ open, onClose }: { open: boolean; onClose: () => void
           <section className="pet-detail" aria-label={view.name}>
             <CompanionArt pet={view} size={110} />
             <div className="min-w-0">
-              <p className="eyebrow">{view.species} · {arenaName(view.arena)}</p>
+              <p className="eyebrow">
+                {view.species} · {arenaName(view.arena)}
+              </p>
               <h3 className="font-display text-[22px] font-bold leading-tight">{view.name}</h3>
               <p className="text-[14px] leading-snug">{view.about}</p>
               {active === view.id ? (
@@ -195,7 +207,9 @@ function HatchOverlay({ pet, onDone }: { pet: Companion | null; onDone: (p: Comp
           <div className="hatch-pop">
             <CompanionArt pet={pet} size={200} />
           </div>
-          <p className="eyebrow !text-white/90">{pet.species} de {arenaName(pet.arena)}</p>
+          <p className="eyebrow !text-white/90">
+            {pet.species} de {arenaName(pet.arena)}
+          </p>
           <h2 className="font-display text-[34px] font-bold leading-tight text-white">{pet.name} nasceu!</h2>
           <p className="max-w-[300px] text-[16px] font-semibold text-white/95">{pet.about}</p>
           <div className="grid w-full max-w-[320px] gap-2">
@@ -214,4 +228,3 @@ function HatchOverlay({ pet, onDone }: { pet: Companion | null; onDone: (p: Comp
     document.body,
   );
 }
-
