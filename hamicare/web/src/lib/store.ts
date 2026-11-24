@@ -1344,6 +1344,14 @@ export function setWallpaper(id: string) {
   if (owned(state, id)) commit({ ...state, house: { ...state.house, wallpaper: id } });
 }
 
+/** Marca ou desmarca um item como favorito na Bolsa. */
+export function toggleFavorite(id: string): boolean {
+  const list = state.favorites ?? [];
+  const on = !list.includes(id);
+  commit({ ...state, favorites: on ? [...list, id] : list.filter((x) => x !== id) });
+  return on;
+}
+
 export function setFloor(id: string) {
   if (owned(state, id)) commit({ ...state, house: { ...state.house, floor: id } });
 }

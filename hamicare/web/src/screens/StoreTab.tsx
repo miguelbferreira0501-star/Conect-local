@@ -2,7 +2,7 @@
 // (coleções com desconto e itens de temporada) e as lojinhas de antes (vendinha, baús, etc.).
 // As sementes só aparecem aqui, onde se compra.
 import { useEffect, useMemo, useState } from 'react';
-import { Gift, Lock, RefreshCw, Sparkles } from 'lucide-react';
+import { Gift, Lock, RefreshCw, Shirt, Sofa, Sparkles } from 'lucide-react';
 import { FLOOR_CSS, WALLPAPER_CSS } from '../components/Furniture';
 import { play } from '../lib/sound';
 import { ITEMS, KIND_LABEL, STYLES, WEARABLE_KINDS, HOUSE_KINDS, stylePrice, type Item, type ItemKind } from '../data/items';
@@ -51,7 +51,6 @@ function Tile({ item, onOpen }: { item: Item; onOpen: (i: Item) => void }) {
     </button>
   );
 }
-
 
 /** Casas prontas: a coleção inteira (parede, piso e móveis) com desconto. */
 function HouseStyles() {
@@ -120,30 +119,8 @@ export function StoreTab({ onPlus, onGift }: { onPlus: () => void; onGift: (item
           <Coins value={s.coins} />
         </span>
       </header>
-      <div className="st-tabs" role="tablist" aria-label="Seções da loja">
-        {(
-          [
-            ['itens', 'Itens'],
-            ['limitados', 'Limitados'],
-            ['lojinhas', 'Lojinhas'],
-          ] as [Sec, string][]
-        ).map(([id, label]) => (
-          <button key={id} role="tab" aria-selected={sec === id} className={sec === id ? 'is-on' : ''} onClick={() => setSec(id)}>
-            {label}
-          </button>
-        ))}
-      </div>
-
       {sec === 'itens' && (
         <>
-          <div className="st-mode" role="tablist" aria-label="Roupas ou móveis">
-            <button role="tab" aria-selected={mode === 'roupas'} className={mode === 'roupas' ? 'is-on' : ''} onClick={() => setMode('roupas')}>
-              Roupas
-            </button>
-            <button role="tab" aria-selected={mode === 'moveis'} className={mode === 'moveis' ? 'is-on' : ''} onClick={() => setMode('moveis')}>
-              Móveis
-            </button>
-          </div>
           <section className="st-card">
             <span className="st-ribbon">Especial de hoje</span>
             <p className="st-refresh">
@@ -211,6 +188,33 @@ export function StoreTab({ onPlus, onGift }: { onPlus: () => void; onGift: (item
       )}
 
       {sec === 'lojinhas' && <ShopHub onPlus={onPlus} onGift={onGift} />}
+
+      {/* embaixo, como nas lojas dos apps de pet: o seletor Roupas/Móveis flutuando e as seções da loja */}
+      <div className="st-dock">
+        {sec === 'itens' && (
+          <div className="st-float" role="tablist" aria-label="Roupas ou móveis">
+            <button role="tab" aria-selected={mode === 'roupas'} className={mode === 'roupas' ? 'is-on' : ''} onClick={() => (setMode('roupas'), play('toque'))}>
+              <Shirt size={18} /> Roupas
+            </button>
+            <button role="tab" aria-selected={mode === 'moveis'} className={mode === 'moveis' ? 'is-on' : ''} onClick={() => (setMode('moveis'), play('toque'))}>
+              <Sofa size={18} /> Móveis
+            </button>
+          </div>
+        )}
+        <div className="st-tabs" role="tablist" aria-label="Seções da loja">
+          {(
+            [
+              ['itens', 'Itens'],
+              ['limitados', 'Limitados'],
+              ['lojinhas', 'Lojinhas'],
+            ] as [Sec, string][]
+          ).map(([id, label]) => (
+            <button key={id} role="tab" aria-selected={sec === id} className={sec === id ? 'is-on' : ''} onClick={() => setSec(id)}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <TryOn item={open?.item ?? null} list={open?.list ?? []} onPick={(item) => setOpen((o) => (o ? { ...o, item } : o))} onClose={() => setOpen(null)} onPlus={onPlus} onGift={onGift} />
     </div>

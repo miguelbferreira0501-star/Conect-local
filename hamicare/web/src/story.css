@@ -967,3 +967,69 @@ span.tcal-ico { background: transparent; }
 @keyframes wkh-blink { 0%, 92%, 96%, 100% { transform: scaleY(1); } 94% { transform: scaleY(0.12); } }
 .wkh.is-still .wkh-bob, .wkh.is-still .wkh-foot, .wkh.is-still .wkh-basket, .wkh.is-still .wkh-arm, .wkh.is-still .wkh-ear, .wkh.is-still .wkh-ear2 { animation: none; }
 @media (prefers-reduced-motion: reduce) { .wkh-bob, .wkh-foot, .wkh-basket, .wkh-arm, .wkh-ear, .wkh-ear2, .wkh-eye { animation: none; } }
+
+/* ---------- Bolsa (provador): quarto em cima, ícones, grade, folha de equipar, Roupas/Casa embaixo ---------- */
+.bag2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding-bottom: 82px; }
+.bag2-stage { position: relative; margin: -16px -16px 0; overflow: hidden; border-radius: 0 0 30px 30px; box-shadow: 0 6px 0 rgba(60, 40, 90, 0.06); }
+.bag2-stage .room { border-radius: 0; }
+.bag2-plain { display: grid; place-items: end center; height: 300px; padding-bottom: 18px; background: radial-gradient(ellipse 34% 9% at 50% 93%, rgba(60, 40, 90, 0.14), transparent 70%), linear-gradient(180deg, #efe6ff, #fdf8ff); }
+.bag2-arrange { position: absolute; right: 12px; top: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 0; border-radius: 99px; background: rgba(255, 255, 255, 0.94); color: #2f2640; font-weight: 900; font-size: 14px; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.1); }
+.bag2-bar { display: flex; align-items: flex-start; gap: 18px; padding: 0 6px; }
+.bag2-act { display: grid; justify-items: center; gap: 3px; min-width: 52px; padding: 0; border: 0; background: none; color: #7a6f95; font-size: 12px; font-weight: 800; }
+.bag2-act svg { width: 26px; height: 26px; padding: 6px; box-sizing: content-box; border-radius: 14px; background: var(--surface); color: #8a63d2; box-shadow: 0 3px 0 rgba(60, 40, 90, 0.08); }
+.bag2-act.is-on svg { background: #8a63d2; color: #fff; }
+.bag2-act.is-name { color: var(--ink); max-width: 120px; }
+.bag2-act.is-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px; }
+.bag2-cats { display: flex; gap: 4px; overflow-x: auto; margin: 0 -16px; padding: 8px 16px; border-block: 1px solid color-mix(in srgb, #8a63d2 12%, transparent); scrollbar-width: none; }
+.bag2-cats::-webkit-scrollbar { display: none; }
+.bag2-cats button { flex: none; display: grid; place-items: center; width: 44px; height: 40px; border: 0; border-radius: 13px; background: none; color: #b7aed0; }
+.bag2-cats button svg { width: 23px; height: 23px; }
+.bag2-cats button.is-on { background: color-mix(in srgb, #8a63d2 16%, var(--surface)); color: #8a63d2; }
+.bag2-list { position: relative; min-height: 230px; }
+.bag2-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; transition: opacity 160ms ease; }
+.bag2-grid.is-loading { opacity: 0.25; }
+.bag2-tile { position: relative; display: grid; place-items: center; aspect-ratio: 1; padding: 10px; border: 0; border-radius: 22px; background: linear-gradient(180deg, #f6f1ff, #ece4fb); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.9), 0 3px 0 rgba(60, 40, 90, 0.07); overflow: hidden; }
+.bag2-tile:active { transform: scale(0.96); }
+.bag2-tile > :not(.bag2-check) { max-width: 100%; max-height: 100%; }
+.bag2-tile .kit-icon { width: 100% !important; height: 100% !important; }
+.bag2-tile.is-on { box-shadow: inset 0 0 0 2.5px #8a63d2, 0 3px 0 rgba(60, 40, 90, 0.07); }
+.bag2-check { position: absolute; top: 7px; right: 7px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #8a63d2; color: #fff; box-shadow: 0 0 0 2px #fff; }
+.bag2-empty { display: grid; justify-items: center; gap: 14px; padding: 40px 4px 10px; text-align: center; color: #9a91b4; font-weight: 700; }
+.bag2-visit { width: 100%; min-height: 50px; border: 0; border-radius: 16px; background: var(--surface); color: var(--ink); font-size: 16px; font-weight: 900; box-shadow: inset 0 0 0 2px color-mix(in srgb, #8a63d2 20%, transparent), 0 3px 0 rgba(60, 40, 90, 0.08); }
+.bag2-loading { position: absolute; left: 50%; top: 40px; z-index: 2; display: grid; justify-items: center; gap: 4px; padding: 12px 16px 10px; border-radius: 22px; background: var(--surface); box-shadow: 0 8px 22px rgba(60, 40, 90, 0.16); transform: translateX(-50%); animation: bag2-pop 220ms cubic-bezier(0.2, 1.3, 0.4, 1) both; }
+@keyframes bag2-pop { from { opacity: 0; transform: translateX(-50%) scale(0.7); } }
+.bag2-dots { display: flex; gap: 5px; }
+.bag2-dots i { width: 7px; height: 7px; border-radius: 50%; background: #5a3b2e; animation: bag2-dot 0.8s ease-in-out infinite; }
+.bag2-dots i:nth-child(2) { animation-delay: 0.12s; } .bag2-dots i:nth-child(3) { animation-delay: 0.24s; } .bag2-dots i:nth-child(4) { animation-delay: 0.36s; }
+@keyframes bag2-dot { 0%, 100% { transform: translateY(0); opacity: 0.5; } 40% { transform: translateY(-5px); opacity: 1; } }
+.bag2-sheet-wrap { position: fixed; inset: 0; z-index: 60; display: flex; align-items: flex-end; justify-content: center; background: rgba(30, 24, 50, 0.38); animation: bag2-fade 180ms ease both; }
+@keyframes bag2-fade { from { opacity: 0; } }
+.bag2-sheet { position: relative; width: 100%; max-width: 520px; display: grid; gap: 14px; padding: 46px 16px calc(18px + env(safe-area-inset-bottom, 0px)); border-radius: 28px 28px 0 0; background: #f6f3fb; animation: bag2-up 260ms cubic-bezier(0.2, 1, 0.3, 1) both; }
+@keyframes bag2-up { from { transform: translateY(100%); } }
+.bag2-sheet-x { position: absolute; right: 14px; top: 10px; display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--surface); color: var(--ink); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.08); }
+.bag2-sheet-card { display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 20px; background: var(--surface); box-shadow: 0 3px 0 rgba(60, 40, 90, 0.06); }
+.bag2-sheet-card b { display: block; font-size: 17px; font-weight: 900; color: var(--ink); }
+.bag2-sheet-card small { display: block; margin-top: 2px; font-size: 13px; font-weight: 700; color: #9a91b4; }
+.bag2-sheet-art { display: grid; place-items: center; flex: none; width: 74px; height: 74px; padding: 8px; border-radius: 18px; background: linear-gradient(180deg, #f6f1ff, #ece4fb); box-shadow: inset 0 0 0 2.5px #8a63d2; overflow: hidden; }
+.bag2-sheet-art > * { max-width: 100%; max-height: 100%; }
+.bag2-sheet-art .kit-icon { width: 100% !important; height: 100% !important; }
+.bag2-fav { display: grid; place-items: center; flex: none; width: 42px; height: 42px; border: 0; border-radius: 50%; background: #f4eefe; color: #b7aed0; }
+.bag2-fav.is-on { color: #ff5c8a; background: #ffe6ee; }
+.bag2-fav.is-on svg { fill: currentColor; }
+.bag2-primary { min-height: 54px; border: 0; border-radius: 18px; background: #8a63d2; color: #fff; font-size: 17px; font-weight: 900; box-shadow: 0 4px 0 #6a45ad; }
+.bag2-primary:disabled { background: #cfc5e6; box-shadow: 0 4px 0 #b3a8cf; }
+.bag2-switch { position: sticky; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); z-index: 20; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 4px -4px 0; padding: 6px; border-radius: 22px; background: color-mix(in srgb, var(--surface) 94%, transparent); box-shadow: 0 6px 18px rgba(60, 40, 90, 0.14); backdrop-filter: blur(6px); }
+.bag2-switch button { display: grid; justify-items: center; gap: 2px; padding: 7px 0 6px; border: 0; border-radius: 16px; background: none; color: #9a91b4; font-size: 12.5px; font-weight: 900; }
+.bag2-switch button svg { width: 24px; height: 24px; }
+.bag2-switch button.is-on { background: color-mix(in srgb, #8a63d2 14%, var(--surface)); color: #8a63d2; }
+@media (prefers-reduced-motion: reduce) { .bag2-loading, .bag2-dots i, .bag2-sheet, .bag2-sheet-wrap { animation: none; } }
+/* Loja: seletor Roupas/Móveis flutuando e as seções embaixo (fixos logo acima da barra de abas) */
+.st-dock { position: sticky; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); z-index: 20; display: grid; justify-items: center; gap: 8px; margin-top: 4px; pointer-events: none; }
+.st-dock > * { pointer-events: auto; }
+.st-dock .st-tabs { width: 100%; background: color-mix(in srgb, var(--surface) 92%, #c98a52 8%); box-shadow: 0 6px 18px rgba(60, 30, 20, 0.16); }
+.st-float { display: inline-flex; gap: 4px; padding: 4px; border-radius: 99px; background: var(--surface); box-shadow: 0 6px 16px rgba(60, 30, 20, 0.18); }
+.st-float button { display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 16px; border: 0; border-radius: 99px; background: none; color: var(--muted); font-size: 14.5px; font-weight: 900; }
+.st-float button.is-on { background: #ff7f9e; color: #fff; box-shadow: 0 3px 0 #e0577a; }
+.st { padding-bottom: 6px; }
+.bag2-sheet-art > * { width: 100%; height: 100%; display: grid; place-items: center; }
+.bag2-sheet-art svg { width: 100% !important; height: 100% !important; }

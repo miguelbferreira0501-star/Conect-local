@@ -330,6 +330,8 @@ export interface State {
   quickMetaAt?: string;
   /** Quando e de onde veio cada item. */
   itemMeta?: Record<string, ItemMeta>;
+  /** Itens favoritos da Bolsa (coração). */
+  favorites?: string[];
   /** Curva de níveis nova aplicada (o XP antigo foi convertido sem perder nível). */
   xpV?: number;
   updatedAt: number;
