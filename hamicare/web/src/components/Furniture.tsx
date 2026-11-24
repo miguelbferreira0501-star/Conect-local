@@ -133,7 +133,8 @@ export const WALLPAPER_CSS: Record<string, string> = {
   'p-mar': 'radial-gradient(circle at 20% 70%,rgba(255,255,255,.5) 4px,transparent 5px) 0 0/50px 60px,radial-gradient(circle at 70% 30%,rgba(255,255,255,.4) 3px,transparent 4px) 0 0/50px 60px,linear-gradient(180deg,#7FD3E8,#2F7FB8)',
   'p-sonhos': 'radial-gradient(ellipse 40px 18px at 30% 40%,#FFFFFF 60%,transparent 62%) 0 0/120px 80px,radial-gradient(circle at 80% 20%,#FFF3B0 3px,transparent 4px) 0 0/60px 60px,linear-gradient(180deg,#F2D9FF,#FFC9E8)',
   'p-castelo': 'repeating-linear-gradient(0deg,#C9C2DA 0 2px,transparent 2px 22px),repeating-linear-gradient(90deg,#C9C2DA 0 2px,transparent 2px 44px),linear-gradient(180deg,#E9E4F5,#D8D0EC)',
-  'p-lua': 'radial-gradient(circle at 78% 26%,#7FB8F0 0 22px,#5FBF77 22px 26px,transparent 27px),radial-gradient(circle at 15% 25%,#FFFFFF 1.4px,transparent 2px) 0 0/38px 38px,radial-gradient(circle at 60% 75%,#FFF3B0 1.2px,transparent 2px) 0 0/54px 54px,linear-gradient(180deg,#0E1233,#2A2466)',
+  // base lunar por dentro: painéis de metal lilás com rebites, faixa de luz no teto e corrimão
+  'p-lua': 'linear-gradient(180deg,#FBF9FF 0 4%,#D8D2F6 4% 5.4%,transparent 5.4%),linear-gradient(180deg,transparent 0 74%,#C9CCE6 74% 79%,#A7AACB 79% 80.5%,transparent 80.5%),radial-gradient(circle at 9px 13px,#FFFFFF 0 1.7px,rgba(110,114,165,0.35) 1.8px 2.6px,transparent 2.8px) 0 0/78px 66px,radial-gradient(circle at 69px 13px,#FFFFFF 0 1.7px,rgba(110,114,165,0.35) 1.8px 2.6px,transparent 2.8px) 0 0/78px 66px,linear-gradient(90deg,rgba(118,122,172,0.3) 0 2px,rgba(255,255,255,0.55) 2px 3.5px,transparent 3.5px) 0 0/78px 100%,linear-gradient(180deg,rgba(118,122,172,0.22) 0 2px,transparent 2px) 0 0/100% 66px,linear-gradient(180deg,#E6E6F6,#CED1EA)',
   'p-espaco': 'radial-gradient(circle at 20% 30%,#FFFFFF 1.5px,transparent 2px) 0 0/46px 46px,radial-gradient(circle at 70% 70%,#FFE27A 1.5px,transparent 2px) 0 0/58px 58px,radial-gradient(circle at 80% 20%,rgba(169,139,242,.6) 18px,transparent 19px),linear-gradient(180deg,#1E2350,#3E2F7A)',
   'p-celeste': 'radial-gradient(circle at 50% 0%,rgba(255,233,160,.9),transparent 60%),radial-gradient(ellipse 50px 20px at 20% 80%,#FFFFFF 60%,transparent 62%) 0 0/140px 90px,linear-gradient(180deg,#FFF3C9,#BFE6FF)',
 };
@@ -143,7 +144,7 @@ export const FLOOR_TONE: Record<string, string> = {
   'f-pistache': '#9FD48C', 'f-madeira': '#C79F75', 'f-clara': '#E2CBAE', 'f-carpete': '#F2BCC8', 'f-azulejo': '#C9DCEE', 'f-grama': '#7FC47A', 'f-marmore': '#D6D7DE',
   'f-areia': '#E9CF97', 'f-tabuleiro': '#D9D2EC', 'f-hexagono': '#F2CD6A', 'f-azul': '#A9CBF2', 'f-nuvem': '#BCDCFA', 'f-ladrilho': '#F6C3B6',
   'f-musgo': '#7BC46C', 'f-tacos': '#E58A5C', 'f-folhas': '#7FC46A', 'f-chale': '#D46F62', 'f-concreto': '#9AA2B4', 'f-areia-mar': '#CDB57A',
-  'f-algodao': '#F0C2DD', 'f-real': '#E3CB93', 'f-metal': '#9AA3BC', 'f-ouro': '#E8B83A', 'f-lua': '#B9BDCB',
+  'f-algodao': '#F0C2DD', 'f-real': '#E3CB93', 'f-metal': '#9AA3BC', 'f-ouro': '#E8B83A', 'f-lua': '#C2C5DB',
 };
 
 /** Escurece (t > 0) ou clareia (t < 0) uma cor #RRGGBB. */

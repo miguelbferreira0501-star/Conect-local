@@ -27,17 +27,27 @@ export const ItemIcon = memo(function ItemIcon({ item, size = 34, fur = 'caramel
 function KitIcon({ item, size }: { item: Item; size: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   useEffect(() => {
-    const svg = ref.current?.querySelector('svg');
-    if (!svg || typeof (svg as SVGGraphicsElement).getBBox !== 'function') return;
-    try {
-      const b = (svg as SVGGraphicsElement).getBBox();
-      if (!b.width || !b.height) return;
-      const pad = Math.max(b.width, b.height) * 0.05;
-      svg.setAttribute('viewBox', `${b.x - pad} ${b.y - pad} ${b.width + pad * 2} ${b.height + pad * 2}`);
-      svg.style.overflow = 'visible';
-    } catch {
-      /* sem medida: fica a moldura original */
-    }
+    // Mede depois de desenhado (em listas que acabaram de abrir o desenho ainda não tem tamanho): tenta algumas vezes.
+    let tries = 0;
+    let raf = 0;
+    const fit = () => {
+      const svg = ref.current?.querySelector('svg');
+      if (!svg || typeof (svg as SVGGraphicsElement).getBBox !== 'function') return;
+      try {
+        const b = (svg as SVGGraphicsElement).getBBox();
+        if (!b.width || !b.height) {
+          if (tries++ < 12) raf = requestAnimationFrame(fit);
+          return;
+        }
+        const pad = Math.max(b.width, b.height) * 0.05;
+        svg.setAttribute('viewBox', `${b.x - pad} ${b.y - pad} ${b.width + pad * 2} ${b.height + pad * 2}`);
+        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      } catch {
+        if (tries++ < 12) raf = requestAnimationFrame(fit);
+      }
+    };
+    fit();
+    return () => cancelAnimationFrame(raf);
   }, [item.svg, item.c1, item.c2]);
   return (
     <span ref={ref} className="kit-icon" style={{ width: size * 1.7, height: size * 1.7 }}>

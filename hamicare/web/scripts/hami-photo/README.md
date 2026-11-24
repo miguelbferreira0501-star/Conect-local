@@ -10,3 +10,12 @@ Como as imagens de `src/assets/hami/` foram feitas a partir da foto de referênc
 
 Depois, a versão sem rosto (para as outras expressões) foi feita apagando olhos e boca com o LaMa, e a máscara do pelo
 laranja (`hami-pelo.webp`) serve para trocar a cor da pelagem.
+
+## Fotos de situações (dormindo e banho)
+
+- `hami-dormindo.webp`: a foto dele dormindo de barriguinha; a faixa, a flor e os "Zzz" foram apagados com o LaMa
+  (os "z" voltam animados no app) e o alto da cabeça foi refeito com fios de pelo da própria foto.
+- `hami-banho.webp`: a foto da tina de espuma (patinho, toalha e bolhas). `key2.py` recorta o roxo e deixa as bolhas
+  semitransparentes de verdade.
+- `furmask.py <foto> <saida> [limite_y] [cx,cy,rx,ry ...]`: faz a máscara do pelo caramelo (`*-pelo.webp`) para trocar a
+  cor da pelagem; `limite_y` corta abaixo de uma altura (a tina) e as elipses tiram partes amarelas (patinho, miolo da flor).

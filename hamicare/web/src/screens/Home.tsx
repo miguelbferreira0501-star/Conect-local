@@ -2,8 +2,11 @@ import { PlusWeeklyCard } from '../components/PlusWeekly';
 import { MoonTeaser } from '../components/MoonTeaser';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Flame, Globe, House as HouseIcon, Mail, Plus, Settings, Trees } from 'lucide-react';
-import { Outdoors, outdoorGround } from '../components/Outdoors';
-import { Room } from '../components/Room';
+import { MOON_N } from '../data/arenas';
+import { MoonOutdoors, Outdoors, outdoorGround } from '../components/Outdoors';
+import { Room, useKindOf } from '../components/Room';
+import { itemById } from '../data/items';
+import { play } from '../lib/sound';
 import { floorPalette, tonePalette } from '../components/Furniture';
 import { TREK_THEMES, Suitcase, TrekBar, TrekScene, TrekStart, TrekUnpack, WalkingHami, finishTrek, trekThemeOf } from '../components/Trek';
 import type { TrekResult } from '../lib/store';
@@ -23,7 +26,7 @@ import { Modal, Sheet, toast } from '../components/ui';
 import { MOODS, periodOf, petLine } from '../data/lines';
 import { placeById } from '../data/world';
 import { streakOf } from '../logic/streak';
-import { dayGoalOf, setDayGoal, dayOf, finishAdventure, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
+import { homeArenaOf, dayGoalOf, setDayGoal, dayOf, finishAdventure, kcalOf, care as doCare, todayKey, todayTasks, toggleTask, useApp, type AdventureResult } from '../lib/store';
 import { prefersReducedMotion } from '../lib/util';
 import type { PetMood, Task } from '../types';
 import { Glyph } from '../components/art';
@@ -77,6 +80,8 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
   const today = todayKey();
   // O Início continua o chão da casa: o degradê, a página e os cartões seguem a cor do piso.
   const floor = s.house.floor;
+  // Casa na Lua: lá fora é a paisagem lunar.
+  const onMoon = homeArenaOf(s) === MOON_N;
   // Enquanto ele anda, o Início mostra o caminho; quando volta, ele aparece em casa com a mala.
   const trekBack = !!s.trek && now >= s.trek.endsAt;
   const trekTheme = s.trek && !trekBack ? trekThemeOf(s) : null;
@@ -96,7 +101,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
   useEffect(() => {
     // Na viagem, a página continua o chão do caminho.
     // Lá fora, a página continua o gramado.
-    const p = trekTheme ? tonePalette((TREK_THEMES[trekTheme] ?? TREK_THEMES.casinha).ground) : outside ? tonePalette(outdoorGround(periodOf(new Date()))) : floorPalette(floor);
+    const p = trekTheme ? tonePalette((TREK_THEMES[trekTheme] ?? TREK_THEMES.casinha).ground) : outside ? tonePalette(outdoorGround(periodOf(new Date()), onMoon)) : floorPalette(floor);
     const root = document.documentElement.style;
     root.setProperty('--home-floor', p.tone);
     root.setProperty('--home-page', p.page);
@@ -105,7 +110,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
     root.setProperty('--home-page-dark', p.dark);
     root.setProperty('--home-ink', p.ink);
     return () => ['--home-floor', '--home-page', '--home-card', '--home-deep', '--home-page-dark', '--home-ink'].forEach((k) => root.removeProperty(k));
-  }, [floor, trekTheme, outside]);
+  }, [floor, trekTheme, outside, onMoon]);
   const day = dayOf(s, today);
   const tasks = todayTasks(s, today);
   const done = tasks.filter((t) => t.id in day.done).length;
@@ -140,7 +145,9 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
   }, [day.battery]);
 
   // Situação do dia: ele acorda com frio, calor, gripado… e pede algumas tarefas para melhorar.
-  const cond = conditionOf(s.seed, today);
+  // Na Lua não chove: no dia da chuva ele acorda com frio.
+  const cond0 = conditionOf(s.seed, today);
+  const cond = onMoon && cond0 === 'chuva' ? 'frio' : cond0;
   const need = conditionNeed(tasks.length);
   const condOn = tasks.length > 0 && done < need;
   // Quando melhora agora (acabou de fazer a tarefa que faltava), ele comemora e agradece.
@@ -161,6 +168,19 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
   const [actLine] = useState(() => act.lines[Math.floor(Math.random() * act.lines.length)]);
   const busy = condOn || justFixed;
   const hardDay = day.battery === 1;
+  // Ao abrir o app ele pode estar dormindo: na caminha (se tiver cama na casa) ou cochilando no chão. Um toque acorda.
+  const [awake, setAwake] = useState(false);
+  const napping = !awake && !busy && !hardDay && !adv && !s.trek && (activity === 'soneca' || activity === 'cama');
+  const bed = s.house.items.find((h) => useKindOf(h.itemId, itemById(h.itemId)?.svg) === 'deitar');
+  const inBed = napping && activity === 'cama' && !!bed && !outside;
+  useEffect(() => {
+    if (inBed && bed) furniture.useItem(bed.uid, 'deitar', true);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const wake = () => {
+    setAwake(true);
+    play('squeak');
+    if (furniture.use?.kind === 'deitar') furniture.stop();
+  };
   const petMood: PetMood = mood ?? (justFixed ? 'risada' : condOn ? (CONDITIONS[cond].teary ? 'manha' : 'feliz') : hardDay ? petMoodOf(s, { hardDay, done, total: tasks.length, hour: new Date(now).getHours() }) : act.mood);
   const scrollToTasks = () => document.querySelector('.hc-tasks')?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
 
@@ -180,7 +200,11 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
     </div>
   ) : s.pet.sleeping ? (
     <button className="sleep-spot" onClick={() => toast(`${s.pet.name} está dormindo. Shhh…`)} aria-label={`${s.pet.name} dormindo`} data-sound="none">
-      <SleepingHami fur={s.pet.fur} size={180} outfit={s.pet.outfit} />
+      <SleepingHami fur={s.pet.fur} size={200} place="chao" />
+    </button>
+  ) : napping && !inBed ? (
+    <button className="sleep-spot" onClick={wake} aria-label={`${s.pet.name} cochilando. Toque para acordar`} data-sound="none">
+      <SleepingHami fur={s.pet.fur} size={200} place="chao" />
     </button>
   ) : (
     <div className="relative">
@@ -217,13 +241,17 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
           </TrekScene>
         ) : outside ? (
           <PanRoom>
-            <Outdoors period={period} height={430}>
-              {hami}
-            </Outdoors>
+            {onMoon ? (
+              <MoonOutdoors height={430}>{hami}</MoonOutdoors>
+            ) : (
+              <Outdoors period={period} height={430}>
+                {hami}
+              </Outdoors>
+            )}
           </PanRoom>
         ) : (
           <PanRoom width={1.45}>
-            <Room house={s.house} period={period} height={430} wide={1.45} onUse={furniture.useItem} usage={furniture.usage}>
+            <Room house={s.house} period={period} height={430} wide={1.45} onUse={(uid, kind) => (napping && furniture.use?.uid === uid && setAwake(true), furniture.useItem(uid, kind))} usage={furniture.usage}>
               {furniture.use ? null : hami}
             </Room>
           </PanRoom>
@@ -266,7 +294,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
         )}
         {!adv && !s.trek && (
           <div className={`hr-bubble ${condOn && !furniture.line ? 'is-need' : ''}`}>
-            <p>{furniture.line ?? (s.pet.sleeping ? line : justFixed ? CONDITIONS[cond].fixed : condOn ? askText(cond, need) : hardDay ? line : actLine)}</p>
+            <p>{napping ? actLine : furniture.line ?? (s.pet.sleeping ? line : justFixed ? CONDITIONS[cond].fixed : condOn ? askText(cond, need) : hardDay ? line : actLine)}</p>
             {condOn && !furniture.line && !s.pet.sleeping && (
               <button className="hr-need" onClick={scrollToTasks} aria-label={`${Math.min(done, need)} de ${need} tarefas feitas. Ver as tarefas`}>
                 <span className="hr-need-bar" aria-hidden="true">

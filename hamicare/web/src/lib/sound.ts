@@ -16,7 +16,7 @@ export type SoundId =
   // Banho
   | 'shampoo' | 'espuma' | 'bolha' | 'toalha' | 'sacudir'
   // Hami
-  | 'nhac' | 'gole' | 'escova' | 'brilho' | 'iii' | 'risada' | 'choro' | 'ronrom' | 'coracao' | 'pulo' | 'bocejo' | 'ronco' | 'espreguicar'
+  | 'nhac' | 'gole' | 'escova' | 'brilho' | 'iii' | 'squeak' | 'risada' | 'choro' | 'ronrom' | 'coracao' | 'pulo' | 'bocejo' | 'ronco' | 'espreguicar'
   // Brincadeiras
   | 'pega' | 'jogar' | 'quica' | 'tique' | 'fim-jogo'
   // Quarto e casa
@@ -395,6 +395,44 @@ const SOUNDS: Record<SoundId, (o: PlayOpts) => void> = {
   },
   escova: () => noise({ f: 2600, type: 'highpass', q: 0.6, d: 0.09, v: 0.09, a: 0.02, pan: Math.random() * 0.6 - 0.3 }),
   brilho: () => [2093, 2637, 3136, 4186].forEach((f, i) => bell(f, i * 0.04, 0.045, 0.3, 0.45)),
+  // guinchinho de hamster de verdade: dois ou três "iik" bem agudos e curtinhos, com um tremido rápido
+  squeak: () => {
+    const c = ac!;
+    const n = Math.random() < 0.5 ? 2 : 3;
+    const base = 2700 + Math.random() * 500;
+    for (let i = 0; i < n; i++) {
+      const t0 = now() + i * (0.085 + Math.random() * 0.03);
+      const f0 = base * (1 + i * 0.04);
+      const osc = c.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(f0 * 0.82, t0);
+      osc.frequency.exponentialRampToValueAtTime(f0 * 1.18, t0 + 0.025);
+      osc.frequency.exponentialRampToValueAtTime(f0 * 0.95, t0 + 0.065);
+      // tremido rápido (garganta pequenininha)
+      const lfo = c.createOscillator();
+      const depth = c.createGain();
+      lfo.frequency.value = 55 + Math.random() * 15;
+      depth.gain.value = f0 * 0.05;
+      lfo.connect(depth);
+      depth.connect(osc.frequency);
+      const g = c.createGain();
+      env(g, t0, 0.05, 0.006, 0.07);
+      const hp = c.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = 1400;
+      osc.connect(hp);
+      hp.connect(g);
+      route(g, 0.08, (Math.random() - 0.5) * 0.2);
+      lfo.start(t0);
+      osc.start(t0);
+      osc.stop(t0 + 0.1);
+      lfo.stop(t0 + 0.1);
+      voices++;
+      osc.onended = () => voices--;
+    }
+    // respiradinha do focinho no fim
+    noise({ f: 5200, type: 'bandpass', q: 1.2, t: n * 0.1, d: 0.05, v: 0.018, a: 0.01 });
+  },
   iii: () => {
     tone({ f: 1500, to: 2100, d: 0.09, v: 0.06, vib: 30 });
     tone({ f: 1700, to: 2350, t: 0.11, d: 0.09, v: 0.06, vib: 30 });
@@ -505,7 +543,7 @@ const SOUNDS: Record<SoundId, (o: PlayOpts) => void> = {
 export const SOUND_IDS = Object.keys(SOUNDS) as SoundId[];
 
 /** Intervalo mínimo entre repetições (sons de arrastar o dedo não viram chiado). */
-const GAP: Partial<Record<SoundId, number>> = { toque: 40, espuma: 75, toalha: 95, escova: 110, coracao: 120, bolha: 60, 'bau-treme': 120, ronco: 1700, tique: 300, semente: 120, sacudir: 400, iii: 250, risada: 300, quica: 150 };
+const GAP: Partial<Record<SoundId, number>> = { toque: 40, espuma: 75, toalha: 95, escova: 110, coracao: 120, bolha: 60, 'bau-treme': 120, ronco: 1700, tique: 300, semente: 120, sacudir: 400, iii: 250, squeak: 260, risada: 300, quica: 150 };
 const QUIET: SoundId[] = ['toque', 'aba', 'aviso'];
 
 function allowed(id: SoundId) {

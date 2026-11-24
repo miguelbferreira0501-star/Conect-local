@@ -825,3 +825,86 @@ span.tcal-ico { background: transparent; }
 .wk-real { position: relative; display: inline-flex; align-items: flex-end; justify-content: center; }
 .wk-real .wk-hop { position: relative; display: inline-block; }
 .wk-real .wk-sack { position: absolute; right: 12%; top: 66%; transform-origin: 50% 0%; }
+/* Móveis sempre dentro do quadradinho (nada passa da borda) */
+.st-tile-art { overflow: hidden; width: 100%; height: 100%; }
+.st-tile-art .kit-icon { width: 100% !important; height: 100% !important; max-width: 100%; max-height: 100%; }
+.st-tile-art .kit-icon svg, .bag-tile .kit-icon svg, .inv-icon .kit-icon svg { overflow: hidden !important; }
+.bag-tile .kit-icon { width: 100% !important; height: 100% !important; }
+/* Lá fora na Lua */
+.mo-shoot { animation: mo-shoot 7s ease-in infinite; }
+@keyframes mo-shoot { 0%, 86% { opacity: 0; transform: translate(0, 0); } 88% { opacity: 0.9; } 96% { opacity: 0; transform: translate(-120px, 44px); } 100% { opacity: 0; } }
+.mo-blink { animation: od-twinkle 1.4s ease-in-out infinite; }
+.mo-flag { transform-box: fill-box; transform-origin: 0% 50%; animation: mo-flag 3s ease-in-out infinite; }
+@keyframes mo-flag { 50% { transform: skewY(-6deg) scaleX(0.94); } }
+.outdoors.is-still .mo-shoot, .outdoors.is-still .mo-blink, .outdoors.is-still .mo-flag { animation: none; }
+@media (prefers-reduced-motion: reduce) { .mo-shoot, .mo-blink, .mo-flag { animation: none; } }
+
+/* ---------- Hami realista: vida própria (respira, pisca, acena e bate os bracinhos) ---------- */
+.hami-breathe { animation: hami-breathe 3.4s ease-in-out infinite; }
+@keyframes hami-breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.008, 1.018); } }
+.hami-sleep { animation: hami-sleep 4.6s ease-in-out infinite; }
+@keyframes hami-sleep { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.016, 1.03); } }
+.hami-blink { opacity: 0; animation: hami-blink 5.2s steps(1, end) infinite; }
+@keyframes hami-blink { 0%, 95% { opacity: 0; } 95.5%, 98% { opacity: 1; } 98.5% { opacity: 0; } }
+.hami-arm { transform-box: view-box; }
+/* acena como quem dá "oi": levanta de lado, balança e abaixa (a cada 11 s) */
+.hami-arm-idle-l { animation: hami-arm-l 11s cubic-bezier(0.45, 0, 0.3, 1) infinite; }
+@keyframes hami-arm-l {
+  0%, 8% { transform: rotate(0deg); }
+  11% { transform: rotate(150deg); }
+  14% { transform: rotate(172deg); }
+  17% { transform: rotate(146deg); }
+  20% { transform: rotate(172deg); }
+  23% { transform: rotate(150deg); }
+  27%, 56% { transform: rotate(0deg); }
+  58% { transform: rotate(26deg); }
+  60% { transform: rotate(0deg); }
+  62% { transform: rotate(26deg); }
+  64%, 100% { transform: rotate(0deg); }
+}
+/* o outro bracinho só bate junto, de alegria (como um passarinho batendo as asas) */
+.hami-arm-idle-r { animation: hami-arm-r 11s cubic-bezier(0.45, 0, 0.3, 1) infinite; }
+@keyframes hami-arm-r {
+  0%, 56% { transform: rotate(0deg); }
+  58% { transform: rotate(-26deg); }
+  60% { transform: rotate(0deg); }
+  62% { transform: rotate(-26deg); }
+  64%, 100% { transform: rotate(0deg); }
+}
+.hami-wave { animation: hami-wave 0.9s ease-in-out infinite; }
+@keyframes hami-wave { 0%, 100% { transform: rotate(150deg); } 50% { transform: rotate(174deg); } }
+@media (prefers-reduced-motion: reduce) { .hami-breathe, .hami-sleep, .hami-blink, .hami-arm-idle-l, .hami-arm-idle-r, .hami-wave { animation: none; } }
+/* toque: pulinho macio (amassa, sobe e pousa) */
+.gest-oi { display: inline-block; transform-origin: 50% 100%; animation: gest-oi 0.62s cubic-bezier(0.3, 0.7, 0.3, 1); }
+@keyframes gest-oi { 0% { transform: scale(1, 1); } 18% { transform: scale(1.06, 0.92); } 45% { transform: translateY(-8%) scale(0.97, 1.04); } 75% { transform: translateY(0) scale(1.04, 0.96); } 100% { transform: scale(1, 1); } }
+@media (prefers-reduced-motion: reduce) { .gest-oi { animation: none; } }
+/* Hami dormindo: respiração lenta, coberta subindo e descendo e os "z" flutuando */
+.sleep-hami { position: relative; display: inline-flex; align-items: flex-end; justify-content: center; }
+.sleep-hami svg { overflow: visible; }
+.sleep-breathe { animation: hami-sleep 4.6s ease-in-out infinite; }
+.sleep-blanket { animation: sleep-blanket 4.6s ease-in-out infinite; }
+@keyframes sleep-blanket { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.012, 1.05); } }
+.zz-float text { opacity: 0; animation: zz-float 3.6s ease-out infinite; }
+.zz-float .zz-2 { animation-delay: 1.2s; }
+.zz-float .zz-3 { animation-delay: 2.4s; }
+@keyframes zz-float { 0% { opacity: 0; transform: translate(0, 6px); } 20% { opacity: 0.9; } 80% { opacity: 0.5; } 100% { opacity: 0; transform: translate(10px, -16px); } }
+@media (prefers-reduced-motion: reduce) { .sleep-breathe, .sleep-blanket, .zz-float text { animation: none; opacity: 0.8; } }
+
+/* ---------- Fotos do Hami: dormindo de barriguinha e no banho de espuma ---------- */
+.sleep-photo { position: relative; display: inline-block; }
+.sleep-photo .sleep-breathe { position: relative; z-index: 1; display: block; transform-origin: 50% 96%; animation: photo-breathe 4.6s ease-in-out infinite; }
+@keyframes photo-breathe { 0%, 100% { transform: scale(1, 1); } 45% { transform: scale(1.012, 1.032); } }
+.sleep-photo .sleep-zzz { position: absolute; left: 54%; top: -24%; z-index: 2; pointer-events: none; }
+.sleep-cushion { position: absolute; left: -5%; right: -3%; bottom: -9%; height: 30%; border-radius: 50%; background: radial-gradient(ellipse at 50% 30%, #fff1f6 0%, #f8c6d6 62%, #ee9fb9 100%); box-shadow: 0 7px 12px rgba(59, 42, 90, 0.18), inset 0 -5px 8px rgba(190, 90, 130, 0.18); }
+.sleep-photo.is-cama::after { content: ''; position: absolute; left: 6%; right: 6%; bottom: 1%; height: 10%; border-radius: 50%; background: rgba(60, 40, 70, 0.16); filter: blur(4px); }
+.bath-photo { position: relative; display: inline-block; }
+.bath-photo-bob { display: block; transform-origin: 50% 100%; animation: bath-breathe 3.4s ease-in-out infinite; }
+@keyframes bath-breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.006, 1.014); } }
+.photo-bubbles { position: absolute; inset: 0; pointer-events: none; }
+.photo-bubbles i { position: absolute; bottom: 52%; border-radius: 50%; background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.95) 0 16%, rgba(255, 255, 255, 0.2) 38%, rgba(190, 215, 255, 0.28) 68%, rgba(255, 185, 230, 0.55) 100%); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.75); opacity: 0; animation: photo-bubble 3s ease-out infinite; }
+@keyframes photo-bubble { 0% { opacity: 0; transform: translate(0, 0) scale(0.4); } 15% { opacity: 0.95; } 80% { opacity: 0.85; transform: translate(6px, -70px) scale(1); } 100% { opacity: 0; transform: translate(9px, -84px) scale(1.25); } }
+.room-item.is-bathing > svg:first-child { opacity: 0; }
+.room-item.is-bathing .use-banho { bottom: 2%; }
+.room-item.is-bathing .room-use { z-index: 4; }
+@media (prefers-reduced-motion: reduce) { .sleep-photo .sleep-breathe, .bath-photo-bob, .photo-bubbles i { animation: none; } }
+.room-use > .sleep-photo, .room-use > .bath-photo { display: block; }

@@ -1,14 +1,25 @@
-import { createContext, useContext, useId } from 'react';
-import hamiPhoto from '../assets/hami/hami.webp';
-import hamiBlank from '../assets/hami/hami-sem-rosto.webp';
+import { createContext, useContext, useId, type CSSProperties } from 'react';
 import hamiFurMask from '../assets/hami/hami-pelo.webp';
+import hamiBody from '../assets/hami/hami-corpo.webp';
+import hamiBodyBlank from '../assets/hami/hami-corpo-sem-rosto.webp';
+import hamiArmL from '../assets/hami/hami-braco-l.webp';
+import hamiArmR from '../assets/hami/hami-braco-r.webp';
 import { furById } from '../data/fur';
 import { itemById } from '../data/items';
-import { Accessory, AccessoryBack, Cape, Clothes, CostumeBack, CostumeFront, costumeOf, EffectBack, EffectFront, garmentColor, garmentShape, Glasses, Hat, sleeveOf } from './Wear';
+import { NECK_ITEMS, Accessory, AccessoryBack, Cape, Clothes, CostumeBack, CostumeFront, costumeOf, EffectBack, EffectFront, garmentColor, garmentShape, Glasses, Hat, sleeveOf } from './Wear';
 import type { Outfit, PetMood } from '../types';
 import type { Condition, HamiProp } from '../lib/hamiDay';
 
 const INK = '#3B2418';
+
+/** Escurece uma cor #rrggbb (para punhos e dobras). */
+function shadeHex(hex: string, t: number) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  const c = (sh: number) => Math.round(((n >> sh) & 255) * (1 - t)).toString(16).padStart(2, '0');
+  return `#${c(16)}${c(8)}${c(0)}`;
+}
 
 /** Tamanho do Hami da pessoa (cresce com os dias de cuidado). O App informa; o padrão é o tamanho máximo. */
 export const GrowthContext = createContext(1);
@@ -62,20 +73,34 @@ const HEAD_GEO = { top: 40, w: 46, h: 150, eyeY: 70 };
 /** Corpo (no quadro normal) para roupas, colares, capas e efeitos. */
 const BODY_GEO = { top: 30, w: 52, h: 163, eyeY: 72 };
 /** Contorno da barriga (logo abaixo do queixo até em cima dos pezinhos): as roupas vestem este contorno. */
-const BODY = 'M52 125 Q99 135 145 125 C152 131 154 140 153.5 150 C153 161 150 170 139 177.5 C127 184.5 113 185.5 99 185.5 C85 185.5 71 184.5 59 177.5 C48 170 45 161 44.5 150 C44 140 46 131 52 125 Z';
-const DRESS = 'M52 125 Q99 135 145 125 C152 131 154 140 154.5 150 C156 163 160 175 158.5 183.5 C138 188.5 60 188.5 39.5 183.5 C38 175 42 163 43.5 150 C44 140 46 131 52 125 Z';
+const BODY = 'M52.4 123.0 Q99 132 145.8 123.0 L147.8 126.0 L150.0 129.0 L151.8 132.0 L152.8 135.0 L153.4 138.0 L153.5 141.0 L153.3 144.0 L153.0 147.0 L152.8 150.0 L152.9 153.0 L153.3 156.0 L153.4 159.0 L152.7 162.0 L151.6 165.0 L150.2 168.0 L148.5 171.0 L146.3 174.0 L143.8 177.0 Q99 187 55.4 177.0 L52.9 174.0 L50.7 171.0 L48.6 168.0 L47.0 165.0 L46.1 162.0 L45.6 159.0 L45.4 156.0 L45.0 153.0 L44.5 150.0 L44.0 147.0 L43.7 144.0 L43.8 141.0 L44.0 138.0 L44.8 135.0 L45.9 132.0 L47.6 129.0 L49.8 126.0 L52.4 123.0 Z';
+const DRESS = 'M52.4 123.0 Q99 132 145.8 123.0 L147.8 126.0 L150.0 129.0 L151.8 132.0 L152.8 135.0 L153.4 138.0 L153.5 141.0 L153.3 144.0 L153.0 147.0 L152.8 150.0 L154.2 153.0 L155.8 156.0 L157.1 159.0 L157.7 162.0 L157.9 165.0 L157.8 168.0 L157.3 171.0 L156.4 174.0 L157.1 183.0 Q99 190 42.1 183.0 L42.8 174.0 L41.8 171.0 L41.1 168.0 L40.8 165.0 L41.1 162.0 L41.9 159.0 L42.8 156.0 L43.7 153.0 L44.5 150.0 L44.0 147.0 L43.7 144.0 L43.8 141.0 L44.0 138.0 L44.8 135.0 L45.9 132.0 L47.6 129.0 L49.8 126.0 L52.4 123.0 Z';
 /** Cabeça inteira com as orelhas (para o capuz das fantasias e efeitos na cabeça). */
 const HOOD = 'M99 20 C141 20 169 42 167 76 C166 104 148 124 99 127 C50 124 32 104 31 76 C29 42 57 20 99 20 Z';
 /** Corpo inteiro da fantasia (até os pezinhos). */
 const SUIT = 'M50 122 Q99 132 148 122 C156 130 158 142 157.5 152 C157 165 152 176 140 183 C126 190 112 191 99 191 C86 191 72 190 58 183 C46 176 41 165 40.5 152 C40 142 42 130 50 122 Z';
 const HEAD = { cx: 99, cy: 76, rx: 66, ry: 48, top: 27 };
-/** As patinhas da foto: são redesenhadas por cima das roupas e dos objetos, como se segurassem. */
+/** As patinhas brancas da foto: são redesenhadas por cima das roupas e dos objetos (saindo da manga). */
 const PAWS = [
-  { cx: 61, cy: 142, rx: 11.5, ry: 12.5 },
-  { cx: 136.5, cy: 141.5, rx: 11.5, ry: 12.5 },
+  { cx: 59.6, cy: 141.6, rx: 9.6, ry: 10.4 },
+  { cx: 138.6, cy: 142, rx: 9.6, ry: 10.4 },
+];
+/** Os bracinhos (recortados da foto) giram no ombro: acenam, batem de alegria e seguram coisas. */
+const ARM_L = 'M42 123 L54 120.5 L63 125 L69.5 133 L71 142 L69 150 L63 153.5 L55 153 L49 148.5 L44.5 141 L42.5 132 Z';
+const ARM_R = 'M156.2 123 L144.2 120.5 L135.2 125 L128.7 133 L127.2 142 L129.2 150 L135.2 153.5 L143.2 153 L149.2 148.5 L153.7 141 L155.7 132 Z';
+const ARMS = [
+  { href: hamiArmL, x: 42.6, y: 119.8, w: 29.2, h: 34.4, pivot: '51px 127px', side: 'l', path: ARM_L },
+  { href: hamiArmR, x: 126.4, y: 119.8, w: 29, h: 34.4, pivot: '147.2px 127px', side: 'r', path: ARM_R },
+] as const;
+/** Os olhos da foto (para piscar por cima). */
+const EYES = [
+  { cx: 72, cy: 76.6 },
+  { cx: 131.8, cy: 81 },
 ];
 /** Expressões que usam o rosto da própria foto (olhões e a boquinha aberta). */
 const PHOTO_MOODS: PetMood[] = ['feliz', 'animado', 'comendo'];
+/** Roupas sem manga (o bracinho fica de fora). */
+const NO_SLEEVE = new Set(['regata', 'avental', 'jardineira', 'tutu', 'capa', 'avental-costura', 'avental-vendinha', 'colete-obra', 'babado']);
 
 /**
  * O Hami: o hamster realista da foto, com pelo de verdade. A expressão padrão é a da própria foto; as outras
@@ -99,8 +124,15 @@ export function Hamster({ fur: furId, mood = 'feliz', outfit = NO_OUTFIT, size =
   const garment = costume ? null : shape ? garmentColor(outfit.roupa) : (sleeveOf(outfit.roupa) ?? (outfit.roupa ? (itemById(outfit.roupa)?.c1 ?? null) : null));
   const cloth = shape === 'dress' ? DRESS : BODY;
   const holds = !!prop && prop !== 'fones';
-  const pawsOnTop = !!outfit.roupa || holds;
-  const img = (href: string, extra?: Record<string, string>) => <image href={href} x={IMG.x} y={IMG.y} width={IMG.w} height={IMG.h} preserveAspectRatio="xMidYMid meet" {...extra} />;
+  const neckItem = !!outfit.acessorio && NECK_ITEMS.has(itemById(outfit.acessorio)?.base ?? outfit.acessorio);
+  // cor do punho da manga (um tom mais escuro da roupa)
+  const cuff = costume ? shadeHex(costume.c1, 0.12) : garment ? shadeHex(garment, 0.14) : null;
+  // manga do bracinho: só em roupas que cobrem o braço (fantasias, moletons, camisetas, vestidos…)
+  const sleeve = costume ? costume.c1 : outfit.roupa && !NO_SLEEVE.has(itemById(outfit.roupa)?.base ?? '') ? garment : null;
+  // bracinhos: acenam de vez em quando (como dando "oi"), batem de alegria e acenam quando pedem; seguram as coisas paradinhos
+  const armsBusy = holds || (!!outfit.acessorio && itemById(outfit.acessorio)?.base === 'segurar');
+  const armClass = (side: 'l' | 'r') => (pose === 'tchau' ? (side === 'l' ? 'hami-arm hami-wave' : 'hami-arm') : idle && !asleep && !armsBusy ? `hami-arm hami-arm-idle-${side}` : 'hami-arm');
+  const img = (href: string, style?: CSSProperties) => <image href={href} x={IMG.x} y={IMG.y} width={IMG.w} height={IMG.h} preserveAspectRatio="xMidYMid meet" style={style} />;
 
   return (
     <svg viewBox="0 0 200 200" width={size} height={size} role="img" aria-label={label ?? 'Hami'} className="block overflow-visible">
@@ -112,10 +144,33 @@ export function Hamster({ fur: furId, mood = 'feliz', outfit = NO_OUTFIT, size =
         <clipPath id={`k${uid}`}>
           <path d={cloth} />
         </clipPath>
-        <clipPath id={`p${uid}`}>
-          {PAWS.map((p, i) => (
-            <ellipse key={i} cx={p.cx} cy={p.cy} rx={p.rx} ry={p.ry} />
+        {ARMS.map((arm, i) => (
+          <g key={arm.side}>
+            <clipPath id={`ac${i}${uid}`}>
+              <path d={arm.path} />
+            </clipPath>
+            <mask id={`am${i}${uid}`} maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200">
+              <g clipPath={`url(#ac${i}${uid})`}>{img(hamiFurMask)}</g>
+            </mask>
+            {/* manga: o braço todo menos a patinha (que fica de fora) */}
+            <mask id={`sl${i}${uid}`} maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200">
+              <path d={arm.path} fill="#FFFFFF" />
+              <ellipse cx={PAWS[i].cx} cy={PAWS[i].cy + 0.6} rx={PAWS[i].rx + 0.4} ry={PAWS[i].ry + 0.4} fill={`url(#pk${uid})`} />
+            </mask>
+          </g>
+        ))}
+        <radialGradient id={`pk${uid}`}>
+          <stop offset="0.8" stopColor="#000000" />
+          <stop offset="1" stopColor="#000000" stopOpacity="0" />
+        </radialGradient>
+        <clipPath id={`ey${uid}`}>
+          {EYES.map((e, i) => (
+            <ellipse key={i} cx={e.cx} cy={e.cy} rx="14" ry="14.5" />
           ))}
+        </clipPath>
+        {/* tudo abaixo do queixo: os colares saem de trás da cabeça */}
+        <clipPath id={`n${uid}`}>
+          <path d="M0 200 V112 H34 Q99 138 164 112 H200 V200 Z" />
         </clipPath>
         <mask id={`m${uid}`} maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200">
           {img(hamiFurMask)}
@@ -145,14 +200,14 @@ export function Hamster({ fur: furId, mood = 'feliz', outfit = NO_OUTFIT, size =
         {phase >= 3 && <circle cx="100" cy="110" r="94" fill={`url(#g${uid})`} />}
         <EffectBack id={outfit.efeito} geo={BODY_GEO} uid={uid} />
         <ellipse cx="99" cy="192.5" rx="50" ry="5.5" fill="rgba(60,30,40,0.16)" />
-        <g className={`${idle && !asleep ? 'pet-idle' : asleep ? 'pet-sleep' : ''} ${pose === 'tchau' ? 'pet-hello' : ''}`} style={{ transformOrigin: '100px 190px' }}>
+        <g className={idle && !asleep ? 'hami-breathe' : asleep ? 'hami-sleep' : ''} style={{ transformOrigin: '100px 192px' }}>
           <g filter={`url(#t${uid})`}>
             <Cape id={outfit.roupa} geo={BODY_GEO} />
             <AccessoryBack id={outfit.acessorio} geo={BODY_GEO} />
           </g>
 
           {/* a foto do Hami (com o rosto da foto, ou sem rosto para desenhar outra expressão por cima) */}
-          {img(photoFace ? hamiPhoto : hamiBlank, wet ? { style: 'filter: saturate(0.85) brightness(0.93)' } as Record<string, string> : undefined)}
+          {img(photoFace ? hamiBody : hamiBodyBlank, wet ? { filter: 'saturate(0.85) brightness(0.93)' } : undefined)}
           {recolor && (
             <g mask={`url(#m${uid})`}>
               <rect x="0" y="0" width="200" height="200" fill={fur.body} style={{ mixBlendMode: 'color' }} />
@@ -209,8 +264,36 @@ export function Hamster({ fur: furId, mood = 'feliz', outfit = NO_OUTFIT, size =
           )}
           <PropInHands prop={prop} />
           {/* as patinhas da foto ficam por cima da roupa e do que ele segura */}
-          {pawsOnTop && <g clipPath={`url(#p${uid})`}>{img(photoFace ? hamiPhoto : hamiBlank)}</g>}
+          {/* os bracinhos da foto, por cima da roupa e do que ele segura (com a manga, se estiver vestido) */}
+          {ARMS.map((arm, i) => (
+            <g key={arm.side} className={armClass(arm.side)} style={{ transformOrigin: arm.pivot }}>
+              <image href={arm.href} x={arm.x} y={arm.y} width={arm.w} height={arm.h} preserveAspectRatio="none" style={wet ? { filter: 'saturate(0.85) brightness(0.93)' } : undefined} />
+              {recolor && (
+                <g mask={`url(#am${i}${uid})`}>
+                  <rect x={arm.x} y={arm.y} width={arm.w} height={arm.h} fill={fur.body} style={{ mixBlendMode: 'color' }} />
+                  <rect x={arm.x} y={arm.y} width={arm.w} height={arm.h} fill={fur.body} opacity="0.32" />
+                </g>
+              )}
+              {sleeve && (
+                <g filter={`url(#t${uid})`}>
+                  <path d={arm.path} fill={sleeve} mask={`url(#sl${i}${uid})`} />
+                  <ellipse cx={PAWS[i].cx + (i ? 1.2 : -1.2)} cy={PAWS[i].cy - 7.4} rx={PAWS[i].rx + 1.6} ry="3.4" fill={cuff ?? sleeve} mask={`url(#sl${i}${uid})`} />
+                </g>
+              )}
+            </g>
+          ))}
 
+          {/* piscadinha de vez em quando (no rosto da foto) */}
+          {photoFace && idle && (
+            <g className="hami-blink">
+              <g clipPath={`url(#ey${uid})`}>{img(hamiBodyBlank)}</g>
+              <g transform={FACE_T}>
+                {[-1, 1].map((sd) => (
+                  <path key={sd} d={`M${100 + sd * 25 - 9} ${FACE.eyeY - 1} Q${100 + sd * 25} ${FACE.eyeY + 5.5} ${100 + sd * 25 + 9} ${FACE.eyeY - 1}`} stroke={INK} strokeWidth="3.6" strokeLinecap="round" fill="none" />
+                ))}
+              </g>
+            </g>
+          )}
           {/* expressão desenhada por cima do rosto (quando não é a da foto) */}
           {!photoFace && (
             <g transform={FACE_T}>
@@ -277,7 +360,9 @@ export function Hamster({ fur: furId, mood = 'feliz', outfit = NO_OUTFIT, size =
                 </g>
               )}
             </g>
-            <Accessory id={outfit.acessorio} geo={{ top: 86, h: 64, w: 39, eyeY: 72 }} paw="#FFF4EE" head={{ cx: HEAD.cx, cy: 78, rx: HEAD.rx, ry: 45 }} />
+            <g clipPath={neckItem ? `url(#n${uid})` : undefined}>
+              <Accessory id={outfit.acessorio} geo={{ top: 86, h: 64, w: neckItem ? 52 : 39, eyeY: 72 }} paw="#FFF4EE" head={{ cx: HEAD.cx, cy: 78, rx: HEAD.rx, ry: 45 }} />
+            </g>
           </g>
           {phase >= 3 && <Sparkles top={HEAD.top} w={HEAD.rx} />}
           <EffectFront id={outfit.efeito} geo={BODY_GEO} />
