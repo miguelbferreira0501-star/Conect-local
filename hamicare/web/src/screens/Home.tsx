@@ -3,7 +3,7 @@ import { MoonTeaser } from '../components/MoonTeaser';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Flame, Globe, House as HouseIcon, Mail, Plus, Settings, Trees } from 'lucide-react';
 import { MOON_N } from '../data/arenas';
-import { MoonOutdoors, Outdoors, outdoorGround } from '../components/Outdoors';
+import { MoonOutdoors, OUTDOOR_W, Outdoors, outdoorGround } from '../components/Outdoors';
 import { Room, useKindOf } from '../components/Room';
 import { itemById } from '../data/items';
 import { play } from '../lib/sound';
@@ -249,7 +249,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
             <WalkingHami fur={s.pet.fur} outfit={s.pet.outfit} size={148} />
           </TrekScene>
         ) : outside ? (
-          <PanRoom>
+          <PanRoom key={onMoon ? 'lua' : 'fora'} width={onMoon ? 1.9 : OUTDOOR_W / 390}>
             {onMoon ? (
               <MoonOutdoors height={430}>{hami}</MoonOutdoors>
             ) : (
@@ -259,7 +259,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
             )}
           </PanRoom>
         ) : (
-          <PanRoom width={1.45}>
+          <PanRoom key="casa" width={1.45}>
             <Room house={s.house} period={period} height={430} wide={1.45} onUse={(uid, kind) => (napping && furniture.use?.uid === uid && setAwake(true), furniture.useItem(uid, kind))} usage={furniture.usage}>
               {furniture.use ? null : hami}
             </Room>

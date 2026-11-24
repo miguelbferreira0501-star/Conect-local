@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ChevronLeft, ChevronRight, Heart, Lock, Phone, Plus, Sparkles, Trash2, Wand2, X } from 'lucide-react';
 import { Glyph } from '../components/art';
-import { RoutineArt } from '../components/RoutineArt';
+import { RoutineArt, TestArt } from '../components/RoutineArt';
 import { Hamster } from '../components/Hamster';
 import { PlusCard } from '../components/PlusCard';
 import { toast } from '../components/ui';
@@ -132,7 +132,7 @@ function DailyMission({ onGo }: { onGo: Go }) {
 
 // ---------- Rotinas ----------
 
-/** Cartão como no vídeo: imagem quadrada em cima e a legenda embaixo. */
+/** Cartão em forma de ticket: ilustração em cima, picote tracejado com recortes nas laterais e o nome embaixo. */
 function RoutineCard({ r, fav, onOpen }: { r: Routine; fav?: boolean; onOpen: (r: Routine) => void }) {
   const s = useApp();
   const locked = r.plus && !isPremium(s);
@@ -151,6 +151,7 @@ function RoutineCard({ r, fav, onOpen }: { r: Routine; fav?: boolean; onOpen: (r
           </span>
         )}
       </span>
+      <span className="gw-rc-cut" aria-hidden="true" />
       <span className="gw-rc-txt">{r.title}</span>
     </button>
   );
@@ -463,7 +464,9 @@ function TestsPage({ open, onClose, onRoutine }: { open: boolean; onClose: () =>
           <div className="gw-tests">
             {list.map((t) => (
               <button key={t.id} className="gw-test" style={{ background: t.tone }} onClick={() => begin(t)}>
-                <Glyph e={t.emoji} size={54} />
+                <span className="gw-test-art">
+                  <TestArt id={t.id} emoji={t.emoji} />
+                </span>
                 <b>{t.title}</b>
                 <small>{results[t.id] ? `Feito · ${testResult(t, results[t.id].score).title}` : `${t.questions.length} perguntas · 1 min`}</small>
               </button>
@@ -477,7 +480,7 @@ function TestsPage({ open, onClose, onRoutine }: { open: boolean; onClose: () =>
       {pick && step === 'sobre' && (
         <div className="gw-tcard">
           <span className="gw-tcard-art">
-            <Glyph e={pick.emoji} size={92} />
+            <TestArt id={pick.id} emoji={pick.emoji} glyph={92} />
           </span>
           <h2>{pick.title}</h2>
           <h3>Sobre o teste</h3>

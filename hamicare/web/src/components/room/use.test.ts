@@ -3,11 +3,11 @@ import { useKindOf } from '../Room';
 import { arenaHouse, upgradeHouse } from '../../data/arenas';
 
 describe('Hami usando os móveis', () => {
-  it('cama deita, banheira dá banho, sofá e cadeira sentam, rodinha corre', () => {
+  it('cama deita, banheira dá banho, rodinha corre (sofá e cadeira são só decoração)', () => {
     expect(useKindOf('k-cama-rosa', 'k-cama')).toBe('deitar');
     expect(useKindOf('k-banheira-madeira', 'k-banheira')).toBe('banho');
-    expect(useKindOf('k-sofa-azul', 'k-sofa')).toBe('sentar');
-    expect(useKindOf('k-cadeira-madeira', 'k-cadeira')).toBe('sentar');
+    expect(useKindOf('k-sofa-azul', 'k-sofa')).toBeNull();
+    expect(useKindOf('k-cadeira-madeira', 'k-cadeira')).toBeNull();
     expect(useKindOf('k-rodinha-azul', 'k-rodinha')).toBe('correr');
     expect(useKindOf('k-guarda-roupa-rosa', 'k-guarda-roupa')).toBeNull();
   });

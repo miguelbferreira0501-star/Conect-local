@@ -37,9 +37,8 @@ interface Props {
 export type UseKind = 'deitar' | 'banho' | 'sentar' | 'correr' | 'balancar';
 /** O que o Hami faz em cada móvel. */
 export function useKindOf(itemId: string, svg?: string): UseKind | null {
-  if (svg === 'k-banheira' || svg === 'k-lua-banheira') return 'banho';
-  if (svg === 'k-cama' || svg === 'k-lua-cama' || svg === 'k-cama-dossel' || svg === 'k-almofada' || svg === 'caminha' || /^cama/.test(itemId)) return 'deitar';
-  if (svg === 'k-sofa' || svg === 'k-poltrona' || svg === 'k-cadeira' || svg === 'k-banquinho' || /poltrona|cadeira|banco|trono|sofa/.test(itemId)) return 'sentar';
+  if (svg === 'k-banheira' || svg === 'k-lua-banheira' || svg === 'k-inv-banheira') return 'banho';
+  if (svg === 'k-cama' || svg === 'k-lua-cama' || svg === 'k-cama-dossel' || svg === 'k-inv-cama-pinguim' || svg === 'k-jar-cama-cogumelo' || svg === 'k-almofada' || svg === 'caminha' || /^cama/.test(itemId)) return 'deitar';
   if (svg === 'k-rodinha' || svg === 'k-lua-rodinha' || svg === 'rodinha') return 'correr';
   if (svg === 'k-balanco') return 'balancar';
   return null;

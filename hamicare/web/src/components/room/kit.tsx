@@ -1,4 +1,5 @@
 import { createContext, useContext, useId, type ReactNode } from 'react';
+import { ThemeKit } from './themeKit';
 
 /** Ícones pequenos (listas, lojas): desenha sem o filtro de contorno, que pesa muito no celular. */
 export const KitLite = createContext(false);
@@ -1506,7 +1507,8 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
         </S>
       );
     default:
-      return null;
+      // coleções temáticas (Inverno, Praia, Jardim)
+      return <ThemeKit id={id} c1={c1} c2={c2} />;
   }
 }
 
@@ -1534,4 +1536,10 @@ export const KIT_PLACE: Record<string, Place> = {
   'k-alvo': 'parede',
   'k-janela': 'parede',
   'k-colmeia': 'parede',
+  // coleções temáticas
+  'k-inv-tapete-urso': 'tapete',
+  'k-inv-flocos': 'parede',
+  'k-praia-toalha': 'tapete',
+  'k-jar-tapete-folha': 'tapete',
+  'k-jar-guirlanda': 'parede',
 };

@@ -65,6 +65,25 @@ export const TREK_THEMES: Record<string, Theme> = {
   lua: { sky: ['#0D1030', '#262A5C'], far: '#3A3F73', ground: '#8E94AE', props: ['cratera', 'pedra', 'bandeira', 'foguete'], night: true, extra: 'terra' },
 };
 
+/** Temas com vegetação (moitas e flores entre as árvores). */
+const GREEN = new Set(['casinha', 'jardim', 'vila', 'floresta', 'castelo']);
+/** O que passa em primeiro plano em cada tema. */
+const NEAR: Record<string, 'grama' | 'praia' | 'neve' | 'pedra' | 'nuvem'> = {
+  casinha: 'grama',
+  jardim: 'grama',
+  vila: 'grama',
+  floresta: 'grama',
+  castelo: 'grama',
+  tropical: 'praia',
+  mar: 'praia',
+  neve: 'neve',
+  cidade: 'pedra',
+  espaco: 'pedra',
+  lua: 'pedra',
+  sonhos: 'nuvem',
+  celeste: 'nuvem',
+};
+
 /** Tema da viagem: a arena onde o Hami mora (ou a Lua). */
 export const trekThemeOf = (s: State): string => trekPlaceOf(s);
 
@@ -279,6 +298,53 @@ export function TrekScene({ theme, height = 430, children, still = false }: { th
       {t.props.map((k, i) => (
         <PropArt key={i} kind={k} x={90 + i * 200} t={t} />
       ))}
+      {/* entre uma coisa e outra: moitas e flores (onde tem vegetação) */}
+      {GREEN.has(theme) &&
+        [0, 1, 2, 3].map((i) => (
+          <g key={`f${i}`} transform={`translate(${190 + i * 200} 0) scale(0.75)`}>
+            <PropArt kind={i % 2 ? 'flor' : 'arbusto'} x={0} t={t} />
+          </g>
+        ))}
+    </>
+  );
+  // primeiro plano (passa mais rápido): grama e flores, conchas, neve, pedrinhas…
+  const near = (
+    <>
+      {Array.from({ length: 8 }, (_, i) => {
+        const x = 30 + i * 100 + ((i * 37) % 40);
+        const kind = NEAR[theme] ?? 'grama';
+        let art: ReactNode = null;
+        if (kind === 'grama')
+          art = (
+            <>
+              <path d="M-12 0 q3 -16 6 0 q3 -22 6 0 q3 -15 6 0 q3 -19 6 0" fill={shade(t.ground, 0.22)} />
+              {i % 2 === 0 && (
+                <g transform="translate(16 -10)">
+                  <path d="M0 0 V10" stroke="#3E9E58" strokeWidth="2" />
+                  {[0, 72, 144, 216, 288].map((a) => (
+                    <ellipse key={a} cx="0" cy="-4" rx="3.2" ry="4.4" fill={['#FF8FB8', '#FFD34D', '#FFFFFF', '#B9A3F0'][i % 4]} transform={`rotate(${a})`} />
+                  ))}
+                  <circle r="2.4" fill="#FFD34D" />
+                </g>
+              )}
+            </>
+          );
+        else if (kind === 'praia') art = i % 3 === 0 ? <path d="M-9 0 C-9 -11 9 -11 9 0Z" fill="#FFB3CF" /> : <ellipse cx="0" cy="-3" rx="7" ry="4" fill={shade(t.ground, 0.15)} />;
+        else if (kind === 'neve') art = <ellipse cx="0" cy="-4" rx="16" ry="7" fill="#FFFFFF" />;
+        else if (kind === 'pedra') art = <path d="M-10 0 Q-10 -9 0 -10 Q10 -9 10 0Z" fill={shade(t.ground, 0.25)} />;
+        else if (kind === 'nuvem')
+          art = (
+            <g fill="#FFFFFF" opacity="0.9">
+              <circle cx="-8" cy="-4" r="8" />
+              <circle cx="6" cy="-6" r="10" />
+            </g>
+          );
+        return (
+          <g key={i} transform={`translate(${x} 0) scale(2)`}>
+            {art}
+          </g>
+        );
+      })}
     </>
   );
   return (
@@ -322,6 +388,12 @@ export function TrekScene({ theme, height = 430, children, still = false }: { th
         <div className="trek-marks" />
       </div>
       <div className="trek-pet">{children}</div>
+      <div className="trek-layer trek-near" aria-hidden="true">
+        <svg viewBox={`0 -56 ${W * 2} 56`} preserveAspectRatio="xMidYMax meet">
+          {near}
+          <g transform={`translate(${W} 0)`}>{near}</g>
+        </svg>
+      </div>
     </div>
   );
 }

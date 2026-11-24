@@ -1,4 +1,5 @@
-// Ilustração de cada rotina do Crescer (o Hami fazendo a rotina), igual aos cartões do vídeo de referência.
+// Ilustração de cada rotina e de cada teste do Crescer: o cachorrinho fazendo a rotina (tiradas das folhas de
+// ilustrações enviadas, ampliadas em alta qualidade).
 import { Glyph } from './art';
 import type { Routine } from '../data/routines';
 import a_academia from '../assets/routines/academia.webp';
@@ -27,6 +28,12 @@ import a_recomeco from '../assets/routines/recomeco.webp';
 import a_skincare from '../assets/routines/skincare.webp';
 import a_tdah from '../assets/routines/tdah.webp';
 import a_verao from '../assets/routines/verao.webp';
+import t_sono from '../assets/tests/sono.webp';
+import t_energia from '../assets/tests/energia.webp';
+import t_cuidado from '../assets/tests/cuidado.webp';
+import t_estresse from '../assets/tests/estresse.webp';
+import t_foco from '../assets/tests/foco.webp';
+import t_gentileza from '../assets/tests/gentileza.webp';
 
 const ART: Record<string, string> = {
   academia: a_academia,
@@ -56,6 +63,15 @@ const ART: Record<string, string> = {
   tdah: a_tdah,
   verao: a_verao,
 };
+
+const TEST_ART: Record<string, string> = { sono: t_sono, energia: t_energia, cuidado: t_cuidado, estresse: t_estresse, foco: t_foco, gentileza: t_gentileza };
+
+/** Ilustração de um teste (ou o ícone, se ainda não tiver). */
+export function TestArt({ id, emoji, glyph = 54 }: { id: string; emoji: string; glyph?: number }) {
+  const src = TEST_ART[id];
+  if (!src) return <Glyph e={emoji} size={glyph} />;
+  return <img className="rt-art" src={src} alt="" draggable={false} loading="lazy" decoding="async" />;
+}
 
 export function RoutineArt({ r, glyph = 60 }: { r: Routine; glyph?: number }) {
   const src = ART[r.id];

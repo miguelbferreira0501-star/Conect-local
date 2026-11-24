@@ -6,7 +6,7 @@ import type { Outfit } from '../types';
 export function WalkingHami({ fur, outfit, size = 150, still = false }: { fur: string; outfit?: Outfit; size?: number; still?: boolean }) {
   return (
     <span className="wk3d" style={{ width: size }} role="img" aria-label="Passeando">
-      <DogPose kind="anda" fur={fur} outfit={outfit} width={size} still={still} label="" flip />
+      <DogPose kind="anda" fur={fur} outfit={outfit} width={size} still={still} label="" flip bag />
     </span>
   );
 }
