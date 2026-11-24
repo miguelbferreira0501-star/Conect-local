@@ -17,7 +17,10 @@ function shadeHex(hex: string, t: number) {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex);
   if (!m) return hex;
   const n = parseInt(m[1], 16);
-  const c = (sh: number) => Math.round(((n >> sh) & 255) * (1 - t)).toString(16).padStart(2, '0');
+  const c = (sh: number) =>
+    Math.round(((n >> sh) & 255) * (1 - t))
+      .toString(16)
+      .padStart(2, '0');
   return `#${c(16)}${c(8)}${c(0)}`;
 }
 
@@ -57,10 +60,6 @@ export interface HamsterProps {
   prop?: HamiProp;
 }
 
-
-
-
-
 // ---------- O Hami realista (foto) ----------
 // A foto fica no quadro 0–200: pezinhos em y≈192, centro do corpo em x≈99.
 const IMG = { x: 27.8, y: 14, w: 144.4, h: 180 };
@@ -72,9 +71,12 @@ const FACE_T = `translate(${FACE.cx} ${FACE.cy}) rotate(${FACE.rot}) scale(${FAC
 const HEAD_GEO = { top: 40, w: 46, h: 150, eyeY: 70 };
 /** Corpo (no quadro normal) para roupas, colares, capas e efeitos. */
 const BODY_GEO = { top: 30, w: 52, h: 163, eyeY: 72 };
-/** Contorno da barriga (logo abaixo do queixo até em cima dos pezinhos): as roupas vestem este contorno. */
-const BODY = 'M52.4 123.0 Q99 132 145.8 123.0 L147.8 126.0 L150.0 129.0 L151.8 132.0 L152.8 135.0 L153.4 138.0 L153.5 141.0 L153.3 144.0 L153.0 147.0 L152.8 150.0 L152.9 153.0 L153.3 156.0 L153.4 159.0 L152.7 162.0 L151.6 165.0 L150.2 168.0 L148.5 171.0 L146.3 174.0 L143.8 177.0 Q99 187 55.4 177.0 L52.9 174.0 L50.7 171.0 L48.6 168.0 L47.0 165.0 L46.1 162.0 L45.6 159.0 L45.4 156.0 L45.0 153.0 L44.5 150.0 L44.0 147.0 L43.7 144.0 L43.8 141.0 L44.0 138.0 L44.8 135.0 L45.9 132.0 L47.6 129.0 L49.8 126.0 L52.4 123.0 Z';
-const DRESS = 'M52.4 123.0 Q99 132 145.8 123.0 L147.8 126.0 L150.0 129.0 L151.8 132.0 L152.8 135.0 L153.4 138.0 L153.5 141.0 L153.3 144.0 L153.0 147.0 L152.8 150.0 L154.2 153.0 L155.8 156.0 L157.1 159.0 L157.7 162.0 L157.9 165.0 L157.8 168.0 L157.3 171.0 L156.4 174.0 L157.1 183.0 Q99 190 42.1 183.0 L42.8 174.0 L41.8 171.0 L41.1 168.0 L40.8 165.0 L41.1 162.0 L41.9 159.0 L42.8 156.0 L43.7 153.0 L44.5 150.0 L44.0 147.0 L43.7 144.0 L43.8 141.0 L44.0 138.0 L44.8 135.0 L45.9 132.0 L47.6 129.0 L49.8 126.0 L52.4 123.0 Z';
+/** Contorno da barriga (logo abaixo do queixo até em cima dos pezinhos), tirado da foto até a pontinha do pelo:
+ *  as roupas vestem este contorno e cobrem o corpo todo, sem sobrar pelo dos lados. */
+const BODY =
+  'M49.5 123.0 C49.5 123.0 65.8 125.8 74.0 126.6 C82.2 127.4 90.7 128.0 99.0 128.0 C107.3 128.0 115.5 127.4 124.0 126.6 C132.5 125.8 150.0 123.0 150.0 123.0 C150.0 123.0 150.2 124.8 150.8 126.0 C151.4 127.2 153.0 128.7 153.8 130.0 C154.6 131.3 155.3 132.7 155.8 134.0 C156.3 135.3 156.8 136.7 157.0 138.0 C157.2 139.3 156.9 140.7 156.8 142.0 C156.7 143.3 156.7 144.7 156.6 146.0 C156.5 147.3 156.2 148.7 156.2 150.0 C156.2 151.3 156.3 152.7 156.4 154.0 C156.5 155.3 156.7 156.7 156.6 158.0 C156.5 159.3 156.2 160.7 155.8 162.0 C155.4 163.3 154.8 164.7 154.2 166.0 C153.6 167.3 152.8 168.7 152.0 170.0 C151.2 171.3 150.2 172.7 149.2 174.0 C148.2 175.3 147.4 176.8 146.0 178.0 C142.0 179.3 132.8 180.8 125.0 181.6 C117.2 182.4 107.7 182.6 99.0 182.6 C90.3 182.6 80.8 182.4 73.0 181.6 C65.2 180.8 55.8 179.3 52.0 178.0 C50.6 176.8 50.8 175.3 50.0 174.0 C49.2 172.7 47.9 171.3 47.0 170.0 C46.1 168.7 45.2 167.3 44.6 166.0 C44.0 164.7 43.6 163.3 43.2 162.0 C42.8 160.7 42.4 159.3 42.2 158.0 C42.0 156.7 42.1 155.3 42.0 154.0 C41.9 152.7 41.8 151.3 41.6 150.0 C41.4 148.7 40.9 147.3 40.8 146.0 C40.7 144.7 40.8 143.3 40.8 142.0 C40.8 140.7 40.6 139.3 40.8 138.0 C41.0 136.7 41.3 135.3 41.8 134.0 C42.3 132.7 42.9 131.3 43.6 130.0 C44.3 128.7 45.0 127.2 46.0 126.0 C47.0 124.8 49.5 123.0 49.5 123.0 Z';
+const DRESS =
+  'M49.5 123.0 C49.5 123.0 65.8 125.8 74.0 126.6 C82.2 127.4 90.7 128.0 99.0 128.0 C107.3 128.0 115.5 127.4 124.0 126.6 C132.5 125.8 150.0 123.0 150.0 123.0 C150.0 123.0 150.2 124.8 150.8 126.0 C151.4 127.2 153.0 128.7 153.8 130.0 C154.6 131.3 155.3 132.7 155.8 134.0 C156.3 135.3 156.8 136.7 157.0 138.0 C157.2 139.3 156.9 140.7 156.8 142.0 C156.7 143.3 156.6 144.7 156.6 146.0 C156.6 147.3 156.4 148.3 156.6 150.0 C156.8 151.7 157.3 153.7 157.6 156.0 C157.9 158.3 158.3 161.3 158.6 164.0 C158.9 166.7 159.2 169.0 159.4 172.0 C159.6 175.0 160.0 182.0 160.0 182.0 C160.0 182.0 140.2 185.3 130.0 186.2 C119.8 187.1 109.3 187.2 99.0 187.2 C88.7 187.2 78.2 187.1 68.0 186.2 C57.8 185.3 38.0 182.0 38.0 182.0 C38.0 182.0 38.4 175.0 38.6 172.0 C38.8 169.0 39.1 166.7 39.4 164.0 C39.7 161.3 40.1 158.3 40.4 156.0 C40.7 153.7 41.3 151.7 41.4 150.0 C41.5 148.3 40.9 147.3 40.8 146.0 C40.7 144.7 40.8 143.3 40.8 142.0 C40.8 140.7 40.6 139.3 40.8 138.0 C41.0 136.7 41.3 135.3 41.8 134.0 C42.3 132.7 42.9 131.3 43.6 130.0 C44.3 128.7 45.0 127.2 46.0 126.0 C47.0 124.8 49.5 123.0 49.5 123.0 Z';
 /** Cabeça inteira com as orelhas (para o capuz das fantasias e efeitos na cabeça). */
 const HOOD = 'M99 20 C141 20 169 42 167 76 C166 104 148 124 99 127 C50 124 32 104 31 76 C29 42 57 20 99 20 Z';
 /** Corpo inteiro da fantasia (até os pezinhos). */
@@ -85,9 +87,11 @@ const PAWS = [
   { cx: 59.6, cy: 141.6, rx: 9.6, ry: 10.4 },
   { cx: 138.6, cy: 142, rx: 9.6, ry: 10.4 },
 ];
-/** Os bracinhos (recortados da foto) giram no ombro: acenam, batem de alegria e seguram coisas. */
-const ARM_L = 'M42 123 L54 120.5 L63 125 L69.5 133 L71 142 L69 150 L63 153.5 L55 153 L49 148.5 L44.5 141 L42.5 132 Z';
-const ARM_R = 'M156.2 123 L144.2 120.5 L135.2 125 L128.7 133 L127.2 142 L129.2 150 L135.2 153.5 L143.2 153 L149.2 148.5 L153.7 141 L155.7 132 Z';
+/** Os bracinhos (recortados da foto, contorno liso tirado da própria foto) giram no ombro; a manga segue esse contorno. */
+const ARM_L =
+  'M52.8 120.1 C51.8 120.3 51.3 121.6 50.4 122.5 C49.5 123.5 48.4 124.7 47.6 125.8 C46.7 126.8 45.9 127.8 45.1 128.9 C44.4 130.0 43.4 131.2 43.0 132.5 C42.6 133.7 42.5 135.1 42.6 136.4 C42.8 137.6 43.3 138.7 43.9 140.0 C44.5 141.3 45.2 142.8 46.1 144.2 C46.9 145.6 47.8 147.2 48.9 148.5 C50.1 149.8 51.6 151.0 53.0 151.8 C54.4 152.6 55.9 152.8 57.2 153.2 C58.5 153.6 59.6 154.0 60.8 154.0 C62.0 154.0 63.2 153.5 64.4 152.9 C65.7 152.3 67.6 151.5 68.5 150.4 C69.5 149.3 69.7 147.7 70.2 146.4 C70.7 145.1 71.5 143.8 71.6 142.6 C71.7 141.3 71.0 140.3 70.8 139.0 C70.5 137.7 70.5 136.2 70.0 134.8 C69.5 133.4 68.7 132.0 67.8 130.6 C66.9 129.2 65.7 127.6 64.5 126.4 C63.3 125.2 61.9 124.4 60.6 123.6 C59.3 122.7 57.7 121.9 56.4 121.4 C55.1 120.8 53.8 119.9 52.8 120.1 Z';
+const ARM_R =
+  'M143.6 120.1 C142.4 120.3 141.2 121.5 139.8 122.3 C138.4 123.0 136.7 123.6 135.4 124.6 C134.1 125.6 133.1 127.0 131.9 128.4 C130.8 129.8 129.3 131.4 128.6 132.8 C127.9 134.2 128.0 135.7 127.6 137.0 C127.3 138.3 126.5 139.6 126.4 140.8 C126.4 142.1 127.0 143.1 127.3 144.4 C127.6 145.7 127.7 147.6 128.4 148.8 C129.2 150.0 130.6 151.0 131.8 151.9 C133.0 152.7 134.3 153.7 135.6 154.0 C136.9 154.3 138.1 153.8 139.5 153.6 C140.8 153.4 142.2 153.4 143.6 152.8 C145.0 152.1 146.6 150.8 147.8 149.6 C149.0 148.5 150.1 147.0 151.1 145.6 C152.0 144.2 152.9 142.7 153.6 141.4 C154.3 140.1 154.9 138.8 155.1 137.5 C155.3 136.2 155.2 135.0 154.8 133.7 C154.4 132.4 153.8 130.9 153.0 129.7 C152.2 128.5 150.8 127.5 150.1 126.4 C149.5 125.2 149.4 123.5 148.9 122.6 C148.4 121.7 148.1 121.3 147.2 120.9 C146.3 120.5 144.9 119.9 143.6 120.1 Z';
 const ARMS = [
   { href: hamiArmL, x: 42.6, y: 119.8, w: 29.2, h: 34.4, pivot: '51px 127px', side: 'l', path: ARM_L },
   { href: hamiArmR, x: 126.4, y: 119.8, w: 29, h: 34.4, pivot: '147.2px 127px', side: 'r', path: ARM_R },
@@ -107,7 +111,23 @@ const NO_SLEEVE = new Set(['regata', 'avental', 'jardineira', 'tutu', 'capa', 'a
  * (sono, choro, frio…) são desenhadas por cima do rosto. A cor da pelagem muda só no pelo laranja.
  * As roupas vestem o contorno do corpo, e as patinhas ficam por cima delas.
  */
-export function Hamster({ fur: furId, mood = 'feliz', outfit = NO_OUTFIT, size = 180, idle = true, label, neutral, wet: wetProp, shine, growth, pose, cond, condFace = true, prop, phase = 0 }: HamsterProps) {
+export function Hamster({
+  fur: furId,
+  mood = 'feliz',
+  outfit = NO_OUTFIT,
+  size = 180,
+  idle = true,
+  label,
+  neutral,
+  wet: wetProp,
+  shine,
+  growth,
+  pose,
+  cond,
+  condFace = true,
+  prop,
+  phase = 0,
+}: HamsterProps) {
   const wet = wetProp || cond === 'chuva';
   const fur = furById(furId);
   const current = useContext(GrowthContext);
@@ -131,7 +151,16 @@ export function Hamster({ fur: furId, mood = 'feliz', outfit = NO_OUTFIT, size =
   const sleeve = costume ? costume.c1 : outfit.roupa && !NO_SLEEVE.has(itemById(outfit.roupa)?.base ?? '') ? garment : null;
   // bracinhos: acenam de vez em quando (como dando "oi"), batem de alegria e acenam quando pedem; seguram as coisas paradinhos
   const armsBusy = holds || (!!outfit.acessorio && itemById(outfit.acessorio)?.base === 'segurar');
-  const armClass = (side: 'l' | 'r') => (pose === 'festa' ? `hami-arm hami-cheer-${side}` : pose === 'tchau' ? (side === 'l' ? 'hami-arm hami-wave' : 'hami-arm') : idle && !asleep && !armsBusy ? `hami-arm hami-arm-idle-${side}` : 'hami-arm');
+  const armClass = (side: 'l' | 'r') =>
+    pose === 'festa'
+      ? `hami-arm hami-cheer-${side}`
+      : pose === 'tchau'
+        ? side === 'l'
+          ? 'hami-arm hami-wave'
+          : 'hami-arm'
+        : idle && !asleep && !armsBusy
+          ? `hami-arm hami-arm-idle-${side}`
+          : 'hami-arm';
   const img = (href: string, style?: CSSProperties) => <image href={href} x={IMG.x} y={IMG.y} width={IMG.w} height={IMG.h} preserveAspectRatio="xMidYMid meet" style={style} />;
 
   return (
@@ -152,10 +181,14 @@ export function Hamster({ fur: furId, mood = 'feliz', outfit = NO_OUTFIT, size =
             <mask id={`am${i}${uid}`} maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200">
               <g clipPath={`url(#ac${i}${uid})`}>{img(hamiFurMask)}</g>
             </mask>
-            {/* manga: o braço todo menos a patinha (que fica de fora) */}
+            {/* manga: do ombro até o pulso; a patinha sai pela ponta (nada de manga embaixo dela) */}
             <mask id={`sl${i}${uid}`} maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200">
               <path d={arm.path} fill="#FFFFFF" />
-              <ellipse cx={PAWS[i].cx} cy={PAWS[i].cy + 0.6} rx={PAWS[i].rx + 0.4} ry={PAWS[i].ry + 0.4} fill={`url(#pk${uid})`} />
+              <ellipse cx={PAWS[i].cx} cy={PAWS[i].cy + 1.6} rx={PAWS[i].rx + 0.2} ry={PAWS[i].ry + 0.4} fill={`url(#pk${uid})`} />
+              <rect x={PAWS[i].cx - PAWS[i].rx * 0.9} y={PAWS[i].cy + 4} width={PAWS[i].rx * 1.8} height="30" fill="#000000" />
+            </mask>
+            <mask id={`sa${i}${uid}`} maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200">
+              <path d={arm.path} fill="#FFFFFF" />
             </mask>
           </g>
         ))}
@@ -230,7 +263,7 @@ export function Hamster({ fur: furId, mood = 'feliz', outfit = NO_OUTFIT, size =
               </g>
             )}
             {costume ? null : shape && garment ? (
-            <g>
+              <g>
                 <path d={cloth} fill={garment} />
                 <g clipPath={`url(#k${uid})`}>
                   <Clothes id={outfit.roupa} geo={BODY_GEO} />
@@ -277,7 +310,15 @@ export function Hamster({ fur: furId, mood = 'feliz', outfit = NO_OUTFIT, size =
               {sleeve && (
                 <g filter={`url(#t${uid})`}>
                   <path d={arm.path} fill={sleeve} mask={`url(#sl${i}${uid})`} />
-                  <ellipse cx={PAWS[i].cx + (i ? 1.2 : -1.2)} cy={PAWS[i].cy - 7.4} rx={PAWS[i].rx + 1.6} ry="3.4" fill={cuff ?? sleeve} mask={`url(#sl${i}${uid})`} />
+                  {/* punho: arco em volta do pulso, por cima do comecinho da patinha */}
+                  <path
+                    d={`M${PAWS[i].cx - PAWS[i].rx - 1.2} ${PAWS[i].cy - 1} A${PAWS[i].rx + 1.2} ${PAWS[i].ry + 0.6} 0 0 1 ${PAWS[i].cx + PAWS[i].rx + 1.2} ${PAWS[i].cy - 1}`}
+                    stroke={cuff ?? sleeve}
+                    strokeWidth="3.4"
+                    strokeLinecap="round"
+                    fill="none"
+                    mask={`url(#sa${i}${uid})`}
+                  />
                 </g>
               )}
             </g>
@@ -289,7 +330,14 @@ export function Hamster({ fur: furId, mood = 'feliz', outfit = NO_OUTFIT, size =
               <g clipPath={`url(#ey${uid})`}>{img(hamiBodyBlank)}</g>
               <g transform={FACE_T}>
                 {[-1, 1].map((sd) => (
-                  <path key={sd} d={`M${100 + sd * 25 - 9} ${FACE.eyeY - 1} Q${100 + sd * 25} ${FACE.eyeY + 5.5} ${100 + sd * 25 + 9} ${FACE.eyeY - 1}`} stroke={INK} strokeWidth="3.6" strokeLinecap="round" fill="none" />
+                  <path
+                    key={sd}
+                    d={`M${100 + sd * 25 - 9} ${FACE.eyeY - 1} Q${100 + sd * 25} ${FACE.eyeY + 5.5} ${100 + sd * 25 + 9} ${FACE.eyeY - 1}`}
+                    stroke={INK}
+                    strokeWidth="3.6"
+                    strokeLinecap="round"
+                    fill="none"
+                  />
                 ))}
               </g>
             </g>
@@ -350,7 +398,13 @@ export function Hamster({ fur: furId, mood = 'feliz', outfit = NO_OUTFIT, size =
               <Hat id={outfit.chapeu} geo={HEAD_GEO} />
               {prop === 'fones' && (
                 <g>
-                  <path d={`M${100 - 56} ${FACE.eyeY - 4} C${100 - 58} ${HEAD_GEO.top - 22} ${100 + 58} ${HEAD_GEO.top - 22} ${100 + 56} ${FACE.eyeY - 4}`} stroke="#5B6BD6" strokeWidth="5.5" strokeLinecap="round" fill="none" />
+                  <path
+                    d={`M${100 - 56} ${FACE.eyeY - 4} C${100 - 58} ${HEAD_GEO.top - 22} ${100 + 58} ${HEAD_GEO.top - 22} ${100 + 56} ${FACE.eyeY - 4}`}
+                    stroke="#5B6BD6"
+                    strokeWidth="5.5"
+                    strokeLinecap="round"
+                    fill="none"
+                  />
                   {[-1, 1].map((sd) => (
                     <g key={sd}>
                       <rect x={100 + sd * 56 - 8} y={FACE.eyeY - 16} width="16" height="22" rx="8" fill="#FF8FB1" />
@@ -381,7 +435,7 @@ export function Hamster({ fur: furId, mood = 'feliz', outfit = NO_OUTFIT, size =
  * Acabamento de tecido para roupas e acessórios: textura de feltro bem fininha, volume macio nas bordas
  * (como pano estofado) e uma sombrinha no pelo — para combinar com o Hami realista.
  */
-function FabricFilter({ id }: { id: string }) {
+export function FabricFilter({ id }: { id: string }) {
   return (
     <filter id={id} x="-10%" y="-10%" width="120%" height="120%" colorInterpolationFilters="sRGB">
       {/* volume de pano estofado: luz de cima à esquerda e borda que afunda (sem escurecer a cor) */}
@@ -394,18 +448,34 @@ function FabricFilter({ id }: { id: string }) {
         <feDistantLight azimuth="235" elevation="58" />
       </feSpecularLighting>
       <feComposite in="lit" in2="spec" operator="arithmetic" k1="0" k2="1" k3="0.22" k4="0" result="shiny" />
-      {/* trama do tecido: bem de leve, só para não parecer plástico */}
-      <feTurbulence type="fractalNoise" baseFrequency="1.5 0.55" numOctaves="2" seed="5" result="noise" />
-      <feColorMatrix in="noise" type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0 0.16" result="knit" />
-      <feBlend in="knit" in2="shiny" mode="overlay" result="tex" />
-      <feComposite in="tex" in2="SourceAlpha" operator="in" result="fabric" />
+      <feComposite in="shiny" in2="SourceAlpha" operator="in" result="fabric" />
       {/* sombrinha macia no pelo */}
       <feDropShadow in="fabric" dx="0" dy="1.8" stdDeviation="1.8" floodColor="#5A2E14" floodOpacity="0.28" />
     </filter>
   );
 }
 
-function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1, uid, photoBlush }: { mood: PetMood; cond?: Condition; eyeY: number; noseY: number; ex: number; blush: string; eyeK?: number; uid: string; photoBlush?: boolean }) {
+function Face({
+  mood,
+  cond,
+  eyeY,
+  noseY,
+  ex,
+  blush,
+  eyeK = 1,
+  uid,
+  photoBlush,
+}: {
+  mood: PetMood;
+  cond?: Condition;
+  eyeY: number;
+  noseY: number;
+  ex: number;
+  blush: string;
+  eyeK?: number;
+  uid: string;
+  photoBlush?: boolean;
+}) {
   // Olhões castanhos redondos e brilhantes, bochechas rosadas com brilhinho e a boquinha "ω".
   // A situação do dia troca o rostinho: > < tremendo de frio, olhinhos caídos de calor, nariz vermelho de gripe…
   const sleepy = mood === 'sono' || mood === 'dormindo';
@@ -443,9 +513,31 @@ function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1, uid, photoBlush }:
             const x = 100 + s * ex;
             return (
               <g key={`t${s}`}>
-                <path className="tear-flow" d={`M${x + s * 7} ${eyeY + 2} C${x + s * 11} ${eyeY + 14} ${x + s * 7} ${eyeY + 24} ${x + s * 12} ${eyeY + 36}`} stroke="#8FD0FF" strokeWidth="6" strokeLinecap="round" fill="none" opacity="0.9" />
-                <path d={`M${x + s * 7} ${eyeY + 2} C${x + s * 11} ${eyeY + 14} ${x + s * 7} ${eyeY + 24} ${x + s * 12} ${eyeY + 36}`} stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity="0.7" />
-                <path className="tear-drop" style={{ animationDelay: s === 1 ? '0.35s' : '0s' }} d={`M${x + s * 13} ${eyeY - 2} q-3.2 5.4 0 8 q3.2 -2.6 0 -8 Z`} fill="#8FD0FF" stroke="#5BA9E8" strokeWidth="0.8" />
+                <path
+                  className="tear-flow"
+                  d={`M${x + s * 7} ${eyeY + 2} C${x + s * 11} ${eyeY + 14} ${x + s * 7} ${eyeY + 24} ${x + s * 12} ${eyeY + 36}`}
+                  stroke="#8FD0FF"
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  fill="none"
+                  opacity="0.9"
+                />
+                <path
+                  d={`M${x + s * 7} ${eyeY + 2} C${x + s * 11} ${eyeY + 14} ${x + s * 7} ${eyeY + 24} ${x + s * 12} ${eyeY + 36}`}
+                  stroke="#FFFFFF"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  fill="none"
+                  opacity="0.7"
+                />
+                <path
+                  className="tear-drop"
+                  style={{ animationDelay: s === 1 ? '0.35s' : '0s' }}
+                  d={`M${x + s * 13} ${eyeY - 2} q-3.2 5.4 0 8 q3.2 -2.6 0 -8 Z`}
+                  fill="#8FD0FF"
+                  stroke="#5BA9E8"
+                  strokeWidth="0.8"
+                />
               </g>
             );
           })}
@@ -460,7 +552,11 @@ function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1, uid, photoBlush }:
               <g key={s}>
                 {bigEye(x)}
                 {/* lágrima acumulada no olhinho */}
-                <path d={`M${x - 8.6} ${eyeY + 3.4} Q${x} ${eyeY + 8} ${x + 8.6} ${eyeY + 3.4} Q${x + 7.2} ${eyeY + 9.8} ${x} ${eyeY + 10.8} Q${x - 7.2} ${eyeY + 9.8} ${x - 8.6} ${eyeY + 3.4} Z`} fill="#8FD0FF" opacity="0.85" />
+                <path
+                  d={`M${x - 8.6} ${eyeY + 3.4} Q${x} ${eyeY + 8} ${x + 8.6} ${eyeY + 3.4} Q${x + 7.2} ${eyeY + 9.8} ${x} ${eyeY + 10.8} Q${x - 7.2} ${eyeY + 9.8} ${x - 8.6} ${eyeY + 3.4} Z`}
+                  fill="#8FD0FF"
+                  opacity="0.85"
+                />
               </g>
             );
           })}
@@ -492,8 +588,7 @@ function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1, uid, photoBlush }:
           })}
         </g>
       );
-    if (face === 'chuva' || face === 'medo')
-      return <g className="pet-eyes">{[-1, 1].map((s) => bigEye(100 + s * ex, face === 'medo' ? 8.6 : 8, face === 'medo' ? 10 : 9.2))}</g>;
+    if (face === 'chuva' || face === 'medo') return <g className="pet-eyes">{[-1, 1].map((s) => bigEye(100 + s * ex, face === 'medo' ? 8.6 : 8, face === 'medo' ? 10 : 9.2))}</g>;
     if (sleepy)
       return (
         <g stroke={INK} strokeWidth="3.8" strokeLinecap="round" fill="none">
@@ -517,9 +612,22 @@ function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1, uid, photoBlush }:
   /** A boquinha "ω" aberta, com a linguinha rosa. */
   const omega = (w = 7) => (
     <g>
-      <path d={`M${100 - w * 0.62} ${n + 3.4} Q${100 - w * 0.5} ${n + 10.6} 100 ${n + 10.6} Q${100 + w * 0.5} ${n + 10.6} ${100 + w * 0.62} ${n + 3.4} Q100 ${n + 5.4} ${100 - w * 0.62} ${n + 3.4} Z`} fill="#A23E4B" />
-      <path d={`M${100 - w * 0.4} ${n + 8.2} Q100 ${n + 6.4} ${100 + w * 0.4} ${n + 8.2} Q${100 + w * 0.3} ${n + 10.3} 100 ${n + 10.4} Q${100 - w * 0.3} ${n + 10.3} ${100 - w * 0.4} ${n + 8.2} Z`} fill="#FF8DA1" />
-      <path d={`M${100 - w} ${n + 2} Q${100 - w * 0.5} ${n + 6.6} 100 ${n + 2.6} Q${100 + w * 0.5} ${n + 6.6} ${100 + w} ${n + 2}`} stroke={INK} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path
+        d={`M${100 - w * 0.62} ${n + 3.4} Q${100 - w * 0.5} ${n + 10.6} 100 ${n + 10.6} Q${100 + w * 0.5} ${n + 10.6} ${100 + w * 0.62} ${n + 3.4} Q100 ${n + 5.4} ${100 - w * 0.62} ${n + 3.4} Z`}
+        fill="#A23E4B"
+      />
+      <path
+        d={`M${100 - w * 0.4} ${n + 8.2} Q100 ${n + 6.4} ${100 + w * 0.4} ${n + 8.2} Q${100 + w * 0.3} ${n + 10.3} 100 ${n + 10.4} Q${100 - w * 0.3} ${n + 10.3} ${100 - w * 0.4} ${n + 8.2} Z`}
+        fill="#FF8DA1"
+      />
+      <path
+        d={`M${100 - w} ${n + 2} Q${100 - w * 0.5} ${n + 6.6} 100 ${n + 2.6} Q${100 + w * 0.5} ${n + 6.6} ${100 + w} ${n + 2}`}
+        stroke={INK}
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
     </g>
   );
   const mouth = () => {
@@ -530,7 +638,18 @@ function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1, uid, photoBlush }:
           <path d={`M95 ${n + 9.6} Q100 ${n + 6.6} 105 ${n + 9.6} Q103.6 ${n + 12} 100 ${n + 12} Q96.4 ${n + 12} 95 ${n + 9.6} Z`} fill="#FF8FA0" />
         </g>
       );
-    if (teary) return <path className="pout" d={`M94.6 ${n + 6} Q97.3 ${n + 2.6} 100 ${n + 4.4} Q102.7 ${n + 2.6} 105.4 ${n + 6}`} stroke={INK} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />;
+    if (teary)
+      return (
+        <path
+          className="pout"
+          d={`M94.6 ${n + 6} Q97.3 ${n + 2.6} 100 ${n + 4.4} Q102.7 ${n + 2.6} 105.4 ${n + 6}`}
+          stroke={INK}
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      );
     if (face === 'frio')
       return (
         <g>
@@ -556,7 +675,8 @@ function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1, uid, photoBlush }:
           <ellipse cx="100" cy={n + 8} rx={mood === 'boca' ? 2.8 : 2} ry="1.8" fill="#FF8DA1" />
         </g>
       );
-    if (sleepy) return <path d={`M95.5 ${n + 3} Q97.8 ${n + 5.4} 100 ${n + 3.4} Q102.2 ${n + 5.4} 104.5 ${n + 3}`} stroke={INK} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />;
+    if (sleepy)
+      return <path d={`M95.5 ${n + 3} Q97.8 ${n + 5.4} 100 ${n + 3.4} Q102.2 ${n + 5.4} 104.5 ${n + 3}`} stroke={INK} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />;
     return omega(mood === 'comendo' ? 6 : 7.4);
   };
   const cheek = face === 'frio' ? '#8FB4F0' : face === 'calor' ? '#FF6F6F' : face === 'gripado' ? '#FF8A8A' : blush;
@@ -565,20 +685,21 @@ function Face({ mood, cond, eyeY, noseY, ex, blush, eyeK = 1, uid, photoBlush }:
     <g>
       <g transform={eyeK !== 1 ? `translate(100 ${eyeY}) scale(${eyeK}) translate(-100 ${-eyeY})` : undefined}>{eyes()}</g>
       {/* bochechas rosadas com risquinhos de brilho (na foto elas já existem: só muda a cor no frio, calor e gripe) */}
-      {(!photoBlush || face === 'frio' || face === 'calor' || face === 'gripado') && [-1, 1].map((s) => {
-        const cx = 100 + s * (ex + 16);
-        const cy = eyeY + 13;
-        return (
-          <g key={s}>
-            <ellipse cx={cx} cy={cy} rx="10.5" ry="6.6" fill={cheek} opacity={cheekOp} />
-            {face === 'frio' ? (
-              <path d={`M${cx - 5} ${cy + 3} l3 -6 M${cx - 1} ${cy + 3} l3 -6 M${cx + 3} ${cy + 3} l3 -6`} stroke="#6E93D6" strokeWidth="1.4" strokeLinecap="round" opacity="0.8" />
-            ) : (
-              <path d={`M${cx - 4.6} ${cy + 1.6} l2.2 -3.6 M${cx - 0.6} ${cy + 1.6} l2.2 -3.6`} stroke="#FFFFFF" strokeWidth="1.4" strokeLinecap="round" opacity="0.75" />
-            )}
-          </g>
-        );
-      })}
+      {(!photoBlush || face === 'frio' || face === 'calor' || face === 'gripado') &&
+        [-1, 1].map((s) => {
+          const cx = 100 + s * (ex + 16);
+          const cy = eyeY + 13;
+          return (
+            <g key={s}>
+              <ellipse cx={cx} cy={cy} rx="10.5" ry="6.6" fill={cheek} opacity={cheekOp} />
+              {face === 'frio' ? (
+                <path d={`M${cx - 5} ${cy + 3} l3 -6 M${cx - 1} ${cy + 3} l3 -6 M${cx + 3} ${cy + 3} l3 -6`} stroke="#6E93D6" strokeWidth="1.4" strokeLinecap="round" opacity="0.8" />
+              ) : (
+                <path d={`M${cx - 4.6} ${cy + 1.6} l2.2 -3.6 M${cx - 0.6} ${cy + 1.6} l2.2 -3.6`} stroke="#FFFFFF" strokeWidth="1.4" strokeLinecap="round" opacity="0.75" />
+              )}
+            </g>
+          );
+        })}
       {/* narizinho rosa (vermelhinho quando está gripado) */}
       {face === 'gripado' ? <ellipse cx="100" cy={n - 1.4} rx="5.4" ry="4" fill="#FF6F7E" /> : <ellipse cx="100" cy={n - 0.6} rx="2.6" ry="1.8" fill="#E9899A" />}
       {mouth()}

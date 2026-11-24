@@ -22,7 +22,7 @@ const USE_LINE: Record<UseKind, string> = {
 export function UsePet({ kind, w }: { kind: UseKind; w: number }) {
   const s = useApp();
   const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
-  if (kind === 'deitar') return <SleepingHami fur={s.pet.fur} size={clamp(w * 0.66, 80, 180)} />;
+  if (kind === 'deitar') return <SleepingHami fur={s.pet.fur} size={clamp(w * 0.66, 80, 180)} outfit={s.pet.outfit} />;
   // No banho, a foto (tina de madeira, espuma, patinho e toalha) fica no lugar da banheira.
   if (kind === 'banho') return <BathPhoto fur={s.pet.fur} width={clamp(w * 1.22, 130, 300)} />;
   const size = kind === 'sentar' ? clamp(w * 0.5, 70, 140) : kind === 'correr' ? clamp(w * 0.58, 60, 130) : clamp(w * 0.45, 60, 120);
