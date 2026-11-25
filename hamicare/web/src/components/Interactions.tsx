@@ -158,7 +158,7 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
     if (i === lastTrick.current) i = (i + 1) % TRICKS.length;
     lastTrick.current = i;
     run(TRICKS[i]);
-    play('squeak');
+    play('latido');
     care('carinho');
     const got = addHearts(1, 'toque');
     if (got) later(() => burst(1), 250);
@@ -224,7 +224,7 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
     if (asleep) return talk(`Zzz… ${name} está dormindo. Depois eu busco~`);
     if (performance.now() < busyUntil.current || fetching.current) return talk('Au~ Estou brincando agora, só um segundinho~');
     fetching.current = true;
-    play('squeak');
+    play('latido');
     talk('Au! Vou buscar!');
     later(
       () =>

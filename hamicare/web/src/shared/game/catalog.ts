@@ -10,10 +10,10 @@ export const CHEST_KINDS: ItemKind[] = ['chapeu', 'oculos', 'roupa', 'acessorio'
 export function rarityOf(item: Item): Rarity {
   if (item.rarity) return item.rarity;
   if (item.plus) return 'epico';
-  if (item.kind === 'efeito') return item.price >= 110 ? 'lendario' : item.price >= 80 ? 'epico' : 'raro';
+  const p = item.basePrice ?? item.price;
+  if (item.kind === 'efeito') return p >= 110 ? 'lendario' : p >= 80 ? 'epico' : 'raro';
   if (item.c1 === '#F6C445' && item.base) return 'epico'; // variações douradas
   if (item.season) return 'raro';
-  const p = item.price;
   if (p <= 20) return 'comum';
   if (p <= 35) return 'incomum';
   if (p <= 55) return 'raro';

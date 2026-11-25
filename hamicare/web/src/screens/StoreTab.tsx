@@ -78,7 +78,7 @@ function ThemeCard({ st }: { st: StyleSet }) {
       <div className="st-theme-info">
         <b>{st.name}</b>
         <small>
-          {st.items.length} móveis + roupinha combinando · 25% off
+          {st.items.length} móveis + roupinha combinando · 10% off
         </small>
         <div className="st-theme-pieces">
           {pieces.map((id) => {
@@ -237,7 +237,7 @@ export function StoreTab({ onPlus, onGift }: { onPlus: () => void; onGift: (item
           </section>
           <section className="st-card">
             <span className="st-ribbon">Casas prontas</span>
-            <p className="st-refresh">A coleção inteira com 25% de desconto</p>
+            <p className="st-refresh">A coleção inteira com 10% de desconto</p>
             <HouseStyles />
           </section>
           {seasonal.length > 0 && (

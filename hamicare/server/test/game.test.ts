@@ -1,3 +1,4 @@
+import { itemById } from '../../web/src/data/items';
 import { describe, expect, it } from 'vitest';
 import pg from 'pg';
 import { call, newUser, setupDatabase } from './helpers';
@@ -105,9 +106,13 @@ describe('carteira e ganhos no servidor', () => {
 describe('compras no servidor', () => {
   it('preço vem do catálogo; sem sementes não compra; a mesma compra não cobra duas vezes', async () => {
     const u = await newUser('Gabi');
+    const laco = itemById('laco')!.price;
+    const start = laco + 10;
+    await wallet(u.cookie);
+    await owner((c) => c.query('UPDATE game_wallet SET coins = $2 WHERE user_id = $1', [u.id, start]));
     const r = await call('POST', '/game/ops', { ops: [{ op: 'spend', ref: 'loja:laco:1', label: 'x', coins: 1 }] }, u.cookie);
     expect(r.body.results[0].ok).toBe(true);
-    expect(r.body.wallet.coins).toBe(30 - 20);
+    expect(r.body.wallet.coins).toBe(start - laco);
     const again = await call('POST', '/game/ops', { ops: [{ op: 'spend', ref: 'loja:laco:1', label: 'x', coins: 1 }] }, u.cookie);
     expect(again.body.wallet.coins).toBe(10);
     const owned = await call('POST', '/game/ops', { ops: [{ op: 'spend', ref: 'loja:laco:2', label: 'x', coins: 1 }] }, u.cookie);

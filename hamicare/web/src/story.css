@@ -309,8 +309,10 @@ span.tcal-ico { background: transparent; }
 .od-fall { animation: od-fall 0.9s linear infinite; }
 @keyframes od-fall { to { stroke-dashoffset: -22; } }
 .od-flow { animation: od-flow 2.4s linear infinite; }
+.od-snow { animation: od-snow 8s linear infinite; }
+@keyframes od-snow { from { transform: translate(0, 0); } 50% { transform: translate(14px, 220px); } to { transform: translate(-6px, 450px); } }
 @keyframes od-flow { to { stroke-dashoffset: -32; } }
-.outdoors.is-still .od-bird, .outdoors.is-still .od-mill, .outdoors.is-still .od-sway, .outdoors.is-still .od-swing, .outdoors.is-still .od-bee, .outdoors.is-still .od-bob, .outdoors.is-still .od-fall, .outdoors.is-still .od-flow { animation: none; }
+.outdoors.is-still .od-snow, .outdoors.is-still .od-bird, .outdoors.is-still .od-mill, .outdoors.is-still .od-sway, .outdoors.is-still .od-swing, .outdoors.is-still .od-bee, .outdoors.is-still .od-bob, .outdoors.is-still .od-fall, .outdoors.is-still .od-flow { animation: none; }
 .outdoors.is-still .od-cloud, .outdoors.is-still .od-fly, .outdoors.is-still .od-wing, .outdoors.is-still .od-firefly, .outdoors.is-still .od-star, .outdoors.is-still .od-ripple { animation: none; }
 .hr-place { position: absolute; left: 12px; bottom: 40px; z-index: 5; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 3px solid #fff; border-radius: 99px; background: #4fb063; color: #fff; font-family: var(--font-display, inherit); font-size: 14px; font-weight: 800; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18); }
 .hr-place:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18); }
@@ -1294,19 +1296,19 @@ span.tcal-ico { background: transparent; }
 }
 @media (prefers-reduced-motion: reduce) { .gest-pat, .fx-moonhop { animation: none; } }
 /* Lua: só o corpo pula (a sombra fica no chão e diminui quando ele está lá em cima) */
-.dog-moonhop { animation: dog-moonhop 3.4s cubic-bezier(0.33, 0, 0.67, 1) infinite; }
+.dog-moonhop { animation: dog-moonhop 2.6s linear infinite; }
+/* pulo contínuo de gravidade baixa: sobe desacelerando, flutua e desce acelerando, já emendando o próximo (sem parar) */
 @keyframes dog-moonhop {
-  0% { transform: translateY(0) scale(1.06, 0.93); }
-  8% { transform: translateY(0) scale(0.96, 1.05); }
-  30% { transform: translateY(-70px) rotate(-4deg); }
-  50% { transform: translateY(-78px) rotate(3deg); }
-  72% { transform: translateY(-48px) rotate(-2deg); }
-  92% { transform: translateY(0) scale(1, 1); }
-  96% { transform: translateY(0) scale(1.05, 0.94); }
-  100% { transform: translateY(0) scale(1.06, 0.93); }
+  0% { transform: translateY(0) rotate(-2.5deg); animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1); }
+  50% { transform: translateY(-82px) rotate(2.5deg); animation-timing-function: cubic-bezier(0.64, 0, 0.78, 0.39); }
+  100% { transform: translateY(0) rotate(-2.5deg); }
 }
-.dog-moon-shadow { transform-box: fill-box; transform-origin: center; animation: dog-moon-shadow 3.4s cubic-bezier(0.33, 0, 0.67, 1) infinite; }
-@keyframes dog-moon-shadow { 0%, 8%, 92%, 100% { transform: scale(1); opacity: 1; } 30% { transform: scale(0.55); opacity: 0.55; } 50% { transform: scale(0.5); opacity: 0.5; } 72% { transform: scale(0.65); opacity: 0.65; } }
+.dog-moon-shadow { transform-box: fill-box; transform-origin: center; animation: dog-moon-shadow 2.6s linear infinite; }
+@keyframes dog-moon-shadow {
+  0% { transform: scale(1); opacity: 1; animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1); }
+  50% { transform: scale(0.5); opacity: 0.45; animation-timing-function: cubic-bezier(0.64, 0, 0.78, 0.39); }
+  100% { transform: scale(1); opacity: 1; }
+}
 @media (prefers-reduced-motion: reduce) { .dog-moonhop, .dog-moon-shadow { animation: none; } }
 
 /* Loja: coleções temáticas (quarto do tema + roupinha combinando) */

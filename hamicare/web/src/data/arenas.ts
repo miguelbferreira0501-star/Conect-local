@@ -1,6 +1,7 @@
 // A casa de cada arena: parede, piso e os móveis já arrumados (kit novo + os exclusivos da arena).
 // x e y em % do cômodo; y é onde a peça toca o chão (ou a parede, para as que ficam penduradas).
 import type { House } from '../types';
+import { STYLES } from './items';
 
 type Spot = { itemId: string; x: number; y: number };
 
@@ -268,8 +269,42 @@ const OLD_STARTER = ['caminha', 'planta', 'rodinha'];
 
 const same = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join() === [...b].sort().join();
 
+/** Onde os móveis das coleções temáticas ficavam antes (alguns saíam da tela ou cobriam a janela). */
+const OLD_THEME_POS: Record<string, [number, number]> = {
+  'k-inv-tapete-urso': [50, 94],
+  'k-inv-cama-pinguim': [25, 72],
+  'k-inv-banheira': [75, 72],
+  'k-inv-boneco-neve': [92, 90],
+  'k-inv-flocos': [26, 26],
+  'k-praia-toalha': [50, 94],
+  'k-praia-espreguicadeira': [27, 74],
+  'k-praia-coqueiro': [86, 74],
+  'k-praia-castelo': [66, 80],
+  'k-praia-prancha': [8, 80],
+  'k-jar-tapete-folha': [50, 94],
+  'k-jar-cama-cogumelo': [25, 72],
+  'k-jar-mesa-tronco': [70, 76],
+  'k-jar-pufe-sapo': [88, 90],
+  'k-jar-abajur-flor': [50, 70],
+  'k-jar-guirlanda': [74, 24],
+};
+/** Peças de coleção ainda no lugar antigo de fábrica vão para o lugar novo (alinhado e dentro da tela). */
+function realignThemes(h: House): House {
+  if (!h.items.some((i) => OLD_THEME_POS[i.itemId]?.[0] === i.x && OLD_THEME_POS[i.itemId]?.[1] === i.y)) return h;
+  const spots = new Map(STYLES.flatMap((st) => st.items.map((it) => [it.itemId, it] as const)));
+  return {
+    ...h,
+    items: h.items.map((i) => {
+      const o = OLD_THEME_POS[i.itemId];
+      const n = spots.get(i.itemId);
+      return o && n && o[0] === i.x && o[1] === i.y ? { ...i, x: n.x, y: n.y } : i;
+    }),
+  };
+}
+
 /** Casa ainda do jeito que veio (antes da reforma)? Então ganha a decoração nova da arena, com a parede e o piso de quem já escolheu. */
-export function upgradeHouse(input: House, n: number): House {
+export function upgradeHouse(raw: House, n: number): House {
+  const input = realignThemes(raw);
   // A casinha inicial deixou de ser marrom: quem ainda está com a parede creme e o piso de madeira de fábrica ganha a casa verdinha.
   // A casinha inicial de fábrica (a marrom antiga e a verdinha) ganha a parede azul clarinha e o piso creme;
   // quem escolheu outra parede ou piso fica como está.

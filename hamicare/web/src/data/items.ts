@@ -18,6 +18,8 @@ export interface Item {
   level?: number;
   /** Só vem de aventura: não está à venda. */
   souvenir?: boolean;
+  /** Valor de referência (antes do multiplicador da loja): usado para a raridade nos baús. */
+  basePrice?: number;
   /** Peça de uma coleção temática (inverno, praia, jardim). */
   theme?: 'inverno' | 'praia' | 'jardim';
   food?: { saciedade: number; felicidade: number };
@@ -37,7 +39,10 @@ export interface Item {
   tag?: 'identidade';
 }
 
-const W = (id: string, name: string, kind: ItemKind, price: number, extra: Partial<Item> = {}): Item => ({ id, name, kind, price, ...extra });
+/** Preços da loja: tudo (menos comida) custa 3× o valor de referência, arredondado de 5 em 5. */
+export const PRICE_X = 3;
+const shopPrice = (kind: ItemKind, price: number) => (kind === 'comida' || price <= 0 ? price : Math.round((price * PRICE_X) / 5) * 5);
+const W = (id: string, name: string, kind: ItemKind, price: number, extra: Partial<Item> = {}): Item => ({ id, name, kind, price: shopPrice(kind, price), basePrice: price, ...extra });
 
 type Rar = NonNullable<Item['rarity']>;
 /** Itens exclusivos de uma arena: não estão à venda (vêm de presente ao abrir a arena). */
@@ -931,28 +936,28 @@ export const ITEMS: Item[] = [
   ).map(([id, name, kind, extra]) => W(id, name, kind, 0, { souvenir: true, rarity: 'lendario', ...extra })),
   // Coleções temáticas: móveis desenhados para combinar entre si e com uma roupinha do mesmo tema.
   // Inverno
-  W('k-inv-cama-pinguim', 'Cama de pinguim', 'movel', 160, { svg: 'k-inv-cama-pinguim', size: 44, c1: '#3E5B9A', c2: '#8EC9F2', theme: 'inverno' }),
+  W('k-inv-cama-pinguim', 'Cama de pinguim', 'movel', 160, { svg: 'k-inv-cama-pinguim', size: 38, c1: '#3E5B9A', c2: '#8EC9F2', theme: 'inverno' }),
   W('k-inv-boneco-neve', 'Boneco de neve', 'decor', 70, { svg: 'k-inv-boneco-neve', size: 16, c1: '#E85A5A', c2: '#3E5B9A', theme: 'inverno' }),
-  W('k-inv-tapete-urso', 'Tapete de ursinho polar', 'movel', 90, { svg: 'k-inv-tapete-urso', size: 50, c1: '#A9D4F5', c2: '#FFFFFF', theme: 'inverno' }),
-  W('k-inv-banheira', 'Ofurô de gelo', 'movel', 120, { svg: 'k-inv-banheira', size: 32, c1: '#A9DDF7', c2: '#7FD3F0', theme: 'inverno' }),
-  W('k-inv-flocos', 'Varal de flocos de neve', 'decor', 50, { svg: 'k-inv-flocos', size: 42, c1: '#8EC9F2', c2: '#FFE27A', theme: 'inverno' }),
+  W('k-inv-tapete-urso', 'Tapete de ursinho polar', 'movel', 90, { svg: 'k-inv-tapete-urso', size: 44, c1: '#A9D4F5', c2: '#FFFFFF', theme: 'inverno' }),
+  W('k-inv-banheira', 'Ofurô de gelo', 'movel', 120, { svg: 'k-inv-banheira', size: 28, c1: '#A9DDF7', c2: '#7FD3F0', theme: 'inverno' }),
+  W('k-inv-flocos', 'Varal de flocos de neve', 'decor', 50, { svg: 'k-inv-flocos', size: 24, c1: '#8EC9F2', c2: '#FFE27A', theme: 'inverno' }),
   W('pijama-patos', 'Pijama de patinhos', 'roupa', 90, { base: 'pijama-patos', c1: '#6F9BE8', c2: '#FFFFFF', theme: 'inverno' }),
   W('touca-inverno', 'Touca de inverno', 'chapeu', 45, { base: 'gorro', c1: '#6F9BE8', c2: '#FFFFFF', theme: 'inverno' }),
   // Praia
-  W('k-praia-espreguicadeira', 'Guarda-sol e espreguiçadeira', 'movel', 140, { svg: 'k-praia-espreguicadeira', size: 42, c1: '#FF8A7A', c2: '#3CC6C9', theme: 'praia' }),
-  W('k-praia-castelo', 'Castelinho de areia', 'decor', 70, { svg: 'k-praia-castelo', size: 22, c1: '#FF5C7A', c2: '#FFB3CF', theme: 'praia' }),
-  W('k-praia-coqueiro', 'Coqueiro', 'decor', 80, { svg: 'k-praia-coqueiro', size: 21, c1: '#5FBF77', c2: '#FF9A6B', theme: 'praia' }),
-  W('k-praia-prancha', 'Prancha de surfe', 'decor', 60, { svg: 'k-praia-prancha', size: 10, c1: '#3CC6C9', c2: '#FFD34D', theme: 'praia' }),
-  W('k-praia-toalha', 'Toalha de praia', 'movel', 60, { svg: 'k-praia-toalha', size: 48, c1: '#FF8A7A', c2: '#3CC6C9', theme: 'praia' }),
+  W('k-praia-espreguicadeira', 'Guarda-sol e espreguiçadeira', 'movel', 140, { svg: 'k-praia-espreguicadeira', size: 36, c1: '#FF8A7A', c2: '#3CC6C9', theme: 'praia' }),
+  W('k-praia-castelo', 'Castelinho de areia', 'decor', 70, { svg: 'k-praia-castelo', size: 16, c1: '#FF5C7A', c2: '#FFB3CF', theme: 'praia' }),
+  W('k-praia-coqueiro', 'Coqueiro', 'decor', 80, { svg: 'k-praia-coqueiro', size: 20, c1: '#5FBF77', c2: '#FF9A6B', theme: 'praia' }),
+  W('k-praia-prancha', 'Prancha de surfe', 'decor', 60, { svg: 'k-praia-prancha', size: 9, c1: '#3CC6C9', c2: '#FFD34D', theme: 'praia' }),
+  W('k-praia-toalha', 'Toalha de praia', 'movel', 60, { svg: 'k-praia-toalha', size: 40, c1: '#FF8A7A', c2: '#3CC6C9', theme: 'praia' }),
   W('camisa-praia', 'Camisa de praia', 'roupa', 80, { base: 'camisa-praia', c1: '#3CC6C9', c2: '#FF7A8A', theme: 'praia' }),
   W('chapeu-praia', 'Chapéu de praia', 'chapeu', 45, { base: 'palha', theme: 'praia' }),
   // Jardim
-  W('k-jar-cama-cogumelo', 'Cama de cogumelo', 'movel', 160, { svg: 'k-jar-cama-cogumelo', size: 44, c1: '#F0525F', c2: '#7CC765', theme: 'jardim' }),
-  W('k-jar-abajur-flor', 'Abajur de tulipa', 'decor', 45, { svg: 'k-jar-abajur-flor', size: 10, c1: '#FF9FC2', c2: '#D9895E', theme: 'jardim' }),
-  W('k-jar-mesa-tronco', 'Mesinha de toco', 'movel', 70, { svg: 'k-jar-mesa-tronco', size: 22, c1: '#F0525F', c2: '#FFFFFF', theme: 'jardim' }),
-  W('k-jar-pufe-sapo', 'Pufe de sapinho', 'movel', 60, { svg: 'k-jar-pufe-sapo', size: 17, c1: '#7CC765', c2: '#FFC2D6', theme: 'jardim' }),
-  W('k-jar-tapete-folha', 'Tapete de folha', 'movel', 70, { svg: 'k-jar-tapete-folha', size: 50, c1: '#8BCF6E', c2: '#FFC2D6', theme: 'jardim' }),
-  W('k-jar-guirlanda', 'Trepadeira florida', 'decor', 45, { svg: 'k-jar-guirlanda', size: 42, c1: '#FF9FC2', c2: '#FFD34D', theme: 'jardim' }),
+  W('k-jar-cama-cogumelo', 'Cama de cogumelo', 'movel', 160, { svg: 'k-jar-cama-cogumelo', size: 38, c1: '#F0525F', c2: '#7CC765', theme: 'jardim' }),
+  W('k-jar-abajur-flor', 'Abajur de tulipa', 'decor', 45, { svg: 'k-jar-abajur-flor', size: 9, c1: '#FF9FC2', c2: '#D9895E', theme: 'jardim' }),
+  W('k-jar-mesa-tronco', 'Mesinha de toco', 'movel', 70, { svg: 'k-jar-mesa-tronco', size: 20, c1: '#F0525F', c2: '#FFFFFF', theme: 'jardim' }),
+  W('k-jar-pufe-sapo', 'Pufe de sapinho', 'movel', 60, { svg: 'k-jar-pufe-sapo', size: 15, c1: '#7CC765', c2: '#FFC2D6', theme: 'jardim' }),
+  W('k-jar-tapete-folha', 'Tapete de folha', 'movel', 70, { svg: 'k-jar-tapete-folha', size: 44, c1: '#8BCF6E', c2: '#FFC2D6', theme: 'jardim' }),
+  W('k-jar-guirlanda', 'Trepadeira florida', 'decor', 45, { svg: 'k-jar-guirlanda', size: 24, c1: '#FF9FC2', c2: '#FFD34D', theme: 'jardim' }),
   W('blusa-jardim', 'Blusinha de jardim', 'roupa', 80, { base: 'blusa-jardim', c1: '#A8D88A', c2: '#FF9FC2', theme: 'jardim' }),
   W('tiara-jardim', 'Florzinha no cabelo', 'chapeu', 40, { base: 'flor', c1: '#FF9FC2', theme: 'jardim' }),
   // Comidas (consumíveis)
@@ -1089,11 +1094,11 @@ export const STYLES: StyleSet[] = [
     floor: 'f-azul',
     outfit: { roupa: 'pijama-patos', chapeu: 'touca-inverno' },
     items: [
-      { itemId: 'k-inv-tapete-urso', x: 50, y: 94 },
-      { itemId: 'k-inv-cama-pinguim', x: 25, y: 72 },
-      { itemId: 'k-inv-banheira', x: 75, y: 72 },
-      { itemId: 'k-inv-boneco-neve', x: 92, y: 90 },
-      { itemId: 'k-inv-flocos', x: 26, y: 26 },
+      { itemId: 'k-inv-tapete-urso', x: 50, y: 93 },
+      { itemId: 'k-inv-cama-pinguim', x: 30, y: 70 },
+      { itemId: 'k-inv-banheira', x: 71, y: 70 },
+      { itemId: 'k-inv-boneco-neve', x: 77, y: 90 },
+      { itemId: 'k-inv-flocos', x: 25, y: 30 },
     ],
   },
   {
@@ -1104,11 +1109,11 @@ export const STYLES: StyleSet[] = [
     floor: 'f-areia',
     outfit: { roupa: 'camisa-praia', chapeu: 'chapeu-praia' },
     items: [
-      { itemId: 'k-praia-toalha', x: 50, y: 94 },
-      { itemId: 'k-praia-espreguicadeira', x: 27, y: 74 },
-      { itemId: 'k-praia-coqueiro', x: 86, y: 74 },
-      { itemId: 'k-praia-castelo', x: 66, y: 80 },
-      { itemId: 'k-praia-prancha', x: 8, y: 80 },
+      { itemId: 'k-praia-toalha', x: 48, y: 93 },
+      { itemId: 'k-praia-espreguicadeira', x: 30, y: 70 },
+      { itemId: 'k-praia-prancha', x: 58, y: 70 },
+      { itemId: 'k-praia-coqueiro', x: 75, y: 70 },
+      { itemId: 'k-praia-castelo', x: 70, y: 90 },
     ],
   },
   {
@@ -1119,12 +1124,12 @@ export const STYLES: StyleSet[] = [
     floor: 'f-grama',
     outfit: { roupa: 'blusa-jardim', chapeu: 'tiara-jardim' },
     items: [
-      { itemId: 'k-jar-tapete-folha', x: 50, y: 94 },
-      { itemId: 'k-jar-cama-cogumelo', x: 25, y: 72 },
-      { itemId: 'k-jar-mesa-tronco', x: 70, y: 76 },
-      { itemId: 'k-jar-pufe-sapo', x: 88, y: 90 },
-      { itemId: 'k-jar-abajur-flor', x: 50, y: 70 },
-      { itemId: 'k-jar-guirlanda', x: 74, y: 24 },
+      { itemId: 'k-jar-tapete-folha', x: 50, y: 93 },
+      { itemId: 'k-jar-cama-cogumelo', x: 30, y: 70 },
+      { itemId: 'k-jar-abajur-flor', x: 58, y: 70 },
+      { itemId: 'k-jar-mesa-tronco', x: 72, y: 70 },
+      { itemId: 'k-jar-pufe-sapo', x: 77, y: 90 },
+      { itemId: 'k-jar-guirlanda', x: 75, y: 30 },
     ],
   },
   {
@@ -1291,11 +1296,11 @@ export const STYLES: StyleSet[] = [
 /** Tudo o que vem na coleção (casa e, nas temáticas, a roupinha). */
 export const styleIds = (style: StyleSet) => [style.wallpaper, style.floor, ...style.items.map((i) => i.itemId), ...(style.outfit ? [style.outfit.roupa, style.outfit.chapeu].filter((x): x is string => !!x) : [])];
 
-/** Preço da coleção: soma do que falta, com 25% de desconto. */
+/** Preço da coleção: soma do que falta, com 10% de desconto. */
 export function stylePrice(style: StyleSet, owned: (id: string) => boolean): number {
   const ids = styleIds(style);
   const missing = [...new Set(ids)].filter((id) => !owned(id));
-  return Math.round(missing.reduce((s, id) => s + (itemById(id)?.price ?? 0), 0) * 0.75);
+  return Math.round((missing.reduce((s, id) => s + (itemById(id)?.price ?? 0), 0) * 0.9) / 5) * 5;
 }
 
 /** Receitas da cozinha: 3 ingredientes viram um prato que alimenta mais. */

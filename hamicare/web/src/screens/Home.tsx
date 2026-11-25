@@ -3,7 +3,8 @@ import { MoonTeaser } from '../components/MoonTeaser';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Flame, Globe, House as HouseIcon, Mail, Plus, Settings, Trees } from 'lucide-react';
 import { MOON_N } from '../data/arenas';
-import { MoonOutdoors, OUTDOOR_W, Outdoors, outdoorGround } from '../components/Outdoors';
+import { MoonOutdoors, OUTDOOR_W, Outdoors, outdoorGround, type YardTheme } from '../components/Outdoors';
+import { gameCfg } from '../lib/game';
 import { Room, useKindOf } from '../components/Room';
 import { itemById } from '../data/items';
 import { play } from '../lib/sound';
@@ -83,6 +84,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
   const floor = s.house.floor;
   // Casa na Lua: lá fora é a paisagem lunar.
   const onMoon = homeArenaOf(s) === MOON_N;
+  const yard = yardThemeOf(s.house, gameCfg().arenas.find((a) => a.n === homeArenaOf(s))?.id ?? 'casinha');
   // Enquanto ele anda, o Início mostra o caminho; quando volta, ele aparece em casa com a mala.
   const trekBack = !!s.trek && now >= s.trek.endsAt;
   const trekTheme = s.trek && !trekBack ? trekThemeOf(s) : null;
@@ -102,7 +104,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
   useEffect(() => {
     // Na viagem, a página continua o chão do caminho.
     // Lá fora, a página continua o gramado.
-    const p = trekTheme ? tonePalette((TREK_THEMES[trekTheme] ?? TREK_THEMES.casinha).ground) : outside ? tonePalette(outdoorGround(periodOf(new Date()), onMoon)) : floorPalette(floor);
+    const p = trekTheme ? tonePalette((TREK_THEMES[trekTheme] ?? TREK_THEMES.casinha).ground) : outside ? tonePalette(outdoorGround(periodOf(new Date()), onMoon, yard)) : floorPalette(floor);
     const root = document.documentElement.style;
     root.setProperty('--home-floor', p.tone);
     root.setProperty('--home-page', p.page);
@@ -111,7 +113,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
     root.setProperty('--home-page-dark', p.dark);
     root.setProperty('--home-ink', p.ink);
     return () => ['--home-floor', '--home-page', '--home-card', '--home-deep', '--home-page-dark', '--home-ink'].forEach((k) => root.removeProperty(k));
-  }, [floor, trekTheme, outside, onMoon]);
+  }, [floor, trekTheme, outside, onMoon, yard]);
   const day = dayOf(s, today);
   const tasks = todayTasks(s, today);
   const done = tasks.filter((t) => t.id in day.done).length;
@@ -182,7 +184,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const wake = () => {
     setAwake(true);
-    play('squeak');
+    play('latido');
     if (furniture.use?.kind === 'deitar') furniture.stop();
   };
   const petMood: PetMood = mood ?? (justFixed ? 'risada' : condOn ? (CONDITIONS[cond].teary ? 'manha' : 'feliz') : hardDay ? petMoodOf(s, { hardDay, done, total: tasks.length, hour: new Date(now).getHours() }) : act.mood);
@@ -211,7 +213,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
       <SleepingHami fur={s.pet.fur} size={136} place="chao" outfit={s.pet.outfit} />
     </button>
   ) : sittingNow ? (
-    <button className="sleep-spot sit-spot" onClick={() => (setAwake(true), play('squeak'))} aria-label={`${s.pet.name} sentadinho. Toque para ele levantar`} data-sound="none">
+    <button className="sleep-spot sit-spot" onClick={() => (setAwake(true), play('latido'))} aria-label={`${s.pet.name} sentadinho. Toque para ele levantar`} data-sound="none">
       <DogPose kind="senta" fur={s.pet.fur} outfit={s.pet.outfit} width={132} label="" />
     </button>
   ) : (
@@ -253,7 +255,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
             {onMoon ? (
               <MoonOutdoors height={430}>{hami}</MoonOutdoors>
             ) : (
-              <Outdoors period={period} height={430}>
+              <Outdoors period={period} height={430} theme={yard}>
                 {hami}
               </Outdoors>
             )}
@@ -436,6 +438,21 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
 }
 
 /** A casa é mais larga que a tela: arrasta para os lados (com o dedo ou o mouse). Começa no meio. */
+/**
+ * Lá fora combina com a casa: com móveis de inverno o quintal fica nevado, com os de praia vira praia, com os de
+ * jardim fica florido. Sem coleção, segue a arena onde ele mora (montanhas nevadas, paraíso tropical, jardim).
+ */
+function yardThemeOf(house: { items: { itemId: string }[]; wallpaper: string; floor: string }, arena: string): YardTheme {
+  const n = { inverno: 0, praia: 0, jardim: 0 };
+  for (const it of house.items) {
+    const th = itemById(it.itemId)?.theme;
+    if (th) n[th]++;
+  }
+  const best = (Object.keys(n) as (keyof typeof n)[]).sort((a, b) => n[b] - n[a])[0];
+  if (n[best] >= 2) return best === 'inverno' ? 'neve' : best;
+  return arena === 'neve' ? 'neve' : arena === 'tropical' ? 'praia' : arena === 'jardim' ? 'jardim' : 'prado';
+}
+
 function PanRoom({ children, width = 1.9 }: { children: React.ReactNode; width?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const drag = useRef<{ x: number; left: number } | null>(null);

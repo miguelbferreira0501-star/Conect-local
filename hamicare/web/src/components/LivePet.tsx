@@ -12,7 +12,7 @@ export type Trick = 'carinho' | 'choro';
 
 const TRICKS: Record<Trick, { mood: PetMood; sound: SoundId; ms: number; say?: string }> = {
   // carinho: amassadinho, pulinho, olhinhos fechados de alegria, bracinhos batendo e coraçõezinhos
-  carinho: { mood: 'risada', sound: 'squeak', ms: 1400 },
+  carinho: { mood: 'risada', sound: 'latido', ms: 1400 },
   // chorão fofinho (sozinho, de tempos em tempos, quando ele precisa de ajuda)
   choro: { mood: 'choro', sound: 'choro', ms: 2600 },
 };

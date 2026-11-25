@@ -16,7 +16,7 @@ export type SoundId =
   // Banho
   | 'shampoo' | 'espuma' | 'bolha' | 'toalha' | 'sacudir'
   // Hami
-  | 'nhac' | 'gole' | 'escova' | 'brilho' | 'iii' | 'squeak' | 'risada' | 'choro' | 'ronrom' | 'coracao' | 'pulo' | 'bocejo' | 'ronco' | 'espreguicar'
+  | 'nhac' | 'gole' | 'escova' | 'brilho' | 'iii' | 'squeak' | 'latido' | 'risada' | 'choro' | 'ronrom' | 'coracao' | 'pulo' | 'bocejo' | 'ronco' | 'espreguicar'
   // Brincadeiras
   | 'pega' | 'jogar' | 'quica' | 'tique' | 'fim-jogo'
   // Quarto e casa
@@ -430,6 +430,53 @@ const SOUNDS: Record<SoundId, (o: PlayOpts) => void> = {
       noise({ f: 1800, type: 'bandpass', q: 0.8, t: i * 0.17, d: 0.04, v: 0.03, a: 0.004 });
     }
   },
+  // latido fofo de filhotinho (ao tocar nele): "arf!" agudinho e redondo, às vezes "arf arf" ou "arf arf arf",
+  // com voz macia (triângulo), um pouquinho de rouquidão filtrada e o "a" virando "u" no fim
+  latido: () => {
+    const c = ac!;
+    const r = Math.random();
+    const n = r < 0.5 ? 2 : r < 0.85 ? 1 : 3;
+    const base = 860 + Math.random() * 160;
+    for (let i = 0; i < n; i++) {
+      const t0 = now() + i * (0.15 + Math.random() * 0.03);
+      const f0 = base * (i === n - 1 && n > 1 ? 0.94 : 1 + i * 0.03);
+      const voice = (type: OscillatorType) => {
+        const o = c.createOscillator();
+        o.type = type;
+        o.frequency.setValueAtTime(f0 * 0.82, t0);
+        o.frequency.exponentialRampToValueAtTime(f0 * 1.16, t0 + 0.028);
+        o.frequency.exponentialRampToValueAtTime(f0 * 0.72, t0 + 0.12);
+        return o;
+      };
+      const body = voice('triangle');
+      const edge = voice('sawtooth');
+      const edgeMix = c.createGain();
+      edgeMix.gain.value = 0.22;
+      const mouth = c.createBiquadFilter();
+      mouth.type = 'bandpass';
+      mouth.frequency.setValueAtTime(2100, t0);
+      mouth.frequency.exponentialRampToValueAtTime(1050, t0 + 0.12);
+      mouth.Q.value = 1.4;
+      const lp = c.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 3000;
+      const g = c.createGain();
+      env(g, t0, 0.2, 0.006, 0.14);
+      body.connect(lp);
+      edge.connect(edgeMix);
+      edgeMix.connect(mouth);
+      mouth.connect(lp);
+      lp.connect(g);
+      route(g, 0.08, (Math.random() - 0.5) * 0.2);
+      for (const o of [body, edge]) {
+        o.start(t0);
+        o.stop(t0 + 0.17);
+        voices++;
+        o.onended = () => voices--;
+      }
+      noise({ f: 2400, type: 'bandpass', q: 0.9, t: i * 0.15, d: 0.035, v: 0.02, a: 0.003 });
+    }
+  },
   iii: () => {
     tone({ f: 1500, to: 2100, d: 0.09, v: 0.06, vib: 30 });
     tone({ f: 1700, to: 2350, t: 0.11, d: 0.09, v: 0.06, vib: 30 });
@@ -540,7 +587,7 @@ const SOUNDS: Record<SoundId, (o: PlayOpts) => void> = {
 export const SOUND_IDS = Object.keys(SOUNDS) as SoundId[];
 
 /** Intervalo mínimo entre repetições (sons de arrastar o dedo não viram chiado). */
-const GAP: Partial<Record<SoundId, number>> = { toque: 40, espuma: 75, toalha: 95, escova: 110, coracao: 120, bolha: 60, 'bau-treme': 120, ronco: 1700, tique: 300, semente: 120, sacudir: 400, iii: 250, squeak: 260, risada: 300, quica: 150 };
+const GAP: Partial<Record<SoundId, number>> = { toque: 40, espuma: 75, toalha: 95, escova: 110, coracao: 120, bolha: 60, 'bau-treme': 120, ronco: 1700, tique: 300, semente: 120, sacudir: 400, iii: 250, squeak: 260, latido: 300, risada: 300, quica: 150 };
 const QUIET: SoundId[] = ['toque', 'aba', 'aviso'];
 
 function allowed(id: SoundId) {
