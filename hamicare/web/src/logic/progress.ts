@@ -59,7 +59,7 @@ export interface QuestDef {
 export const QUESTS: QuestDef[] = [
   { id: 'tarefas3', period: 'dia', title: 'Concluir 3 missões', target: 3, coins: 10, xp: 15, count: doneCount },
   { id: 'mover1', period: 'dia', title: 'Fazer 1 atividade de movimento', target: 1, coins: 8, xp: 10, count: catCount('fitness') },
-  { id: 'cuidar2', period: 'dia', title: 'Cuidar do Hami 2 vezes', target: 2, coins: 6, xp: 10, count: (d) => d.care.length },
+  { id: 'cuidar2', period: 'dia', title: 'Fazer carinho 2 vezes', target: 2, coins: 6, xp: 10, count: (d) => d.care.length },
   { id: 'humor', period: 'dia', title: 'Registrar como você está', target: 1, coins: 5, xp: 8, count: (d) => (d.mood ? 1 : 0) },
   { id: 'pote', period: 'dia', title: 'Guardar algo bom no pote', target: 1, coins: 6, xp: 8, count: eventCount('pote') },
   { id: 'vibe', period: 'dia', title: 'Mandar uma vibe boa a um amigo', target: 1, coins: 6, xp: 8, count: eventCount('vibe') },

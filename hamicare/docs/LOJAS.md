@@ -71,7 +71,7 @@ Imagens prontas para as lojas ficam em [`docs/lojas/`](lojas): ícone 512×512, 
 - **Descrição curta** e **descrição completa:** veja a seção 3.
 - **Ícone:** `docs/lojas/icone-512.png`
 - **Recurso gráfico (banner):** `docs/lojas/banner-1024x500.png`
-- **Capturas de tela do celular:** as 6 `docs/lojas/captura-*.png`
+- **Capturas de tela do celular:** as 8 de `docs/lojas/android/`
 - **Categoria:** Saúde e fitness · **E-mail de contato:** o mesmo da política
 
 ### 1.6 Conteúdo do app (Política → Conteúdo do app)
