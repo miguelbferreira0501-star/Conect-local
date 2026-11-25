@@ -1,63 +1,47 @@
-// Lá fora: o Hami no quintal, numa paisagem viva (céu que muda com a hora, nuvens andando,
-// árvores, a casinha dele ao fundo, laguinho, flores e borboletas; de noite, estrelas e vagalumes).
-// Ilustração plana própria, mais larga que a tela (arrasta para os lados como a casa).
-import type { ReactNode } from 'react';
+// Lá fora: uma clareira simples e ilustrada (sem casa, sem excesso de coisas). Árvores grandes
+// emoldurando as bordas, arbustos e morrinhos ao fundo, pedra com cogumelos e flores. O chão da
+// frente tem exatamente a cor da página do Início, então cenário e página viram uma coisa só.
+import { useId, type ReactNode } from 'react';
 import type { Period } from '../data/lines';
 import { prefersReducedMotion } from '../lib/util';
-import { BeachBall, Bench, Birch, Boat, Bush, Crab, Duck, Fence, Flower, Garden, Grass, Hive, Lamp, Lighthouse, Lounger, Mailbox, Mushroom, Palm, Penguin, Picnic, Pine, Rock, RoseArch, RoundTree, Shell, Sled, Snowman, SnowMound, Starfish, Sunflower, SwingTree, Tulip, TulipBed, Umbrella, Willow, Windmill, type YardPal } from './yardArt';
 
-/** Largura do quintal (o Início mostra numa faixa que arrasta para os lados). */
-export const OUTDOOR_W = 1300;
+/** Largura da clareira (um pouco mais larga que a tela: arrasta de leve para os lados). */
+export const OUTDOOR_W = 480;
 
-type Pal = YardPal;
-
-const PAL: Record<Period, Pal> = {
-  manha: { sky: ['#7FCBFF', '#DDF4FF'], far: '#BFE6F5', hill1: '#A8E092', hill2: '#86D27A', ground: '#7FCF6E', meadow: '#9BDD82', path: '#F6E7B8', leaf: '#4FB063', leaf2: '#3E9E58', leafHi: '#7DD488', pine: '#3A9A5C', trunk: '#A0714F', water: '#7FD3F7', sun: '#FFE066', dim: 0 },
-  tarde: { sky: ['#8EC5FF', '#FFE2BC'], far: '#C9DDF0', hill1: '#B3DE8C', hill2: '#8FD176', ground: '#86CF6C', meadow: '#A4DC80', path: '#F8E2B0', leaf: '#56B062', leaf2: '#449F55', leafHi: '#86D58A', pine: '#3F9A5A', trunk: '#A0714F', water: '#86CDF2', sun: '#FFC36B', dim: 0 },
-  noite: { sky: ['#17204E', '#3B3C84'], far: '#2E3A72', hill1: '#2C5A5E', hill2: '#24504F', ground: '#2F6A55', meadow: '#377A5E', path: '#7C8AA8', leaf: '#2E6B55', leaf2: '#245A49', leafHi: '#3E8268', pine: '#1F4F45', trunk: '#5E4A52', water: '#3E5FA8', sun: '#FFF3C2', dim: 1 },
-};
-/** Quintal de neve (casa de inverno ou arena das montanhas nevadas). */
-const PAL_NEVE: Record<Period, Pal> = {
-  manha: { sky: ['#9CC8F2', '#EAF5FF'], far: '#C3D4EE', hill1: '#E6EEF9', hill2: '#DCE6F4', ground: '#EEF3FB', meadow: '#FFFFFF', path: '#D2DCEC', leaf: '#3F8E6A', leaf2: '#2F7A5A', leafHi: '#FFFFFF', pine: '#2F7A5A', trunk: '#8A6A58', water: '#CDE6F7', sun: '#FFF1C2', dim: 0 },
-  tarde: { sky: ['#A6C6F0', '#FFE9D6'], far: '#C6D2EC', hill1: '#E9EEF8', hill2: '#DFE6F3', ground: '#F0F3FA', meadow: '#FFFFFF', path: '#D6DCEA', leaf: '#3F8E6A', leaf2: '#2F7A5A', leafHi: '#FFFFFF', pine: '#2F7A5A', trunk: '#8A6A58', water: '#D0E6F6', sun: '#FFD9A0', dim: 0 },
-  noite: { sky: ['#18204C', '#3A467E'], far: '#3D4E86', hill1: '#7383B4', hill2: '#6A7AAC', ground: '#8392BE', meadow: '#93A2CC', path: '#6E7AA0', leaf: '#2A5E4E', leaf2: '#22503F', leafHi: '#C9D4EE', pine: '#22503F', trunk: '#5E4A52', water: '#8FA8D6', sun: '#FFF3C2', dim: 1 },
-};
-/** Quintal de praia (casa de praia ou arena tropical). */
-const PAL_PRAIA: Record<Period, Pal> = {
-  manha: { sky: ['#6FCDFF', '#E3F7FF'], far: '#4FBDE3', hill1: '#F6E3B4', hill2: '#F1D8A0', ground: '#F3D9A0', meadow: '#F8E6BC', path: '#C98A5B', leaf: '#3FA866', leaf2: '#2F9058', leafHi: '#7FD8A6', pine: '#2F9058', trunk: '#B07A4F', water: '#5FD0E8', sun: '#FFE066', dim: 0 },
-  tarde: { sky: ['#7CC4FF', '#FFE2BC'], far: '#55B6E0', hill1: '#F6E0AE', hill2: '#F0D49A', ground: '#F2D69A', meadow: '#F7E3B6', path: '#C98A5B', leaf: '#3FA866', leaf2: '#2F9058', leafHi: '#7FD8A6', pine: '#2F9058', trunk: '#B07A4F', water: '#62CBE6', sun: '#FFC36B', dim: 0 },
-  noite: { sky: ['#17204E', '#3B3C84'], far: '#2E5A86', hill1: '#8E7E60', hill2: '#837456', ground: '#8A7A5C', meadow: '#978868', path: '#6E5246', leaf: '#2A5A48', leaf2: '#224C3C', leafHi: '#3E7A62', pine: '#224C3C', trunk: '#6E5040', water: '#3E6FA8', sun: '#FFF3C2', dim: 1 },
-};
 export type YardTheme = 'prado' | 'jardim' | 'neve' | 'praia';
-const palOf = (theme: YardTheme, period: Period) => (theme === 'neve' ? PAL_NEVE : theme === 'praia' ? PAL_PRAIA : PAL)[period];
 
+type Pal = {
+  sky: [string, string];
+  hill1: string;
+  hill2: string;
+  meadow: string;
+  ground: string;
+  bush1: string;
+  bush2: string;
+  bush3: string;
+  pine: [string, string];
+  trunk: [string, string];
+  canopy: [string, string];
+  rock: [string, string];
+  dim: number;
+};
 
-/** A casinha do Hami lá no fundo: parede creme, telhado coral, porta redonda amarela. */
-function Cottage({ x, y, p, theme = 'prado' }: { x: number; y: number; p: Pal; theme?: YardTheme }) {
-  const night = p.dim > 0;
-  const roof = theme === 'praia' ? (night ? '#3E7A8A' : '#3CC6C9') : night ? '#B05A62' : '#FF7F6E';
-  return (
-    <g transform={`translate(${x} ${y})`}>
-      <ellipse cx="0" cy="4" rx="74" ry="9" fill="#000" opacity="0.1" />
-      <rect x="-54" y="-70" width="108" height="72" rx="10" fill={night ? '#C9C4D6' : '#FFF4E2'} />
-      <path d="M-68 -66 Q0 -132 68 -66 Q72 -58 62 -58 H-62 Q-72 -58 -68 -66Z" fill={roof} />
-      {theme === 'neve' && <path d="M-70 -64 Q0 -134 70 -64 Q60 -70 52 -62 Q44 -72 34 -64 Q22 -74 10 -66 Q-2 -76 -14 -66 Q-26 -74 -36 -64 Q-46 -72 -54 -62 Q-62 -70 -70 -64Z" fill="#FFFFFF" />}
-      <path d="M-50 -76 Q0 -118 50 -76" stroke="#FFFFFF" strokeOpacity="0.35" strokeWidth="4" fill="none" strokeLinecap="round" />
-      <rect x="28" y="-120" width="14" height="30" rx="3" fill={night ? '#8E8AA6' : '#FFE0CC'} />
-      <path d="M-14 2 V-24 Q-14 -40 0 -40 Q14 -40 14 -24 V2Z" fill={night ? '#C9A040' : '#FFC94D'} />
-      <circle cx="8" cy="-18" r="2" fill="#8A5A3B" />
-      <circle cx="-34" cy="-34" r="12" fill={night ? '#FFE9A0' : '#9FDBFF'} />
-      <path d="M-34 -46 V-22 M-46 -34 H-22" stroke="#FFFFFF" strokeWidth="3" />
-      <circle cx="34" cy="-34" r="12" fill={night ? '#FFE9A0' : '#9FDBFF'} />
-      <path d="M34 -46 V-22 M22 -34 H46" stroke="#FFFFFF" strokeWidth="3" />
-      <path d="M-46 -18 h24 M22 -18 h24" stroke={night ? '#9A8FB8' : '#FFB3C7'} strokeWidth="5" strokeLinecap="round" />
-      {[-40, -30, 30, 40].map((fx) => (
-        <circle key={fx} cx={fx} cy="-22" r="3" fill="#FF8FB8" />
-      ))}
-    </g>
-  );
-}
-
+const GREEN: Record<Period, Pal> = {
+  manha: { sky: ['#9ED5F5', '#E9F6EC'], hill1: '#BFDDA0', hill2: '#A6D08A', meadow: '#9CCB72', ground: '#8DC264', bush1: '#2E7563', bush2: '#4E9A5C', bush3: '#B9C94C', pine: ['#3F8A5A', '#2F7550'], trunk: ['#9A6A48', '#B88660'], canopy: ['#A8BE3E', '#C6D35A'], rock: ['#A89C92', '#C9BFB4'], dim: 0 },
+  tarde: { sky: ['#C99BD6', '#F4C6C2'], hill1: '#B9CF94', hill2: '#A2C47E', meadow: '#97C26C', ground: '#8BBA62', bush1: '#2F6F5E', bush2: '#4A925A', bush3: '#B5C64A', pine: ['#3D8459', '#2E704E'], trunk: ['#94654A', '#B3815E'], canopy: ['#A4B83C', '#C2CF58'], rock: ['#A3978E', '#C6BBB0'], dim: 0 },
+  noite: { sky: ['#1B2350', '#4A3E7C'], hill1: '#2F5260', hill2: '#294B55', meadow: '#2E5F52', ground: '#2C5A4C', bush1: '#173F3A', bush2: '#21503F', bush3: '#3E6A3E', pine: ['#1F4B3E', '#183E34'], trunk: ['#4E3C40', '#62494C'], canopy: ['#3A5E36', '#4A7040'], rock: ['#5A5670', '#706C88'], dim: 1 },
+};
+const SNOW: Record<Period, Pal> = {
+  manha: { sky: ['#A9CDF2', '#EEF6FF'], hill1: '#E3ECF8', hill2: '#D6E2F2', meadow: '#E8EFF9', ground: '#F1F5FB', bush1: '#2F6E5E', bush2: '#3F8268', bush3: '#DDE7F4', pine: ['#3A7E62', '#2C6A52'], trunk: ['#8A6A58', '#A8866F'], canopy: ['#FFFFFF', '#E6EEF8'], rock: ['#A7AEBE', '#C8CFDC'], dim: 0 },
+  tarde: { sky: ['#B9B4E6', '#F7D9D6'], hill1: '#E4E8F6', hill2: '#D7DDF0', meadow: '#E9EDF8', ground: '#F2F4FA', bush1: '#2F6E5E', bush2: '#3F8268', bush3: '#DEE4F2', pine: ['#3A7E62', '#2C6A52'], trunk: ['#8A6A58', '#A8866F'], canopy: ['#FFFFFF', '#E8ECF7'], rock: ['#A9AEC0', '#CACFDD'], dim: 0 },
+  noite: { sky: ['#1B2350', '#3E4A82'], hill1: '#6C7CAE', hill2: '#6272A4', meadow: '#7686B6', ground: '#8090BE', bush1: '#1E4A40', bush2: '#285A4A', bush3: '#8A98C4', pine: ['#22503F', '#1A4234'], trunk: ['#5E4A52', '#6E5862'], canopy: ['#C9D2EE', '#B5C0E2'], rock: ['#5E6488', '#767CA0'], dim: 1 },
+};
+const SAND: Record<Period, Pal> = {
+  manha: { sky: ['#8FD3F7', '#E8F7F4'], hill1: '#5FC4DE', hill2: '#7FD3E6', meadow: '#F3DCA8', ground: '#EFD49C', bush1: '#2E8A62', bush2: '#3FA06A', bush3: '#8FCB5A', pine: ['#3FA066', '#2F8A58'], trunk: ['#B07E52', '#C99A6C'], canopy: ['#3FA066', '#6CC27A'], rock: ['#B5A28E', '#D2C1AE'], dim: 0 },
+  tarde: { sky: ['#C6A2DA', '#F8CDB8'], hill1: '#58B7D6', hill2: '#78C9E0', meadow: '#F2D8A2', ground: '#EDCF94', bush1: '#2E8A62', bush2: '#3FA06A', bush3: '#8FCB5A', pine: ['#3FA066', '#2F8A58'], trunk: ['#AD7B50', '#C6976A'], canopy: ['#3B9A62', '#66BC76'], rock: ['#B2A08C', '#CFBFAC'], dim: 0 },
+  noite: { sky: ['#1B2350', '#3B3C84'], hill1: '#2E5A86', hill2: '#3A6A94', meadow: '#8E7E60', ground: '#867658', bush1: '#1E4A3C', bush2: '#24553F', bush3: '#3E6A40', pine: ['#24553F', '#1C4634'], trunk: ['#6E5040', '#7E5E4C'], canopy: ['#2A5A48', '#3A6E58'], rock: ['#6A6070', '#827888'], dim: 1 },
+};
+const palOf = (theme: YardTheme, period: Period) => (theme === 'neve' ? SNOW : theme === 'praia' ? SAND : GREEN)[period];
 /** Chão da Lua (a página do Início usa a mesma cor quando a casa é na Lua). */
 export const MOON_GROUND = '#A9AEC6';
 
@@ -184,6 +168,71 @@ export function MoonOutdoors({ height = 430, children }: { height?: number; chil
   );
 }
 
+/** Moita arredondada feita de bolhas sobrepostas. */
+function Blob({ x, y, r, c, n = 4, flat }: { x: number; y: number; r: number; c: string; n?: number; flat?: boolean }) {
+  return (
+    <g fill={c}>
+      {Array.from({ length: n }, (_, i) => {
+        const t = n === 1 ? 0.5 : i / (n - 1);
+        return <circle key={i} cx={x + (t - 0.5) * r * 2.2} cy={y - Math.sin(t * Math.PI) * r * 0.55} r={r * (0.7 + Math.sin(t * Math.PI) * 0.35)} />;
+      })}
+      {flat && <rect x={x - r * 1.5} y={y - r * 0.2} width={r * 3} height={r * 1.4} rx={r * 0.3} />}
+    </g>
+  );
+}
+
+/** Pinheiro grande de camadas com pontas arredondadas (corta no alto da cena). */
+function BigPine({ x, y, s, p, snow }: { x: number; y: number; s: number; p: Pal; snow?: boolean }) {
+  const layer = (yy: number, w: number, k: number) => (
+    <g key={k}>
+      <path d={`M${x} ${yy - 70 * s} Q${x + w * 0.2} ${yy - 40 * s} ${x + w} ${yy} Q${x} ${yy + 12 * s} ${x - w} ${yy} Q${x - w * 0.2} ${yy - 40 * s} ${x} ${yy - 70 * s}Z`} fill={k % 2 ? p.pine[1] : p.pine[0]} />
+      {snow && <path d={`M${x} ${yy - 70 * s} Q${x + w * 0.16} ${yy - 46 * s} ${x + w * 0.5} ${yy - 30 * s} Q${x} ${yy - 36 * s} ${x - w * 0.5} ${yy - 30 * s} Q${x - w * 0.16} ${yy - 46 * s} ${x} ${yy - 70 * s}Z`} fill="#FFFFFF" />}
+    </g>
+  );
+  return (
+    <g className="od-sway">
+      <rect x={x - 7 * s} y={y - 20 * s} width={14 * s} height={30 * s} fill={p.trunk[0]} />
+      {[0, 1, 2, 3].map((k) => layer(y - k * 52 * s, (78 - k * 14) * s, k))}
+    </g>
+  );
+}
+
+/** Árvore grande de tronco curvo na borda, com galho e copa saindo pelo alto. */
+function CurvyTree({ x, p, palm }: { x: number; p: Pal; palm?: boolean }) {
+  if (palm)
+    return (
+      <g>
+        <path d={`M${x + 40} 430 Q${x + 10} 300 ${x - 10} 150 Q${x - 18} 90 ${x - 6} 40 L${x + 14} 44 Q${x + 4} 120 ${x + 22} 200 Q${x + 44} 320 ${x + 76} 430Z`} fill={p.trunk[0]} />
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <path key={i} d={`M${x + 4} ${70 + i * 46} q12 -4 18 2`} stroke={p.trunk[1]} strokeWidth="4" fill="none" strokeLinecap="round" />
+        ))}
+        <g className="od-sway">
+          {[-150, -115, -70, -30, 10, 40].map((a, i) => (
+            <path key={i} transform={`translate(${x + 2} 42) rotate(${a})`} d="M0 0 Q40 -26 96 -6 Q50 -6 0 6Z" fill={i % 2 ? p.canopy[0] : p.canopy[1]} />
+          ))}
+          <circle cx={x - 4} cy="50" r="8" fill="#8A5A3B" />
+          <circle cx={x + 10} cy="54" r="8" fill="#7A4E33" />
+        </g>
+      </g>
+    );
+  return (
+    <g>
+      <path d={`M${x + 20} 430 Q${x - 4} 330 ${x + 12} 240 Q${x + 24} 150 ${x - 2} 60 Q${x - 10} 20 ${x} -10 L${x + 64} -10 Q${x + 60} 110 ${x + 66} 230 Q${x + 72} 340 ${x + 96} 430Z`} fill={p.trunk[0]} />
+      <path d={`M${x + 24} 380 q10 -40 2 -70 M${x + 34} 220 q14 -30 6 -60 M${x + 38} 300 q-10 -20 0 -30 q14 6 8 22`} stroke={p.trunk[1]} strokeWidth="5" fill="none" strokeLinecap="round" />
+      <path d={`M${x + 14} 130 Q${x - 60} 96 ${x - 150} 96 L${x - 150} 110 Q${x - 60} 112 ${x + 10} 154Z`} fill={p.trunk[0]} />
+      <path d={`M${x - 60} 104 Q${x - 80} 80 ${x - 104} 72 L${x - 102} 64 Q${x - 74} 72 ${x - 54} 98Z`} fill={p.trunk[0]} />
+      <g className="od-sway">
+        {[[-150, 84, 30, 0], [-104, 56, 34, 1], [-40, 40, 40, 0], [30, 14, 52, 1], [90, 40, 40, 0], [-180, 110, 20, 1], [-120, 100, 22, 0], [-6, 78, 28, 1], [60, 80, 30, 0]].map(([dx, cy, r, k], i) => (
+          <circle key={i} cx={x + dx} cy={cy} r={r} fill={k ? p.canopy[1] : p.canopy[0]} />
+        ))}
+        {[[-140, 72], [-70, 40], [10, 6], [80, 26]].map(([dx, cy], i) => (
+          <path key={`h${i}`} d={`M${x + dx - 14} ${cy} q14 -12 28 0`} stroke="#FFFFFF" strokeOpacity="0.25" strokeWidth="5" fill="none" strokeLinecap="round" />
+        ))}
+      </g>
+    </g>
+  );
+}
+
 export function Outdoors({ period = 'tarde', height = 430, children, theme = 'prado' }: { period?: Period; height?: number; children?: ReactNode; theme?: YardTheme }) {
   const p = palOf(theme, period);
   const night = p.dim > 0;
@@ -191,351 +240,127 @@ export function Outdoors({ period = 'tarde', height = 430, children, theme = 'pr
   const snow = theme === 'neve';
   const beach = theme === 'praia';
   const garden = theme === 'jardim';
-  const green = !snow && !beach;
   const W = OUTDOOR_W;
-  const flowers: [number, number, string][] = [
-    [96, 352, '#FF8FB8'], [180, 396, '#FFFFFF'], [228, 418, '#FFD34D'], [344, 330, '#FF8FB8'], [390, 382, '#B9A3F0'], [452, 410, '#FFFFFF'],
-    [560, 352, '#FFD34D'], [596, 404, '#FF8FB8'], [716, 338, '#FFFFFF'], [742, 410, '#B9A3F0'], [880, 336, '#FF8FB8'], [960, 412, '#FFD34D'],
-    [1046, 400, '#FFFFFF'], [1104, 420, '#FF8FB8'], [1236, 400, '#FFD34D'], [1290, 376, '#B9A3F0'], [30, 330, '#FFD34D'], [640, 330, '#B9A3F0'],
-  ];
-  const tufts: [number, number][] = [[70, 424], [200, 420], [316, 414], [470, 428], [610, 420], [700, 426], [820, 424], [990, 426], [1130, 426], [1250, 420], [260, 344], [430, 352], [780, 350], [940, 352], [1160, 332]];
-  /** Árvore do tema: redonda no prado, pinheiro com neve, coqueiro na praia. */
-  const tree = (x: number, y: number, s: number, fruit?: string) =>
-    snow ? <Pine key={`t${x}`} x={x} y={y} s={s * 1.05} p={p} snow /> : beach ? <Palm key={`t${x}`} x={x} y={y} s={s * 0.85} p={p} flip={x > 650} /> : <RoundTree key={`t${x}`} x={x} y={y} s={s} p={p} fruit={fruit} />;
+  const sky = `od-sky-${useId().replace(/:/g, '')}`;
+  const flower = (x: number, y: number, c: string, r = 5) => (
+    <g key={`f${x}-${y}`} transform={`translate(${x} ${y})`}>
+      {[0, 72, 144, 216, 288].map((a) => (
+        <circle key={a} cx={Math.cos((a * Math.PI) / 180) * r} cy={Math.sin((a * Math.PI) / 180) * r} r={r * 0.75} fill={c} />
+      ))}
+      <circle r={r * 0.55} fill="#FFFFFF" />
+    </g>
+  );
   return (
-    <div className={`outdoors ${night ? 'is-night' : ''} ${still ? 'is-still' : ''}`} style={{ height, background: p.sky[0] }}>
+    <div className={`outdoors ${night ? 'is-night' : ''} ${still ? 'is-still' : ''}`} style={{ height, background: p.ground }}>
       <svg className="od-art" viewBox={`0 0 ${W} 430`} preserveAspectRatio="xMidYMax slice" aria-hidden="true">
         <defs>
-          <linearGradient id="od-sky" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={sky} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor={p.sky[0]} />
             <stop offset="1" stopColor={p.sky[1]} />
           </linearGradient>
-          <radialGradient id="od-sun">
-            <stop offset="0.55" stopColor={p.sun} />
-            <stop offset="1" stopColor={p.sun} stopOpacity="0" />
-          </radialGradient>
-          <linearGradient id="od-haze" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor={p.sky[1]} stopOpacity="0" />
-            <stop offset="1" stopColor={p.sky[1]} stopOpacity={night ? 0.15 : 0.55} />
-          </linearGradient>
         </defs>
-        <rect width={W} height="430" fill="url(#od-sky)" />
-        {/* sol ou lua, estrelas */}
-        {night ? (
-          <g>
-            {Array.from({ length: 26 }, (_, i) => [((i * 211) % W) + 10, ((i * 67) % 150) + 14] as const).map(([x, y], i) => (
-              <circle key={i} className="od-star" style={{ animationDelay: `${(i % 5) * 0.6}s` }} cx={x} cy={y} r={i % 3 ? 1.6 : 2.4} fill="#FFFFFF" />
+        <rect width={W} height="430" fill={`url(#${sky})`} />
+        {night &&
+          Array.from({ length: 26 }, (_, i) => <circle key={i} className="od-star" style={{ animationDelay: `${(i * 0.37) % 3}s` }} cx={(i * 113) % W} cy={((i * 71) % 170) + 8} r={i % 4 ? 1.2 : 2} fill="#FFFFFF" />)}
+
+        {/* fundo: morrinhos (ou o mar, na praia) */}
+        {beach ? (
+          <>
+            <rect x="0" y="236" width={W} height="90" fill={p.hill1} />
+            <path d={`M0 236 H${W}`} stroke="#FFFFFF" strokeOpacity="0.5" strokeWidth="3" />
+            {[90, 190, 300, 400].map((x) => (
+              <path key={x} d={`M${x} 262 q10 -6 20 0 q10 6 20 0`} stroke="#FFFFFF" strokeOpacity="0.55" strokeWidth="3" fill="none" strokeLinecap="round" />
             ))}
-            <circle cx="1010" cy="74" r="28" fill="#FFF3C2" />
-            <circle cx="1022" cy="66" r="25" fill={p.sky[0]} />
+          </>
+        ) : (
+          <>
+            <path d={`M0 250 Q110 190 220 226 Q310 252 390 206 Q440 186 ${W} 200 V330 H0Z`} fill={p.hill1} />
+            <path d={`M0 282 Q130 236 260 266 Q370 288 ${W} 252 V330 H0Z`} fill={p.hill2} />
+          </>
+        )}
+
+        {/* faixa de grama do fundo e moitas */}
+        <path d={`M0 300 Q120 286 240 294 T${W} 290 V340 H0Z`} fill={p.meadow} />
+        <Blob x={128} y={306} r={42} c={p.bush1} n={4} flat />
+        <Blob x={214} y={316} r={24} c={p.bush2} n={3} flat />
+        <Blob x={318} y={300} r={40} c={p.bush3} n={4} flat />
+        {!snow && !beach && [[300, 270, '#E2553C'], [326, 292, '#E2553C'], [118, 284, '#F7B6C8']].map(([x, y, c]) => flower(x as number, y as number, c as string, 5.5))}
+
+        {/* esquerda: pinheiro grande (ou coqueiro) + toco */}
+        {beach ? <CurvyTree x={80} p={p} palm /> : <BigPine x={44} y={300} s={1.5} p={p} snow={snow} />}
+        {!beach && (
+          <g>
+            <path d="M40 272 L38 336 H118 L114 272Z" fill={p.trunk[0]} />
+            <ellipse cx="77" cy="272" rx="38" ry="11" fill={snow ? '#FFFFFF' : '#D9B48A'} />
+            <ellipse cx="77" cy="272" rx="24" ry="6" fill="none" stroke={snow ? '#DDE4F0' : '#B98E62'} strokeWidth="2" />
+            {!snow && <path d="M112 290 q24 -8 30 6 q-14 10 -30 4z" fill="#C98A52" />}
+          </g>
+        )}
+
+        {/* direita: árvore curva emoldurando, pedra com cogumelos/flores */}
+        <CurvyTree x={beach ? 420 : 392} p={p} palm={beach} />
+        <path d="M318 336 Q312 268 356 252 Q404 238 428 276 Q440 306 436 336Z" fill={p.rock[0]} />
+        <path d="M332 278 Q350 256 380 256 Q366 266 358 284Z" fill={p.rock[1]} />
+        {beach ? (
+          <g>
+            <circle cx="320" cy="328" r="13" fill="#FFFFFF" />
+            <path d="M307 328 A13 13 0 0 1 333 328Z" fill="#FF6F7A" />
+            <path d="M314 317 q6 -4 12 0" stroke="#4FB3E8" strokeWidth="4" fill="none" />
+            <path d="M384 340 l4 -10 l4 10 l10 1 l-8 6 l3 10 l-9 -6 l-9 6 l3 -10 l-8 -6z" fill="#FF9A5C" />
+          </g>
+        ) : snow ? (
+          <g>
+            <circle cx="322" cy="324" r="15" fill="#FFFFFF" />
+            <circle cx="322" cy="300" r="11" fill="#FFFFFF" />
+            <path d="M322 300 l10 2 l-10 2z" fill="#FF8A3D" />
+            <circle cx="318" cy="296" r="1.6" fill="#2B2F55" />
+            <circle cx="326" cy="296" r="1.6" fill="#2B2F55" />
+            <path d="M311 310 h22" stroke="#E2553C" strokeWidth="4" strokeLinecap="round" />
           </g>
         ) : (
           <g>
-            <circle cx="1010" cy="80" r="70" fill="url(#od-sun)" opacity="0.6" />
-            <circle cx="1010" cy="80" r="32" fill={p.sun} />
+            <path d="M392 262 q-6 -30 6 -48 M404 264 q8 -26 26 -34" stroke={p.bush2} strokeWidth="6" fill="none" strokeLinecap="round" />
+            {flower(398, 212, '#F2A6C8', 7)}
+            {flower(430, 228, '#F2A6C8', 6)}
+            <rect x="364" y="294" width="20" height="38" rx="8" fill="#FBEFD9" />
+            <path d="M336 300 Q338 262 374 260 Q410 262 412 300 Q374 308 336 300Z" fill="#D6403A" />
+            {[[354, 282, 5], [374, 272, 6], [394, 286, 5], [370, 292, 3.5], [346, 294, 3]].map(([cx, cy, r], i) => <circle key={i} cx={cx} cy={cy} r={r} fill="#FFFFFF" />)}
+            <rect x="320" y="308" width="9" height="22" rx="4" fill="#FBEFD9" />
+            <path d="M308 312 Q310 294 324 294 Q338 294 340 312Z" fill="#F7F1E6" />
+            <rect x="340" y="318" width="7" height="14" rx="3" fill="#FBEFD9" />
+            <path d="M332 322 Q333 310 343 310 Q353 310 354 322Z" fill="#F7F1E6" />
           </g>
         )}
-        {/* nuvens andando e passarinhos (gaivotas na praia) */}
-        <g opacity={night ? 0.25 : snow ? 0.85 : 0.95}>
-          {[
-            [120, 80, 1, '90s', '0s'],
-            [420, 54, 1.2, '120s', '-40s'],
-            [760, 120, 0.8, '100s', '-70s'],
-            [1100, 150, 0.9, '110s', '-20s'],
-            [1240, 60, 1.1, '130s', '-90s'],
-          ].map(([x, y, s, d, dl], i) => (
-            <g key={i} className="od-cloud od-cloud-wide" style={{ animationDuration: d as string, animationDelay: dl as string }}>
-              <g transform={`translate(${x} ${y}) scale(${s})`}>
-                <ellipse cx="0" cy="0" rx="50" ry="16" fill="#FFFFFF" />
-                <ellipse cx="18" cy="-12" rx="28" ry="19" fill="#FFFFFF" />
-                <ellipse cx="-18" cy="-6" rx="20" ry="14" fill="#FFFFFF" />
-              </g>
-            </g>
-          ))}
-        </g>
-        {!night &&
-          !snow &&
+
+        {/* chão da frente: a mesma cor da página, sem linha */}
+        <path d={`M0 330 Q130 318 250 326 Q380 334 ${W} 322 V430 H0Z`} fill={p.ground} />
+        {garden && [[70, 360, '#FF8FB8'], [110, 392, '#FFD34D'], [380, 366, '#B9A3F0'], [420, 398, '#FF8FB8'], [60, 412, '#FFFFFF'], [400, 420, '#FFD34D']].map(([x, y, c]) => flower(x as number, y as number, c as string, 4.5))}
+        {!snow && !beach && !garden && [[70, 396, '#FFFFFF'], [414, 404, '#FFD34D']].map(([x, y, c]) => flower(x as number, y as number, c as string, 3.5))}
+        {beach && <path d="M64 400 q8 -10 16 0 q-8 6 -16 0z M408 384 q8 -10 16 0 q-8 6 -16 0z" fill="#FFF3E0" />}
+
+        {/* vida: neve caindo, borboletas, vagalumes */}
+        {snow &&
+          Array.from({ length: 22 }, (_, i) => <circle key={i} className="od-snow" style={{ animationDelay: `-${(i * 0.7) % 8}s` }} cx={(i * 97) % W} cy={-20 - ((i * 37) % 120)} r={i % 3 ? 2 : 3} fill="#FFFFFF" opacity="0.9" />)}
+        {night &&
+          Array.from({ length: 8 }, (_, i) => <circle key={i} className="od-firefly" style={{ animationDelay: `${(i * 0.6) % 2.6}s` }} cx={40 + ((i * 61) % 400)} cy={240 + ((i * 29) % 120)} r="2.4" fill="#FFF07A" />)}
+        {!night && !snow &&
           [
-            [300, 120, 0],
-            [330, 108, 0.4],
-            [860, 90, 1.2],
-          ].map(([x, y, d], i) => (
-            <g key={i} className="od-bird" style={{ animationDelay: `-${d}s` }}>
-              <path d={`M${x - 8} ${y} q4 -5 8 0 q4 -5 8 0`} stroke={beach ? '#FFFFFF' : '#4E5570'} strokeWidth="2" fill="none" strokeLinecap="round" />
-            </g>
-          ))}
-        {beach ? (
-          <>
-            {/* mar até o horizonte, ilhas e barquinho */}
-            <path d="M120 214 Q170 186 230 214Z M880 214 Q950 176 1040 214Z" fill={night ? '#2B5A4E' : '#5FB98A'} />
-            <rect x="0" y="212" width={W} height="110" fill={p.far} />
-            <rect x="0" y="212" width={W} height="6" fill="#FFFFFF" opacity="0.35" />
-            {[236, 252, 270].map((yy, k) => (
-              <path key={yy} className="wave-bob" style={{ animationDelay: `-${k}s` }} d={Array.from({ length: 14 }, (_, j) => `M${40 + j * 92 + k * 30} ${yy} q10 -4 20 0`).join(' ')} stroke="#FFFFFF" strokeOpacity="0.55" strokeWidth="2.4" fill="none" strokeLinecap="round" />
-            ))}
-            <Boat x={420} y={240} s={0.9} />
-          </>
-        ) : (
-          <>
-            {/* montanhas com neve e cachoeira (congelada no inverno) */}
-            <path d="M0 232 L70 186 L140 222 L230 148 L320 214 L420 168 L520 222 L640 160 L760 218 L860 172 L960 222 L1080 156 L1190 216 L1300 180 V310 H0Z" fill={p.far} />
-            {(!night || snow) && (
-              <path
-                d={snow ? 'M70 186 L92 200 L70 196 L50 200Z M230 148 L262 172 L246 176 L230 166 L214 176 L198 172Z M420 168 L446 186 L420 182 L396 186Z M640 160 L670 182 L654 186 L640 176 L626 186 L610 182Z M860 172 L884 188 L860 184 L838 188Z M1080 156 L1110 178 L1094 182 L1080 172 L1066 182 L1050 178Z M1300 180 L1276 196 L1300 192Z' : 'M230 148 L252 166 L242 170 L230 162 L218 170 L210 166Z M640 160 L662 177 L650 180 L640 172 L630 180 L620 176Z M1080 156 L1102 173 L1090 176 L1080 168 L1070 176 L1060 172Z'}
-                fill="#FFFFFF"
-                opacity={night ? 0.7 : 0.9}
-              />
-            )}
-            <path d="M226 172 Q222 210 230 250 L246 250 Q240 210 238 172Z" fill={snow ? '#E8F6FF' : night ? '#6C86C4' : '#E8F7FF'} />
-            {!snow && <path className="od-fall" d="M232 176 V250 M240 176 V250" stroke={night ? '#9FB4E8' : '#FFFFFF'} strokeWidth="2.4" strokeDasharray="10 12" />}
-            {snow && <path d="M228 178 L230 196 L232 178Z M236 180 L238 204 L240 180Z" fill="#BFE0F5" />}
-          </>
-        )}
-        <rect width={W} height="430" fill="url(#od-haze)" />
-        {/* morros do fundo (dunas na praia) */}
-        <path d={beach ? 'M0 300 Q120 276 260 290 T520 284 T780 290 T1040 282 T1300 288 V340 H0Z' : 'M0 262 Q120 214 260 246 T520 236 T780 244 T1040 232 T1300 240 V330 H0Z'} fill={p.hill1} />
-        {!beach &&
-          Array.from({ length: 30 }, (_, i) => {
-            const x = 10 + i * 44 + ((i * 13) % 17);
-            if (x > 190 && x < 290) return null;
-            const y = 246 - Math.sin(i * 0.9) * 8;
-            return snow ? (
-              <g key={i} opacity={night ? 0.7 : 0.55}>
-                <path d={`M${x} ${y - 26 - (i % 3) * 5} L${x + 13} ${y + 6} H${x - 13}Z`} fill={p.leaf2} />
-                <path d={`M${x} ${y - 26 - (i % 3) * 5} L${x + 5} ${y - 14 - (i % 3) * 5} H${x - 5}Z`} fill="#FFFFFF" />
-              </g>
-            ) : (
-              <circle key={i} cx={x} cy={y} r={14 + (i % 3) * 4} fill={p.leaf2} opacity={night ? 0.6 : 0.45} />
-            );
-          })}
-        {beach ? <Lighthouse x={1100} y={226} s={0.9} night={night} /> : <Windmill x={1080} y={250} s={0.8} night={night} />}
-        {snow && <path d="M1066 182 Q1080 170 1094 182Z" fill="#FFFFFF" transform="translate(-8 50) scale(1)" />}
-        <path d={beach ? 'M0 304 Q160 290 330 300 T660 296 T990 300 T1300 294 V340 H0Z' : 'M0 292 Q160 256 330 282 T660 274 T990 280 T1300 270 V340 H0Z'} fill={p.hill2} />
-        {/* fileira de árvores ao fundo */}
-        {beach ? (
-          <>
-            <Palm x={40} y={304} s={0.55} p={p} />
-            <Palm x={330} y={300} s={0.5} p={p} flip />
-            <Palm x={700} y={298} s={0.48} p={p} />
-            <Palm x={930} y={300} s={0.5} p={p} flip />
-            <Palm x={1270} y={300} s={0.55} p={p} flip />
-          </>
-        ) : (
-          <>
-            <Pine x={20} y={300} s={0.75} p={p} snow={snow} />
-            <Pine x={60} y={292} s={0.9} p={p} snow={snow} />
-            {snow ? <Pine x={150} y={296} s={0.65} p={p} snow /> : <RoundTree x={150} y={296} s={0.6} p={p} sway={false} />}
-            {snow ? <Pine x={330} y={292} s={0.7} p={p} snow /> : <Birch x={330} y={292} s={0.7} p={p} />}
-            <Pine x={372} y={288} s={0.7} p={p} snow={snow} />
-            {snow ? <Pine x={640} y={286} s={0.6} p={p} snow /> : <RoundTree x={640} y={286} s={0.55} p={p} sway={false} />}
-            {snow ? <Pine x={700} y={284} s={0.62} p={p} snow /> : <Birch x={700} y={284} s={0.65} p={p} />}
-            <Pine x={900} y={290} s={0.75} p={p} snow={snow} />
-            {snow ? <Pine x={950} y={292} s={0.6} p={p} snow /> : <RoundTree x={950} y={292} s={0.6} p={p} sway={false} />}
-            <Pine x={1240} y={286} s={0.85} p={p} snow={snow} />
-            <Pine x={1290} y={292} s={0.7} p={p} snow={snow} />
-          </>
-        )}
-        {/* campo de lavanda (prado e jardim) */}
-        {green &&
-          [0, 1, 2, 3].map((r) => (
-            <path key={r} d={`M${1150 + r * 6} ${300 + r * 8} Q1220 ${292 + r * 8} 1300 ${296 + r * 8}`} stroke={night ? '#6C5A9E' : garden ? '#FF9FC2' : '#B99AF0'} strokeWidth="6" strokeLinecap="round" strokeDasharray="3 5" fill="none" />
-          ))}
-        {/* gramado (neve, areia) da frente */}
-        <path d="M0 300 Q300 286 650 296 T1300 294 V430 H0Z" fill={p.ground} />
-        <path d="M0 336 Q260 322 520 332 T1040 330 T1300 334 V430 H0Z" fill={p.meadow} opacity={snow ? 0.7 : 0.35} />
-        {/* riacho com ponte (congelado no inverno); na praia, a torre do salva-vidas */}
-        {beach ? (
-          <g transform="translate(262 372)">
-            <rect x="-26" y="-74" width="52" height="8" rx="3" fill="#E46F5F" />
-            <path d="M-22 -66 L-28 0 M22 -66 L28 0 M-25 -36 H25 M-27 -14 H27" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" />
-            <path d="M-28 -74 Q0 -98 28 -74Z" fill="#FFD34D" />
-            <rect x="-2" y="-112" width="3" height="26" fill="#8B5A35" />
-            <path d="M1 -112 L22 -106 L1 -100Z" fill="#E2453C" />
-          </g>
-        ) : (
-          <>
-            <path d="M228 250 Q214 280 240 300 Q270 322 236 350 Q200 380 230 430 H300 Q272 386 302 352 Q330 320 298 296 Q270 276 250 250Z" fill={snow ? '#B9D7EE' : night ? '#2B4A86' : '#5FB8E8'} />
-            <path d="M236 262 Q228 284 252 300 Q280 322 248 350 Q218 380 244 430 H286 Q262 384 290 352 Q316 322 286 298 Q262 280 246 262Z" fill={p.water} />
-            {snow ? (
-              <path d="M246 296 l14 6 M256 344 l-12 10 M250 392 l10 8" stroke="#FFFFFF" strokeWidth="2.4" strokeLinecap="round" opacity="0.9" />
-            ) : (
-              <path className="od-flow" d="M244 300 q12 8 0 18 M262 348 q-10 10 2 20 M254 392 q-6 10 4 20" stroke="#FFFFFF" strokeOpacity="0.7" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeDasharray="6 10" />
-            )}
-            <Rock x={212} y={300} s={0.7} c={snow ? '#C9D2E0' : undefined} />
-            <Rock x={312} y={360} s={0.8} c={snow ? '#C9D2E0' : undefined} />
-            <Rock x={206} y={410} s={0.9} c={snow ? '#C9D2E0' : undefined} />
-            <g transform="translate(266 346)">
-              <path d="M-46 6 Q0 -26 46 6 L46 14 Q0 -16 -46 14Z" fill={night ? '#8A6A58' : '#C98A5B'} />
-              {Array.from({ length: 9 }, (_, i) => (
-                <path key={i} d={`M${-40 + i * 10} ${8 - Math.sin(((i + 0.5) / 9) * Math.PI) * 18} v8`} stroke={night ? '#6E5246' : '#A9713F'} strokeWidth="2" />
-              ))}
-              <path d="M-46 -4 Q0 -36 46 -4" stroke={night ? '#8A6A58' : '#C98A5B'} strokeWidth="3.4" fill="none" />
-              {snow && <path d="M-46 -6 Q0 -38 46 -6" stroke="#FFFFFF" strokeWidth="3" fill="none" strokeLinecap="round" />}
-              {[-40, -20, 0, 20, 40].map((xx) => (
-                <path key={xx} d={`M${xx} ${-4 - Math.cos((xx / 46) * (Math.PI / 2)) * 26} V${8 - Math.cos((xx / 46) * (Math.PI / 2)) * 18}`} stroke={night ? '#8A6A58' : '#C98A5B'} strokeWidth="3" />
-              ))}
-            </g>
-          </>
-        )}
-        {/* à esquerda: pomar com colmeia (pinheiros no inverno, coqueiros na praia) */}
-        {tree(70, 340, 0.85, '#FF6F6F')}
-        {tree(150, 330, 0.7, '#FFB347')}
-        {green && <Hive x={108} y={276} />}
-        {/* casinha com cerquinha, caixa de correio e poste */}
-        <Cottage x={500} y={304} p={p} theme={theme} />
-        <Fence x={386} y={318} n={4} night={night} />
-        <Fence x={566} y={318} n={4} night={night} />
-        <Mailbox x={640} y={320} />
-        <Lamp x={420} y={340} night={night} />
-        {/* caminho até a frente (passarela de madeira na praia) */}
-        <path d="M486 306 Q520 336 590 356 Q650 374 640 430 H730 Q730 370 660 346 Q580 322 516 304Z" fill={p.path} opacity={night ? 0.5 : 1} />
-        {beach
-          ? [318, 332, 346, 360, 376, 392, 410].map((yy, k) => <path key={yy} d={`M${516 + k * 24 - 26} ${yy} l46 ${2 + k}`} stroke="#A9713F" strokeWidth="2" opacity="0.6" />)
-          : [[512, 316], [560, 336], [610, 352], [664, 372], [690, 404]].map(([x, y], i) => <ellipse key={i} cx={x} cy={y} rx="9" ry="4" fill="#FFFFFF" opacity={night ? 0.15 : 0.45} />)}
-        {garden && <RoseArch x={548} y={346} s={0.9} night={night} />}
-        {/* meio da direita: horta (prado), canteiros de tulipas (jardim), bonecos de neve (inverno), guarda-sóis (praia) */}
-        {snow ? (
-          <>
-            <Snowman x={800} y={356} s={1} />
-            <Snowman x={860} y={350} s={0.7} scarf="#5B8DEF" hat="#E2547A" />
-            {[[900, 360], [912, 364], [906, 354]].map(([x, y], i) => (
-              <circle key={i} cx={x} cy={y} r="6" fill="#FFFFFF" />
-            ))}
-            <SnowMound x={950} y={360} s={1} holly />
-          </>
-        ) : beach ? (
-          <>
-            <Umbrella x={800} y={356} s={0.9} />
-            <Lounger x={860} y={360} s={0.9} />
-            <Umbrella x={950} y={350} s={0.75} c="#3CC6C9" c2="#FFE27A" />
-            <BeachBall x={900} y={372} />
-            <Shell x={772} y={370} />
-          </>
-        ) : garden ? (
-          <>
-            <TulipBed x={760} y={322} n={9} colors={['#FF7FA0', '#FFD34D', '#B48CFF', '#FF9D5C']} />
-            <TulipBed x={770} y={346} n={9} colors={['#FFFFFF', '#FF7FA0', '#FFB3CF']} />
-            <TulipBed x={780} y={370} n={8} colors={['#FF9D5C', '#B48CFF', '#FFD34D']} />
-          </>
-        ) : (
-          <Garden x={760} y={316} p={p} night={night} />
-        )}
-        {/* lago (congelado com pinguins no inverno; piscina natural com caranguejo na praia) e banquinho */}
-        <Bench x={1066} y={334} night={night} />
-        <g transform="translate(1150 372)">
-          <ellipse cx="0" cy="0" rx="96" ry="26" fill={snow ? '#B9D7EE' : beach ? (night ? '#2B4A86' : '#3FB4D8') : night ? '#2B4A86' : '#5FB8E8'} />
-          <ellipse cx="0" cy="-3" rx="88" ry="21" fill={p.water} />
-          {snow ? (
-            <>
-              <path d="M-50 -6 q20 -10 40 0 t40 0 M-30 6 q16 -8 32 0" stroke="#FFFFFF" strokeWidth="2" fill="none" opacity="0.9" />
-              <Penguin x={-20} y={2} />
-              <Penguin x={18} y={-2} s={0.8} flip />
-            </>
-          ) : beach ? (
-            <>
-              <path className="od-ripple" d="M-40 -4 q10 -4 20 0 M10 6 q10 -4 20 0" stroke="#FFFFFF" strokeOpacity="0.6" strokeWidth="2" fill="none" strokeLinecap="round" />
-              <Rock x={-70} y={10} s={0.8} c="#C9BFA9" />
-              <Rock x={76} y={6} s={0.7} c="#C9BFA9" />
-            </>
-          ) : (
-            <>
-              <path className="od-ripple" d="M-40 -4 q10 -4 20 0 M10 6 q10 -4 20 0 M40 -8 q8 -3 16 0" stroke="#FFFFFF" strokeOpacity="0.6" strokeWidth="2" fill="none" strokeLinecap="round" />
-              <path d="M-60 2 a10 5 0 1 0 14 -6 L-54 0Z M46 -8 a9 4.5 0 1 0 12 -5 L52 -8Z" fill="#4FB063" />
-              <Flower x={-54} y={-2} c="#FFB3C7" s={0.8} />
-              <Duck x={-6} y={-2} />
-              <Duck x={18} y={4} s={0.7} />
-              {[-80, -72, 76, 84].map((rx) => (
-                <path key={rx} d={`M${rx} 10 q-2 -18 2 -26`} stroke="#4E9A4A" strokeWidth="3" fill="none" strokeLinecap="round" />
-              ))}
-            </>
-          )}
-        </g>
-        {beach && <Crab x={1060} y={404} />}
-        {beach && <Starfish x={1236} y={410} />}
-        {snow ? <Pine x={1250} y={362} s={1.05} p={p} snow /> : beach ? <Palm x={1250} y={360} s={0.9} p={p} flip /> : <Willow x={1250} y={360} s={0.95} p={p} />}
-        {snow ? <Pine x={1000} y={392} s={1.1} p={p} snow /> : beach ? <Palm x={1000} y={392} s={0.95} p={p} /> : <SwingTree x={1000} y={392} s={0.85} p={p} />}
-        {green && [0, 1, 2].map((i) => <Sunflower key={i} x={946 + i * 22} y={350 + (i % 2) * 8} s={0.9 - i * 0.05} h={56 + (i % 2) * 10} />)}
-        {/* piquenique (trenó com presentes no inverno, toalha e boia na praia) */}
-        {snow ? (
-          <Sled x={856} y={404} s={1.1} />
-        ) : beach ? (
-          <g transform="translate(856 404)">
-            <path d="M-50 0 L-30 -24 H44 L58 0Z" fill="#5B8DEF" />
-            {[-34, -14, 6, 26, 46].map((xx) => (
-              <path key={xx} d={`M${xx} 0 L${xx + 8} -24`} stroke="#FFFFFF" strokeWidth="5" opacity="0.85" />
-            ))}
-            <g transform="translate(14 -14)">
-              <circle r="11" fill="#FF8A7A" />
-              <circle r="5" fill={p.ground} />
-              <path d="M-11 0 H-5 M5 0 H11 M0 -11 V-5 M0 5 V11" stroke="#FFFFFF" strokeWidth="3" />
-            </g>
-          </g>
-        ) : (
-          <Picnic x={856} y={404} />
-        )}
-        {/* moldura: árvores grandes nas pontas, moitas, pedras */}
-        {tree(26, 420, 1.35)}
-        {snow ? (
-          <>
-            <SnowMound x={150} y={424} s={1.2} holly />
-            <SnowMound x={372} y={428} s={1} />
-            <SnowMound x={940} y={430} s={1} holly />
-            <SnowMound x={1180} y={430} s={1.1} />
-          </>
-        ) : (
-          <>
-            <Bush x={150} y={424} s={1.1} p={p} berry={beach ? undefined : '#E2547A'} />
-            <Bush x={372} y={428} s={0.95} p={p} />
-            <Bush x={940} y={430} s={0.9} p={p} berry={beach ? undefined : '#5B8DEF'} />
-            <Bush x={1180} y={430} s={1.05} p={p} />
-          </>
-        )}
-        <Rock x={520} y={422} s={0.8} c={snow ? '#C9D2E0' : beach ? '#C9BFA9' : undefined} />
-        <Rock x={1290} y={430} s={1.1} c={snow ? '#C9D2E0' : beach ? '#C9BFA9' : undefined} />
-        {green && (
-          <>
-            <Mushroom x={176} y={402} />
-            <Mushroom x={192} y={408} s={0.7} c="#FF9F4D" />
-            <Mushroom x={1210} y={410} s={0.8} />
-          </>
-        )}
-        {/* chão: flores (prado e jardim), conchas e estrelas (praia), brilhinhos de neve (inverno) */}
-        {green && flowers.map(([x, y, c], i) => <Flower key={i} x={x} y={y} c={c} s={0.9 + (i % 3) * 0.15} />)}
-        {garden && flowers.map(([x, y], i) => <Flower key={`g${i}`} x={x + 22} y={y + 6} c={['#FF7FA0', '#FFD34D', '#FFFFFF', '#B48CFF'][i % 4]} s={0.8} />)}
-        {beach && flowers.map(([x, y], i) => (i % 3 === 0 ? <Starfish key={i} x={x} y={y + 6} s={0.7} c={i % 2 ? '#FF9A6B' : '#FFB347'} /> : <Shell key={i} x={x} y={y + 4} s={0.8} c={['#FFB3CF', '#FFFFFF', '#FFE2C2'][i % 3]} />))}
-        {snow && flowers.map(([x, y], i) => <path key={i} d={`M${x} ${y - 5} l1.6 3.4 l3.4 1.6 l-3.4 1.6 l-1.6 3.4 l-1.6 -3.4 l-3.4 -1.6 l3.4 -1.6Z`} fill="#FFFFFF" opacity="0.9" />)}
-        {green && [[300, 418, '#FF7FA0'], [330, 424, '#FFD34D'], [770, 422, '#FF9D5C'], [790, 426, '#E2547A'], [1070, 424, '#B48CFF']].map(([x, y, c], i) => <Tulip key={i} x={x as number} y={y as number} c={c as string} />)}
-        {!snow && tufts.map(([x, y], i) => <Grass key={i} x={x} y={y} c={beach ? (night ? '#5E6A40' : '#A7B86A') : p.leaf2} s={0.9 + (i % 3) * 0.2} />)}
-        {/* neve caindo (inverno), borboletas (prado e jardim) ou vagalumes (de noite) */}
-        {snow
-          ? Array.from({ length: 34 }, (_, i) => (
-              <circle key={i} className="od-snow" style={{ animationDelay: `-${(i * 0.73) % 9}s`, animationDuration: `${7 + (i % 5)}s` }} cx={(i * 397) % W} cy="-10" r={1.6 + (i % 3)} fill="#FFFFFF" opacity="0.9" />
-            ))
-          : night
-            ? Array.from({ length: 14 }, (_, i) => [60 + i * 92 + ((i * 37) % 40), 250 + ((i * 53) % 130)] as const).map(([x, y], i) => (
-                <circle key={i} className="od-firefly" style={{ animationDelay: `${(i % 7) * 0.7}s` }} cx={x} cy={y} r="3" fill="#FFF07A" />
-              ))
-            : !beach &&
-              [
-                [180, 250, '#FF9FC2', 0],
-                [470, 230, '#FFD34D', 2.5],
-                [820, 270, '#B9A3F0', 5],
-                [1100, 250, '#FF9FC2', 3.5],
-                [1230, 300, '#FFD34D', 1.2],
-                ...(garden ? [[620, 280, '#FF7FA0', 4.2] as [number, number, string, number], [900, 240, '#7FD3F0', 6] as [number, number, string, number]] : []),
-              ].map(([x, y, c, d], i) => (
-                <g key={i} className="od-fly" style={{ animationDelay: `-${d}s` }}>
-                  <g transform={`translate(${x} ${y})`}>
-                    <g className="od-wing">
-                      <ellipse cx="-5" cy="-3" rx="6" ry="7" fill={c as string} />
-                      <ellipse cx="5" cy="-3" rx="6" ry="7" fill={c as string} />
-                      <ellipse cx="-4" cy="5" rx="4" ry="4.5" fill={c as string} opacity="0.85" />
-                      <ellipse cx="4" cy="5" rx="4" ry="4.5" fill={c as string} opacity="0.85" />
-                    </g>
-                    <rect x="-1.2" y="-6" width="2.4" height="13" rx="1.2" fill="#3B2F45" />
-                  </g>
+            [150, 230, '#FFFFFF', 0],
+            [280, 200, '#FFD34D', 3],
+            ...(garden ? [[230, 220, '#FF9FC2', 5] as [number, number, string, number]] : []),
+          ].map(([x, y, c, d], i) => (
+            <g key={i} className="od-fly" style={{ animationDelay: `-${d}s` }}>
+              <g transform={`translate(${x} ${y})`}>
+                <g className="od-wing">
+                  <ellipse cx="-5" cy="-3" rx="6" ry="7" fill={c as string} />
+                  <ellipse cx="5" cy="-3" rx="6" ry="7" fill={c as string} />
+                  <ellipse cx="-4" cy="5" rx="4" ry="4.5" fill={c as string} opacity="0.85" />
+                  <ellipse cx="4" cy="5" rx="4" ry="4.5" fill={c as string} opacity="0.85" />
                 </g>
-              ))}
+                <rect x="-1.2" y="-6" width="2.4" height="13" rx="1.2" fill="#3B2F45" />
+              </g>
+            </g>
+          ))}
       </svg>
       {children && <div className="od-pet">{children}</div>}
     </div>
