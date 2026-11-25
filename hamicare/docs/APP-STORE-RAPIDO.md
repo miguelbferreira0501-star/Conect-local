@@ -21,7 +21,7 @@ Quem faz os passos 1, 2, 5 e 6 é a **Jessika**, dona da conta (são dados e con
 | Campo | Valor |
 |---|---|
 | Plataforma | iOS |
-| Nome | `Lumbi: autocuidado e calma` |
+| Nome | `Lumbi: Self-Care` |
 | Idioma principal | Português (Brasil) |
 | ID do pacote | `com.hamicare.app` (se não aparecer: developer.apple.com → Identifiers → **+** → App IDs → esse pacote) |
 | SKU | `hamicare-ios` |
@@ -66,34 +66,30 @@ Depois, **Manual Deploy**. (Isso também aplica as mudanças de banco 011 a 014.
 
 ## 7. Ficha da loja (copiar e colar)
 
-**Subtítulo:** `Autocuidado com um hamster`
+**Subtítulo:** `Hábitos e calma com um pet`
 
 **Palavras-chave:** `autocuidado,saúde mental,ansiedade,hábitos,calma,bem-estar,rotina,humor,diário,pet virtual`
 
-**Texto promocional:** `Novo: parque de jogos com vôlei, skate, pênalti e mais. Cada partida vale sementes!`
+**Texto promocional:** `Novo: coleções de Inverno, Praia e Jardim, com móveis e roupinhas combinando!`
 
 **Descrição:**
 ```
-Conheça o Hami, um hamster que cresce junto com você. Cada cuidado que você tem consigo, como beber água, arrumar a cama, alongar ou respirar fundo, vira uma missão cumprida: o Hami fica feliz e cresce.
+Conheça o Lumbi, um cachorrinho que cresce junto com você. Cada cuidado que você tem consigo, como beber água, arrumar a cama, alongar ou respirar fundo, vira uma tarefa cumprida: o Lumbi fica feliz e sai em aventuras.
 
 AUTOCUIDADO SEM PRESSÃO
-• Missões pequenas do seu jeito e uma meta do dia que você escolhe
-• Missões rápidas: nomeie sua emoção, escreva uma reflexão, complete uma meta
-• Água em litros, com lembretes
+• Tarefas pequenas do seu jeito e uma meta do dia que você escolhe
+• Rotinas prontas para organizar o dia, se mexer, estudar e relaxar
 • Check-in de humor, diário, respiração e SOS para a ansiedade
-• O martelinho conserta um dia que faltou na sua sequência
+• Autoavaliações rápidas para se conhecer melhor (não são diagnóstico)
+• Água do dia com lembretes
 
 UM CANTINHO SÓ SEU
-• Decore a casa do Hami e mude de casa em 12 mundos, até a Lua
+• Decore a casa do Lumbi com móveis e coleções temáticas
 • Centenas de roupas e fantasias fofas
-• Quando você completa a meta do dia, o Hami sai em viagem e volta com presentes
+• Brinque com ele no quintal: jogue o graveto, dê petiscos e ganhe corações
+• Complete a meta do dia e ele viaja por 12 mundos, até a Lua
 
-PARQUE DE JOGOS
-• Embaixadinha, corrida de carrinho, pênalti, memória e mais
-• Cada partida vale sementes para gastar na loja
-
-HAMICARE+ (opcional)
-• Vôlei na praia, skate radical e pula nuvens
+LUMBI+ (opcional)
 • Roupas, casas e pelagens exclusivas, relatório da semana e sementes toda semana
 • Até 7 dias grátis, sem cartão. Depois: R$ 49,90 por mês ou R$ 329,90 por ano, com renovação automática pela sua conta Apple. Cancele quando quiser nos Ajustes do iPhone.
 
@@ -109,7 +105,7 @@ Privacidade: https://hamicare.onrender.com/privacidade
 
 **Categoria:** Saúde e fitness (secundária: Estilo de vida) · **Direitos autorais:** `2026 Jessika Neusa Borges Gervin`
 
-**Capturas (iPhone 6,9"):** as 6 de `docs/lojas/iphone/`, nesta ordem. O app é só para iPhone: não precisa de iPad.
+**Capturas (iPhone 6,9" = 1320×2868 ou 6,7" = 1290×2796):** as imagens que você fizer (de 3 a 10). O app é só para iPhone: não precisa de iPad.
 
 **Classificação etária:** responder o questionário com sinceridade: conteúdo gerado por usuários (com
 moderação, denúncia e bloqueio), compras no app, sem violência, sem jogos de azar com dinheiro. Os baús são

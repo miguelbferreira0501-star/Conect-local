@@ -246,19 +246,19 @@ Posicionamento (lição do Finch): o Lumbi se apresenta como **app de autocuidad
 como "jogo de bichinho". O bichinho é o jeito gostoso de cuidar de você. Categoria: **Saúde e fitness**.
 Nada de promessa médica: é bem-estar, não tratamento.
 
-**Nome (até 30):** `Lumbi: autocuidado e calma`
+**Nome (até 30):** `Lumbi: Self-Care`
 
-**Subtítulo da App Store (até 30):** `Autocuidado com um hamster`
+**Subtítulo da App Store (até 30):** `Hábitos e calma com um pet`
 
 **Descrição curta da Google Play (até 80):**
-`Cuide de você e o Hami cresce junto: hábitos, calma, água e humor do seu jeito.`
+`Cuide de você e o Lumbi cresce junto: hábitos, calma, humor e diário.`
 
 **Palavras-chave da App Store (até 100):**
 `autocuidado,saúde mental,ansiedade,hábitos,calma,bem-estar,rotina,humor,diário,água,pet virtual`
 
 **Descrição completa:**
 
-> Conheça o Hami, um hamster que cresce junto com você. Cada cuidado que você tem consigo, como beber água,
+> Conheça o Lumbi, um cachorrinho que cresce junto com você. Cada cuidado que você tem consigo, como beber água,
 > arrumar a cama, alongar ou respirar fundo, vira uma missão cumprida: explode confete e o Hami fica feliz.
 >
 > **Autocuidado sem pressão**
