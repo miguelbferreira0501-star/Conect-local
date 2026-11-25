@@ -1,13 +1,13 @@
-# Compila o app do HamiCare para iPhone na nuvem (Mac do Codemagic) e manda para o TestFlight.
+# Compila o app do Lumbi para iPhone na nuvem (Mac do Codemagic) e manda para o TestFlight.
 # Passo a passo (contas, chave da Apple e primeira compilação): hamicare/docs/LOJAS.md, parte "App Store".
 workflows:
   hamicare-ios:
-    name: HamiCare iOS (TestFlight)
+    name: Lumbi iOS (TestFlight)
     max_build_duration: 60
     instance_type: mac_mini_m2
     integrations:
       # Nome da chave de API do App Store Connect cadastrada no Codemagic (Integrations → Developer Portal).
-      app_store_connect: HamiCare ASC
+      app_store_connect: Lumbi ASC
     environment:
       ios_signing:
         distribution_type: app_store
@@ -54,7 +54,7 @@ workflows:
   # Igual ao de cima, mas também manda para a REVISÃO da App Store. Roda sozinho quando você cria uma tag
   # "ios-v1.0.0" (ou pelo botão no Codemagic). Lançamento manual: depois de aprovado, você toca em "Publicar".
   hamicare-ios-loja:
-    name: HamiCare iOS (enviar para a App Store)
+    name: Lumbi iOS (enviar para a App Store)
     max_build_duration: 60
     instance_type: mac_mini_m2
     triggering:
@@ -63,7 +63,7 @@ workflows:
       tag_patterns:
         - pattern: 'ios-v*'
     integrations:
-      app_store_connect: HamiCare ASC
+      app_store_connect: Lumbi ASC
     environment:
       ios_signing:
         distribution_type: app_store
@@ -84,7 +84,7 @@ workflows:
   # App Android (Capacitor) com o widget do Hami, assinado e enviado para a Google Play (teste interno).
   # Passo a passo (chave de assinatura e conta de serviço da Google): hamicare/docs/LOJAS.md, parte "Android com Capacitor".
   hamicare-android:
-    name: HamiCare Android (Google Play)
+    name: Lumbi Android (Google Play)
     max_build_duration: 60
     instance_type: linux_x2
     environment:
