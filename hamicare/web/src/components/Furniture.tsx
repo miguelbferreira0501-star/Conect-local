@@ -141,12 +141,55 @@ export const WALLPAPER_CSS: Record<string, string> = {
 };
 
 /** Cor "de fundo" de cada piso: o Início continua o chão nessa cor (degradê e página). */
-export const FLOOR_TONE: Record<string, string> = {
+const FLOOR_BASE: Record<string, string> = {
   'f-creme': '#EFEADF', 'f-pistache': '#9FD48C', 'f-madeira': '#C79F75', 'f-clara': '#E2CBAE', 'f-carpete': '#F2BCC8', 'f-azulejo': '#C9DCEE', 'f-grama': '#7FC47A', 'f-marmore': '#D6D7DE',
   'f-areia': '#E9CF97', 'f-tabuleiro': '#D9D2EC', 'f-hexagono': '#F2CD6A', 'f-azul': '#A9CBF2', 'f-nuvem': '#BCDCFA', 'f-ladrilho': '#F6C3B6',
   'f-musgo': '#7BC46C', 'f-tacos': '#E58A5C', 'f-folhas': '#7FC46A', 'f-chale': '#D46F62', 'f-concreto': '#9AA2B4', 'f-areia-mar': '#CDB57A',
   'f-algodao': '#F0C2DD', 'f-real': '#E3CB93', 'f-metal': '#9AA3BC', 'f-ouro': '#E8B83A', 'f-lua': '#C2C5DB',
 };
+
+/**
+ * Deixa a cor mais viva (estilo dos apps de pet): mais saturação e um pouco mais funda quando é
+ * muito clarinha. Cinzas e cremes quase neutros ficam como estão.
+ */
+/** Mesma cor em HSL, só mais funda (dl em 0..1), sem perder a saturação. */
+export function deepen(hex: string, dl: number) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  let l = (mx + mn) / 2;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  let h = 0;
+  if (d) h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  h = (h * 60 + 360) % 360;
+  l = Math.max(0, l - dl);
+  const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs(((h / 60) % 2) - 1)), m = l - c / 2;
+  const [R, G, B] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  const f = (v: number) => Math.round((v + m) * 255).toString(16).padStart(2, '0');
+  return `#${f(R)}${f(G)}${f(B)}`;
+}
+
+export function vivid(hex: string) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+  let l = (mx + mn) / 2;
+  const d = mx - mn;
+  let s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  if (s < 0.16 || d < 0.08) return hex;
+  let h = 0;
+  if (d) h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  h = (h * 60 + 360) % 360;
+  s = Math.min(0.6, s * 1.08 + 0.03);
+  if (l > 0.58) l = 0.58 + (l - 0.58) * 0.35;
+  const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs(((h / 60) % 2) - 1)), m = l - c / 2;
+  const [R, G, B] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  const f = (v: number) => Math.round((v + m) * 255).toString(16).padStart(2, '0');
+  return `#${f(R)}${f(G)}${f(B)}`.toUpperCase();
+}
+
+/** Cor lisa de cada chão, já viva: é a mesma no quarto e na página do Início. */
+export const FLOOR_TONE: Record<string, string> = Object.fromEntries(Object.entries(FLOOR_BASE).map(([k, v]) => [k, vivid(v)]));
 
 /** Escurece (t > 0) ou clareia (t < 0) uma cor #RRGGBB. */
 export function shade(hex: string, t: number) {
@@ -177,7 +220,7 @@ export function tonePalette(tone: string) {
   // texto solto na página: o que contrastar mais com o chão (branco ou um tom bem escuro da mesma cor)
   const darkInk = shade(tone, 0.8);
   const ink = 1.05 / (lum(tone) + 0.05) >= (lum(tone) + 0.05) / (lum(darkInk) + 0.05) ? '#FFFFFF' : darkInk;
-  return { tone, page: tone, card: shade(tone, t + 0.06), deep: shade(tone, t + 0.16), dark: shade(tone, 0.72), ink };
+  return { tone, page: tone, card: shade(tone, t + 0.06), deep: shade(tone, t + 0.16), dark: shade(tone, 0.72), ink, soft: deepen(tone, 0.06), soft2: deepen(tone, 0.11) };
 }
 
 export const FLOOR_CSS: Record<string, string> = {
