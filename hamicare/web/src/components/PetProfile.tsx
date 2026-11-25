@@ -1,4 +1,4 @@
-// Perfil do Hami: foto, nome e pronome, idade (dias juntos), quem cuida dele, viagens; a sequência da
+// Perfil do Lumbi: foto, nome e pronome, idade (dias juntos), quem cuida dele, viagens; a sequência da
 // semana em bolinhas e as descobertas das viagens e passeios. Segunda aba: o jeitinho dele.
 import { useState } from 'react';
 import { createPortal } from 'react-dom';

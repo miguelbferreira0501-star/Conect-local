@@ -1,4 +1,4 @@
-// Ilustrações da casa do Hami: móveis, decoração e brinquedos.
+// Ilustrações da casa do Lumbi: móveis, decoração e brinquedos.
 import { C, Face, Hi, Pot, Sh, heart, sparkle, star, type Draw } from './kit';
 
 export const HOME: Record<string, Draw> = {

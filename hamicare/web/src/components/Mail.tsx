@@ -1,4 +1,4 @@
-// Correio do Hami (estilo Finch): caixa de correio no céu, cartas novas com bolinha e cartas lidas.
+// Correio do Lumbi (estilo Finch): caixa de correio no céu, cartas novas com bolinha e cartas lidas.
 import { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { Sheet } from './ui';

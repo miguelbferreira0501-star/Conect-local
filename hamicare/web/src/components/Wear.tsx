@@ -1,4 +1,4 @@
-// Peças desenhadas no Hami. Cada item da loja aponta para um modelo (`base`) e cores (`c1`, `c2`),
+// Peças desenhadas no Lumbi. Cada item da loja aponta para um modelo (`base`) e cores (`c1`, `c2`),
 // então as variações de cor usam o mesmo desenho. Coordenadas no quadro 0–200 do Hamster.
 import { itemById } from '../data/items';
 
@@ -394,7 +394,7 @@ export function Hat({ id, geo }: { id: string | null; geo: Geo }) {
 }
 
 /**
- * Óculos que encaixam nos olhos do Hami (olhos em 100 ± ex): armação fina, lente com brilho,
+ * Óculos que encaixam nos olhos do Lumbi (olhos em 100 ± ex): armação fina, lente com brilho,
  * ponte curvinha e hastes que vão até a lateral da cabeça.
  */
 export function Glasses({ id, eyeY, ex = 27 }: { id: string | null; eyeY: number; ex?: number }) {
@@ -1106,7 +1106,7 @@ export function Accessory({ id, geo, paw, head }: { id: string | null; geo: Geo;
   const { top, w, h } = geo;
   const it = id ? itemById(id) : undefined;
   const base = it?.base ?? id;
-  // Colares, cordões, lenços e gravatas ficam no pescoço: logo abaixo do queixo (a cabeça do Hami é grande).
+  // Colares, cordões, lenços e gravatas ficam no pescoço: logo abaixo do queixo (a cabeça do Lumbi é grande).
   const neck = !!head && NECK_ITEMS.has(base ?? '');
   const y = neck ? head!.cy + head!.ry + 3 : top + h * 0.6;
   const c1 = it?.c1;
@@ -1672,7 +1672,7 @@ export function AccessoryBack({ id, geo }: { id: string | null | undefined; geo:
   }
 }
 
-/** Efeitos atrás do Hami (aura, arco-íris, raios). */
+/** Efeitos atrás do Lumbi (aura, arco-íris, raios). */
 export function EffectBack({ id, geo, uid }: { id: string | null | undefined; geo: Geo; uid: string }) {
   const { top, h } = geo;
   const it = id ? itemById(id) : undefined;
@@ -1804,8 +1804,8 @@ export function EffectFront({ id, geo }: { id: string | null | undefined; geo: G
 
 const COSTUMES = new Set(['fantasia-coelho', 'fantasia-urso', 'fantasia-gato', 'fantasia-sapo', 'fantasia-dino', 'fantasia-unicornio', 'fantasia-pintinho', 'fantasia-pinguim', 'fantasia-raposa', 'fantasia-panda', 'fantasia-leao', 'fantasia-dragao', 'fantasia-tubarao', 'fantasia-vaca', 'fantasia-morango', 'fantasia-abacate', 'fantasia-rena']);
 
-/** A roupa é uma fantasia de corpo inteiro? Então o Hami fica de capuz (sem as orelhinhas dele) e com patinhas da cor da fantasia. */
-/** Roupas de cima com manga: o bracinho do Hami fica da cor da roupa (com a patinha aparecendo). */
+/** A roupa é uma fantasia de corpo inteiro? Então o Lumbi fica de capuz (sem as orelhinhas dele) e com patinhas da cor da fantasia. */
+/** Roupas de cima com manga: o bracinho do Lumbi fica da cor da roupa (com a patinha aparecendo). */
 const SLEEVED = new Set(['pijama-patos', 'camisa-praia', 'blusa-jardim', 'moletom', 'camiseta', 'listrada', 'jaqueta', 'kimono', 'florida', 'futebol', 'dolma', 'casaco-capitao', 'sueter', 'xadrez', 'smoking', 'astronauta', 'pijama', 'jardineira', 'vestido', 'princesa', 'babado', 'estrelado', 'manto-mago', 'pijama-nuvem']);
 export function sleeveOf(roupa: string | null | undefined): string | null {
   if (!roupa) return null;

@@ -1,5 +1,5 @@
 // Destinos das viagens: a lista "Já possui / Bloqueado" (comprar com sementes) e a tela "Ir para…"
-// que aparece quando a meta do dia é cumprida, com o Hami de mala na mão pronto para sair.
+// que aparece quando a meta do dia é cumprida, com o Lumbi de mala na mão pronto para sair.
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ChevronDown, ChevronRight, Lock, X } from 'lucide-react';
@@ -64,7 +64,7 @@ export function DestinationSheet({ open, onClose }: { open: boolean; onClose: ()
     const r = buyDestination(d.id);
     if (r === 'ok') {
       play('compra');
-      toast(`${d.name} liberado! É o próximo destino do Hami.`);
+      toast(`${d.name} liberado! É o próximo destino do Lumbi.`);
       setTab('meus');
     } else if (r === 'plus') toast('Esse destino é do Lumbi+.');
     else if (r === 'sem-sementes') toast(`Faltam ${d.price - s.coins} sementes.`);
@@ -142,7 +142,7 @@ export function DestinationSheet({ open, onClose }: { open: boolean; onClose: ()
   );
 }
 
-/** Antes de sair: o Hami com a sacolinha, a fala do destino, o cartão e o botão "Ir". */
+/** Antes de sair: o Lumbi com a sacolinha, a fala do destino, o cartão e o botão "Ir". */
 export function TrekGo({ open, onClose, onGo }: { open: boolean; onClose: () => void; onGo: () => void }) {
   const s = useApp();
   const [pick, setPick] = useState(false);

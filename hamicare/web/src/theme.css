@@ -545,7 +545,7 @@ body {
   .tab { font-size: 9.5px; letter-spacing: -0.02em; }
 }
 
-/* Efeitos do guarda-roupa (no desenho do Hami) */
+/* Efeitos do guarda-roupa (no desenho do Lumbi) */
 .fx-pulse { transform-box: fill-box; transform-origin: center; animation: fx-pulse 2.6s ease-in-out infinite; }
 .fx-spin { transform-box: fill-box; transform-origin: center; animation: fx-spin 18s linear infinite; }
 .fx-orbit { transform-box: fill-box; transform-origin: center; animation: fx-spin 10s linear infinite; }
@@ -561,7 +561,7 @@ body {
   .fx-pulse, .fx-spin, .fx-orbit, .fx-rise, .fx-fall, .wing-flutter { animation: none; }
 }
 
-/* Armário: cada peça num quadradinho com o Hami vestindo */
+/* Armário: cada peça num quadradinho com o Lumbi vestindo */
 .wardrobe-tile {
   position: relative;
   display: grid;

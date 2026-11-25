@@ -1,8 +1,8 @@
-// Jornada de peso por calorias, condicionamento e fases do Hami. Funções puras (testadas em evolution.test.ts).
+// Jornada de peso por calorias, condicionamento e fases do Lumbi. Funções puras (testadas em evolution.test.ts).
 import type { AgeGroup, BodyData, BodyStart, DayLog, Direction, GoalId, Journey } from '../types';
 import { addDays, clamp, dayDiff } from '../lib/util';
 
-/** Faixa saudável do Hami, em gramas de hamster (nunca comparável a gente). */
+/** Faixa saudável do Lumbi, em gramas de hamster (nunca comparável a gente). */
 export const BAND = { min: 120, max: 150, center: 135 } as const;
 /** Limites visuais: abaixo ou acima disso o desenho não muda mais. */
 export const LIMITS = { min: 105, max: 175 } as const;
@@ -37,7 +37,7 @@ export function recentAverageKg(logs: BodyData['logs'], endKey: string): number 
 //
 // A pessoa escolhe emagrecer, ganhar ou manter. Cada missão saudável soma uma
 // estimativa das calorias que ela queimou, economizou (troca saudável) ou somou
-// (lanche nutritivo). O Hami recebe exatamente as mesmas calorias: quando a
+// (lanche nutritivo). O Lumbi recebe exatamente as mesmas calorias: quando a
 // pessoa chega à meta dela, ele chega à dele.
 
 /** Calorias aproximadas em 1 kg de gordura corporal. */
@@ -46,7 +46,7 @@ export const KCAL_PER_KG = 7700;
 export const REF_KG = 70;
 /** Teto de calorias contadas por dia: mais do que isso não acelera (sem exagero). */
 export const DAY_CAP: Record<Direction, number> = { perder: 800, ganhar: 700, manter: 800 };
-/** Corpo do Hami no começo e na meta de cada jornada. */
+/** Corpo do Lumbi no começo e na meta de cada jornada. */
 export const JOURNEY_GRAMS: Record<Direction, { start: number; goal: number }> = {
   perder: { start: 165, goal: 135 },
   ganhar: { start: 115, goal: 140 },
@@ -129,7 +129,7 @@ export function journeyProgress(j: Journey, kcal: number): number {
   return clamp(kcal / j.needKcal, 0, 1);
 }
 
-/** Peso do Hami para um progresso da jornada (meio grama de precisão no desenho, décimos no número). */
+/** Peso do Lumbi para um progresso da jornada (meio grama de precisão no desenho, décimos no número). */
 export function journeyGrams(j: Journey, progress: number): number {
   const g = j.startGrams + (j.goalGrams - j.startGrams) * clamp(progress, 0, 1);
   return Math.round(clamp(g, LIMITS.min, LIMITS.max) * 10) / 10;

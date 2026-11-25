@@ -84,7 +84,7 @@ function HouseTab({ onArenas }: { onArenas: () => void }) {
       </div>
       {editing && (
         <>
-          <p className="text-[14px] text-muted">Arraste os móveis com o dedo. Toque num móvel para trazer pra frente ou tirar da casa (o Hami fica transparente para você alcançar o que está atrás dele).</p>
+          <p className="text-[14px] text-muted">Arraste os móveis com o dedo. Toque num móvel para trazer pra frente ou tirar da casa (o Lumbi fica transparente para você alcançar o que está atrás dele).</p>
           {selItem && (
             <div className="flex items-center gap-2 rounded-2xl bg-accent-soft p-3">
               <span className="house-sel-icon" aria-label={itemById(selItem.itemId)?.name}>

@@ -126,7 +126,7 @@ export function DailyWelcome({ onClose }: { onClose: () => void }) {
   );
 }
 
-/** Ofensiva: tela cheia com raios girando, o Hami pulando e a semana marcada. */
+/** Ofensiva: tela cheia com raios girando, o Lumbi pulando e a semana marcada. */
 export function StreakScreen({ count, hammer, onClose, onShare }: { count: number; hammer?: boolean; onClose: () => void; onShare: (p: Photo) => void }) {
   const s = useApp();
   const today = todayKey();

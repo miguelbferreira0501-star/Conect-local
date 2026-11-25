@@ -1,4 +1,4 @@
-// Lembretes ao longo do dia: água, cuidar do Hami, missões, pausa, hora de dormir e a volta dos passeios.
+// Lembretes ao longo do dia: água, cuidar do Lumbi, missões, pausa, hora de dormir e a volta dos passeios.
 // O servidor usa este planejador a cada poucos minutos. Regras de gentileza:
 // - no máximo 5 por dia, com pelo menos 1 hora entre um e outro;
 // - nunca de madrugada (silêncio das 22h30 às 8h; para menores, das 21h30 às 8h);
@@ -34,7 +34,7 @@ export const MIN_GAP_MS = 60 * 60_000;
 const WINDOW_MIN = 120;
 export const QUIET = { adulto: { from: '22:30', to: '08:00' }, menor: { from: '21:30', to: '08:00' } };
 
-/** Quanto a fome e a alegria do Hami caem por hora (o mesmo do app). */
+/** Quanto a fome e a alegria do Lumbi caem por hora (o mesmo do app). */
 export const DECAY_PER_HOUR = { felicidade: 1.5, saciedade: 2.5, limpeza: 1, energia: 1.2 };
 
 const MSG: Record<Exclude<ReminderKind, 'amigos'>, string[]> = {
@@ -84,7 +84,7 @@ const inWindow = (hm: string, at: string) => {
 
 export function reminderText(kind: Exclude<ReminderKind, 'amigos'>, pet: string, seed: number): string {
   const list = MSG[kind];
-  return list[Math.abs(seed) % list.length].replace(/\{pet\}/g, pet || 'Hami');
+  return list[Math.abs(seed) % list.length].replace(/\{pet\}/g, pet || 'Lumbi');
 }
 
 /** Fome e alegria de agora, pelo estado salvo e o tempo que passou. */
@@ -136,7 +136,7 @@ export function dueReminder(args: { prefs: ReminderPrefs; state: any; sent: Sent
   if (Number(sent._count ?? 0) >= DAILY_MAX) return { reminder: null, sent };
   if (now.ms - Number(sent._last ?? 0) < MIN_GAP_MS) return { reminder: null, sent };
 
-  const pet = String(state?.pet?.name ?? 'Hami');
+  const pet = String(state?.pet?.name ?? 'Lumbi');
   const seed = Math.floor(now.ms / 86_400_000);
   const done = (key: string, value: string = now.date) => sent[key] === value;
   const pick = (kind: Exclude<ReminderKind, 'amigos'>, key: string, value: string = now.date): { reminder: Reminder; sent: SentLog } => ({
@@ -148,7 +148,7 @@ export function dueReminder(args: { prefs: ReminderPrefs; state: any; sent: Sent
   const adv = state?.adventure;
   if (on('aventura') && adv?.endsAt && adv.endsAt <= now.ms && !done('aventura', String(adv.endsAt))) return pick('aventura', 'aventura', String(adv.endsAt));
 
-  // 2. O Hami precisa de você (uma vez por dia, depois do meio-dia).
+  // 2. O Lumbi precisa de você (uma vez por dia, depois do meio-dia).
   const needs = petNeeds(state, now.ms);
   if (on('hami') && needs && (needs.saciedade < 30 || needs.felicidade < 30) && toMin(now.hm) >= toMin(HAMI_FROM) && !done('hami')) return pick('hami', 'hami');
 
@@ -192,7 +192,7 @@ export interface PlannedReminder {
 
 /**
  * Os lembretes de um dia inteiro, para agendar no celular: missões no horário escolhido, hora de dormir,
- * o Hami depois do almoço, os copos d'água, a pausa e os desafios de segunda. Fora do silêncio da noite,
+ * o Lumbi depois do almoço, os copos d'água, a pausa e os desafios de segunda. Fora do silêncio da noite,
  * com pelo menos 1 hora entre eles e no máximo DAILY_MAX, escolhidos por importância.
  */
 export function planDay(args: { prefs: ReminderPrefs; pet: string; weekday: number; minor: boolean; seed: number; skipTasks?: boolean }): PlannedReminder[] {

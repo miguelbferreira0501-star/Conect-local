@@ -1,4 +1,4 @@
-// Crescimento do Hami: o selinho no Início e o cartão com as fases em Nossa evolução.
+// Crescimento do Lumbi: o selinho no Início e o cartão com as fases em Nossa evolução.
 import { useMemo } from 'react';
 import { Hamster } from './Hamster';
 import { Bar } from './ui';
@@ -30,7 +30,7 @@ export function GrowthPill({ s, onClick }: { s: State; onClick: () => void }) {
   );
 }
 
-/** Cartão com as 8 fases: o Hami de cada tamanho, a fase atual e quanto falta. */
+/** Cartão com as 8 fases: o Lumbi de cada tamanho, a fase atual e quanto falta. */
 export function GrowthCard({ s }: { s: State }) {
   const g = useGrowth(s);
   return (

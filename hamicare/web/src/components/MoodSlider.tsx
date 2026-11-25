@@ -107,7 +107,7 @@ export function MoodSlider({ value, onCommit }: { value: Mood | undefined; onCom
   const commit = useRef(onCommit);
   commit.current = onCommit;
 
-  // Humor salvo por outro lugar (por exemplo, conversando com o Hami): a barrinha acompanha.
+  // Humor salvo por outro lugar (por exemplo, conversando com o Lumbi): a barrinha acompanha.
   useEffect(() => {
     if (value && moodOf(v) !== value) setV(((value - 1) / 4) * 100);
   }, [value]); // eslint-disable-line react-hooks/exhaustive-deps

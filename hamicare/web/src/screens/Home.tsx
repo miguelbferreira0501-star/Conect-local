@@ -91,7 +91,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
   const mailN = unreadMail(s);
   const [trekStart, setTrekStart] = useState(false);
   const [trekResult, setTrekResult] = useState<TrekResult | null>(null);
-  // Meta do dia completa: o Hami sai em viagem sozinho.
+  // Meta do dia completa: o Lumbi sai em viagem sozinho.
   const goalDone = trekReady(s);
   // Meta cumprida: aparece a tela "Ir para…" com o destino (a pessoa pode trocar antes de sair).
   const [trekGo, setTrekGo] = useState(false);
@@ -331,7 +331,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
 
       <TrekBar now={now} />
 
-      {/* Aventura do dia (minimalista): bolinhas que acendem a cada tarefa; completa, o Hami sai em viagem. */}
+      {/* Aventura do dia (minimalista): bolinhas que acendem a cada tarefa; completa, o Lumbi sai em viagem. */}
       <section className="hc-trip" aria-label="Aventura do dia">
         <button className="hc-trip-top" onClick={() => setAreaOpen(true)} aria-label={`${tripN}ª aventura: ${Math.min(done, goal)} de ${goal} tarefas. Toque para mudar a meta.`}>
           <b>{tripN}ª Aventura</b>

@@ -14,7 +14,7 @@ function run(hm: string, sent: SentLog = {}, p = prefs(), state: any = happy, mi
 }
 
 describe('lembretes ao longo do dia', () => {
-  it('água nos horários do plano, uma vez cada, com o nome do Hami', () => {
+  it('água nos horários do plano, uma vez cada, com o nome do Lumbi', () => {
     const r = run('10:05');
     expect(r.reminder?.kind).toBe('agua');
     expect(r.reminder?.body).toMatch(/Bolota/);
@@ -46,7 +46,7 @@ describe('lembretes ao longo do dia', () => {
     expect(run('10:05', { _day: '2026-11-03', _count: DAILY_MAX }).reminder?.kind).toBe('agua');
   });
 
-  it('o Hami com fome chama depois do meio-dia, uma vez por dia', () => {
+  it('o Lumbi com fome chama depois do meio-dia, uma vez por dia', () => {
     const hungry = { ...happy, pet: { ...happy.pet, stats: { saciedade: 40, felicidade: 80 }, statsAt: at('06:00').ms } };
     expect(run('11:00', {}, prefs({ kinds: { agua: false } }), hungry).reminder).toBeNull();
     const r = run('12:10', {}, prefs({ kinds: { agua: false } }), hungry);

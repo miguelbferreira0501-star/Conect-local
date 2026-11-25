@@ -151,7 +151,7 @@ export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; o
                   {!hideNums && (
                     <p className="text-[14px]">
                       Vocês já {jt.verb} <b>{fmtNum(jn.kcal, 0)} kcal</b> (≈ {fmtNum(jn.kcal / KCAL_PER_KG, jn.kcal < KCAL_PER_KG ? 2 : 1)} kg). Faltam <b>{fmtNum(Math.max(0, j.needKcal - jn.kcal), 0)} kcal</b>.
-                      {jn.byScale && ' O Hami está seguindo a sua balança.'}
+                      {jn.byScale && ' O Lumbi está seguindo a sua balança.'}
                     </p>
                   )}
                 </div>
@@ -167,7 +167,7 @@ export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; o
                       </div>
                     ))}
                   </div>
-                  <LineChart points={petPoints} label="Peso do Hami" unit=" g" band={[BAND.min, BAND.max]} tone="var(--gold)" />
+                  <LineChart points={petPoints} label="Peso do Lumbi" unit=" g" band={[BAND.min, BAND.max]} tone="var(--gold)" />
                 </>
               )}
               <details className="rounded-2xl bg-surface2 p-3 text-[14px]">
@@ -226,7 +226,7 @@ export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; o
             <label className="flex items-start gap-3 rounded-2xl bg-surface2 p-3 text-[14px]" htmlFor="ev-sync">
               <input id="ev-sync" type="checkbox" className="mt-1 h-5 w-5 accent-[var(--accent)]" checked={s.body.sync} onChange={(e) => setSync(e.target.checked)} />
               <span>
-                <b>O Hami segue a minha balança.</b> Em vez das missões, o peso dele acompanha o seu progresso real até a meta. Dá pra desligar quando quiser.
+                <b>O Lumbi segue a minha balança.</b> Em vez das missões, o peso dele acompanha o seu progresso real até a meta. Dá pra desligar quando quiser.
               </span>
             </label>
             {j.dir !== 'manter' && (
@@ -238,7 +238,7 @@ export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; o
                     className="btn btn-soft shrink-0"
                     onClick={() => {
                       const r = setGoal(goalKg ? Number(goalKg.replace(',', '.')) : null);
-                      toast(r.ok ? 'Meta salva: a jornada do Hami se ajustou' : r.reason);
+                      toast(r.ok ? 'Meta salva: a jornada do Lumbi se ajustou' : r.reason);
                     }}
                   >
                     Salvar
@@ -320,7 +320,7 @@ export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; o
         <PlusCard onOpen={onPlus} title="Veja 6 meses de evolução" text="Gráficos de 6 meses, além de roupas, pelagens e estilos de casa exclusivos." />
       </div>
 
-      <Modal open={!!photo} onClose={() => setPhoto(null)} label="Foto do Hami">
+      <Modal open={!!photo} onClose={() => setPhoto(null)} label="Foto do Lumbi">
         {photo && (
           <div className="grid justify-items-center gap-3 p-5">
             <Hamster fur={photo.snap.fur} grams={photo.snap.grams} phase={photo.snap.phase} outfit={photo.snap.outfit} mood={photo.snap.mood} size={220} />

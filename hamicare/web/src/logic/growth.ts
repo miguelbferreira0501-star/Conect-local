@@ -1,4 +1,4 @@
-// Crescimento do Hami: ele nasce pequenininho (uns 70% do tamanho) e cresce um pouquinho a cada dia de cuidado.
+// Crescimento do Lumbi: ele nasce pequenininho (uns 70% do tamanho) e cresce um pouquinho a cada dia de cuidado.
 // Demora de propósito: chega ao tamanho máximo depois de uns 300 dias cuidados (não precisam ser seguidos).
 import type { DayLog } from '../types';
 
@@ -21,7 +21,7 @@ export const GROWTH: GrowthStage[] = [
   { days: 300, name: 'Grandão', scale: 1 },
 ];
 
-/** Dia de cuidado: fez pelo menos uma missão ou cuidou do Hami (comida, banho, carinho…). */
+/** Dia de cuidado: fez pelo menos uma missão ou cuidou do Lumbi (comida, banho, carinho…). */
 export const caredDay = (d: DayLog | undefined) => !!d && (Object.keys(d.done ?? {}).length > 0 || (d.care ?? []).length > 0);
 
 export function careDays(days: Record<string, DayLog>): number {

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { useKindOf } from '../Room';
 import { arenaHouse, upgradeHouse } from '../../data/arenas';
 
-describe('Hami usando os móveis', () => {
+describe('Lumbi usando os móveis', () => {
   it('cama deita, banheira dá banho, rodinha corre (sofá e cadeira são só decoração)', () => {
     expect(useKindOf('k-cama-rosa', 'k-cama')).toBe('deitar');
     expect(useKindOf('k-banheira-madeira', 'k-banheira')).toBe('banho');

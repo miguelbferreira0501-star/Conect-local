@@ -1,4 +1,4 @@
-// Cenário vivo do Início: o jardim do Hami com céu que acompanha a hora do dia.
+// Cenário vivo do Início: o jardim do Lumbi com céu que acompanha a hora do dia.
 // Arte própria do Lumbi: colinas, a toca no tronco, nuvens, flores, borboletas e vaga-lumes.
 import type { ReactNode } from 'react';
 
@@ -23,7 +23,7 @@ interface Props {
   time?: SkyTime;
   height?: number;
   children?: ReactNode;
-  /** Algo por cima de tudo (fala do Hami, avisos). */
+  /** Algo por cima de tudo (fala do Lumbi, avisos). */
   overlay?: ReactNode;
   /** O chão se funde com a cor da tela (Início). */
   fade?: boolean;
@@ -92,7 +92,7 @@ export function Scene({ time = skyOf(), height = 300, children, overlay, fade }:
           </g>
         ))}
         <path d="M0 222 C70 196 150 206 210 214 C280 224 330 200 400 206 L400 300 L0 300 Z" fill={c.near} />
-        {/* A toca do Hami: um tronco com portinha redonda */}
+        {/* A toca do Lumbi: um tronco com portinha redonda */}
         <g transform="translate(66 156)">
           <path d="M-36 66 C-38 34 -34 6 -28 -6 L28 -6 C34 6 38 34 36 66 Z" fill={night ? '#5B4036' : '#B07A52'} />
           <ellipse cx="0" cy="-6" rx="28" ry="8" fill={night ? '#7A5848' : '#D7A574'} />

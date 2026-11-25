@@ -1,5 +1,5 @@
-// Estados visuais do Hami escolhidos pelo contexto (nunca ao acaso). O desenho continua 2D em SVG:
-// é o que mantém o mesmo Hami em todas as poses, aceita as 280+ roupas encaixadas e roda leve no celular.
+// Estados visuais do Lumbi escolhidos pelo contexto (nunca ao acaso). O desenho continua 2D em SVG:
+// é o que mantém o mesmo Lumbi em todas as poses, aceita as 280+ roupas encaixadas e roda leve no celular.
 import type { PetMood, State } from '../types';
 
 export type PetState = 'dormindo' | 'sonolento' | 'com-fome' | 'sujinho' | 'carente' | 'dia-dificil' | 'comemorando' | 'feliz' | 'tranquilo';

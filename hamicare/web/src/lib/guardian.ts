@@ -1,4 +1,4 @@
-// Guardiões do Hami no app: mural, pedir ajuda e ser Guardião (pagamento único pelo site).
+// Guardiões do Lumbi no app: mural, pedir ajuda e ser Guardião (pagamento único pelo site).
 import { http } from './social/api';
 import { isNativeApp } from './native';
 import { grantPremium } from './store';

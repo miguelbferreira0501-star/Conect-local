@@ -1,4 +1,4 @@
-// Árvore dos amigos (estilo Finch): o seu Hami no meio da árvore, cada amigo num galho e placas "???"
+// Árvore dos amigos (estilo Finch): o seu Lumbi no meio da árvore, cada amigo num galho e placas "???"
 // nos lugares vazios. Embaixo, o prêmio do próximo amigo e o menu de adicionar (convite, código e QR).
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronRight, Gift, Plus, QrCode, ScanLine, Search, Share2 } from 'lucide-react';
@@ -63,7 +63,7 @@ function Scenery() {
       <g fill="#36622f">
         <circle cx="70" cy="370" r="80" /><circle cx="320" cy="365" r="85" /><circle cx="195" cy="330" r="90" /><circle cx="130" cy="290" r="60" /><circle cx="265" cy="290" r="62" />
       </g>
-      {/* galho do meio, onde mora o seu Hami */}
+      {/* galho do meio, onde mora o seu Lumbi */}
       <ellipse cx="195" cy="300" rx="84" ry="30" fill="#2f5a2c" />
       {/* brilhinhos nas folhas */}
       <g fill="#4f8a43" opacity="0.55">

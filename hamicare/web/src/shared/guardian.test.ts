@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { brl, guardianBonus, guardianQuote } from './guardian';
 
-describe('Guardiões do Hami', () => {
+describe('Guardiões do Lumbi', () => {
   it('níveis fixos: Aliado ajuda 1, Protetor ajuda 3', () => {
     expect(guardianQuote('aliado', 'mes')).toEqual({ seats: 1, months: 1, cents: 990 });
     expect(guardianQuote('protetor', 'ano')).toEqual({ seats: 3, months: 12, cents: 29700 });

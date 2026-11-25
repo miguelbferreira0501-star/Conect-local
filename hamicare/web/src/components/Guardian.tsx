@@ -1,4 +1,4 @@
-// Guardiões do Hami: quem pode pagar dá Lumbi+ para quem não pode agora (ideia do Finch, do nosso jeito).
+// Guardiões do Lumbi: quem pode pagar dá Lumbi+ para quem não pode agora (ideia do Finch, do nosso jeito).
 // - Pedir ajuda: entra na fila; quando um Guardião paga, o Plus liga sozinho (ordem de chegada).
 // - Ser Guardião (só adultos, só no site): Aliado (1 pessoa), Protetor (3) ou Super-herói (você escolhe o valor),
 //   por 1 mês ou 1 ano, pagamento único (Pix ou cartão), nome no mural e 100 sementes por pessoa ajudada.
@@ -50,7 +50,7 @@ export function GuardianHost() {
     };
   }, []);
   return (
-    <Sheet open={open} onClose={() => setOpen(false)} title="Guardiões do Hami">
+    <Sheet open={open} onClose={() => setOpen(false)} title="Guardiões do Lumbi">
       {open && <GuardianBody testOrder={testOrder} onTestDone={() => setTestOrder(null)} />}
     </Sheet>
   );
@@ -71,7 +71,7 @@ function GuardianBody({ testOrder, onTestDone }: { testOrder: string | null; onT
     if (ready && online) load();
   }, [ready, online, load]);
 
-  if (kid) return <p className="pb-4 text-center text-[15px] text-muted">O Lumbi+ é para quem tem 13 anos ou mais. Tudo o que importa para cuidar do Hami é grátis.</p>;
+  if (kid) return <p className="pb-4 text-center text-[15px] text-muted">O Lumbi+ é para quem tem 13 anos ou mais. Tudo o que importa para cuidar do Lumbi é grátis.</p>;
 
   return (
     <div className="grid gap-4 pb-3">

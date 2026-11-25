@@ -1,4 +1,4 @@
-// Turma: você e até 3 amigos, com os Hamis juntos e missões em comum.
+// Turma: você e até 3 amigos, com os Lumbis juntos e missões em comum.
 // Uma missão só conta quando todos fazem; quando todos fazem tudo, o dia fecha e cada um ganha o prêmio.
 // Marcar a missão pessoal (em Missões) já marca a parte da turma.
 import { useCallback, useEffect, useState } from 'react';
@@ -55,7 +55,7 @@ const missionLabel = (id: string) => libById(id)?.title ?? id;
 const missionEmoji = (id: string) => libById(id)?.emoji ?? '⭐';
 const doneCount = (team: Team, id: string) => team.missions.filter((m) => (team.today.checkins[id] ?? []).includes(m)).length;
 
-/** Os Hamis da turma juntos, cada um com o que já fez hoje. */
+/** Os Lumbis da turma juntos, cada um com o que já fez hoje. */
 export function TeamHamis({ team, size = 84, arena }: { team: Team; size?: number; arena: string }) {
   return (
     <ArenaScene arena={arena} height={size * 2.3}>
@@ -77,7 +77,7 @@ export function TeamHamis({ team, size = 84, arena }: { team: Team; size?: numbe
   );
 }
 
-/** Cartão do Início: os Hamis da turma e quanto falta hoje. */
+/** Cartão do Início: os Lumbis da turma e quanto falta hoje. */
 export function TeamHomeCard({ onOpen }: { onOpen: () => void }) {
   const s = useApp();
   const { api } = useSocial();
@@ -276,7 +276,7 @@ function CreateTeam({ api, friends, onCreated }: { api: SocialApi; friends: Prof
       <section className="card grid justify-items-center gap-2 p-5 text-center">
         <Glyph e="art:turma" size={72} />
         <h2 className="font-display text-[22px] font-bold leading-tight">Monte a sua turma</h2>
-        <p className="text-[14px] text-muted">Você e até {teamCap - 1} amigos, com os Hamis juntos.{teamCap < TEAM_MAX_PLUS ? ` Com Lumbi+, até ${TEAM_MAX_PLUS - 1} amigos.` : ''} Vocês escolhem missões em comum, e cada missão só conta quando todo mundo faz.</p>
+        <p className="text-[14px] text-muted">Você e até {teamCap - 1} amigos, com os Lumbis juntos.{teamCap < TEAM_MAX_PLUS ? ` Com Lumbi+, até ${TEAM_MAX_PLUS - 1} amigos.` : ''} Vocês escolhem missões em comum, e cada missão só conta quando todo mundo faz.</p>
       </section>
       <label className="grid gap-1 text-[14px] font-bold" htmlFor="team-name">
         Nome da turma

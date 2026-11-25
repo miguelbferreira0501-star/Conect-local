@@ -1,4 +1,4 @@
-// O desenho pequeno de um item: móvel, decoração, parede, piso ou roupa (vestida num Hami pequenininho).
+// O desenho pequeno de um item: móvel, decoração, parede, piso ou roupa (vestida num Lumbi pequenininho).
 import { memo, useEffect, useRef } from 'react';
 import { Furniture, FLOOR_CSS, Garland, WALLPAPER_CSS } from './Furniture';
 import { KitLite } from './room/kit';

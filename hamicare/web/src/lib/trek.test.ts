@@ -81,7 +81,7 @@ describe('trilha Plus da temporada', () => {
   });
 });
 
-describe('correio do Hami', () => {
+describe('correio do Lumbi', () => {
   it('tem cartas novas, marca como lida e limpa', () => {
     start();
     const all = lettersOf(getState());

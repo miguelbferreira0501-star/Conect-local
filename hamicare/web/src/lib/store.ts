@@ -117,7 +117,7 @@ export function latestKg(s: State): number | null {
 export const personKg = (s: State) => latestKg(s) ?? REF_KG;
 
 /**
- * Monta uma jornada nova. O Hami começa do peso atual dele (ou do corpo inicial da jornada)
+ * Monta uma jornada nova. O Lumbi começa do peso atual dele (ou do corpo inicial da jornada)
  * e a meta dele acompanha a da pessoa.
  */
 export function buildJourney(dir: Direction, kg: number | null, goalKg: number | null, today: string, fromGrams?: number): Journey {
@@ -157,7 +157,7 @@ function upgradeHouses(input: State): State {
 }
 
 function normalizeRest(s: State, raw: State): State {
-  // Só a área de hábitos saudáveis por enquanto: quem estava numa área de peso ou calma passa para hábitos (o Hami para de mudar de peso).
+  // Só a área de hábitos saudáveis por enquanto: quem estava numa área de peso ou calma passa para hábitos (o Lumbi para de mudar de peso).
   if (s.profile.goal !== 'habitos') {
     s.profile = { ...s.profile, goal: 'habitos' };
     s.journey = { ...s.journey, dir: 'manter', startGrams: s.pet.grams, goalGrams: s.pet.grams };
@@ -167,6 +167,10 @@ function normalizeRest(s: State, raw: State): State {
   // Identidade colorida: o tema claro passa a ser o padrão (uma vez; depois vale a escolha da pessoa).
   if (!raw.themeV) s.settings = { ...s.settings, theme: s.settings.theme === 'auto' ? 'claro' : s.settings.theme };
   s.themeV = 1;
+  // O mascote agora se chama Lumbi: quem ficou com o nome antigo padrão ganha o novo.
+  if (s.pet.name === 'Hami') s.pet = { ...s.pet, name: 'Lumbi' };
+  // Só 4 pelagens agora: quem tinha outra volta para a primeira.
+  if (!FURS.some((f) => f.id === s.pet.fur)) s.pet = { ...s.pet, fur: FURS[0].id };
   // Lembretes novos (água, pausa, hora de dormir): quem já tinha lembretes ganha os padrões.
   const n = s.settings.notif;
   s.settings = { ...s.settings, notif: { ...n, kinds: { ...REMINDER_DEFAULTS, ...n.kinds }, water: n.water ?? 'normal', bedtime: n.bedtime ?? '22:00' } };
@@ -603,9 +607,9 @@ export function maintain(input: State): State {
   if (!input.onboarded) return input;
   let s = decayStats(input);
   const today = todayKey();
-  // Jornada: o peso do Hami acompanha as calorias das missões (ou a balança, se a pessoa quiser).
+  // Jornada: o peso do Lumbi acompanha as calorias das missões (ou a balança, se a pessoa quiser).
   s = applyJourney(s, today);
-  // Crescimento: o Hami cresce com os dias de cuidado (a primeira vez só anota, sem festa).
+  // Crescimento: o Lumbi cresce com os dias de cuidado (a primeira vez só anota, sem festa).
   const grown = growthOf(careDays(s.days));
   if (s.pet.growStage == null) s = { ...s, pet: { ...s.pet, growStage: grown.stage } };
   else if (grown.stage > s.pet.growStage) {
@@ -787,7 +791,7 @@ export function completeOnboarding(a: OnboardingAnswers) {
     onboarded: true,
     journey,
     profile: { name: a.userName.trim(), ageGroup: a.ageGroup, goal, focus: a.focus, minutes: a.minutes, likes: a.likes, incentive: a.incentive, feeling: a.feeling, lifeAreas: a.lifeAreas },
-    pet: { ...base.pet, name: a.petName.trim() || 'Hami', fur: a.fur, trait: a.trait, gender: a.petGender, body: bodyStart, grams, startGrams: grams, lastWeighIn: today, weighIns: [{ date: today, grams }] },
+    pet: { ...base.pet, name: a.petName.trim() || 'Lumbi', fur: a.fur, trait: a.trait, gender: a.petGender, body: bodyStart, grams, startGrams: grams, lastWeighIn: today, weighIns: [{ date: today, grams }] },
     body: {
       ...base.body,
       tracking,
@@ -852,12 +856,12 @@ export function toggleTask(id: string): ToggleResult | null {
   let next = withDay(state, key, { ...d, done: { ...d.done, [id]: task.cat }, kcal: kcal > 0 ? { ...(d.kcal ?? {}), [id]: kcal } : d.kcal });
   next = grant(next, { kind: 'tarefa', id, energy: task.energy, cat: task.cat, date: key });
   const got = next.game.paid[`tarefa:${key}:${id}`]?.coins ?? 0;
-  // Durante uma aventura, cada atividade traz o Hami 5 minutos mais cedo.
+  // Durante uma aventura, cada atividade traz o Lumbi 5 minutos mais cedo.
   if (next.adventure) next = { ...next, adventure: { ...next.adventure, endsAt: next.adventure.endsAt - 5 * 60_000 } };
   // Na viagem do dia, cada missão traz ele 15 minutos mais cedo.
   if (next.trek) next = { ...next, trek: { ...next.trek, endsAt: next.trek.endsAt - TREK.perTaskMin * 60_000 } };
   const firstToday = Object.keys(d.done).length === 0;
-  // Um dia de cuidado revela uma curiosidade nova sobre o Hami.
+  // Um dia de cuidado revela uma curiosidade nova sobre o Lumbi.
   if (firstToday && next.pet.facts.length < FACTS.length) {
     const fact = FACTS.find((_, i) => !next.pet.facts.includes(String(i)));
     if (fact) next = { ...next, pet: { ...next.pet, facts: [...next.pet.facts, String(FACTS.indexOf(fact))] } };
@@ -1142,7 +1146,7 @@ export function deleteJar(id: string) {
   commit({ ...state, jar: state.jar.filter((j) => j.id !== id) });
 }
 
-// ---------- Cuidados com o Hami ----------
+// ---------- Cuidados com o Lumbi ----------
 
 const CARE_EFFECT: Partial<Record<CareId, Partial<Record<keyof State['pet']['stats'], number>>>> = {
   carinho: { felicidade: 10 },
@@ -1313,7 +1317,7 @@ export function claimDailyGift(): { coins: number; food?: string } | null {
 
 // ---------- Pets companheiros ----------
 
-/** Choca o ovo (só depois dos dias de cuidado). O primeiro pet já vem andar junto com o Hami. */
+/** Choca o ovo (só depois dos dias de cuidado). O primeiro pet já vem andar junto com o Lumbi. */
 export function hatchCompanion(id: string): boolean {
   const c = state.companions;
   const g = c?.got[id];
@@ -1322,7 +1326,7 @@ export function hatchCompanion(id: string): boolean {
   return true;
 }
 
-/** Escolhe quem anda junto com o Hami (ou ninguém). */
+/** Escolhe quem anda junto com o Lumbi (ou ninguém). */
 export function setCompanion(id: string | null) {
   const c = state.companions;
   if (!c || (id && !c.got[id]?.hatched)) return;
@@ -1375,7 +1379,7 @@ export function setFloor(id: string) {
 }
 
 /**
- * Coloca um móvel na casa onde o Hami mora. Se todas as unidades já estão em outra casa (de outra arena),
+ * Coloca um móvel na casa onde o Lumbi mora. Se todas as unidades já estão em outra casa (de outra arena),
  * o móvel se muda de lá para cá, em vez de não acontecer nada.
  */
 export function placeItem(itemId: string): 'ok' | 'movido' | 'ja-esta' | 'sem-item' {
@@ -1398,7 +1402,7 @@ export function placeItem(itemId: string): 'ok' | 'movido' | 'ja-esta' | 'sem-it
   // Quadro e relógio vão para a parede; tapete, para o meio do chão; o resto, para o chão.
   const place = KIT_PLACE[itemById(itemId)?.svg ?? ''];
   const y = place === 'parede' ? 40 : place === 'tapete' ? 94 : 78;
-  // Vai para a parte da casa que aparece na tela, ao lado do Hami (não atrás dos botões das bordas),
+  // Vai para a parte da casa que aparece na tela, ao lado do Lumbi (não atrás dos botões das bordas),
   // no lugar mais livre entre alguns pontos perto do meio.
   const spots = [38, 62, 30, 70, 46, 54];
   const near = state.house.items.filter((i) => Math.abs(i.y - y) < 18);
@@ -1429,7 +1433,7 @@ export function placeAt(itemId: string, x: number, y: number, flip = false): Buy
   return 'ok';
 }
 
-/** Viagem para a Lua: compra a casa lunar (5.000 sementes) e o Hami se muda para lá. */
+/** Viagem para a Lua: compra a casa lunar (5.000 sementes) e o Lumbi se muda para lá. */
 export function buyMoon(): 'ok' | 'sem-sementes' | 'ja-tem' {
   if (state.moon) return 'ja-tem';
   if (state.coins < MOON_PRICE) return 'sem-sementes';
@@ -1448,14 +1452,14 @@ export function backToEarth(): boolean {
 
 /** Arena atual (a mais alta já aberta). */
 export const currentArena = (s: State) => arenaOf(Math.max(levelOf(s.xp), s.game.maxLevel), gameCfg()).n;
-/** Arena onde o Hami mora. */
+/** Arena onde o Lumbi mora. */
 export const homeArenaOf = (s: State) => (s.homeArena === MOON_N && s.moon ? MOON_N : Math.min(s.homeArena ?? 1, currentArena(s)));
 /** Casa de uma arena (a de agora ou uma guardada). */
 export function houseOf(s: State, n: number) {
   return n === homeArenaOf(s) ? s.house : s.houses?.[n] ?? arenaHouse(n);
 }
 
-/** Muda a casa principal do Hami para outra arena já aberta (as casas antigas ficam guardadas). */
+/** Muda a casa principal do Lumbi para outra arena já aberta (as casas antigas ficam guardadas). */
 export function moveHome(n: number): boolean {
   if (n === MOON_N ? !state.moon : n < 1 || n > currentArena(state)) return false;
   const from = homeArenaOf(state);
@@ -1536,7 +1540,7 @@ export function finishAdventure(now = Date.now()): AdventureResult | null {
   return { placeId: place.id, story: mission.story, coins: mission.coins, xp: mission.xp, find };
 }
 
-// ---------- Viagem do dia (o Hami sai andando e volta com um presente) ----------
+// ---------- Viagem do dia (o Lumbi sai andando e volta com um presente) ----------
 
 export { TREK, SEASON_PLUS };
 const doneToday = (s: State, today = todayKey()) => Object.keys(dayOf(s, today).done).length;
@@ -1586,7 +1590,7 @@ export const TREK_TALES: { s: string; q: string; a: [string, string]; r: [string
   { s: 'Duas trilhas se abrem: uma conhecida e uma que ninguém sabe onde vai dar.', q: 'precisa escolher.', a: ['A trilha conhecida.', 'A trilha nova.'], r: ['O que é familiar também acolhe.', 'Coragem é dar um passo no desconhecido.'] },
 ];
 
-/** Lugar onde o Hami mora (arena ou Lua). */
+/** Lugar onde o Lumbi mora (arena ou Lua). */
 export function homePlaceOf(s: State): string {
   const n = homeArenaOf(s);
   return n === MOON_N ? 'lua' : gameCfg().arenas.find((a) => a.n === n)?.id ?? 'casinha';
@@ -1600,7 +1604,7 @@ export function destinationOwned(s: State, id: string): boolean {
   return !!arena && arena.n <= currentArena(s);
 }
 
-/** Lugar da viagem: o destino escolhido (se a pessoa tem), senão onde o Hami mora. */
+/** Lugar da viagem: o destino escolhido (se a pessoa tem), senão onde o Lumbi mora. */
 export function trekPlaceOf(s: State): string {
   return s.trekDest && destById(s.trekDest) && destinationOwned(s, s.trekDest) ? s.trekDest : homePlaceOf(s);
 }
@@ -1622,7 +1626,7 @@ export function buyDestination(id: string): BuyResult | 'plus' {
   return 'ok';
 }
 
-/** O Hami voltou: sementes, XP, uma comidinha, um cartão de lembrança e uma história. */
+/** O Lumbi voltou: sementes, XP, uma comidinha, um cartão de lembrança e uma história. */
 export function finishTrek(now = Date.now()): TrekResult | null {
   const t = state.trek;
   if (!t || now < t.endsAt) return null;
@@ -1736,7 +1740,7 @@ export function gamePrizesLeft(s: State, today = todayKey()): number {
 }
 export const gameLocked = (s: State, game: GameId) => PLUS_GAMES.includes(game) && !isPremium(s);
 /**
- * Fim de partida: o Hami fica feliz (cuidado de brincar) e, enquanto houver partidas premiadas no dia,
+ * Fim de partida: o Lumbi fica feliz (cuidado de brincar) e, enquanto houver partidas premiadas no dia,
  * ganha sementes conforme as estrelas. Devolve as sementes ganhas (0 se acabaram as do dia).
  */
 export function finishGame(game: GameId, stars: number): number {
@@ -1752,7 +1756,7 @@ export function finishGame(game: GameId, stars: number): number {
   return next.game.paid[`jogo:${today}:${n}`]?.coins ?? 0;
 }
 
-// ---------- Correio do Hami ----------
+// ---------- Correio do Lumbi ----------
 
 export function mailRead(id: string) {
   const m = state.mail ?? { read: [], gone: [] };

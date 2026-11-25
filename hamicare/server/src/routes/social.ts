@@ -181,7 +181,7 @@ social.get('/friends', (c) =>
       id: b.id,
       name: 'Pessoa bloqueada',
       code: '',
-      pet: { name: 'Hami', fur: 'nuvem', phase: 0, outfit: { chapeu: null, oculos: null, roupa: null, acessorio: null } },
+      pet: { name: 'Lumbi', fur: 'nuvem', phase: 0, outfit: { chapeu: null, oculos: null, roupa: null, acessorio: null } },
       house: { wallpaper: 'p-creme', floor: 'f-madeira', items: [] },
       level: 1,
       teen: false,

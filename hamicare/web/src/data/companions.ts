@@ -1,5 +1,5 @@
 // Pets companheiros: cada arena aberta traz um ovo misterioso. Ele choca depois de alguns dias de cuidado
-// (fez pelo menos uma missão ou cuidou do Hami), contados a partir do dia em que o ovo chegou.
+// (fez pelo menos uma missão ou cuidou do Lumbi), contados a partir do dia em que o ovo chegou.
 import { caredDay } from '../logic/growth';
 import type { CompanionState, DayLog } from '../types';
 import type { SoundId } from '../lib/sound';

@@ -1,4 +1,4 @@
-// Lembretes push ao longo do dia (água, Hami, missões, pausa, hora de dormir, passeios) e avisos de amigos.
+// Lembretes push ao longo do dia (água, Lumbi, missões, pausa, hora de dormir, passeios) e avisos de amigos.
 // Quem decide o que sai e quando é o planejador compartilhado (web/src/shared/reminders.ts):
 // no máximo 5 por dia, 1 hora entre eles, nunca de madrugada e sem culpa.
 import webpush from 'web-push';

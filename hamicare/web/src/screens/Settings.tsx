@@ -22,11 +22,11 @@ import { iapAvailable, manageSubscription, restorePlans } from '../lib/iap';
 
 const NOTIF_LABEL: Record<NotifKind, [string, string]> = {
   agua: ['Beber água', 'Nos horários do plano de água'],
-  hami: ['Quando o Hami precisar de você', 'Com fome ou com saudade, uma vez por dia'],
+  hami: ['Quando o Lumbi precisar de você', 'Com fome ou com saudade, uma vez por dia'],
   tarefas: ['Missões do dia', 'No horário escolhido, se ainda faltar alguma'],
   pausa: ['Pausa da tarde', 'Respirar ou alongar às 15h30'],
   dormir: ['Hora de dormir', 'Para desacelerar antes de deitar'],
-  aventura: ['Volta dos passeios', 'Quando o Hami chega da aventura'],
+  aventura: ['Volta dos passeios', 'Quando o Lumbi chega da aventura'],
   missoes: ['Desafios novos da semana', 'Segunda de manhã'],
   amigos: ['Amigos', 'Visitas, presentes e pedidos de amizade'],
 };
@@ -61,7 +61,7 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
           </Field>
         </Group>
 
-        <Group title="Hami">
+        <Group title="Lumbi">
           <Field id="set-pet" label="Nome">
             <input id="set-pet" className="field" maxLength={18} value={s.pet.name} onChange={(e) => updatePet({ name: e.target.value })} />
           </Field>
@@ -182,13 +182,13 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
           <Toggle id="set-req" checked={s.privacy.requests === 'todos'} onChange={(on) => updatePrivacy({ requests: on ? 'todos' : 'ninguem' })} label="Aceitar pedidos de amizade pelo código" sub="Só quem tem o seu código consegue pedir." />
           <Toggle id="set-photos" checked={s.privacy.sharePhotos} onChange={(on) => updatePrivacy({ sharePhotos: on })} label="Permitir que eu compartilhe fotos no feed" />
           <Toggle id="set-rank" checked={s.privacy.ranking !== false} onChange={(on) => updatePrivacy({ ranking: on })} label="Aparecer no ranking dos amigos" sub="Só entre amigos: dias ativos, missões, conquistas, coleções e arenas. Peso nunca aparece. Desligado, você também não vê o ranking." />
-          <p className="text-[13px] text-muted">Peso, diário e humor nunca vão para o feed nem para amigos. No feed e nas visitas, o Hami de todo mundo aparece no formato padrão: ninguém compara corpo.</p>
+          <p className="text-[13px] text-muted">Peso, diário e humor nunca vão para o feed nem para amigos. No feed e nas visitas, o Lumbi de todo mundo aparece no formato padrão: ninguém compara corpo.</p>
         </Group>
 
         {!isMinor && (
           <Group title="Dados físicos (opcional)">
             <Toggle id="set-track" checked={s.body.tracking} onChange={(on) => enableTracking(on)} label="Registrar meu peso" sub={s.body.consentAt ? `Consentimento dado em ${formatDay(s.body.consentAt.slice(0, 10), { day: 'numeric', month: 'long', year: 'numeric' })}.` : 'Fica só com você. Dá pra apagar tudo.'} />
-            <Toggle id="set-hide" checked={s.body.hideNumbers} onChange={setHideNumbers} label="Modo sem números" sub="Esconde todos os pesos, do Hami e seus." />
+            <Toggle id="set-hide" checked={s.body.hideNumbers} onChange={setHideNumbers} label="Modo sem números" sub="Esconde todos os pesos, do Lumbi e seus." />
             {s.body.tracking && (
               <Field id="set-height" label="Altura (cm), opcional">
                 <input id="set-height" className="field" inputMode="numeric" defaultValue={s.body.heightCm ?? ''} onBlur={(e) => setHeight(Number(e.target.value) || null)} />
@@ -223,7 +223,7 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
           {s.profile.ageGroup !== 'ate12' && guardiansHere() && (
             <button className="opt" onClick={() => (onClose(), openGuardian())}>
               <Glyph e="🛡️" size={22} />
-              <span className="min-w-0 flex-1">Guardiões do Hami</span>
+              <span className="min-w-0 flex-1">Guardiões do Lumbi</span>
               <ChevronRight size={18} className="text-muted" />
             </button>
           )}

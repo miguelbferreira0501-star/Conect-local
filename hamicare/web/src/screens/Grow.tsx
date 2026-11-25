@@ -285,7 +285,7 @@ function Planner({ open, onClose }: { open: boolean; onClose: () => void }) {
     setDraft('');
   };
   const hamiPlan = () => {
-    // O Hami escolhe até 5 tarefas da área (as que ainda não estão no plano) e sugere um nome.
+    // O Lumbi escolhe até 5 tarefas da área (as que ainda não estão no plano) e sugere um nome.
     const pick = ideas.slice(0, Math.max(0, Math.min(5, PLAN_MAX - entries.length)));
     if (!pick.length) return toast('O plano já tem todas as ideias desta área.');
     setEntries((l) => [...l, ...pick.map((t, i) => ({ key: `${Date.now()}-${i}`, lib: t.id, title: t.title, emoji: t.emoji }))]);

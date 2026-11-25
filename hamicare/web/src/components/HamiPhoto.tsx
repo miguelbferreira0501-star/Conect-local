@@ -1,4 +1,4 @@
-// Enfeites do Hami 3D: os "z" do sono e as bolhinhas do banho.
+// Enfeites do Lumbi 3D: os "z" do sono e as bolhinhas do banho.
 
 /** Os "z" subindo devagar. */
 export function Zzz({ size = 54 }: { size?: number }) {

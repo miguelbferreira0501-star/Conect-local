@@ -47,7 +47,7 @@ export function useKcalPop() {
   return { pop, layer };
 }
 
-/** Card principal do Início: deixa claro que o Hami emagrece ou ganha peso junto com a pessoa. */
+/** Card principal do Início: deixa claro que o Lumbi emagrece ou ganha peso junto com a pessoa. */
 export type CalmAction = 'sos' | 'respirar' | 'aterrar' | 'sono';
 
 export function JourneyCard({ s, onOpen, onCalm }: { s: State; onOpen: () => void; onCalm?: (a: CalmAction) => void }) {
@@ -143,11 +143,11 @@ export function JourneyCard({ s, onOpen, onCalm }: { s: State; onOpen: () => voi
           </div>
           <p className="text-[12.5px] font-bold opacity-85">
             {j.dir === 'ganhar' && !s.mealRef && !byScale
-              ? 'Coloque sua referência de calorias no Cardápio de hoje para o Hami crescer com você.'
+              ? 'Coloque sua referência de calorias no Cardápio de hoje para o Lumbi crescer com você.'
               : hide
                 ? 'Cada hábito saudável aproxima vocês dois da meta.'
                 : byScale
-                  ? 'O Hami está seguindo a sua balança.'
+                  ? 'O Lumbi está seguindo a sua balança.'
                   : j.dir === 'ganhar'
                     ? `O ${s.pet.name} cresce com o que você come acima da referência.`
                     : `Você e o ${s.pet.name} ${t.verb} as mesmas calorias.`}
@@ -202,7 +202,7 @@ function CalmCard({ s, onCalm }: { s: State; onCalm?: (a: CalmAction) => void })
         <Glyph e="🫶" size={30} />
         <span className="min-w-0 text-left">
           <span className="block text-[17px] font-extrabold leading-tight">A ansiedade apertou?</span>
-          <span className="block text-[13px] font-semibold opacity-80">SOS com o Hami: 3 passos, uns 3 minutos</span>
+          <span className="block text-[13px] font-semibold opacity-80">SOS com o Lumbi: 3 passos, uns 3 minutos</span>
         </span>
         <ChevronRight size={20} className="ml-auto shrink-0" />
       </button>

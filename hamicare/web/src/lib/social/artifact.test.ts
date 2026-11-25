@@ -21,7 +21,7 @@ function fakeDb() {
 
 const profile = (name: string) => ({
   name,
-  pet: { name: `Hami de ${name}`, fur: 'caramelo', phase: 1, outfit: { chapeu: null, oculos: null, roupa: null, acessorio: null } },
+  pet: { name: `Lumbi de ${name}`, fur: 'caramelo', phase: 1, outfit: { chapeu: null, oculos: null, roupa: null, acessorio: null } },
   house: { wallpaper: 'p-creme', floor: 'f-madeira', items: [] },
   level: 2,
   teen: false,
@@ -198,7 +198,7 @@ describe('turma na página publicada', () => {
     expect(t.missions).toEqual(['agua', 'sol']);
     expect(t.memberIds).toHaveLength(4);
     await expect(ana.addTeamMember('u_edu', day)).rejects.toThrow(/4 pessoas/);
-    // Bia vê a turma (com os Hamis de todos).
+    // Bia vê a turma (com os Lumbis de todos).
     expect((await bia.team(day))!.members.map((m) => m.name)).toEqual(['ana', 'bia', 'cris', 'duda']);
     expect(await edu.team(day)).toBeNull();
     // Missão só conta quando todos fazem.

@@ -56,15 +56,15 @@ export const PRIVACY: LegalDoc = {
     {
       h: '2. Quais dados usamos',
       body: [
-        'Sem conta: o app funciona inteiro no seu aparelho. Seu Hami, missões, cardápio, peso, diário e humor ficam guardados apenas no armazenamento local do navegador ou do aparelho. Nós não temos acesso.',
+        'Sem conta: o app funciona inteiro no seu aparelho. Seu Lumbi, missões, cardápio, peso, diário e humor ficam guardados apenas no armazenamento local do navegador ou do aparelho. Nós não temos acesso.',
         'Com conta, tratamos:',
         [
           'Dados da conta: nome, e-mail, faixa de idade e senha. A senha é guardada de forma embaralhada (hash), e nem nós conseguimos lê-la.',
-          'Backup do progresso: tudo o que o app guarda no aparelho, como Hami, roupas, casa, missões, sementes, conquistas e configurações.',
+          'Backup do progresso: tudo o que o app guarda no aparelho, como Lumbi, roupas, casa, missões, sementes, conquistas e configurações.',
           'Dados de saúde, que a LGPD chama de dados sensíveis: peso, medidas, metas de peso, calorias do cardápio e das missões, humor, sono, diário e respostas dos exercícios de bem-estar. Eles ficam apenas no seu backup privado e nunca aparecem para amigos.',
-          'Parte social, se você usar: perfil público (nome, código de amigo, aparência do Hami, casa, nível, bio, ofensiva e conquistas), amizades, grupos, posts, fotos que você escolher postar, comentários, reações, presentes, bloqueios e denúncias.',
+          'Parte social, se você usar: perfil público (nome, código de amigo, aparência do Lumbi, casa, nível, bio, ofensiva e conquistas), amizades, grupos, posts, fotos que você escolher postar, comentários, reações, presentes, bloqueios e denúncias.',
           'Lembretes, se você ligar: o endereço de notificação do aparelho, o horário escolhido, o fuso horário e os tipos de lembrete.',
-          'Guardiões do Hami, se você participar: quem pede ajuda guarda o pedido e, se quiser, um motivo curto (só a equipe vê, nunca aparece para outras pessoas); quem é Guardião guarda o pedido, o valor, o nome escolhido para o mural (ou anônimo) e o recadinho, que aparecem no mural.',
+          'Guardiões do Lumbi, se você participar: quem pede ajuda guarda o pedido e, se quiser, um motivo curto (só a equipe vê, nunca aparece para outras pessoas); quem é Guardião guarda o pedido, o valor, o nome escolhido para o mural (ou anônimo) e o recadinho, que aparecem no mural.',
           'Dados técnicos: um cookie de sessão para manter você conectado, o endereço IP (usado na hora para barrar tentativas em massa de login) e registros técnicos de erros e acesso do servidor.',
           'Contagem de uso: os dias em que você abriu o app com a conta e, se você chegou por um convite ou divulgação, o código dessa origem. Olhamos isso só em números somados (por exemplo, quantas pessoas voltaram na semana), para saber se o app está ajudando.',
         ],
@@ -96,7 +96,7 @@ export const PRIVACY: LegalDoc = {
           'Envio de e-mails, como o de troca de senha (por exemplo, Resend ou Brevo). Só mandamos e-mails necessários para a sua conta; nada de propaganda.',
           'Serviço de notificações do seu navegador ou aparelho (Google, Apple ou Mozilla), que recebe só o endereço de notificação e o texto do lembrete.',
           'Lojas de aplicativos e meios de pagamento, se você assinar o Lumbi+. Eles cuidam do pagamento; nós não recebemos os dados do seu cartão.',
-          'Mercado Pago, se você for Guardião do Hami: ele processa o Pix ou o cartão e nos avisa só se o pagamento foi aprovado e o valor. Não recebemos os dados do cartão nem da sua conta bancária.',
+          'Mercado Pago, se você for Guardião do Lumbi: ele processa o Pix ou o cartão e nos avisa só se o pagamento foi aprovado e o valor. Não recebemos os dados do cartão nem da sua conta bancária.',
         ],
         'Também podemos fornecer dados quando a lei exigir ou por ordem de autoridade competente.',
       ],
@@ -255,7 +255,7 @@ export const TERMS: LegalDoc = {
       h: '7. Sementes e itens virtuais',
       body: [
         [
-          'Sementes são a moeda do app. Você ganha cuidando do Hami, cumprindo missões e jogando no parque de jogos (até 8 partidas premiadas por dia).',
+          'Sementes são a moeda do app. Você ganha cuidando do Lumbi, cumprindo missões e jogando no parque de jogos (até 8 partidas premiadas por dia).',
           'Quem assina o Lumbi+ recebe uma mesada de 500 sementes por semana (pega no app, uma vez por semana, enquanto o Plus estiver ativo) e um martelinho por mês, além da trilha Plus da temporada (sementes, baús e fantasias exclusivas em cada degrau, liberados pelos dias ativos no mês). Tudo isso faz parte dos benefícios do Plus: sementes não são vendidas avulsas.',
           'Sementes, roupas, pelagens, móveis e outros itens são licenças de uso dentro do app. Eles não têm valor em dinheiro, não podem ser trocados por dinheiro nem vendidos fora do app.',
           'Presentes entre amigos são permitidos dentro do app.',
@@ -278,7 +278,7 @@ export const TERMS: LegalDoc = {
       ],
     },
     {
-      h: '8.1 Guardiões do Hami',
+      h: '8.1 Guardiões do Lumbi',
       body: [
         [
           'Quem não pode pagar o Lumbi+ pode pedir um de presente. Os pedidos formam uma fila por ordem de chegada; quando um Guardião paga, cada vaga vira 1 mês (ou 1 ano) de Lumbi+ para a próxima pessoa da fila. Não prometemos prazo, porque depende de quantos Guardiões existirem.',
@@ -292,7 +292,7 @@ export const TERMS: LegalDoc = {
     {
       h: '9. Propriedade intelectual',
       body: [
-        'O nome Lumbi, o personagem Hami, as ilustrações, os textos, as músicas e o código do app são nossos ou licenciados para nós. Você pode usar o app para fins pessoais, mas não pode copiar, vender ou criar produtos a partir dele sem autorização.',
+        'O nome Lumbi, o personagem Lumbi, as ilustrações, os textos, as músicas e o código do app são nossos ou licenciados para nós. Você pode usar o app para fins pessoais, mas não pode copiar, vender ou criar produtos a partir dele sem autorização.',
       ],
     },
     {

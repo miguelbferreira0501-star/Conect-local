@@ -15,7 +15,7 @@ export type SoundId =
   | 'bau-treme' | 'bau-abre'
   // Banho
   | 'shampoo' | 'espuma' | 'bolha' | 'toalha' | 'sacudir'
-  // Hami
+  // Lumbi
   | 'nhac' | 'gole' | 'escova' | 'brilho' | 'iii' | 'squeak' | 'latido' | 'risada' | 'choro' | 'ronrom' | 'coracao' | 'pulo' | 'bocejo' | 'ronco' | 'espreguicar'
   // Brincadeiras
   | 'pega' | 'jogar' | 'quica' | 'tique' | 'fim-jogo'
@@ -382,7 +382,7 @@ const SOUNDS: Record<SoundId, (o: PlayOpts) => void> = {
     for (let i = 0; i < 6; i++) tone({ f: 1200 + Math.random() * 1000, to: 800, t: Math.random() * 0.35, d: 0.05, v: 0.05, pan: Math.random() * 1.4 - 0.7 });
   },
 
-  // Hami
+  // Lumbi
   nhac: () => {
     for (let i = 0; i < 4; i++) {
       noise({ f: 2200, type: 'highpass', q: 0.5, t: i * 0.16, d: 0.045, v: 0.12 });

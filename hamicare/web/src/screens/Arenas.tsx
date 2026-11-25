@@ -1,5 +1,5 @@
 // Mapa das Arenas: a trilha das 12 arenas, a arena de agora, as já abertas e as que vêm depois.
-// Daqui o Hami muda de casa (as casas antigas ficam guardadas) e você espia as casas de cada arena.
+// Daqui o Lumbi muda de casa (as casas antigas ficam guardadas) e você espia as casas de cada arena.
 import { useEffect, useRef, useState } from 'react';
 import { Check, Home as HomeIcon, Lock, MapPin, Eye } from 'lucide-react';
 import { ArenaScene } from '../components/ArenaScene';
@@ -82,7 +82,7 @@ export function ArenasTab({ onHouse }: { onHouse: () => void }) {
           const isHome = a.n === home;
           return (
             <li key={a.n} ref={a.n === cur ? curRef : undefined} className={`arena-stop ${i % 2 ? 'is-right' : ''} ${a.n === cur ? 'is-current' : ''} ${unlocked ? '' : 'is-locked'}`}>
-              <button className="arena-card" onClick={() => setOpen(a.n)} aria-label={`${a.name}, ${unlocked ? (isHome ? 'onde o Hami mora' : 'aberta') : `abre no nível ${a.level}`}`}>
+              <button className="arena-card" onClick={() => setOpen(a.n)} aria-label={`${a.name}, ${unlocked ? (isHome ? 'onde o Lumbi mora' : 'aberta') : `abre no nível ${a.level}`}`}>
                 <ArenaScene arena={a.id} height={118} mini locked={!unlocked} time="dia" />
                 <span className="arena-num">{a.n}</span>
                 {unlocked ? (
@@ -227,7 +227,7 @@ function ArenaSheet({ n, onClose, onHouse }: { n: number | null; onClose: () => 
   );
 }
 
-/** Selo do lugar onde o Hami mora (para o Início). */
+/** Selo do lugar onde o Lumbi mora (para o Início). */
 export function ArenaPin({ s, onClick }: { s: State; onClick: () => void }) {
   const a = arenaByN(homeArenaOf(s));
   return (

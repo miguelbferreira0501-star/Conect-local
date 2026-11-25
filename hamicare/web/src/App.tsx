@@ -110,7 +110,7 @@ export default function App() {
     if (s.onboarded) window.scrollTo({ top: 0 });
   }, [s.onboarded]);
 
-  // O tempo passa para o Hami (fome, sono, pesagem semanal) e os lembretes chegam no horário.
+  // O tempo passa para o Lumbi (fome, sono, pesagem semanal) e os lembretes chegam no horário.
   useEffect(() => {
     tick();
     const id = setInterval(() => {
@@ -182,7 +182,7 @@ export default function App() {
     window.scrollTo({ top: 0 });
   }
 
-  // Tamanho do Hami: cresce com os dias de cuidado.
+  // Tamanho do Lumbi: cresce com os dias de cuidado.
   const growth = useMemo(() => growthOf(careDays(s.days)), [s.days]);
 
   // Som de cada comemoração quando ela aparece na tela.

@@ -35,7 +35,7 @@ export async function saveFile(filename: string, blob: Blob): Promise<'salvo' | 
   const nav = navigator as Navigator & { canShare?: (d: unknown) => boolean };
   if (nav.canShare?.({ files: [file] })) {
     try {
-      await nav.share({ files: [file], title: 'Meu Hami' });
+      await nav.share({ files: [file], title: 'Meu Lumbi' });
       return 'salvo';
     } catch {
       return 'cancelado';
@@ -54,7 +54,7 @@ export async function saveFile(filename: string, blob: Blob): Promise<'salvo' | 
   }
 }
 
-/** Transforma um <svg> da tela numa imagem PNG com fundo e legenda (fotos do Hami). */
+/** Transforma um <svg> da tela numa imagem PNG com fundo e legenda (fotos do Lumbi). */
 export async function snapshotPng(svg: SVGSVGElement, opts: { bg: [string, string]; caption?: string; size?: number }): Promise<Blob> {
   const size = opts.size ?? 720;
   const clone = svg.cloneNode(true) as SVGSVGElement;

@@ -19,7 +19,7 @@ export type ShareDraft = { kind: 'foto'; photo: Photo } | { kind: 'atividade'; t
 const PASTEL = ['#FFD6E4', '#D9ECFF', '#DFF5D2', '#EBDDFF', '#FFE9C2', '#D4F3EE'];
 export const pastelOf = (id: string) => PASTEL[hashStr(id) % PASTEL.length];
 
-/** Rosto do Hami da pessoa num círculo, com anel colorido (como os "stories"). */
+/** Rosto do Lumbi da pessoa num círculo, com anel colorido (como os "stories"). */
 export function Avatar({ pet, id, size = 48, ring = false, label }: { pet: PublicPet; id: string; size?: number; ring?: boolean; label?: string }) {
   const k = 1.45;
   return (
@@ -35,7 +35,7 @@ export function Avatar({ pet, id, size = 48, ring = false, label }: { pet: Publi
 
 const KIND_STICKER: Record<Post['kind'], string> = { atividade: '✅', foto: '📸', decoracao: '🏡', conquista: '🏆', momento: '💛' };
 
-/** A "foto" do post: foto real, casa ou o Hami num fundo colorido. */
+/** A "foto" do post: foto real, casa ou o Lumbi num fundo colorido. */
 export function PostMedia({ post, square }: { post: Post; square?: boolean }) {
   if (post.image) return <img src={post.image} alt={post.text || 'Foto compartilhada'} className={`post-media object-cover ${square ? 'aspect-square' : 'max-h-[420px]'}`} />;
   if (post.house)
@@ -296,7 +296,7 @@ export function Composer({ open, api, draft, onClose, onPosted, groupId, groupNa
             </button>
           )}
         </div>
-        {teen && <p className="text-[12px] text-muted">Para menores de 18, o feed mostra só o Hami e a casa, sem fotos reais.</p>}
+        {teen && <p className="text-[12px] text-muted">Para menores de 18, o feed mostra só o Lumbi e a casa, sem fotos reais.</p>}
         <p className="text-[12px] text-muted">{groupName ? 'Só quem está no grupo vê.' : 'Só seus amigos veem.'} Peso, calorias, diário e humor nunca são compartilhados.</p>
         <button className="btn btn-primary" disabled={busy || !check.ok} onClick={publish}>
           Publicar

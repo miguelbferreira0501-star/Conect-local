@@ -69,7 +69,7 @@ export function ChestShopView() {
         <div className="flex items-center gap-3">
           <Chest kind="ouro" size={74} />
           <div className="min-w-0 flex-1">
-            <h2 className="font-display text-[22px] font-bold leading-tight">Baús do Hami</h2>
+            <h2 className="font-display text-[22px] font-bold leading-tight">Baús do Lumbi</h2>
             <p className="text-[14px] font-semibold leading-snug opacity-90">Abra com as sementes que você ganha se cuidando. Cada baú traz um item para vestir ou decorar.</p>
           </div>
         </div>

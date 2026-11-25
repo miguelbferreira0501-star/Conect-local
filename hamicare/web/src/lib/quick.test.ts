@@ -69,7 +69,7 @@ describe('prêmio por amigo', () => {
 });
 
 describe('casa na Lua', () => {
-  it('custa 5.000 sementes, dá a casa lunar e o Hami se muda', async () => {
+  it('custa 5.000 sementes, dá a casa lunar e o Lumbi se muda', async () => {
     const { buyMoon, homeArenaOf } = await import('./store');
     const { MOON_N, MOON_PRICE } = await import('../data/arenas');
     start(100);

@@ -75,7 +75,7 @@ export async function login(email: string, password: string) {
 /** Depois de criar a conta ou entrar: junta o progresso e já cria o perfil (com o código de amigo). */
 async function afterSignIn() {
   const r = await firstSync();
-  // Se a pessoa ainda vai escolher qual Hami fica, o perfil sai depois da escolha.
+  // Se a pessoa ainda vai escolher qual Lumbi fica, o perfil sai depois da escolha.
   if (r !== 'escolher') void syncProfile(getState());
   return r;
 }
@@ -143,7 +143,7 @@ async function firstSyncInner(): Promise<'nuvem' | 'aparelho' | 'escolher'> {
     startSync();
     return 'nuvem';
   }
-  // Mesmo Hami (criado neste aparelho ou vindo do mesmo backup): fica a versão mais nova, sem perguntar.
+  // Mesmo Lumbi (criado neste aparelho ou vindo do mesmo backup): fica a versão mais nova, sem perguntar.
   if (r.state && local.onboarded && sameOrigin(r.state, local)) {
     if ((r.state.updatedAt ?? 0) > (local.updatedAt ?? 0)) {
       replaceState(r.state, { silent: true });

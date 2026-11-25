@@ -31,7 +31,7 @@ export function widgetData(s: State, now = new Date()): WidgetData {
   const tasks = todayTasks(s, key);
   const done = tasks.filter((t) => t.id in day.done).length;
   return {
-    name: s.pet.name || 'Hami',
+    name: s.pet.name || 'Lumbi',
     line: petLine({ period: periodOf(now), battery: day.battery, done, total: tasks.length, user: s.profile.name, seed: s.seed + now.getDate(), stats: s.pet.stats, sleeping: s.pet.sleeping }),
     done,
     total: tasks.length,

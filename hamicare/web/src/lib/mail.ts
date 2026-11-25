@@ -1,4 +1,4 @@
-// Correio do Hami: cartinhas do app (temporada nova, Guardiões, mesada do Plus…). Ficam no aparelho.
+// Correio do Lumbi: cartinhas do app (temporada nova, Guardiões, mesada do Plus…). Ficam no aparelho.
 import { guardiansHere } from './native';
 import { addDays, dayDiff } from './util';
 import { isPremium, plusWeek, plusWeeklyClaimed, todayKey } from './store';
@@ -16,13 +16,13 @@ export interface Letter {
   action?: { label: string; go: UiTarget | 'guardioes' };
 }
 
-const SEASON_NAMES = ['Verão das Ondas', 'Carnaval de Cores', 'Outono das Folhas', 'Bosque dos Cogumelos', 'Festa das Flores', 'Arraial do Hami', 'Inverno Quentinho', 'Ventania de Pipas', 'Primavera Florida', 'Noite das Lanternas', 'Trilha das Estrelas', 'Natal Iluminado'];
+const SEASON_NAMES = ['Verão das Ondas', 'Carnaval de Cores', 'Outono das Folhas', 'Bosque dos Cogumelos', 'Festa das Flores', 'Arraial do Lumbi', 'Inverno Quentinho', 'Ventania de Pipas', 'Primavera Florida', 'Noite das Lanternas', 'Trilha das Estrelas', 'Natal Iluminado'];
 
 export function lettersOf(s: State, today = todayKey()): Letter[] {
   const month = today.slice(0, 7);
   const m = Number(today.slice(5, 7)) - 1;
   const lastDay = new Date(Number(today.slice(0, 4)), m + 1, 0).getDate();
-  const pet = s.pet.name || 'Hami';
+  const pet = s.pet.name || 'Lumbi';
   const list: Letter[] = [
     {
       id: 'boas-vindas',
@@ -46,7 +46,7 @@ export function lettersOf(s: State, today = todayKey()): Letter[] {
       id: `guardioes:${month}`,
       kind: 'arco',
       title: 'Vamos celebrar os Guardiões!',
-      body: 'Os Guardiões do Hami dão o Lumbi+ de presente para quem não pode pagar agora. Graças a eles, ninguém fica sem cuidado. Você pode pedir um presente ou virar Guardião.',
+      body: 'Os Guardiões do Lumbi dão o Lumbi+ de presente para quem não pode pagar agora. Graças a eles, ninguém fica sem cuidado. Você pode pedir um presente ou virar Guardião.',
       date: `${month}-03` <= today ? `${month}-03` : `${month}-01`,
       action: { label: 'Conhecer os Guardiões', go: 'guardioes' },
     });
@@ -56,7 +56,7 @@ export function lettersOf(s: State, today = todayKey()): Letter[] {
       id: 'gostando',
       kind: 'estrela',
       title: 'Está gostando do Lumbi? Conta pra gente!',
-      body: `O ${pet} e a gente adoram saber como você está se sentindo por aqui. Se o app está te fazendo bem, chame um amigo para cuidar do Hami junto com você: cada amigo novo ainda vale sementes.`,
+      body: `O ${pet} e a gente adoram saber como você está se sentindo por aqui. Se o app está te fazendo bem, chame um amigo para cuidar do Lumbi junto com você: cada amigo novo ainda vale sementes.`,
       date: addDays(s.createdAt, 3),
       action: { label: 'Convidar um amigo', go: 'amigos' },
     });

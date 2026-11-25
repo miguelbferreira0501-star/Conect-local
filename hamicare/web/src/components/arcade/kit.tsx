@@ -1,5 +1,5 @@
 // Peças comuns do parque de jogos: moldura com início/placar/fim, laço de animação,
-// tamanho do palco e o Hami "congelado" (memo) para não redesenhar o SVG a cada quadro.
+// tamanho do palco e o Lumbi "congelado" (memo) para não redesenhar o SVG a cada quadro.
 import { memo, useEffect, useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, X } from 'lucide-react';
 import { Hamster } from '../Hamster';
@@ -59,7 +59,7 @@ export function useBox<T extends HTMLElement>() {
   return { ref, size };
 }
 
-/** O Hami desenhado uma vez só; quem se mexe é a caixa de fora. */
+/** O Lumbi desenhado uma vez só; quem se mexe é a caixa de fora. */
 export const Sprite = memo(function Sprite({ fur, outfit, size, mood = 'feliz' }: { fur: string; outfit?: Outfit; size: number; mood?: PetMood }) {
   return <Hamster fur={fur} outfit={outfit} size={size} idle={false} mood={mood} growth={1} label="" />;
 });

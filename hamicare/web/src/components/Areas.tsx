@@ -1,4 +1,4 @@
-// Áreas da vida em cartões coloridos com o Hami (como no começo do app), no Início e numa página própria.
+// Áreas da vida em cartões coloridos com o Lumbi (como no começo do app), no Início e numa página própria.
 // Cada área abre "Como você quer…?" com hábitos prontos para adicionar ou tirar, e "Criar a minha".
 import { useState } from 'react';
 import { createPortal } from 'react-dom';

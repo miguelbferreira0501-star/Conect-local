@@ -12,7 +12,7 @@ export const ARENA_HOME: Record<number, { wallpaper: string; floor: string; item
     wallpaper: 'p-azulzinho',
     floor: 'f-creme',
     items: [
-      // tudo juntinho no meio da tela, em volta do Hami (como um cantinho de verdade)
+      // tudo juntinho no meio da tela, em volta do Lumbi (como um cantinho de verdade)
       { itemId: 'k-tapete-rosa', x: 50, y: 94 },
       { itemId: 'k-cama-rosa', x: 35, y: 71 },
       { itemId: 'k-criado-branco', x: 49, y: 64 },
@@ -209,7 +209,7 @@ export const MOON_ITEMS = [
   'lua-telescopio',
   'lua-quadro',
 ];
-// Base lunar: paredes de painéis com rebites, janela redonda para a Terra e móveis lunares juntinhos em volta do Hami.
+// Base lunar: paredes de painéis com rebites, janela redonda para a Terra e móveis lunares juntinhos em volta do Lumbi.
 ARENA_HOME[MOON_N] = {
   wallpaper: 'p-lua',
   floor: 'f-lua',
@@ -312,7 +312,7 @@ export function upgradeHouse(raw: House, n: number): House {
   const h = n === 1 && factory ? { ...input, wallpaper: 'p-azulzinho', floor: 'f-creme' } : input;
   const ids = h.items.map((i) => i.itemId);
   const old = OLD_ARENA_ITEMS[n] ?? [];
-  // Casa inicial com os móveis ainda no lugar de fábrica antigo: chegam mais perto do Hami.
+  // Casa inicial com os móveis ainda no lugar de fábrica antigo: chegam mais perto do Lumbi.
   if (n === 1 && h.items.length && h.items.every((i) => OLD_STARTER_POS[i.itemId]?.[0] === i.x && OLD_STARTER_POS[i.itemId]?.[1] === i.y)) {
     const fresh = arenaHouse(1).items;
     return {

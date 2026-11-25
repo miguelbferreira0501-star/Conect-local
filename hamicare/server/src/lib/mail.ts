@@ -112,7 +112,7 @@ export function resetMail(to: string, name: string, link: string, minutes: numbe
     'Se não foi você, é só ignorar este e-mail: sua senha continua a mesma.',
     '',
     'Com carinho,',
-    'Hami 🐹',
+    'Lumbi 🐹',
   ].join('\n');
   const html = `<!doctype html><html lang="pt-BR"><body style="margin:0;background:#E9F6F1;font-family:Arial,Helvetica,sans-serif;color:#24323A">
 <div style="max-width:480px;margin:0 auto;padding:28px 18px">
