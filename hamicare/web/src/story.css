@@ -1319,8 +1319,13 @@ span.tcal-ico { background: transparent; }
 .st-theme-info { display: grid; gap: 8px; padding: 12px 14px 14px; background: #FFFFFF; color: #3a2a20; }
 .st-theme-info b { font-size: 17px; font-weight: 900; line-height: 1.15; }
 .st-theme-info small { margin-top: -4px; font-size: 12.5px; font-weight: 700; opacity: 0.7; }
-.st-theme-pieces { display: flex; flex-wrap: wrap; gap: 5px; }
-.st-theme-pieces > span { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: #F6F1EA; }
+.st-theme-info > * { min-width: 0; }
+.st-theme-info small { overflow-wrap: anywhere; }
+/* peças da coleção: quadradinhos iguais, em grade, cada desenho centralizado e inteiro dentro do quadrado */
+.st-theme-pieces { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.st-theme-pieces > span { position: relative; display: grid; place-items: center; aspect-ratio: 1; overflow: hidden; border-radius: 12px; background: #F6F1EA; padding: 5px; }
+.st-theme-pieces > span > * { width: 100% !important; height: 100% !important; max-width: 100%; max-height: 100%; display: grid; place-items: center; overflow: hidden; }
+.st-theme-pieces > span svg, .st-theme-pieces > span img { max-width: 100%; max-height: 100%; width: auto !important; height: auto !important; object-fit: contain; }
 .st-theme-pieces > span.is-own { box-shadow: inset 0 0 0 2px #7CC765; }
 .st-theme-buy { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 44px; border-radius: 999px; background: #7CC765; color: #FFFFFF; font-size: 17px; font-weight: 900; box-shadow: 0 4px 0 #5DA549; }
 .st-theme-buy:disabled { background: #D9D4CC; box-shadow: 0 4px 0 #C2BCB2; color: #6b6259; }
