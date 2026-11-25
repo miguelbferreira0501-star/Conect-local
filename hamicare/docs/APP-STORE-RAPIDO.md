@@ -105,7 +105,7 @@ Privacidade: https://hamicare.onrender.com/privacidade
 
 **Categoria:** Saúde e fitness (secundária: Estilo de vida) · **Direitos autorais:** `2026 Jessika Neusa Borges Gervin`
 
-**Capturas (iPhone 6,9" = 1320×2868 ou 6,7" = 1290×2796):** as imagens que você fizer (de 3 a 10). O app é só para iPhone: não precisa de iPad.
+**Capturas (iPhone 6,9", 1320×2868):** as 8 de `docs/lojas/iphone/`, nesta ordem. O app é só para iPhone: não precisa de iPad.
 
 **Classificação etária:** responder o questionário com sinceridade: conteúdo gerado por usuários (com
 moderação, denúncia e bloqueio), compras no app, sem violência, sem jogos de azar com dinheiro. Os baús são
