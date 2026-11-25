@@ -1,4 +1,4 @@
-// Lumbi+ à vista: um cartão com o Hami de cartola e o botão "Ver planos", e o selo "Plus" do topo.
+// Lumbi+ à vista: um cartão com o Lumbi de cartola e o botão "Ver planos", e o selo "Plus" do topo.
 // Não aparece para quem já é Plus nem para crianças de até 12 anos (sem oferta para criança).
 import { Crown, ChevronRight } from 'lucide-react';
 import { Hamster } from './Hamster';

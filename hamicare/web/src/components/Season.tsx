@@ -20,7 +20,7 @@ export const SEASONS = [
   { name: 'Outono das Folhas', emoji: '🍂', c: ['#FFC37A', '#E07B39'] },
   { name: 'Bosque dos Cogumelos', emoji: '🍄', c: ['#FF9F9F', '#D9534F'] },
   { name: 'Festa das Flores', emoji: '🌸', c: ['#FFC6DD', '#F072A8'] },
-  { name: 'Arraial do Hami', emoji: '🌽', c: ['#FFE07A', '#F2A23A'] },
+  { name: 'Arraial do Lumbi', emoji: '🌽', c: ['#FFE07A', '#F2A23A'] },
   { name: 'Inverno Quentinho', emoji: '☕', c: ['#C9B6FF', '#7E5BD9'] },
   { name: 'Ventania de Pipas', emoji: '🪁', c: ['#9FE3D2', '#3FB8AC'] },
   { name: 'Primavera Florida', emoji: '🌼', c: ['#C6F0A0', '#5FBF5E'] },
@@ -237,7 +237,7 @@ function plusText(p: PlusTier): string {
   if (p.item) parts.push(itemById(p.item)?.name ?? 'Roupa exclusiva');
   return parts.join(' e ');
 }
-/** O prêmio grande do degrau Plus: fantasia vestida no Hami, baú ou sementes. */
+/** O prêmio grande do degrau Plus: fantasia vestida no Lumbi, baú ou sementes. */
 function PlusPrize({ p, fur }: { p: PlusTier; fur: string }) {
   if (p.item)
     return (

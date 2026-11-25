@@ -127,7 +127,7 @@ export function Wellbeing({ onPlus }: { onPlus: () => void }) {
   );
 }
 
-/** O Hami no cantinho de baixo: tocar nele faz ele pular, soltar coraçõezinhos e falar alguma coisa gentil. */
+/** O Lumbi no cantinho de baixo: tocar nele faz ele pular, soltar coraçõezinhos e falar alguma coisa gentil. */
 function WellbeingPet() {
   const s = useApp();
   const [n, setN] = useState(0);
@@ -252,7 +252,7 @@ function HelpLine({ name, number }: { name: string; number: string }) {
   );
 }
 
-// ---------- Ferramentas: cada uma com cenário próprio e o Hami reagindo ----------
+// ---------- Ferramentas: cada uma com cenário próprio e o Lumbi reagindo ----------
 
 type Theme = 'ceu' | 'noite' | 'aurora' | 'foco' | 'jardim' | 'rosa' | 'lavanda';
 
@@ -419,7 +419,7 @@ function Breath({ onClose, auto, next }: { onClose: () => void; auto?: boolean; 
   const theme: Theme = pat.id === 'sono' ? 'noite' : 'ceu';
 
   return (
-    <ToolScreen title="Respirar" sub={phase ? `Respiração ${cycle + 1} de ${pat.cycles}` : 'Respire junto com o Hami'} theme={theme} onClose={onClose}>
+    <ToolScreen title="Respirar" sub={phase ? `Respiração ${cycle + 1} de ${pat.cycles}` : 'Respire junto com o Lumbi'} theme={theme} onClose={onClose}>
       {step < 0 && (
         <div className="grid gap-2">
           {BREATHS.map((b) => (
@@ -488,7 +488,7 @@ function Breath({ onClose, auto, next }: { onClose: () => void; auto?: boolean; 
             )}
           </>
         ) : (
-          <p className="tool-text font-display text-[22px] font-bold">O Hami enche as bochechas quando você puxa o ar</p>
+          <p className="tool-text font-display text-[22px] font-bold">O Lumbi enche as bochechas quando você puxa o ar</p>
         )}
       </div>
       {finished && next && (
@@ -525,7 +525,7 @@ function Sos({ onClose }: { onClose: () => void }) {
   if (stage === 2) return <Grounding onClose={onClose} next={{ label: 'Último passo', go: () => (markMissions(), setStage(3)) }} />;
   if (stage === 3) {
     return (
-      <ToolScreen title="SOS com o Hami" sub="Passo 3 de 3" theme="lavanda" onClose={onClose}>
+      <ToolScreen title="SOS com o Lumbi" sub="Passo 3 de 3" theme="lavanda" onClose={onClose}>
         <div className="grid justify-items-center gap-3 text-center">
           <PetBig mood={felt === 'melhor' ? 'animado' : 'calmo'} size={160} className={felt === 'melhor' ? 'hop-loop' : ''} />
           {!felt ? (
@@ -560,7 +560,7 @@ function Sos({ onClose }: { onClose: () => void }) {
               </button>
             </div>
           )}
-          {marked.length > 0 && <p className="tool-text text-[13px] font-bold opacity-80">Missão feita: {marked.length === 2 ? 'Respirar e 5-4-3-2-1' : marked[0] === 'respirar' ? 'Respirar com o Hami' : '5-4-3-2-1'}</p>}
+          {marked.length > 0 && <p className="tool-text text-[13px] font-bold opacity-80">Missão feita: {marked.length === 2 ? 'Respirar e 5-4-3-2-1' : marked[0] === 'respirar' ? 'Respirar com o Lumbi' : '5-4-3-2-1'}</p>}
           <button className={`btn w-full ${felt === 'ainda' ? 'btn-ghost' : 'btn-primary'}`} onClick={onClose}>
             Voltar
           </button>
@@ -569,14 +569,14 @@ function Sos({ onClose }: { onClose: () => void }) {
     );
   }
   return (
-    <ToolScreen title="SOS com o Hami" sub="3 passos, uns 3 minutos" theme="lavanda" onClose={onClose}>
+    <ToolScreen title="SOS com o Lumbi" sub="3 passos, uns 3 minutos" theme="lavanda" onClose={onClose}>
       <div className="grid justify-items-center gap-4 text-center">
         <PetBig mood="calmo" size={170} />
         <p className="tool-text font-display text-[24px] font-bold leading-tight">Ei{s.profile.name ? `, ${s.profile.name}` : ''}. Eu tô aqui com você.</p>
         <p className="tool-text text-[16px] opacity-90">O que você está sentindo é forte, mas passa. Vamos juntos: primeiro respirar, depois voltar para o agora.</p>
         <ol className="grid w-full gap-1.5 text-left">
           {[
-            ['🌬️', 'Respirar devagar com o Hami'],
+            ['🌬️', 'Respirar devagar com o Lumbi'],
             ['🖐️', '5-4-3-2-1: voltar para o agora'],
             ['🫶', 'Ver como você está e pedir ajuda se precisar'],
           ].map(([e, t], k) => (
@@ -705,7 +705,7 @@ function useCountdown(totalSec: number | null, onEnd: () => void) {
 
 const mmss = (sec: number) => `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
 
-/** Anel de progresso em volta do Hami. */
+/** Anel de progresso em volta do Lumbi. */
 function Ring({ progress, color, size = 260, children }: { progress: number; color: string; size?: number; children: React.ReactNode }) {
   const r = size / 2 - 10;
   const c = 2 * Math.PI * r;
@@ -729,12 +729,12 @@ function Meditate({ onClose }: { onClose: () => void }) {
   const total = mins ? mins * 60 : 1;
   const cueIdx = mins ? Math.min(MEDITATION_CUES.length - 1, Math.floor(((total - left) / total) * MEDITATION_CUES.length)) : 0;
   return (
-    <ToolScreen title="Meditação" sub={mins && !done ? 'O Hami medita junto com você' : 'Um tempinho só seu'} theme="aurora" onClose={onClose}>
+    <ToolScreen title="Meditação" sub={mins && !done ? 'O Lumbi medita junto com você' : 'Um tempinho só seu'} theme="aurora" onClose={onClose}>
       <div className="grid justify-items-center gap-4 text-center">
         {!mins ? (
           <>
             <PetBig mood="calmo" size={180} className="levitate" />
-            <p className="tool-text text-[16px]">Escolha quanto tempo. Feche os olhos se quiser: o Hami avisa quando acabar.</p>
+            <p className="tool-text text-[16px]">Escolha quanto tempo. Feche os olhos se quiser: o Lumbi avisa quando acabar.</p>
             <div className="grid w-full grid-cols-3 gap-2">
               {[
                 [3, '🌱', 'Rapidinho'],
@@ -784,7 +784,7 @@ function Focus({ onClose }: { onClose: () => void }) {
   const total = phase === 'foco' ? 25 * 60 : phase === 'pausa' ? 5 * 60 : null;
   const left = useCountdown(total, () => setPhase((p) => (p === 'foco' ? 'pausa' : 'fim')));
   return (
-    <ToolScreen title="Foco" sub={phase === 'foco' ? 'Celular de lado. O Hami cuida do tempo.' : phase === 'pausa' ? 'Pausa: estica as pernas!' : 'Pomodoro com o Hami'} theme="foco" onClose={onClose}>
+    <ToolScreen title="Foco" sub={phase === 'foco' ? 'Celular de lado. O Lumbi cuida do tempo.' : phase === 'pausa' ? 'Pausa: estica as pernas!' : 'Pomodoro com o Lumbi'} theme="foco" onClose={onClose}>
       <div className="grid justify-items-center gap-4 text-center">
         {phase === 'pronto' && (
           <>
@@ -794,7 +794,7 @@ function Focus({ onClose }: { onClose: () => void }) {
                 <Glyph e="📖" size={44} />
               </span>
             </div>
-            <p className="tool-text text-[16px]">25 minutos de foco e 5 de pausa. O Hami estuda junto (de óculos e tudo).</p>
+            <p className="tool-text text-[16px]">25 minutos de foco e 5 de pausa. O Lumbi estuda junto (de óculos e tudo).</p>
             <button className="btn btn-primary w-full" onClick={() => setPhase('foco')}>
               Começar foco
             </button>
@@ -836,7 +836,7 @@ function Focus({ onClose }: { onClose: () => void }) {
   );
 }
 
-// ---------- Relaxar (a luz desce pelo corpo do Hami) ----------
+// ---------- Relaxar (a luz desce pelo corpo do Lumbi) ----------
 
 const SCAN_Y: Record<string, number> = { Pés: 90, Pernas: 80, Barriga: 66, Mãos: 70, Ombros: 50, Rosto: 40, 'Corpo todo': 62 };
 

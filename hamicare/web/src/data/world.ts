@@ -1,4 +1,4 @@
-// Mapa do mundo do Hami: 10 lugares, 3 missões e 3 achadinhos em cada um (30 colecionáveis).
+// Mapa do mundo do Lumbi: 10 lugares, 3 missões e 3 achadinhos em cada um (30 colecionáveis).
 export interface Mission {
   id: string;
   title: string;
@@ -114,7 +114,7 @@ export const PLACES: Place[] = [
     id: 'vila-inverno', name: 'Vila de inverno', emoji: '❄️', level: 6, colors: ['#EAF4FF', '#9CC3E8'], pos: [82, 20],
     desc: 'Casinhas com chaminé, neve fofinha e luzes amarelas.',
     missions: [
-      m('boneco', 'Fazer um boneco de neve', 15, 'Fiz um boneco de neve do meu tamanho. Dei o nome de Neve-Hami.'),
+      m('boneco', 'Fazer um boneco de neve', 15, 'Fiz um boneco de neve do meu tamanho. Dei o nome de Neve-Lumbi.'),
       m('patins', 'Patinar no lago', 45, 'Caí três vezes e levantei quatro. Isso é o que importa!'),
       m('lareira', 'Ouvir histórias na lareira', 120, 'A vovó da vila contou histórias até eu dormir quentinho.'),
     ],

@@ -13,18 +13,18 @@ interface Props {
   house: House;
   period?: Period;
   height?: number;
-  /** O Hami (ou outro conteúdo) no centro do chão. */
+  /** O Lumbi (ou outro conteúdo) no centro do chão. */
   children?: ReactNode;
   editing?: boolean;
   selected?: string | null;
   onSelect?: (uid: string | null) => void;
   onMove?: (uid: string, x: number, y: number) => void;
-  /** Tocar num móvel que o Hami sabe usar (cama, banheira, sofá…). */
+  /** Tocar num móvel que o Lumbi sabe usar (cama, banheira, sofá…). */
   onUse?: (uid: string, kind: UseKind) => void;
   /** Modo de decorar: guardar o móvel selecionado ou trazer para a frente (botões em cima dele). */
   onRemove?: (uid: string) => void;
   onFront?: (uid: string) => void;
-  /** O Hami usando um móvel agora: desenhado dentro dele, com a largura do móvel em px. */
+  /** O Lumbi usando um móvel agora: desenhado dentro dele, com a largura do móvel em px. */
   usage?: { uid: string; kind: UseKind; node: (w: number) => ReactNode } | null;
   /** Só este móvel pode ser arrastado (prévia da compra na Loja). */
   only?: string;
@@ -35,7 +35,7 @@ interface Props {
 }
 
 export type UseKind = 'deitar' | 'banho' | 'sentar' | 'correr' | 'balancar';
-/** O que o Hami faz em cada móvel. */
+/** O que o Lumbi faz em cada móvel. */
 export function useKindOf(itemId: string, svg?: string): UseKind | null {
   if (svg === 'k-banheira' || svg === 'k-lua-banheira' || svg === 'k-inv-banheira') return 'banho';
   if (svg === 'k-cama' || svg === 'k-lua-cama' || svg === 'k-cama-dossel' || svg === 'k-inv-cama-pinguim' || svg === 'k-jar-cama-cogumelo' || svg === 'k-almofada' || svg === 'caminha' || /^cama/.test(itemId)) return 'deitar';
@@ -45,7 +45,7 @@ export function useKindOf(itemId: string, svg?: string): UseKind | null {
 }
 
 const GARLANDS = new Set(['pisca', 'bandeirinhas']);
-/** Tapetes ficam no chão, sempre embaixo do Hami e dos móveis. */
+/** Tapetes ficam no chão, sempre embaixo do Lumbi e dos móveis. */
 const FLAT = /^tapete/;
 
 /** Onde a peça está: tapete (deitado no chão), parede (pendurado) ou chão (em pé, com sombra). */
@@ -60,7 +60,7 @@ export function placeOf(itemId: string, svg: string | undefined, y: number): 'ta
 const depth = (y: number) => 0.8 + 0.2 * Math.min(1, Math.max(0, (y - WALL_H) / (100 - WALL_H)));
 
 /**
- * A casa do Hami: um cômodo de verdade (parede lisa de uma cor só até o chão, chão em perspectiva,
+ * A casa do Lumbi: um cômodo de verdade (parede lisa de uma cor só até o chão, chão em perspectiva,
  * janela com cortina) e os móveis posicionados em % (arrastáveis no modo de edição).
  */
 export function Room({ house, period = 'tarde', height = 260, children, editing, selected, onSelect, onMove, onRemove, onFront, onUse, usage, only, ghost, onDrag, wide = 1 }: Props & { wide?: number }) {
@@ -134,7 +134,7 @@ export function Room({ house, period = 'tarde', height = 260, children, editing,
           <div
             key={it.uid}
             role={editing || kind ? 'button' : 'img'}
-            aria-label={kind ? `${item.name}: levar o Hami até lá` : item.name}
+            aria-label={kind ? `${item.name}: levar o Lumbi até lá` : item.name}
             tabIndex={editing || kind ? 0 : -1}
             onClick={kind ? () => onUse?.(it.uid, kind) : undefined}
             className={`room-item ${place === 'tapete' ? 'is-flat' : ''} ${movable ? 'is-editable' : ''} ${selected === it.uid ? 'is-selected' : ''} ${kind ? 'is-usable' : ''} ${ghost?.uid === it.uid ? 'is-ghost' : ''}`}

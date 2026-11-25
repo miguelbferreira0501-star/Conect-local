@@ -1,6 +1,6 @@
-/* Layout: app de uma coluna (máx. 480px), barra de 5 abas fixa embaixo, o Hami em destaque no topo do Início.
+/* Layout: app de uma coluna (máx. 480px), barra de 5 abas fixa embaixo, o Lumbi em destaque no topo do Início.
    Paleta: névoa lavanda de fundo, tinta ameixa, cor de destaque escolhida pela pessoa (6 opções),
-   folha e girassol para progresso. O caramelo do Hami é a cor quente da tela. */
+   folha e girassol para progresso. O caramelo do Lumbi é a cor quente da tela. */
 :root {
   --bg: #f6f3ff;
   --surface: #ffffff;
@@ -361,7 +361,7 @@ h3 {
   border-radius: 10px;
 }
 
-/* ---------- Hami ---------- */
+/* ---------- Lumbi ---------- */
 .pet-idle {
   animation: pet-bob 3.2s ease-in-out infinite;
   transform-box: fill-box;
@@ -932,7 +932,7 @@ h3 {
 @media (prefers-reduced-motion: reduce) {
   .neon-glow { animation: none; }
 }
-/* Hami com vida própria: orelha que mexe, rabinho que balança e bracinho que se ajeita. */
+/* Lumbi com vida própria: orelha que mexe, rabinho que balança e bracinho que se ajeita. */
 .pet-ear { animation: pet-ear 6.5s ease-in-out infinite; }
 @keyframes pet-ear { 0%, 88%, 100% { rotate: 0deg; } 91% { rotate: 14deg; } 94% { rotate: -6deg; } 97% { rotate: 6deg; } }
 .pet-tail { animation: pet-tail 2.6s ease-in-out infinite; }

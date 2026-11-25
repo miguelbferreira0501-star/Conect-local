@@ -3,7 +3,7 @@
 import type { House, Outfit, PetMood } from '../../types';
 import type { ReactionId } from '../../shared/moderation';
 
-/** O que os amigos veem do Hami: nunca o peso. */
+/** O que os amigos veem do Lumbi: nunca o peso. */
 export interface PublicPet {
   name: string;
   fur: string;
@@ -26,7 +26,7 @@ export interface Profile {
   /** Contadores públicos: só coisas boas. */
   streak?: number;
   badges?: number;
-  /** Arena onde o Hami mora (para a visita mostrar o cenário). */
+  /** Arena onde o Lumbi mora (para a visita mostrar o cenário). */
   arena?: number;
   /** Aparece no ranking dos amigos (dá para sair). */
   ranked?: boolean;

@@ -1,4 +1,4 @@
-// Animação de viagem: o Hami sai dirigindo um carrinho vermelho pela estrada até o lugar do passeio.
+// Animação de viagem: o Lumbi sai dirigindo um carrinho vermelho pela estrada até o lugar do passeio.
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Hamster } from './Hamster';

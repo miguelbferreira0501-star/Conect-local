@@ -511,7 +511,7 @@ export const WORLD: Record<string, Draw> = {
       <circle cx="56" cy="50" r="6" fill={C.leaf} />
     </g>
   ),
-  // Turma: três Hamis lado a lado.
+  // Turma: três Lumbis lado a lado.
   'art:turma': () => (
     <g>
       {[

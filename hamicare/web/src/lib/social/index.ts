@@ -66,7 +66,7 @@ export function useSocial(): { api: SocialApi | null; loading: boolean } {
 export function publicProfileOf(s: State): Omit<Profile, 'id' | 'code' | 'updatedAt'> {
   return {
     name: s.profile.name || 'Alguém',
-    pet: { name: s.pet.name.trim() || 'Hami', fur: s.pet.fur, phase: s.pet.phase, outfit: s.pet.outfit },
+    pet: { name: s.pet.name.trim() || 'Lumbi', fur: s.pet.fur, phase: s.pet.phase, outfit: s.pet.outfit },
     house: s.house,
     level: levelOf(s.xp),
     teen: s.profile.ageGroup === '13a17',

@@ -224,7 +224,7 @@ export function SyncChoiceModal() {
     <Modal open onClose={() => {}} label="Qual progresso manter?">
       <div className="grid gap-3 p-5">
         <h2 className="font-display text-[22px] font-bold">Qual progresso manter?</h2>
-        <p className="text-[14px] text-muted">Esta conta já tem um Hami salvo na nuvem, diferente do deste aparelho.</p>
+        <p className="text-[14px] text-muted">Esta conta já tem um Lumbi salvo na nuvem, diferente do deste aparelho.</p>
         {card(choice.server, 'O da nuvem', 'nuvem')}
         {card(choice.local, 'O deste aparelho', 'aparelho')}
       </div>

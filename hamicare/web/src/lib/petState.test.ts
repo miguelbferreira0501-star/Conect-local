@@ -5,7 +5,7 @@ import type { State } from '../types';
 
 const base = (energia: number, sleeping = false) => ({ pet: { sleeping, stats: { felicidade: 80, saciedade: 80, limpeza: 80, energia }, statsAt: 0 } }) as unknown as State;
 
-describe('Hami não vive com sono', () => {
+describe('Lumbi não vive com sono', () => {
   it('de dia, com energia mediana, ele fica feliz (não sonolento)', () => {
     expect(petStateOf(base(30), { hour: 10 })).toBe('feliz');
   });

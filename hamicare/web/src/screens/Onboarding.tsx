@@ -35,7 +35,7 @@ export function Onboarding() {
 
   const steps: StepId[] = useMemo(() => {
     // Por enquanto só há a área de hábitos saudáveis: sem a pergunta de objetivo nem jornada de peso.
-    // Primeiro o Hami (menino ou menina, nome, jeitinho), depois você, as áreas e a nossa jornada.
+    // Primeiro o Lumbi (menino ou menina, nome, jeitinho), depois você, as áreas e a nossa jornada.
     const list: StepId[] = ['intro', 'gender', 'name', 'pet', 'you', 'age'];
     if (weightJourney) list.push('body-data', 'journey');
     list.push('focus', 'minutes', 'feeling', 'j1', 'j2', 'j3', 'plan', 'plus');
@@ -44,7 +44,7 @@ export function Onboarding() {
   const step = steps[Math.min(i, steps.length - 1)];
   const next = () => setI((n) => Math.min(n + 1, steps.length - 1));
   const back = () => setI((n) => Math.max(0, n - 1));
-  const petName = a.petName.trim() || 'Hami';
+  const petName = a.petName.trim() || 'Lumbi';
   const grams = JOURNEY_GRAMS[dir].start;
   const kg = a.tracking && consent && a.weightKg ? a.weightKg : null;
   const goalKg = kg ? a.goalKg ?? defaultGoalKg(kg, dir) : null;
@@ -60,7 +60,7 @@ export function Onboarding() {
   const section = ['gender', 'name', 'pet'].includes(step) ? 'Sobre mim' : ['j1', 'j2', 'j3', 'plan'].includes(step) ? 'A nossa jornada' : 'Sobre você';
   const showPet = !['plus', 'focus', 'j1', 'j2', 'j3', 'pet'].includes(step);
 
-  // Quem chega pela primeira vez conhece o Hami numa pequena história antes das perguntas.
+  // Quem chega pela primeira vez conhece o Lumbi numa pequena história antes das perguntas.
   if (step === 'intro' && !migrated) return <StoryIntro fur={a.fur} onDone={next} />;
 
   return (
@@ -75,7 +75,7 @@ export function Onboarding() {
       </div>
       <p className="obx-section">{section}</p>
 
-      {/* Na tela do Plus o Hami aparece lá dentro, de cartola: aqui em cima ficaria repetido. */}
+      {/* Na tela do Plus o Lumbi aparece lá dentro, de cartola: aqui em cima ficaria repetido. */}
       {showPet && (
         <div className="flex justify-center">
           <Hamster fur={a.fur} grams={grams} phase={0} mood={step === 'plan' ? 'animado' : 'feliz'} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: null }} size={104} label={petName} />
@@ -85,10 +85,10 @@ export function Onboarding() {
       <div className="grid gap-3" key={step}>
         {step === 'intro' && (
           <>
-            {say(migrated ? <>Oi de novo! O {s.pet.name || 'Xodó'} virou um cachorrinho: o <b>Hami</b>. Seus pontos, itens e diário vieram junto. Me responde umas perguntinhas?</> : <>Zzz… Oi! Eu sou o <b>Hami</b>. A gente cuida um do outro: posso <b>emagrecer ou ganhar peso junto com você</b>, te ajudar com <b>hábitos saudáveis</b> ou com a <b>ansiedade</b>. Você escolhe.</>)}
+            {say(migrated ? <>Oi de novo! O {s.pet.name || 'Xodó'} virou um cachorrinho: o <b>Lumbi</b>. Seus pontos, itens e diário vieram junto. Me responde umas perguntinhas?</> : <>Zzz… Oi! Eu sou o <b>Lumbi</b>. A gente cuida um do outro: posso <b>emagrecer ou ganhar peso junto com você</b>, te ajudar com <b>hábitos saudáveis</b> ou com a <b>ansiedade</b>. Você escolhe.</>)}
             <p className="text-center text-[14px] text-muted">São perguntas rápidas. Dá pra mudar tudo depois.</p>
             <button className="btn btn-primary" onClick={next}>
-              {migrated ? 'Vamos lá' : 'Acordar o Hami'}
+              {migrated ? 'Vamos lá' : 'Acordar o Lumbi'}
             </button>
           </>
         )}
@@ -190,7 +190,7 @@ export function Onboarding() {
                 <span>Sou o adulto responsável, li como o app funciona e autorizo o uso. (Para menores de 13, amigos e feed ficam desligados.)</span>
               </label>
             )}
-            {ageSet && minor && <p className="text-[14px] text-muted">Para quem tem menos de 18, o Hami não muda de peso e não tem contagem de calorias: a jornada é de hábitos e movimento.</p>}
+            {ageSet && minor && <p className="text-[14px] text-muted">Para quem tem menos de 18, o Lumbi não muda de peso e não tem contagem de calorias: a jornada é de hábitos e movimento.</p>}
             <button className="btn btn-primary" onClick={next} disabled={!ageSet || (a.ageGroup === 'ate12' && !guardianOk)}>
               Continuar
             </button>

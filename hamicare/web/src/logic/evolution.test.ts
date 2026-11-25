@@ -50,7 +50,7 @@ describe('calorias de cada missão', () => {
   });
 });
 
-describe('jornada do Hami', () => {
+describe('jornada do Lumbi', () => {
   it('menores sempre mantêm o peso', () => {
     expect(directionOf('emagrecer', true)).toBe('manter');
     expect(directionOf('emagrecer', false)).toBe('perder');
@@ -62,7 +62,7 @@ describe('jornada do Hami', () => {
     expect(defaultGoalKg(60, 'ganhar')).toBe(63);
     expect(needKcalFor(80, 76)).toBe(30800);
   });
-  it('o Hami chega à meta dele quando a pessoa chega à dela', () => {
+  it('o Lumbi chega à meta dele quando a pessoa chega à dela', () => {
     const j = journey();
     expect(journeyGrams(j, journeyProgress(j, 0))).toBe(165);
     expect(journeyGrams(j, journeyProgress(j, j.needKcal / 2))).toBe(150);
@@ -73,11 +73,11 @@ describe('jornada do Hami', () => {
     // 140 kcal de 26.950 → 0,52% da jornada → 30 g × 0,0052 ≈ 0,2 g
     expect(165 - journeyGrams(j, journeyProgress(j, 140))).toBeCloseTo(0.2, 1);
   });
-  it('ganhar peso faz o Hami crescer até a meta', () => {
+  it('ganhar peso faz o Lumbi crescer até a meta', () => {
     const j = journey({ dir: 'ganhar', startGrams: 115, goalGrams: 140, needKcal: 23100 });
     expect(journeyGrams(j, journeyProgress(j, 23100))).toBe(140);
   });
-  it('manter: o Hami fica firme', () => {
+  it('manter: o Lumbi fica firme', () => {
     const j = journey({ dir: 'manter', startGrams: 135, goalGrams: 135, needKcal: 0 });
     expect(journeyGrams(j, journeyProgress(j, 5000))).toBe(135);
   });

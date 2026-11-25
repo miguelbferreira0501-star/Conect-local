@@ -1,5 +1,5 @@
 // Áreas do Lumbi: o que a pessoa quer cuidar agora. Dá para trocar a qualquer momento.
-// - perder / ganhar / manter: o Hami muda de peso junto (só para maiores de 18).
+// - perder / ganhar / manter: o Lumbi muda de peso junto (só para maiores de 18).
 // - habitos: só hábitos saudáveis (cama, dentes, caminhada…), sem falar de peso nem de calorias.
 // - calma: para quem sente ansiedade: respirar, desacelerar, dormir melhor e um SOS para as crises.
 import type { AgeGroup, GoalId } from '../types';

@@ -61,7 +61,7 @@ describe('áreas da vida', () => {
   });
 });
 
-describe('estados do Hami pelo contexto', () => {
+describe('estados do Lumbi pelo contexto', () => {
   it('dormindo, com fome, dia difícil e comemorando', () => {
     base();
     const s = getState();

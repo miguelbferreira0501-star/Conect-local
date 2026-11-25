@@ -1,5 +1,5 @@
-// Nível novo em tela cheia: brilho, partículas, o Hami comemorando, o número e o prêmio.
-// Quando o nível abre uma arena, vem a revelação: o Hami brilha, a arena aparece,
+// Nível novo em tela cheia: brilho, partículas, o Lumbi comemorando, o número e o prêmio.
+// Quando o nível abre uma arena, vem a revelação: o Lumbi brilha, a arena aparece,
 // depois a casa nova com os presentes, e você escolhe se muda agora ou explora depois.
 import { useEffect, useState } from 'react';
 import { ArenaScene } from './ArenaScene';

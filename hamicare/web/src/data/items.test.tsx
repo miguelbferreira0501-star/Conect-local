@@ -21,7 +21,7 @@ describe('catálogo', () => {
     expect(ITEMS.filter((i) => i.kind === 'efeito').length).toBeGreaterThanOrEqual(10);
   });
 
-  it('toda peça aparece desenhada no Hami', () => {
+  it('toda peça aparece desenhada no Lumbi', () => {
     const base = renderToStaticMarkup(<Hamster fur="caramelo" outfit={empty} idle={false} />);
     const missing = ITEMS.filter((i) => WEARABLE_KINDS.includes(i.kind)).filter((i) => {
       const html = renderToStaticMarkup(<Hamster fur="caramelo" outfit={{ ...empty, [i.kind]: i.id }} idle={false} />);

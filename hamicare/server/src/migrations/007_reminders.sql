@@ -1,4 +1,4 @@
--- Lembretes ao longo do dia (água, Hami, missões, pausa, hora de dormir, passeios e amigos).
+-- Lembretes ao longo do dia (água, Lumbi, missões, pausa, hora de dormir, passeios e amigos).
 -- O plano de cada lembrete fica no servidor (web/src/shared/reminders.ts); aqui ficam as escolhas da pessoa
 -- e o controle do que já saiu (para nunca repetir nem passar do limite do dia).
 

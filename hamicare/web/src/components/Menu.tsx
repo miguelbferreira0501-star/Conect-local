@@ -1,4 +1,4 @@
-// Menu do Lumbi (estilo Finch): cartão do Hami, widget, atalhos em grade, Plus e comunidade.
+// Menu do Lumbi (estilo Finch): cartão do Lumbi, widget, atalhos em grade, Plus e comunidade.
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Copy } from 'lucide-react';
 import { Hamster } from './Hamster';
@@ -115,7 +115,7 @@ export function MenuScreen({ open, onClose }: { open: boolean; onClose: () => vo
         </button>
         {s.profile.ageGroup !== 'ate12' && guardiansHere() && (
           <button onClick={() => (onClose(), openGuardian())}>
-            <Glyph e="🛡️" size={30} /> <span className="menu-t">Guardiões do Hami</span> <ChevronRight size={22} />
+            <Glyph e="🛡️" size={30} /> <span className="menu-t">Guardiões do Lumbi</span> <ChevronRight size={22} />
           </button>
         )}
       </div>

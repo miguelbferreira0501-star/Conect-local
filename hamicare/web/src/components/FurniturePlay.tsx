@@ -1,4 +1,4 @@
-// O Hami usando os móveis (Início e aba Cuidar): tocar na cama, banheira, sofá, cadeira ou rodinha faz ele
+// O Lumbi usando os móveis (Início e aba Cuidar): tocar na cama, banheira, sofá, cadeira ou rodinha faz ele
 // ir até lá e deitar, tomar banho, sentar ou correr por alguns segundos. Banho e brincar contam como cuidado.
 import { useRef, useState } from 'react';
 import { SleepingHami } from './SleepingHami';
@@ -19,7 +19,7 @@ const USE_LINE: Record<UseKind, string> = {
   balancar: 'Uiii, lá vou eu!',
 };
 
-/** O Hami usando o móvel (desenhado dentro dele, na largura do móvel). */
+/** O Lumbi usando o móvel (desenhado dentro dele, na largura do móvel). */
 export function UsePet({ kind, w }: { kind: UseKind; w: number }) {
   const s = useApp();
   const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));

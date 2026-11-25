@@ -1,4 +1,4 @@
-// Ilustrações de comidas: cardápio da pessoa e lanchinhos do Hami.
+// Ilustrações de comidas: cardápio da pessoa e lanchinhos do Lumbi.
 import { C, Hi, Sh, heart, type Draw } from './kit';
 
 /** Tigela vista de lado, com o que estiver dentro desenhado antes. */

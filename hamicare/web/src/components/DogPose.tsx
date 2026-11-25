@@ -34,6 +34,38 @@ const PRINT: Record<DogPoseKind, { dx: number; top: number }> = {
   anda: { dx: -25, top: 2 },
 };
 
+/**
+ * A roupa vista de lado (andando): nada de gola, botões ou bolso da frente. Só a gola de trás no
+ * pescoço, a barra na cintura e, quando a roupa tem estampa, alguns desenhos espalhados pelo lado.
+ */
+function SideDetails({ base, c1, c2, seam }: { base: string; c1?: string; c2?: string; seam: string }) {
+  const light = c2 ?? '#FFFFFF';
+  const ducks = base.includes('patos');
+  const stars = base === 'pijama';
+  const stripes = ['futebol', 'listr', 'marinheiro', 'abelha', 'tigre', 'zebra'].some((k) => base.includes(k));
+  return (
+    <g>
+      {c1 && <rect x="0" y="0" width="165" height="190" fill={c1} />}
+      {stripes && [112, 126, 140].map((y) => <rect key={y} x="0" y={y} width="165" height="5" fill={light} opacity="0.85" />)}
+      {ducks &&
+        [[70, 120], [94, 136], [66, 140]].map(([x, y], i) => (
+          <g key={i} transform={`translate(${x} ${y})`}>
+            <ellipse cx="0" cy="2" rx="6" ry="4.2" fill="#FFD34D" />
+            <circle cx="4" cy="-3" r="3.2" fill="#FFD34D" />
+            <path d="M7 -3 l3 1 l-3 1z" fill="#F08A3A" />
+          </g>
+        ))}
+      {stars &&
+        [[70, 118], [94, 132], [64, 138], [98, 112]].map(([x, y], i) => (
+          <path key={i} transform={`translate(${x} ${y}) scale(0.9)`} d="M0 -5 L1.5 -1.5 L5 -1.5 L2.2 1 L3.2 4.6 L0 2.6 L-3.2 4.6 L-2.2 1 L-5 -1.5 L-1.5 -1.5Z" fill="#FFE27A" />
+        ))}
+      {/* gola de trás e barra da cintura */}
+      <path d="M44 100 Q58 108 78 102" fill="none" stroke={light} strokeWidth="5" strokeLinecap="round" opacity="0.9" />
+      <rect x="0" y="143" width="165" height="8" fill={seam} opacity="0.55" />
+    </g>
+  );
+}
+
 export function DogPose({
   kind,
   fur: furId,
@@ -99,7 +131,7 @@ export function DogPose({
       </defs>
       {/* virado: espelha por dentro do desenho (sem o volume de tecido, que escurece quando espelhado) */}
       <g transform={flip ? `translate(${S.w} 0) scale(-1 1)` : undefined}>
-        <ellipse cx={S.w * 0.5} cy={S.h - 4} rx={S.w * 0.34} ry="4.6" fill="rgba(60,30,40,0.13)" />
+        <ellipse className={anim && kind === 'anda' ? (fast ? 'dogp-shadow is-fast' : 'dogp-shadow') : undefined} style={{ transformOrigin: `${S.w * 0.5}px ${S.h - 4}px` }} cx={S.w * 0.5} cy={S.h - 4} rx={S.w * 0.34} ry="4.6" fill="rgba(60,30,40,0.13)" />
         <g
           className={anim ? (kind === 'anda' ? (fast ? 'dogp-bob is-fast' : 'dogp-bob') : kind === 'dorme' ? 'hami-sleep' : 'hami-breathe') : undefined}
           style={{ transformOrigin: `${S.w / 2}px ${S.h}px` }}
@@ -119,9 +151,13 @@ export function DogPose({
             <g clipPath={costume ? undefined : `url(#hm${uid})`}>
               <g clipPath={`url(#cl${uid})`} filter={flip ? undefined : `url(#t${uid})`}>
                 <rect x="0" y="0" width={S.w} height={S.h} fill={garment} />
-                <g transform={`translate(${print.dx} 0)`}>
-                  <Clothes id={roupa} geo={{ top: print.top, w: 48, h: 163, eyeY: 62 }} />
-                </g>
+                {kind === 'anda' && !costume ? (
+                  <SideDetails base={itemById(roupa)?.base ?? roupa ?? ''} c1={itemById(roupa)?.c1} c2={itemById(roupa)?.c2} seam={seam ?? garment} />
+                ) : (
+                  <g transform={`translate(${print.dx} 0)`}>
+                    <Clothes id={roupa} geo={{ top: print.top, w: 48, h: 163, eyeY: 62 }} />
+                  </g>
+                )}
               </g>
               <g clipPath={`url(#cl${uid})`}>
                 <path d={S.clothes} fill="none" stroke={seam ?? garment} strokeWidth="4.4" />

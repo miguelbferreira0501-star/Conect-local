@@ -1,5 +1,5 @@
 // A Loja: a rua das lojinhas (portas grandes coloridas) e a loja em tela cheia, como um cantinho próprio:
-// o Hami vendedor no alto, fundo marrom, quadradinhos só com o desenho e o preço (o nome aparece ao tocar)
+// o Lumbi vendedor no alto, fundo marrom, quadradinhos só com o desenho e o preço (o nome aparece ao tocar)
 // e abas da loja embaixo (Vendinha, Roupas, Casa, Comida e Baús).
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -36,7 +36,7 @@ const DOOR_TEXT: Record<ShopId, string> = {
   vendinha: 'Coleção do dia e presente',
   roupas: 'Roupas, fantasias e looks',
   casa: 'Móveis, paredes e pisos',
-  comida: 'Comidinhas para o Hami',
+  comida: 'Comidinhas para o Lumbi',
   baus: 'Baús com surpresas',
 };
 
@@ -138,7 +138,7 @@ function PlusBanner({ onPlus }: { onPlus: () => void }) {
     <button className="sm-plus" onClick={onPlus}>
       <span className="min-w-0 text-left">
         <b>Virar Plus</b>
-        <small>{PLUS_COUNTS.items} itens lindos só para o {s.pet.name || 'Hami'}</small>
+        <small>{PLUS_COUNTS.items} itens lindos só para o {s.pet.name || 'Lumbi'}</small>
       </span>
       <span className="sm-plus-art" aria-hidden="true">
         <Hamster growth={1} fur={s.pet.fur} outfit={{ chapeu: 'coroa-rei', oculos: null, roupa: null, acessorio: null, efeito: null }} size={74} idle={false} mood="animado" />
@@ -297,7 +297,7 @@ function AisleBody({ kinds, looks, onTry, onPlus }: { kinds: ItemKind[]; looks?:
   );
 }
 
-/** Looks prontos: o Hami vestido e o preço do conjunto (o nome do look aparece para leitores de tela). */
+/** Looks prontos: o Lumbi vestido e o preço do conjunto (o nome do look aparece para leitores de tela). */
 export function LookTiles({ onPlus }: { onPlus: () => void }) {
   const s = useApp();
   const kids = s.profile.ageGroup === 'ate12';
@@ -349,8 +349,8 @@ export function LookTiles({ onPlus }: { onPlus: () => void }) {
   );
 }
 
-/** Provador: o Hami com a roupa de agora + a peça escolhida, antes de comprar. */
-/** Provador no estilo jogo: o Hami grandão no meio (ou a peça dentro da sua casa), nome e preço,
+/** Provador: o Lumbi com a roupa de agora + a peça escolhida, antes de comprar. */
+/** Provador no estilo jogo: o Lumbi grandão no meio (ou a peça dentro da sua casa), nome e preço,
  *  e um carrossel com as peças da prateleira para ir trocando. */
 export function TryOn({ item, list, onPick, onClose, onPlus, onGift }: { item: Item | null; list: Item[]; onPick: (item: Item) => void; onClose: () => void; onPlus: () => void; onGift?: (itemId: string) => void }) {
   const s = useApp();
@@ -467,14 +467,14 @@ function previewHouse(house: House, item: Item): House {
   return { ...house, items: [...house.items, { uid: 'provador', itemId: item.id, ...spot, z: 999 }] };
 }
 
-/** Vitrine do Plus: 8 peças que mudam todo dia, para provar no Hami (ou ver na casa) de graça. */
+/** Vitrine do Plus: 8 peças que mudam todo dia, para provar no Lumbi (ou ver na casa) de graça. */
 export function PlusShowcase({ onTry, onAll }: { onTry: (item: Item, list?: Item[]) => void; onAll: () => void }) {
   const s = useApp();
   const today = todayKey();
   const premium = isPremium(s);
   const picks = useMemo(() => {
     const rnd = mulberry32(hashStr(`plus:${today}`));
-    // Só as peças desenhadas mais caprichadas: roupas com desenho no Hami e móveis do kit novo.
+    // Só as peças desenhadas mais caprichadas: roupas com desenho no Lumbi e móveis do kit novo.
     const pool = ITEMS.filter((i) => i.plus && !i.souvenir && i.price > 0 && inSeason(i)).sort(() => rnd() - 0.5);
     const wear = pool.filter((i) => WEARABLE_KINDS.includes(i.kind) && i.kind !== 'efeito' && i.base).slice(0, 5);
     const home = pool.filter((i) => i.svg?.startsWith('k-')).slice(0, 3);

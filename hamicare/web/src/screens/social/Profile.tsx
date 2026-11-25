@@ -36,7 +36,7 @@ export function MyHeader({ me, api, postsCount, friendsCount, onAdd, error, onRe
     return (
       <div className="card grid gap-2 p-4 text-center">
         <p className="font-display text-[18px] font-bold">Não deu para criar seu perfil</p>
-        <p className="text-[14px] text-muted">{error} Se for o nome, troque em Ajustes (o seu ou o do Hami).</p>
+        <p className="text-[14px] text-muted">{error} Se for o nome, troque em Ajustes (o seu ou o do Lumbi).</p>
         <button className="btn btn-primary btn-sm justify-self-center" onClick={onRetry}>
           Tentar de novo
         </button>
@@ -50,7 +50,7 @@ export function MyHeader({ me, api, postsCount, friendsCount, onAdd, error, onRe
         <span className="pf-clip" aria-hidden="true" />
         <span className="pf-stamp" aria-hidden="true" />
         <div className="pf-top">
-          <span className="pf-photo" role="img" aria-label={`Hami de ${me.name}`}>
+          <span className="pf-photo" role="img" aria-label={`Lumbi de ${me.name}`}>
             <Hamster fur={me.pet.fur} phase={me.pet.phase} outfit={me.pet.outfit} size={112} idle={false} neutral label="" />
           </span>
           <div className="min-w-0 flex-1">
@@ -115,7 +115,7 @@ export function MyHeader({ me, api, postsCount, friendsCount, onAdd, error, onRe
           </label>
           {!check.ok && <p className="text-[13px] text-danger">{REASON_TEXT[check.reason]}</p>}
           <p className="text-[12px] text-muted">
-            {bio.length}/120 · Seu perfil mostra só coisas boas: nome, Hami, nível, ofensiva e conquistas. Peso, calorias, diário e humor nunca aparecem.
+            {bio.length}/120 · Seu perfil mostra só coisas boas: nome, Lumbi, nível, ofensiva e conquistas. Peso, calorias, diário e humor nunca aparecem.
           </p>
           <button className="btn btn-primary" type="submit" disabled={!check.ok}>
             Salvar
@@ -169,7 +169,7 @@ export function ProfilePage({ userId, api, myId, onClose, onChanged }: { userId:
           <>
             <section className="profile-head">
               <div className="flex items-center gap-4">
-                <Avatar pet={p.pet} id={p.id} size={86} ring label={`Hami de ${p.name}`} />
+                <Avatar pet={p.pet} id={p.id} size={86} ring label={`Lumbi de ${p.name}`} />
                 <div className="grid flex-1 grid-cols-3 gap-1">
                   <Counter value={page.isFriend ? page.posts.length : '–'} label="posts" />
                   <Counter value={page.friendsCount} label="amigos" />

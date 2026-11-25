@@ -32,7 +32,7 @@ const ROWS: Row[] = [
   ['Trilha Hábito que fica (21 dias)', '3 dias', '21 dias'],
   ['Relatório da semana', false, true],
   ['Estatísticas de evolução e humor', '30 dias', '6 meses'],
-  ['Hami, missões, arenas e baús', true, true],
+  ['Lumbi, missões, arenas e baús', true, true],
   ['SOS, respiração, diário e humor', true, true],
   ['Temporada do mês e coleções', true, true],
   ['Amigos e feed', true, true],
@@ -42,7 +42,6 @@ const ROWS: Row[] = [
   ['Trilha Plus da temporada (sementes extras)', false, true],
   [`Fantasias, roupas e móveis exclusivos`, false, `${PLUS_COUNTS.items} itens`],
   [`Estilos de casa completos`, false, `${PLUS_COUNTS.styles}`],
-  [`Pelagens especiais`, false, `${PLUS_COUNTS.furs}`],
 ];
 
 const cell = (v: string | boolean) => (v === true ? <Check size={18} className="mx-auto" aria-label="sim" /> : v === false ? <span className="opacity-60" aria-label="não">—</span> : <b>{v}</b>);
@@ -70,7 +69,7 @@ function Compare() {
   );
 }
 
-/** Lumbi+ em duas etapas: o que muda (com o Hami vestido) e a escolha do plano. O essencial de autocuidado é sempre grátis. */
+/** Lumbi+ em duas etapas: o que muda (com o Lumbi vestido) e a escolha do plano. O essencial de autocuidado é sempre grátis. */
 export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () => void; fromOnboarding?: boolean; fur?: string; name?: string }) {
   const s = useApp();
   const { user } = useAccount();
@@ -79,7 +78,7 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
   const [step, setStep] = useState<'intro' | 'planos'>('intro');
   const [plan, setPlan] = useState<Plan>('anual');
   const [compare, setCompare] = useState(false);
-  const pet = name ?? (s.pet.name || 'Hami');
+  const pet = name ?? (s.pet.name || 'Lumbi');
   const petFur = fur ?? s.pet.fur;
   const later = fromOnboarding ? 'Continuar grátis' : 'Agora não';
   // No iPhone, os preços vêm da App Store (na moeda da pessoa).
@@ -148,7 +147,7 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
           </li>
           <li>
             <span className="pw-ico">
-              <Hamster growth={1} fur={petFur} outfit={{ chapeu: null, oculos: null, roupa: 'fantasia-raposa', acessorio: null, efeito: null }} size={56} idle={false} mood="feliz" label="Hami de raposinha" />
+              <Hamster growth={1} fur={petFur} outfit={{ chapeu: null, oculos: null, roupa: 'fantasia-raposa', acessorio: null, efeito: null }} size={56} idle={false} mood="feliz" label="Lumbi de raposinha" />
             </span>
             <span>
               <b>Deixe o {pet} do seu jeito</b>
@@ -170,7 +169,7 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
             </span>
             <span>
               <b>Turma com até {TEAM_MAX_PLUS} pessoas</b>
-              Chame mais amigos para cuidar dos Hamis juntos (sem Plus, cabem {TEAM_MAX}).
+              Chame mais amigos para cuidar dos Lumbis juntos (sem Plus, cabem {TEAM_MAX}).
             </span>
           </li>
           <li>
@@ -182,7 +181,7 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
           </li>
           <li>
             <span className="pw-ico">
-              <Hamster growth={1} fur={petFur} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: 'm-pelucia', efeito: null }} size={56} idle={false} mood="animado" label="Hami com pelúcia" />
+              <Hamster growth={1} fur={petFur} outfit={{ chapeu: null, oculos: null, roupa: null, acessorio: 'm-pelucia', efeito: null }} size={56} idle={false} mood="animado" label="Lumbi com pelúcia" />
             </span>
             <span>
               <b>Apoie nossa missão</b>

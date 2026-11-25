@@ -1,4 +1,4 @@
-// Pets companheiros: o cartão no Mapa das Arenas, a coleção, o ovo chocando e o pet que anda junto com o Hami.
+// Pets companheiros: o cartão no Mapa das Arenas, a coleção, o ovo chocando e o pet que anda junto com o Lumbi.
 import { useContext, useState } from 'react';
 import { GrowthContext } from '../components/Hamster';
 import { createPortal } from 'react-dom';
@@ -15,8 +15,8 @@ const VOICE = PET_VOICE;
 const arenaName = (n: number) => gameCfg().arenas.find((a) => a.n === n)?.name ?? `Arena ${n}`;
 const daysWord = (n: number) => (n === 1 ? '1 dia' : `${n} dias`);
 
-/** O pet que anda com o Hami (tocar faz ele pular e fazer barulhinho). Fica do lado do Hami, no mesmo chão,
- *  e acompanha o tamanho dele (o Hami filhote é bem menor). `hamster` é o tamanho do desenho do Hami ao lado. */
+/** O pet que anda com o Lumbi (tocar faz ele pular e fazer barulhinho). Fica do lado do Lumbi, no mesmo chão,
+ *  e acompanha o tamanho dele (o Lumbi filhote é bem menor). `hamster` é o tamanho do desenho do Lumbi ao lado. */
 export function CompanionBuddy({ hamster = 176 }: { hamster?: number }) {
   const s = useApp();
   const k = useContext(GrowthContext);
@@ -24,7 +24,7 @@ export function CompanionBuddy({ hamster = 176 }: { hamster?: number }) {
   const [hop, setHop] = useState(0);
   if (!pet) return null;
   const size = Math.round(hamster * (0.3 + 0.14 * k));
-  // Dormindo, o Hami fica deitado (bem mais comprido): o pet fica do lado, sem encostar nele.
+  // Dormindo, o Lumbi fica deitado (bem mais comprido): o pet fica do lado, sem encostar nele.
   const asleep = s.pet.sleeping;
   const half = asleep ? hamster * 0.36 : 67 * k * (hamster / 200);
   const style = { left: `calc(50% - ${Math.round(half + (asleep ? size + 6 : 2 + size * 0.8))}px)`, bottom: Math.round(0.07 * (hamster - size)) };
@@ -57,7 +57,7 @@ export function CompanionsCard() {
   const ready = list.find((x) => x.state === 'pronto');
   const egg = list.find((x) => x.state === 'ovo');
   const active = companionById(s.companions?.active);
-  const name = s.pet.name || 'Hami';
+  const name = s.pet.name || 'Lumbi';
   return (
     <>
       <button className={`card pets-card ${ready ? 'is-ready' : ''}`} onClick={() => setOpen(true)} aria-label={`Pets companheiros: ${born} de ${list.length}`}>
@@ -93,7 +93,7 @@ function CompanionsSheet({ open, onClose }: { open: boolean; onClose: () => void
   const active = s.companions?.active ?? null;
   const [view, setView] = useState<Companion | null>(null);
   const [hatching, setHatching] = useState<Companion | null>(null);
-  const name = s.pet.name || 'Hami';
+  const name = s.pet.name || 'Lumbi';
   return (
     <Sheet open={open} onClose={onClose} title="Pets companheiros">
       <div className="grid gap-4">
@@ -215,7 +215,7 @@ function HatchOverlay({ pet, onDone }: { pet: Companion | null; onDone: (p: Comp
           <div className="grid w-full max-w-[320px] gap-2">
             {!isActive && (
               <button className="btn welcome-btn w-full" onClick={() => (setCompanion(pet.id), close())}>
-                <Heart size={18} /> Levar junto com o {s.pet.name || 'Hami'}
+                <Heart size={18} /> Levar junto com o {s.pet.name || 'Lumbi'}
               </button>
             )}
             <button className={`btn w-full ${isActive ? 'welcome-btn' : 'btn-soft'}`} onClick={close}>

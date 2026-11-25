@@ -67,7 +67,7 @@ export const QUESTS: QuestDef[] = [
   { id: 'ativos5', period: 'semana', title: 'Ter 5 dias com atividades', target: 5, coins: 40, xp: 60, count: (d) => (isActive(d) ? 1 : 0) },
   { id: 'mover3', period: 'semana', title: 'Se mexer em 3 dias diferentes', target: 3, coins: 35, xp: 50, count: hasCat('fitness') },
   { id: 'diario3', period: 'semana', title: 'Escrever 3 vezes no diário', target: 3, coins: 30, xp: 40, count: eventCount('diario') },
-  { id: 'aventura1', period: 'semana', title: 'Levar o Hami a uma aventura', target: 1, coins: 25, xp: 40, count: eventCount('aventura') },
+  { id: 'aventura1', period: 'semana', title: 'Levar o Lumbi a uma aventura', target: 1, coins: 25, xp: 40, count: eventCount('aventura') },
   { id: 'cuidado20', period: 'mes', title: 'Cuidar de você em 20 dias', target: 20, coins: 150, xp: 200, count: hasCat('autocuidado') },
   { id: 'mover12', period: 'mes', title: 'Se mexer em 12 dias', target: 12, coins: 150, xp: 200, count: hasCat('fitness') },
 ];
@@ -131,15 +131,15 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: 'cem', title: 'Cem missões', desc: '100 missões concluídas', emoji: '💯', coins: 100, check: (_s, c) => c.totalDone >= 100 },
   { id: 'ofensiva7', title: 'Uma semana seguida', desc: 'Ofensiva de 7 dias', emoji: '🔥', coins: 30, check: (_s, c) => c.best >= 7 },
   { id: 'ofensiva30', title: 'Primeiro mês de constância', desc: 'Ofensiva de 30 dias', emoji: '🏅', coins: 120, check: (_s, c) => c.best >= 30 },
-  { id: 'primeira-aventura', title: 'Explorador', desc: 'Primeira aventura do Hami', emoji: '🗺️', coins: 20, check: (s) => Object.keys(s.placesDone).length > 0 },
+  { id: 'primeira-aventura', title: 'Explorador', desc: 'Primeira aventura do Lumbi', emoji: '🗺️', coins: 20, check: (s) => Object.keys(s.placesDone).length > 0 },
   { id: 'primeira-decoracao', title: 'Lar doce lar', desc: 'Decorou a casa pela primeira vez', emoji: '🛋️', coins: 15, check: (s) => s.house.items.some((i) => !i.uid.startsWith('inicial-') && !i.uid.startsWith('arena')) || !['p-creme', 'p-menta', 'p-azulzinho'].includes(s.house.wallpaper) || !['f-madeira', 'f-pistache', 'f-creme'].includes(s.house.floor) },
-  { id: 'primeiro-banho', title: 'Cheirosinho', desc: 'Deu o primeiro banho no Hami', emoji: '🫧', coins: 10, check: (s) => anyDay(s, (d) => d.care.includes('banho')) },
+  { id: 'primeiro-banho', title: 'Cheirosinho', desc: 'Deu o primeiro banho no Lumbi', emoji: '🫧', coins: 10, check: (s) => anyDay(s, (d) => d.care.includes('banho')) },
   { id: 'pote10', title: 'Pote cheinho', desc: '10 coisas boas guardadas', emoji: '🫙', coins: 25, check: (s) => s.jar.length >= 10 },
   { id: 'diario7', title: 'Querido diário', desc: '7 textos no diário', emoji: '📔', coins: 25, check: (s) => s.journal.length >= 7 },
   { id: 'achados10', title: 'Colecionador', desc: '10 achadinhos encontrados', emoji: '🐞', coins: 40, check: (s) => s.finds.length >= 10 },
-  { id: 'fase2', title: 'Em evolução', desc: 'O Hami chegou à fase Evolução', emoji: '⭐', coins: 30, check: (s) => s.pet.phase >= 1 },
-  { id: 'fase3', title: 'Condicionado', desc: 'O Hami chegou à fase Condicionamento', emoji: '🌟', coins: 60, check: (s) => s.pet.phase >= 2 },
-  { id: 'fase4', title: 'Avançado', desc: 'O Hami chegou à fase Avançada', emoji: '💛', coins: 100, check: (s) => s.pet.phase >= 3 },
+  { id: 'fase2', title: 'Em evolução', desc: 'O Lumbi chegou à fase Evolução', emoji: '⭐', coins: 30, check: (s) => s.pet.phase >= 1 },
+  { id: 'fase3', title: 'Condicionado', desc: 'O Lumbi chegou à fase Condicionamento', emoji: '🌟', coins: 60, check: (s) => s.pet.phase >= 2 },
+  { id: 'fase4', title: 'Avançado', desc: 'O Lumbi chegou à fase Avançada', emoji: '💛', coins: 100, check: (s) => s.pet.phase >= 3 },
 ];
 
 /** Conquistas que acabaram de ser ganhas (ainda não registradas). */

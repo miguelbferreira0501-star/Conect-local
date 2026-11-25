@@ -416,7 +416,7 @@ export function Clouds({ end }: { end: End }) {
         <div className="arc-obj" style={{ transform: `translate(${me.x - 38}px, ${me.y - cam.current - 80}px) scaleX(${me.face})` }}>
           <Me size={76} mood={me.vy < 0 ? 'animado' : 'surpreso'} />
         </div>
-        {height() < 6 && <p className="arc-tip">Arraste o dedo para os lados para guiar o Hami</p>}
+        {height() < 6 && <p className="arc-tip">Arraste o dedo para os lados para guiar o Lumbi</p>}
       </div>
     </>
   );

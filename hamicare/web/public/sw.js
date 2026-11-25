@@ -13,7 +13,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(data.title, { body: data.body, icon: 'hami-icon-192.png', badge: 'hami-icon-192.png', tag: data.tag, data: { url: data.url } }));
 });
 
-// Tocar no lembrete abre o app na tela certa (água → Missões, Hami → Cuidar, pausa → Bem-estar...).
+// Tocar no lembrete abre o app na tela certa (água → Missões, Lumbi → Cuidar, pausa → Bem-estar...).
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const url = (event.notification.data && event.notification.data.url) || '/';

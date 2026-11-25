@@ -1,4 +1,4 @@
-// A vida do Hami no Início, sem a pessoa precisar fazer nada:
+// A vida do Lumbi no Início, sem a pessoa precisar fazer nada:
 // 1) Situação do dia: cada dia novo ele acorda com alguma coisa (muito frio, muito calor, gripado, encharcado
 //    de chuva, entediado, sujinho de terra, com medo do trovão ou chorando de saudade) e pede algumas tarefas
 //    para melhorar. Enquanto espera, cai num chorinho fofo de tempos em tempos (para dar dó).
@@ -12,7 +12,7 @@ export type Condition = 'frio' | 'calor' | 'gripado' | 'chuva' | 'tedio' | 'terr
 export interface ConditionInfo {
   /** Nome curto (para o selinho). */
   label: string;
-  /** Pedido do Hami ({n} = quantas tarefas). */
+  /** Pedido do Lumbi ({n} = quantas tarefas). */
   ask: string;
   /** O que ele diz quando melhora. */
   fixed: string;
@@ -51,7 +51,7 @@ function rawCondition(seed: number, day: string): Condition {
   return CONDITION_ORDER[hash(`${seed}:${day}`) % CONDITION_ORDER.length];
 }
 
-/** A situação do Hami no dia (nunca a mesma de ontem). */
+/** A situação do Lumbi no dia (nunca a mesma de ontem). */
 export function conditionOf(seed: number, day: string): Condition {
   const c = rawCondition(seed, day);
   if (c !== rawCondition(seed, prevDay(day))) return c;

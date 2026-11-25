@@ -218,7 +218,7 @@ function Casinha({ night, time }: { night: boolean; time: SkyTime }) {
           <path key={x} d={`M${x - 4} 262 V240 l4 -5 l4 5 V262 Z`} fill={n('#FFFFFF', '#9A8F86')} stroke={n('#E8DCCB', '#6E655D')} strokeWidth="1" />
         ))}
       </g>
-      {/* caminho de pedras até o Hami */}
+      {/* caminho de pedras até o Lumbi */}
       <path d="M108 236 C120 252 150 262 180 270 C196 276 204 286 206 300 H150 C152 290 146 280 130 272 C116 266 100 254 98 240 Z" fill={n('#EFDDB5', '#5E5448')} opacity="0.9" />
       {[[110, 246, 7], [126, 258, 8], [148, 268, 9], [172, 276, 10], [188, 290, 11]].map(([x, y, r], i) => (
         <ellipse key={i} cx={x} cy={y} rx={r} ry={r * 0.45} fill={n('#E2D2B4', '#6E6658')} stroke={n('#CDBB98', '#4E4840')} strokeWidth="1" />
@@ -574,7 +574,7 @@ const LOOKS: Record<string, ArenaLook> = {
           </g>
         ))}
         <rect x="0" y="210" width="400" height="90" fill={night ? '#3A3F58' : '#B9C1D6'} />
-        {/* Prédio da casa do Hami */}
+        {/* Prédio da casa do Lumbi */}
         <g transform="translate(20 70)" data-tap="casa">
           <rect x="0" y="0" width="110" height="170" rx="6" fill={night ? '#5B4F94' : '#FF9FB5'} />
           {[20, 60, 100].map((y) => (

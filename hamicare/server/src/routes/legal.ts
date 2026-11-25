@@ -55,7 +55,7 @@ export function legalHtml(doc: LegalDoc): string {
   const other = doc.id === 'termos' ? LEGAL.privacidade : LEGAL.termos;
   return pageShell(
     doc.title,
-    `${doc.title} do Lumbi, app de autocuidado com o hamster Hami.`,
+    `${doc.title} do Lumbi, app de autocuidado com o hamster Lumbi.`,
     `    <h1>${esc(doc.title)}</h1>
     <p class="date">Versão de ${esc(formatLegalDate(LEGAL_INFO.atualizado))}</p>
     <div class="summary"><strong>Em poucas palavras</strong><ul>${doc.summary.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div>

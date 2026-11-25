@@ -114,7 +114,7 @@ CREATE POLICY team_notices_rw ON team_notices USING (app.in_team(team_id)) WITH 
 REVOKE ALL ON FUNCTION app.in_team(uuid), app.team_owner(uuid), app.team_day_complete(uuid, date) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION app.in_team(uuid), app.team_owner(uuid), app.team_day_complete(uuid, date) TO {{APP_ROLE}};
 
--- Quem está na mesma turma vê o perfil um do outro (para ver os Hamis juntos), mesmo sem ser amigo direto.
+-- Quem está na mesma turma vê o perfil um do outro (para ver os Lumbis juntos), mesmo sem ser amigo direto.
 CREATE OR REPLACE FUNCTION app.share_team(a uuid, b uuid) RETURNS boolean
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, app AS $$
   SELECT EXISTS (SELECT 1 FROM team_members x JOIN team_members y ON x.team_id = y.team_id WHERE x.user_id = a AND y.user_id = b)

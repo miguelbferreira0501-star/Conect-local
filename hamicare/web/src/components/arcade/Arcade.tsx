@@ -1,4 +1,4 @@
-// Parque de jogos do Hami: grade de jogos, prêmios do dia e jogos exclusivos do Lumbi+.
+// Parque de jogos do Lumbi: grade de jogos, prêmios do dia e jogos exclusivos do Lumbi+.
 import { useState, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { Glyph } from '../art';
@@ -12,12 +12,12 @@ import { Clouds, Skate, Volley } from './plus';
 
 export const ARCADE: GameMeta[] = [
   { id: 'volei', name: 'Vôlei na praia', hint: 'Partida contra um rival', how: 'Use as setas para andar e o botão do meio para pular. Rebata a bola por cima da rede: quem fizer 5 pontos vence.', icon: '🏐', stars: [0, 8, 12], unit: 'pontos', tone: 'beach' },
-  { id: 'skate', name: 'Skate radical', hint: 'Pule os obstáculos da cidade', how: 'O Hami anda de skate sozinho. Toque para pular os cones e caixas (dois toques fazem um pulo duplo) e pegue as sementes no ar.', icon: '🛹', stars: [0, 60, 140], unit: 'pontos', tone: 'city' },
-  { id: 'nuvens', name: 'Pula nuvens', hint: 'Suba o mais alto que der', how: 'O Hami quica sozinho nas nuvens. Arraste o dedo para os lados para guiar. Nuvens com estrela dão um superpulo!', icon: '☁️', stars: [0, 60, 150], unit: 'pontos', tone: 'sky' },
+  { id: 'skate', name: 'Skate radical', hint: 'Pule os obstáculos da cidade', how: 'O Lumbi anda de skate sozinho. Toque para pular os cones e caixas (dois toques fazem um pulo duplo) e pegue as sementes no ar.', icon: '🛹', stars: [0, 60, 140], unit: 'pontos', tone: 'city' },
+  { id: 'nuvens', name: 'Pula nuvens', hint: 'Suba o mais alto que der', how: 'O Lumbi quica sozinho nas nuvens. Arraste o dedo para os lados para guiar. Nuvens com estrela dão um superpulo!', icon: '☁️', stars: [0, 60, 150], unit: 'pontos', tone: 'sky' },
   { id: 'embaixadinha', name: 'Embaixadinha', hint: 'Não deixe a bola cair', how: 'Toque na bola para chutar para cima. Toque do lado para mandar ela para o outro lado. Quantas embaixadinhas você consegue?', icon: '⚽', stars: [0, 12, 25], unit: 'embaixadinhas', tone: 'grass' },
   { id: 'carrinho', name: 'Corrida de carrinho', hint: 'Desvie dos cones', how: 'Toque à esquerda ou à direita para trocar de pista. Desvie dos cones e pedras e pegue sementes e estrelas.', icon: '🚗', stars: [0, 25, 55], unit: 'pontos', tone: 'road' },
   { id: 'penalti', name: 'Pênalti', hint: '5 chutes contra o goleiro', how: 'Toque no canto do gol para chutar. O goleiro se mexe: escolha bem o canto!', icon: '🥅', stars: [0, 3, 5], unit: 'gols', tone: 'pitch' },
-  { id: 'memoria', name: 'Memória do Hami', hint: 'Ache os pares', how: 'Vire duas cartas por vez e ache os pares iguais com o menor número de jogadas.', icon: '🃏', stars: [0, 10, 14], unit: 'pontos', tone: 'cards' },
+  { id: 'memoria', name: 'Memória do Lumbi', hint: 'Ache os pares', how: 'Vire duas cartas por vez e ache os pares iguais com o menor número de jogadas.', icon: '🃏', stars: [0, 10, 14], unit: 'pontos', tone: 'cards' },
   { id: 'chuva', name: 'Chuva de sementes', hint: 'Pegue o que cai do céu', how: '', icon: '🌻', stars: [0, 30, 50], unit: 'pontos', tone: 'rain' },
   { id: 'bolinha', name: 'Busca a bolinha', hint: 'Jogue e ele traz de volta', how: '', icon: '🎾', stars: [0, 99, 99], unit: '', tone: 'grass' },
 ];

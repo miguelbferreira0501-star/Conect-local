@@ -31,5 +31,5 @@ export const TRAIL: TrailStep[] = [
   { title: 'Seu ambiente fala', learn: 'Pessoas, lugares e o celular empurram você para algum lado. Deixe o empurrão a seu favor.', doIt: 'Mude uma coisa no seu espaço que lembre você de se cuidar.' },
   { title: 'Olhe para trás', learn: 'Ver o caminho feito dá energia para seguir. Compare com o primeiro dia da trilha.', doIt: 'Abra a Evolução e veja quantos dias ativos você já tem.' },
   { title: 'Ensine alguém', learn: 'Explicar o que aprendeu deixa o aprendizado mais firme.', doIt: 'Conte para alguém uma dica desta trilha.' },
-  { title: 'Hábito que fica', learn: 'Você chegou ao fim. O hábito agora é seu: não precisa ser perfeito, só precisa continuar voltando.', doIt: 'Escolha o próximo hábito que você quer cultivar com o Hami.' },
+  { title: 'Hábito que fica', learn: 'Você chegou ao fim. O hábito agora é seu: não precisa ser perfeito, só precisa continuar voltando.', doIt: 'Escolha o próximo hábito que você quer cultivar com o Lumbi.' },
 ];

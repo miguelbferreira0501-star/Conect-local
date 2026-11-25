@@ -966,7 +966,7 @@
   from { transform: translateY(-30px) scale(0.8); opacity: 0; }
 }
 
-/* Gotinhas do Hami molhado */
+/* Gotinhas do Lumbi molhado */
 .drip {
   animation: drip 1.4s ease-in infinite;
 }
@@ -1243,7 +1243,7 @@
   box-shadow: 0 4px 0 var(--line), var(--shadow);
 }
 
-/* ---------- Lojinhas: o Hami de vendedor atrás do balcão ---------- */
+/* ---------- Lojinhas: o Lumbi de vendedor atrás do balcão ---------- */
 .shop-front {
   display: grid;
   gap: 10px;
@@ -2692,7 +2692,7 @@
   border-color: var(--accent);
 }
 
-/* ---------- Crescimento do Hami ---------- */
+/* ---------- Crescimento do Lumbi ---------- */
 .growth-pill {
   display: flex;
   align-items: center;
@@ -3745,7 +3745,7 @@
 @keyframes spin-slow { to { rotate: 360deg; } }
 @media (prefers-reduced-motion: reduce) { .spin-slow { animation: none; } }
 
-/* ---------- Hami vivo: gracinhas ao toque ---------- */
+/* ---------- Lumbi vivo: gracinhas ao toque ---------- */
 .live-pet { position: relative; display: grid; justify-items: center; }
 .live-pet-btn {
   position: relative;
@@ -3973,7 +3973,7 @@
 @media (prefers-reduced-motion: reduce) { .care-stat.is-low, .care-cell.is-urgent { animation: none; } }
 .care-tray-note { margin-top: 14px; text-align: center; font-size: 12.5px; font-weight: 600; opacity: 0.75; }
 
-/* ---------- Missões: o quarto do Hami no alto e a trilha do dia ---------- */
+/* ---------- Missões: o quarto do Lumbi no alto e a trilha do dia ---------- */
 .mission-scene { position: relative; overflow: hidden; }
 .mission-hud {
   position: absolute;
@@ -4191,7 +4191,7 @@
 .fit-pick-tag.is-own { background: #7cd389; color: #1f4a2a; }
 @media (prefers-reduced-motion: reduce) { .fit-pet { animation: none; } }
 
-/* ---------- Viagem: o Hami dirigindo até o passeio ---------- */
+/* ---------- Viagem: o Lumbi dirigindo até o passeio ---------- */
 .trip-go { position: fixed; inset: 0; z-index: 88; overflow: hidden; animation: fade-in 260ms var(--ease-out); }
 .trip-go-sky { position: absolute; inset: 0; background: linear-gradient(180deg, #7cc8ff 0%, #d9f2ff 55%, var(--to, #a3db8e) 100%); }
 .trip-go-sun { position: absolute; right: 12%; top: 10%; width: 70px; height: 70px; border-radius: 50%; background: #ffe066; box-shadow: 0 0 0 18px rgba(255, 224, 102, 0.25); }
@@ -4418,7 +4418,7 @@
 .pw-year-month small { font-size: 16px; font-weight: 800; opacity: 0.85; }
 .pw-plan-month { padding: 12px 18px; opacity: 0.9; }
 
-/* ================= Guardiões do Hami ================= */
+/* ================= Guardiões do Lumbi ================= */
 .gd-hero { display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 24px; background: linear-gradient(135deg, #7e6cd0, #a98bf2); color: #ffffff; }
 .gd-hero-title { font-family: var(--font-display, inherit); font-size: 20px; font-weight: 800; line-height: 1.2; }
 .gd-hero-sub { margin-top: 2px; font-size: 14px; font-weight: 600; opacity: 0.95; }
@@ -4516,7 +4516,7 @@
 .inv-icon { overflow: hidden; contain: paint; }
 .inv-icon .kit-icon { max-width: 50px; max-height: 50px; }
 .inv-icon .kit-icon svg { max-width: 100%; max-height: 100%; width: auto; height: auto; }
-/* Ícones de item ficam paradinhos: dezenas de Hamis piscando ao mesmo tempo travavam a rolagem */
+/* Ícones de item ficam paradinhos: dezenas de Lumbis piscando ao mesmo tempo travavam a rolagem */
 .icon-still { display: block; }
 .icon-still *, .inv-icon *, .kit-icon * { animation: none !important; }
 .inv-tile { contain: layout paint style; }
@@ -4583,7 +4583,7 @@
 .moon-teaser-n { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 12px; font-weight: 800; opacity: 0.85; }
 @media (prefers-reduced-motion: reduce) { .moon-teaser-rocket { animation: none; } }
 
-/* ================= Viagem do dia (Hami andando de lado) ================= */
+/* ================= Viagem do dia (Lumbi andando de lado) ================= */
 .wk { display: block; overflow: visible; }
 .wk-bob { animation: wk-bob 0.56s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
 @keyframes wk-bob { 50% { transform: translateY(-4px) rotate(1.2deg); } }
@@ -4671,7 +4671,7 @@
 .pf-btn.is-main { background: #a97c58; color: #fff; box-shadow: 0 3px 0 #7d5a3d; }
 .pf-btn:active { transform: translateY(2px); }
 
-/* ================= Correio do Hami ================= */
+/* ================= Correio do Lumbi ================= */
 .mail { position: fixed; inset: 0; z-index: 86; display: flex; flex-direction: column; background: #a9d2f7; overflow-y: auto; animation: ci-up 320ms cubic-bezier(0.2, 0.9, 0.3, 1); }
 .mail-sky { position: relative; display: grid; place-items: end center; height: 250px; flex: none; padding-top: env(safe-area-inset-top, 0px); }
 .mail-back, .menu-back { position: absolute; left: 12px; top: calc(10px + env(safe-area-inset-top, 0px)); display: grid; place-items: center; width: 48px; height: 48px; color: #4d5670; filter: drop-shadow(0 0 0 #fff) drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff); z-index: 2; }
@@ -4877,7 +4877,7 @@
 .wr-blur { filter: blur(6px); pointer-events: none; user-select: none; }
 .wr-unlock { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 99px; background: #6b82e8; color: #fff; font-size: 14px; font-weight: 900; white-space: nowrap; box-shadow: 0 4px 0 #4c62c4; }
 .wr-note { font-size: 13.5px; font-weight: 700; color: #6a6478; }
-/* Armário e lojas leves: os quadradinhos fora da tela não são desenhados e os Hamis ficam parados */
+/* Armário e lojas leves: os quadradinhos fora da tela não são desenhados e os Lumbis ficam parados */
 .wardrobe-tile { content-visibility: auto; contain-intrinsic-size: auto 110px; contain: layout paint style; }
 .wardrobe-tile *, .sm-body .icon-still * { animation: none !important; }
 .sm-art *, .sm-art { animation: none !important; }

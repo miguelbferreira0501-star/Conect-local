@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Lumbi",
   "short_name": "Lumbi",
-  "description": "Cuide de você com o Hami: hábitos saudáveis, calma para a ansiedade e um mundo inteiro para explorar. Cada cuidado seu faz o Hami evoluir.",
+  "description": "Cuide de você com o Lumbi: hábitos saudáveis, calma para a ansiedade e um mundo inteiro para explorar. Cada cuidado seu faz o Lumbi evoluir.",
   "lang": "pt-BR",
   "dir": "ltr",
   "start_url": "/",
@@ -43,7 +43,7 @@
       "sizes": "540x1080",
       "type": "image/webp",
       "form_factor": "narrow",
-      "label": "Início com o Hami na sua arena"
+      "label": "Início com o Lumbi na sua arena"
     },
     {
       "src": "screenshots/arenas.webp",

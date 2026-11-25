@@ -1,4 +1,4 @@
-// Falas do Hami, perguntas do onboarding e textos de apoio. Tom acolhedor, sem culpa e sem gênero.
+// Falas do Lumbi, perguntas do onboarding e textos de apoio. Tom acolhedor, sem culpa e sem gênero.
 import type { GoalId, Incentive, TraitId } from '../types';
 
 export type Period = 'manha' | 'tarde' | 'noite';
@@ -21,9 +21,9 @@ export const TRAITS: Record<TraitId, { label: string; emoji: string; hello: stri
 };
 
 export const GOALS: Record<GoalId, { label: string; emoji: string; desc: string; weight?: boolean }> = {
-  emagrecer: { label: 'Emagrecer junto com o Hami', emoji: '🔥', desc: 'Cada hábito saudável tira calorias de vocês dois', weight: true },
-  ganhar: { label: 'Ganhar peso junto com o Hami', emoji: '💪', desc: 'Cardápio no capricho e treino de força para crescerem juntos', weight: true },
-  manter: { label: 'Manter o peso', emoji: '⚖️', desc: 'Equilíbrio: o Hami fica firme com você', weight: true },
+  emagrecer: { label: 'Emagrecer junto com o Lumbi', emoji: '🔥', desc: 'Cada hábito saudável tira calorias de vocês dois', weight: true },
+  ganhar: { label: 'Ganhar peso junto com o Lumbi', emoji: '💪', desc: 'Cardápio no capricho e treino de força para crescerem juntos', weight: true },
+  manter: { label: 'Manter o peso', emoji: '⚖️', desc: 'Equilíbrio: o Lumbi fica firme com você', weight: true },
   habitos: { label: 'Só hábitos saudáveis', emoji: '🌱', desc: 'Arrumar a cama, escovar os dentes, caminhar…' },
   calma: { label: 'Calma para a ansiedade', emoji: '🍃', desc: 'Respirar, desacelerar e dormir melhor' },
   condicionamento: { label: 'Melhorar o condicionamento', emoji: '🫁', desc: 'Ter mais fôlego e disposição' },
@@ -74,7 +74,7 @@ export const BATTERIES = [
 
 export const PET_NAME_IDEAS = ['Paçoca', 'Pudim', 'Pipoca', 'Amendoim', 'Biscoito', 'Jujuba', 'Fubá', 'Bolacha'];
 
-/** "Hoje o Hami descobriu…": uma curiosidade nova por dia de cuidado (personalidade aos poucos). */
+/** "Hoje o Lumbi descobriu…": uma curiosidade nova por dia de cuidado (personalidade aos poucos). */
 export const FACTS = [
   'que ama o barulhinho da chuva no telhado.',
   'que o lado esquerdo da bochecha guarda mais sementes que o direito.',
@@ -106,7 +106,7 @@ const LINES = {
   dirty: ['Acho que tô precisando de um banho 🫧', 'Rolei na terra do jardim, hehe.'],
   sleepy: ['Tô com soninho…', 'Uma soneca cairia bem agora.'],
   sad: ['Brinca comigo um pouquinho?', 'Um carinho agora seria bom…'],
-  sleeping: ['Zzz… (o Hami tá dormindo. Toque em Acordar quando quiser.)'],
+  sleeping: ['Zzz… (o Lumbi tá dormindo. Toque em Acordar quando quiser.)'],
 };
 
 const pick = (list: string[], seed: number) => list[Math.abs(seed) % list.length];
@@ -134,7 +134,7 @@ export function petLine(o: {
   return line.replace('{d}', o.done === 1 ? '1 atividade' : `${o.done} atividades`).replace('{u}', o.user || 'você');
 }
 
-/** Perguntas que o Hami faz em "Conversar". A resposta vira registro de humor ou só carinho. */
+/** Perguntas que o Lumbi faz em "Conversar". A resposta vira registro de humor ou só carinho. */
 export const CHATS = [
   { q: 'Como foi seu dia até agora?', a: [{ t: 'Foi bom!', mood: 4 }, { t: 'Mais ou menos', mood: 3 }, { t: 'Tá difícil', mood: 2 }] },
   { q: 'Você bebeu água hoje?', a: [{ t: 'Bebi sim!' }, { t: 'Vou beber agora' }] },
@@ -168,9 +168,9 @@ export const REFLECTIONS = [
 ];
 
 export const NOTIFS = {
-  tarefas: ['Que tal uma caminhada hoje?', 'Hora de cuidar um pouquinho de você.', 'Um copo d’água agora? O Hami acompanha 💧'],
-  hami: ['O Hami está esperando pra brincar!', 'O Hami guardou uma semente pra você 🌻'],
+  tarefas: ['Que tal uma caminhada hoje?', 'Hora de cuidar um pouquinho de você.', 'Um copo d’água agora? O Lumbi acompanha 💧'],
+  hami: ['O Lumbi está esperando pra brincar!', 'O Lumbi guardou uma semente pra você 🌻'],
   missoes: ['Sua nova missão está disponível!', 'Tem desafio novo no Lumbi.'],
-  aventura: ['O Hami voltou da aventura e encontrou algo interessante!'],
+  aventura: ['O Lumbi voltou da aventura e encontrou algo interessante!'],
   amigos: ['Um amigo mandou uma vibe boa pra você 💛'],
 };

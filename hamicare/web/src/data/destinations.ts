@@ -1,10 +1,10 @@
-// Destinos das viagens do Hami (cada um com o seu cenário). Os das arenas já liberadas são da pessoa;
+// Destinos das viagens do Lumbi (cada um com o seu cenário). Os das arenas já liberadas são da pessoa;
 // os outros podem ser comprados com sementes (os "Premium" só para quem tem o Lumbi+).
 // Cada destino tem uma lembrança para colecionar (7 peças) e cartões de lembrança (24).
 export interface Destination {
   id: string;
   name: string;
-  /** O que o Hami diz antes de ir. */
+  /** O que o Lumbi diz antes de ir. */
   line: string;
   price: number;
   plus?: boolean;

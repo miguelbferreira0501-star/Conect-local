@@ -1,4 +1,4 @@
-// Catálogo da loja. Roupas são desenhadas no próprio Hami (Hamster.tsx); móveis e decoração
+// Catálogo da loja. Roupas são desenhadas no próprio Lumbi (Hamster.tsx); móveis e decoração
 // vão para a casa (Room.tsx); comidas são consumíveis.
 export type ItemKind = 'chapeu' | 'oculos' | 'roupa' | 'acessorio' | 'efeito' | 'movel' | 'decor' | 'brinquedo' | 'comida' | 'parede' | 'piso';
 export type Season = 'natal' | 'junina' | 'halloween';
@@ -31,7 +31,7 @@ export interface Item {
   rarity?: 'comum' | 'incomum' | 'raro' | 'epico' | 'lendario';
   /** Só sai do Baú Lendário (não está à venda nem pode ser presenteado). */
   chestOnly?: boolean;
-  /** Peça desenhada no Hami: o modelo e as cores (as variações de cor usam o mesmo desenho). */
+  /** Peça desenhada no Lumbi: o modelo e as cores (as variações de cor usam o mesmo desenho). */
   base?: string;
   c1?: string;
   c2?: string;
@@ -231,7 +231,7 @@ export const KIT_ITEMS: Item[] = [
     ['rosa', 'rosa', '#FF86AC', '#FFF0F4'],
     ['dourado', 'dourado', '#F2C14E', '#FFF8EC'],
   ]),
-  ...moveis('quadro-hami', 'Retrato do Hami', 'decor', 45, 12, [
+  ...moveis('quadro-hami', 'Retrato do Lumbi', 'decor', 45, 12, [
     ['madeira', 'de madeira', '#C98A5B', '#DDF0FF'],
     ['rosa', 'rosa', '#FF9FC2', '#FFF6E8'],
   ]),
@@ -698,7 +698,7 @@ export const ITEMS: Item[] = [
   W('m-balao', 'Balão na patinha', 'acessorio', 25, { base: 'segurar', c1: '#FF5E7E', c2: '#FFFFFF' }),
   W('m-varinha', 'Varinha de estrela', 'acessorio', 70, { base: 'segurar', c1: '#FFD34D', c2: '#FFFFFF', level: 3 }),
   W('m-girassol', 'Girassol na patinha', 'acessorio', 25, { base: 'segurar', c1: '#FFD34D', c2: '#8A5A3B' }),
-  // Sou assim: itens para a pessoa se ver no Hami (preço baixo de propósito)
+  // Sou assim: itens para a pessoa se ver no Lumbi (preço baixo de propósito)
   W('m-bandeira-orgulho', 'Bandeira do orgulho LGBTQIA+', 'acessorio', 15, { base: 'segurar', c1: '#E8455A', c2: '#7E57D6', tag: 'identidade' }),
   W('m-bandeira-trans', 'Bandeira trans', 'acessorio', 15, { base: 'segurar', c1: '#5BCEFA', c2: '#F5A9B8', tag: 'identidade' }),
   W('m-bandeira-bi', 'Bandeira bissexual', 'acessorio', 15, { base: 'segurar', c1: '#D60270', c2: '#0038A8', tag: 'identidade' }),
@@ -720,7 +720,7 @@ export const ITEMS: Item[] = [
   W('m-sorvete', 'Sorvete de duas bolas', 'acessorio', 70, { base: 'segurar', c1: '#FF9FC2', c2: '#BFE9F5', plus: true }),
   W('m-livro', 'Livro de feitiços', 'acessorio', 90, { base: 'segurar', c1: '#7E57D6', c2: '#FFD34D', plus: true }),
 
-  // ---------- Roupas de trabalho (o Hami vendedor usa nas lojinhas; dá para comprar também) ----------
+  // ---------- Roupas de trabalho (o Lumbi vendedor usa nas lojinhas; dá para comprar também) ----------
   W('capacete-obra', 'Capacete de obra', 'chapeu', 45, { base: 'capacete-obra', c1: '#FFC93C', c2: '#E8A317' }),
   W('capacete-obra-rosa', 'Capacete de obra rosa', 'chapeu', 45, { base: 'capacete-obra', c1: '#FF9FC2', c2: '#E87FA5' }),
   W('colete-obra', 'Colete de construtor', 'roupa', 55, { base: 'colete-obra', c1: '#FF8A3D', c2: '#5E7FB8' }),
@@ -734,7 +734,7 @@ export const ITEMS: Item[] = [
   W('m-mapa', 'Mapa do tesouro na patinha', 'acessorio', 40, { base: 'segurar', c1: '#F3DDB0', c2: '#E2547A', level: 2 }),
   W('m-sacola', 'Sacolinha de compras', 'acessorio', 25, { base: 'segurar', c1: '#FFFFFF', c2: '#FF86AC' }),
 
-  // ---------- Efeitos (brilhos ao redor do Hami) ----------
+  // ---------- Efeitos (brilhos ao redor do Lumbi) ----------
   W('fx-brilhos', 'Brilhinhos', 'efeito', 60, { base: 'brilhos', c1: '#FFE27A' }),
   W('fx-coracoes', 'Chuva de coraçõezinhos', 'efeito', 80, { base: 'coracoes', c1: '#FF6F91' }),
   W('fx-notas', 'Notas musicais', 'efeito', 70, { base: 'notas', c1: '#7E57D6', level: 2 }),
@@ -915,7 +915,7 @@ export const ITEMS: Item[] = [
   // Casa na Lua: vem junto com a viagem (5.000 sementes), não está à venda.
   W('p-lua', 'Parede lunar com a Terra', 'parede', 0, { souvenir: true, rarity: 'lendario' }),
   W('f-lua', 'Chão da Lua', 'piso', 0, { souvenir: true, rarity: 'lendario' }),
-  W('foguete-hami', 'Foguete do Hami', 'decor', 0, { souvenir: true, rarity: 'lendario', art: 'art:foguete', size: 22 }),
+  W('foguete-hami', 'Foguete do Lumbi', 'decor', 0, { souvenir: true, rarity: 'lendario', art: 'art:foguete', size: 22 }),
   W('bandeira-lua', 'Bandeirinha na Lua', 'decor', 0, { souvenir: true, rarity: 'lendario', art: 'art:bandeira-lua', size: 12 }),
   W('cama-cratera', 'Cama de cratera', 'movel', 0, { souvenir: true, rarity: 'lendario', art: 'art:cama-cratera', size: 36 }),
   // Móveis lunares (base na Lua): também vêm junto com a viagem.
@@ -1058,7 +1058,7 @@ export const HOUSE_KINDS: ItemKind[] = ['movel', 'decor', 'brinquedo'];
 
 export const SEASONS: Record<Season, { label: string; months: number[]; until: string }> = {
   natal: { label: 'Temporada de Natal', months: [10, 11], until: 'até 31 de dezembro' },
-  junina: { label: 'Arraiá do Hami', months: [5, 6], until: 'até 31 de julho' },
+  junina: { label: 'Arraiá do Lumbi', months: [5, 6], until: 'até 31 de julho' },
   halloween: { label: 'Dia das Bruxinhas', months: [9], until: 'até 31 de outubro' },
 };
 
@@ -1150,7 +1150,7 @@ export const STYLES: StyleSet[] = [
   },
   {
     id: 'parquinho-plus',
-    name: 'Parquinho do Hami',
+    name: 'Parquinho do Lumbi',
     plus: true,
     wallpaper: 'p-ceu',
     floor: 'f-grama',

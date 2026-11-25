@@ -1,4 +1,4 @@
-// Detalhes a mais de cada arena (desenhados por cima do cenário, nas laterais, longe de onde o Hami fica):
+// Detalhes a mais de cada arena (desenhados por cima do cenário, nas laterais, longe de onde o Lumbi fica):
 // tufos de grama, pedrinhas e um bichinho ou objeto que reage ao toque. Quadro 400 x 300.
 import type { ReactNode } from 'react';
 

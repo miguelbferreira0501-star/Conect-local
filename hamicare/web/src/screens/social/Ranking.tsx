@@ -17,7 +17,7 @@ import { Avatar } from './Post';
 
 const reactionOf = (id: ReactionId) => REACTIONS.find((r) => r.id === id) ?? REACTIONS[0];
 
-/** A casa do amigo: a arena onde o Hami dele mora, o lado de dentro e um carinho para deixar. */
+/** A casa do amigo: a arena onde o Lumbi dele mora, o lado de dentro e um carinho para deixar. */
 export function VisitView({ p, api, canReact }: { p: Profile; api: SocialApi; canReact: boolean }) {
   const [inside, setInside] = useState(false);
   const [sent, setSent] = useState<ReactionId | null>(null);

@@ -1,5 +1,5 @@
 // Lembretes no app da loja (iPhone/Android): agendados no próprio celular, chegam mesmo com o app fechado
-// e sem internet. Reagendados quando o app abre e quando algo muda (horários, missões feitas, nome do Hami).
+// e sem internet. Reagendados quando o app abre e quando algo muda (horários, missões feitas, nome do Lumbi).
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { planDay } from '../shared/reminders';
 import { isNativeApp } from './native';
@@ -49,7 +49,7 @@ function taskNotifications(s: State, now: Date) {
       if (!isDue(t, key) || (t.id in dayOf(s, key).done)) return;
       const [h, m] = t.at!.split(':').map(Number);
       const at = new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m);
-      if (at.getTime() > now.getTime() + 30_000) out.push({ id: 10_000 + d * 100 + i, title: s.pet.name || 'Hami', body: `Hora de: ${t.title}`, schedule: { at, allowWhileIdle: true } });
+      if (at.getTime() > now.getTime() + 30_000) out.push({ id: 10_000 + d * 100 + i, title: s.pet.name || 'Lumbi', body: `Hora de: ${t.title}`, schedule: { at, allowWhileIdle: true } });
     });
   }
   return out;
@@ -64,7 +64,7 @@ function generalNotifications(s: State, now: Date) {
   const out: { id: number; title: string; body: string; schedule: { at: Date; allowWhileIdle: boolean } }[] = [];
   for (let d = 0; d < DAYS_AHEAD; d++) {
     const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + d);
-    const plan = planDay({ prefs, pet: s.pet.name || 'Hami', weekday: day.getDay(), minor, seed: Math.floor(day.getTime() / 86_400_000), skipTasks: d === 0 && allDone });
+    const plan = planDay({ prefs, pet: s.pet.name || 'Lumbi', weekday: day.getDay(), minor, seed: Math.floor(day.getTime() / 86_400_000), skipTasks: d === 0 && allDone });
     plan.forEach((p, i) => {
       const [h, m] = p.at.split(':').map(Number);
       const at = new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m);

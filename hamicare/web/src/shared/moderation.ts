@@ -84,7 +84,7 @@ export const PRESET_COMMENTS = [
   'Que orgulho de você! 💛',
   'Arrasou! 👏',
   'Continua assim! 💪',
-  'Que fofo o seu Hami! 🐹',
+  'Que fofo o seu Lumbi! 🐹',
   'Você me inspira! ✨',
   'Um passo de cada vez 🌻',
   'Tô torcendo por você! 🤗',

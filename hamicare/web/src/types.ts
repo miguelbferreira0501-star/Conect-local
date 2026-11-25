@@ -1,9 +1,9 @@
 // Tipos centrais do Lumbi (estado salvo no aparelho e no backup da conta).
 
 export type AgeGroup = 'ate12' | '13a17' | '18mais';
-/** Missão principal. emagrecer/ganhar/manter mexem no peso do Hami (só 18+). */
+/** Missão principal. emagrecer/ganhar/manter mexem no peso do Lumbi (só 18+). */
 export type GoalId = 'emagrecer' | 'ganhar' | 'manter' | 'habitos' | 'calma' | 'condicionamento' | 'ativo' | 'cuidar';
-/** Para onde o peso do Hami vai na jornada. */
+/** Para onde o peso do Lumbi vai na jornada. */
 export type Direction = 'perder' | 'ganhar' | 'manter';
 export type BodyStart = 'fofinho' | 'equilibrado' | 'mignon';
 export type Category = 'fitness' | 'autocuidado' | 'habitos' | 'emocional';
@@ -75,11 +75,11 @@ export interface MealEntry {
   eaten: boolean;
 }
 
-/** Jornada de peso do Hami: ele emagrece ou ganha peso junto com a pessoa. */
+/** Jornada de peso do Lumbi: ele emagrece ou ganha peso junto com a pessoa. */
 export interface Journey {
   dir: Direction;
   startedAt: string;
-  /** Peso do Hami no começo e na meta (gramas de hamster). */
+  /** Peso do Lumbi no começo e na meta (gramas de hamster). */
   startGrams: number;
   goalGrams: number;
   /** Calorias que a pessoa precisa somar nas missões para chegar à meta. */
@@ -92,7 +92,7 @@ export interface Outfit {
   oculos: string | null;
   roupa: string | null;
   acessorio: string | null;
-  /** Brilhos, corações, aura… em volta do Hami. */
+  /** Brilhos, corações, aura… em volta do Lumbi. */
   efeito?: string | null;
 }
 
@@ -192,7 +192,7 @@ export type PetMood = 'feliz' | 'calmo' | 'sono' | 'animado' | 'dormindo' | 'com
 export interface CompanionState {
   /** Ovos e pets: quando o ovo chegou e quando chocou. */
   got: Record<string, { at: string; hatched?: string }>;
-  /** Quem anda junto com o Hami agora. */
+  /** Quem anda junto com o Lumbi agora. */
   active: string | null;
 }
 
@@ -279,7 +279,7 @@ export interface State {
   wishlist: string[];
   house: House;
   adventure: Adventure | null;
-  /** Viagem do dia: o Hami sai andando depois de algumas missões e volta com um presente. */
+  /** Viagem do dia: o Lumbi sai andando depois de algumas missões e volta com um presente. */
   trek?: { startedAt: number; endsAt: number; day: string } | null;
   /** Trilha "Hábito que fica": dia em que começou e passos feitos (índice → dia em que fez). */
   trail?: { start: string; done: Record<number, string> };
@@ -293,7 +293,7 @@ export interface State {
   plans?: QuestPlan[];
   /** Dia da última viagem (uma por dia). */
   trekDay?: string;
-  /** Correio do Hami: cartas já lidas e cartas apagadas. */
+  /** Correio do Lumbi: cartas já lidas e cartas apagadas. */
   mail?: { read: string[]; gone: string[] };
   finds: string[];
   placesDone: Record<string, number>;
@@ -320,7 +320,7 @@ export interface State {
   lastGift: string | null;
   /** Economia do jogo (níveis, carteira, baús). */
   game: GameState;
-  /** Arena onde o Hami mora (a casa principal). */
+  /** Arena onde o Lumbi mora (a casa principal). */
   homeArena?: number;
   /** As casas das outras arenas (a de agora fica em `house`). */
   houses?: Record<string, House>;

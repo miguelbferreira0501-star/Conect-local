@@ -1,4 +1,4 @@
-// Viagem para a Lua: o Hami sobe de foguete, a Terra fica pequenininha lá embaixo e ele pousa na casa lunar.
+// Viagem para a Lua: o Lumbi sobe de foguete, a Terra fica pequenininha lá embaixo e ele pousa na casa lunar.
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Hamster } from './Hamster';

@@ -44,7 +44,7 @@ export const PLUS_GAMES: readonly GameId[] = ['volei', 'skate', 'nuvens'];
 /** Partidas premiadas por dia (as outras valem só a diversão) e sementes por estrela (1 a 3). */
 export const JOGO = { perDay: 8, coins: [4, 7, 10], plusCoins: [6, 10, 15], xp: 2 };
 export const gameCoins = (game: GameId, stars: number) => (PLUS_GAMES.includes(game) ? JOGO.plusCoins : JOGO.coins)[Math.max(1, Math.min(3, Math.floor(stars))) - 1];
-/** Viagem do dia: o Hami sai para explorar depois de algumas missões e volta com um presente. */
+/** Viagem do dia: o Lumbi sai para explorar depois de algumas missões e volta com um presente. */
 export const TREK = { needs: 3, hours: 4, perTaskMin: 15, coins: 20, xp: 10 };
 /** Trilha Plus da temporada: um prêmio grande em cada degrau (mesmos dias da trilha grátis). */
 export interface SeasonPlusTier {
@@ -97,7 +97,7 @@ export function baseGrant(src: Source, cfg: GameConfig): Grant {
       };
     }
     case 'cuidado':
-      return { ref: `cuidado:${src.date}:${src.care}`, label: 'Cuidou do Hami', ...cfg.small.cuidado, routine: true, date: src.date };
+      return { ref: `cuidado:${src.date}:${src.care}`, label: 'Cuidou do Lumbi', ...cfg.small.cuidado, routine: true, date: src.date };
     case 'diario':
       return { ref: `diario:${src.date}`, label: 'Escreveu no diário', ...cfg.small.diario, routine: true, date: src.date };
     case 'pote':

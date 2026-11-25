@@ -48,7 +48,7 @@ export const MOON_GROUND = '#A9AEC6';
 /** Cor do gramado da frente (a página do Início usa a mesma, para o chão se fundir com ela). */
 export const outdoorGround = (period: Period, moon = false, theme: YardTheme = 'prado') => (moon ? MOON_GROUND : palOf(theme, period).ground);
 
-/** Lá fora na Lua: céu de estrelas, a Terra enorme, a base lunar (a casa do Hami) ao fundo, crateras, foguete e bandeira. */
+/** Lá fora na Lua: céu de estrelas, a Terra enorme, a base lunar (a casa do Lumbi) ao fundo, crateras, foguete e bandeira. */
 export function MoonOutdoors({ height = 430, children }: { height?: number; children?: ReactNode }) {
   const still = prefersReducedMotion();
   const stars = Array.from({ length: 46 }, (_, i) => [((i * 157) % 740) + ((i * 7) % 11), ((i * 89) % 230) + 6, i % 4 === 0 ? 2.2 : i % 3 ? 1.2 : 1.7]);
@@ -103,7 +103,7 @@ export function MoonOutdoors({ height = 430, children }: { height?: number; chil
         {/* morros lunares ao fundo */}
         <path d="M0 250 Q80 214 170 236 Q260 206 360 232 Q460 204 560 230 Q650 210 740 228 V300 H0Z" fill="#7C82A8" />
         <path d="M0 272 Q120 246 240 264 Q380 240 520 262 Q640 246 740 258 V320 H0Z" fill="#9499BC" />
-        {/* a base lunar: a casa do Hami */}
+        {/* a base lunar: a casa do Lumbi */}
         <g transform="translate(212 300)">
           <ellipse cx="0" cy="2" rx="96" ry="12" fill="#000" opacity="0.18" />
           <rect x="-96" y="-18" width="192" height="20" rx="8" fill="#9EA4C4" />
@@ -152,7 +152,7 @@ export function MoonOutdoors({ height = 430, children }: { height?: number; chil
         {[[40, 380], [250, 330], [470, 322], [560, 420], [720, 360], [150, 312]].map(([x, y], i) => (
           <ellipse key={i} cx={x} cy={y} rx={7 + (i % 3) * 3} ry={4 + (i % 2) * 2} fill="#8A8FAE" />
         ))}
-        {/* bandeirinha do Hami */}
+        {/* bandeirinha do Lumbi */}
         <g transform="translate(560 318)">
           <path d="M0 0 V-46" stroke="#C6CAE2" strokeWidth="3" />
           <path className="mo-flag" d="M0 -46 h30 l-6 9 6 9 h-30Z" fill="#FF8FB1" />
@@ -233,7 +233,7 @@ function CurvyTree({ x, p, palm }: { x: number; p: Pal; palm?: boolean }) {
   );
 }
 
-export function Outdoors({ period = 'tarde', height = 430, children, theme = 'prado' }: { period?: Period; height?: number; children?: ReactNode; theme?: YardTheme }) {
+export function Outdoors({ period = 'tarde', height = 430, children, theme = 'prado' }: { period?: Period; height?: number | string; children?: ReactNode; theme?: YardTheme }) {
   const p = palOf(theme, period);
   const night = p.dim > 0;
   const still = prefersReducedMotion();

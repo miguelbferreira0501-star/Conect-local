@@ -1,4 +1,4 @@
-// Bolsa: tudo o que a pessoa já tem, no jeito de "provador" dos apps de pet. Em cima, o quarto do Hami com ele
+// Bolsa: tudo o que a pessoa já tem, no jeito de "provador" dos apps de pet. Em cima, o quarto do Lumbi com ele
 // dentro (mostrando o resultado na hora); logo abaixo, o nome dele (ou "Esconder casa" nas roupas), Foto e
 // Favoritos; depois a barra de categorias com ícones e a grade com ✓ no que está em uso. Tocar num item abre a
 // folha de baixo para vestir/tirar ou colocar/guardar (e favoritar). Embaixo, Roupas / Casa / Coleção.
@@ -79,7 +79,7 @@ function ownedFurs(s: State) {
   return FURS.filter((f) => (!f.price || owned(s, `fur:${f.id}`)) && (!f.plus || premium));
 }
 
-/** Carregando a categoria: o Hami pequenininho com pontinhos pulando. */
+/** Carregando a categoria: o Lumbi pequenininho com pontinhos pulando. */
 function Loading() {
   return (
     <div className="bag2-loading" aria-hidden="true">
@@ -250,7 +250,7 @@ function Closet({ part, onStore, onDecorate }: { part: 'roupas' | 'casa'; onStor
   const showRoom = !(part === 'roupas' && hide);
   return (
     <>
-      {/* o quarto com o Hami dentro (nas roupas dá para esconder a casa e ver só ele) */}
+      {/* o quarto com o Lumbi dentro (nas roupas dá para esconder a casa e ver só ele) */}
       <div className={`bag2-stage ${showRoom ? '' : 'is-plain'}`}>
         {showRoom ? (
           <Room house={s.house} period={periodOf()} height={300}>

@@ -1,6 +1,6 @@
-// Fachada de cada lojinha: toldo, parede, prateleiras, balcão e o próprio Hami de vendedor,
+// Fachada de cada lojinha: toldo, parede, prateleiras, balcão e o próprio Lumbi de vendedor,
 // com a roupa da loja (pedreiro na marcenaria, chef na cozinha, estilista no ateliê, capitão nos baús).
-// Tudo desenhado aqui (quadro 360 x 210); o Hami fica entre o fundo e o balcão.
+// Tudo desenhado aqui (quadro 360 x 210); o Lumbi fica entre o fundo e o balcão.
 import { useState } from 'react';
 import { Hamster } from './Hamster';
 import { play, type SoundId } from '../lib/sound';
@@ -167,12 +167,12 @@ export function ShopIcon({ id, size = 28, c }: { id: ShopId; size?: number; c?: 
   );
 }
 
-/** O Hami de vendedor da loja, com o fundo e o balcão. Tocar nele faz ele pular e falar outra coisa.
+/** O Lumbi de vendedor da loja, com o fundo e o balcão. Tocar nele faz ele pular e falar outra coisa.
  *  `immersive`: versão da tela cheia da loja (placa redonda com o ícone e a fala só aparece ao tocar). */
 export function ShopFront({ shop, immersive }: { shop: ShopId; immersive?: boolean }) {
   const s = useApp();
   const look = SHOPS[shop];
-  const pet = s.pet.name || 'Hami';
+  const pet = s.pet.name || 'Lumbi';
   const start = hashStr(`${s.seed}:${todayKey()}:${shop}`) % look.lines.length;
   const [taps, setTaps] = useState(0);
   const line = look.lines[(start + taps) % look.lines.length];
@@ -539,7 +539,7 @@ function PortoBack() {
   );
 }
 
-// ---------- Balcão (fica na frente do Hami) ----------
+// ---------- Balcão (fica na frente do Lumbi) ----------
 
 function Counter({ id, wood }: { id: ShopId; wood: string }) {
   return (

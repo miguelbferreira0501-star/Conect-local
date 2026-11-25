@@ -98,7 +98,7 @@ describe('carteira e ganhos no servidor', () => {
     expect(r.status).toBe(200);
     expect(r.body.wallet.coins).toBe(5000);
     expect(r.body.wallet.xp).toBe(20000);
-    expect(r.body.items).toBe(3);
+    expect(r.body.items).toBe(2); // 'inventado' e 'fur:mel' (pelagem que não existe mais) ficam de fora
     expect((await call('POST', '/game/import', { coins: 1, xp: 1, items: [] }, u.cookie)).status).toBe(409);
   });
 });

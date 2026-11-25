@@ -1,5 +1,5 @@
-// Ilustrações planas da história do começo: o Hami encolhido na chuva (com uma folhinha na cabeça),
-// as mãos que levam ele para casa, o quarto quentinho e o Hami embrulhado na toalha.
+// Ilustrações planas da história do começo: o Lumbi encolhido na chuva (com uma folhinha na cabeça),
+// as mãos que levam ele para casa, o quarto quentinho e o Lumbi embrulhado na toalha.
 import { furById } from '../data/fur';
 
 function darken(hex: string, t: number) {
@@ -22,7 +22,7 @@ export function Leaf({ size = 26, color = '#4FA36B' }: { size?: number; color?: 
   );
 }
 
-/** O Hami encolhido como uma bolinha: olhos fechados, tristinhos ou olhando para cima. */
+/** O Lumbi encolhido como uma bolinha: olhos fechados, tristinhos ou olhando para cima. */
 export function CurledHami({ fur: furId, eyes, wet = true, leaf = true, size = 190 }: { fur: string; eyes: 'fechados' | 'tristes' | 'acima'; wet?: boolean; leaf?: boolean; size?: number }) {
   const f = furById(furId);
   const line = darken(f.shade, 0.18);
@@ -84,7 +84,7 @@ export function CurledHami({ fur: furId, eyes, wet = true, leaf = true, size = 1
   );
 }
 
-/** Duas mãos em concha que pegam o Hami por baixo (cor neutra, sem tom de pele, para todo mundo se ver). */
+/** Duas mãos em concha que pegam o Lumbi por baixo (cor neutra, sem tom de pele, para todo mundo se ver). */
 export function Hands({ width = 360 }: { width?: number }) {
   const hand = (
     <g>
@@ -105,7 +105,7 @@ export function Hands({ width = 360 }: { width?: number }) {
   );
 }
 
-/** O Hami embrulhado na toalha branca, só com a carinha feliz de fora. */
+/** O Lumbi embrulhado na toalha branca, só com a carinha feliz de fora. */
 export function WrappedHami({ fur: furId, size = 210 }: { fur: string; size?: number }) {
   const f = furById(furId);
   return (

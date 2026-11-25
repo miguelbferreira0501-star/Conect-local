@@ -1,4 +1,4 @@
--- Guardiões do Hami: quem pode pagar dá HamiCare+ para quem não pode.
+-- Guardiões do Lumbi: quem pode pagar dá HamiCare+ para quem não pode.
 -- Pedido do Guardião (pagamento único) → quando o pagamento confirma, cada "vaga" vira Plus para
 -- a próxima pessoa da fila de quem pediu ajuda (ordem de chegada). Tudo que mexe em outra conta
 -- passa por funções SECURITY DEFINER; a API só lê o que é da própria pessoa.

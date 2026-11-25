@@ -1,4 +1,4 @@
-// Viagem do dia (estilo Finch): o Hami passeia de mochilinha, com o cenário da arena
+// Viagem do dia (estilo Finch): o Lumbi passeia de mochilinha, com o cenário da arena
 // onde mora (ou da Lua) passando atrás. Barra de progresso até o "?" e presente na volta.
 import { WalkingHami } from './WalkingHami';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -12,7 +12,7 @@ import { Glyph } from './art';
 import { Seed } from './ui';
 import type { State } from '../types';
 
-// O Hami passeando de mochilinha (WalkingHami.tsx).
+// O Lumbi passeando de mochilinha (WalkingHami.tsx).
 export { WalkingHami };
 
 // ---------- Cenários de viagem: um por arena, mais a Lua ----------
@@ -84,7 +84,7 @@ const NEAR: Record<string, 'grama' | 'praia' | 'neve' | 'pedra' | 'nuvem'> = {
   celeste: 'nuvem',
 };
 
-/** Tema da viagem: a arena onde o Hami mora (ou a Lua). */
+/** Tema da viagem: a arena onde o Lumbi mora (ou a Lua). */
 export const trekThemeOf = (s: State): string => trekPlaceOf(s);
 
 function PropArt({ kind, x, t }: { kind: Prop; x: number; t: Theme }) {
@@ -282,7 +282,7 @@ function PropArt({ kind, x, t }: { kind: Prop; x: number; t: Theme }) {
   }
 }
 
-/** Cenário com três camadas que passam em velocidades diferentes (o Hami fica no meio, andando). */
+/** Cenário com três camadas que passam em velocidades diferentes (o Lumbi fica no meio, andando). */
 export function TrekScene({ theme, height = 430, children, still = false }: { theme: string; height?: number; children?: ReactNode; still?: boolean }) {
   const t = TREK_THEMES[theme] ?? TREK_THEMES.casinha;
   const W = 800;
@@ -518,7 +518,7 @@ export function inkOn(hex: string) {
   return l > 0.62 ? '#4A3423' : '#FFFFFF';
 }
 
-/** A mala que o Hami traz da viagem. */
+/** A mala que o Lumbi traz da viagem. */
 export function Suitcase({ size = 90 }: { size?: number }) {
   return (
     <svg viewBox="0 0 100 110" width={size} height={(size * 110) / 100} aria-hidden="true">

@@ -45,7 +45,7 @@ const schema = z.object({
   ANDROID_PACKAGE_NAME: z.string().regex(/^[a-zA-Z][\w]*(\.[a-zA-Z][\w]*)+$/).optional(),
   ANDROID_CERT_SHA256: z.string().optional(),
   /**
-   * Guardiões do Hami (dar Lumbi+ para quem não pode pagar): pagamento pelo Mercado Pago (Pix e cartão).
+   * Guardiões do Lumbi (dar Lumbi+ para quem não pode pagar): pagamento pelo Mercado Pago (Pix e cartão).
    * MP_ACCESS_TOKEN: "Access token" de produção da sua aplicação no Mercado Pago (Suas integrações → Credenciais).
    * MP_WEBHOOK_SECRET: "Assinatura secreta" das notificações (Webhooks), para conferir que o aviso veio do Mercado Pago.
    * Sem token, o botão de ser Guardião fica "em breve". GUARDIAN_TEST_PAY=true liga um pagamento de mentira

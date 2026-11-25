@@ -43,7 +43,7 @@ describe('as 12 arenas', () => {
     for (const i of exclusive) {
       expect(i.price, i.id).toBe(0);
       expect(i.souvenir, i.id).toBe(true);
-      // Roupas são desenhadas no próprio Hami (base); móveis e decoração têm desenho próprio.
+      // Roupas são desenhadas no próprio Lumbi (base); móveis e decoração têm desenho próprio.
       if (i.kind !== 'parede' && i.kind !== 'piso') expect(Boolean(i.base) || hasArt(i.art ?? i.emoji ?? ''), i.id).toBe(true);
     }
     // Toda peça das casas prontas existe: ou é exclusiva da arena (vem de presente), ou é móvel da loja (vem junto com a casa).
@@ -80,7 +80,7 @@ describe('as 12 arenas', () => {
 });
 
 describe('casas por arena', () => {
-  it('abrir uma arena dá os itens exclusivos e deixa a casa dela pronta, sem mudar o Hami', async () => {
+  it('abrir uma arena dá os itens exclusivos e deixa a casa dela pronta, sem mudar o Lumbi', async () => {
     start(xpAt(2, G) - 1);
     toggleTask('corrida');
     await new Promise((r) => setTimeout(r, 5));

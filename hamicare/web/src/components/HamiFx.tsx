@@ -1,4 +1,4 @@
-// Efeitos em volta do Hami no Início: o clima da situação do dia (neve, calor, chuva, trovão…) e
+// Efeitos em volta do Lumbi no Início: o clima da situação do dia (neve, calor, chuva, trovão…) e
 // os detalhes da atividade (bolinha quicando, bolhas subindo, notas de música, brilhinhos).
 import type { Activity, Condition } from '../lib/hamiDay';
 
@@ -100,7 +100,7 @@ export function ConditionFx({ cond }: { cond: Condition }) {
   }
 }
 
-/** Detalhes da atividade (o objeto que ele segura já vem desenhado no próprio Hami). */
+/** Detalhes da atividade (o objeto que ele segura já vem desenhado no próprio Lumbi). */
 /** As atividades agora são tranquilas (em pé, sentado, dormindo): sem efeitos em volta. */
 export function ActivityFx(_: { act: Activity }) {
   return null;
