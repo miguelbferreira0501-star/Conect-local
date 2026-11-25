@@ -2,7 +2,6 @@
 // resumo da semana, nível, fase e conquista. Um de cada vez, em tela cheia ou janela.
 import { useEffect, useState } from 'react';
 import { Hamster } from './Hamster';
-import { useGrowth } from './Growth';
 import { Modal } from './ui';
 import { AFFIRMATIONS, JOURNEY_TEXT } from '../data/lines';
 import { PHASES } from '../logic/evolution';
@@ -13,167 +12,113 @@ import { isActive } from '../logic/evolution';
 import type { Photo } from '../types';
 import { Glyph } from './art';
 
-const DAY_NAMES = ['Domingo Doce', 'Segunda Serena', 'Terça Tranquila', 'Quarta Querida', 'Quinta Quentinha', 'Sexta Sorridente', 'Sábado Sossegado'];
-const DAY_COLORS: [string, string][] = [
-  ['#FFB0C8', '#FF7FA3'],
-  ['#9FD2FF', '#5DA8F5'],
-  ['#B9E8A8', '#5FBF7A'],
-  ['#D2BCFF', '#9A72F0'],
-  ['#FFD98A', '#FFAE45'],
-  ['#FFC4A8', '#FF8A65'],
-  ['#A8E6E0', '#3FB8AC'],
-];
+const DAY_FULL = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+/** Fundo vivo e liso de cada dia da semana. */
+const DAY_BG = ['#EE7BA2', '#4F9FE0', '#4DB46C', '#4A97DB', '#F0A23A', '#EF7E5A', '#2FB0A3'];
 
-/** Cenário fofo das telas de abertura: nuvens, bolinhas, corações e estrelas flutuando e um morrinho florido. */
-function DwDecor() {
-  const floaters = ['♥', '✦', '★', '♥', '✿', '✦', '♥', '★', '✿', '♥'];
+/** Cartão ilustrado da afirmação: céu, montanhas, sol nascendo e o pet no alto da pedra. */
+function AffirmationCard({ text, pet }: { text: string; pet: React.ReactNode }) {
+  const words = text.replace(/[.!]$/, '').split(' ');
+  const cut = Math.max(1, Math.ceil(words.length * 0.55));
+  const end = /[.!]$/.test(text) ? text.slice(-1) : '';
   return (
-    <div className="dw-decor" aria-hidden="true">
-      <span className="dw-dots" />
-      <span className="dw-cloud dw-cloud-1" />
-      <span className="dw-cloud dw-cloud-2" />
-      <span className="dw-cloud dw-cloud-3" />
-      {floaters.map((c, i) => (
-        <span key={i} className="dw-float" style={{ left: `${6 + ((i * 37) % 88)}%`, animationDelay: `${(i * 0.9) % 7}s`, fontSize: `${14 + (i % 3) * 6}px` }}>
-          {c}
-        </span>
-      ))}
-      <svg className="dw-hill" viewBox="0 0 400 120" preserveAspectRatio="none">
-        <path d="M0 60 Q100 20 200 46 T400 40 V120 H0Z" fill="#FFFFFF" opacity="0.22" />
-        <path d="M0 84 Q120 56 240 76 T400 70 V120 H0Z" fill="#FFFFFF" opacity="0.32" />
-        {[[40, 80], [96, 72], [300, 74], [356, 78], [180, 82]].map(([x, y], i) => (
-          <g key={i} transform={`translate(${x} ${y})`}>
-            <rect x="-1" y="0" width="2" height="12" fill="#6FB868" />
-            {[0, 72, 144, 216, 288].map((a) => (
-              <circle key={a} cx={Math.cos((a * Math.PI) / 180) * 4} cy={Math.sin((a * Math.PI) / 180) * 4} r="3.4" fill={['#FF9FC2', '#FFE27A', '#FFFFFF', '#C9B6FF', '#9FD8FF'][i]} />
-            ))}
-            <circle r="2.4" fill="#FFB347" />
+    <div className="fw-card">
+      <div className="fw-card-in">
+        <svg className="fw-card-art" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <rect width="300" height="300" fill="#7CC4EE" />
+          <circle cx="232" cy="236" r="96" fill="#A9D3C9" opacity="0.55" />
+          <circle cx="232" cy="236" r="70" fill="#C7D7A6" opacity="0.6" />
+          <circle cx="232" cy="236" r="44" fill="#F5B562" />
+          <g fill="#FFFFFF" opacity="0.9">
+            <ellipse cx="40" cy="180" rx="34" ry="14" />
+            <ellipse cx="62" cy="172" rx="22" ry="14" />
+            <ellipse cx="272" cy="150" rx="24" ry="9" />
+            <ellipse cx="150" cy="196" rx="26" ry="9" />
           </g>
-        ))}
-      </svg>
+          <path d="M60 300 L150 196 L214 262 L250 222 L300 270 V300Z" fill="#C9CED6" />
+          <path d="M150 196 L176 226 L160 222 L148 234 L138 214Z" fill="#FFFFFF" />
+          <path d="M170 300 L232 240 L300 290 V300Z" fill="#B3BAC4" />
+          <g fill="#3E9A4E">
+            <path d="M218 262 l8 -20 l8 20z" />
+            <path d="M244 280 l7 -18 l7 18z" />
+            <path d="M200 282 l6 -15 l6 15z" />
+          </g>
+          <path d="M150 300 Q220 280 300 286 V300Z" fill="#6FCFCB" />
+          <path d="M0 300 V236 Q40 214 96 226 Q132 236 150 262 L160 300Z" fill="#5A5E66" />
+          <path d="M0 250 Q44 230 92 240" stroke="#71757E" strokeWidth="6" fill="none" strokeLinecap="round" />
+        </svg>
+        <p className="fw-card-kicker">Afirmação do dia</p>
+        <p className="fw-card-text">
+          {words.slice(0, cut).join(' ')} <span>{words.slice(cut).join(' ')}{end}</span>
+        </p>
+        <span className="fw-card-pet">{pet}</span>
+      </div>
     </div>
   );
 }
 
 /**
- * Abertura do dia (estilo Catzy), em três passos: os dias juntos com o contador subindo,
- * a sequência de 7 dias com corações e o crescimento do Hami.
+ * Abertura do dia em duas telas de cor viva: boas-vindas com a afirmação do dia num cartão
+ * ilustrado e, depois, a sequência com raios de sol, a semana e os martelinhos que salvaram dias.
  */
 export function DailyWelcome({ onClose }: { onClose: () => void }) {
   const s = useApp();
   const today = todayKey();
   const dow = new Date(`${today}T12:00:00`).getDay();
   const n = sinceStart(s) + 1;
-  const streak = streakOf(s.days, today, s.createdAt);
-  const g = useGrowth(s);
-  const [step, setStep] = useState<0 | 1 | 2>(0);
-  const [shown, setShown] = useState(Math.max(0, n - 1));
+  const st = streakOf(s.days, today, s.createdAt);
+  const [step, setStep] = useState<0 | 1>(0);
+  const [shown, setShown] = useState(Math.max(0, st.count - 1));
   useEffect(() => {
-    const t = setTimeout(() => setShown(n), 900);
+    if (step !== 1) return;
+    const t = setTimeout(() => setShown(st.count), 500);
     return () => clearTimeout(t);
-  }, [n]);
-  const away = s.welcomed ? dayDiff(s.welcomed, today) : 0;
-  const hello = n === 1 ? 'Nosso primeiro dia juntos!' : away > 1 ? 'Senti um pouquinho a sua falta. Só um pouquinho.' : 'Que bom te ver de novo!';
-  // Ciclo de 7 dias: quantos corações já estão cheios nesta volta.
-  const filled = streak.count === 0 ? 0 : ((streak.count - 1) % 7) + 1;
-  const first = addDays(today, -(filled > 0 && isActive(s.days[today]) ? filled - 1 : filled));
-  const line =
-    streak.count >= 2
-      ? `Depois de ${streak.count} dias, você está cada vez mais perto da pessoa que quer ser.`
-      : `“${AFFIRMATIONS[hashStr(`${s.seed}:${today}`) % AFFIRMATIONS.length]}”`;
-  const [a, b] = DAY_COLORS[dow];
+  }, [step, st.count]);
+  const aff = AFFIRMATIONS[hashStr(`${s.seed}:${today}`) % AFFIRMATIONS.length];
+  const art = dow === 0 || dow === 6 ? 'ao' : 'à';
+  // Semana de seg a dom (como a da imagem), com dias feitos, salvos pelo martelinho e de descanso.
+  const start = addDays(today, -((dow + 6) % 7));
+  const week = Array.from({ length: 7 }, (_, i) => addDays(start, i));
+  const kind = (k: string) => (isActive(s.days[k]) ? 'ok' : s.days[k]?.repaired ? 'fix' : st.rested.includes(k) ? 'rest' : dayDiff(k, today) < 0 ? 'next' : dayDiff(k, today) === 0 ? 'today' : 'miss');
+  const kinds = week.map(kind);
+  const saved = kinds.includes('fix');
+  const filledIdx = kinds.map((k, i) => (k === 'ok' || k === 'fix' || k === 'rest' ? i : -1)).filter((i) => i >= 0);
+  const msg = saved ? `Ufa... sua sequência foi salva desta vez! Visite o ${s.pet.name} todo dia para continuar.` : st.count >= 2 ? `Você voltou de novo! Visite o ${s.pet.name} todo dia para a sequência continuar.` : `Um dia de cada vez. Visite o ${s.pet.name} amanhã para começar uma sequência.`;
+  const pet = (mood: 'animado' | 'feliz', size: number) => <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={mood} size={size} />;
   return (
-    <div className="welcome dw" role="dialog" aria-modal="true" aria-label="Boas-vindas do dia" style={{ ['--w1' as string]: a, ['--w2' as string]: b }}>
-      <DwDecor />
+    <div className="fw" role="dialog" aria-modal="true" aria-label="Boas-vindas do dia" style={{ ['--fw' as string]: DAY_BG[dow] }}>
       {step === 0 && (
-        <div className="dw-step">
-          <p className="dw-kicker">{DAY_NAMES[dow]}</p>
-          <p className="dw-hello">{hello}</p>
-          <div className="dw-heart">
-            <svg viewBox="0 0 200 180" aria-hidden="true">
-              <defs>
-                <linearGradient id="dwh" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stopColor="#FFD3E4" />
-                  <stop offset="1" stopColor="#FF9FC2" />
-                </linearGradient>
-                <pattern id="dwp" width="18" height="18" patternUnits="userSpaceOnUse">
-                  <circle cx="9" cy="9" r="2.6" fill="#FFFFFF" opacity="0.45" />
-                </pattern>
-              </defs>
-              <path d="M100 172 C40 128 12 94 12 58 C12 28 36 8 62 8 C80 8 92 18 100 32 C108 18 120 8 138 8 C164 8 188 28 188 58 C188 94 160 128 100 172 Z" fill="#FFFFFF" />
-              <path d="M100 164 C44 122 20 92 20 58 C20 33 40 16 62 16 C79 16 92 26 100 42 C108 26 121 16 138 16 C160 16 180 33 180 58 C180 92 156 122 100 164 Z" fill="url(#dwh)" />
-              <path d="M100 164 C44 122 20 92 20 58 C20 33 40 16 62 16 C79 16 92 26 100 42 C108 26 121 16 138 16 C160 16 180 33 180 58 C180 92 156 122 100 164 Z" fill="url(#dwp)" />
-              <path d="M44 46 C48 34 60 28 70 30" stroke="#FFFFFF" strokeWidth="7" strokeLinecap="round" fill="none" opacity="0.8" />
-            </svg>
-            <span className="dw-star dw-star-1">★</span>
-            <span className="dw-star dw-star-2">★</span>
-            <span className="dw-star dw-star-3">✦</span>
-            <span className="dw-pet">
-              <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="animado" size={150} />
-            </span>
-          </div>
-          <div className="dw-badge">
-            <p key={shown} className="dw-count">{shown}</p>
-            <p className="dw-ribbon">
-              <span>{shown === 1 ? 'dia junto' : 'dias juntos'}</span>
-            </p>
-          </div>
-          <button className="dw-btn" onClick={() => setStep(1)}>
+        <div className="fw-step" key="a">
+          <p className="fw-day">Dia {n}</p>
+          <h1 className="fw-title">
+            Boas-vindas {art} {DAY_FULL[dow]}!
+          </h1>
+          <AffirmationCard text={aff} pet={pet('feliz', 120)} />
+          <Glyph e="⚡" size={46} />
+          <p className="fw-help">Ajude o {s.pet.name} a ganhar toda a energia hoje para sair em aventura e crescer!</p>
+          <button className="fw-btn" onClick={() => setStep(1)}>
             Começar hoje
           </button>
         </div>
       )}
       {step === 1 && (
-        <div className="dw-step">
-          <h1 className="dw-title">Sequência de 7 dias</h1>
-          <p className="dw-fire">
-            <Glyph e="🔥" size={22} /> {streak.count} {streak.count === 1 ? 'dia seguido' : 'dias seguidos'}
-          </p>
-          <div className="dw-talk">
-            <p>{line}</p>
-          </div>
-          <ol className="dw-week" aria-label={`${filled} de 7 dias desta sequência`}>
-            {Array.from({ length: 7 }, (_, i) => (
-              <li key={i} className={i < filled ? 'is-on' : ''}>
-                <small>{WEEKDAYS[new Date(`${addDays(first, i)}T12:00:00`).getDay()].slice(0, 1).toUpperCase()}</small>
-                <span>♥</span>
-              </li>
+        <div className="fw-step" key="b">
+          <span className="fw-rays" aria-hidden="true" />
+          <span className="fw-pet">{pet('animado', 190)}</span>
+          <p className="fw-num">{shown}</p>
+          <p className="fw-label">{st.count === 1 ? 'Dia seguido' : 'Dias seguidos'}</p>
+          <div className="fw-week" aria-label="Semana da sequência">
+            {filledIdx.length > 0 && <span className="fw-track" style={{ left: `calc(${(filledIdx[0] / 7) * 100}% + 4px)`, width: `calc(${((filledIdx[filledIdx.length - 1] - filledIdx[0] + 1) / 7) * 100}% - 8px)` }} />}
+            {week.map((k, i) => (
+              <div key={k} className="fw-wd">
+                <small>{DAY_FULL[new Date(`${k}T12:00:00`).getDay()].slice(0, 1)}</small>
+                <span className={`fw-dot is-${kinds[i]}`}>{kinds[i] === 'ok' ? '✓' : kinds[i] === 'fix' ? <Glyph e="🔨" size={30} /> : kinds[i] === 'rest' ? <Glyph e="💤" size={20} /> : ''}</span>
+              </div>
             ))}
-          </ol>
-          <p className="dw-note">Cuide de você aos poucos por 7 dias. Cada vez que completar um ciclo, uma sequência nova começa{streak.count >= 1 ? ' e você ganha um martelinho' : ''}.</p>
-          <div className="dw-stage" aria-hidden="true">
-            <span className="dw-cushion" />
-            <span className="dw-stage-pet">
-              <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={180} />
-            </span>
-            <span className="dw-bubble">🔥 {streak.count}</span>
           </div>
-          <button className="dw-btn" onClick={() => setStep(2)}>
-            Vamos começar!
-          </button>
-        </div>
-      )}
-      {step === 2 && (
-        <div className="dw-step">
-          <p className="dw-hello">Seus cuidados de cada dia fazem o {s.pet.name} crescer, mais forte e saudável.</p>
-          <div className="dw-grow">
-            <span className="dw-sun" aria-hidden="true" />
-            <span className="dw-ruler" aria-hidden="true" />
-            <span className="dw-pot" aria-hidden="true">🌱</span>
-            <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={170} />
-          </div>
-          <div className="dw-card">
-            <p className="dw-card-name">
-              <span aria-hidden="true">🌱</span> {g.name}
-              {g.next && <small> → {g.next.name}</small>}
-            </p>
-            <span className="dw-card-bar" aria-hidden="true">
-              <span style={{ width: `${Math.max(6, Math.round(g.progress * 100))}%` }} />
-            </span>
-            <p className="dw-card-note">{g.next ? `Cresce de novo com mais ${g.toNext} ${g.toNext === 1 ? 'dia' : 'dias'} de cuidado.` : 'Ele já está do tamanho máximo. Que orgulho!'}</p>
-          </div>
-          <button className="dw-btn" onClick={onClose}>
-            Bora, {s.pet.name}!
+          <p className="fw-msg">{msg}</p>
+          <button className="fw-btn" onClick={onClose}>
+            Vamos lá!
           </button>
         </div>
       )}

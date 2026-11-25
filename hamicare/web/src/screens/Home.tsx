@@ -112,7 +112,9 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
     root.setProperty('--home-deep', p.deep);
     root.setProperty('--home-page-dark', p.dark);
     root.setProperty('--home-ink', p.ink);
-    return () => ['--home-floor', '--home-page', '--home-card', '--home-deep', '--home-page-dark', '--home-ink'].forEach((k) => root.removeProperty(k));
+    root.setProperty('--home-soft', p.soft);
+    root.setProperty('--home-soft2', p.soft2);
+    return () => ['--home-floor', '--home-page', '--home-card', '--home-deep', '--home-page-dark', '--home-ink', '--home-soft', '--home-soft2'].forEach((k) => root.removeProperty(k));
   }, [floor, trekTheme, outside, onMoon, yard]);
   const day = dayOf(s, today);
   const tasks = todayTasks(s, today);
