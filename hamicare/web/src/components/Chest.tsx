@@ -1,4 +1,4 @@
-// Os 5 baús do HamiCare, desenhados à mão em SVG. A tampa pode abrir (animação de abertura).
+// Os 5 baús do Lumbi, desenhados à mão em SVG. A tampa pode abrir (animação de abertura).
 import type { ChestId } from '../shared/game/config';
 
 interface Look {

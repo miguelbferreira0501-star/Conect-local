@@ -40,11 +40,11 @@ export const inviteLink = (code: string) => `${isNativeApp() ? SITE_URL : locati
 
 /** Manda o convite pelo menu de compartilhar do celular; sem ele, copia. Devolve o aviso para mostrar ('' = nenhum). */
 export async function shareInvite(code: string, withLink: boolean): Promise<string> {
-  const text = `Vem cuidar do seu Hami comigo no HamiCare! Meu código de amigo é ${code}`;
+  const text = `Vem cuidar do seu Hami comigo no Lumbi! Meu código de amigo é ${code}`;
   const url = withLink ? inviteLink(code) : undefined;
   if (typeof navigator.share === 'function') {
     try {
-      await navigator.share({ title: 'HamiCare', text, url });
+      await navigator.share({ title: 'Lumbi', text, url });
       return '';
     } catch (e) {
       if ((e as Error)?.name === 'AbortError') return '';

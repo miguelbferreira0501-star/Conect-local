@@ -1,4 +1,4 @@
-// Trilha "Hábito que fica" (21 dias) e Relatório da semana: o que o HamiCare+ entrega de resultado.
+// Trilha "Hábito que fica" (21 dias) e Relatório da semana: o que o Lumbi+ entrega de resultado.
 import { useState } from 'react';
 import { Check, ChevronRight, Lock, TrendingDown, TrendingUp } from 'lucide-react';
 import { Sheet, toast } from './ui';
@@ -26,7 +26,7 @@ export function TrailCard() {
         <span className="trail-ico" aria-hidden="true">🌱</span>
         <span className="min-w-0 flex-1 text-left">
           <small>Trilha Hábito que fica · dia {Math.min(doneN + (n.state === 'amanha' ? 0 : 1), TRAIL.length)} de {TRAIL.length}</small>
-          <b>{n.state === 'amanha' ? 'Passo de hoje feito! Volta amanhã' : n.state === 'plus' ? 'Continue a trilha com o HamiCare+' : step.title}</b>
+          <b>{n.state === 'amanha' ? 'Passo de hoje feito! Volta amanhã' : n.state === 'plus' ? 'Continue a trilha com o Lumbi+' : step.title}</b>
           <span className="trail-bar" aria-hidden="true">
             <span style={{ width: `${(doneN / TRAIL.length) * 100}%` }} />
           </span>
@@ -45,7 +45,7 @@ export function TrailCard() {
                   <p className="trail-blur">{step.learn}</p>
                   {!kid && (
                     <button className="btn btn-primary" onClick={() => (setOpen(false), openUi('plus'))}>
-                      <Lock size={16} /> Continuar com o HamiCare+
+                      <Lock size={16} /> Continuar com o Lumbi+
                     </button>
                   )}
                 </>

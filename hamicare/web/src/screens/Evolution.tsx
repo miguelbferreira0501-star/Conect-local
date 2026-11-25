@@ -244,7 +244,7 @@ export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; o
                     Salvar
                   </button>
                 </div>
-                <p className="text-[12px] text-muted">Uma jornada vai até 20% do peso (emagrecer) ou 15% (ganhar), sem passar de um peso saudável para a sua altura. O HamiCare não faz recomendação médica.</p>
+                <p className="text-[12px] text-muted">Uma jornada vai até 20% do peso (emagrecer) ou 15% (ganhar), sem passar de um peso saudável para a sua altura. O Lumbi não faz recomendação médica.</p>
               </div>
             )}
           </section>
@@ -316,7 +316,7 @@ export function Evolution({ onClose, onShare, onPlus }: { onClose: () => void; o
             ))}
           </ol>
         </section>
-        {!isPremium(s) && <p className="text-center text-[13px] text-muted">Gráficos dos últimos 30 dias. Com o HamiCare+, 6 meses.</p>}
+        {!isPremium(s) && <p className="text-center text-[13px] text-muted">Gráficos dos últimos 30 dias. Com o Lumbi+, 6 meses.</p>}
         <PlusCard onOpen={onPlus} title="Veja 6 meses de evolução" text="Gráficos de 6 meses, além de roupas, pelagens e estilos de casa exclusivos." />
       </div>
 

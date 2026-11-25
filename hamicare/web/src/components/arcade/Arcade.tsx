@@ -1,4 +1,4 @@
-// Parque de jogos do Hami: grade de jogos, prêmios do dia e jogos exclusivos do HamiCare+.
+// Parque de jogos do Hami: grade de jogos, prêmios do dia e jogos exclusivos do Lumbi+.
 import { useState, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { Glyph } from '../art';
@@ -110,7 +110,7 @@ export function ArcadeHub({ onClose, legacy }: { onClose: () => void; legacy: Pa
         </div>
         {showPlusOffers(s) && (
           <button className="arc-plus-cta" onClick={() => (onClose(), openUi('plus'))}>
-            <Glyph e="👑" size={26} /> Com o HamiCare+ você libera vôlei, skate e pula nuvens, e eles valem mais sementes
+            <Glyph e="👑" size={26} /> Com o Lumbi+ você libera vôlei, skate e pula nuvens, e eles valem mais sementes
           </button>
         )}
       </div>

@@ -84,7 +84,7 @@ export async function snapshotPng(svg: SVGSVGElement, opts: { bg: [string, strin
   ctx.fillStyle = 'rgba(43,34,64,0.55)';
   ctx.font = '700 22px "Nunito Sans", system-ui, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('HamiCare', size / 2, canvas.height - 18);
+  ctx.fillText('Lumbi', size / 2, canvas.height - 18);
   return new Promise((res, rej) => canvas.toBlob((b) => (b ? res(b) : rej(new Error('sem imagem'))), 'image/png'));
 }
 

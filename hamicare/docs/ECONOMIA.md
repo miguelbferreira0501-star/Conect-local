@@ -1,6 +1,6 @@
 # Economia do jogo
 
-Números de níveis, XP, sementes e baús do HamiCare, ajustados por simulação.
+Números de níveis, XP, sementes e baús do Lumbi, ajustados por simulação.
 Os valores ficam em `web/src/shared/game/config.ts` (o painel de administração poderá gravar outra versão),
 e as metas de equilíbrio são conferidas pelo teste `web/src/shared/game/simulate.test.ts`.
 

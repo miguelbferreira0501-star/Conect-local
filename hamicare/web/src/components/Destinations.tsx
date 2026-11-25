@@ -66,7 +66,7 @@ export function DestinationSheet({ open, onClose }: { open: boolean; onClose: ()
       play('compra');
       toast(`${d.name} liberado! É o próximo destino do Hami.`);
       setTab('meus');
-    } else if (r === 'plus') toast('Esse destino é do HamiCare+.');
+    } else if (r === 'plus') toast('Esse destino é do Lumbi+.');
     else if (r === 'sem-sementes') toast(`Faltam ${d.price - s.coins} sementes.`);
   };
 
@@ -120,7 +120,7 @@ export function DestinationSheet({ open, onClose }: { open: boolean; onClose: ()
                 </button>
                 {tab === 'bloqueados' &&
                   (d.plus && !isPremium(s) ? (
-                    <span className="dst-price is-plus">Só no HamiCare+</span>
+                    <span className="dst-price is-plus">Só no Lumbi+</span>
                   ) : (
                     <button className="dst-price" onClick={() => buy(d)} aria-label={`Comprar ${d.name} por ${d.price} sementes`}>
                       <Seed /> {d.price}

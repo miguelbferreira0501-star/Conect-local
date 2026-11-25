@@ -1,4 +1,4 @@
-// Parte social e conta usando o servidor do HamiCare (hamicare/server).
+// Parte social e conta usando o servidor do Lumbi (hamicare/server).
 import type { ReactionId } from '../../shared/moderation';
 import { apiBase } from '../native';
 import type { CommentResult, Feed, FriendState, Gift, GroupChallenge, Profile, RankRow, ReportTarget, SocialApi, Team, Visit } from './types';
@@ -22,7 +22,7 @@ export async function http<T = any>(method: string, path: string, body?: unknown
 }
 
 let health: Promise<boolean> | null = null;
-/** Existe servidor do HamiCare neste endereço e a pessoa está logada? */
+/** Existe servidor do Lumbi neste endereço e a pessoa está logada? */
 export function serverAvailable(): Promise<boolean> {
   if (location.protocol === 'file:') return Promise.resolve(false);
   if (!health) {

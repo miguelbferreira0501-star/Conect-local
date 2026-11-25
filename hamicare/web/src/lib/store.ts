@@ -1,4 +1,4 @@
-// Estado do HamiCare: salvo no aparelho (localStorage) e, com conta, no backup privado do servidor.
+// Estado do Lumbi: salvo no aparelho (localStorage) e, com conta, no backup privado do servidor.
 import { careDays, growthOf } from '../logic/growth';
 import { useSyncExternalStore } from 'react';
 import { AREA_GOAL, AREA_PLAN, areaOf, isWeightArea, type Area } from '../logic/areas';
@@ -198,7 +198,7 @@ function normalizeRest(s: State, raw: State): State {
 const OLD_FUR: Record<string, string> = { maracuja: 'caramelo', pitanga: 'pessego', acai: 'lavanda', mate: 'menta', ceu: 'ceu' };
 const OLD_ITEM: Record<string, string> = { vaso: 'planta', luzinhas: 'pisca', varal: 'quadro', radinho: 'relogio', violao: 'flores', concha: 'concha-decor' };
 
-/** Converte o progresso do app antigo (Xodó) para o HamiCare. */
+/** Converte o progresso do app antigo (Xodó) para o Lumbi. */
 export function migrateXodo(old: any): State {
   const s = fresh();
   s.from = 'xodo';
@@ -1096,7 +1096,7 @@ export function applyHammers(): RepairPlan | 'sem-martelinho' | null {
   return plan;
 }
 
-// ---------- HamiCare+: mesada semanal e martelinho do mês ----------
+// ---------- Lumbi+: mesada semanal e martelinho do mês ----------
 
 export { PLUS_WEEKLY };
 /** Semana de agora (segunda-feira), chave da mesada. */
@@ -1661,7 +1661,7 @@ export function trailDo(): boolean {
   return true;
 }
 
-// ---------- Relatório da semana (HamiCare+) ----------
+// ---------- Relatório da semana (Lumbi+) ----------
 
 export interface WeekReport {
   from: string;
@@ -1997,7 +1997,7 @@ export function updatePrivacy(patch: Partial<State['privacy']>) {
   commit({ ...state, privacy: { ...state.privacy, ...patch } });
 }
 
-/** Teste grátis de 7 dias do HamiCare+ (uma vez por conta). */
+/** Teste grátis de 7 dias do Lumbi+ (uma vez por conta). */
 /** Teste grátis (sem conta): 7 dias no plano anual, 3 no mensal. Uma vez só. */
 export function startTrial(days = 7): boolean {
   if (state.premium.trialStart) return false;

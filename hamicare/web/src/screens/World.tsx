@@ -246,7 +246,7 @@ function MapTab({ onPlus }: { onPlus: () => void }) {
             {placeLocked(s, place.id) === 'nivel' && <p className="rounded-2xl bg-surface2 p-3 font-bold">Libera no nível {place.level}. Cada atividade te leva mais perto.</p>}
             {placeLocked(s, place.id) === 'plus' && (
               <button className="btn btn-soft" onClick={onPlus}>
-                <Sparkles size={18} /> Aventura extra do HamiCare+
+                <Sparkles size={18} /> Aventura extra do Lumbi+
               </button>
             )}
             {!placeLocked(s, place.id) &&

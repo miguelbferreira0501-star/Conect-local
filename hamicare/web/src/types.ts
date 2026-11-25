@@ -1,4 +1,4 @@
-// Tipos centrais do HamiCare (estado salvo no aparelho e no backup da conta).
+// Tipos centrais do Lumbi (estado salvo no aparelho e no backup da conta).
 
 export type AgeGroup = 'ate12' | '13a17' | '18mais';
 /** Missão principal. emagrecer/ganhar/manter mexem no peso do Hami (só 18+). */
@@ -330,7 +330,7 @@ export interface State {
   moon?: boolean;
   /** Martelinhos para consertar a ofensiva (ganha 1 a cada 7 dias seguidos; até 3). */
   hammers?: number;
-  /** Mês (AAAA-MM) em que o martelinho grátis do HamiCare+ já foi entregue. */
+  /** Mês (AAAA-MM) em que o martelinho grátis do Lumbi+ já foi entregue. */
   plusHammerMonth?: string;
   /** Turno ("AAAA-MM-DD:n") em que uma missão foi feita: libera a missão rápida "complete uma meta". */
   quickMetaAt?: string;

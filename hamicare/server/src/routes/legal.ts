@@ -14,7 +14,7 @@ export function pageShell(title: string, description: string, body: string, foot
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(title)} · HamiCare</title>
+<title>${esc(title)} · Lumbi</title>
 <meta name="description" content="${esc(description)}">
 <link rel="icon" href="/hami-icon-192.png">
 <style>
@@ -41,7 +41,7 @@ export function pageShell(title: string, description: string, body: string, foot
 </head>
 <body>
 <main>
-  <header><img src="/hami-icon-192.png" alt=""><a href="/">HamiCare</a></header>
+  <header><img src="/hami-icon-192.png" alt=""><a href="/">Lumbi</a></header>
   <article class="card">
 ${body}
   </article>
@@ -55,12 +55,12 @@ export function legalHtml(doc: LegalDoc): string {
   const other = doc.id === 'termos' ? LEGAL.privacidade : LEGAL.termos;
   return pageShell(
     doc.title,
-    `${doc.title} do HamiCare, app de autocuidado com o hamster Hami.`,
+    `${doc.title} do Lumbi, app de autocuidado com o hamster Hami.`,
     `    <h1>${esc(doc.title)}</h1>
     <p class="date">Versão de ${esc(formatLegalDate(LEGAL_INFO.atualizado))}</p>
     <div class="summary"><strong>Em poucas palavras</strong><ul>${doc.summary.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div>
     ${doc.sections.map((s) => `<section><h2>${esc(s.h)}</h2>${s.body.map(block).join('')}</section>`).join('\n    ')}`,
-    `<a href="/${other.id}">${esc(other.title)}</a> · <a href="/excluir-conta">Excluir conta</a> · <a href="/">Abrir o HamiCare</a>`,
+    `<a href="/${other.id}">${esc(other.title)}</a> · <a href="/excluir-conta">Excluir conta</a> · <a href="/">Abrir o Lumbi</a>`,
   );
 }
 

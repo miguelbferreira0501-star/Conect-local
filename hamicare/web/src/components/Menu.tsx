@@ -1,4 +1,4 @@
-// Menu do HamiCare (estilo Finch): cartão do Hami, widget, atalhos em grade, Plus e comunidade.
+// Menu do Lumbi (estilo Finch): cartão do Hami, widget, atalhos em grade, Plus e comunidade.
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Copy } from 'lucide-react';
 import { Hamster } from './Hamster';
@@ -37,8 +37,8 @@ export function MenuScreen({ open, onClose }: { open: boolean; onClose: () => vo
       !isNativeApp()
         ? 'O widget funciona no app instalado pela loja. Assim que o app sair, é só adicionar pela tela inicial.'
         : nativePlatform() === 'ios'
-          ? 'Segure a tela inicial, toque em + e procure por HamiCare.'
-          : 'Segure a tela inicial, toque em Widgets e escolha HamiCare.',
+          ? 'Segure a tela inicial, toque em + e procure por Lumbi.'
+          : 'Segure a tela inicial, toque em Widgets e escolha Lumbi.',
     );
   const tiles: { ico: string; label: string; on: () => void; badge?: number }[] = [
     { ico: '💗', label: `Perfil do ${s.pet.name}`, on: () => go('hami') },
@@ -100,7 +100,7 @@ export function MenuScreen({ open, onClose }: { open: boolean; onClose: () => vo
         <button className="menu-banner menu-plus" onClick={() => go('plus')}>
           <span className="min-w-0 flex-1 text-left">
             <b>
-              HamiCare <em>PLUS</em>
+              Lumbi <em>PLUS</em>
             </b>
             <small>{isPremium(s) ? 'Sua mesada, fantasias e turma maior' : `Sementes toda semana e mimos pro ${s.pet.name}`}</small>
           </span>

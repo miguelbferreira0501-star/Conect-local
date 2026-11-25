@@ -61,7 +61,7 @@ describe('admin dá sementes', () => {
     expect(r.status).toBe(200);
     const w = await call('GET', '/game/wallet', undefined, quem.cookie);
     expect(w.body.wallet.coins).toBe(30 + 10000);
-    expect(JSON.stringify(w.body.ledger)).toContain('Presente da equipe HamiCare');
+    expect(JSON.stringify(w.body.ledger)).toContain('Presente da equipe Lumbi');
   });
 });
 

@@ -192,7 +192,7 @@ function QrSheet({ open, me, server, onClose, onScanned }: { open: boolean; me: 
           <>
             <div className="am-qr" dangerouslySetInnerHTML={{ __html: svg }} role="img" aria-label={`QR code do seu convite (${me?.code ?? ''})`} />
             <p className="font-display text-[20px] font-bold tracking-wide text-white">{me?.code}</p>
-            <p className="max-w-[300px] text-[14px] font-bold text-white/85">Peça para o seu amigo apontar a câmera do celular para este código. O convite abre direto no HamiCare.</p>
+            <p className="max-w-[300px] text-[14px] font-bold text-white/85">Peça para o seu amigo apontar a câmera do celular para este código. O convite abre direto no Lumbi.</p>
             <button className="am-card am-row" onClick={() => setScan(true)}>
               <ScanLine size={24} className="text-[#5d5a6e]" />
               <b>Ler o QR de um amigo</b>
@@ -217,7 +217,7 @@ function Scanner({ onDone, onCancel }: { onDone: () => void; onCancel: () => voi
   useEffect(() => {
     const BD = (window as unknown as { BarcodeDetector?: new (o: { formats: string[] }) => Detector }).BarcodeDetector;
     if (!BD || !navigator.mediaDevices?.getUserMedia) {
-      setMsg('Este celular não lê QR aqui dentro. Use a câmera do próprio celular: o convite abre o HamiCare sozinho.');
+      setMsg('Este celular não lê QR aqui dentro. Use a câmera do próprio celular: o convite abre o Lumbi sozinho.');
       return;
     }
     if (!video) return;

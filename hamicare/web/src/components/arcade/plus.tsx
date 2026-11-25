@@ -1,4 +1,4 @@
-// Jogos do HamiCare+: vôlei na praia, skate radical e pula nuvens.
+// Jogos do Lumbi+: vôlei na praia, skate radical e pula nuvens.
 import { useEffect, useRef, useState } from 'react';
 import { Glyph } from '../art';
 import { play } from '../../lib/sound';

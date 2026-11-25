@@ -1,4 +1,4 @@
-// Efeitos sonoros do HamiCare. Todos são criados na hora com Web Audio: nenhum arquivo para baixar,
+// Efeitos sonoros do Lumbi. Todos são criados na hora com Web Audio: nenhum arquivo para baixar,
 // funcionam sem internet e na página de teste. Respeitam a opção "Sons" dos Ajustes.
 //
 // play('tarefa')                 → toca um som uma vez

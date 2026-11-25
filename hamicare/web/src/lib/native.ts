@@ -14,7 +14,7 @@ export const guardiansHere = () => nativePlatform() !== 'ios';
 
 const ENV = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
 
-/** Endereço público do HamiCare (links de convite, termos, servidor). */
+/** Endereço público do Lumbi (links de convite, termos, servidor). */
 export const SITE_URL = ENV.VITE_SITE_URL ?? 'https://hamicare.onrender.com';
 
 /** No app da loja, o app vem dentro do celular e conversa com o servidor pela internet; no site, é o mesmo endereço. */

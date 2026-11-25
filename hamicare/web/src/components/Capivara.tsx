@@ -1,4 +1,4 @@
-// Dona Capivara, a vendedora da lojinha (desenho próprio do HamiCare).
+// Dona Capivara, a vendedora da lojinha (desenho próprio do Lumbi).
 export function Capivara({ size = 96 }: { size?: number }) {
   return (
     <svg viewBox="0 0 120 120" width={size} height={size} role="img" aria-label="Dona Capivara" className="capivara">

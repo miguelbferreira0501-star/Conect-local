@@ -1,5 +1,5 @@
 // Trilha "Hábito que fica": 21 passos curtos, um por dia, para transformar uma missão em hábito.
-// Os 3 primeiros são grátis; o resto é do HamiCare+. Conteúdo educativo, sem promessa de saúde.
+// Os 3 primeiros são grátis; o resto é do Lumbi+. Conteúdo educativo, sem promessa de saúde.
 export interface TrailStep {
   title: string;
   /** O que aprender hoje (2 ou 3 frases). */

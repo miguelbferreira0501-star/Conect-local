@@ -1,6 +1,6 @@
-# Colocar o HamiCare na Google Play e na App Store
+# Colocar o Lumbi na Google Play e na App Store
 
-O HamiCare já está no ar em `https://hamicare.onrender.com`. Para as lojas, o app vira um pacote
+O Lumbi já está no ar em `https://hamicare.onrender.com`. Para as lojas, o app vira um pacote
 que abre esse mesmo endereço em tela cheia, sem a barra do navegador. Tudo o que muda no site
 chega no app das lojas na hora, sem precisar mandar versão nova.
 
@@ -38,7 +38,7 @@ Imagens prontas para as lojas ficam em [`docs/lojas/`](lojas): ícone 512×512, 
 1. Abra [pwabuilder.com](https://www.pwabuilder.com) e cole `https://hamicare.onrender.com`.
 2. Toque em **Package for stores → Android → Generate Package** e preencha as opções:
    - **Package ID:** `com.hamicare.app`
-   - **App name:** `HamiCare` · **Launcher name:** `HamiCare`
+   - **App name:** `Lumbi` · **Launcher name:** `Lumbi`
    - **App version:** `1.0.0` · **Version code:** `1`
    - **Signing key:** *Create new* (o PWABuilder cria a chave)
 3. Baixe o arquivo `.zip`. Dentro dele estão:
@@ -64,10 +64,10 @@ Imagens prontas para as lojas ficam em [`docs/lojas/`](lojas): ícone 512×512, 
    Sem isso, o app baixado da loja abre com a barra do navegador.
 
 ### 1.4 Criar o app no Play Console
-**Criar app** → nome `HamiCare` · idioma padrão **Português (Brasil)** · **App** · **Gratuito**.
+**Criar app** → nome `Lumbi` · idioma padrão **Português (Brasil)** · **App** · **Gratuito**.
 
 ### 1.5 Página do app na loja (Presença na loja → Página principal)
-- **Nome do app:** `HamiCare: hábitos e calma`
+- **Nome do app:** `Lumbi: Self-Care`
 - **Descrição curta** e **descrição completa:** veja a seção 3.
 - **Ícone:** `docs/lojas/icone-512.png`
 - **Recurso gráfico (banner):** `docs/lojas/banner-1024x500.png`
@@ -133,7 +133,7 @@ Não use documento de outra pessoa numa conta que não está no nome dela: foi o
    → entrar com o Apple ID dele (com verificação em duas etapas ligada) → **Pessoa física** → nome igual ao
    documento → pagar a anuidade (**US$ 99 por ano**, cobrada em reais no cartão). A aprovação leva de 1 a 2 dias.
 2. **Criar o app no App Store Connect** ([appstoreconnect.apple.com](https://appstoreconnect.apple.com)) →
-   Apps → **+** → Novo app: plataforma iOS, nome `HamiCare: hábitos e calma`, idioma **Português (Brasil)**,
+   Apps → **+** → Novo app: plataforma iOS, nome `Lumbi: hábitos e calma`, idioma **Português (Brasil)**,
    ID do pacote **`com.hamicare.app`** (se não aparecer na lista, criar antes em developer.apple.com →
    Certificates, IDs & Profiles → Identifiers → **+** → App IDs, com esse mesmo pacote), SKU `hamicare-ios`.
 3. **Chave de API para o Codemagic:** App Store Connect → Usuários e acesso → **Integrações** → App Store
@@ -141,8 +141,8 @@ Não use documento de outra pessoa numa conta que não está no nome dela: foi o
    e anotar o **Issuer ID** e o **Key ID**.
 4. **Codemagic** (compila no Mac da nuvem, grátis até 500 minutos por mês): [codemagic.io](https://codemagic.io)
    → entrar com o GitHub → adicionar o repositório. Em **Team settings → Integrations → Developer Portal**,
-   conectar a chave do passo 3 com o nome **`HamiCare ASC`** (tem que ser exatamente esse, é o que o
-   `codemagic.yaml` usa). Depois, no app, rodar o workflow **HamiCare iOS (TestFlight)**. O Codemagic cria
+   conectar a chave do passo 3 com o nome **`Lumbi ASC`** (tem que ser exatamente esse, é o que o
+   `codemagic.yaml` usa). Depois, no app, rodar o workflow **Lumbi iOS (TestFlight)**. O Codemagic cria
    os certificados, gera o app assinado e manda para o TestFlight. A primeira compilação leva uns 20 minutos.
 5. **Testar no seu iPhone (TestFlight):** App Store Connect → Usuários e acesso → **+** → adicionar o seu
    e-mail do Apple ID (a função *Marketing* basta). No app → TestFlight → Testes internos → adicionar você.
@@ -150,7 +150,7 @@ Não use documento de outra pessoa numa conta que não está no nome dela: foi o
 6. **Antes de mandar para a revisão da Apple** (para aparecer na App Store):
    - **Assinatura do Plus pela compra da Apple.** A Apple exige que assinaturas vendidas no iPhone usem a
      compra dela. O adulto assina o *Contrato de apps pagos* (App Store Connect → Negócios: dados bancários e
-     fiscais dele) e cria um grupo de assinaturas **HamiCare+** com dois produtos:
+     fiscais dele) e cria um grupo de assinaturas **Lumbi+** com dois produtos:
      `com.hamicare.app.plus.anual` (R$ 329,90) e `com.hamicare.app.plus.mensal` (R$ 49,90), sem oferta de
      teste da Apple (o app já dá o teste sem cartão). A compra já está ligada no app e no servidor: veja o passo
      a passo completo em `docs/APP-STORE-RAPIDO.md`.
@@ -181,19 +181,19 @@ sozinho sempre que algo muda (plugin próprio em `hamicare/web/plugins/hami-widg
 
 ### No iPhone (uma vez só, no site da Apple)
 1. Entre em [developer.apple.com/account](https://developer.apple.com/account) → **Certificates, IDs & Profiles**.
-2. **Identifiers → +** → **App Groups** → descrição `HamiCare` e identificador `group.com.hamicare.app`.
+2. **Identifiers → +** → **App Groups** → descrição `Lumbi` e identificador `group.com.hamicare.app`.
 3. Em **Identifiers**, abra `com.hamicare.app` → marque **App Groups** → **Configure** → escolha `group.com.hamicare.app` → **Save**.
-4. **Identifiers → + → App IDs → App** → descrição `HamiCare Widget`, Bundle ID `com.hamicare.app.widget`,
+4. **Identifiers → + → App IDs → App** → descrição `Lumbi Widget`, Bundle ID `com.hamicare.app.widget`,
    marque **App Groups** e escolha o mesmo grupo → **Register**.
-5. Em **Profiles**, apague os perfis antigos do HamiCare (o Codemagic cria perfis novos já com o App Group).
-6. No Codemagic → app HamiCare → **Environment variables**: adicione `HAMI_WIDGET` = `1`.
-7. Rode o workflow **HamiCare iOS** de novo. No iPhone: segure a tela inicial → **+** → procure **HamiCare**.
+5. Em **Profiles**, apague os perfis antigos do Lumbi (o Codemagic cria perfis novos já com o App Group).
+6. No Codemagic → app Lumbi → **Environment variables**: adicione `HAMI_WIDGET` = `1`.
+7. Rode o workflow **Lumbi iOS** de novo. No iPhone: segure a tela inicial → **+** → procure **Lumbi**.
 
 Sem o passo 6, o app continua saindo sem widget, igual a antes (nada quebra).
 
 ### No Android
 O widget vem junto com o app Android feito com Capacitor (parte 2.2). Depois de instalar: segure a tela
-inicial → **Widgets** → **HamiCare** → arraste o **Hami** para a tela.
+inicial → **Widgets** → **Lumbi** → arraste o **Hami** para a tela.
 
 ---
 
@@ -201,7 +201,7 @@ inicial → **Widgets** → **HamiCare** → arraste o **Hami** para a tela.
 
 O PWABuilder (parte 1.2) gera um app que é só o site em tela cheia: **não dá para ter widget**. Agora o projeto
 também tem o app Android de verdade em `hamicare/web/android` (igual ao do iPhone), com o widget e os lembretes
-nativos. Ele é gerado no Codemagic, no workflow **HamiCare Android**.
+nativos. Ele é gerado no Codemagic, no workflow **Lumbi Android**.
 
 1. **Chave de assinatura.** Se você já gerou o pacote no PWABuilder, use a mesma chave (`signing.keystore` e as
    senhas do `signing-key-info.txt`). Se ainda não mandou nada para a Play, pode criar uma nova no Codemagic.
@@ -220,7 +220,7 @@ nativos. Ele é gerado no Codemagic, no workflow **HamiCare Android**.
 
 ## 2.3 Guardiões do Hami: pagamento pelo Mercado Pago
 
-Quem pode pagar dá HamiCare+ para quem não pode (pagamento único, Pix ou cartão, só pelo site: os apps das
+Quem pode pagar dá Lumbi+ para quem não pode (pagamento único, Pix ou cartão, só pelo site: os apps das
 lojas mostram o mural e o pedido de ajuda, mas não vendem). Sem estas chaves, o botão aparece como "Abre em breve".
 
 1. Crie a conta no [Mercado Pago](https://www.mercadopago.com.br) **no nome do adulto responsável**
@@ -236,17 +236,17 @@ lojas mostram o mural e o pedido de ajuda, mas não vendem). Sem estas chaves, o
 5. Salve no Render (ele reinicia sozinho). Teste com um valor pequeno (Aliado, 1 mês) e veja o seu nome no mural.
 
 O servidor nunca confia no aviso: ele confere o pagamento direto no Mercado Pago antes de entregar as vagas.
-Cada vaga vira 1 mês (ou 1 ano) de HamiCare+ para a próxima pessoa da fila de quem pediu ajuda.
+Cada vaga vira 1 mês (ou 1 ano) de Lumbi+ para a próxima pessoa da fila de quem pediu ajuda.
 
 ---
 
 ## 3. Textos da loja
 
-Posicionamento (lição do Finch): o HamiCare se apresenta como **app de autocuidado e saúde emocional**, não
+Posicionamento (lição do Finch): o Lumbi se apresenta como **app de autocuidado e saúde emocional**, não
 como "jogo de bichinho". O bichinho é o jeito gostoso de cuidar de você. Categoria: **Saúde e fitness**.
 Nada de promessa médica: é bem-estar, não tratamento.
 
-**Nome (até 30):** `HamiCare: autocuidado e calma`
+**Nome (até 30):** `Lumbi: autocuidado e calma`
 
 **Subtítulo da App Store (até 30):** `Autocuidado com um hamster`
 
@@ -275,12 +275,12 @@ Nada de promessa médica: é bem-estar, não tratamento.
 >
 > **Ninguém fica sem cuidado**
 > • O essencial é sempre grátis e sem anúncios
-> • Não dá para pagar o HamiCare+ agora? Peça de presente a um Guardião do Hami
+> • Não dá para pagar o Lumbi+ agora? Peça de presente a um Guardião do Hami
 > • Amigos e feed só de gentileza, com moderação
 >
-> O HamiCare é um app de bem-estar e não substitui acompanhamento profissional.
+> O Lumbi é um app de bem-estar e não substitui acompanhamento profissional.
 > Em uma crise, ligue para o CVV (188) ou o SAMU (192).
 
-**O que há de novo (versão 1.0.0):** `Primeira versão do HamiCare na loja.`
+**O que há de novo (versão 1.0.0):** `Primeira versão do Lumbi na loja.`
 
 O plano de divulgação (anúncios, TikTok e comunidade) está em `docs/DIVULGACAO.md`.

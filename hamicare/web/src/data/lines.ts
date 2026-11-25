@@ -170,7 +170,7 @@ export const REFLECTIONS = [
 export const NOTIFS = {
   tarefas: ['Que tal uma caminhada hoje?', 'Hora de cuidar um pouquinho de você.', 'Um copo d’água agora? O Hami acompanha 💧'],
   hami: ['O Hami está esperando pra brincar!', 'O Hami guardou uma semente pra você 🌻'],
-  missoes: ['Sua nova missão está disponível!', 'Tem desafio novo no HamiCare.'],
+  missoes: ['Sua nova missão está disponível!', 'Tem desafio novo no Lumbi.'],
   aventura: ['O Hami voltou da aventura e encontrou algo interessante!'],
   amigos: ['Um amigo mandou uma vibe boa pra você 💛'],
 };

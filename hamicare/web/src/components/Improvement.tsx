@@ -1,5 +1,5 @@
 // "Quanto você melhorou": gráficos simples de missões e água, com as descobertas mais importantes
-// borradas para quem não tem o HamiCare+ (tocar abre a tela do Plus).
+// borradas para quem não tem o Lumbi+ (tocar abre a tela do Plus).
 import type { ReactNode } from 'react';
 import { Lock } from 'lucide-react';
 import { LineChart } from './ui';
@@ -56,7 +56,7 @@ function Locked({ locked, onPlus, kids, children }: { locked: boolean; onPlus: (
         {children}
       </div>
       <button className="imp-unlock" onClick={kids ? undefined : onPlus} disabled={kids}>
-        <Lock size={15} /> {kids ? 'Exclusivo do HamiCare+' : 'Ver com o Plus'}
+        <Lock size={15} /> {kids ? 'Exclusivo do Lumbi+' : 'Ver com o Plus'}
       </button>
     </div>
   );

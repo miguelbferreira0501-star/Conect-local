@@ -32,7 +32,7 @@ const schema = z.object({
   SMTP_USER: z.string().optional(),
   /** A senha de app do Gmail vem em blocos com espaços ("abcd efgh ..."): os espaços são tirados. */
   SMTP_PASS: z.string().optional().transform((v) => v?.replace(/\s+/g, '')),
-  /** Remetente. Em branco: "HamiCare <SMTP_USER>" ou o endereço padrão. */
+  /** Remetente. Em branco: "Lumbi <SMTP_USER>" ou o endereço padrão. */
   MAIL_FROM: z.string().optional(),
   /** Endereço público do app, usado nos links dos e-mails. No Render, vem sozinho de RENDER_EXTERNAL_URL. */
   APP_URL: z.string().url().optional(),
@@ -45,7 +45,7 @@ const schema = z.object({
   ANDROID_PACKAGE_NAME: z.string().regex(/^[a-zA-Z][\w]*(\.[a-zA-Z][\w]*)+$/).optional(),
   ANDROID_CERT_SHA256: z.string().optional(),
   /**
-   * Guardiões do Hami (dar HamiCare+ para quem não pode pagar): pagamento pelo Mercado Pago (Pix e cartão).
+   * Guardiões do Hami (dar Lumbi+ para quem não pode pagar): pagamento pelo Mercado Pago (Pix e cartão).
    * MP_ACCESS_TOKEN: "Access token" de produção da sua aplicação no Mercado Pago (Suas integrações → Credenciais).
    * MP_WEBHOOK_SECRET: "Assinatura secreta" das notificações (Webhooks), para conferir que o aviso veio do Mercado Pago.
    * Sem token, o botão de ser Guardião fica "em breve". GUARDIAN_TEST_PAY=true liga um pagamento de mentira
@@ -55,7 +55,7 @@ const schema = z.object({
   MP_WEBHOOK_SECRET: z.string().optional(),
   GUARDIAN_TEST_PAY: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
   /**
-   * Assinatura do HamiCare+ pela App Store. APPLE_BUNDLE_ID é o pacote do app; APPLE_APP_ID é o número
+   * Assinatura do Lumbi+ pela App Store. APPLE_BUNDLE_ID é o pacote do app; APPLE_APP_ID é o número
    * do app no App Store Connect (Informações do app → "Apple ID", só números). Sem APPLE_APP_ID, só as
    * compras de teste (Sandbox/TestFlight) são aceitas.
    */
@@ -83,6 +83,6 @@ function publicUrl(): string {
   return url.replace(/\/+$/, '');
 }
 
-const mailFrom = parsed.MAIL_FROM ?? (parsed.SMTP_USER && !parsed.RESEND_API_KEY && !parsed.BREVO_API_KEY ? `HamiCare <${parsed.SMTP_USER}>` : 'HamiCare <nao-responda@hamicare.app>');
+const mailFrom = parsed.MAIL_FROM ?? (parsed.SMTP_USER && !parsed.RESEND_API_KEY && !parsed.BREVO_API_KEY ? `Lumbi <${parsed.SMTP_USER}>` : 'Lumbi <nao-responda@hamicare.app>');
 
 export const env = { ...parsed, DATABASE_URL: appUrl(), APP_URL: publicUrl(), MAIL_FROM: mailFrom };

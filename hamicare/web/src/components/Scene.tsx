@@ -1,5 +1,5 @@
 // Cenário vivo do Início: o jardim do Hami com céu que acompanha a hora do dia.
-// Arte própria do HamiCare: colinas, a toca no tronco, nuvens, flores, borboletas e vaga-lumes.
+// Arte própria do Lumbi: colinas, a toca no tronco, nuvens, flores, borboletas e vaga-lumes.
 import type { ReactNode } from 'react';
 
 export type SkyTime = 'amanhecer' | 'dia' | 'entardecer' | 'noite';

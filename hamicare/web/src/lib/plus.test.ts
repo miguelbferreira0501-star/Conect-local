@@ -7,7 +7,7 @@ function start(plus: boolean, extra: Partial<ReturnType<typeof fresh>> = {}) {
   replaceState({ ...base, onboarded: true, coins: 0, premium: { trialStart: null, until: plus ? addDays(todayKey(), 30) : null }, ...extra });
 }
 
-describe('HamiCare+: mesada da semana', () => {
+describe('Lumbi+: mesada da semana', () => {
   it('sem Plus não tem mesada', () => {
     start(false);
     expect(claimPlusWeekly()).toBeNull();

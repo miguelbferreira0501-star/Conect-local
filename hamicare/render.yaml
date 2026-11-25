@@ -1,4 +1,4 @@
-# Publicação do HamiCare no Render (https://render.com) via "Blueprint".
+# Publicação do Lumbi no Render (https://render.com) via "Blueprint".
 # No Render: New → Blueprint → escolha o repositório e, em "Blueprint Path", escreva hamicare/render.yaml.
 # Passo a passo completo em docs/PUBLICAR.md.
 services:
@@ -35,7 +35,7 @@ services:
       # E-mail de "Esqueci minha senha" sem domínio: Brevo (https://brevo.com). A chave começa com xkeysib-
       - key: BREVO_API_KEY
         sync: false
-      # Remetente, com o e-mail verificado no Brevo. Ex.: HamiCare <seuemail@gmail.com>
+      # Remetente, com o e-mail verificado no Brevo. Ex.: Lumbi <seuemail@gmail.com>
       - key: MAIL_FROM
         sync: false
       # Com domínio próprio, troque pelo Resend em Environment: RESEND_API_KEY e APP_URL (veja docs/PUBLICAR.md).
@@ -45,12 +45,12 @@ services:
         sync: false
       - key: ANDROID_CERT_SHA256
         sync: false
-      # Guardiões do Hami (dar HamiCare+ para quem não pode pagar): Mercado Pago (Pix e cartão).
+      # Guardiões do Hami (dar Lumbi+ para quem não pode pagar): Mercado Pago (Pix e cartão).
       # Access token de produção e a assinatura secreta dos Webhooks (veja docs/LOJAS.md, parte "Guardiões").
       - key: MP_ACCESS_TOKEN
         sync: false
       - key: MP_WEBHOOK_SECRET
         sync: false
-      # Assinatura do HamiCare+ pela App Store: o "Apple ID" (número) do app no App Store Connect.
+      # Assinatura do Lumbi+ pela App Store: o "Apple ID" (número) do app no App Store Connect.
       - key: APPLE_APP_ID
         sync: false

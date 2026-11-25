@@ -1,4 +1,4 @@
-// Mesada do HamiCare+: 500 sementes toda semana (e um martelinho grátis por mês). Some quando já foi pega.
+// Mesada do Lumbi+: 500 sementes toda semana (e um martelinho grátis por mês). Some quando já foi pega.
 import { Crown, Gift } from 'lucide-react';
 import { Seed, toast } from './ui';
 import { burstConfetti } from '../lib/confetti';

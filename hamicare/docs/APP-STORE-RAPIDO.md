@@ -1,7 +1,7 @@
-# Lançar o HamiCare na App Store (sem Mac)
+# Lançar o Lumbi na App Store (sem Mac)
 
 O Codemagic compila num Mac na nuvem, assina e envia para a Apple. O código já está pronto para a loja:
-compra do HamiCare+ pela Apple (com o servidor conferindo cada compra), restaurar compras, gerenciar
+compra do Lumbi+ pela Apple (com o servidor conferindo cada compra), restaurar compras, gerenciar
 assinatura, excluir conta, termos e privacidade dentro do app. O programa Guardião (Pix fora da Apple)
 não aparece no app do iPhone, só no site e no Android.
 
@@ -21,22 +21,22 @@ Quem faz os passos 1, 2, 5 e 6 é a **Jessika**, dona da conta (são dados e con
 | Campo | Valor |
 |---|---|
 | Plataforma | iOS |
-| Nome | `HamiCare: autocuidado e calma` |
+| Nome | `Lumbi: autocuidado e calma` |
 | Idioma principal | Português (Brasil) |
 | ID do pacote | `com.hamicare.app` (se não aparecer: developer.apple.com → Identifiers → **+** → App IDs → esse pacote) |
 | SKU | `hamicare-ios` |
 
 Depois de criar, abra **Informações do app** e anote o **Apple ID** (um número, ex.: `6741234567`).
 
-## 3. Assinaturas do HamiCare+ (15 minutos)
+## 3. Assinaturas do Lumbi+ (15 minutos)
 1. **Negócios** (ou "Contratos"): aceitar o **Contrato de apps pagos** e preencher banco e impostos (dados da
    Jessika). Sem isso as compras não funcionam, nem no teste.
-2. No app → **Monetização → Assinaturas** → criar o grupo **`HamiCare+`** e, dentro dele, duas assinaturas:
+2. No app → **Monetização → Assinaturas** → criar o grupo **`Lumbi+`** e, dentro dele, duas assinaturas:
 
 | ID do produto (exatamente assim) | Nome | Duração | Preço (Brasil) |
 |---|---|---|---|
-| `com.hamicare.app.plus.anual` | HamiCare+ anual | 1 ano | R$ 329,90 |
-| `com.hamicare.app.plus.mensal` | HamiCare+ mensal | 1 mês | R$ 49,90 |
+| `com.hamicare.app.plus.anual` | Lumbi+ anual | 1 ano | R$ 329,90 |
+| `com.hamicare.app.plus.mensal` | Lumbi+ mensal | 1 mês | R$ 49,90 |
 
    Em cada uma: nome de exibição e descrição em português (ex.: "Roupas, casas e jogos exclusivos, relatório
    da semana e sementes toda semana"), e a imagem de revisão (pode ser a captura `docs/lojas/iphone/3-volei.png`).
@@ -46,7 +46,7 @@ Depois de criar, abra **Informações do app** e anote o **Apple ID** (um númer
    `https://hamicare.onrender.com/api/apple-webhook`
 
 ## 4. Servidor (Render, 2 minutos)
-Render → serviço do HamiCare → **Environment** → adicionar `APPLE_APP_ID` = o número anotado no passo 2.
+Render → serviço do Lumbi → **Environment** → adicionar `APPLE_APP_ID` = o número anotado no passo 2.
 Depois, **Manual Deploy**. (Isso também aplica as mudanças de banco 011 a 014.)
 
 ## 5. Chave de API e Codemagic (15 minutos)
@@ -54,8 +54,8 @@ Depois, **Manual Deploy**. (Isso também aplica as mudanças de banco 011 a 014.
    **App Manager**. Baixar o `.p8` (só baixa uma vez) e anotar **Issuer ID** e **Key ID**.
 2. [codemagic.io](https://codemagic.io) → entrar com o GitHub → adicionar o repositório **Conect-local**.
 3. **Team settings → Integrations → Developer Portal** → conectar com os três dados, com o nome exatamente
-   **`HamiCare ASC`**.
-4. Rodar o workflow **HamiCare iOS (TestFlight)**. Em uns 20 minutos o app aparece no TestFlight.
+   **`Lumbi ASC`**.
+4. Rodar o workflow **Lumbi iOS (TestFlight)**. Em uns 20 minutos o app aparece no TestFlight.
 
 ## 6. Testar no iPhone antes de mandar (TestFlight)
 1. App Store Connect → **Usuários e acesso → +** → seu e-mail (função *Marketing* basta).
@@ -99,7 +99,7 @@ HAMICARE+ (opcional)
 
 O essencial é sempre grátis e sem anúncios.
 
-O HamiCare é um app de bem-estar e não substitui acompanhamento profissional. Em uma crise, ligue para o CVV (188) ou o SAMU (192).
+O Lumbi é um app de bem-estar e não substitui acompanhamento profissional. Em uma crise, ligue para o CVV (188) ou o SAMU (192).
 
 Termos de Uso: https://hamicare.onrender.com/termos
 Privacidade: https://hamicare.onrender.com/privacidade
@@ -126,8 +126,8 @@ prêmios do jogo, comprados só com sementes ganhas no app (nunca com dinheiro).
 **Informações para a revisão** (campo "Notas"):
 ```
 Conta de teste: [e-mail] / [senha]
-O HamiCare é um app de autocuidado com um bichinho virtual. As missões são hábitos simples (beber água, alongar).
-O HamiCare+ é vendido só pela compra da Apple (Plus → Ver planos → Assinar; "Restaurar compras" também fica em Ajustes).
+O Lumbi é um app de autocuidado com um bichinho virtual. As missões são hábitos simples (beber água, alongar).
+O Lumbi+ é vendido só pela compra da Apple (Plus → Ver planos → Assinar; "Restaurar compras" também fica em Ajustes).
 O teste grátis de 7 dias é do próprio app e não pede cartão.
 Os baús são prêmios do jogo comprados só com sementes ganhas no app; as chances aparecem antes de abrir. Para menores de 18 anos o conteúdo do baú é mostrado antes.
 Amigos e feed precisam de duas contas; comentários passam por filtro e há denúncia e bloqueio.
@@ -137,7 +137,7 @@ Crie essa conta de teste no app de verdade antes (com idade 18+) e troque o e-ma
 
 ## 8. Mandar para a revisão
 - Pelo celular: GitHub → repositório → **Releases → Draft a new release** → tag `ios-v1.0.0` → **Publish
-  release**. O Codemagic compila, sobe e manda para a revisão (workflow "HamiCare iOS (enviar para a App Store)").
+  release**. O Codemagic compila, sobe e manda para a revisão (workflow "Lumbi iOS (enviar para a App Store)").
 - Ou no App Store Connect: na versão 1.0, escolher a compilação do TestFlight, marcar as duas assinaturas em
   **Compras no app e assinaturas** (na primeira vez elas vão junto com o app) e **Enviar para revisão**.
 - A Apple responde em 1 a 3 dias. Se recusar, mande o print da mensagem que eu resolvo.

@@ -66,7 +66,7 @@ function ThemeCard({ st }: { st: StyleSet }) {
     const r = buyStyle(st.id);
     if (r === 'ok') play('compra');
     else play('erro');
-    toast(r === 'ok' ? `${st.name}: casa arrumada e roupinha vestida!` : r === 'sem-sementes' ? `Faltam ${price - s.coins} sementes para essa coleção.` : 'Essa coleção é do HamiCare+.');
+    toast(r === 'ok' ? `${st.name}: casa arrumada e roupinha vestida!` : r === 'sem-sementes' ? `Faltam ${price - s.coins} sementes para essa coleção.` : 'Essa coleção é do Lumbi+.');
   };
   return (
     <article className="st-theme" style={{ background: st.tone }}>
@@ -138,7 +138,7 @@ function HouseStyles() {
                 onClick={() => {
                   const r = buyStyle(st.id);
                   if (r === 'ok') play('compra');
-                  toast(r === 'ok' ? `Casa no estilo ${st.name}!` : r === 'sem-sementes' ? 'Faltam sementes para essa coleção.' : 'Esse estilo é do HamiCare+.');
+                  toast(r === 'ok' ? `Casa no estilo ${st.name}!` : r === 'sem-sementes' ? 'Faltam sementes para essa coleção.' : 'Esse estilo é do Lumbi+.');
                 }}
               >
                 {locked ? <Lock size={14} /> : <Seed />} {price || 'Já é sua'}
@@ -252,7 +252,7 @@ export function StoreTab({ onPlus, onGift }: { onPlus: () => void; onGift: (item
           )}
           {!kids && !isPremium(s) && (
             <button className="st-plus" onClick={onPlus}>
-              <Gift size={20} /> Itens exclusivos no HamiCare+
+              <Gift size={20} /> Itens exclusivos no Lumbi+
             </button>
           )}
         </div>

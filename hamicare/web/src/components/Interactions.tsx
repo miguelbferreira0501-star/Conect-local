@@ -347,8 +347,8 @@ function Playground({ onBack, onStore }: { onBack: () => void; onStore?: () => v
       !isNativeApp()
         ? `O widget funciona no app instalado pela loja: o ${name} fica na tela do seu celular.`
         : nativePlatform() === 'ios'
-          ? 'Segure a tela inicial, toque em + e procure por HamiCare.'
-          : 'Segure a tela inicial, toque em Widgets e escolha HamiCare.',
+          ? 'Segure a tela inicial, toque em + e procure por Lumbi.'
+          : 'Segure a tela inicial, toque em Widgets e escolha Lumbi.',
     );
 
   const heartsTotal = s.pet.hearts ?? 0;

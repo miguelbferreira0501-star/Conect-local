@@ -1,4 +1,4 @@
-# HamiCare: auditoria, decisão do mascote e plano
+# Lumbi: auditoria, decisão do mascote e plano
 
 03/11/2026. Etapas 1 a 3 do prompt mestre. A implementação (etapa 4) e os testes (etapa 5) estão no código e em `docs/TESTES.md`.
 
@@ -15,11 +15,11 @@
 
 ## 2. Decisão sobre o mascote: **hamster, redesenhado do zero**
 
-O nome "HamiCare" já diz *hamster* (Hami) + *care*. Comparei 4 caminhos, com nota de 1 a 5:
+O nome "Lumbi" já diz *hamster* (Hami) + *care*. Comparei 4 caminhos, com nota de 1 a 5:
 
 | Critério | Hamster redesenhado | Criatura original (Xodó) | Capivara | Gato |
 |---|---|---|---|---|
-| Combina com o nome HamiCare | **5** | 1 | 1 | 1 |
+| Combina com o nome Lumbi | **5** | 1 | 1 | 1 |
 | Carisma e identificação | 5 | 3 | 4 | 5 |
 | Mudança gradual de peso sem virar piada | **5**: hamster já é redondo; o peso aparece como "fofura" (corpo e bochechas), bonito em qualquer fase | 2: uma bolha mais gorda ou mais magra vira "corpo" e nada mais | 3: já é um barril; pouca leitura visual | 3: gato gordo é meme (vira piada, que o prompt proíbe) |
 | Metáfora de exercício | **5**: a rodinha é o símbolo mundial de hamster se mexendo | 1 | 2 | 2 |
@@ -51,9 +51,9 @@ Respiração, 5-4-3-2-1, CVV 188 sempre visível, diário de humor, pote de cois
 - **Bem-estar:** gráfico de humor, diário com reflexões guiadas, meditação, foco, relaxamento (escaneamento do corpo), rotina de sono, afirmações e quizzes de autoconhecimento (não clínicos).
 
 ### Alterado
-- Nome: **HamiCare**. Mascote: **Hami**. Moeda: **sementes de girassol** (comida favorita de hamster).
+- Nome: **Lumbi**. Mascote: **Hami**. Moeda: **sementes de girassol** (comida favorita de hamster).
 - Navegação em 5 áreas: **Início, Atividades, Mundo, Bem-estar, Amigos**.
-- Onboarding em formato de conversa com o Hami: 10 perguntas, plano inicial e apresentação do HamiCare+ com 7 dias grátis.
+- Onboarding em formato de conversa com o Hami: 10 perguntas, plano inicial e apresentação do Lumbi+ com 7 dias grátis.
 
 ### Mecânica de peso (o diferencial) — versão 2: jornada de calorias
 
@@ -116,7 +116,7 @@ Pedido do dono do produto: missões são hábitos saudáveis, sem alimentos; os 
 
 ### Ilustrações próprias
 
-Pedido do dono do produto: tirar os emojis e usar desenhos como os de apps de bichinho (sem copiar nenhum). O HamiCare ganhou um conjunto próprio de cerca de 230 ilustrações em SVG (`web/src/components/art/`), num estilo só: formas chapadas e arredondadas, uma sombra suave e um brilho. Os dados continuam usando o emoji como chave, então nada salvo pelas pessoas precisou mudar; a tela desenha a ilustração no lugar (`<Glyph e="🪥" />`). Os móveis da casa também passaram a ser desenhados.
+Pedido do dono do produto: tirar os emojis e usar desenhos como os de apps de bichinho (sem copiar nenhum). O Lumbi ganhou um conjunto próprio de cerca de 230 ilustrações em SVG (`web/src/components/art/`), num estilo só: formas chapadas e arredondadas, uma sombra suave e um brilho. Os dados continuam usando o emoji como chave, então nada salvo pelas pessoas precisou mudar; a tela desenha a ilustração no lugar (`<Glyph e="🪥" />`). Os móveis da casa também passaram a ser desenhados.
 
 ### Foto real
 
@@ -142,7 +142,7 @@ Pedido do dono do produto: no começo, escolher a área (só perder ou ganhar pe
 
 ### Jogo (fase 2): as 12 arenas
 
-- **Cada arena tem cenário próprio** (casinha, jardim, vila, floresta, praia tropical, montanhas nevadas, cidade, fundo do mar, reino dos sonhos, castelo, estação espacial e ilha celestial), todos desenhados em SVG para o HamiCare, com clima animado (borboletas, folhas, neve, bolhas, estrelas) e coisas que reagem ao toque. O céu acompanha a hora do dia.
+- **Cada arena tem cenário próprio** (casinha, jardim, vila, floresta, praia tropical, montanhas nevadas, cidade, fundo do mar, reino dos sonhos, castelo, estação espacial e ilha celestial), todos desenhados em SVG para o Lumbi, com clima animado (borboletas, folhas, neve, bolhas, estrelas) e coisas que reagem ao toque. O céu acompanha a hora do dia.
 - **O Início mostra a arena onde o Hami mora.** Abrir uma arena nova não muda o Hami de lugar sozinho: a pessoa escolhe "Morar aqui agora" ou "Explorar depois". A casa antiga fica guardada com os móveis, e dá pra voltar quando quiser pelo Mapa das Arenas, de graça.
 - **Mapa das Arenas** (Mundo › Arenas, ou o botão "Mapa" no Início): trilha das 12 arenas com a atual marcada, as abertas com selo e as próximas em silhueta com o nível e os prêmios. A aba de aventuras passou a se chamar "Passeios" para não confundir.
 - **Arena nova é um momento:** tela de nível (número grande, prêmio, partículas) → o Hami brilha → a arena aparece → a casa nova com os presentes (sementes, baú grátis e os itens exclusivos). Tudo pode ser pulado e respeita "reduzir movimento".
@@ -171,7 +171,7 @@ Pedido do dono do produto: no começo, escolher a área (só perder ou ganhar pe
 
 - **Subir de nível ficou cerca de 4 vezes mais lento**, a pedido do dono do produto: cada ação vale pouco XP (missão leve 1, normal 2, puxada 3), conquistas valem 10, desafios 5/12/25, e o teto do dia caiu para 25 XP (movimento 12). Os níveis em si não mudaram, então **ninguém perdeu nível**: só o caminho daqui para frente ficou mais longo. As sementes continuam iguais. Detalhes e a simulação em `docs/ECONOMIA.md`.
 - O teto baixo por dia continua sendo a proteção contra exagero: fazer mais do que isso não rende mais XP.
-- **Plus mais visível:** botão dourado "Plus" no cenário do Início (do lado oposto ao "Mapa") e um cartão do HamiCare+ no Início, em Missões, na Loja, no Armário, no Bem-estar e em Nossa evolução. Itens do Plus têm selo "Plus" e o botão "Só no Plus".
+- **Plus mais visível:** botão dourado "Plus" no cenário do Início (do lado oposto ao "Mapa") e um cartão do Lumbi+ no Início, em Missões, na Loja, no Armário, no Bem-estar e em Nossa evolução. Itens do Plus têm selo "Plus" e o botão "Só no Plus".
 - **Tela de planos (duas etapas):** primeiro o que muda (o Hami com fantasias do Plus e 3 benefícios), depois o plano: anual R$ 329,90 (R$ 27,49/mês, riscado R$ 598,80 = 12 × o mensal, economize 45%, 7 dias grátis) e mensal R$ 49,90 (3 dias grátis). O teste não pede cartão e não vira assinatura sozinho; a tabela Grátis × Plus fica em "Comparar". Não usamos números de efeito sem pesquisa própria (como "2x mais") nem selos de prêmio que o app não tem. A cobrança paga ainda não existe: depois do teste, a tela avisa que a assinatura chega pelas lojas e pelo Pix.
 - As ofertas não aparecem para quem já é Plus nem para crianças de até 12 anos (sem apelo comercial para criança).
 
@@ -180,7 +180,7 @@ Pedido do dono do produto: no começo, escolher a área (só perder ou ganhar pe
 - **Tipos:** beber água (plano de 2, 4 ou 6 vezes por dia), quando o Hami precisar de você (fome ou saudade, depois do meio-dia), missões do dia (no horário escolhido, só se faltar alguma), pausa da tarde (15h30), hora de dormir (no horário escolhido), volta dos passeios, desafios novos da semana (segunda de manhã) e avisos de amigos (visita com reação, presente, vibe boa e pedido de amizade). Cada um liga e desliga em Ajustes › Lembretes; pausa e hora de dormir começam desligados.
 - **Gentileza:** no máximo 5 por dia, pelo menos 1 hora entre um e outro, nunca de madrugada (silêncio das 22h30 às 8h; para menores de 18, das 21h30 às 8h), horário perdido não sai atrasado, nenhuma mensagem fala em culpa. Os textos usam o nome do Hami.
 - Tocar no lembrete abre a tela certa (água e missões → Missões, Hami → Cuidar, pausa e sono → Bem-estar, amigos → Amigos). Um lembrete novo do mesmo tipo troca o anterior em vez de empilhar.
-- **Com conta**, os lembretes chegam com o app fechado (push). No iPhone, só com o HamiCare na tela de início. O servidor precisa estar acordado: no plano grátis do Render ele dorme, então os lembretes pedem o plano Starter.
+- **Com conta**, os lembretes chegam com o app fechado (push). No iPhone, só com o Lumbi na tela de início. O servidor precisa estar acordado: no plano grátis do Render ele dorme, então os lembretes pedem o plano Starter.
 - **Widget do Hami na tela inicial:** não existe para apps web. Só dá no app das lojas, com código nativo (Android: widget no projeto do app; iPhone: WidgetKit). Fica para quando a conta da Google Play estiver pronta.
 
 ### Turma (novembro de 2026)

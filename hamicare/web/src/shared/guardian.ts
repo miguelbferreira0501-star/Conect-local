@@ -1,4 +1,4 @@
-// Guardiões do Hami: quem pode pagar dá HamiCare+ para quem não pode (ideia vista no Finch, do nosso jeito).
+// Guardiões do Hami: quem pode pagar dá Lumbi+ para quem não pode (ideia vista no Finch, do nosso jeito).
 // Pagamento único (não renova sozinho): 1 mês ou 1 ano de Plus para cada pessoa ajudada.
 // Usado pelo app (tela) e pelo servidor (preço e quantas pessoas cada pedido ajuda).
 
@@ -15,8 +15,8 @@ export const GUARDIAN_BONUS_MAX = 3000;
 export const HERO_MAX_CENTS = 500_000;
 
 export const TIERS: Record<GuardianTier, { name: string; seats: number | null; about: string }> = {
-  aliado: { name: 'Aliado', seats: 1, about: 'Dá HamiCare+ para 1 pessoa' },
-  protetor: { name: 'Protetor', seats: 3, about: 'Dá HamiCare+ para 3 pessoas' },
+  aliado: { name: 'Aliado', seats: 1, about: 'Dá Lumbi+ para 1 pessoa' },
+  protetor: { name: 'Protetor', seats: 3, about: 'Dá Lumbi+ para 3 pessoas' },
   heroi: { name: 'Super-herói', seats: null, about: 'Você escolhe o valor' },
 };
 

@@ -1,4 +1,4 @@
-// Guardiões do Hami: quem pode pagar dá HamiCare+ para quem não pode (pagamento único, sem renovação).
+// Guardiões do Hami: quem pode pagar dá Lumbi+ para quem não pode (pagamento único, sem renovação).
 // - POST /guardiao/pedidos: cria o pedido e devolve o link de pagamento (Mercado Pago: Pix e cartão).
 // - POST /guardiao-webhook (fora do /api com CSRF): o Mercado Pago avisa; o servidor confere o pagamento
 //   direto na API dele (nunca confia no aviso) e entrega as vagas para a fila, em ordem de chegada.
@@ -76,7 +76,7 @@ guardian.post('/pedidos', requireAuth, async (c) => {
       )
     ).rows[0] as { id: string };
   });
-  const title = `Guardião do Hami (${TIERS[b.tier as GuardianTier].name}): HamiCare+ para ${quote.seats} ${quote.seats === 1 ? 'pessoa' : 'pessoas'} por ${quote.months === 12 ? '1 ano' : '1 mês'}`;
+  const title = `Guardião do Hami (${TIERS[b.tier as GuardianTier].name}): Lumbi+ para ${quote.seats} ${quote.seats === 1 ? 'pessoa' : 'pessoas'} por ${quote.months === 12 ? '1 ano' : '1 mês'}`;
   if (prov === 'teste') return c.json({ orderId: order.id, checkoutUrl: `${env.APP_URL}/#guardiao=teste:${order.id}`, provider: prov, quote }, 201);
   // Mercado Pago: preferência de pagamento (Checkout Pro). A volta cai no app com #guardiao=ok.
   const res = await fetch(`${MP_API}/checkout/preferences`, {
@@ -134,8 +134,8 @@ guardian.post('/pedir', requireAuth, async (c) => {
   const userId = c.get('userId')!;
   const r = await withUser(userId, async (db) => {
     const u = (await db.query('SELECT age_group, premium_until >= current_date AS plus FROM users WHERE id = $1', [userId])).rows[0];
-    if (u?.age_group === 'ate12') throw new AppError(403, 'idade', 'O HamiCare+ é para quem tem 13 anos ou mais.');
-    if (u?.plus) throw new AppError(409, 'ja_plus', 'Você já está com o HamiCare+ ativo. Quando acabar, dá para pedir de novo.');
+    if (u?.age_group === 'ate12') throw new AppError(403, 'idade', 'O Lumbi+ é para quem tem 13 anos ou mais.');
+    if (u?.plus) throw new AppError(409, 'ja_plus', 'Você já está com o Lumbi+ ativo. Quando acabar, dá para pedir de novo.');
     const old = (await db.query('SELECT status FROM guardian_requests WHERE user_id = $1', [userId])).rows[0];
     if (old?.status === 'esperando') {
       await db.query('UPDATE guardian_requests SET reason = $2 WHERE user_id = $1', [userId, reason]);

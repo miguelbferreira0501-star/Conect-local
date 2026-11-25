@@ -1,11 +1,11 @@
-# Divulgação do HamiCare
+# Divulgação do Lumbi
 
 Plano feito a partir do que o Finch faz (episódio "How Finch turned self-care into a $100M+ game", do podcast
 Two and a Half Gamers) e adaptado para o Brasil. **Inspirar sem copiar:** nada de arte, nomes ou textos do Finch.
 
 ## 1. Posicionamento
 
-**Uma frase:** o HamiCare é um app de autocuidado em que cada cuidado com você faz o seu hamster crescer.
+**Uma frase:** o Lumbi é um app de autocuidado em que cada cuidado com você faz o seu hamster crescer.
 
 - Categoria nas lojas: **Saúde e fitness** (como o Finch, que lidera "saúde mental", e não "jogos de pet").
 - O bichinho é o jeito gostoso de se cuidar; a promessa é **autocuidado sem culpa**, não "jogo".
@@ -24,7 +24,7 @@ Vídeos verticais de 10 a 20 segundos. O gancho nos 2 primeiros segundos decide 
 
 ### A) Muro de texto
 - **Tela:** fundo liso (lavanda ou creme) com texto grande e o Hami num cantinho.
-- **Texto:** "Coisas que contam como autocuidado no HamiCare: ✔ beber água ✔ levantar da cama ✔ tomar banho ✔ responder 1 mensagem ✔ respirar 1 minuto". Fim: "Cada uma faz seu hamster feliz. Grátis."
+- **Texto:** "Coisas que contam como autocuidado no Lumbi: ✔ beber água ✔ levantar da cama ✔ tomar banho ✔ responder 1 mensagem ✔ respirar 1 minuto". Fim: "Cada uma faz seu hamster feliz. Grátis."
 - **Por quê:** o Finch cresceu com esse formato. É barato de fazer e fácil de testar variações de texto.
 
 ### B) Música com a letra na tela
@@ -37,7 +37,7 @@ que você tenha direito de uso comercial):
 > me cuidar já é vitória, uma por uma.
 
 - **Tela:** a letra aparecendo palavra por palavra, cenas do app (confete, Hami dançando, garrafinha enchendo).
-- **Fim:** "HamiCare. Grátis na loja."
+- **Fim:** "Lumbi. Grátis na loja."
 
 ### C) POV (estilo TikTok)
 - "POV: você esqueceu de beber água e seu hamster virtual ficou olhando pra você 🥺" → mostra o lembrete,
@@ -92,7 +92,7 @@ O link dos anúncios pode ir para uma página simples antes da loja (o Finch faz
 
 ## 7. Guardiões na divulgação
 
-- Contar histórias reais (com permissão e sem expor ninguém): "Hoje 12 pessoas ganharam o HamiCare+ de Guardiões".
+- Contar histórias reais (com permissão e sem expor ninguém): "Hoje 12 pessoas ganharam o Lumbi+ de Guardiões".
 - Mostrar o mural no perfil uma vez por semana. Isso reforça a marca de cuidado e traz quem pode pagar.
 
 ## 8. Números para acompanhar

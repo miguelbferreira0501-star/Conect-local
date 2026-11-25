@@ -1,4 +1,4 @@
-# Diferenciais do HamiCare (pesquisa de apps de autocuidado com bichinho)
+# Diferenciais do Lumbi (pesquisa de apps de autocuidado com bichinho)
 
 Pesquisa feita em 21/11/2026 com o método da skill *competitor-analysis*. Fontes no fim.
 
@@ -12,12 +12,12 @@ Pesquisa feita em 21/11/2026 com o método da skill *competitor-analysis*. Fonte
 | **Habitica** | Jogo profundo, grupos | Seco para quem quer acolhimento | Turma, parque de jogos |
 | **Moodsy / HeartPet** | Humor com insights | Pouco jogo | Gráficos de humor e relatório da semana |
 
-## O que só o HamiCare junta
+## O que só o Lumbi junta
 1. **História de resgate**: você encontra o Hami na chuva, seca o pelo com a toalha e leva para casa (nenhum concorrente começa com cuidado interativo).
 2. **Modo "hoje está difícil"** no Início: só as tarefas leves, o Hami fica do seu lado e a sequência fica protegida.
 3. **Planner + bichinho + jogos** no mesmo lugar: calendário com dias, horário e lembrete (Capy), viagem e casa (Finch/Catzy) e parque de jogos com prêmio (Pou).
 4. **Feito para o Brasil**: português de verdade, CVV 188 no SOS, Guardiões (Pix) para quem não pode pagar, nada de cobrança diferente entre iPhone e Android.
-5. **Leve e estável**: as críticas mais comuns ao Finch são travamentos; o HamiCare é 2D em SVG e testado em celular a cada rodada.
+5. **Leve e estável**: as críticas mais comuns ao Finch são travamentos; o Lumbi é 2D em SVG e testado em celular a cada rodada.
 
 ## Próximos diferenciais possíveis
 - Áudios guiados curtos com a voz do Hami (o que mais elogiam no Amaru).

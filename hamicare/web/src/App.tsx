@@ -247,7 +247,7 @@ export default function App() {
       <SeasonPass open={season} onClose={() => setSeason(false)} />
       <WalletSheet open={walletOpen} onClose={() => setWalletOpen(false)} />
       <SettingsSheet open={settings} onClose={() => setSettings(false)} onPlus={() => (setSettings(false), setPlus(true))} account={account} />
-      <Sheet open={plus} onClose={() => setPlus(false)} title="HamiCare+">
+      <Sheet open={plus} onClose={() => setPlus(false)} title="Lumbi+">
         <Paywall onClose={() => setPlus(false)} />
       </Sheet>
       {current?.type === 'level' ? <LevelUpScreen c={current} onClose={() => setQueue((q) => q.slice(1))} /> : <CelebrationModal c={current} onClose={() => setQueue((q) => q.slice(1))} />}

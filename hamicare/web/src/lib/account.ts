@@ -1,4 +1,4 @@
-// Conta no servidor do HamiCare: login, backup automático, Plus e push.
+// Conta no servidor do Lumbi: login, backup automático, Plus e push.
 import { useEffect, useState } from 'react';
 import { http, resetServerCheck } from './social/api';
 import { resetSocial, syncProfile } from './social';
@@ -18,7 +18,7 @@ export interface User {
 }
 
 let reachable: Promise<boolean> | null = null;
-/** Existe servidor do HamiCare neste endereço? (Não existe na página de teste nem no arquivo local.) */
+/** Existe servidor do Lumbi neste endereço? (Não existe na página de teste nem no arquivo local.) */
 export function serverReachable(): Promise<boolean> {
   if (location.protocol === 'file:' || (window as unknown as { claude?: unknown }).claude) return Promise.resolve(false);
   if (!reachable) reachable = http<{ app: string }>('GET', '/health').then((r) => r.app === 'hamicare').catch(() => false);

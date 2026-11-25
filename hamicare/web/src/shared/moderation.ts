@@ -11,7 +11,7 @@ export const REASON_TEXT: Record<KindnessReason, string> = {
   longo: `Use até ${MAX_COMMENT} caracteres.`,
   ofensa: 'Esse texto não passou no filtro de gentileza. Que tal um elogio?',
   corpo: 'Aqui não se comenta o corpo de ninguém. Que tal elogiar o esforço?',
-  negativo: 'Esse texto parece desanimador. No HamiCare só vale incentivo.',
+  negativo: 'Esse texto parece desanimador. No Lumbi só vale incentivo.',
   contato: 'Por segurança, não compartilhe telefone, e-mail ou outras redes.',
   link: 'Links não são permitidos nos comentários.',
 };

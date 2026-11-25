@@ -140,7 +140,7 @@ export function dueReminder(args: { prefs: ReminderPrefs; state: any; sent: Sent
   const seed = Math.floor(now.ms / 86_400_000);
   const done = (key: string, value: string = now.date) => sent[key] === value;
   const pick = (kind: Exclude<ReminderKind, 'amigos'>, key: string, value: string = now.date): { reminder: Reminder; sent: SentLog } => ({
-    reminder: { key, kind, title: 'HamiCare', body: reminderText(kind, pet, seed + key.length), url: URL[kind], tag: `hamicare-${kind}` },
+    reminder: { key, kind, title: 'Lumbi', body: reminderText(kind, pet, seed + key.length), url: URL[kind], tag: `hamicare-${kind}` },
     sent: { ...sent, [key]: value, _last: now.ms, _count: Number(sent._count ?? 0) + 1 },
   });
 

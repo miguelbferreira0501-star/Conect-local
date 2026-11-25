@@ -1,5 +1,5 @@
 // Destinos das viagens do Hami (cada um com o seu cenário). Os das arenas já liberadas são da pessoa;
-// os outros podem ser comprados com sementes (os "Premium" só para quem tem o HamiCare+).
+// os outros podem ser comprados com sementes (os "Premium" só para quem tem o Lumbi+).
 // Cada destino tem uma lembrança para colecionar (7 peças) e cartões de lembrança (24).
 export interface Destination {
   id: string;

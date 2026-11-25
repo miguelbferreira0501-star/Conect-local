@@ -20,7 +20,7 @@ export function AccountSection() {
     <Group title="Conta e nuvem">
       {!online ? (
         <p className="rounded-2xl bg-surface2 p-3 text-[14px] text-muted">
-          A conta fica disponível no app instalado do HamiCare. Nesta versão de teste, seu progresso fica salvo neste aparelho e no código de backup.
+          A conta fica disponível no app instalado do Lumbi. Nesta versão de teste, seu progresso fica salvo neste aparelho e no código de backup.
         </p>
       ) : user ? (
         <LoggedIn user={user} onAdmin={() => setAdmin(true)} />

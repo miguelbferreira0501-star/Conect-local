@@ -169,7 +169,7 @@ account.put('/state', requireAuth, async (c) => {
   return c.json({ ok: true });
 });
 
-// ---------- HamiCare+ ----------
+// ---------- Lumbi+ ----------
 
 account.post('/plus/trial', requireAuth, async (c) => {
   // Anual: 7 dias grátis; mensal: 3 dias (sem plano, vale o anual).

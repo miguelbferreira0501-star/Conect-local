@@ -34,10 +34,10 @@ export const QUICK_IDS: QuickId[] = ['emocao', 'reflexao', 'meta'];
 export const reflectionCoins = (chars: number) => (chars >= 400 ? 12 : chars >= 150 ? 8 : 4);
 /** Prêmio por amigo novo: cada um vale mais que o anterior (até o 5º). */
 export const FRIEND_LADDER = [40, 60, 80, 100, 150];
-/** HamiCare+: mesada de sementes toda semana (cerca de 2.000 por mês). */
+/** Lumbi+: mesada de sementes toda semana (cerca de 2.000 por mês). */
 export const PLUS_WEEKLY = 500;
 
-/** Parque de jogos: os três últimos são só do HamiCare+. */
+/** Parque de jogos: os três últimos são só do Lumbi+. */
 export const GAMES = ['embaixadinha', 'carrinho', 'penalti', 'memoria', 'chuva', 'bolinha', 'volei', 'skate', 'nuvens'] as const;
 export type GameId = (typeof GAMES)[number];
 export const PLUS_GAMES: readonly GameId[] = ['volei', 'skate', 'nuvens'];
@@ -154,7 +154,7 @@ export function baseGrant(src: Source, cfg: GameConfig): Grant {
       return { ref: `jogo:${src.date}:${n}`, label: 'Partida no parque de jogos', xp: JOGO.xp, coins: gameCoins(src.game, src.stars), routine: false, date: src.date };
     }
     case 'plus':
-      return { ref: `plus:${src.week}`, label: 'Mesada semanal do HamiCare+', xp: 0, coins: PLUS_WEEKLY, routine: false };
+      return { ref: `plus:${src.week}`, label: 'Mesada semanal do Lumbi+', xp: 0, coins: PLUS_WEEKLY, routine: false };
     case 'colecao': {
       const c = cfg.collections.find((x) => x.id === src.id);
       return { ref: `colecao:${src.id}`, label: `Coleção completa: ${c?.name ?? src.id}`, xp: c?.reward.xp ?? 0, coins: c?.reward.coins ?? 0, routine: false };

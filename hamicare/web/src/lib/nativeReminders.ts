@@ -68,7 +68,7 @@ function generalNotifications(s: State, now: Date) {
     plan.forEach((p, i) => {
       const [h, m] = p.at.split(':').map(Number);
       const at = new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m);
-      if (at.getTime() > now.getTime() + 30_000) out.push({ id: (d + 1) * 100 + i, title: 'HamiCare', body: p.body, schedule: { at, allowWhileIdle: true } });
+      if (at.getTime() > now.getTime() + 30_000) out.push({ id: (d + 1) * 100 + i, title: 'Lumbi', body: p.body, schedule: { at, allowWhileIdle: true } });
     });
   }
   return out;

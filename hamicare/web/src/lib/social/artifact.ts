@@ -56,7 +56,7 @@ interface TeamDoc {
   missions: string[];
   members: string[];
   createdAt: number;
-  /** Quem criou tem HamiCare+: cabem até 8 pessoas. */
+  /** Quem criou tem Lumbi+: cabem até 8 pessoas. */
   plus?: boolean;
 }
 interface GroupsDoc {
@@ -416,7 +416,7 @@ export function createArtifactSocial(db: Db, myId: string): SocialApi {
       if (!doc.team || !mine || mine.owner !== myId) throw new Error('Só quem criou a turma chama pessoas.');
       const plus = isPremium(getState());
       const max = plus ? TEAM_MAX_PLUS : TEAM_MAX;
-      if (mine.memberIds.length >= max) throw new Error(plus ? `A turma já tem ${max} pessoas.` : `A turma já tem ${max} pessoas. Com HamiCare+, cabem até ${TEAM_MAX_PLUS}.`);
+      if (mine.memberIds.length >= max) throw new Error(plus ? `A turma já tem ${max} pessoas.` : `A turma já tem ${max} pessoas. Com Lumbi+, cabem até ${TEAM_MAX_PLUS}.`);
       if (!st.friends.includes(userId)) throw new Error('Só dá para chamar amigos para a turma.');
       if (teamOf(userId)) throw new Error('Essa pessoa já está em outra turma.');
       await write(`groups/${myId}`, { ...doc, team: { ...doc.team, plus, members: [...doc.team.members.filter((m) => m !== userId), userId] } });

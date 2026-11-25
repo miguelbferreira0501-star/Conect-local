@@ -1,4 +1,4 @@
-// Configuração do jogo do HamiCare: níveis, XP, limites, arenas, raridades e baús.
+// Configuração do jogo do Lumbi: níveis, XP, limites, arenas, raridades e baús.
 // Tudo aqui é editável (o painel de administração grava uma versão nova no servidor).
 // O app e o servidor usam as mesmas regras.
 
