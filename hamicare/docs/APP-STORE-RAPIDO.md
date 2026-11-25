@@ -35,8 +35,8 @@ Depois de criar, abra **Informações do app** e anote o **Apple ID** (um númer
 
 | ID do produto (exatamente assim) | Nome | Duração | Preço (Brasil) |
 |---|---|---|---|
-| `com.hamicare.app.plus.anual` | Lumbi+ anual | 1 ano | R$ 329,90 |
-| `com.hamicare.app.plus.mensal` | Lumbi+ mensal | 1 mês | R$ 49,90 |
+| `com.hamicare.app.plus.anual` | Lumbi+ anual | 1 ano | R$ 65,90 |
+| `com.hamicare.app.plus.mensal` | Lumbi+ mensal | 1 mês | R$ 10,00 |
 
    Em cada uma: nome de exibição e descrição em português (ex.: "Roupas, casas e jogos exclusivos, relatório
    da semana e sementes toda semana"), e a imagem de revisão (pode ser a captura `docs/lojas/iphone/3-volei.png`).
@@ -91,7 +91,7 @@ UM CANTINHO SÓ SEU
 
 LUMBI+ (opcional)
 • Roupas, casas e pelagens exclusivas, relatório da semana e sementes toda semana
-• Até 7 dias grátis, sem cartão. Depois: R$ 49,90 por mês ou R$ 329,90 por ano, com renovação automática pela sua conta Apple. Cancele quando quiser nos Ajustes do iPhone.
+• Até 7 dias grátis, sem cartão. Depois: R$ 10,00 por mês ou R$ 65,90 por ano, com renovação automática pela sua conta Apple. Cancele quando quiser nos Ajustes do iPhone.
 
 O essencial é sempre grátis e sem anúncios.
 
