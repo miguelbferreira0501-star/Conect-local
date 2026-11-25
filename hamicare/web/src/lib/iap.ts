@@ -1,4 +1,4 @@
-// Compra do HamiCare+ dentro do app do iPhone (StoreKit 2, pela App Store).
+// Compra do Lumbi+ dentro do app do iPhone (StoreKit 2, pela App Store).
 // A compra é confirmada no nosso servidor, que confere a assinatura da Apple antes de liberar o Plus.
 import { NativePurchases, PURCHASE_TYPE } from '@capgo/native-purchases';
 import { nativePlatform } from './native';

@@ -19,7 +19,7 @@ let queue: Promise<unknown> = Promise.resolve();
 export type MailVia = 'resend' | 'brevo' | 'smtp' | 'nenhum';
 export const mailVia = (): MailVia => (env.RESEND_API_KEY ? 'resend' : env.BREVO_API_KEY ? 'brevo' : env.SMTP_USER && env.SMTP_PASS ? 'smtp' : 'nenhum');
 
-/** "HamiCare <a@b.com>" → { name: 'HamiCare', email: 'a@b.com' } */
+/** "Lumbi <a@b.com>" → { name: 'Lumbi', email: 'a@b.com' } */
 export function parseFrom(from: string): { name?: string; email: string } {
   const m = from.match(/^\s*"?([^"<]*?)"?\s*<([^>]+)>\s*$/);
   return m ? { name: m[1].trim() || undefined, email: m[2].trim() } : { email: from.trim() };
@@ -104,7 +104,7 @@ const esc = (t: string) => t.replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '
 export function resetMail(to: string, name: string, link: string, minutes: number): Mail {
   const first = name.split(' ')[0] || 'Oi';
   const text = [
-    `${first}, recebemos um pedido para trocar a senha da sua conta no HamiCare.`,
+    `${first}, recebemos um pedido para trocar a senha da sua conta no Lumbi.`,
     '',
     `Para criar uma senha nova, abra este link (ele vale por ${minutes} minutos e funciona uma vez só):`,
     link,
@@ -118,12 +118,12 @@ export function resetMail(to: string, name: string, link: string, minutes: numbe
 <div style="max-width:480px;margin:0 auto;padding:28px 18px">
   <div style="background:#ffffff;border-radius:24px;padding:26px 22px;border:2px solid #CBE9DF">
     <p style="font-size:34px;margin:0 0 6px">🐹</p>
-    <h1 style="font-size:22px;margin:0 0 12px">Trocar a senha do HamiCare</h1>
+    <h1 style="font-size:22px;margin:0 0 12px">Trocar a senha do Lumbi</h1>
     <p style="font-size:16px;line-height:1.5;margin:0 0 18px">${esc(first)}, recebemos um pedido para trocar a senha da sua conta. Toque no botão para criar uma senha nova.</p>
     <p style="margin:0 0 18px"><a href="${esc(link)}" style="display:inline-block;background:#2F9E83;color:#ffffff;text-decoration:none;font-weight:bold;font-size:17px;padding:14px 22px;border-radius:16px;border-bottom:4px solid #1F7461">Criar senha nova</a></p>
     <p style="font-size:14px;line-height:1.5;color:#55656E;margin:0 0 10px">O link vale por ${minutes} minutos e funciona uma vez só. Se não foi você, ignore este e-mail: sua senha continua a mesma.</p>
     <p style="font-size:12px;line-height:1.5;color:#7A8A92;margin:0;word-break:break-all">Se o botão não abrir, copie este endereço: ${esc(link)}</p>
   </div>
 </div></body></html>`;
-  return { to, subject: 'Trocar a senha do HamiCare', text, html };
+  return { to, subject: 'Trocar a senha do Lumbi', text, html };
 }

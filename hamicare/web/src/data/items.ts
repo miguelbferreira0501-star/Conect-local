@@ -636,7 +636,7 @@ export const ITEMS: Item[] = [
   W('fantasia-morango', 'Fantasia de moranguinho', 'roupa', 150, { base: 'fantasia-morango', c1: '#F0525F', c2: '#FFE3E3', plus: true }),
   W('fantasia-abacate', 'Fantasia de abacate', 'roupa', 150, { base: 'fantasia-abacate', c1: '#7BC86C', c2: '#E9F5B8', plus: true }),
   W('fantasia-rena', 'Fantasia de renazinha', 'roupa', 140, { base: 'fantasia-rena', c1: '#B07A52', c2: '#F2D2B0', plus: true }),
-  // Só no Baú Lendário: as fantasias mais especiais do HamiCare (não estão à venda)
+  // Só no Baú Lendário: as fantasias mais especiais do Lumbi (não estão à venda)
   W('fantasia-dragao-dourado', 'Fantasia de dragão dourado', 'roupa', 300, { base: 'fantasia-dragao', c1: '#F6C445', c2: '#FFF1C9', rarity: 'lendario', chestOnly: true }),
   W('fantasia-dragao-galaxia', 'Fantasia de dragão galáxia', 'roupa', 300, { base: 'fantasia-dragao', c1: '#3E3A8C', c2: '#C9B6FF', rarity: 'lendario', chestOnly: true }),
   W('fantasia-unicornio-arco', 'Fantasia de unicórnio arco-íris', 'roupa', 300, { base: 'fantasia-unicornio', c1: '#FFF4FA', c2: '#8FD3FF', rarity: 'lendario', chestOnly: true }),

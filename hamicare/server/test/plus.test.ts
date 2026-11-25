@@ -19,7 +19,7 @@ const givePlus = (id: string) => owner((c) => c.query("UPDATE users SET premium_
 const week = () => weekStart(new Date().toISOString().slice(0, 10));
 const mesada = (w = week()) => ({ ops: [{ op: 'grant', src: { kind: 'plus', week: w } }] });
 
-describe('HamiCare+', () => {
+describe('Lumbi+', () => {
   it('mesada semanal: só com Plus, uma vez por semana, só a semana de agora', async () => {
     const u = await newUser('Lia');
     const sem = await call('POST', '/game/ops', mesada(), u.cookie);

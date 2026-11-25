@@ -76,7 +76,7 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account, ini
   if (socialBlocked(s)) {
     return (
       <Shell>
-        <Empty>Para menores de 13 anos, amigos e feed ficam desligados. O resto do HamiCare funciona normalmente.</Empty>
+        <Empty>Para menores de 13 anos, amigos e feed ficam desligados. O resto do Lumbi funciona normalmente.</Empty>
       </Shell>
     );
   }
@@ -180,7 +180,7 @@ function AddFriend({ open, api, me, initialCode, onClose, onAdded, onOpenProfile
   const [found, setFound] = useState<Search>(null);
   const [busy, setBusy] = useState(false);
   const server = api.kind === 'servidor';
-  const where = server ? (isNativeApp() ? 'o app HamiCare (ou o site, com a mesma conta)' : location.host) : 'o mesmo link do HamiCare';
+  const where = server ? (isNativeApp() ? 'o app Lumbi (ou o site, com a mesma conta)' : location.host) : 'o mesmo link do Lumbi';
 
   async function search(raw: string) {
     // Aceita do jeito que a pessoa digitar: sem "HAMI-", minúsculo, com espaço, O no lugar de 0.
@@ -254,7 +254,7 @@ function AddFriend({ open, api, me, initialCode, onClose, onAdded, onOpenProfile
         {found === 'proprio' && <p className="text-[14px] font-bold">Esse é o seu código! 😊 Mande ele para um amigo e peça o código dele.</p>}
         {found === 'outro_app' && (
           <p className="text-[14px] text-muted">
-            Os códigos daqui só usam números e as letras de A a F. Confira as letras. Se o seu amigo usa a versão de teste do HamiCare (o link do Claude), vocês dois precisam usar o mesmo app: <b>{where}</b>.
+            Os códigos daqui só usam números e as letras de A a F. Confira as letras. Se o seu amigo usa a versão de teste do Lumbi (o link do Claude), vocês dois precisam usar o mesmo app: <b>{where}</b>.
           </p>
         )}
         {found === 'nada' && (

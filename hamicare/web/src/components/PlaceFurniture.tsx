@@ -137,7 +137,7 @@ export function PlaceFurniture({ item, onPick, onClose, onPlus }: { item: Item; 
         <p className="pl-title">{variants.length > 1 ? 'Escolha a cor que você mais gosta!' : item.name}</p>
         {res === 'plus' ? (
           <button className="pl-buy is-plus" onClick={kids ? undefined : onPlus} disabled={kids}>
-            <Crown size={18} /> {kids ? 'Exclusivo do HamiCare+' : 'Liberar com o Plus'}
+            <Crown size={18} /> {kids ? 'Exclusivo do Lumbi+' : 'Liberar com o Plus'}
           </button>
         ) : res === 'nivel' ? (
           <span className="pl-buy is-off">

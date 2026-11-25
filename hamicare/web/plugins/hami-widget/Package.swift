@@ -1,7 +1,7 @@
 // swift-tools-version: 5.9
 import PackageDescription
 
-// Plugin local do HamiCare (o Capacitor inclui sozinho no projeto do iPhone ao rodar `npx cap sync ios`).
+// Plugin local do Lumbi (o Capacitor inclui sozinho no projeto do iPhone ao rodar `npx cap sync ios`).
 let package = Package(
     name: "HamiWidget",
     platforms: [.iOS(.v15)],

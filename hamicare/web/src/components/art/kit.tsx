@@ -1,4 +1,4 @@
-// Kit das ilustrações do HamiCare: paleta, sombra, brilho e formas que se repetem.
+// Kit das ilustrações do Lumbi: paleta, sombra, brilho e formas que se repetem.
 // Estilo: formas chapadas e arredondadas, uma sombra suave de um lado e um brilho branco.
 // Tudo desenhado num quadro de 64 × 64.
 import type { ReactElement } from 'react';

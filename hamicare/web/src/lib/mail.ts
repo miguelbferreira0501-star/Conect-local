@@ -46,7 +46,7 @@ export function lettersOf(s: State, today = todayKey()): Letter[] {
       id: `guardioes:${month}`,
       kind: 'arco',
       title: 'Vamos celebrar os Guardiões!',
-      body: 'Os Guardiões do Hami dão o HamiCare+ de presente para quem não pode pagar agora. Graças a eles, ninguém fica sem cuidado. Você pode pedir um presente ou virar Guardião.',
+      body: 'Os Guardiões do Hami dão o Lumbi+ de presente para quem não pode pagar agora. Graças a eles, ninguém fica sem cuidado. Você pode pedir um presente ou virar Guardião.',
       date: `${month}-03` <= today ? `${month}-03` : `${month}-01`,
       action: { label: 'Conhecer os Guardiões', go: 'guardioes' },
     });
@@ -55,7 +55,7 @@ export function lettersOf(s: State, today = todayKey()): Letter[] {
     list.push({
       id: 'gostando',
       kind: 'estrela',
-      title: 'Está gostando do HamiCare? Conta pra gente!',
+      title: 'Está gostando do Lumbi? Conta pra gente!',
       body: `O ${pet} e a gente adoram saber como você está se sentindo por aqui. Se o app está te fazendo bem, chame um amigo para cuidar do Hami junto com você: cada amigo novo ainda vale sementes.`,
       date: addDays(s.createdAt, 3),
       action: { label: 'Convidar um amigo', go: 'amigos' },

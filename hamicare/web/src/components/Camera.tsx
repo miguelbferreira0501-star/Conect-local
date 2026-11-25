@@ -132,10 +132,10 @@ export function CameraSheet({ open, onClose, onPhoto }: { open: boolean; onClose
             <p className="font-display text-[20px] font-bold">{status === 'sem-camera' ? 'Não achamos uma câmera aqui' : 'A câmera não abriu'}</p>
             <p className="text-[14px] opacity-90">
               {inPreview
-                ? 'Nesta versão de teste, dentro do app do Claude, o celular não deixa abrir a câmera. No HamiCare publicado (no navegador ou instalado na tela inicial), ela funciona.'
+                ? 'Nesta versão de teste, dentro do app do Claude, o celular não deixa abrir a câmera. No Lumbi publicado (no navegador ou instalado na tela inicial), ela funciona.'
                 : status === 'sem-camera'
                   ? 'Você pode escolher uma foto da galeria.'
-                  : 'Libere a câmera para o HamiCare nas permissões do navegador (o cadeado ao lado do endereço) ou escolha uma foto da galeria.'}
+                  : 'Libere a câmera para o Lumbi nas permissões do navegador (o cadeado ao lado do endereço) ou escolha uma foto da galeria.'}
             </p>
             <label className="btn btn-primary">
               <input type="file" accept="image/*" className="sr-only" onChange={fromGallery} />

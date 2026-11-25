@@ -30,12 +30,12 @@ export function assetLinks(pkg: string | undefined, certs: string | undefined) {
 
 const DELETE_HTML = pageShell(
   'Excluir sua conta',
-  'Como excluir sua conta do HamiCare e o que acontece com os seus dados.',
-  `    <h1>Excluir sua conta do HamiCare</h1>
+  'Como excluir sua conta do Lumbi e o que acontece com os seus dados.',
+  `    <h1>Excluir sua conta do Lumbi</h1>
     <p>Você pode excluir sua conta a qualquer momento, sem custo e sem precisar explicar o motivo.</p>
     <h2>Pelo app (o jeito mais rápido)</h2>
     <ol>
-      <li>Abra o HamiCare e toque na engrenagem (Ajustes), no topo do Início.</li>
+      <li>Abra o Lumbi e toque na engrenagem (Ajustes), no topo do Início.</li>
       <li>Toque em <b>Conta e nuvem</b> e depois em <b>Excluir minha conta</b>.</li>
       <li>Digite a sua senha e confirme.</li>
     </ol>
@@ -56,7 +56,7 @@ const DELETE_HTML = pageShell(
     </ul>
     <h2>Sem conta</h2>
     <p>Sem conta, tudo fica só no seu aparelho e nós não temos acesso. Para apagar, desinstale o app ou limpe os dados do site no navegador.</p>`,
-  `<a href="/privacidade">Política de Privacidade</a> · <a href="/termos">Termos de Uso</a> · <a href="/">Abrir o HamiCare</a>`,
+  `<a href="/privacidade">Política de Privacidade</a> · <a href="/termos">Termos de Uso</a> · <a href="/">Abrir o Lumbi</a>`,
 );
 
 export const stores = new Hono();

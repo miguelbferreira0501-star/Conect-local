@@ -232,7 +232,7 @@ function MealSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
               Salvar
             </button>
           </div>
-          <p className="text-[12px] text-muted">Use a referência que um nutricionista passou para você. O HamiCare não faz recomendação médica.</p>
+          <p className="text-[12px] text-muted">Use a referência que um nutricionista passou para você. O Lumbi não faz recomendação médica.</p>
         </section>
 
         <button className="btn btn-ghost" onClick={() => toast(copyYesterdayMeals() ? 'Cardápio de ontem copiado' : 'Ontem não teve cardápio')}>

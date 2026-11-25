@@ -229,7 +229,7 @@ function SosCard() {
         <a className="font-bold text-accent underline underline-offset-4" href="https://cvv.org.br" target="_blank" rel="noreferrer">
           cvv.org.br
         </a>
-        . O HamiCare ajuda no dia a dia, mas não substitui terapia nem atendimento médico.
+        . O Lumbi ajuda no dia a dia, mas não substitui terapia nem atendimento médico.
       </p>
     </section>
   );

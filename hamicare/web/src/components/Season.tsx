@@ -165,7 +165,7 @@ export function SeasonPass({ open, onClose }: { open: boolean; onClose: () => vo
         {showPlus && (
           <button className="sp-plus" onClick={() => (onClose(), openUi('plus'))}>
             <i>{premium ? 'Ativo' : 'Ativar'}</i>
-            HamiCare <em>PLUS</em>
+            Lumbi <em>PLUS</em>
           </button>
         )}
       </header>

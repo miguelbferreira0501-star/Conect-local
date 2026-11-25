@@ -1,4 +1,4 @@
-// Contrato da parte social. Duas implementações: servidor do HamiCare (produção) e
+// Contrato da parte social. Duas implementações: servidor do Lumbi (produção) e
 // armazenamento compartilhado da página publicada no Claude (link de teste).
 import type { House, Outfit, PetMood } from '../../types';
 import type { ReactionId } from '../../shared/moderation';
@@ -58,7 +58,7 @@ export interface Team {
   missions: string[];
   memberIds: string[];
   members: Profile[];
-  /** Quantas pessoas cabem (4, ou 8 se quem criou tem HamiCare+). */
+  /** Quantas pessoas cabem (4, ou 8 se quem criou tem Lumbi+). */
   max?: number;
   today: { date: string; checkins: Record<string, string[]>; complete: boolean };
   /** Dias completos seguidos. */

@@ -599,7 +599,7 @@ export function TrekUnpack({ result, onClose }: { result: TrekResult | null; onC
           <p className="unp-sub">Toda vez que ele volta de uma viagem, você ganha 1 cartão do lugar por onde ele passou.</p>
           <div className="unp-card is-back">
             <span>🐹</span>
-            <i>HamiCare</i>
+            <i>Lumbi</i>
           </div>
           <p className="unp-plus">
             Cartão de lembrança +1 · você tem {result.cards} de {placeName(result.place)}

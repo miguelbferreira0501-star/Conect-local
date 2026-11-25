@@ -70,7 +70,7 @@ function Compare() {
   );
 }
 
-/** HamiCare+ em duas etapas: o que muda (com o Hami vestido) e a escolha do plano. O essencial de autocuidado é sempre grátis. */
+/** Lumbi+ em duas etapas: o que muda (com o Hami vestido) e a escolha do plano. O essencial de autocuidado é sempre grátis. */
 export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () => void; fromOnboarding?: boolean; fur?: string; name?: string }) {
   const s = useApp();
   const { user } = useAccount();
@@ -186,7 +186,7 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
             </span>
             <span>
               <b>Apoie nossa missão</b>
-              Você ajuda a manter o HamiCare grátis no essencial para quem precisa se cuidar.
+              Você ajuda a manter o Lumbi grátis no essencial para quem precisa se cuidar.
             </span>
           </li>
         </ul>
@@ -271,7 +271,7 @@ function AppStoreBuy({ plan, price, userId, onClose }: { plan: Plan; price: stri
     try {
       const until = await fn();
       if (until) {
-        toast(`HamiCare+ ativo até ${formatDay(until, { day: 'numeric', month: 'long' })}!`);
+        toast(`Lumbi+ ativo até ${formatDay(until, { day: 'numeric', month: 'long' })}!`);
         onClose();
       } else if (none) toast(none);
     } catch (e) {
@@ -316,7 +316,7 @@ function GuardianLinks({ onClose }: { onClose: () => void }) {
   return (
     <div className="pw-guardian">
       <button onClick={go}>
-        <Glyph e="💌" size={24} /> Não dá para pagar agora? Peça um HamiCare+ de presente
+        <Glyph e="💌" size={24} /> Não dá para pagar agora? Peça um Lumbi+ de presente
       </button>
       {canBuyHere() && (
         <button onClick={go}>

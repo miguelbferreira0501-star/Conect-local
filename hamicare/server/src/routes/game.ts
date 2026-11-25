@@ -235,7 +235,7 @@ async function trusted(db: pg.PoolClient, userId: string, src: Source, cfg: Game
       return (await activeDays(db, userId, src.month)) >= t.days ? src : null;
     }
     case 'plus': {
-      // Mesada do HamiCare+: só com Plus ativo, uma vez por semana (a semana de agora, com folga na virada).
+      // Mesada do Lumbi+: só com Plus ativo, uma vez por semana (a semana de agora, com folga na virada).
       const weeks = [periodStart('semana', utcDay(-1)), periodStart('semana', utcDay(0)), periodStart('semana', utcDay(1))];
       if (!weeks.includes(src.week)) return null;
       return (await isPremium(db, userId)) ? src : null;
@@ -403,7 +403,7 @@ async function applySpend(db: pg.PoolClient, userId: string, w: WalletRow, op: {
     // Martelinho que conserta a ofensiva: preço fixo do catálogo do jogo.
     price = HAMMER_PRICE;
   } else if (kind === 'destino') {
-    // Destino de viagem: preço do catálogo; os "Premium" só para quem tem o HamiCare+.
+    // Destino de viagem: preço do catálogo; os "Premium" só para quem tem o Lumbi+.
     const dest = DESTINATIONS.find((d) => d.id === id);
     if (!dest || !dest.price || id === 'lua') return { w, ok: false, error: 'invalido' };
     if (dest.plus && !premium) return { w, ok: false, error: 'plus' };

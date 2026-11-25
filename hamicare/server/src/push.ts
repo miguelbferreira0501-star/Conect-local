@@ -88,5 +88,5 @@ export async function notifyFriend(userId: string, body: string, url = '/#amigos
   const kinds = (t.kinds ?? {}) as Partial<Record<ReminderKind, boolean>>;
   if (!(kinds.amigos ?? REMINDER_DEFAULTS.amigos)) return 0;
   if (isQuiet(safeLocal(now, t.tz).hm, t.minor)) return 0;
-  return pushTo(userId, { title: 'HamiCare', body, url, tag: 'hamicare-amigos' });
+  return pushTo(userId, { title: 'Lumbi', body, url, tag: 'hamicare-amigos' });
 }

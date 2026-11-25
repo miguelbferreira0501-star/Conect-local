@@ -127,7 +127,7 @@ social.post('/friends/:id/request', (c) =>
     const result = (await db.query('SELECT app.request_friend($1) AS r', [target])).rows[0].r;
     if (result === 'ok') {
       const name = await myName(db);
-      later(() => notifyFriend(target, `${name} quer ser seu amigo no HamiCare 🐹`));
+      later(() => notifyFriend(target, `${name} quer ser seu amigo no Lumbi 🐹`));
     }
     return c.json({ result });
   }),
@@ -339,7 +339,7 @@ const teamMissions = z.array(z.string()).min(1).max(TEAM_MISSIONS_MAX).refine((l
 function teamError(e: unknown): never {
   const code = (e as { code?: string }).code;
   if (code === '23505') throw new AppError(409, 'ja_em_turma', 'Alguém já está em outra turma. Cada pessoa fica em uma turma por vez.');
-  if (code === '23514') throw new AppError(409, 'turma_cheia', 'A turma está cheia. Sem Plus, cabem 4 pessoas; com HamiCare+, até 8.');
+  if (code === '23514') throw new AppError(409, 'turma_cheia', 'A turma está cheia. Sem Plus, cabem 4 pessoas; com Lumbi+, até 8.');
   if (code === '42501') throw forbidden('Só dá para chamar amigos para a turma.');
   throw e;
 }

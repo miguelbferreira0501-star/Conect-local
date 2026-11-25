@@ -1,4 +1,4 @@
-// Ilustrações próprias do HamiCare no lugar dos emojis.
+// Ilustrações próprias do Lumbi no lugar dos emojis.
 // Os dados continuam usando o emoji como chave (ex.: '🪥'); a tela desenha a ilustração.
 import type { CSSProperties } from 'react';
 import type { Draw } from './kit';

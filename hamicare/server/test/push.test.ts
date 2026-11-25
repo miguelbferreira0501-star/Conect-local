@@ -69,7 +69,7 @@ describe('avisos de amigos', () => {
 
     await call('POST', `/social/friends/${bia.id}/request`, {}, ana.cookie);
     await tick();
-    expect(box.map((b) => b.payload.body)).toContain('Ana quer ser seu amigo no HamiCare 🐹');
+    expect(box.map((b) => b.payload.body)).toContain('Ana quer ser seu amigo no Lumbi 🐹');
     await call('POST', `/social/friends/${ana.id}/accept`, {}, bia.cookie);
 
     await call('POST', `/social/visits/${bia.id}`, { reaction: 'abraco' }, ana.cookie);

@@ -1,4 +1,4 @@
-// Tela que abre pelo link do e-mail "Trocar a senha do HamiCare" (…/#redefinir=TOKEN).
+// Tela que abre pelo link do e-mail "Trocar a senha do Lumbi" (…/#redefinir=TOKEN).
 import { useEffect, useState } from 'react';
 import { KeyRound } from 'lucide-react';
 import { Modal, toast } from '../components/ui';

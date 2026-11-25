@@ -50,13 +50,13 @@ describe('e-mail sem domínio', () => {
     expect(got.user).toBe('hami@gmail.com');
     expect(got.from).toBe('hami@gmail.com');
     expect(got.to).toEqual(['lia@teste.com']);
-    expect(got.data).toContain('HamiCare <hami@gmail.com>');
+    expect(got.data).toContain('Lumbi <hami@gmail.com>');
     expect(got.data).toMatch(/redefinir=(3D)?abc/); // o corpo vai codificado (quoted-printable)
   });
 
   it('manda pelo Brevo, com o remetente verificado, e o Brevo vem antes do SMTP', async () => {
     vi.resetModules();
-    Object.assign(process.env, { BREVO_API_KEY: 'xkeysib-teste', MAIL_FROM: 'HamiCare <hami@gmail.com>' });
+    Object.assign(process.env, { BREVO_API_KEY: 'xkeysib-teste', MAIL_FROM: 'Lumbi <hami@gmail.com>' });
     const calls: { url: string; init: RequestInit }[] = [];
     vi.stubGlobal('fetch', async (url: string, init: RequestInit) => (calls.push({ url, init }), new Response('{"messageId":"1"}', { status: 201 })));
     const mail = await import('../src/lib/mail');
@@ -65,7 +65,7 @@ describe('e-mail sem domínio', () => {
     expect(calls[0].url).toBe('https://api.brevo.com/v3/smtp/email');
     expect((calls[0].init.headers as Record<string, string>)['api-key']).toBe('xkeysib-teste');
     const body = JSON.parse(String(calls[0].init.body));
-    expect(body.sender).toEqual({ name: 'HamiCare', email: 'hami@gmail.com' });
+    expect(body.sender).toEqual({ name: 'Lumbi', email: 'hami@gmail.com' });
     expect(body.to).toEqual([{ email: 'bia@teste.com' }]);
     expect(body.htmlContent).toContain('redefinir=xyz');
     vi.stubGlobal('fetch', async () => new Response('erro', { status: 401 }));
@@ -77,7 +77,7 @@ describe('e-mail sem domínio', () => {
 
   it('lê o remetente com e sem nome', async () => {
     const { parseFrom } = await import('../src/lib/mail');
-    expect(parseFrom('HamiCare <a@b.com>')).toEqual({ name: 'HamiCare', email: 'a@b.com' });
+    expect(parseFrom('Lumbi <a@b.com>')).toEqual({ name: 'Lumbi', email: 'a@b.com' });
     expect(parseFrom('"Hami Care" <a@b.com>')).toEqual({ name: 'Hami Care', email: 'a@b.com' });
     expect(parseFrom('a@b.com')).toEqual({ email: 'a@b.com' });
   });

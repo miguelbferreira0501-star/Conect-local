@@ -1,6 +1,6 @@
-# HamiCare
+# Lumbi
 
-<img src="docs/logo/hamicare-logo-1024.png" alt="Logo do HamiCare: o Hami sorrindo, de patinhas para a frente, num fundo roxo" width="160">
+<img src="docs/logo/hamicare-logo-1024.png" alt="Logo do Lumbi: o Hami sorrindo, de patinhas para a frente, num fundo roxo" width="160">
 
 **Sua jornada, seu mascote, sua evolução.** O **Hami**, um hamster, **emagrece ou ganha peso junto com você**: cada missão saudável (beber água no lugar do refrigerante, comer uma fruta, caminhar) tira ou soma as mesmas calorias de vocês dois. Em volta disso: cuidados animados, casa, aventuras, bem-estar e uma rede de amigos só de gentileza.
 
@@ -22,7 +22,7 @@
 | **Mundo** | Casa com móveis arrastáveis e 7 estilos; mapa com 10 lugares e álbum de figurinhas dos 30 achadinhos; loja da Dona Capivara com coleção do dia, **312 itens** (195 para vestir: 72 chapéus, 23 óculos, 54 roupas, 34 acessórios e 12 efeitos como aura, asas e brilhos; 76 de casa; 16 paredes; 12 pisos), **12 looks completos com 20% de desconto** e **provador** para experimentar antes de comprar; Armário com 24 pelagens (8 compradas com sementes e 4 do Plus) |
 | **Bem-estar** | Humor com emoções e gráfico, diário privado com reflexões guiadas e 9 ferramentas com cenário próprio e o Hami reagindo: respiração (anel que cresce e encolhe, Hami enche as bochechas e solta ventinho), 5-4-3-2-1, meditação (Hami flutuando sob a aurora), foco (Hami de óculos lendo), relaxar (luz passando pelo corpo), para dormir (cada passo acende uma estrela), afirmações, pote que enche de bilhetinhos e quizzes. CVV 188 |
 | **Amigos** | Perfil estilo rede social (Hami com anel, bio, posts, amigos, ofensiva, grade de posts, casa), "stories" dos amigos, feed com toque duplo para curtir, reações só positivas e comentários no filtro de gentileza; **grupos** com mural próprio; pedidos, bloquear, denunciar, vibes, presentes e desafios em grupo |
-| **Ajustes** | Perfil e faixa de idade, Hami (nome, 14 pelagens, jeitinho), tema claro/escuro, 6 cores de app, lembretes, privacidade, dados físicos (consentimento, modo sem números, apagar registros), HamiCare+, conta e nuvem, código de backup, começar do zero |
+| **Ajustes** | Perfil e faixa de idade, Hami (nome, 14 pelagens, jeitinho), tema claro/escuro, 6 cores de app, lembretes, privacidade, dados físicos (consentimento, modo sem números, apagar registros), Lumbi+, conta e nuvem, código de backup, começar do zero |
 | **Admin** | Estatísticas, denúncias (remover/manter), usuários (Plus, suspender), eventos e missões especiais |
 
 ## Segurança e cuidado
@@ -60,7 +60,7 @@ Para a página de teste no Claude: `cd web && npm run build:artifact` gera `dist
 
 Passo a passo em [`docs/PUBLICAR.md`](docs/PUBLICAR.md): Neon, Render e Brevo, sem domínio e sem custo para começar; domínio e Resend depois.
 
-`render.yaml` (na pasta `hamicare/`; no Render, use *Blueprint Path* `hamicare/render.yaml`) sobe tudo: informe `DATABASE_OWNER_URL`, `ADMIN_EMAILS`, `APP_ORIGINS` e, para o e-mail de troca de senha, `BREVO_API_KEY` e `MAIL_FROM` (sem domínio) ou `RESEND_API_KEY` (com domínio). O deploy cria o papel da API, aplica as migrações e serve o app, a política de privacidade (`/privacidade`) e os termos (`/termos`). Instalado no celular (PWA), o HamiCare recebe lembretes push.
+`render.yaml` (na pasta `hamicare/`; no Render, use *Blueprint Path* `hamicare/render.yaml`) sobe tudo: informe `DATABASE_OWNER_URL`, `ADMIN_EMAILS`, `APP_ORIGINS` e, para o e-mail de troca de senha, `BREVO_API_KEY` e `MAIL_FROM` (sem domínio) ou `RESEND_API_KEY` (com domínio). O deploy cria o papel da API, aplica as migrações e serve o app, a política de privacidade (`/privacidade`) e os termos (`/termos`). Instalado no celular (PWA), o Lumbi recebe lembretes push.
 
 Antes de publicar, preencha os dados da empresa em `web/src/shared/legal.ts` (`LEGAL_INFO`).
 

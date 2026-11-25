@@ -226,7 +226,7 @@ export function TeamTab({ api, friends, onOpenProfile }: { api: SocialApi; frien
           </div>
         ))}
         {isOwner && team.members.length >= (team.max ?? TEAM_MAX) && (team.max ?? TEAM_MAX) < TEAM_MAX_PLUS && (
-          <p className="px-1 text-[13px] font-bold text-muted">Turma cheia. Com HamiCare+, a turma cabe até {TEAM_MAX_PLUS} pessoas.</p>
+          <p className="px-1 text-[13px] font-bold text-muted">Turma cheia. Com Lumbi+, a turma cabe até {TEAM_MAX_PLUS} pessoas.</p>
         )}
         {isOwner && team.members.length < (team.max ?? TEAM_MAX) && outside.length > 0 && (
           <div className="grid gap-2">
@@ -276,7 +276,7 @@ function CreateTeam({ api, friends, onCreated }: { api: SocialApi; friends: Prof
       <section className="card grid justify-items-center gap-2 p-5 text-center">
         <Glyph e="art:turma" size={72} />
         <h2 className="font-display text-[22px] font-bold leading-tight">Monte a sua turma</h2>
-        <p className="text-[14px] text-muted">Você e até {teamCap - 1} amigos, com os Hamis juntos.{teamCap < TEAM_MAX_PLUS ? ` Com HamiCare+, até ${TEAM_MAX_PLUS - 1} amigos.` : ''} Vocês escolhem missões em comum, e cada missão só conta quando todo mundo faz.</p>
+        <p className="text-[14px] text-muted">Você e até {teamCap - 1} amigos, com os Hamis juntos.{teamCap < TEAM_MAX_PLUS ? ` Com Lumbi+, até ${TEAM_MAX_PLUS - 1} amigos.` : ''} Vocês escolhem missões em comum, e cada missão só conta quando todo mundo faz.</p>
       </section>
       <label className="grid gap-1 text-[14px] font-bold" htmlFor="team-name">
         Nome da turma

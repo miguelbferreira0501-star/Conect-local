@@ -1,9 +1,9 @@
-// Service worker do HamiCare: recebe os lembretes push e abre o app ao tocar.
+// Service worker do Lumbi: recebe os lembretes push e abre o app ao tocar.
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 
 self.addEventListener('push', (event) => {
-  let data = { title: 'HamiCare', body: 'Hora de cuidar um pouquinho de você.', url: '/', tag: 'hamicare' };
+  let data = { title: 'Lumbi', body: 'Hora de cuidar um pouquinho de você.', url: '/', tag: 'hamicare' };
   try {
     data = { ...data, ...event.data.json() };
   } catch (_) {

@@ -1,4 +1,4 @@
-// Política de privacidade e termos de uso do HamiCare.
+// Política de privacidade e termos de uso do Lumbi.
 // O mesmo texto aparece no app (Ajustes) e no site (/privacidade e /termos),
 // que é o endereço pedido pela Google Play e pela App Store.
 //
@@ -40,7 +40,7 @@ export const PRIVACY: LegalDoc = {
   id: 'privacidade',
   title: 'Política de Privacidade',
   summary: [
-    'Sem conta, tudo o que você faz no HamiCare fica só no seu aparelho. Nós não recebemos nada.',
+    'Sem conta, tudo o que você faz no Lumbi fica só no seu aparelho. Nós não recebemos nada.',
     'Com conta, guardamos um backup privado do seu progresso. Peso, calorias, humor e diário só você vê.',
     'Não vendemos seus dados, não mostramos anúncios e não usamos rastreadores de publicidade.',
     'Você pode baixar, corrigir ou apagar seus dados quando quiser, direto no app.',
@@ -49,7 +49,7 @@ export const PRIVACY: LegalDoc = {
     {
       h: '1. Quem cuida dos seus dados',
       body: [
-        `O HamiCare é oferecido por ${I.controlador}${I.documento ? `, CNPJ ${I.documento}` : ''}, de ${I.cidade} ("nós"). Somos o controlador dos dados pessoais tratados no app, nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018, "LGPD").`,
+        `O Lumbi é oferecido por ${I.controlador}${I.documento ? `, CNPJ ${I.documento}` : ''}, de ${I.cidade} ("nós"). Somos o controlador dos dados pessoais tratados no app, nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018, "LGPD").`,
         `Canal de privacidade (encarregado): ${I.email}. Respondemos em até 15 dias.`,
       ],
     },
@@ -95,7 +95,7 @@ export const PRIVACY: LegalDoc = {
           'Banco de dados (por exemplo, Neon).',
           'Envio de e-mails, como o de troca de senha (por exemplo, Resend ou Brevo). Só mandamos e-mails necessários para a sua conta; nada de propaganda.',
           'Serviço de notificações do seu navegador ou aparelho (Google, Apple ou Mozilla), que recebe só o endereço de notificação e o texto do lembrete.',
-          'Lojas de aplicativos e meios de pagamento, se você assinar o HamiCare+. Eles cuidam do pagamento; nós não recebemos os dados do seu cartão.',
+          'Lojas de aplicativos e meios de pagamento, se você assinar o Lumbi+. Eles cuidam do pagamento; nós não recebemos os dados do seu cartão.',
           'Mercado Pago, se você for Guardião do Hami: ele processa o Pix ou o cartão e nos avisa só se o pagamento foi aprovado e o valor. Não recebemos os dados do cartão nem da sua conta bancária.',
         ],
         'Também podemos fornecer dados quando a lei exigir ou por ordem de autoridade competente.',
@@ -122,7 +122,7 @@ export const PRIVACY: LegalDoc = {
     {
       h: '7. Crianças e adolescentes',
       body: [
-        'O HamiCare foi pensado para ser seguro para todas as idades, seguindo o Estatuto da Criança e do Adolescente, o art. 14 da LGPD e o Estatuto Digital da Criança e do Adolescente (Lei nº 15.211/2025), sempre no melhor interesse da criança e do adolescente.',
+        'O Lumbi foi pensado para ser seguro para todas as idades, seguindo o Estatuto da Criança e do Adolescente, o art. 14 da LGPD e o Estatuto Digital da Criança e do Adolescente (Lei nº 15.211/2025), sempre no melhor interesse da criança e do adolescente.',
         [
           'Menores de 13 anos só criam conta com a autorização de um responsável, e não têm acesso à parte social (amigos, feed e grupos).',
           'Para menores de 18 anos, o app não mostra números de peso nem de calorias e não incentiva dietas: a jornada é de hábitos.',
@@ -184,7 +184,7 @@ export const TERMS: LegalDoc = {
   id: 'termos',
   title: 'Termos de Uso',
   summary: [
-    'O HamiCare é um app de autocuidado com um bichinho virtual. Ele não é serviço médico nem nutricional.',
+    'O Lumbi é um app de autocuidado com um bichinho virtual. Ele não é serviço médico nem nutricional.',
     'As calorias são estimativas. Antes de mudar sua alimentação ou começar exercícios, converse com um profissional de saúde.',
     'Seja gentil na comunidade. Conteúdo que machuca alguém é removido.',
     'Sementes e itens do app são virtuais e não valem dinheiro.',
@@ -193,23 +193,23 @@ export const TERMS: LegalDoc = {
     {
       h: '1. Aceitação',
       body: [
-        `Estes Termos são um contrato entre você e ${I.controlador}${I.documento ? ` (CNPJ ${I.documento})` : ''}, responsável pelo HamiCare. Ao usar o app ou criar uma conta, você concorda com estes Termos e com a Política de Privacidade. Se não concordar, não use o app.`,
+        `Estes Termos são um contrato entre você e ${I.controlador}${I.documento ? ` (CNPJ ${I.documento})` : ''}, responsável pelo Lumbi. Ao usar o app ou criar uma conta, você concorda com estes Termos e com a Política de Privacidade. Se não concordar, não use o app.`,
       ],
     },
     {
       h: '2. Quem pode usar',
       body: [
         [
-          'Qualquer idade pode usar o HamiCare sem conta, com o progresso guardado só no aparelho.',
+          'Qualquer idade pode usar o Lumbi sem conta, com o progresso guardado só no aparelho.',
           'Menores de 13 anos só podem criar conta com a autorização de um responsável, que aceita estes Termos em nome deles. A parte social fica desligada para essa idade.',
           'Adolescentes de 13 a 17 anos devem usar com o conhecimento de um responsável. Para eles, o app não mostra números de peso nem de calorias.',
         ],
       ],
     },
     {
-      h: '3. O HamiCare não é tratamento de saúde',
+      h: '3. O Lumbi não é tratamento de saúde',
       body: [
-        'O HamiCare ajuda a criar hábitos com um bichinho virtual. Ele não faz diagnóstico, não prescreve dieta nem treino e não substitui médico, nutricionista, educador físico ou psicólogo.',
+        'O Lumbi ajuda a criar hábitos com um bichinho virtual. Ele não faz diagnóstico, não prescreve dieta nem treino e não substitui médico, nutricionista, educador físico ou psicólogo.',
         [
           'As calorias das missões e do cardápio são estimativas aproximadas, baseadas em tabelas e médias. O valor real muda de pessoa para pessoa.',
           'O app limita o ritmo de perda ou ganho de peso para manter metas seguras, mas quem decide e acompanha sua saúde é você, com um profissional.',
@@ -256,21 +256,21 @@ export const TERMS: LegalDoc = {
       body: [
         [
           'Sementes são a moeda do app. Você ganha cuidando do Hami, cumprindo missões e jogando no parque de jogos (até 8 partidas premiadas por dia).',
-          'Quem assina o HamiCare+ recebe uma mesada de 500 sementes por semana (pega no app, uma vez por semana, enquanto o Plus estiver ativo) e um martelinho por mês, além da trilha Plus da temporada (sementes, baús e fantasias exclusivas em cada degrau, liberados pelos dias ativos no mês). Tudo isso faz parte dos benefícios do Plus: sementes não são vendidas avulsas.',
+          'Quem assina o Lumbi+ recebe uma mesada de 500 sementes por semana (pega no app, uma vez por semana, enquanto o Plus estiver ativo) e um martelinho por mês, além da trilha Plus da temporada (sementes, baús e fantasias exclusivas em cada degrau, liberados pelos dias ativos no mês). Tudo isso faz parte dos benefícios do Plus: sementes não são vendidas avulsas.',
           'Sementes, roupas, pelagens, móveis e outros itens são licenças de uso dentro do app. Eles não têm valor em dinheiro, não podem ser trocados por dinheiro nem vendidos fora do app.',
           'Presentes entre amigos são permitidos dentro do app.',
           'Podemos ajustar preços em sementes, itens e temporadas para manter o jogo equilibrado.',
         ],
-        'Baús: abrem só com sementes do app. Não existe compra avulsa de sementes, baús ou chances com dinheiro, e a assinatura HamiCare+ não dá baús. Os itens dos baús são só enfeites (roupas e decoração): não mudam missões, saúde, nível nem progresso.',
+        'Baús: abrem só com sementes do app. Não existe compra avulsa de sementes, baús ou chances com dinheiro, e a assinatura Lumbi+ não dá baús. Os itens dos baús são só enfeites (roupas e decoração): não mudam missões, saúde, nível nem progresso.',
         'As chances de cada raridade aparecem na loja antes de abrir e já contam a proteção contra azar: depois de alguns baús sem item raro, a chance de raro sobe, e há um limite garantido. Item repetido vira fragmentos, que podem ser trocados na Oficina pelo item que você escolher.',
         'Para menores de 18 anos, o baú é revelado: o item aparece antes da compra e é exatamente ele que vem. Nada é sorteado na hora da compra.',
       ],
     },
     {
-      h: '8. HamiCare+ (assinatura)',
+      h: '8. Lumbi+ (assinatura)',
       body: [
         [
-          'O HamiCare+ libera itens e recursos extras. O preço, o período e a forma de renovação aparecem antes de você confirmar.',
+          'O Lumbi+ libera itens e recursos extras. O preço, o período e a forma de renovação aparecem antes de você confirmar.',
           'O teste grátis dura 7 dias e pode ser usado uma vez por conta. Nada é cobrado no teste.',
           'Quando a assinatura for paga pela Google Play ou pela App Store, a cobrança, a renovação automática e o cancelamento seguem a conta da loja. Você pode cancelar quando quiser nas configurações da loja, e o acesso continua até o fim do período já pago.',
           'Você pode desistir da compra em até 7 dias a partir da contratação e receber o valor de volta (Código de Defesa do Consumidor, art. 49). Peça pela loja ou pelo nosso e-mail.',
@@ -281,10 +281,10 @@ export const TERMS: LegalDoc = {
       h: '8.1 Guardiões do Hami',
       body: [
         [
-          'Quem não pode pagar o HamiCare+ pode pedir um de presente. Os pedidos formam uma fila por ordem de chegada; quando um Guardião paga, cada vaga vira 1 mês (ou 1 ano) de HamiCare+ para a próxima pessoa da fila. Não prometemos prazo, porque depende de quantos Guardiões existirem.',
+          'Quem não pode pagar o Lumbi+ pode pedir um de presente. Os pedidos formam uma fila por ordem de chegada; quando um Guardião paga, cada vaga vira 1 mês (ou 1 ano) de Lumbi+ para a próxima pessoa da fila. Não prometemos prazo, porque depende de quantos Guardiões existirem.',
           'Ser Guardião é para maiores de 18 anos e só pelo site, com pagamento único pelo Mercado Pago (Pix ou cartão). Não há renovação automática.',
           'O Guardião escolhe o nível (Aliado, Protetor ou Super-herói, com valor livre), o nome no mural (ou anônimo) e um recadinho opcional, que passa pelo filtro de gentileza. Como agradecimento, ganha sementes no app (100 por pessoa ajudada, até 3.000 por pedido).',
-          'O valor pago não é doação para entidade beneficente nem gera recibo para imposto de renda: é a compra de assinaturas do HamiCare+ para outras pessoas.',
+          'O valor pago não é doação para entidade beneficente nem gera recibo para imposto de renda: é a compra de assinaturas do Lumbi+ para outras pessoas.',
           'Você pode desistir em até 7 dias (Código de Defesa do Consumidor, art. 49). Se alguma vaga já tiver sido entregue, ela continua com a pessoa que recebeu e devolvemos o valor das vagas ainda não entregues.',
         ],
       ],
@@ -292,13 +292,13 @@ export const TERMS: LegalDoc = {
     {
       h: '9. Propriedade intelectual',
       body: [
-        'O nome HamiCare, o personagem Hami, as ilustrações, os textos, as músicas e o código do app são nossos ou licenciados para nós. Você pode usar o app para fins pessoais, mas não pode copiar, vender ou criar produtos a partir dele sem autorização.',
+        'O nome Lumbi, o personagem Hami, as ilustrações, os textos, as músicas e o código do app são nossos ou licenciados para nós. Você pode usar o app para fins pessoais, mas não pode copiar, vender ou criar produtos a partir dele sem autorização.',
       ],
     },
     {
       h: '10. Funcionamento do app',
       body: [
-        'Trabalhamos para o app funcionar bem, mas ele pode ter falhas, ficar fora do ar para manutenção ou mudar. Podemos criar, alterar ou retirar recursos. Se um dia o HamiCare for encerrado, avisaremos com pelo menos 30 dias de antecedência para você guardar seu progresso.',
+        'Trabalhamos para o app funcionar bem, mas ele pode ter falhas, ficar fora do ar para manutenção ou mudar. Podemos criar, alterar ou retirar recursos. Se um dia o Lumbi for encerrado, avisaremos com pelo menos 30 dias de antecedência para você guardar seu progresso.',
         'Sem conta, seu progresso vive só no aparelho: se o aparelho for perdido ou os dados do navegador forem apagados, ele pode se perder. Por isso recomendamos criar uma conta ou guardar o código de backup.',
       ],
     },

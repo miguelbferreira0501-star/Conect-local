@@ -1,4 +1,4 @@
-// Assinatura do HamiCare+ pela App Store (StoreKit 2).
+// Assinatura do Lumbi+ pela App Store (StoreKit 2).
 // - POST /api/billing/apple (logado): o app manda a transação assinada pela Apple (JWS) logo depois da compra
 //   ou ao restaurar; o servidor confere a assinatura com os certificados da Apple e libera o Plus.
 // - POST /api/apple-webhook (sem cookie): avisos da Apple (App Store Server Notifications V2) com renovações,
@@ -87,7 +87,7 @@ async function apply(tx: AppleTx, userId: string | null, forceRevoked = false): 
     const p = r.rows[0]?.p as Date | string | null;
     return p ? (typeof p === 'string' ? p.slice(0, 10) : p.toISOString().slice(0, 10)) : null;
   }).catch((e: { code?: string }) => {
-    if (e.code === '42501') throw new AppError(409, 'outra_conta', 'Esta assinatura da App Store já está ligada a outra conta do HamiCare. Entre com aquela conta.');
+    if (e.code === '42501') throw new AppError(409, 'outra_conta', 'Esta assinatura da App Store já está ligada a outra conta do Lumbi. Entre com aquela conta.');
     throw e;
   });
 }
@@ -102,7 +102,7 @@ billing.post('/apple', requireAuth, async (c) => {
   const userId = c.get('userId')!;
   // Se o app mandou a conta junto da compra, ela tem que ser a mesma de quem está logado.
   if (tx.appAccountToken && tx.appAccountToken.toLowerCase() !== userId.toLowerCase()) {
-    throw new AppError(409, 'outra_conta', 'Esta compra foi feita em outra conta do HamiCare. Entre com aquela conta.');
+    throw new AppError(409, 'outra_conta', 'Esta compra foi feita em outra conta do Lumbi. Entre com aquela conta.');
   }
   const premiumUntil = await apply(tx, userId);
   return c.json({ premiumUntil });

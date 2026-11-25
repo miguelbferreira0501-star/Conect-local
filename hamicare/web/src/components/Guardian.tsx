@@ -1,4 +1,4 @@
-// Guardiões do Hami: quem pode pagar dá HamiCare+ para quem não pode agora (ideia do Finch, do nosso jeito).
+// Guardiões do Hami: quem pode pagar dá Lumbi+ para quem não pode agora (ideia do Finch, do nosso jeito).
 // - Pedir ajuda: entra na fila; quando um Guardião paga, o Plus liga sozinho (ordem de chegada).
 // - Ser Guardião (só adultos, só no site): Aliado (1 pessoa), Protetor (3) ou Super-herói (você escolhe o valor),
 //   por 1 mês ou 1 ano, pagamento único (Pix ou cartão), nome no mural e 100 sementes por pessoa ajudada.
@@ -71,7 +71,7 @@ function GuardianBody({ testOrder, onTestDone }: { testOrder: string | null; onT
     if (ready && online) load();
   }, [ready, online, load]);
 
-  if (kid) return <p className="pb-4 text-center text-[15px] text-muted">O HamiCare+ é para quem tem 13 anos ou mais. Tudo o que importa para cuidar do Hami é grátis.</p>;
+  if (kid) return <p className="pb-4 text-center text-[15px] text-muted">O Lumbi+ é para quem tem 13 anos ou mais. Tudo o que importa para cuidar do Hami é grátis.</p>;
 
   return (
     <div className="grid gap-4 pb-3">
@@ -79,7 +79,7 @@ function GuardianBody({ testOrder, onTestDone }: { testOrder: string | null; onT
         <Glyph e="🛡️" size={64} />
         <div className="min-w-0">
           <p className="gd-hero-title">Ninguém fica sem cuidado</p>
-          <p className="gd-hero-sub">Quem pode dá HamiCare+ de presente para quem não pode pagar agora.</p>
+          <p className="gd-hero-sub">Quem pode dá Lumbi+ de presente para quem não pode pagar agora.</p>
         </div>
       </section>
       {wall && (
@@ -96,7 +96,7 @@ function GuardianBody({ testOrder, onTestDone }: { testOrder: string | null; onT
         </div>
       )}
       {!online ? (
-        <p className="rounded-2xl bg-surface-2 p-3 text-[14px] text-muted">Os Guardiões funcionam no app do HamiCare com conta (backup ligado). Nesta versão de teste, dá só para conhecer.</p>
+        <p className="rounded-2xl bg-surface-2 p-3 text-[14px] text-muted">Os Guardiões funcionam no app do Lumbi com conta (backup ligado). Nesta versão de teste, dá só para conhecer.</p>
       ) : !user ? (
         <p className="rounded-2xl bg-surface-2 p-3 text-[14px] text-muted">Entre na sua conta (Ajustes → Conta) para pedir ajuda ou ser Guardião.</p>
       ) : (
@@ -121,7 +121,7 @@ function HelpCard({ me, onChange }: { me: GuardianMe | null; onChange: () => voi
       <section className="gd-card gd-got">
         <Glyph e="💌" size={40} />
         <p className="text-[15px] font-bold leading-snug">
-          Um Guardião te deu {req.months === 12 ? '1 ano' : `${req.months ?? 1} ${req.months === 1 || !req.months ? 'mês' : 'meses'}`} de HamiCare+ 💜 Aproveite: alguém acredita em você.
+          Um Guardião te deu {req.months === 12 ? '1 ano' : `${req.months ?? 1} ${req.months === 1 || !req.months ? 'mês' : 'meses'}`} de Lumbi+ 💜 Aproveite: alguém acredita em você.
         </p>
       </section>
     );
@@ -132,7 +132,7 @@ function HelpCard({ me, onChange }: { me: GuardianMe | null; onChange: () => voi
       <h3 className="gd-title">Precisa de ajuda?</h3>
       {req?.status === 'esperando' ? (
         <>
-          <p className="text-[14px] text-muted">Você está na fila. Quando um Guardião ajudar, o HamiCare+ liga sozinho e você recebe um aviso aqui.</p>
+          <p className="text-[14px] text-muted">Você está na fila. Quando um Guardião ajudar, o Lumbi+ liga sozinho e você recebe um aviso aqui.</p>
           <button
             className="btn btn-ghost btn-sm justify-self-start"
             onClick={async () => {
@@ -145,7 +145,7 @@ function HelpCard({ me, onChange }: { me: GuardianMe | null; onChange: () => voi
         </>
       ) : (
         <>
-          <p className="text-[14px] text-muted">Se agora não dá para pagar, peça um HamiCare+ de presente. Não precisa explicar nada.</p>
+          <p className="text-[14px] text-muted">Se agora não dá para pagar, peça um Lumbi+ de presente. Não precisa explicar nada.</p>
           <textarea className="field min-h-[70px]" value={reason} maxLength={200} onChange={(e) => setReason(e.target.value)} placeholder="Se quiser, conte em poucas palavras (opcional)" aria-label="Por que você precisa (opcional)" />
           <button
             className="btn btn-primary"
@@ -155,7 +155,7 @@ function HelpCard({ me, onChange }: { me: GuardianMe | null; onChange: () => voi
               try {
                 const r = await askHelp(reason.trim() || undefined);
                 play(r.status === 'atendido' ? 'conquista' : 'pronto');
-                toast(r.status === 'atendido' ? 'Um Guardião já estava esperando por você: HamiCare+ ligado! 💜' : 'Pronto! Você entrou na fila dos Guardiões.');
+                toast(r.status === 'atendido' ? 'Um Guardião já estava esperando por você: Lumbi+ ligado! 💜' : 'Pronto! Você entrou na fila dos Guardiões.');
                 setReason('');
                 onChange();
               } catch (e) {
@@ -165,7 +165,7 @@ function HelpCard({ me, onChange }: { me: GuardianMe | null; onChange: () => voi
               }
             }}
           >
-            Pedir um HamiCare+ de presente
+            Pedir um Lumbi+ de presente
           </button>
         </>
       )}
@@ -228,7 +228,7 @@ function BecomeCard({ paymentsOn, testOrder, onTestDone, defaultName }: { paymen
       </label>
       {q && (
         <p className="flex flex-wrap items-center gap-1 text-[13px] font-bold text-muted">
-          {q.seats} {q.seats === 1 ? 'pessoa ganha' : 'pessoas ganham'} HamiCare+ por {q.months === 12 ? '1 ano' : '1 mês'} · você ganha <Seed size={12} /> {guardianBonus(q.seats)}
+          {q.seats} {q.seats === 1 ? 'pessoa ganha' : 'pessoas ganham'} Lumbi+ por {q.months === 12 ? '1 ano' : '1 mês'} · você ganha <Seed size={12} /> {guardianBonus(q.seats)}
         </p>
       )}
       <button

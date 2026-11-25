@@ -238,7 +238,7 @@ export function Onboarding() {
                 {!goalCheck.ok && <p className="rounded-2xl bg-gold-soft p-3 text-[14px] font-bold">{goalCheck.reason}</p>}
                 <label className="flex items-start gap-3 text-[14px]" htmlFor="ob-consent">
                   <input id="ob-consent" type="checkbox" className="mt-1 h-5 w-5 accent-[var(--accent)]" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-                  <span>Autorizo o HamiCare a guardar esses dados só para mim. Eles nunca aparecem para amigos, e eu posso apagar tudo nos Ajustes.</span>
+                  <span>Autorizo o Lumbi a guardar esses dados só para mim. Eles nunca aparecem para amigos, e eu posso apagar tudo nos Ajustes.</span>
                 </label>
                 <button className="btn btn-primary" onClick={next} disabled={!consent || !(a.weightKg && a.weightKg > 25 && a.weightKg < 400) || !goalCheck.ok}>
                   Salvar e continuar

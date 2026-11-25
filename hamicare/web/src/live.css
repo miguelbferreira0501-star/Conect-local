@@ -1,4 +1,4 @@
-/* Visual "vivo" do HamiCare: botões fofos com volume, cenário animado, jornada, cuidados e comemorações.
+/* Visual "vivo" do Lumbi: botões fofos com volume, cenário animado, jornada, cuidados e comemorações.
    Tudo com arte própria. As animações respeitam "reduzir movimento" no fim do arquivo. */
 
 /* ---------- Botões com volume (apertáveis) ---------- */
@@ -2447,7 +2447,7 @@
   z-index: 95;
 }
 
-/* ---------- HamiCare+ à vista ---------- */
+/* ---------- Lumbi+ à vista ---------- */
 .plus-card {
   position: relative;
   display: flex;
@@ -2826,7 +2826,7 @@
   outline-offset: 2px;
 }
 
-/* ---------- Vitrine do HamiCare+ (loja) ---------- */
+/* ---------- Vitrine do Lumbi+ (loja) ---------- */
 .plus-showcase {
   display: grid;
   gap: 10px;
@@ -2902,7 +2902,7 @@
   margin: 0 -5px;
 }
 
-/* ---------- Tela do HamiCare+ (duas etapas) ---------- */
+/* ---------- Tela do Lumbi+ (duas etapas) ---------- */
 .pw {
   position: relative;
   padding: 18px 16px 14px;
@@ -4521,7 +4521,7 @@
 .icon-still *, .inv-icon *, .kit-icon * { animation: none !important; }
 .inv-tile { contain: layout paint style; }
 
-/* ---------- Mesada do HamiCare+ ---------- */
+/* ---------- Mesada do Lumbi+ ---------- */
 .plusw { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 22px; background: linear-gradient(135deg, #ffe7a3, #ffc95c); border: 3px solid #fff; box-shadow: 0 6px 14px rgba(160, 100, 20, 0.18); color: #5a3a12; }
 .plusw.is-done { background: rgba(255, 255, 255, 0.18); color: inherit; box-shadow: none; }
 .plusw-ico { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 14px; background: #fff; color: #e09a1a; }

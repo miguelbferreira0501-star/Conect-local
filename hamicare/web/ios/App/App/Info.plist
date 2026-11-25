@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>pt-BR</string>
 	<key>CFBundleDisplayName</key>
-        <string>HamiCare</string>
+        <string>Lumbi</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -65,9 +65,9 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>O HamiCare usa a câmera só quando você tira uma foto para o seu álbum ou para o Hami.</string>
+	<string>O Lumbi usa a câmera só quando você tira uma foto para o seu álbum ou para o Hami.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Para escolher uma foto da galeria para o seu álbum do HamiCare.</string>
+	<string>Para escolher uma foto da galeria para o seu álbum do Lumbi.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Para salvar no seu celular as fotos que você tirou com o Hami.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>

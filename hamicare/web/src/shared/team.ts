@@ -2,7 +2,7 @@
 // Uma missão só conta quando todos da turma fazem; o dia fica completo quando todos fazem todas.
 
 export const TEAM_MAX = 4;
-/** Com HamiCare+ (de quem criou a turma), a turma pode ter até 8 pessoas. */
+/** Com Lumbi+ (de quem criou a turma), a turma pode ter até 8 pessoas. */
 export const TEAM_MAX_PLUS = 8;
 export const TEAM_MISSIONS_MAX = 3;
 

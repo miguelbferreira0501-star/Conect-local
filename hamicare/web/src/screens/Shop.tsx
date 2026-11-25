@@ -398,7 +398,7 @@ export function TryOn({ item, list, onPick, onClose, onPlus, onGift }: { item: I
       <div className="fit-info">
         {item.plus && (
           <p className="fit-name">
-            <Crown size={16} className="inline" /> HamiCare+
+            <Crown size={16} className="inline" /> Lumbi+
           </p>
         )}
         {res === 'ja-tem' ? (
@@ -411,7 +411,7 @@ export function TryOn({ item, list, onPick, onClose, onPlus, onGift }: { item: I
           )
         ) : res === 'plus' ? (
           <button className="fit-btn is-plus" onClick={kids ? undefined : onPlus} disabled={kids}>
-            <Crown size={16} /> {kids ? 'Exclusivo do HamiCare+' : 'Liberar com o Plus'}
+            <Crown size={16} /> {kids ? 'Exclusivo do Lumbi+' : 'Liberar com o Plus'}
           </button>
         ) : res === 'nivel' ? (
           <span className="fit-btn is-owned">
@@ -449,7 +449,7 @@ export function TryOn({ item, list, onPick, onClose, onPlus, onGift }: { item: I
   );
 }
 
-/** Seis destaques que mudam todo dia (um deles do HamiCare+, quando houver). */
+/** Seis destaques que mudam todo dia (um deles do Lumbi+, quando houver). */
 function dailyCollection(today: string): Item[] {
   const rnd = mulberry32(hashStr(`colecao:${today}`));
   const pool = ITEMS.filter((i) => !i.souvenir && !i.chestOnly && i.price > 0 && inSeason(i) && i.kind !== 'comida' && i.kind !== 'parede' && i.kind !== 'piso');
@@ -481,11 +481,11 @@ export function PlusShowcase({ onTry, onAll }: { onTry: (item: Item, list?: Item
     return [wear[0], home[0], wear[1], wear[2], home[1], wear[3], home[2], wear[4]].filter(Boolean);
   }, [today]);
   return (
-    <section className="plus-showcase" aria-label="Vitrine do HamiCare+">
+    <section className="plus-showcase" aria-label="Vitrine do Lumbi+">
       <div className="flex items-end justify-between gap-2">
         <div className="min-w-0">
           <p className="flex items-center gap-1 text-[12px] font-black uppercase tracking-wide text-[#9A6A00]">
-            <Crown size={13} /> {premium ? 'Exclusivos do seu Plus' : 'Vitrine do HamiCare+'}
+            <Crown size={13} /> {premium ? 'Exclusivos do seu Plus' : 'Vitrine do Lumbi+'}
           </p>
           <p className="font-display text-[19px] font-bold leading-tight">{premium ? 'Peças especiais para você' : `Prove no ${s.pet.name}, é de graça`}</p>
         </div>

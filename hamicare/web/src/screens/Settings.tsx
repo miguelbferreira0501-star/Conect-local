@@ -173,7 +173,7 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
                 Testar lembrete
               </button>
               {permission() === 'denied' && <p className="text-[13px] text-muted">As notificações do sistema estão bloqueadas neste navegador. Os lembretes aparecem dentro do app.</p>}
-              <p className="text-[13px] text-muted">No iPhone, os lembretes só chegam com o HamiCare na tela inicial (Compartilhar → Adicionar à Tela de Início).</p>
+              <p className="text-[13px] text-muted">No iPhone, os lembretes só chegam com o Lumbi na tela inicial (Compartilhar → Adicionar à Tela de Início).</p>
             </>
           )}
         </Group>
@@ -214,10 +214,10 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
           </Group>
         )}
 
-        <Group title="HamiCare+">
+        <Group title="Lumbi+">
           <button className="opt" onClick={onPlus}>
             <Sparkles size={20} className="text-accent" />
-            <span className="min-w-0 flex-1">{isPremium(s) ? `Plus ativo até ${formatDay(s.premium.until!, { day: 'numeric', month: 'long' })}` : 'Conhecer o HamiCare+'}</span>
+            <span className="min-w-0 flex-1">{isPremium(s) ? `Plus ativo até ${formatDay(s.premium.until!, { day: 'numeric', month: 'long' })}` : 'Conhecer o Lumbi+'}</span>
             <ChevronRight size={18} className="text-muted" />
           </button>
           {s.profile.ageGroup !== 'ate12' && guardiansHere() && (
@@ -271,8 +271,8 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
               className="opt"
               onClick={() =>
                 restorePlans()
-                  .then((until) => toast(until ? `HamiCare+ ativo até ${formatDay(until, { day: 'numeric', month: 'long' })}!` : 'Não encontramos uma assinatura ativa nesta conta Apple.'))
-                  .catch(() => toast('Entre na sua conta do HamiCare e tente de novo.'))
+                  .then((until) => toast(until ? `Lumbi+ ativo até ${formatDay(until, { day: 'numeric', month: 'long' })}!` : 'Não encontramos uma assinatura ativa nesta conta Apple.'))
+                  .catch(() => toast('Entre na sua conta do Lumbi e tente de novo.'))
               }
             >
               <Sparkles size={20} className="text-accent" />
@@ -301,7 +301,7 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
         </Group>
 
         <Group title="Sobre">
-          <p className="text-[14px] text-muted">O HamiCare é um companheiro de autocuidado. Ele não faz diagnóstico, não substitui terapia nem atendimento médico e não vende resultado físico. Em crise, ligue 188 (CVV, grátis, 24h).</p>
+          <p className="text-[14px] text-muted">O Lumbi é um companheiro de autocuidado. Ele não faz diagnóstico, não substitui terapia nem atendimento médico e não vende resultado físico. Em crise, ligue 188 (CVV, grátis, 24h).</p>
           {confirm === 'reset' ? (
             <div className="grid gap-2 rounded-2xl bg-accent-soft p-3">
               <p className="font-bold">Apagar tudo deste aparelho e começar do zero?</p>

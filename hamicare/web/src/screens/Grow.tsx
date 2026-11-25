@@ -141,7 +141,7 @@ function RoutineCard({ r, fav, onOpen }: { r: Routine; fav?: boolean; onOpen: (r
       <span className="gw-rc-img" style={{ background: r.tone }}>
         <RoutineArt r={r} glyph={56} />
         {locked && (
-          <span className="gw-rc-lock" aria-label="HamiCare+">
+          <span className="gw-rc-lock" aria-label="Lumbi+">
             <Lock size={12} strokeWidth={3} />
           </span>
         )}
@@ -206,7 +206,7 @@ function RoutineSheet({ r, fav, onFav, onClose, onPlus }: { r: Routine | null; f
           <button className="gw-cta" onClick={add} disabled={!locked && !missing}>
             {locked ? (
               <>
-                <Sparkles size={18} /> Liberar no HamiCare+
+                <Sparkles size={18} /> Liberar no Lumbi+
               </>
             ) : missing ? (
               `Adicionar ${missing} ${missing === 1 ? 'tarefa' : 'tarefas'}`
@@ -608,7 +608,7 @@ export function Grow({ onGo, onPlus }: { onGo: Go; onPlus: () => void }) {
         );
       })}
 
-      {!isKid(s) && <PlusCard onOpen={onPlus} title="Rotinas exclusivas" text="Plano de academia iniciante, Deixe sua carteira incrível e muito mais no HamiCare+." />}
+      {!isKid(s) && <PlusCard onOpen={onPlus} title="Rotinas exclusivas" text="Plano de academia iniciante, Deixe sua carteira incrível e muito mais no Lumbi+." />}
 
       <RoutinesPage open={page !== null} start={page ?? 'todas'} onClose={() => setPage(null)} onOpen={setRoutine} fav={fav} />
       <Planner open={planner} onClose={() => setPlanner(false)} />

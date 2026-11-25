@@ -253,7 +253,7 @@ function MoonCard({ onHouse }: { onHouse: () => void }) {
           ? home
             ? `${s.pet.name} mora na Lua, com a Terra na janela.`
             : `${s.pet.name} tem uma casa na Lua. Quer voltar para lá?`
-          : 'Uma casa lunar com foguete, cama de cratera e a Terra na janela. A viagem mais especial do HamiCare.'}
+          : 'Uma casa lunar com foguete, cama de cratera e a Terra na janela. A viagem mais especial do Lumbi.'}
       </p>
       {s.moon ? (
         home ? (

@@ -4,7 +4,7 @@ import { ThemeKit } from './themeKit';
 /** Ícones pequenos (listas, lojas): desenha sem o filtro de contorno, que pesa muito no celular. */
 export const KitLite = createContext(false);
 
-// Kit de móveis da casa (desenhos próprios do HamiCare). Cada peça aceita duas cores (c1 principal, c2 detalhe),
+// Kit de móveis da casa (desenhos próprios do Lumbi). Cada peça aceita duas cores (c1 principal, c2 detalhe),
 // então a mesma cama vira rosa, azul ou lilás na loja. Desenhados de frente, com um pouquinho de profundidade.
 
 export type Place = 'chao' | 'parede' | 'tapete';

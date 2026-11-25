@@ -85,7 +85,7 @@ export function Bar({ value, max = 100, tone = 'leaf', label, thin }: { value: n
   );
 }
 
-/** Semente de girassol: a moeda do HamiCare. */
+/** Semente de girassol: a moeda do Lumbi. */
 export function Seed({ size = 14 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" aria-hidden="true" className="shrink-0">
