@@ -54,3 +54,8 @@ services:
       # Assinatura do Lumbi+ pela App Store: o "Apple ID" (número) do app no App Store Connect.
       - key: APPLE_APP_ID
         sync: false
+      # Assinatura do Lumbi+ pela Google Play: a chave .json da conta de serviço (colada inteira) e a senha dos avisos.
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: GOOGLE_RTDN_TOKEN
+        generateValue: true

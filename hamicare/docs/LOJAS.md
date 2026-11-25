@@ -111,6 +111,44 @@ A primeira revisão costuma levar de alguns dias a 1 semana.
 
 ---
 
+### 1.9 Assinatura Lumbi+ pela Google Play (para as pessoas pagarem no Android)
+
+O app Android usa o pagamento da própria Google Play (obrigatório para assinaturas digitais).
+A compra é confirmada pelo servidor do Lumbi, que libera o Plus.
+
+1. **Perfil de pagamentos:** Play Console → Configuração → Perfil de pagamentos. Precisa estar ativo
+   (conta da Jessika, com conta bancária para receber).
+2. **Criar as assinaturas:** Monetizar com o Play → Produtos → Assinaturas → Criar assinatura:
+   - ID `com.hamicare.app.plus.mensal`, nome "Lumbi+ Mensal" → plano básico `mensal`, renovação automática,
+     período 1 mês, preço R$ 49,90 → Ativar.
+   - ID `com.hamicare.app.plus.anual`, nome "Lumbi+ Anual" → plano básico `anual`, renovação automática,
+     período 1 ano, preço R$ 329,90 → Ativar.
+   - Os IDs têm que ser exatamente esses (o app e o servidor procuram por eles). Não crie oferta de teste
+     grátis: o teste grátis já é dado pelo próprio app, sem cartão.
+3. **Conta de serviço (para o servidor conferir as compras):**
+   - Play Console → Configuração → Acesso à API → vincular um projeto do Google Cloud (criar novo).
+   - No Google Cloud (link na mesma tela): IAM → Contas de serviço → Criar → nome `lumbi-pagamentos` →
+     Concluir. Abra a conta → Chaves → Adicionar chave → JSON. Baixa um arquivo `.json` (guarde, é secreto).
+   - De volta na Play Console → Usuários e permissões → Convidar usuário → o e-mail da conta de serviço
+     (termina em `iam.gserviceaccount.com`) → Permissões do app: Lumbi → marque **Ver dados financeiros**
+     e **Gerenciar pedidos e assinaturas** → Convidar.
+   - No Render → Environment → `GOOGLE_SERVICE_ACCOUNT_JSON` = cole o conteúdo inteiro do arquivo `.json`.
+     Salve e faça Manual Deploy. (Pode levar até 24 h para a permissão valer no Google.)
+4. **Avisos de renovação e cancelamento (RTDN):**
+   - Google Cloud → Pub/Sub → Criar tópico `lumbi-play`. Em Permissões do tópico, adicione
+     `google-play-developer-notifications@system.gserviceaccount.com` como **Editor do Pub/Sub**.
+   - No tópico → Criar assinatura → tipo **Push** → endereço
+     `https://hamicare.onrender.com/api/google-webhook/SENHA` (SENHA = o valor de `GOOGLE_RTDN_TOKEN`
+     no Render, em Environment).
+   - Play Console → Monetizar com o Play → Configuração da monetização → Notificações em tempo real →
+     tópico `projects/SEU-PROJETO/topics/lumbi-play` → Enviar notificação de teste → Salvar.
+5. **Pacote com o Google Play Billing ligado:** no PWABuilder, gere o pacote Android de novo com a opção
+   **"Google Play billing"** marcada, **Version code 2** (e assim por diante a cada envio) e a **mesma
+   chave** (Signing key → Use mine → `signing.keystore` e a senha do `signing-key-info.txt`). Envie o
+   `.aab` novo numa versão nova do teste fechado.
+6. **Testar sem cobrar:** Play Console → Configuração → Teste de licença → adicione os Gmails de teste.
+   Para essas contas, a compra aparece como "cartão de teste" e renova em minutos.
+
 ## 2. App Store (iPhone)
 
 O projeto do iPhone já está no repositório (`hamicare/web/ios`, feito com Capacitor 8): o app web vai dentro
