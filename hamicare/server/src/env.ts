@@ -61,6 +61,16 @@ const schema = z.object({
    */
   APPLE_BUNDLE_ID: z.string().default('com.hamicare.app'),
   APPLE_APP_ID: z.coerce.number().int().positive().optional(),
+  /**
+   * Assinatura do Lumbi+ pela Google Play (app Android). GOOGLE_PLAY_PACKAGE é o pacote do app.
+   * GOOGLE_SERVICE_ACCOUNT_JSON é a chave (o arquivo .json inteiro, colado como texto) da conta de serviço
+   * ligada à Play Console com permissão de ver e gerenciar pedidos e assinaturas. Sem ela, o servidor não
+   * consegue conferir as compras do Android e o botão de assinar avisa que ainda não está pronto.
+   * GOOGLE_RTDN_TOKEN é uma senha qualquer que vai no fim do endereço dos avisos do Google (Pub/Sub).
+   */
+  GOOGLE_PLAY_PACKAGE: z.string().default('com.hamicare.app'),
+  GOOGLE_SERVICE_ACCOUNT_JSON: z.string().optional(),
+  GOOGLE_RTDN_TOKEN: z.string().min(12).optional(),
 });
 
 // Campo deixado em branco no painel da hospedagem conta como "não informado".

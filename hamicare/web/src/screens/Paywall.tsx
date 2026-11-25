@@ -17,6 +17,7 @@ import { PlusWeeklyCard } from '../components/PlusWeekly';
 import { PLUS_WEEKLY } from '../lib/store';
 import { TEAM_MAX, TEAM_MAX_PLUS } from '../shared/team';
 import { buyPlan, iapAvailable, loadStorePrices, restorePlans, type StorePrice } from '../lib/iap';
+import { buyPlayPlan, loadPlayPrices, playService, restorePlayPlans } from '../lib/playBilling';
 import { openLegal } from '../components/Legal';
 import { openUi } from '../lib/bus';
 
@@ -82,9 +83,17 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
   const petFur = fur ?? s.pet.fur;
   const later = fromOnboarding ? 'Continuar grátis' : 'Agora não';
   // No iPhone, os preços vêm da App Store (na moeda da pessoa).
+  // No app Android, os preços vêm da Google Play.
   const [prices, setPrices] = useState<Partial<Record<Plan, StorePrice>>>({});
+  const [play, setPlay] = useState(false);
   useEffect(() => {
     if (iapAvailable()) loadStorePrices().then(setPrices).catch(() => {});
+    else
+      playService().then((sv) => {
+        if (!sv) return;
+        setPlay(true);
+        loadPlayPrices().then(setPrices).catch(() => {});
+      });
   }, []);
   const yearPrice = prices.anual?.price ?? PLUS_PRICE.year;
   const monthPrice = prices.mensal?.price ?? PLUS_PRICE.month;
@@ -246,6 +255,8 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
         </>
       ) : iapAvailable() ? (
         <AppStoreBuy plan={plan} price={plan === 'anual' ? `${yearPrice} por ano` : `${monthPrice} por mês`} userId={user?.id ?? null} onClose={onClose} />
+      ) : play ? (
+        <AppStoreBuy store="google" plan={plan} price={plan === 'anual' ? `${yearPrice} por ano` : `${monthPrice} por mês`} userId={user?.id ?? null} onClose={onClose} />
       ) : (
         <p className="rounded-2xl bg-white/15 p-4 text-center text-[14px]">Seu teste grátis já foi usado. A assinatura do plano {plan} chega em breve {storeWord()}. Ela vai renovar sozinha no fim de cada período até você cancelar, e o cancelamento leva poucos toques nos ajustes da loja.</p>
       )}
@@ -257,8 +268,9 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
   );
 }
 
-/** Assinar pela App Store (iPhone): compra, restaurar e o aviso de renovação automática que a Apple pede. */
-function AppStoreBuy({ plan, price, userId, onClose }: { plan: Plan; price: string; userId: string | null; onClose: () => void }) {
+/** Assinar pela loja (App Store no iPhone, Google Play no Android): compra, restaurar e o aviso de renovação automática. */
+function AppStoreBuy({ plan, price, userId, onClose, store = 'apple' }: { plan: Plan; price: string; userId: string | null; onClose: () => void; store?: 'apple' | 'google' }) {
+  const google = store === 'google';
   const [busy, setBusy] = useState(false);
   const needAccount = () => {
     toast('Entre ou crie sua conta para assinar: assim o Plus vale em qualquer aparelho.');
@@ -269,7 +281,10 @@ function AppStoreBuy({ plan, price, userId, onClose }: { plan: Plan; price: stri
     setBusy(true);
     try {
       const until = await fn();
-      if (until) {
+      if (until === 'pendente') {
+        toast('Compra recebida! O Plus é liberado assim que o pagamento for confirmado pelo Google Play.');
+        onClose();
+      } else if (until) {
         toast(`Lumbi+ ativo até ${formatDay(until, { day: 'numeric', month: 'long' })}!`);
         onClose();
       } else if (none) toast(none);
@@ -281,13 +296,20 @@ function AppStoreBuy({ plan, price, userId, onClose }: { plan: Plan; price: stri
   }
   return (
     <div className="grid gap-3">
-      <button className="pw-cta" disabled={busy} onClick={() => (userId ? run(() => buyPlan(plan, userId), '') : needAccount())}>
-        {busy ? 'Falando com a App Store…' : `Assinar por ${price}`}
+      <button className="pw-cta" disabled={busy} onClick={() => (userId ? run(() => (google ? buyPlayPlan(plan) : buyPlan(plan, userId)), '') : needAccount())}>
+        {busy ? (google ? 'Falando com o Google Play…' : 'Falando com a App Store…') : `Assinar por ${price}`}
       </button>
-      <p className="pw-legal">
-        Assinatura {plan} de {price}, com renovação automática até você cancelar. A cobrança é feita na sua conta Apple quando você confirma a compra e a cada renovação.
-        Cancele quando quiser nos Ajustes do iPhone (seu nome → Assinaturas), até 24 horas antes do fim do período.
-      </p>
+      {google ? (
+        <p className="pw-legal">
+          Assinatura {plan} de {price}, com renovação automática até você cancelar. A cobrança é feita na sua conta Google quando você confirma a compra e a cada renovação.
+          Cancele quando quiser no app Google Play (seu perfil → Pagamentos e assinaturas → Assinaturas).
+        </p>
+      ) : (
+        <p className="pw-legal">
+          Assinatura {plan} de {price}, com renovação automática até você cancelar. A cobrança é feita na sua conta Apple quando você confirma a compra e a cada renovação.
+          Cancele quando quiser nos Ajustes do iPhone (seu nome → Assinaturas), até 24 horas antes do fim do período.
+        </p>
+      )}
       <p className="pw-legal">
         <button className="underline" onClick={() => openLegal('termos')}>
           Termos de Uso
@@ -297,7 +319,7 @@ function AppStoreBuy({ plan, price, userId, onClose }: { plan: Plan; price: stri
           Privacidade
         </button>
         {' · '}
-        <button className="underline" disabled={busy} onClick={() => (userId ? run(restorePlans, 'Não encontramos uma assinatura ativa nesta conta Apple.') : needAccount())}>
+        <button className="underline" disabled={busy} onClick={() => (userId ? run(google ? restorePlayPlans : restorePlans, google ? 'Não encontramos uma assinatura ativa nesta conta Google.' : 'Não encontramos uma assinatura ativa nesta conta Apple.') : needAccount())}>
           Restaurar compras
         </button>
       </p>

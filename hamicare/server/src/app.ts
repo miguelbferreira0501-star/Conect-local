@@ -14,6 +14,7 @@ import { legal } from './routes/legal';
 import { stores } from './routes/stores';
 import { guardian, guardianWebhook } from './routes/guardian';
 import { appleWebhook, billing } from './routes/billing';
+import { googleBilling, googleWebhook } from './routes/googlePlay';
 
 export function createApp() {
   const app = new Hono<AppEnv>();
@@ -51,12 +52,14 @@ export function createApp() {
   api.route('/push', push);
   api.route('/game', game);
   api.route('/guardiao', guardian);
+  api.route('/billing/google', googleBilling);
   api.route('/billing', billing);
   api.notFound((c) => c.json({ error: 'nao_encontrado', message: 'Rota não encontrada.' }, 404));
   // Aviso do Mercado Pago (Guardiões): sem cookie e sem CSRF, conferido direto na API do Mercado Pago.
   app.route('/api/guardiao-webhook', guardianWebhook);
   // Avisos da App Store (renovação, cancelamento, reembolso): sem cookie, conferidos pela assinatura da Apple.
   app.route('/api/apple-webhook', appleWebhook);
+  app.route('/api/google-webhook', googleWebhook);
   app.route('/api', api);
 
   app.onError((err, c) => {
