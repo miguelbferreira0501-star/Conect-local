@@ -120,9 +120,9 @@ A compra é confirmada pelo servidor do Lumbi, que libera o Plus.
    (conta da Jessika, com conta bancária para receber).
 2. **Criar as assinaturas:** Monetizar com o Play → Produtos → Assinaturas → Criar assinatura:
    - ID `com.hamicare.app.plus.mensal`, nome "Lumbi+ Mensal" → plano básico `mensal`, renovação automática,
-     período 1 mês, preço R$ 49,90 → Ativar.
+     período 1 mês, preço R$ 10,00 → Ativar.
    - ID `com.hamicare.app.plus.anual`, nome "Lumbi+ Anual" → plano básico `anual`, renovação automática,
-     período 1 ano, preço R$ 329,90 → Ativar.
+     período 1 ano, preço R$ 65,90 → Ativar.
    - Os IDs têm que ser exatamente esses (o app e o servidor procuram por eles). Não crie oferta de teste
      grátis: o teste grátis já é dado pelo próprio app, sem cartão.
 3. **Conta de serviço (para o servidor conferir as compras):**
@@ -189,7 +189,7 @@ Não use documento de outra pessoa numa conta que não está no nome dela: foi o
    - **Assinatura do Plus pela compra da Apple.** A Apple exige que assinaturas vendidas no iPhone usem a
      compra dela. O adulto assina o *Contrato de apps pagos* (App Store Connect → Negócios: dados bancários e
      fiscais dele) e cria um grupo de assinaturas **Lumbi+** com dois produtos:
-     `com.hamicare.app.plus.anual` (R$ 329,90) e `com.hamicare.app.plus.mensal` (R$ 49,90), sem oferta de
+     `com.hamicare.app.plus.anual` (R$ 65,90) e `com.hamicare.app.plus.mensal` (R$ 10,00), sem oferta de
      teste da Apple (o app já dá o teste sem cartão). A compra já está ligada no app e no servidor: veja o passo
      a passo completo em `docs/APP-STORE-RAPIDO.md`.
    - **Dados de quem publica** em `web/src/shared/legal.ts` (`LEGAL_INFO`): já preenchidos (nome, cidade e e-mail).

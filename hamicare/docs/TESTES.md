@@ -198,7 +198,7 @@ Cobrança real, push num celular de verdade (precisa do app publicado em HTTPS) 
 
 ## Rodada 25 (tela do Plus e preços)
 
-- **Preços:** mensal R$ 49,90; anual R$ 329,90 (R$ 27,49/mês, riscado R$ 598,80 = 12 × o mensal, economize 45%). Teste grátis de 7 dias no anual e 3 dias no mensal (o servidor confere: migração `009_trial_plan.sql`), uma vez por conta, sem cartão e sem virar assinatura sozinho.
+- **Preços:** mensal R$ 10,00; anual R$ 65,90 (R$ 5,49/mês, riscado R$ 120,00 = 12 × o mensal, economize 45%). Teste grátis de 7 dias no anual e 3 dias no mensal (o servidor confere: migração `009_trial_plan.sql`), uma vez por conta, sem cartão e sem virar assinatura sozinho.
 - **Tela em duas etapas:** "Com o Plus, cuidar de você fica ainda mais gostoso!", três benefícios (deixar o Hami do seu jeito, mimos novos todo dia, apoiar a missão), "Testar por R$ 0,00" e "Agora não"; depois "Escolha seu plano e comece o teste grátis", 12 meses com "Melhor oferta", mensal, "O essencial é sempre grátis · Sem anúncios", "Comparar Grátis e Plus" e "Começar meus 7 (ou 3) dias grátis".
 - **Testes:** servidor (7 dias no anual, 3 no mensal; teste só uma vez), 67 testes; app 138 testes; no navegador, as duas etapas, troca de plano muda o botão e o teste libera o Plus por 7 dias, sem erros e sem rolagem para o lado.
 

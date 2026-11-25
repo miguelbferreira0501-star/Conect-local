@@ -8,7 +8,7 @@ import { FURS } from '../data/fur';
 import type { State } from '../types';
 
 /** Preços do Lumbi+. yearFull = 12 × o mensal (para mostrar quanto o anual economiza). */
-export const PLUS_PRICE = { month: 'R$ 49,90', year: 'R$ 329,90', yearMonthly: 'R$ 27,49', yearFull: 'R$ 598,80', saving: '45%' };
+export const PLUS_PRICE = { month: 'R$ 10,00', year: 'R$ 65,90', yearMonthly: 'R$ 5,49', yearFull: 'R$ 120,00', saving: '45%' };
 
 /** Quanto conteúdo é só do Plus (para mostrar números de verdade). */
 export const PLUS_COUNTS = {
