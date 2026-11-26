@@ -4,14 +4,15 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, RotateCcw, X } from 'lucide-react';
-import espia from '../assets/lumbi/quiz-espia.webp';
 import { Glyph } from './art';
-import { POSES, type PoseName } from './Poses';
+import { Hamster } from './Hamster';
+import { PetAct, type Trick } from './LivePet';
+import { useApp } from '../lib/store';
 import { QUIZZES, type QuizDef } from '../data/quizzes';
 import { play } from '../lib/sound';
 
-const QUESTION_POSES: PoseName[] = ['curioso', 'duvida', 'espia', 'musica', 'bandana', 'orgulho'];
-const RESULT_POSES: PoseName[] = ['comemora', 'coracao', 'estrela', 'feliz', 'danca'];
+const QUESTION_ACTS: Trick[] = ['curioso', 'estrela', 'coracao', 'acenar', 'late', 'musica'];
+const RESULT_ACTS: Trick[] = ['comemora', 'danca', 'coracao', 'estrela'];
 
 function Paws() {
   return (
@@ -30,6 +31,7 @@ function Paws() {
 }
 
 export function Quizzes({ onClose }: { onClose: () => void }) {
+  const s = useApp();
   const [quiz, setQuiz] = useState<QuizDef | null>(null);
   const [answers, setAnswers] = useState<string[]>([]);
   const [hop, setHop] = useState(0);
@@ -74,7 +76,10 @@ export function Quizzes({ onClose }: { onClose: () => void }) {
                 Vamos descobrir mais sobre você? <span aria-hidden="true">💜</span>
               </p>
               <span className="qz-spark" aria-hidden="true" />
-              <img src={espia} alt="" className="qz-peek" draggable={false} />
+              {/* o Lumbi de verdade espiando por cima do morrinho, vivo */}
+              <span className="qz-peek" aria-hidden="true">
+                <Hamster fur={s.pet.fur} outfit={s.pet.outfit} mood="risada" size={190} label="" />
+              </span>
             </div>
             <p className="qz-note">
               Não são testes de saúde e não dão diagnóstico.
@@ -127,7 +132,7 @@ export function Quizzes({ onClose }: { onClose: () => void }) {
             <p className="qz-qtitle">{quiz.title}</p>
             {qi === 0 && <p className="qz-intro">{quiz.intro}</p>}
             <div className="qz-ask">
-              <img key={`${qi}-${hop}`} src={POSES[QUESTION_POSES[qi % QUESTION_POSES.length]]} alt="" className="qz-pose is-boing" draggable={false} />
+              <PetAct key={hop} t={QUESTION_ACTS[qi % QUESTION_ACTS.length]} size={130} className="qz-pose" quiet />
               <p className="qz-q" key={qi}>
                 {quiz.questions[qi].q}
               </p>
@@ -162,7 +167,7 @@ export function Quizzes({ onClose }: { onClose: () => void }) {
             </header>
             <div className="qz-result">
               <span className="qz-burst" aria-hidden="true" />
-              <img src={POSES[RESULT_POSES[(quiz.id.length + qi) % RESULT_POSES.length]]} alt="" className="qz-rpose" draggable={false} />
+              <PetAct t={RESULT_ACTS[quiz.id.length % RESULT_ACTS.length]} size={180} every={3200} className="qz-rpose" />
               <small>{quiz.title}</small>
               <h2>{result.title}</h2>
               <p>{result.text}</p>

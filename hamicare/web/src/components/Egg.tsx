@@ -5,7 +5,7 @@ import { useEffect, useId, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { dayGoalOf, dayOf, EGG_GOAL, eggCount, todayKey, todayTasks, useApp, watchState } from '../lib/store';
 import { play } from '../lib/sound';
-import { POSES, type PoseName } from './Poses';
+import { PetAct, type Trick } from './LivePet';
 import type { State } from '../types';
 
 const EGG_COLORS = [
@@ -155,7 +155,7 @@ export function EggPet({ id, size = 80 }: { id: string; size?: number }) {
 }
 
 const NAMES: Record<string, string> = { pintinho: 'Pintinho', coelhinho: 'Coelhinho', passarinho: 'Passarinho', tartaruga: 'Tartaruguinha', ourico: 'Ouricinho', sapinho: 'Sapinho', patinho: 'Patinho', joaninha: 'Joaninha' };
-const CHEER: PoseName[] = ['coracao', 'feliz', 'estrela', 'risada', 'danca'];
+const CHEER: Trick[] = ['coracao', 'comemora', 'estrela', 'danca', 'acenar'];
 
 const doneToday = (s: State) => {
   const k = todayKey();
@@ -212,7 +212,7 @@ export function EggHost() {
             <EggArt k={k} progress={show.n / EGG_GOAL} size={150} />
           </span>
         )}
-        <img src={POSES[pose]} alt="" className="eggs-pose" draggable={false} />
+        <PetAct t={pose} size={130} className="eggs-pose" quiet />
       </div>
       <h2 className="eggs-title">{show.hatched ? (cracked ? `Nasceu um ${NAMES[show.hatched] ?? 'filhote'}!` : 'Ih… está rachando!') : 'Oba! Seu ovinho ficou mais perto de chocar!'}</h2>
       {!show.hatched && (

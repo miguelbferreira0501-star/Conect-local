@@ -466,6 +466,8 @@ export function Hamster({
           ry="5"
           fill="rgba(60,30,40,0.14)"
         />
+        {/* balanço de peso de um pé pro outro (bem lento), por fora da respiração */}
+        <g className={idle && !asleep && !pose ? "lb-sway" : undefined} style={{ transformOrigin: "100px 192px" }}>
         <g className={bodyCls} style={{ transformOrigin: "100px 192px" }}>
           <g filter={`url(#t${uid})`}>
             <Cape id={outfit.roupa} geo={BODY_GEO} />
@@ -653,12 +655,15 @@ export function Hamster({
               </g>
             )}
             {wet && <path d={PATH_CABECA} fill="#5B8FD6" opacity="0.07" />}
-            <DogFace
-              mood={mood}
-              cond={faceCond}
-              young={young}
-              light={fur.pattern === "panda"}
-            />
+            {/* o rostinho desliza mais que a cabeça quando ela vira: dá a sensação de cabeça redonda (3D) */}
+            <g className={headCls.includes("idle") ? "dog-face-turn" : undefined}>
+              <DogFace
+                mood={mood}
+                cond={faceCond}
+                young={young}
+                light={fur.pattern === "panda"}
+              />
+            </g>
             {/* orelhas (por cima da cabeça, escondidas no capuz da fantasia) */}
             {!costume &&
               (["l", "r"] as const).map((s) => (
@@ -819,6 +824,7 @@ export function Hamster({
           )}
           {phase >= 3 && <Sparkles top={HEAD.top} w={HEAD.rx} />}
           <EffectFront id={outfit.efeito} geo={BODY_GEO} />
+        </g>
         </g>
       </g>
       {pose !== 'lua' && <MoodMarks mood={mood} />}
@@ -1340,6 +1346,30 @@ function SickProps() {
 /** O objeto da atividade, seguro entre as patinhas (os bracinhos ficam por cima dele). */
 function PropInHands({ prop }: { prop?: HamiProp }) {
   if (!prop || prop === "fones") return null;
+  // abraçando um coração grande (os bracinhos ficam por cima)
+  if (prop === "coracao")
+    return (
+      <g className="lb-prop-beat" style={{ transformOrigin: "100px 146px" }}>
+        <path d="M100 172 C76 156 64 144 64 130 C64 119 72 112 82 112 C90 112 96 117 100 124 C104 117 110 112 118 112 C128 112 136 119 136 130 C136 144 124 156 100 172 Z" fill="#FF6B81" stroke="#E04A64" strokeWidth="3" strokeLinejoin="round" />
+        <ellipse cx="80" cy="126" rx="7" ry="4.5" fill="#FFFFFF" opacity="0.55" transform="rotate(-30 80 126)" />
+      </g>
+    );
+  // estrela amarela na mão, brilhando
+  if (prop === "estrela")
+    return (
+      <g className="lb-prop-twinkle" style={{ transformOrigin: "142px 128px" }}>
+        <path d="M142 104 L148 120 L165 121 L152 131 L156 148 L142 139 L128 148 L132 131 L119 121 L136 120 Z" fill="#FFD84D" stroke="#F0B429" strokeWidth="3" strokeLinejoin="round" />
+        <ellipse cx="137" cy="120" rx="4" ry="2.6" fill="#FFFFFF" opacity="0.7" transform="rotate(-25 137 120)" />
+      </g>
+    );
+  // travesseirinho azul abraçado
+  if (prop === "travesseiro")
+    return (
+      <g>
+        <path d="M60 134 Q58 120 72 120 L128 118 Q142 118 141 132 L142 156 Q143 168 128 168 L72 170 Q58 170 59 156 Z" fill="#A9CBFF" stroke="#7FA6E8" strokeWidth="3" strokeLinejoin="round" />
+        <path d="M70 160 Q100 150 132 158" fill="none" stroke="#FFFFFF" strokeWidth="3" opacity="0.6" strokeLinecap="round" />
+      </g>
+    );
   if (prop === "livro")
     return (
       <g transform="rotate(-4 99 146)">

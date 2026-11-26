@@ -1,4 +1,3 @@
-import bemestarArt from '../assets/lumbi/bemestar.webp';
 import { play } from '../lib/sound';
 import { MoodSlider } from '../components/MoodSlider';
 import { PlusCard } from '../components/PlusCard';
@@ -9,6 +8,7 @@ import { LineChart, toast } from '../components/ui';
 import { AFFIRMATIONS, EMOTIONS, MOODS, REFLECTIONS } from '../data/lines';
 import { BODY_SCAN, BREATHS, MEDITATION_CUES, SLEEP_ROUTINE } from '../data/wellbeing';
 import { Quizzes } from '../components/Quizzes';
+import { LivePet } from '../components/LivePet';
 import { addJar, addJournal, dayOf, deleteJar, deleteJournal, getState, isPremium, logEvent, setEmotions, setMood, todayKey, todayTasks, toggleTask, useApp } from '../lib/store';
 import { addDays, copyText, formatDay, hashStr, prefersReducedMotion } from '../lib/util';
 import type { PetMood } from '../types';
@@ -144,9 +144,9 @@ function WellbeingPet() {
       <span className="wb-cloud" aria-hidden="true" />
       {/* o cachorrinho de bandana com a estrela (arte enviada) e o balão de incentivo do lado */}
       <div className="wb-pet wb-pet-art">
-        <button className="wb-art-btn" onClick={() => (setN((x) => x + 1), play('pulo'))} aria-label={`${s.pet.name}: toque para ouvir uma frase gentil`} data-sound="none">
-          <img key={n} src={bemestarArt} alt="" className={n ? 'is-boing' : ''} draggable={false} />
-        </button>
+        <span className="wb-art-btn">
+          <LivePet size={210} auto onTap={() => void setN((x) => x + 1)} label={`${s.pet.name}: toque para ele fazer alguma coisa`} />
+        </span>
         <p className="wb-say" aria-live="polite">
           <b>{n % 3 === 0 ? 'Você consegue!' : n % 3 === 1 ? 'Tô aqui com você!' : 'Um passo de cada vez'}</b>
           <span>{n ? line : 'Estou aqui para caminhar com você 💙'}</span>

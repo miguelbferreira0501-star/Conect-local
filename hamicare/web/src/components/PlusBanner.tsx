@@ -1,13 +1,11 @@
-// Faixa do Lumbi+ no Início (embaixo da Aventura), em carrossel: o Lumbi espiando (arte enviada), a namorada
+// Faixa do Lumbi+ no Início (embaixo da Aventura), em carrossel: o Lumbi (vivo, mexendo) espiando, a namorada
 // dele e as pelagens raras. Passa sozinha a cada poucos segundos e dá para arrastar com o dedo.
 // Não aparece para quem já é Plus nem para crianças de até 12 anos.
 import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, Crown } from 'lucide-react';
-import bannerDog from '../assets/lumbi/banner-plus.webp';
 import { Hamster } from './Hamster';
 import { partnerOutfit } from './Partner';
 import { showPlusOffers } from './PlusCard';
-import { POSES } from './Poses';
 import { partnerWord, useApp } from '../lib/store';
 import { prefersReducedMotion } from '../lib/util';
 
@@ -18,16 +16,26 @@ export function PlusBanner({ onOpen }: { onOpen: () => void }) {
   const ele = s.pet.gender === 'menina' ? 'ela' : 'ele';
   const word = partnerWord(s);
   const slides = [
-    { id: 'momentos', cls: 'pb-yellow', title: `Mais pequenos momentos com ${ele}`, art: <img src={bannerDog} alt="" className="pb-dog" draggable={false} /> },
+    {
+      id: 'momentos',
+      cls: 'pb-yellow',
+      title: `Mais pequenos momentos com ${ele}`,
+      art: (
+        // o Lumbi de verdade espiando por cima da faixa (vivo, fazendo as ações dele)
+        <span className="pb-peek" aria-hidden="true">
+          <Hamster fur={s.pet.fur} outfit={s.pet.outfit} size={124} mood="risada" label="" />
+        </span>
+      ),
+    },
     {
       id: 'par',
       cls: 'pb-pink',
       title: `${word === 'namorada' ? 'Uma namorada' : 'Um namorado'} para o ${s.pet.name}`,
       art: (
         <span className="pb-duo" aria-hidden="true">
-          <Hamster fur={s.pet.fur} outfit={s.pet.outfit} size={66} idle={false} mood="feliz" label="" />
+          <Hamster fur={s.pet.fur} outfit={s.pet.outfit} size={66} mood="feliz" label="" />
           <span className="pb-heart">♥</span>
-          <Hamster fur={word === 'namorada' ? 'rosinha' : 'creme'} outfit={partnerOutfit(s)} size={62} idle={false} mood="amor" label="" />
+          <Hamster fur={word === 'namorada' ? 'rosinha' : 'creme'} outfit={partnerOutfit(s)} size={62} mood="amor" label="" />
         </span>
       ),
     },
@@ -37,9 +45,9 @@ export function PlusBanner({ onOpen }: { onOpen: () => void }) {
       title: 'Pelagens raras e 99 itens só do Plus',
       art: (
         <span className="pb-furs" aria-hidden="true">
-          <Hamster fur="algodao" size={50} idle={false} mood="feliz" label="" />
-          <img src={POSES.estrela} alt="" className="pb-pose" draggable={false} />
-          <Hamster fur="menta" size={50} idle={false} mood="feliz" label="" />
+          <Hamster fur="algodao" size={50} mood="feliz" label="" />
+          <Hamster fur={s.pet.fur} outfit={s.pet.outfit} size={64} prop="estrela" mood="animado" label="" />
+          <Hamster fur="menta" size={50} mood="feliz" label="" />
         </span>
       ),
     },
