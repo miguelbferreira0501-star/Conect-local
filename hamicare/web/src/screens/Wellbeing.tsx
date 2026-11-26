@@ -145,7 +145,7 @@ function WellbeingPet() {
       {/* o cachorrinho de bandana com a estrela (arte enviada) e o balão de incentivo do lado */}
       <div className="wb-pet wb-pet-art">
         <span className="wb-art-btn">
-          <LivePet size={210} auto onTap={() => void setN((x) => x + 1)} label={`${s.pet.name}: toque para ele fazer alguma coisa`} />
+          <LivePet size={210} simple wear={{ roupa: 'moletom-roxo', chapeu: 'coroa', oculos: null, acessorio: null, efeito: null }} onTap={() => void setN((x) => x + 1)} label={`${s.pet.name}: toque para ele fazer alguma coisa`} />
         </span>
         <p className="wb-say" aria-live="polite">
           <b>{n % 3 === 0 ? 'Você consegue!' : n % 3 === 1 ? 'Tô aqui com você!' : 'Um passo de cada vez'}</b>

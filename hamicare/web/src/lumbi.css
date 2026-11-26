@@ -459,3 +459,10 @@
 /* toque no Lumbi: só um pulinho bem pequeno junto do latido */
 .lb-act-nudge { animation: lb-nudge 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) 1; }
 @keyframes lb-nudge { 0%, 100% { transform: none; } 40% { transform: translateY(-4px) scale(1.01, 0.99); } }
+
+/* Rodada 81: o Lumbi parado só pisca (sem respirar, virar a cabeça, mexer orelhas, braços ou rabo).
+   Também deixa o Início bem mais leve: as partes com filtro de cor não são redesenhadas a cada quadro. */
+.hami-breathe, .lb-sway, .dog-head-idle, .dog-face-turn, .dog-ear-l, .dog-ear-r, .dog-wag, .dog-wag-fast, .dog-arm-idle-l, .dog-arm-idle-r { animation: none !important; }
+.tabbar .tab svg, .tabbar .tab img { filter: drop-shadow(0 1px 1.5px rgba(40, 30, 70, 0.22)); }
+.home-room, .pb, .hc-trip { contain: layout paint; }
+.hr-rail { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(44, 52, 104, 0.28); padding: 5px 0 !important; }

@@ -3,14 +3,17 @@ import type { Companion, CompanionKind } from '../data/companions';
 
 const INK = '#2B2224';
 
-function Eyes({ y, dx = 10, cx = 50, r = 4, white }: { y: number; dx?: number; cx?: number; r?: number; white?: boolean }) {
+function Eyes({ y, dx = 10, cx = 50, r: r0 = 4, white }: { y: number; dx?: number; cx?: number; r?: number; white?: boolean }) {
+  // olhos maiores e brilhantes (dois pontinhos de luz), no mesmo jeito do Lumbi
+  const r = r0 * 1.22;
   return (
-    <g>
+    <g className="cp-eyes">
       {[-1, 1].map((s) => (
         <g key={s}>
-          {white && <circle cx={cx + s * dx} cy={y} r={r * 1.45} fill="#FFFFFF" />}
-          <ellipse cx={cx + s * dx} cy={y} rx={r} ry={r * 1.15} fill={INK} />
-          <circle cx={cx + s * dx + r * 0.32} cy={y - r * 0.4} r={r * 0.38} fill="#FFFFFF" />
+          {white && <circle cx={cx + s * dx} cy={y} r={r * 1.4} fill="#FFFFFF" />}
+          <ellipse cx={cx + s * dx} cy={y} rx={r} ry={r * 1.18} fill={INK} />
+          <circle cx={cx + s * dx + r * 0.34} cy={y - r * 0.42} r={r * 0.42} fill="#FFFFFF" />
+          <circle cx={cx + s * dx - r * 0.32} cy={y + r * 0.42} r={r * 0.18} fill="#FFFFFF" opacity="0.85" />
         </g>
       ))}
     </g>
@@ -272,11 +275,39 @@ function Body({ kind, c1, c2 }: { kind: CompanionKind; c1: string; c2: string })
   }
 }
 
-/** O pet desenhado. */
+/** Tom mais escuro da cor (para o contorno macio). */
+function darker(hex: string, k = 0.32) {
+  const n = parseInt(hex.replace('#', '').padEnd(6, '0').slice(0, 6), 16);
+  const f = (v: number) => Math.max(0, Math.round(v * (1 - k)));
+  const r = f(n >> 16), g = f((n >> 8) & 255), b = f(n & 255);
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+/** O pet desenhado: contorno macio no tom da cor dele e um brilho suave por cima (mesmo estilo do Lumbi). */
 export function CompanionArt({ pet, size = 72, label }: { pet: Companion; size?: number; label?: string }) {
+  const id = `cp-${pet.id}`;
+  const line = pet.c1.toUpperCase() === '#FFFFFF' ? '#C9BEDF' : darker(pet.c1);
   return (
     <svg viewBox="0 0 100 100" width={size} height={size} role="img" aria-label={label ?? `${pet.name}, ${pet.species.toLowerCase()}`} className="block overflow-visible">
-      <Body kind={pet.kind} c1={pet.c1} c2={pet.c2} />
+      <defs>
+        <filter id={id} x="-15%" y="-15%" width="130%" height="130%">
+          <feMorphology in="SourceAlpha" operator="dilate" radius="1.5" result="d" />
+          <feFlood floodColor={line} />
+          <feComposite in2="d" operator="in" result="o" />
+          <feMerge>
+            <feMergeNode in="o" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        <radialGradient id={`${id}-s`} cx="0.35" cy="0.3" r="0.7">
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.35" />
+          <stop offset="0.6" stopColor="#FFFFFF" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <g filter={`url(#${id})`}>
+        <Body kind={pet.kind} c1={pet.c1} c2={pet.c2} />
+      </g>
+      <ellipse cx="44" cy="52" rx="30" ry="30" fill={`url(#${id}-s)`} style={{ mixBlendMode: 'soft-light' }} pointerEvents="none" />
     </svg>
   );
 }

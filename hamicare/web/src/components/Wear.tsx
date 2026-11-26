@@ -1883,8 +1883,9 @@ export function CostumeBack({ id, geo }: { id: string | null | undefined; geo: G
         <g>
           {[-1, 1].map((s) => (
             <g key={s}>
-              <path d={`M${100 + s * w * 0.2} ${top + 12} L${100 + s * w * 0.62} ${top - 26} L${100 + s * w * 0.86} ${top + 24} Z`} fill={c1} strokeLinejoin="round" />
-              <path d={`M${100 + s * w * 0.34} ${top + 10} L${100 + s * w * 0.6} ${top - 14} L${100 + s * w * 0.74} ${top + 16} Z`} fill={inner} />
+              {/* orelhinhas redondas (sem ponta) */}
+              <ellipse cx={100 + s * w * 0.56} cy={top + 2} rx={w * 0.24} ry={w * 0.22} fill={c1} />
+              <ellipse cx={100 + s * w * 0.56} cy={top + 4} rx={w * 0.13} ry={w * 0.12} fill={inner} />
             </g>
           ))}
         </g>
@@ -1906,7 +1907,7 @@ export function CostumeBack({ id, geo }: { id: string | null | undefined; geo: G
       return (
         <g>
           {[-0.5, -0.2, 0.12, 0.42].map((t, i) => (
-            <path key={i} d={`M${100 + t * w * 1.4 - 12} ${top + 10 + Math.abs(t) * 12} L${100 + t * w * 1.4} ${top - 16 + Math.abs(t) * 14} L${100 + t * w * 1.4 + 12} ${top + 10 + Math.abs(t) * 12} Z`} fill={c2} strokeLinejoin="round" />
+            <circle key={i} cx={100 + t * w * 1.4} cy={top + 2 + Math.abs(t) * 13} r="9" fill={c2} />
           ))}
         </g>
       );
@@ -1915,8 +1916,7 @@ export function CostumeBack({ id, geo }: { id: string | null | undefined; geo: G
         <g>
           {[-1, 1].map((s) => (
             <g key={s}>
-              <path d={`M${100 + s * w * 0.3} ${top + 12} L${100 + s * w * 0.56} ${top - 16} L${100 + s * w * 0.78} ${top + 20} Z`} fill={c1} />
-              <path d={`M${100 + s * w * 0.42} ${top + 10} L${100 + s * w * 0.56} ${top - 6} L${100 + s * w * 0.68} ${top + 14} Z`} fill={inner} />
+
             </g>
           ))}
           {['#FF9FC2', '#FFD34D', '#7FD8BE', '#7FB8F0', '#B399F0'].map((col, i) => (
@@ -1939,9 +1939,8 @@ export function CostumeBack({ id, geo }: { id: string | null | undefined; geo: G
         <g>
           {[-1, 1].map((s) => (
             <g key={s}>
-              <path d={`M${100 + s * w * 0.16} ${top + 14} L${100 + s * w * 0.58} ${top - 32} L${100 + s * w * 0.88} ${top + 22} Z`} fill={c1} />
-              <path d={`M${100 + s * w * 0.32} ${top + 10} L${100 + s * w * 0.58} ${top - 18} L${100 + s * w * 0.74} ${top + 14} Z`} fill="#FFFFFF" />
-              <path d={`M${100 + s * w * 0.52} ${top - 22} L${100 + s * w * 0.58} ${top - 32} L${100 + s * w * 0.66} ${top - 20} Z`} fill="#3A2E2A" />
+              <ellipse cx={100 + s * w * 0.56} cy={top + 1} rx={w * 0.25} ry={w * 0.23} fill={c1} />
+              <ellipse cx={100 + s * w * 0.56} cy={top + 3} rx={w * 0.13} ry={w * 0.12} fill="#FFFFFF" />
             </g>
           ))}
         </g>
@@ -1974,7 +1973,7 @@ export function CostumeBack({ id, geo }: { id: string | null | undefined; geo: G
             <path key={s} d={`M${100 + s * w * 0.7} ${top + 56} Q${100 + s * (w + 24)} ${top + 6} ${100 + s * (w + 29)} ${top + 26} Q${100 + s * (w + 18)} ${top + 38} ${100 + s * (w + 23)} ${top + 54} Q${100 + s * (w + 12)} ${top + 56} ${100 + s * (w + 14)} ${top + 72} Q${100 + s * w * 0.9} ${top + 70} ${100 + s * w * 0.7} ${top + 70} Z`} fill={c2} opacity="0.95" />
           ))}
           {[-0.36, -0.1, 0.16, 0.42].map((t, i) => (
-            <path key={i} d={`M${100 + t * w * 1.3 - 9} ${top + 8 + Math.abs(t) * 12} L${100 + t * w * 1.3} ${top - 12 + Math.abs(t) * 14} L${100 + t * w * 1.3 + 9} ${top + 8 + Math.abs(t) * 12} Z`} fill={c2} />
+            <circle key={i} cx={100 + t * w * 1.3} cy={top + 2 + Math.abs(t) * 13} r="7" fill={c2} />
           ))}
         </g>
       );
@@ -2036,8 +2035,9 @@ export function CostumeFront({ id, geo }: { id: string | null | undefined; geo: 
     case 'fantasia-dragao':
       return (
         <g fill="#FFF3D6">
-          <path d={`M88 ${top + 10} q-6 -12 -2 -22 q4 10 8 18 Z`} />
-          <path d={`M112 ${top + 10} q6 -12 2 -22 q-4 10 -8 18 Z`} />
+          {/* chifrinhos redondos (sem ponta) */}
+          <ellipse cx="88" cy={top + 4} rx="5" ry="6" />
+          <ellipse cx="112" cy={top + 4} rx="5" ry="6" />
         </g>
       );
     case 'fantasia-rena':
