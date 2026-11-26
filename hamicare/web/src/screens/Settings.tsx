@@ -19,6 +19,8 @@ import { Glyph } from '../components/art';
 import { openGuardian } from '../components/Guardian';
 import { guardiansHere } from '../lib/native';
 import { iapAvailable, manageSubscription, restorePlans } from '../lib/iap';
+import { PartnerSettings } from '../components/Partner';
+import { partnerWord } from '../lib/store';
 
 const NOTIF_LABEL: Record<NotifKind, [string, string]> = {
   agua: ['Beber água', 'Nos horários do plano de água'],
@@ -84,6 +86,10 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
               </button>
             ))}
           </div>
+        </Group>
+
+        <Group title={`${partnerWord(s) === 'namorada' ? 'Namorada' : 'Namorado'} do ${s.pet.name || 'Lumbi'}`}>
+          <PartnerSettings onPlus={onPlus} />
         </Group>
 
         <Group title="Sua área">

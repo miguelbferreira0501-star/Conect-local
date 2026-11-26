@@ -260,6 +260,13 @@ export interface ItemMeta {
   seen?: boolean;
 }
 
+/** Namorada (ou namorado) do Lumbi, do Lumbi+: aparece junto com ele no Início. */
+export interface PartnerPet {
+  name: string;
+  fur: string;
+  on: boolean;
+}
+
 export interface State {
   v: 2;
   seed: number;
@@ -267,6 +274,8 @@ export interface State {
   onboarded: boolean;
   profile: Profile;
   pet: PetState;
+  /** Par do Lumbi (Lumbi+). */
+  partner?: PartnerPet;
   body: BodyData;
   coins: number;
   xp: number;

@@ -1956,6 +1956,19 @@ export function updatePet(patch: Partial<Pick<State['pet'], 'name' | 'fur' | 'tr
   commit({ ...state, pet: { ...state.pet, ...patch } });
 }
 
+/** Par do Lumbi (Lumbi+): nome, pelagem e se aparece no Início. */
+export function updatePartner(patch: Partial<NonNullable<State['partner']>>) {
+  const cur = state.partner ?? { name: state.pet.gender === 'menina' ? 'Bento' : 'Mel', fur: 'creme', on: true };
+  if (patch.fur && !FURS.some((f) => f.id === patch.fur)) return;
+  commit({ ...state, partner: { ...cur, ...patch, name: (patch.name ?? cur.name).slice(0, 18) } });
+}
+
+/** A namorada (ou namorado) aparece? Só com Lumbi+ e se a pessoa ligou. */
+export const partnerOn = (s: State) => isPremium(s) && !!s.partner?.on;
+
+/** "namorada" ou "namorado", conforme o Lumbi. */
+export const partnerWord = (s: State) => (s.pet.gender === 'menina' ? 'namorado' : 'namorada');
+
 export function updateSettings(patch: Partial<State['settings']>) {
   commit({ ...state, settings: { ...state.settings, ...patch } });
 }

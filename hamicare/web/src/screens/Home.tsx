@@ -11,7 +11,8 @@ import { play } from '../lib/sound';
 import { floorPalette, tonePalette } from '../components/Furniture';
 import { TREK_THEMES, Suitcase, TrekBar, TrekScene, TrekStart, TrekUnpack, WalkingHami, finishTrek, trekThemeOf } from '../components/Trek';
 import type { TrekResult } from '../lib/store';
-import { introDay, startTrek, trekPlaceOf, trekReady } from '../lib/store';
+import { introDay, partnerOn, startTrek, trekPlaceOf, trekReady } from '../lib/store';
+import { PartnerPet } from '../components/Partner';
 import { DestinationSheet, TrekGo } from '../components/Destinations';
 import { destById } from '../data/destinations';
 import { TrailCard, WeekReportCard } from '../components/Trail';
@@ -244,6 +245,16 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
     </div>
   );
 
+  // Com o Lumbi+, a namorada (ou namorado) fica do lado dele.
+  const duo = partnerOn(s) && !adv ? (
+    <div className="duo">
+      {hami}
+      <PartnerPet size={sittingNow || napping || s.pet.sleeping ? 112 : 128} />
+    </div>
+  ) : (
+    hami
+  );
+
   return (
     <div className="grid gap-4">
       {layer}
@@ -255,17 +266,17 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
         ) : outside ? (
           <PanRoom key={onMoon ? 'lua' : 'fora'} width={onMoon ? 1.9 : OUTDOOR_W / 390}>
             {onMoon ? (
-              <MoonOutdoors height={430}>{hami}</MoonOutdoors>
+              <MoonOutdoors height={430}>{duo}</MoonOutdoors>
             ) : (
               <Outdoors period={period} height={430} theme={yard}>
-                {hami}
+                {duo}
               </Outdoors>
             )}
           </PanRoom>
         ) : (
           <PanRoom key="casa" width={1.45}>
             <Room house={s.house} period={period} height={430} wide={1.45} onUse={(uid, kind) => (napping && furniture.use?.uid === uid && setAwake(true), furniture.useItem(uid, kind))} usage={furniture.usage}>
-              {furniture.use ? null : hami}
+              {furniture.use ? null : duo}
             </Room>
           </PanRoom>
         )}
@@ -448,7 +459,7 @@ function yardThemeOf(house: { items: { itemId: string }[]; wallpaper: string; fl
   const n = { inverno: 0, praia: 0, jardim: 0 };
   for (const it of house.items) {
     const th = itemById(it.itemId)?.theme;
-    if (th) n[th]++;
+    if (th && th in n) n[th as keyof typeof n]++;
   }
   const best = (Object.keys(n) as (keyof typeof n)[]).sort((a, b) => n[b] - n[a])[0];
   if (n[best] >= 2) return best === 'inverno' ? 'neve' : best;

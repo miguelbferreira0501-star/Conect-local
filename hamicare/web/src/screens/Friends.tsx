@@ -88,6 +88,9 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account, ini
           <Hamster fur={s.pet.fur} phase={s.pet.phase} outfit={s.pet.outfit} size={120} neutral />
           <p className="font-display text-[20px] font-bold">Entre na sua conta para ter amigos</p>
           <p className="text-[15px] text-muted">Com conta, você ganha um perfil, um código para adicionar amigos, grupos, visitas, presentes e o feed só de gentileza. Seu progresso também fica salvo na nuvem.</p>
+          <button className="btn btn-primary" onClick={() => document.getElementById('conta')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+            Criar conta ou entrar
+          </button>
           {invite && <p className="rounded-2xl bg-surface2 px-3 py-2 text-[14px] font-bold">Você recebeu um convite de amizade (<span className="whitespace-nowrap">{invite}</span>)! Crie sua conta aqui embaixo para ver quem é.</p>}
         </div>
         {account}
@@ -154,20 +157,45 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Brincar com o seu cachorrinho (área de Interações): o melhor amigo fica aqui também. */
+/** Brincar com o seu cachorrinho (área de Interações): um cartão com o quintal, o pet e um botão grande. */
 function PlayCard() {
   const s = useApp();
   return (
-    <button className="play-card" onClick={() => openUi('interacoes')}>
-      <span className="play-card-pet" aria-hidden="true">
-        <Hamster fur={s.pet.fur} outfit={s.pet.outfit} mood="risada" size={86} idle={false} growth={1} label="" />
+    <button className="pc2" onClick={() => openUi('interacoes')} aria-label={`Brincar com o ${s.pet.name}`}>
+      <span className="pc2-scene" aria-hidden="true">
+        <svg viewBox="0 0 120 120" preserveAspectRatio="xMidYMax slice">
+          <defs>
+            <linearGradient id="pc2sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#A9DCFF" />
+              <stop offset="1" stopColor="#E6F6FF" />
+            </linearGradient>
+          </defs>
+          <rect width="120" height="120" fill="url(#pc2sky)" />
+          <circle cx="92" cy="28" r="14" fill="#FFE07A" />
+          <ellipse cx="30" cy="30" rx="16" ry="6" fill="#FFFFFF" />
+          <ellipse cx="40" cy="26" rx="10" ry="6" fill="#FFFFFF" />
+          <path d="M0 86 Q40 70 80 80 T120 76 V120 H0Z" fill="#A6DB86" />
+          <path d="M0 98 Q50 88 120 96 V120 H0Z" fill="#8BCB6C" />
+          {[[14, 92, '#FF8FB8'], [104, 90, '#FFFFFF'], [96, 104, '#FFD34D']].map(([x, y, c], i) => (
+            <circle key={i} cx={x as number} cy={y as number} r="3" fill={c as string} />
+          ))}
+        </svg>
+        <span className="pc2-pet">
+          <Hamster fur={s.pet.fur} outfit={s.pet.outfit} mood="risada" size={92} idle={false} growth={1} label="" />
+        </span>
       </span>
-      <span className="min-w-0 flex-1 text-left">
+      <span className="pc2-body">
         <b>Brincar com o {s.pet.name}</b>
-        <small>Carinho e petiscos rendem corações</small>
-      </span>
-      <span className="play-card-n" aria-label={`${s.pet.hearts ?? 0} corações`}>
-        ♥ {s.pet.hearts ?? 0}
+        <small>Carinho, petiscos e buscar o graveto</small>
+        <span className="pc2-row">
+          <span className="pc2-go">Brincar</span>
+          <span className="pc2-hearts" aria-label={`${s.pet.hearts ?? 0} corações`}>
+            <svg viewBox="0 0 24 22" width="16" height="15" aria-hidden="true">
+              <path d="M12 21 C5 15 1 11 1 6.5 C1 3 3.6 1 6.4 1 C8.6 1 10.6 2.3 12 4.4 C13.4 2.3 15.4 1 17.6 1 C20.4 1 23 3 23 6.5 C23 11 19 15 12 21Z" fill="#FF5C7A" />
+            </svg>
+            {s.pet.hearts ?? 0}
+          </span>
+        </span>
       </span>
     </button>
   );

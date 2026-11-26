@@ -106,6 +106,10 @@ export function Garland({ id }: { id: string }) {
 
 /** Fundo da parede e do piso: padrões em CSS (cores de ilustração). */
 export const WALLPAPER_CSS: Record<string, string> = {
+  'p-assombrado': 'radial-gradient(circle at 8px 8px,#A65D86 1.8px,transparent 2.4px) 0 0/56px 44px,repeating-linear-gradient(90deg,transparent 0 110px,rgba(110,40,80,.2) 110px 112px),repeating-linear-gradient(0deg,transparent 0 86px,rgba(110,40,80,.14) 86px 88px),#C887AC',
+  'p-amor': `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cpath d='M16 26 C4 18 4 8 11 7 C14 6.5 15.5 8.5 16 10 C16.5 8.5 18 6.5 21 7 C28 8 28 18 16 26 Z M48 58 C36 50 36 40 43 39 C46 38.5 47.5 40.5 48 42 C48.5 40.5 50 38.5 53 39 C60 40 60 50 48 58 Z' fill='%23F4A9AE'/%3E%3C/svg%3E") 0 0/64px 64px,#F9D6D5`,
+  'p-neon': 'linear-gradient(110deg,transparent 0 26%,rgba(170,215,255,.12) 26% 34%,transparent 34% 62%,rgba(170,215,255,.09) 62% 68%,transparent 68%),repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 2px,transparent 2px 26px),repeating-linear-gradient(90deg,rgba(0,0,0,.1) 0 2px,transparent 2px 54px),#2B5577',
+  'p-doce': 'radial-gradient(circle at 10px 12px,#FF9FC2 2.6px,transparent 3.2px) 0 0/36px 36px,radial-gradient(circle at 28px 28px,#8FD3F5 2.6px,transparent 3.2px) 0 0/36px 36px,radial-gradient(circle at 22px 6px,#FFD96B 2.2px,transparent 2.8px) 0 0/36px 36px,radial-gradient(circle at 4px 26px,#B8E39A 2.2px,transparent 2.8px) 0 0/36px 36px,#FFEAF3',
   'p-azulzinho': '#BBD9EC',
   'p-menta': '#D3F1DA',
   'p-creme': 'linear-gradient(180deg,#FFF4E2,#FFEBD2)',

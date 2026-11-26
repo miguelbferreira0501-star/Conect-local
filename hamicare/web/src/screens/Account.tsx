@@ -3,7 +3,7 @@ import { Cloud, LogOut, Shield } from 'lucide-react';
 import { Modal, Seg, toast } from '../components/ui';
 import { Hamster } from '../components/Hamster';
 import { LegalLinks } from '../components/Legal';
-import { deleteAccount, login, logout, onSyncChoice, register, requestReset, resolveChoice, useAccount, type SyncChoice, type User } from '../lib/account';
+import { deleteAccount, isPreview, login, logout, onSyncChoice, register, requestReset, resolveChoice, useAccount, type SyncChoice, type User } from '../lib/account';
 import { ApiError } from '../lib/social/api';
 import { useApp } from '../lib/store';
 import { formatDay } from '../lib/util';
@@ -13,15 +13,26 @@ import { Glyph } from '../components/art';
 
 /** Conta e backup na nuvem. Fora do app instalado (página de teste), explica o que muda com a conta. */
 export function AccountSection() {
-  const { user, ready, online } = useAccount();
+  const { user, ready, online, retry } = useAccount();
   const [admin, setAdmin] = useState(false);
-  if (!ready) return null;
   return (
     <Group title="Conta e nuvem">
-      {!online ? (
-        <p className="rounded-2xl bg-surface2 p-3 text-[14px] text-muted">
-          A conta fica disponível no app instalado do Lumbi. Nesta versão de teste, seu progresso fica salvo neste aparelho e no código de backup.
-        </p>
+      <span id="conta" />
+      {!ready ? (
+        <p className="rounded-2xl bg-surface2 p-3 text-[14px] text-muted">Conectando ao Lumbi…</p>
+      ) : !online ? (
+        isPreview() ? (
+          <p className="rounded-2xl bg-surface2 p-3 text-[14px] text-muted">
+            A conta fica disponível no app instalado do Lumbi. Nesta versão de teste, seu progresso fica salvo neste aparelho e no código de backup.
+          </p>
+        ) : (
+          <div className="grid gap-2 rounded-2xl bg-surface2 p-3 text-[14px] text-muted">
+            <p>Não conseguimos falar com o Lumbi agora. Confira a internet e tente de novo.</p>
+            <button className="btn btn-primary" onClick={retry}>
+              Tentar de novo
+            </button>
+          </div>
+        )
       ) : user ? (
         <LoggedIn user={user} onAdmin={() => setAdmin(true)} />
       ) : (

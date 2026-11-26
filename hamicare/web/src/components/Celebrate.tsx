@@ -172,7 +172,54 @@ export function StreakScreen({ count, hammer, onClose, onShare }: { count: numbe
   );
 }
 
-/** As outras comemorações, numa janela central com raios suaves. */
+const SCENE: Record<string, [string, string, string, string]> = {
+  accent: ['#C7B5F3', '#FFE3EA', '#9FD58A', '#86C774'],
+  gold: ['#FFD27A', '#FFF3D2', '#A9D98A', '#8CC870'],
+  leaf: ['#9FD6FF', '#E6F6FF', '#9ED789', '#7FC66C'],
+};
+/** Fundo das comemorações: céu suave, sol com brilho atrás do pet, nuvens, morrinhos e flores (sem listras). */
+function CelebrateScene({ tone }: { tone: string }) {
+  const [sky1, sky2, hill1, hill2] = SCENE[tone] ?? SCENE.accent;
+  return (
+    <svg className="cel-scene" viewBox="0 0 360 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <defs>
+        <linearGradient id={`cs-${tone}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={sky1} />
+          <stop offset="1" stopColor={sky2} />
+        </linearGradient>
+        <radialGradient id={`csg-${tone}`}>
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.95" />
+          <stop offset="0.5" stopColor="#FFF6D8" stopOpacity="0.55" />
+          <stop offset="1" stopColor="#FFF6D8" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="360" height="260" fill={`url(#cs-${tone})`} />
+      <circle className="cel-glow" cx="180" cy="130" r="120" fill={`url(#csg-${tone})`} />
+      <circle cx="180" cy="150" r="58" fill="#FFD36B" opacity="0.55" />
+      <g className="cel-cloud" fill="#FFFFFF" opacity="0.9">
+        <ellipse cx="62" cy="58" rx="30" ry="11" />
+        <ellipse cx="76" cy="50" rx="18" ry="11" />
+        <ellipse cx="296" cy="86" rx="26" ry="9" />
+        <ellipse cx="308" cy="79" rx="15" ry="9" />
+      </g>
+      <path d="M0 200 Q90 168 180 186 T360 178 V260 H0Z" fill={hill1} />
+      <path d="M0 226 Q120 206 240 218 T360 214 V260 H0Z" fill={hill2} />
+      {[[40, 206, '#FF8FB8'], [72, 222, '#FFFFFF'], [300, 204, '#FFD34D'], [330, 222, '#FF8FB8'], [262, 230, '#FFFFFF']].map(([x, y, c], i) => (
+        <g key={i} transform={`translate(${x} ${y})`}>
+          {[0, 72, 144, 216, 288].map((a) => (
+            <circle key={a} cx={Math.cos((a * Math.PI) / 180) * 3.6} cy={Math.sin((a * Math.PI) / 180) * 3.6} r="2.8" fill={c as string} />
+          ))}
+          <circle r="2" fill="#FFB347" />
+        </g>
+      ))}
+      {[[110, 70], [250, 44], [150, 36], [220, 100]].map(([x, y], i) => (
+        <path key={i} className="cel-spark" style={{ animationDelay: `${i * 0.5}s` }} transform={`translate(${x} ${y})`} d="M0 -6 L1.5 -1.5 L6 0 L1.5 1.5 L0 6 L-1.5 1.5 L-6 0 L-1.5 -1.5Z" fill="#FFFFFF" />
+      ))}
+    </svg>
+  );
+}
+
+/** As outras comemorações, numa janela central com um cenário ilustrado no topo. */
 export function CelebrationModal({ c, onClose }: { c: Celebration | undefined; onClose: () => void }) {
   const s = useApp();
   if (!c || c.type === 'streak' || c.type === 'level') return null;
@@ -197,7 +244,7 @@ export function CelebrationModal({ c, onClose }: { c: Celebration | undefined; o
   return (
     <Modal open onClose={onClose} label={content.title}>
       <div className={`celebrate celebrate-${content.tone}`}>
-        <div className="celebrate-rays" aria-hidden="true" />
+        <CelebrateScene tone={content.tone} />
         <div className="relative grid justify-items-center gap-2 p-6 text-center">
           <div className="evolve-pop">
             <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="animado" size={170} />
