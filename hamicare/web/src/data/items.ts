@@ -204,11 +204,12 @@ export const KIT_ITEMS: Item[] = [
     ['azul', 'azul', '#5B8DEF', '#FF9FC2'],
     ['verde', 'verde', '#5FBF77', '#FFD66B'],
   ]),
+  // rodinha de exercício é coisa de hamster: fora da loja (fica só no catálogo para não quebrar inventários antigos)
   ...moveis('rodinha', 'Rodinha nova', 'movel', 60, 20, [
     ['rosa', 'rosa', '#FF86AC', '#FFD66B'],
     ['azul', 'azul', '#5B8DEF', '#FFFFFF'],
     ['menta', 'menta', '#3FB8A0', '#FFE27A'],
-  ]),
+  ], { souvenir: true }),
   ...moveis('tubo', 'Túnel colorido', 'movel', 70, 28, [
     ['rosa', 'rosa e azul', '#FF9FC2', '#7FB8F0'],
     ['verde', 'verde e amarelo', '#7FD8BE', '#FFD66B'],
@@ -750,7 +751,7 @@ export const ITEMS: Item[] = [
   // Móveis (kit novo, desenhado com detalhe)
   ...KIT_ITEMS,
   // Móveis
-  W('rodinha', 'Rodinha de exercício', 'movel', 30, { svg: 'rodinha', size: 26 }),
+  W('rodinha', 'Rodinha de exercício', 'movel', 30, { svg: 'rodinha', size: 26, souvenir: true }),
   W('caminha', 'Caminha de cachorro', 'movel', 35, { svg: 'caminha', size: 26 }),
   W('casinha', 'Casinha de madeira', 'movel', 50, { svg: 'casinha', size: 28 }),
   W('mesa', 'Mesinha', 'movel', 30, { svg: 'mesa', size: 22 }),
@@ -1313,7 +1314,6 @@ export const STYLES: StyleSet[] = [
       { itemId: 'k-torre-rosa', x: 22, y: 71 },
       { itemId: 'k-casinha-azul', x: 78, y: 71 },
       { itemId: 'k-tubo-rosa', x: 50, y: 74 },
-      { itemId: 'k-rodinha-rosa', x: 86, y: 93 },
       { itemId: 'k-almofada-rosa', x: 16, y: 95 },
       { itemId: 'k-planta-pendurada-rosa', x: 92, y: 28 },
     ],
@@ -1373,7 +1373,6 @@ export const STYLES: StyleSet[] = [
     items: [
       { itemId: 'palmeira', x: 12, y: 66 },
       { itemId: 'flores', x: 84, y: 76 },
-      { itemId: 'rodinha', x: 26, y: 72 },
     ],
   },
   {

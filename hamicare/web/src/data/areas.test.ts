@@ -48,7 +48,7 @@ describe('casa inicial colorida', () => {
     const OLD: Record<string, [number, number]> = { 'k-cama-rosa': [25, 71], 'k-guarda-roupa-rosa': [82, 68] };
     const h = { ...arenaHouse(1), items: arenaHouse(1).items.filter((i) => OLD[i.itemId]).map((i) => ({ ...i, x: OLD[i.itemId][0], y: OLD[i.itemId][1] })) };
     const up = upgradeHouse(h, 1);
-    expect(up.items.find((i) => i.itemId === 'k-guarda-roupa-rosa')!.x).toBe(68);
+    expect(up.items.find((i) => i.itemId === 'k-guarda-roupa-rosa')!.x).toBe(74);
     const moved = { ...h, items: h.items.map((i, n) => (n === 0 ? { ...i, x: 40 } : i)) };
     expect(upgradeHouse(moved, 1).items).toEqual(moved.items);
   });

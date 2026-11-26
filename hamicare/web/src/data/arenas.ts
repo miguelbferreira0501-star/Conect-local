@@ -12,16 +12,16 @@ export const ARENA_HOME: Record<number, { wallpaper: string; floor: string; item
     wallpaper: 'p-azulzinho',
     floor: 'f-creme',
     items: [
-      // tudo juntinho no meio da tela, em volta do Lumbi (como um cantinho de verdade)
+      // já arrumadinho: no fundo, cama, criado-mudo, planta e guarda-roupa lado a lado, sem um entrar no outro;
+      // na frente, o tapete embaixo do Lumbi, a banheira de um lado e o ursinho do outro
       { itemId: 'k-tapete-rosa', x: 50, y: 94 },
-      { itemId: 'k-cama-rosa', x: 35, y: 71 },
-      { itemId: 'k-criado-branco', x: 49, y: 64 },
-      { itemId: 'k-planta-grande-terracota', x: 58.5, y: 66 },
-      { itemId: 'k-guarda-roupa-rosa', x: 68, y: 66 },
-      { itemId: 'k-relogio-madeira', x: 30, y: 36 },
-      { itemId: 'k-rodinha-azul', x: 69, y: 91 },
-      { itemId: 'k-banheira-madeira', x: 31, y: 92 },
-      { itemId: 'k-ursinho-caramelo', x: 41, y: 97 },
+      { itemId: 'k-cama-rosa', x: 30, y: 70 },
+      { itemId: 'k-criado-branco', x: 46.5, y: 66 },
+      { itemId: 'k-planta-grande-terracota', x: 58, y: 66 },
+      { itemId: 'k-guarda-roupa-rosa', x: 74, y: 66 },
+      { itemId: 'k-relogio-madeira', x: 25, y: 36 },
+      { itemId: 'k-banheira-madeira', x: 26.5, y: 93 },
+      { itemId: 'k-ursinho-caramelo', x: 74, y: 96 },
     ],
   },
   // Jardim: cantinho verde com casinha e flores
@@ -204,7 +204,6 @@ export const MOON_ITEMS = [
   'lua-estante',
   'lua-tapete',
   'lua-banheira',
-  'lua-rodinha',
   'lua-planta',
   'lua-telescopio',
   'lua-quadro',
@@ -221,7 +220,6 @@ ARENA_HOME[MOON_N] = {
     { itemId: 'lua-poltrona', x: 68.5, y: 70 },
     { itemId: 'lua-quadro', x: 30, y: 34 },
     { itemId: 'lua-telescopio', x: 77, y: 74 },
-    { itemId: 'lua-rodinha', x: 69, y: 91 },
     { itemId: 'lua-banheira', x: 31, y: 92 },
     { itemId: 'lua-planta', x: 41.5, y: 97 },
     { itemId: 'lua-mesa', x: 22, y: 80 },
@@ -262,10 +260,23 @@ const OLD_STARTER_POS: Record<string, [number, number]> = {
   'k-banheira-madeira': [68, 90],
   'k-ursinho-caramelo': [10, 97],
 };
+/** Onde os móveis da casa inicial ficavam até agora (juntinhos, mas um entrando no outro, e com a rodinha). */
+const PREV_STARTER_POS: Record<string, [number, number]> = {
+  'k-tapete-rosa': [50, 94],
+  'k-cama-rosa': [35, 71],
+  'k-criado-branco': [49, 64],
+  'k-planta-grande-terracota': [58.5, 66],
+  'k-guarda-roupa-rosa': [68, 66],
+  'k-relogio-madeira': [30, 36],
+  'k-banheira-madeira': [31, 92],
+  'k-ursinho-caramelo': [41, 97],
+};
+/** Rodinha de exercício é coisa de hamster: saiu do jogo (das casas, da loja e das coleções). */
+export const isWheel = (itemId: string) => itemId === 'rodinha' || itemId === 'lua-rodinha' || itemId.startsWith('k-rodinha-');
 /** A casa inicial antes de ganhar a banheira. */
-const STARTER_BEFORE_TUB = ['k-tapete-rosa', 'k-cama-rosa', 'k-criado-branco', 'k-planta-grande-terracota', 'k-guarda-roupa-rosa', 'k-relogio-madeira', 'k-rodinha-azul', 'k-ursinho-caramelo'];
-/** A casinha inicial de antes (rodinha, caminha e plantinha). */
-const OLD_STARTER = ['caminha', 'planta', 'rodinha'];
+const STARTER_BEFORE_TUB = ['k-tapete-rosa', 'k-cama-rosa', 'k-criado-branco', 'k-planta-grande-terracota', 'k-guarda-roupa-rosa', 'k-relogio-madeira', 'k-ursinho-caramelo'];
+/** A casinha inicial de antes (caminha e plantinha; a rodinha que vinha junto já saiu). */
+const OLD_STARTER = ['caminha', 'planta'];
 
 const same = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join() === [...b].sort().join();
 
@@ -304,7 +315,8 @@ function realignThemes(h: House): House {
 
 /** Casa ainda do jeito que veio (antes da reforma)? Então ganha a decoração nova da arena, com a parede e o piso de quem já escolheu. */
 export function upgradeHouse(raw: House, n: number): House {
-  const input = realignThemes(raw);
+  const wheel = raw.items.some((i) => isWheel(i.itemId));
+  const input = realignThemes(wheel ? { ...raw, items: raw.items.filter((i) => !isWheel(i.itemId)) } : raw);
   // A casinha inicial deixou de ser marrom: quem ainda está com a parede creme e o piso de madeira de fábrica ganha a casa verdinha.
   // A casinha inicial de fábrica (a marrom antiga e a verdinha) ganha a parede azul clarinha e o piso creme;
   // quem escolheu outra parede ou piso fica como está.
@@ -313,7 +325,8 @@ export function upgradeHouse(raw: House, n: number): House {
   const ids = h.items.map((i) => i.itemId);
   const old = OLD_ARENA_ITEMS[n] ?? [];
   // Casa inicial com os móveis ainda no lugar de fábrica antigo: chegam mais perto do Lumbi.
-  if (n === 1 && h.items.length && h.items.every((i) => OLD_STARTER_POS[i.itemId]?.[0] === i.x && OLD_STARTER_POS[i.itemId]?.[1] === i.y)) {
+  const at = (pos: Record<string, [number, number]>) => h.items.every((i) => pos[i.itemId]?.[0] === i.x && pos[i.itemId]?.[1] === i.y);
+  if (n === 1 && h.items.length && (at(OLD_STARTER_POS) || at(PREV_STARTER_POS))) {
     const fresh = arenaHouse(1).items;
     return {
       ...h,
