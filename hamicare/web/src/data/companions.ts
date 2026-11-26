@@ -51,8 +51,10 @@ export const PET_VOICE: Record<CompanionKind, SoundId> = {
   unicornio: 'brilho',
 };
 
-export const companionById = (id: string | null | undefined) => COMPANIONS.find((c) => c.id === id);
-export const companionOfArena = (n: number) => COMPANIONS.find((c) => c.arena === n);
+/** Os micropets (pets companheiros e ovos) saíram do app: desligados aqui, nada deles aparece mais. */
+export const PETS_ON = false;
+export const companionById = (id: string | null | undefined) => (PETS_ON ? COMPANIONS.find((c) => c.id === id) : undefined);
+export const companionOfArena = (n: number) => (PETS_ON ? COMPANIONS.find((c) => c.arena === n) : undefined);
 
 /** Dias de cuidado para chocar um ovo. */
 export const HATCH_DAYS = 3;

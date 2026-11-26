@@ -466,3 +466,7 @@
 .tabbar .tab svg, .tabbar .tab img { filter: drop-shadow(0 1px 1.5px rgba(40, 30, 70, 0.22)); }
 .home-room, .pb, .hc-trip { contain: layout paint; }
 .hr-rail { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(44, 52, 104, 0.28); padding: 5px 0 !important; }
+
+/* Brincar (aba Lumbi): botão simples. */
+.pc5 { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 15px 18px; border: 0; border-radius: 18px; background: #ff8a5c; color: #fff; font-family: var(--font-display, inherit); font-size: 17px; font-weight: 800; box-shadow: 0 4px 0 #e06a3f; }
+.pc5:active { transform: translateY(3px); box-shadow: 0 1px 0 #e06a3f; }

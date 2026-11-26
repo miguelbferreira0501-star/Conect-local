@@ -159,23 +159,13 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Brincar com o seu cachorrinho (área de Interações): uma faixa simples com o Lumbi, o texto e um botão redondo. */
+/** Brincar com o seu cachorrinho (área de Interações): um botão simples, sem desenho. */
 function PlayCard() {
   const s = useApp();
   return (
-    <button className="pc4" onClick={() => openUi('interacoes')} aria-label={`Brincar com o ${s.pet.name}`}>
-      <span className="pc4-pet" aria-hidden="true">
-        <Hamster fur={s.pet.fur} outfit={s.pet.outfit} mood="risada" size={74} label="" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <b>Brincar com o {s.pet.name}</b>
-        <small>
-          Carinho, petiscos e graveto · <span className="pc4-heart">♥</span> {s.pet.hearts ?? 0}
-        </small>
-      </span>
-      <span className="pc4-go" aria-hidden="true">
-        <PawIcon />
-      </span>
+    <button className="pc5" onClick={() => openUi('interacoes')}>
+      <PawIcon />
+      Brincar com o {s.pet.name}
     </button>
   );
 }

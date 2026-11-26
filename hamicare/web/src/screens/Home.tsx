@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Flame, Mail, Plus } from 'lucide-react';
 import { StickerGlobe, StickerHouse, StickerLines, StickerTree } from '../components/Stickers';
 import { PlusBanner } from '../components/PlusBanner';
-import { EggCollection } from '../components/Egg';
 import { MOON_N } from '../data/arenas';
 import { MoonOutdoors, OUTDOOR_W, Outdoors, outdoorGround, type YardTheme } from '../components/Outdoors';
 import { gameCfg } from '../lib/game';
@@ -39,7 +38,6 @@ import { Glyph } from '../components/art';
 import { WaterCard } from '../components/WaterCard';
 import { StreakRepairCard } from '../components/StreakRepair';
 import { requestTool } from './Wellbeing';
-import { CompanionBuddy } from './Companions';
 import { LivePet, PetAct } from '../components/LivePet';
 import { AddTaskSheet } from '../components/AddTask';
 import { useFurniturePlay } from '../components/FurniturePlay';
@@ -247,7 +245,6 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
           }}
         />
       </div>
-      <CompanionBuddy hamster={168} />
     </div>
   );
 
@@ -443,7 +440,6 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
           <small>água, trilha, relatórios e mais</small>
         </summary>
         <div className="grid gap-4 pt-3">
-          <EggCollection />
           <PlusWeeklyCard />
           <WaterCard />
           <TrailCard />
