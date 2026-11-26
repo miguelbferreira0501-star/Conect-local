@@ -9,7 +9,7 @@ import { showPlusOffers } from './PlusCard';
 import { partnerWord, useApp } from '../lib/store';
 import { prefersReducedMotion } from '../lib/util';
 
-export function PlusBanner({ onOpen }: { onOpen: () => void }) {
+export function PlusBanner({ onOpen, onInvite }: { onOpen: () => void; onInvite?: () => void }) {
   const s = useApp();
   const ref = useRef<HTMLDivElement>(null);
   const [i, setI] = useState(0);
@@ -40,14 +40,13 @@ export function PlusBanner({ onOpen }: { onOpen: () => void }) {
       ),
     },
     {
-      id: 'pelagens',
-      cls: 'pb-lilac',
-      title: 'Pelagens raras e 99 itens só do Plus',
+      id: 'amigos',
+      cls: 'pb-mint',
+      title: `Chame amigos para cuidar com o ${s.pet.name}`,
       art: (
-        <span className="pb-furs" aria-hidden="true">
-          <Hamster fur="algodao" size={50} mood="feliz" label="" />
-          <Hamster fur={s.pet.fur} outfit={s.pet.outfit} size={64} prop="estrela" mood="animado" label="" />
-          <Hamster fur="menta" size={50} mood="feliz" label="" />
+        <span className="pb-duo" aria-hidden="true">
+          <Hamster fur={s.pet.fur} outfit={s.pet.outfit} size={64} mood="feliz" label="" />
+          <Hamster fur="chocolate" size={58} mood="risada" label="" />
         </span>
       ),
     },
@@ -58,21 +57,20 @@ export function PlusBanner({ onOpen }: { onOpen: () => void }) {
     const t = setInterval(() => {
       const el = ref.current;
       if (!el || el.matches(':active')) return;
-      const next = (Math.round(el.scrollLeft / el.clientWidth) + 1) % slides.length;
+      const next = (Math.round(el.scrollLeft / el.clientWidth) + 1) % el.children.length;
       el.scrollTo({ left: next * el.clientWidth, behavior: 'smooth' });
     }, 4500);
     return () => clearInterval(t);
   }, [slides.length]);
-  if (!showPlusOffers(s)) return null;
+  // Quem já é Plus (ou criança) vê só a faixa dos amigos.
+  const shown = showPlusOffers(s) ? slides : slides.filter((sl) => sl.id === 'amigos');
   return (
     <section className="pb" aria-label="Lumbi+">
       <div ref={ref} className="pb-track" onScroll={(e) => setI(Math.round(e.currentTarget.scrollLeft / Math.max(1, e.currentTarget.clientWidth)))}>
-        {slides.map((sl) => (
-          <button key={sl.id} className={`pb-slide ${sl.cls}`} onClick={onOpen} aria-label={`Lumbi+: ${sl.title}. Ver planos`}>
+        {shown.map((sl) => (
+          <button key={sl.id} className={`pb-slide ${sl.cls}`} onClick={sl.id === 'amigos' ? onInvite ?? onOpen : onOpen} aria-label={sl.id === 'amigos' ? `${sl.title}. Convidar amigos` : `Lumbi+: ${sl.title}. Ver planos`}>
             <span className="pb-text">
-              <span className="pb-chip">
-                <Crown size={13} /> PREMIUM
-              </span>
+              <span className="pb-chip">{sl.id === 'amigos' ? <>AMIGOS</> : <><Crown size={13} /> PREMIUM</>}</span>
               <b>{sl.title}</b>
             </span>
             <span className="pb-art">{sl.art}</span>
@@ -83,7 +81,7 @@ export function PlusBanner({ onOpen }: { onOpen: () => void }) {
         ))}
       </div>
       <span className="pb-dots" aria-hidden="true">
-        {slides.map((sl, k) => (
+        {shown.length > 1 && shown.map((sl, k) => (
           <i key={sl.id} className={k === i ? 'is-on' : ''} />
         ))}
       </span>

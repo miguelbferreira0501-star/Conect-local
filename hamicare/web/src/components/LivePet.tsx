@@ -12,11 +12,13 @@ import type { Condition, HamiProp } from '../lib/hamiDay';
  * Ações do Lumbi (tiradas da folha de poses que a dona do app desenhou): ele mesmo faz, com o corpo inteiro
  * animado. Um toque faz uma ação diferente; parado, de tempos em tempos ele faz uma sozinho.
  */
-export type Trick = 'carinho' | 'choro' | 'acenar' | 'coracao' | 'danca' | 'musica' | 'travesseiro' | 'estrela' | 'comemora' | 'rola' | 'late' | 'curioso';
+export type Trick = 'toque' | 'carinho' | 'choro' | 'acenar' | 'coracao' | 'danca' | 'musica' | 'travesseiro' | 'estrela' | 'comemora' | 'rola' | 'late' | 'curioso';
 
 type TrickInfo = { mood: PetMood; sound: SoundId; ms: number; say?: string; pose?: DogPose; prop?: HamiProp; fx?: string };
 export const TRICKS: Record<Trick, TrickInfo> = {
   // carinho: amassadinho, pulinho, olhinhos fechados de alegria, bracinhos batendo e coraçõezinhos
+  // toque simples do Início: só um latidinho e um pulinho bem pequeno
+  toque: { mood: 'feliz', sound: 'latido', ms: 520, fx: 'lb-act-nudge' },
   carinho: { mood: 'risada', sound: 'latido', ms: 1400, fx: 'gest-pat' },
   // chorão fofinho (sozinho, de tempos em tempos, quando ele precisa de ajuda)
   choro: { mood: 'choro', sound: 'choro', ms: 2600, fx: 'fx-sob' },
@@ -63,11 +65,13 @@ interface Props {
   auto?: boolean;
   /** Pedir uma ação agora (muda o id para repetir). */
   act?: { t: Trick; id: number; quiet?: boolean } | null;
+  /** Toque simples: só o latidinho e um pulinho bem pequeno (Início). */
+  simple?: boolean;
 }
 
 let seq = 0;
 
-export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = '', children, label, growth, cond, wear, prop, pose, fx = '', cryEvery = 0, auto = false, act = null }: Props) {
+export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = '', children, label, growth, cond, wear, prop, pose, fx = '', cryEvery = 0, auto = false, act = null, simple = false }: Props) {
   const s = useApp();
   const [trick, setTrick] = useState<{ t: Trick; id: number } | null>(null);
   const timers = useRef<number[]>([]);
@@ -115,6 +119,10 @@ export function LivePet({ size = 200, mood = 'feliz', onTap, say, className = ''
     if (onTap?.() === false) return;
     if (asleep) {
       play('ronco');
+      return;
+    }
+    if (simple) {
+      run('toque');
       return;
     }
     // cada toque, uma ação diferente da anterior
