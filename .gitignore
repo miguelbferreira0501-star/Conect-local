@@ -7,3 +7,4 @@ coverage
 e2e/falha*.png
 web/dist-preview
 .taste-skill/
+hamicare/web/plugins/hami-widget/android/build/
