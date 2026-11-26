@@ -1,6 +1,7 @@
 // Coleções temáticas da casa (Inverno, Praia e Jardim): cada tema tem móveis próprios desenhados para combinar
 // entre si e com uma roupinha do mesmo tema. Mesmo acabamento liso do resto do kit (sem contorno, luz em cima).
 import { S, mix } from './kit';
+import { ThemeKit2 } from './themeKit2';
 
 const dk = (c: string, t = 0.2) => mix(c, '#2B1A14', t);
 const lt = (c: string, t = 0.3) => mix(c, '#FFFFFF', t);
@@ -488,6 +489,6 @@ export function ThemeKit({ id, c1, c2 }: { id: string; c1: string; c2: string })
         </S>
       );
     default:
-      return null;
+      return <ThemeKit2 id={id} c1={c1} c2={c2} />;
   }
 }

@@ -1410,3 +1410,56 @@ span.tcal-ico { background: transparent; }
 @keyframes sy-heart { from { transform: translateY(0) scale(0.5); opacity: 0; } 20% { opacity: 1; transform: translateY(-10px) scale(1.1); } to { transform: translateY(-90px) scale(0.9); opacity: 0; } }
 .sb .sx-text { text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45); }
 @media (prefers-reduced-motion: reduce) { .sb-world, .sb-box { transition: none; } .sb-cone, .sb-leaf, .sb-pup > :first-child, .sb-pup.is-out, .sb-tap, .sb-breath, .sb-heart { animation: none; } }
+
+/* ===== Cartão "Brincar com o Lumbi" (Amigos) ===== */
+.pc2 { display: flex; align-items: stretch; gap: 0; width: 100%; padding: 0; border-radius: 26px; overflow: hidden; background: #fff; color: #2b2f55; text-align: left; box-shadow: 0 6px 0 rgba(43, 47, 85, 0.1), 0 0 0 3px #fff inset; transition: transform 0.12s; }
+.pc2:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(43, 47, 85, 0.1); }
+.pc2-scene { position: relative; flex: none; width: 124px; min-height: 124px; overflow: hidden; }
+.pc2-scene > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.pc2-pet { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); animation: pc2-bob 2.4s ease-in-out infinite; }
+@keyframes pc2-bob { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-4px); } }
+.pc2-body { display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 0; flex: 1; padding: 14px 14px 14px 16px; }
+.pc2-body b { font-family: var(--font-display); font-size: 19px; font-weight: 800; line-height: 1.15; }
+.pc2-body small { font-size: 13px; font-weight: 700; color: #6b6f8f; }
+.pc2-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.pc2-go { padding: 9px 18px; border-radius: 999px; background: #ff8a5c; color: #fff; font-size: 15px; font-weight: 900; box-shadow: 0 4px 0 #d9663b; }
+.pc2-hearts { display: inline-flex; align-items: center; gap: 5px; padding: 7px 11px; border-radius: 999px; background: #ffe6ec; color: #d93f5f; font-size: 14px; font-weight: 900; }
+@media (prefers-reduced-motion: reduce) { .pc2-pet { animation: none; } }
+
+/* ===== Comemorações: cenário ilustrado no topo (sem listras) ===== */
+.celebrate { background: #fff !important; position: relative; overflow: hidden; }
+.celebrate .celebrate-rays { display: none; }
+.cel-scene { position: absolute; left: 0; right: 0; top: 0; width: 100%; height: 250px; }
+.cel-glow { transform-origin: 180px 130px; animation: cel-glow 3.2s ease-in-out infinite; }
+@keyframes cel-glow { 0%, 100% { transform: scale(0.94); opacity: 0.85; } 50% { transform: scale(1.05); opacity: 1; } }
+.cel-cloud { animation: cel-cloud 9s ease-in-out infinite alternate; }
+@keyframes cel-cloud { to { transform: translateX(14px); } }
+.cel-spark { transform-box: fill-box; transform-origin: center; animation: cel-spark 2s ease-in-out infinite; }
+@keyframes cel-spark { 0%, 100% { opacity: 0.2; scale: 0.6; } 50% { opacity: 1; scale: 1; } }
+@media (prefers-reduced-motion: reduce) { .cel-glow, .cel-cloud, .cel-spark { animation: none; } }
+
+/* animações das peças novas */
+.ki-flame { transform-box: fill-box; transform-origin: 50% 100%; animation: ki-flame 0.9s ease-in-out infinite alternate; }
+@keyframes ki-flame { from { transform: scaleY(0.85) scaleX(1.05); } to { transform: scaleY(1.12) scaleX(0.95); } }
+.ki-eq { transform-box: fill-box; transform-origin: 50% 100%; animation: ki-eq 0.7s ease-in-out infinite alternate; }
+@keyframes ki-eq { from { transform: scaleY(0.4); } to { transform: scaleY(1.1); } }
+.ki-steam { animation: ki-steam 2.6s ease-in-out infinite; }
+@keyframes ki-steam { 0%, 100% { opacity: 0.4; transform: translateY(2px); } 50% { opacity: 0.95; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .ki-flame, .ki-eq, .ki-steam { animation: none; } }
+
+/* ===== Namorada do Lumbi (Plus) ===== */
+.duo { display: flex; align-items: flex-end; justify-content: center; }
+.partner { position: relative; margin-left: -26px; background: none; border: 0; padding: 0; animation: partner-sway 3.4s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes partner-sway { 0%, 100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } }
+.partner-heart { position: absolute; left: -6px; top: 18%; font-size: 20px; color: #ff6f91; opacity: 0; animation: partner-heart 5s ease-out infinite; pointer-events: none; }
+@keyframes partner-heart { 0%, 55% { opacity: 0; transform: translateY(0) scale(0.6); } 65% { opacity: 1; transform: translateY(-8px) scale(1.1); } 100% { opacity: 0; transform: translateY(-46px) scale(0.9); } }
+.partner-pop { position: absolute; top: 6%; font-size: 22px; color: #ff5c7a; animation: sy-heart 1.3s ease-out forwards; pointer-events: none; }
+.partner-lock { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 14px 10px 8px; border-radius: 22px; background: linear-gradient(135deg, #ffe3ec, #f3e3ff); text-align: left; }
+.partner-lock b { display: block; font-family: var(--font-display); font-size: 17px; font-weight: 800; }
+.partner-lock small { display: block; font-size: 13px; font-weight: 700; opacity: 0.75; }
+.partner-lock-pets, .partner-preview { position: relative; display: flex; align-items: flex-end; flex: none; }
+.partner-preview { justify-content: center; padding: 6px 0 0; border-radius: 22px; background: linear-gradient(180deg, #ffeef4, #fff7fa); }
+.partner-lock-pets > :last-child, .partner-preview > :last-child { margin-left: -14px; }
+.partner-lock-heart { position: absolute; left: 50%; top: 4px; transform: translateX(-50%); color: #ff5c7a; font-size: 18px; animation: pc2-beat 1.4s ease-in-out infinite; }
+@keyframes pc2-beat { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.2); } }
+@media (prefers-reduced-motion: reduce) { .partner, .partner-heart, .partner-lock-heart { animation: none; } }

@@ -18,10 +18,28 @@ export interface User {
 }
 
 let reachable: Promise<boolean> | null = null;
-/** Existe servidor do Lumbi neste endereço? (Não existe na página de teste nem no arquivo local.) */
+/** É a página de teste (dentro do Claude) ou o arquivo local? Lá não existe servidor do Lumbi. */
+export const isPreview = () => location.protocol === 'file:' || !!(window as unknown as { claude?: unknown }).claude;
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/**
+ * Existe servidor do Lumbi neste endereço? O servidor gratuito "dorme" e leva até um minuto para acordar,
+ * então tenta algumas vezes antes de desistir, e uma falha não fica guardada (a próxima tela tenta de novo).
+ */
 export function serverReachable(): Promise<boolean> {
-  if (location.protocol === 'file:' || (window as unknown as { claude?: unknown }).claude) return Promise.resolve(false);
-  if (!reachable) reachable = http<{ app: string }>('GET', '/health').then((r) => r.app === 'hamicare').catch(() => false);
+  if (isPreview()) return Promise.resolve(false);
+  if (!reachable) {
+    reachable = (async () => {
+      for (let i = 0; i < 4; i++) {
+        const ok = await http<{ app: string }>('GET', '/health').then((r) => r.app === 'hamicare').catch(() => false);
+        if (ok) return true;
+        await wait(3000 + i * 3000);
+      }
+      return false;
+    })();
+    reachable.then((ok) => {
+      if (!ok) reachable = null;
+    });
+  }
   return reachable;
 }
 
@@ -39,8 +57,10 @@ export function useAccount() {
   const [user, setU] = useState<User | null>(current);
   const [ready, setReady] = useState(false);
   const [online, setOnline] = useState(false);
+  const [tries, setTries] = useState(0);
   useEffect(() => {
     listeners.add(setU);
+    setReady(false);
     serverReachable().then(async (ok) => {
       setOnline(ok);
       if (ok && !current) {
@@ -56,8 +76,8 @@ export function useAccount() {
     return () => {
       listeners.delete(setU);
     };
-  }, []);
-  return { user, ready, online };
+  }, [tries]);
+  return { user, ready, online, retry: () => setTries((t) => t + 1) };
 }
 
 export async function register(input: { name: string; email: string; password: string; ageGroup: User['ageGroup']; guardianConsent: boolean }) {

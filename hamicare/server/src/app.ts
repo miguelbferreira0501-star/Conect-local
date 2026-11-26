@@ -11,6 +11,7 @@ import { admin } from './routes/admin';
 import { push } from './routes/push';
 import { game } from './routes/game';
 import { legal } from './routes/legal';
+import { site } from './routes/site';
 import { stores } from './routes/stores';
 import { guardian, guardianWebhook } from './routes/guardian';
 import { appleWebhook, billing } from './routes/billing';
@@ -70,6 +71,8 @@ export function createApp() {
 
   // Política de privacidade e termos (endereços para as lojas de apps).
   app.route('/', legal);
+  // Site de apresentação do Lumbi (com os Guardiões).
+  app.route('/', site);
   // Vínculo do app Android com o site e a página para excluir a conta (pedidos das lojas).
   app.route('/', stores);
 

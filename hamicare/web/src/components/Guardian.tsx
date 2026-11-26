@@ -17,7 +17,7 @@ export function openGuardian() {
   opener?.();
 }
 
-const HASH = /^#guardiao=(ok|pendente|falhou|teste:([0-9a-f-]{36}))$/;
+const HASH = /^#guardiao(?:=(ok|pendente|falhou|teste:([0-9a-f-]{36})))?$/;
 
 export function GuardianHost() {
   const [open, setOpen] = useState(false);
@@ -35,6 +35,7 @@ export function GuardianHost() {
         /* ok */
       }
       setOpen(true);
+      if (!m[1]) return; // veio do site (#guardiao): só abre a tela
       if (m[1] === 'ok') {
         play('conquista');
         toast('Obrigado, Guardião! Seu presente já está ajudando alguém 💜');

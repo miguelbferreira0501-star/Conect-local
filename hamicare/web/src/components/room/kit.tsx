@@ -1514,6 +1514,19 @@ export function Kit({ id, c1 = '#FF9FC2', c2 = '#FFFFFF' }: { id: string; c1?: s
 
 /** Onde cada peça fica: na parede, no chão ou estendida no chão (tapetes). */
 export const KIT_PLACE: Record<string, Place> = {
+  'k-ass-tapete': 'tapete',
+  'k-ass-lustre': 'parede',
+  'k-ass-relogio': 'parede',
+  'k-ass-quadro': 'parede',
+  'k-amor-tapete': 'tapete',
+  'k-amor-lustre': 'parede',
+  'k-amor-prateleira': 'parede',
+  'k-neon-disco': 'tapete',
+  'k-neon-globo': 'parede',
+  'k-neon-letreiro': 'parede',
+  'k-doce-tapete': 'tapete',
+  'k-doce-relogio': 'parede',
+  'k-doce-guirlanda': 'parede',
   'k-lua-tapete': 'tapete',
   'k-lua-quadro': 'parede',
   'k-relogio': 'parede',

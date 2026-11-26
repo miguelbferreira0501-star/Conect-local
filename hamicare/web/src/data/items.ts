@@ -21,7 +21,7 @@ export interface Item {
   /** Valor de referência (antes do multiplicador da loja): usado para a raridade nos baús. */
   basePrice?: number;
   /** Peça de uma coleção temática (inverno, praia, jardim). */
-  theme?: 'inverno' | 'praia' | 'jardim';
+  theme?: 'inverno' | 'praia' | 'jardim' | 'assombrado' | 'amor' | 'neon' | 'doce';
   food?: { saciedade: number; felicidade: number };
   /** Desenho próprio (chave do conjunto de ilustrações) quando não há emoji. */
   art?: string;
@@ -960,6 +960,49 @@ export const ITEMS: Item[] = [
   W('k-jar-guirlanda', 'Trepadeira florida', 'decor', 45, { svg: 'k-jar-guirlanda', size: 24, c1: '#FF9FC2', c2: '#FFD34D', theme: 'jardim' }),
   W('blusa-jardim', 'Blusinha de jardim', 'roupa', 80, { base: 'blusa-jardim', c1: '#A8D88A', c2: '#FF9FC2', theme: 'jardim' }),
   W('tiara-jardim', 'Florzinha no cabelo', 'chapeu', 40, { base: 'flor', c1: '#FF9FC2', theme: 'jardim' }),
+  // Assombrado fofo
+  W('k-ass-cama', 'Cama de teia e estrelas', 'movel', 170, { svg: 'k-ass-cama', size: 38, c1: '#C9779F', c2: '#F48DB4', theme: 'assombrado' }),
+  W('k-ass-lareira', 'Lareira com abóbora', 'movel', 150, { svg: 'k-ass-lareira', size: 30, c1: '#B85C7A', c2: '#F48DB4', theme: 'assombrado' }),
+  W('k-ass-caldeirao', 'Caldeirão de poção', 'decor', 70, { svg: 'k-ass-caldeirao', size: 14, c1: '#2E2A36', c2: '#F06BB0', theme: 'assombrado' }),
+  W('k-ass-lustre', 'Lustre de velinhas', 'decor', 80, { svg: 'k-ass-lustre', size: 24, c1: '#B85C7A', theme: 'assombrado' }),
+  W('k-ass-relogio', 'Relógio morceguinho', 'decor', 50, { svg: 'k-ass-relogio', size: 17, c1: '#C9779F', theme: 'assombrado' }),
+  W('k-ass-tapete', 'Tapete de caveirinha', 'movel', 80, { svg: 'k-ass-tapete', size: 36, c1: '#F48DB4', theme: 'assombrado' }),
+  W('k-ass-quadro', 'Retrato do fantasminha', 'decor', 40, { svg: 'k-ass-quadro', size: 10, c1: '#C9779F', theme: 'assombrado' }),
+  W('moletom-assombrado', 'Moletom assombrado', 'roupa', 80, { base: 'moletom', c1: '#3B2F4A', c2: '#F48DB4', theme: 'assombrado' }),
+  W('bruxinha-rosa', 'Chapéu de bruxinha rosa', 'chapeu', 45, { base: 'bruxa', c1: '#2B2340', c2: '#F06BB0', theme: 'assombrado' }),
+  // Amor
+  W('k-amor-cama', 'Cama capitonê', 'movel', 160, { svg: 'k-amor-cama', size: 38, c1: '#D9A7B0', c2: '#B5656E', theme: 'amor' }),
+  W('k-amor-lareira', 'Lareira rosa com aquário', 'movel', 150, { svg: 'k-amor-lareira', size: 30, c1: '#F0A3AE', theme: 'amor' }),
+  W('k-amor-estante', 'Estante escadinha', 'movel', 70, { svg: 'k-amor-estante', size: 13, c1: '#B5484E', theme: 'amor' }),
+  W('k-amor-lustre', 'Pendente de franjas', 'decor', 60, { svg: 'k-amor-lustre', size: 20, c1: '#E06A74', theme: 'amor' }),
+  W('k-amor-tapete', 'Tapete oval de corações', 'movel', 70, { svg: 'k-amor-tapete', size: 36, c1: '#D9484E', c2: '#F28C8C', theme: 'amor' }),
+  W('k-amor-almofadas', 'Almofadas de estrela', 'decor', 45, { svg: 'k-amor-almofadas', size: 16, c1: '#D9484E', c2: '#F28C6A', theme: 'amor' }),
+  W('k-amor-prateleira', 'Prateleira com luzinhas', 'decor', 55, { svg: 'k-amor-prateleira', size: 24, c1: '#E06A74', theme: 'amor' }),
+  W('vestido-amor', 'Vestidinho de corações', 'roupa', 80, { base: 'vestido', c1: '#FF8FA8', c2: '#FFFFFF', theme: 'amor' }),
+  W('laco-amor', 'Laço de coração', 'chapeu', 35, { base: 'laco', c1: '#FF5C7A', theme: 'amor' }),
+  // Festa neon
+  W('k-neon-cama', 'Cama neon', 'movel', 170, { svg: 'k-neon-cama', size: 38, c1: '#4B3FC4', c2: '#7CFFB2', theme: 'neon' }),
+  W('k-neon-som', 'Aparelho de som', 'movel', 150, { svg: 'k-neon-som', size: 30, c1: '#3D5BD9', c2: '#7CFFB2', theme: 'neon' }),
+  W('k-neon-jukebox', 'Jukebox', 'movel', 110, { svg: 'k-neon-jukebox', size: 16, c1: '#4B3FC4', c2: '#7CE7FF', theme: 'neon' }),
+  W('k-neon-globo', 'Globo de luz', 'decor', 70, { svg: 'k-neon-globo', size: 15, c2: '#9FFFC8', theme: 'neon' }),
+  W('k-neon-letreiro', 'Letreiro neon de fone', 'decor', 60, { svg: 'k-neon-letreiro', size: 20, c1: '#7CE7FF', c2: '#B5FF7C', theme: 'neon' }),
+  W('k-neon-disco', 'Tapete de vinil', 'movel', 70, { svg: 'k-neon-disco', size: 36, c1: '#3A3F9A', c2: '#7CFFB2', theme: 'neon' }),
+  W('k-neon-microfone', 'Microfone de palco', 'decor', 50, { svg: 'k-neon-microfone', size: 8, c1: '#7CE7FF', theme: 'neon' }),
+  W('jaqueta-neon', 'Jaqueta neon', 'roupa', 85, { base: 'jaqueta', c1: '#3D5BD9', c2: '#7CFFB2', theme: 'neon' }),
+  // Doceria
+  W('k-doce-cama', 'Cama de cupcake', 'movel', 170, { svg: 'k-doce-cama', size: 38, c1: '#FF9FC2', c2: '#FFF1DC', theme: 'doce' }),
+  W('k-doce-pirulito', 'Abajur de pirulito', 'decor', 50, { svg: 'k-doce-pirulito', size: 9, c1: '#FF8FB8', c2: '#FFFFFF', theme: 'doce' }),
+  W('k-doce-estante', 'Estante de potes de bala', 'movel', 110, { svg: 'k-doce-estante', size: 20, c1: '#FFC2D6', c2: '#7FD3F0', theme: 'doce' }),
+  W('k-doce-tapete', 'Tapete de donut', 'movel', 70, { svg: 'k-doce-tapete', size: 36, c1: '#FF8FB8', theme: 'doce' }),
+  W('k-doce-relogio', 'Relógio de biscoito', 'decor', 45, { svg: 'k-doce-relogio', size: 11, c1: '#FF5C8A', theme: 'doce' }),
+  W('k-doce-guirlanda', 'Varal de balinhas', 'decor', 45, { svg: 'k-doce-guirlanda', size: 24, c1: '#FF8FB8', c2: '#7FD3F0', theme: 'doce' }),
+  W('avental-doce', 'Aventalzinho de confeiteiro', 'roupa', 70, { base: 'avental', c1: '#FF9FC2', c2: '#FFFFFF', theme: 'doce' }),
+  W('chef-doce', 'Touca de confeiteiro', 'chapeu', 40, { base: 'chef', theme: 'doce' }),
+  // Paredes das coleções novas
+  W('p-assombrado', 'Parede assombrada fofa', 'parede', 45),
+  W('p-amor', 'Parede de coraçõezões', 'parede', 45),
+  W('p-neon', 'Parede de tijolinho neon', 'parede', 45),
+  W('p-doce', 'Parede de confeitos', 'parede', 45),
   // Comidas (consumíveis)
   W('semente', 'Semente de girassol extra', 'comida', 3, { emoji: '🌻', food: { saciedade: 8, felicidade: 6 } }),
   W('cenoura', 'Cenourinha', 'comida', 4, { emoji: '🥕', food: { saciedade: 15, felicidade: 4 } }),
@@ -1130,6 +1173,73 @@ export const STYLES: StyleSet[] = [
       { itemId: 'k-jar-mesa-tronco', x: 72, y: 70 },
       { itemId: 'k-jar-pufe-sapo', x: 77, y: 90 },
       { itemId: 'k-jar-guirlanda', x: 75, y: 30 },
+    ],
+  },
+  {
+    id: 'tema-assombrado',
+    name: 'Assombrado fofo',
+    tone: '#F6D9E8',
+    wallpaper: 'p-assombrado',
+    floor: 'f-concreto',
+    outfit: { roupa: 'moletom-assombrado', chapeu: 'bruxinha-rosa' },
+    items: [
+      { itemId: 'k-ass-tapete', x: 50, y: 93 },
+      { itemId: 'k-ass-cama', x: 24, y: 72 },
+      { itemId: 'k-ass-lareira', x: 50, y: 66 },
+      { itemId: 'k-ass-caldeirao', x: 72, y: 70 },
+      { itemId: 'k-ass-lustre', x: 50, y: 19 },
+      { itemId: 'k-ass-relogio', x: 80, y: 28 },
+      { itemId: 'k-ass-quadro', x: 14, y: 30 },
+    ],
+  },
+  {
+    id: 'tema-amor',
+    name: 'Cantinho do amor',
+    tone: '#FBE0E2',
+    wallpaper: 'p-amor',
+    floor: 'f-concreto',
+    outfit: { roupa: 'vestido-amor', chapeu: 'laco-amor' },
+    items: [
+      { itemId: 'k-amor-tapete', x: 50, y: 93 },
+      { itemId: 'k-amor-cama', x: 24, y: 72 },
+      { itemId: 'k-amor-lareira', x: 50, y: 66 },
+      { itemId: 'k-amor-estante', x: 70, y: 68 },
+      { itemId: 'k-amor-almofadas', x: 78, y: 86 },
+      { itemId: 'k-amor-lustre', x: 50, y: 17 },
+      { itemId: 'k-amor-prateleira', x: 16, y: 30 },
+    ],
+  },
+  {
+    id: 'tema-neon',
+    name: 'Festa neon',
+    tone: '#D9E2FF',
+    wallpaper: 'p-neon',
+    floor: 'f-metal',
+    outfit: { roupa: 'jaqueta-neon', chapeu: 'fone-neon' },
+    items: [
+      { itemId: 'k-neon-disco', x: 50, y: 93 },
+      { itemId: 'k-neon-cama', x: 22, y: 72 },
+      { itemId: 'k-neon-som', x: 54, y: 68 },
+      { itemId: 'k-neon-jukebox', x: 73, y: 68 },
+      { itemId: 'k-neon-microfone', x: 86, y: 76 },
+      { itemId: 'k-neon-globo', x: 50, y: 17 },
+      { itemId: 'k-neon-letreiro', x: 16, y: 30 },
+    ],
+  },
+  {
+    id: 'tema-doce',
+    name: 'Doceria',
+    tone: '#FFE4EF',
+    wallpaper: 'p-doce',
+    floor: 'f-creme',
+    outfit: { roupa: 'avental-doce', chapeu: 'chef-doce' },
+    items: [
+      { itemId: 'k-doce-tapete', x: 50, y: 93 },
+      { itemId: 'k-doce-cama', x: 26, y: 72 },
+      { itemId: 'k-doce-estante', x: 60, y: 68 },
+      { itemId: 'k-doce-pirulito', x: 76, y: 70 },
+      { itemId: 'k-doce-relogio', x: 78, y: 28 },
+      { itemId: 'k-doce-guirlanda', x: 20, y: 26 },
     ],
   },
   {
