@@ -16,7 +16,7 @@ import { Glyph } from '../components/art';
 import { PlusWeeklyCard } from '../components/PlusWeekly';
 import { PLUS_WEEKLY } from '../lib/store';
 import { TEAM_MAX, TEAM_MAX_PLUS } from '../shared/team';
-import { buyPlan, iapAvailable, loadStorePrices, restorePlans, type StorePrice } from '../lib/iap';
+import { buyPlan, iapAvailable, iapStore, loadStorePrices, restorePlans, type StorePrice } from '../lib/iap';
 import { buyPlayPlan, loadPlayPrices, playService, restorePlayPlans } from '../lib/playBilling';
 import { openLegal } from '../components/Legal';
 import { openUi } from '../lib/bus';
@@ -254,7 +254,7 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
           </button>
         </>
       ) : iapAvailable() ? (
-        <AppStoreBuy plan={plan} price={plan === 'anual' ? `${yearPrice} por ano` : `${monthPrice} por mês`} userId={user?.id ?? null} onClose={onClose} />
+        <AppStoreBuy store={iapStore()} plan={plan} price={plan === 'anual' ? `${yearPrice} por ano` : `${monthPrice} por mês`} userId={user?.id ?? null} onClose={onClose} />
       ) : play ? (
         <AppStoreBuy store="google" plan={plan} price={plan === 'anual' ? `${yearPrice} por ano` : `${monthPrice} por mês`} userId={user?.id ?? null} onClose={onClose} />
       ) : (
@@ -296,7 +296,7 @@ function AppStoreBuy({ plan, price, userId, onClose, store = 'apple' }: { plan: 
   }
   return (
     <div className="grid gap-3">
-      <button className="pw-cta" disabled={busy} onClick={() => (userId ? run(() => (google ? buyPlayPlan(plan) : buyPlan(plan, userId)), '') : needAccount())}>
+      <button className="pw-cta" disabled={busy} onClick={() => (userId ? run(() => (google && !iapAvailable() ? buyPlayPlan(plan) : buyPlan(plan, userId)), '') : needAccount())}>
         {busy ? (google ? 'Falando com o Google Play…' : 'Falando com a App Store…') : `Assinar por ${price}`}
       </button>
       {google ? (
@@ -319,7 +319,7 @@ function AppStoreBuy({ plan, price, userId, onClose, store = 'apple' }: { plan: 
           Privacidade
         </button>
         {' · '}
-        <button className="underline" disabled={busy} onClick={() => (userId ? run(google ? restorePlayPlans : restorePlans, google ? 'Não encontramos uma assinatura ativa nesta conta Google.' : 'Não encontramos uma assinatura ativa nesta conta Apple.') : needAccount())}>
+        <button className="underline" disabled={busy} onClick={() => (userId ? run(google && !iapAvailable() ? restorePlayPlans : restorePlans, google ? 'Não encontramos uma assinatura ativa nesta conta Google.' : 'Não encontramos uma assinatura ativa nesta conta Apple.') : needAccount())}>
           Restaurar compras
         </button>
       </p>

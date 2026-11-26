@@ -6,6 +6,9 @@ const config: CapacitorConfig = {
   appId: 'com.hamicare.app',
   appName: 'Lumbi',
   webDir: 'dist',
+  android: {
+    backgroundColor: '#FDE0AD',
+  },
   ios: {
     // O app já respeita o entalhe e a barra de baixo (viewport-fit=cover + env(safe-area-inset-*)).
     contentInset: 'never',
@@ -18,6 +21,9 @@ const config: CapacitorConfig = {
     CapacitorCookies: { enabled: true },
     LocalNotifications: { iconColor: '#FF6F91' },
     SplashScreen: { launchShowDuration: 900, backgroundColor: '#FDE0AD', showSpinner: false },
+    // Android de ponta a ponta: a barra do relógio e a barra de gestos ficam transparentes, por cima do
+    // cenário do app (que já respeita as bordas com env(safe-area-inset-*)). Ícones escuros, como no fundo claro.
+    SystemBars: { insetsHandling: 'css', initialViewportFitValueHint: 'cover', style: 'LIGHT' },
   },
 };
 
