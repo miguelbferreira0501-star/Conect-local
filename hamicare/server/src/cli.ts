@@ -17,11 +17,20 @@ async function ensureAppRole(client: pg.Client) {
 
 const cmd = process.argv[2];
 const client = new pg.Client({ connectionString: env.DATABASE_OWNER_URL });
-await client.connect();
 try {
-  if (cmd === 'reset') await reset(client);
-  if (cmd === 'deploy') await ensureAppRole(client);
-  await migrate(client);
-} finally {
-  await client.end();
+  await client.connect();
+  try {
+    if (cmd === 'reset') await reset(client);
+    if (cmd === 'deploy') await ensureAppRole(client);
+    await migrate(client);
+  } finally {
+    await client.end().catch(() => {});
+  }
+} catch (e) {
+  // Cota do banco esgotada (código 53000, ex.: plano grátis do Neon): no deploy, o site e o app sobem mesmo
+  // assim (as migrações rodam no próximo deploy). Qualquer outro erro continua impedindo o deploy.
+  if (cmd === 'deploy' && (e as { code?: string }).code === '53000') {
+    console.warn(`⚠️  Banco indisponível (cota do plano esgotada): ${(e as Error).message}`);
+    console.warn('⚠️  O servidor vai subir, mas contas, backup e compras só voltam quando o banco voltar.');
+  } else throw e;
 }

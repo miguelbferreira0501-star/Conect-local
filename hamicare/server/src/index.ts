@@ -11,5 +11,7 @@ if (env.NODE_ENV === 'production' && mailVia() === 'nenhum') console.warn('⚠�
 await syncAdmins().catch((e) => console.error('Admins:', e.message));
 serve({ fetch: createApp().fetch, port: env.PORT }, (info) => console.log(`Lumbi no ar: http://localhost:${info.port}`));
 
-// Lembretes: confere a cada 5 minutos quem já passou do horário escolhido.
-setInterval(() => sendDueReminders().catch((e) => console.error('Lembretes:', e.message)), 5 * 60_000);
+// Lembretes: confere a cada 30 minutos quem já passou do horário escolhido. Não pode ser mais curto: o banco
+// grátis (Neon) dorme depois de 5 minutos parado, e conferir a cada 5 minutos o mantinha acordado o mês
+// inteiro, estourando a cota de horas do plano.
+setInterval(() => sendDueReminders().catch((e) => console.error('Lembretes:', e.message)), 30 * 60_000);
