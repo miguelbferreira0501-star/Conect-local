@@ -1,0 +1,87 @@
+{
+  "id": "/",
+  "name": "Lumbi",
+  "short_name": "Lumbi",
+  "description": "Cuide de você com o Lumbi: hábitos saudáveis, calma para a ansiedade e um mundo inteiro para explorar. Cada cuidado seu faz o Lumbi evoluir.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FDE0AD",
+  "theme_color": "#82D2BF",
+  "categories": [
+    "health",
+    "lifestyle",
+    "fitness"
+  ],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "hami-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "hami-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "hami-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/inicio.webp",
+      "sizes": "540x1080",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Início com o Lumbi na sua arena"
+    },
+    {
+      "src": "screenshots/arenas.webp",
+      "sizes": "540x1080",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Mapa das 12 arenas"
+    },
+    {
+      "src": "screenshots/bemestar.webp",
+      "sizes": "540x1080",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Bem-estar com SOS para ansiedade"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Missões de hoje",
+      "short_name": "Missões",
+      "url": "/#atividades",
+      "icons": [
+        {
+          "src": "hami-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "SOS de ansiedade",
+      "short_name": "Bem-estar",
+      "url": "/#bem-estar",
+      "icons": [
+        {
+          "src": "hami-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

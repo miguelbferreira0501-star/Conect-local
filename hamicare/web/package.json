@@ -6,11 +6,13 @@
   "description": "Lumbi: autocuidado, hábitos e evolução junto com o Hami.",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -p tsconfig.json && vite build",
-    "build:artifact": "tsc -p tsconfig.json && vite build && node scripts/artifact.mjs",
+    "build": "node scripts/build.mjs",
+    "build:artifact": "tsc -p tsconfig.json && SINGLEFILE=1 vite build && node scripts/artifact.mjs",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "build:full": "tsc -p tsconfig.json && vite build",
+    "prebuilt": "node scripts/prebuilt.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.0",
