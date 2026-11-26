@@ -8,8 +8,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // Cada envio à Google Play precisa de um número maior (o 10 foi o último pacote feito pelo navegador).
-        versionCode Integer.parseInt(System.getenv("APP_VERSION_CODE") ?: "16")
-        versionName System.getenv("APP_VERSION_NAME") ?: "1.3.2"
+        versionCode Integer.parseInt(System.getenv("APP_VERSION_CODE") ?: "17")
+        versionName System.getenv("APP_VERSION_NAME") ?: "1.3.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

@@ -4,7 +4,6 @@ import { ArrowUpToLine, ChevronLeft, Lock, PackageOpen, Pencil, Sparkles } from 
 import { Hamster } from '../components/Hamster';
 import { TripDepart } from '../components/TripDepart';
 import { ISLAND_AT, MAP_H, MAP_W, TripMapArt } from '../components/TripMap';
-import { CompanionBuddy } from './Companions';
 import { Room } from '../components/Room';
 import { FLOOR_CSS, WALLPAPER_CSS } from '../components/Furniture';
 import { Seg, Sheet, toast } from '../components/ui';
@@ -73,7 +72,6 @@ function HouseTab({ onArenas }: { onArenas: () => void }) {
         {!s.adventure && (
           <div className="relative">
             <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood={s.pet.sleeping ? 'dormindo' : 'feliz'} size={150} label={s.pet.name} />
-            {!editing && <CompanionBuddy hamster={150} />}
           </div>
         )}
       </Room>

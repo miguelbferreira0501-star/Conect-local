@@ -20,7 +20,6 @@ import { arenaItemsOf } from '../shared/game/catalog';
 import { nextArena, xpAt } from '../shared/game/levels';
 import type { ArenaDef } from '../shared/game/config';
 import type { State } from '../types';
-import { CompanionBuddy, CompanionsCard } from './Companions';
 import { Egg } from '../components/Companion';
 import { companionOfArena, HATCH_DAYS } from '../data/companions';
 
@@ -75,7 +74,6 @@ export function ArenasTab({ onHouse }: { onHouse: () => void }) {
     <div className="grid gap-4">
       <LevelCard s={s} />
       <MoonCard onHouse={onHouse} />
-      <CompanionsCard />
       <ol className="arena-trail" aria-label="Trilha das arenas">
         {cfg.arenas.map((a, i) => {
           const unlocked = a.n <= cur;
@@ -183,7 +181,6 @@ function ArenaSheet({ n, onClose, onHouse }: { n: number | null; onClose: () => 
               {unlocked && (
                 <div className="relative">
                   <Hamster fur={s.pet.fur} grams={s.pet.grams} phase={s.pet.phase} outfit={s.pet.outfit} mood="feliz" size={104} label={s.pet.name} />
-                  <CompanionBuddy hamster={104} />
                 </div>
               )}
             </ArenaScene>

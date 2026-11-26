@@ -18,7 +18,7 @@ type TrickInfo = { mood: PetMood; sound: SoundId; ms: number; say?: string; pose
 export const TRICKS: Record<Trick, TrickInfo> = {
   // carinho: amassadinho, pulinho, olhinhos fechados de alegria, bracinhos batendo e coraçõezinhos
   // toque simples do Início: só um latidinho e um pulinho bem pequeno
-  toque: { mood: 'feliz', sound: 'latido', ms: 520, fx: 'lb-act-nudge' },
+  toque: { mood: 'risada', sound: 'latido', ms: 1300 },
   carinho: { mood: 'risada', sound: 'latido', ms: 1400, fx: 'gest-pat' },
   // chorão fofinho (sozinho, de tempos em tempos, quando ele precisa de ajuda)
   choro: { mood: 'choro', sound: 'choro', ms: 2600, fx: 'fx-sob' },

@@ -1,4 +1,3 @@
-import { EggHost } from './components/Egg';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { GoalDone } from './components/GoalDone';
 import { MoodCheckinHost } from './components/MoodCheckin';
@@ -257,7 +256,6 @@ export default function App() {
       <ResetPassword />
       <LegalHost />
       <GoalDone />
-      <EggHost />
       {!showWelcome && <MoodCheckinHost />}
       <GuardianHost />
       <Toaster />
