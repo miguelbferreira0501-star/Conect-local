@@ -1,11 +1,10 @@
 import { PlusWeeklyCard } from '../components/PlusWeekly';
 import { MoonTeaser } from '../components/MoonTeaser';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronRight, ChevronUp, Flame, Mail, Plus } from 'lucide-react';
-import { StickerCamera, StickerClothes, StickerGlobe, StickerHouse, StickerInvite, StickerMenu, StickerTree } from '../components/Stickers';
+import { ChevronRight, Flame, Mail, Menu, Plus } from 'lucide-react';
+import { StickerGlobe, StickerHouse, StickerTree } from '../components/Stickers';
 import { PlusBanner } from '../components/PlusBanner';
 import { EggCollection } from '../components/Egg';
-import { PoseSnap } from '../components/PoseSnap';
 import { MOON_N } from '../data/arenas';
 import { MoonOutdoors, OUTDOOR_W, Outdoors, outdoorGround, type YardTheme } from '../components/Outdoors';
 import { gameCfg } from '../lib/game';
@@ -47,7 +46,6 @@ import { useFurniturePlay } from '../components/FurniturePlay';
 import { TaskCalendar, byPart } from '../components/TaskCalendar';
 import { petMoodOf } from '../lib/petState';
 import { ACTIVITIES, activityForVisit, askText, conditionNeed, conditionOf, CONDITIONS, cryEvery, type Activity } from '../lib/hamiDay';
-import { ActivityFx, bodyFxClass, ConditionFx } from '../components/HamiFx';
 import { setBattery } from '../lib/store';
 
 
@@ -63,7 +61,7 @@ export function useNow(ms: number) {
 /** Altura do cenário do Início: mais baixo, para as tarefas aparecerem sem precisar rolar (como no app do gatinho). */
 const ROOM_H = 330;
 
-export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, onWorld, onBag, onInvite }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onArenas: () => void; onPlus: () => void; onTeam: () => void; onWorld?: (tab?: 'arenas' | 'casa' | 'mapa') => void; onBag?: () => void; onInvite?: () => void }) {
+export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, onWorld, onInvite }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onArenas: () => void; onPlus: () => void; onTeam: () => void; onWorld?: (tab?: 'arenas' | 'casa' | 'mapa') => void; onBag?: () => void; onInvite?: () => void }) {
   const [areaOpen, setAreaOpen] = useState(false);
   const [wallet, setWallet] = useState(false);
   const [cal, setCal] = useState(false);
@@ -149,8 +147,6 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
   const advLeft = adv ? Math.max(0, Math.ceil((adv.endsAt - now) / 60_000)) : 0;
 
   // Apertou, a tarefa sai na hora: sem animação, sem esperar.
-  const [railOpen, setRailOpen] = useState(true);
-  const [snap, setSnap] = useState(false);
   function onToggle(t: Task) {
     toggleTask(t.id);
   }
@@ -237,10 +233,10 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
           mood={moonHop ? 'surpreso' : petMood}
           cond={condOn ? cond : null}
           wear={condOn ? CONDITIONS[cond].wear : undefined}
-          prop={busy || hardDay || mood ? undefined : act.prop}
+          prop={undefined}
           pose={moonHop ? 'lua' : undefined}
-          auto={!moonHop}
-          fx={moonHop ? '' : bodyFxClass(condOn ? cond : null, busy || hardDay ? null : activity)}
+          simple
+          fx=""
           cryEvery={condOn && !mood ? cryEvery(new Date(now).getHours()) : 0}
           onTap={() => {
             if (s.pet.sleeping) {
@@ -251,7 +247,6 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
           }}
         />
       </div>
-      {condOn ? <ConditionFx cond={cond} /> : justFixed ? <span className="hfx hfx-yay" aria-hidden="true" /> : !hardDay && <ActivityFx act={activity} />}
       <CompanionBuddy hamster={168} />
     </div>
   );
@@ -291,69 +286,31 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
             </Room>
           </PanRoom>
         )}
-        {/* Botões do cenário em estilo adesivo: à esquerda o menu (com as cartas) e o mundo; à direita o trilho
-            que recolhe (roupas, casa, lá fora, convidar amigos e foto). */}
+        {/* Só três botões no cenário: o menu (três tracinhos, com as cartas), o Mundo e sair pra fora / voltar pra casa. */}
         <div className="hr-top">
-          <div className="hr-left">
-            <button className="stk-btn" onClick={onSettings} aria-label={`Menu${mailN ? `: ${mailN} cartas novas` : ''}`}>
-              <span className="stk">
-                <StickerMenu size={32} />
-              </span>
-              {mailN > 0 && <span className="stk-badge">{mailN}</span>}
-            </button>
+          <button className="hr-btn" onClick={onSettings} aria-label={`Menu${mailN ? `: ${mailN} cartas novas` : ''}`}>
+            <Menu size={22} strokeWidth={2.8} />
+            {mailN > 0 && <span className="stk-badge">{mailN}</span>}
+          </button>
+          <div className="hr-right">
             {onWorld && (
-              <button className="stk-btn" onClick={() => onWorld()} aria-label="Mundo: arenas, casa e passeios">
+              <button className="hr-btn" onClick={() => onWorld()} aria-label="Mundo: arenas, casa e passeios">
                 <span className="stk">
-                  <StickerGlobe size={30} />
+                  <StickerGlobe size={26} />
                 </span>
               </button>
             )}
-          </div>
-          <div className={`hr-rail ${railOpen ? '' : 'is-closed'}`}>
-            <button className="hr-rail-toggle" onClick={() => setRailOpen((o) => !o)} aria-label={railOpen ? 'Recolher os botões' : 'Mostrar os botões'} aria-expanded={railOpen}>
-              <ChevronUp size={18} strokeWidth={3} />
-            </button>
-            {railOpen && (
-              <>
-                {onBag && (
-                  <button className="stk-btn" onClick={onBag} aria-label="Roupas do Lumbi">
-                    <span className="stk">
-                      <StickerClothes size={30} />
-                    </span>
-                  </button>
-                )}
-                {onWorld && (
-                  <button className="stk-btn" onClick={() => onWorld('casa')} aria-label="Decorar a casa">
-                    <span className="stk">
-                      <StickerHouse size={30} />
-                    </span>
-                  </button>
-                )}
-                {!s.trek && !adv && (
-                  <button
-                    className="stk-btn"
-                    onClick={() => {
-                      if (furniture.use) furniture.stop();
-                      setOutside(!outside);
-                    }}
-                    aria-label={outside ? `Levar o ${s.pet.name} para dentro de casa` : `Levar o ${s.pet.name} lá para fora`}
-                  >
-                    <span className="stk">{outside ? <StickerHouse size={30} /> : <StickerTree size={30} />}</span>
-                  </button>
-                )}
-                {onInvite && (
-                  <button className="stk-btn" onClick={onInvite} aria-label="Convidar amigos">
-                    <span className="stk">
-                      <StickerInvite size={30} />
-                    </span>
-                  </button>
-                )}
-                <button className="stk-btn" onClick={() => setSnap(true)} aria-label={`Tirar foto do ${s.pet.name}`} data-sound="foto">
-                  <span className="stk">
-                    <StickerCamera size={30} />
-                  </span>
-                </button>
-              </>
+            {!s.trek && !adv && (
+              <button
+                className="hr-btn"
+                onClick={() => {
+                  if (furniture.use) furniture.stop();
+                  setOutside(!outside);
+                }}
+                aria-label={outside ? `Levar o ${s.pet.name} para dentro de casa` : `Levar o ${s.pet.name} lá para fora`}
+              >
+                <span className="stk">{outside ? <StickerHouse size={26} /> : <StickerTree size={26} />}</span>
+              </button>
             )}
           </div>
         </div>
@@ -418,8 +375,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
           </span>
         </button>
       </section>
-      <PlusBanner onOpen={onPlus} />
-      <PoseSnap open={snap} onClose={() => setSnap(false)} />
+      <PlusBanner onOpen={onPlus} onInvite={onInvite} />
       <TrekGo open={trekGo && !s.trek} onClose={() => setTrekGo(false)} onGo={() => (setTrekGo(false), startTrek() && setTrekStart(true))} />
       <DestinationSheet open={destOpen} onClose={() => setDestOpen(false)} />
       <DayGoalSheet open={areaOpen} onClose={() => setAreaOpen(false)} total={tasks.length} />
