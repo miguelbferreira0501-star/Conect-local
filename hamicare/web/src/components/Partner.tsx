@@ -10,7 +10,8 @@ import type { Outfit, State } from '../types';
 
 export function partnerOutfit(s: State): Outfit {
   const girl = partnerWord(s) === 'namorada';
-  return { chapeu: girl ? 'laco' : null, oculos: null, roupa: null, acessorio: girl ? null : 'gravata', efeito: null } as Outfit;
+  // nada na cabeça (as orelhinhas ficam livres): ela usa um colar de coração; ele, gravata
+  return { chapeu: null, oculos: null, roupa: null, acessorio: girl ? 'colar-coracao-ouro' : 'gravata', efeito: null } as Outfit;
 }
 
 /** Ela do lado do Lumbi no Início. */
@@ -47,7 +48,7 @@ export function PartnerSettings({ onPlus }: { onPlus: () => void }) {
         <span className="partner-lock-pets" aria-hidden="true">
           <Hamster fur={s.pet.fur} outfit={s.pet.outfit} size={64} idle={false} mood="feliz" />
           <span className="partner-lock-heart">♥</span>
-          <Hamster fur="creme" outfit={partnerOutfit(s)} size={58} idle={false} mood="amor" />
+          <Hamster fur={partnerWord(s) === 'namorada' ? 'rosinha' : 'creme'} outfit={partnerOutfit(s)} size={58} idle={false} mood="amor" />
         </span>
         <span className="min-w-0 flex-1 text-left">
           <b>
@@ -74,8 +75,8 @@ export function PartnerSettings({ onPlus }: { onPlus: () => void }) {
         Nome
         <input className="field" maxLength={18} value={p.name} onChange={(e) => updatePartner({ name: e.target.value })} />
       </label>
-      <div className="grid grid-cols-4 gap-1.5">
-        {FURS.map((f) => (
+      <div className="grid grid-cols-5 gap-1.5">
+        {[...FURS.filter((f) => f.partner), ...FURS.filter((f) => !f.partner)].map((f) => (
           <button key={f.id} className="color-opt !p-0.5" aria-pressed={p.fur === f.id} aria-label={f.label} onClick={() => updatePartner({ fur: f.id })}>
             <Hamster fur={f.id} size={50} idle={false} />
           </button>

@@ -13,7 +13,7 @@ function useOpenSound(open: boolean) {
 }
 
 /** Gaveta que sobe da parte de baixo da tela. */
-export function Sheet({ open, onClose, title, children, className = '' }: { open: boolean; onClose: () => void; title: string; children: ReactNode; className?: string }) {
+export function Sheet({ open, onClose, title, children, className = '', top }: { open: boolean; onClose: () => void; title: string; children: ReactNode; className?: string; top?: boolean }) {
   const [mounted, setMounted] = useState(open);
   const [shown, setShown] = useState(false);
   useOpenSound(open);
@@ -38,7 +38,8 @@ export function Sheet({ open, onClose, title, children, className = '' }: { open
 
   if (!mounted) return null;
   return (
-    <div className="fixed inset-0 z-40">
+    // top: por cima de tudo (até das telas cheias, como Rotinas e a Loja), para abrir na hora de onde for chamado.
+    <div className="fixed inset-0 z-40" style={top ? { zIndex: 400 } : undefined}>
       <div className={`overlay ${shown ? 'is-open' : ''}`} onClick={onClose} />
       <div role="dialog" aria-modal="true" aria-label={title} className={`sheet ${className} ${shown ? 'is-open' : ''}`}>
         <div className="mx-auto mb-1 mt-2 h-1.5 w-10 rounded-full bg-line" />

@@ -10,7 +10,7 @@ export type SoundId =
   // Interface
   | 'toque' | 'aba' | 'abrir' | 'fechar' | 'ligar' | 'desligar' | 'erro' | 'aviso' | 'enviar'
   // Sementes, missões e comemorações
-  | 'semente' | 'compra' | 'tarefa' | 'desfazer' | 'nivel' | 'conquista' | 'ofensiva' | 'bomdia' | 'festa' | 'magia' | 'pronto'
+  | 'semente' | 'compra' | 'tarefa' | 'acerto' | 'desfazer' | 'nivel' | 'conquista' | 'ofensiva' | 'bomdia' | 'festa' | 'magia' | 'pronto'
   // Baús
   | 'bau-treme' | 'bau-abre'
   // Banho
@@ -298,6 +298,14 @@ const SOUNDS: Record<SoundId, (o: PlayOpts) => void> = {
     bell(E6, 0.07, 0.12, 0.35);
     bell(G6, 0.14, 0.13, 0.7, 0.35);
     sparkles(3, 0.18, 0.2);
+  },
+  // Tarefa concluída: o "plim-plim" de resposta certa (duas notas subindo, bem claras).
+  acerto: () => {
+    tone({ f: E6, d: 0.09, v: 0.13, a: 0.002, type: 'triangle' });
+    bell(E6, 0, 0.09, 0.25, 0.2);
+    tone({ f: A6, t: 0.085, d: 0.26, v: 0.14, a: 0.002, type: 'triangle', wet: 0.2 });
+    bell(A6, 0.085, 0.11, 0.7, 0.35);
+    sparkles(4, 0.14, 0.25, 0.035);
   },
   desfazer: () => {
     tone({ f: G5, d: 0.12, v: 0.07 });

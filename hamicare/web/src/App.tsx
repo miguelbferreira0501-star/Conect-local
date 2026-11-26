@@ -1,3 +1,4 @@
+import { EggHost } from './components/Egg';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { GoalDone } from './components/GoalDone';
 import { MoodCheckinHost } from './components/MoodCheckin';
@@ -47,7 +48,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'bem-estar', label: 'Bem-estar' },
   { id: 'loja', label: 'Loja' },
   { id: 'bolsa', label: 'Bolsa' },
-  { id: 'amigos', label: 'Amigos' },
+  { id: 'amigos', label: 'Lumbi' },
 ];
 /** Telas que não ficam na barra (abrem pelo Início, pelo Crescer, pelo menu ou por atalhos). */
 const HIDDEN: Tab[] = ['atividades', 'mundo'];
@@ -219,7 +220,7 @@ export default function App() {
   return (
     <GrowthContext.Provider value={growth.scale}>
       <main className="shell">
-        {tab === 'inicio' && <Home onGo={go} onSettings={() => setMenu(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} onPlus={() => setPlus(true)} onTeam={() => go('amigos', undefined, 'turma')} onWorld={(sub) => go('mundo', sub ?? 'casa')} />}
+        {tab === 'inicio' && <Home onGo={go} onSettings={() => setMenu(true)} onEvolution={() => setEvolution(true)} onArenas={() => go('mundo', 'arenas')} onPlus={() => setPlus(true)} onTeam={() => go('amigos', undefined, 'turma')} onWorld={(sub) => go('mundo', sub ?? 'casa')} onBag={() => go('bolsa')} onInvite={() => go('amigos')} />}
         {tab === 'atividades' && <Activities onShareTask={(task) => shareTo({ kind: 'atividade', task })} onPlus={() => setPlus(true)} onHome={() => go('inicio')} />}
         {tab === 'crescer' && <Grow onGo={(t) => go(t)} onPlus={() => setPlus(true)} />}
         {tab === 'loja' && <StoreTab onPlus={() => setPlus(true)} onGift={(id) => (setGift(id), go('amigos'))} />}
@@ -247,7 +248,7 @@ export default function App() {
       <SeasonPass open={season} onClose={() => setSeason(false)} />
       <WalletSheet open={walletOpen} onClose={() => setWalletOpen(false)} />
       <SettingsSheet open={settings} onClose={() => setSettings(false)} onPlus={() => (setSettings(false), setPlus(true))} account={account} />
-      <Sheet open={plus} onClose={() => setPlus(false)} title="Lumbi+">
+      <Sheet open={plus} onClose={() => setPlus(false)} title="Lumbi+" top>
         <Paywall onClose={() => setPlus(false)} />
       </Sheet>
       {current?.type === 'level' ? <LevelUpScreen c={current} onClose={() => setQueue((q) => q.slice(1))} /> : <CelebrationModal c={current} onClose={() => setQueue((q) => q.slice(1))} />}
@@ -256,6 +257,7 @@ export default function App() {
       <ResetPassword />
       <LegalHost />
       <GoalDone />
+      <EggHost />
       {!showWelcome && <MoodCheckinHost />}
       <GuardianHost />
       <Toaster />

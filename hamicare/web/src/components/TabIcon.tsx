@@ -74,15 +74,17 @@ export function TabIcon({ id }: { id: TabId }) {
           </g>
         )}
         {id === 'amigos' && (
+          // carinha do cachorro (a aba agora se chama "Lumbi")
           <g>
-            <circle cx="11" cy="17" r="8" fill="#FFC75F" stroke="#D99A2B" strokeWidth="1.5" />
-            <circle cx="22" cy="15" r="7" fill="#B48CFF" stroke="#8A63D2" strokeWidth="1.5" />
-            <circle cx="8.5" cy="16" r="1.2" fill="#2B2224" />
-            <circle cx="13.5" cy="16" r="1.2" fill="#2B2224" />
-            <path d="M9 20 q2 1.6 4 0" stroke="#2B2224" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-            <circle cx="20" cy="14" r="1.1" fill="#2B2224" />
-            <circle cx="24.5" cy="14" r="1.1" fill="#2B2224" />
-            <path d="M20.5 17.5 q1.8 1.4 3.6 0" stroke="#2B2224" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+            <ellipse cx="7" cy="15" rx="4.6" ry="7.8" fill="#C98A52" transform="rotate(14 7 15)" />
+            <ellipse cx="25" cy="15" rx="4.6" ry="7.8" fill="#C98A52" transform="rotate(-14 25 15)" />
+            <ellipse cx="16" cy="17.5" rx="10" ry="9.5" fill="#FDEBD0" stroke="#D9A877" strokeWidth="1.2" />
+            <circle cx="12.4" cy="17" r="1.5" fill="#4A2C1D" />
+            <circle cx="19.6" cy="17" r="1.5" fill="#4A2C1D" />
+            <ellipse cx="16" cy="20" rx="1.6" ry="1.2" fill="#4A2C1D" />
+            <path d="M14 21.6 q2 1.4 4 0" stroke="#4A2C1D" strokeWidth="1" fill="none" strokeLinecap="round" />
+            <circle cx="10.5" cy="20.5" r="1.6" fill="#F7A9A0" opacity="0.7" />
+            <circle cx="21.5" cy="20.5" r="1.6" fill="#F7A9A0" opacity="0.7" />
           </g>
         )}
       </svg>

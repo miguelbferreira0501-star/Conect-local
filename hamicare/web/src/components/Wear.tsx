@@ -1908,7 +1908,6 @@ export function CostumeBack({ id, geo }: { id: string | null | undefined; geo: G
           {[-0.5, -0.2, 0.12, 0.42].map((t, i) => (
             <path key={i} d={`M${100 + t * w * 1.4 - 12} ${top + 10 + Math.abs(t) * 12} L${100 + t * w * 1.4} ${top - 16 + Math.abs(t) * 14} L${100 + t * w * 1.4 + 12} ${top + 10 + Math.abs(t) * 12} Z`} fill={c2} strokeLinejoin="round" />
           ))}
-          <path d={`M${100 + w * 0.8} 168 Q${100 + w + 30} 170 ${100 + w + 36} 150 Q${100 + w + 20} 166 ${100 + w * 0.7} 152 Z`} fill={c1} />
         </g>
       );
     case 'fantasia-unicornio':
@@ -1938,8 +1937,6 @@ export function CostumeBack({ id, geo }: { id: string | null | undefined; geo: G
     case 'fantasia-raposa':
       return (
         <g>
-          <path d={`M${100 + w * 0.7} 170 Q${100 + w + 34} 160 ${100 + w + 30} 116 Q${100 + w + 8} 140 ${100 + w * 0.6} 150 Z`} fill={c1} />
-          <path d={`M${100 + w + 30} 116 Q${100 + w + 34} 134 ${100 + w + 22} 140 Q${100 + w + 18} 126 ${100 + w + 30} 116 Z`} fill="#FFFFFF" />
           {[-1, 1].map((s) => (
             <g key={s}>
               <path d={`M${100 + s * w * 0.16} ${top + 14} L${100 + s * w * 0.58} ${top - 32} L${100 + s * w * 0.88} ${top + 22} Z`} fill={c1} />
@@ -1979,7 +1976,6 @@ export function CostumeBack({ id, geo }: { id: string | null | undefined; geo: G
           {[-0.36, -0.1, 0.16, 0.42].map((t, i) => (
             <path key={i} d={`M${100 + t * w * 1.3 - 9} ${top + 8 + Math.abs(t) * 12} L${100 + t * w * 1.3} ${top - 12 + Math.abs(t) * 14} L${100 + t * w * 1.3 + 9} ${top + 8 + Math.abs(t) * 12} Z`} fill={c2} />
           ))}
-          <path d={`M${100 + w * 0.8} 168 Q${100 + w + 30} 172 ${100 + w + 38} 152 L${100 + w + 46} 158 L${100 + w + 40} 146 Q${100 + w + 20} 166 ${100 + w * 0.7} 152 Z`} fill={c1} />
         </g>
       );
     case 'fantasia-tubarao':

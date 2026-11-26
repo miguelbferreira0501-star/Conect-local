@@ -1939,7 +1939,7 @@ export function updateProfile(patch: Partial<State['profile']>) {
 /** A pelagem pode ser usada agora? (as especiais são compradas; as do Plus pedem o Plus) */
 export function furAvailable(s: State, furId: string): boolean {
   const f = FURS.find((x) => x.id === furId);
-  if (!f) return false;
+  if (!f || f.partner) return false;
   if (f.plus && !isPremium(s)) return false;
   return !f.price || owned(s, `fur:${furId}`);
 }
@@ -1960,9 +1960,35 @@ export function updatePet(patch: Partial<Pick<State['pet'], 'name' | 'fur' | 'tr
 
 /** Par do Lumbi (Lumbi+): nome, pelagem e se aparece no Início. */
 export function updatePartner(patch: Partial<NonNullable<State['partner']>>) {
-  const cur = state.partner ?? { name: state.pet.gender === 'menina' ? 'Bento' : 'Mel', fur: 'creme', on: true };
+  const cur = state.partner ?? { name: state.pet.gender === 'menina' ? 'Bento' : 'Mel', fur: state.pet.gender === 'menina' ? 'creme' : 'rosinha', on: true };
   if (patch.fur && !FURS.some((f) => f.id === patch.fur)) return;
   commit({ ...state, partner: { ...cur, ...patch, name: (patch.name ?? cur.name).slice(0, 18) } });
+}
+
+// ---------- Ovinho que choca com as tarefas ----------
+/** Tarefas para chocar cada ovo. */
+export const EGG_GOAL = 5;
+/** Filhotes que podem nascer (em ordem; depois do último, recomeça). */
+export const EGG_PETS = ['pintinho', 'coelhinho', 'passarinho', 'tartaruga', 'ourico', 'sapinho', 'patinho', 'joaninha'] as const;
+
+/**
+ * Conta uma tarefa concluída no ovinho (cada tarefa só conta uma vez por dia). Devolve quantas já contaram
+ * no ovo e o filhote que nasceu agora (ou null). Sem tarefa nova para contar, devolve null.
+ */
+export function eggCount(taskId: string, day = todayKey()): { n: number; hatched: string | null; pets: number } | null {
+  const e = state.egg ?? { n: 0, pets: [] };
+  const counted = e.counted?.day === day ? e.counted.ids : [];
+  if (counted.includes(taskId)) return null;
+  let n = e.n + 1;
+  let hatched: string | null = null;
+  let pets = e.pets;
+  if (n >= EGG_GOAL) {
+    hatched = EGG_PETS[pets.length % EGG_PETS.length];
+    pets = [...pets, hatched];
+    n = 0;
+  }
+  commit({ ...state, egg: { n, pets, counted: { day, ids: [...counted, taskId].slice(-60) } } });
+  return { n: hatched ? EGG_GOAL : n, hatched, pets: pets.length };
 }
 
 /** A namorada (ou namorado) aparece? Só com Lumbi+ e se a pessoa ligou. */

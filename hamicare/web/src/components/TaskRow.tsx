@@ -1,4 +1,5 @@
 // Uma missão do dia com o botão de concluir "fofo" e o selo de calorias.
+import { play } from '../lib/sound';
 import { useRef } from 'react';
 import { Check, Pencil } from 'lucide-react';
 import { KcalChip } from './Journey';
@@ -46,7 +47,9 @@ export function TaskRow({ task, done, kcal, dir, sub, onToggle, onEdit, classNam
         className="check3d"
         aria-pressed={done}
         aria-label={done ? `Desfazer: ${task.title}` : `Concluir: ${task.title}`}
+        data-sound="none"
         onClick={() => {
+          play(done ? 'desfazer' : 'acerto');
           if (!quiet && !done && ref.current && !prefersReducedMotion()) {
             ref.current.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25) rotate(-8deg)' }, { transform: 'scale(0.92)' }, { transform: 'scale(1)' }], { duration: 420, easing: 'cubic-bezier(0.23,1,0.32,1)' });
           }

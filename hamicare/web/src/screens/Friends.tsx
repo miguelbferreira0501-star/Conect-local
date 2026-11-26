@@ -1,3 +1,4 @@
+import brincarArt from '../assets/lumbi/brincar.webp';
 import { useCallback, useEffect, useState } from 'react';
 import { Gift as GiftIcon, Plus, Share2, UserPlus, X } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
@@ -147,9 +148,11 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account, ini
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid gap-4">
-      <header>
-        <p className="eyebrow">Só vale gentileza por aqui</p>
-        <h1 className="font-display text-[30px] font-bold leading-tight">Amigos</h1>
+      <header className="fr-head">
+        <p className="eyebrow">Amigos · só vale gentileza por aqui</p>
+        <h1 className="font-display text-[30px] font-bold leading-tight">
+          Lumbi <span className="fr-spark" aria-hidden="true" />
+        </h1>
       </header>
       <PlayCard />
       {children}
@@ -157,47 +160,43 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Brincar com o seu cachorrinho (área de Interações): um cartão com o quintal, o pet e um botão grande. */
+/** Brincar com o seu cachorrinho (área de Interações): o cartão desenhado pela dona do app. */
 function PlayCard() {
   const s = useApp();
   return (
-    <button className="pc2" onClick={() => openUi('interacoes')} aria-label={`Brincar com o ${s.pet.name}`}>
-      <span className="pc2-scene" aria-hidden="true">
-        <svg viewBox="0 0 120 120" preserveAspectRatio="xMidYMax slice">
-          <defs>
-            <linearGradient id="pc2sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#A9DCFF" />
-              <stop offset="1" stopColor="#E6F6FF" />
-            </linearGradient>
-          </defs>
-          <rect width="120" height="120" fill="url(#pc2sky)" />
-          <circle cx="92" cy="28" r="14" fill="#FFE07A" />
-          <ellipse cx="30" cy="30" rx="16" ry="6" fill="#FFFFFF" />
-          <ellipse cx="40" cy="26" rx="10" ry="6" fill="#FFFFFF" />
-          <path d="M0 86 Q40 70 80 80 T120 76 V120 H0Z" fill="#A6DB86" />
-          <path d="M0 98 Q50 88 120 96 V120 H0Z" fill="#8BCB6C" />
-          {[[14, 92, '#FF8FB8'], [104, 90, '#FFFFFF'], [96, 104, '#FFD34D']].map(([x, y, c], i) => (
-            <circle key={i} cx={x as number} cy={y as number} r="3" fill={c as string} />
-          ))}
-        </svg>
-        <span className="pc2-pet">
-          <Hamster fur={s.pet.fur} outfit={s.pet.outfit} mood="risada" size={92} idle={false} growth={1} label="" />
-        </span>
+    <button className="pc3" onClick={() => openUi('interacoes')} aria-label={`Brincar com o ${s.pet.name}`}>
+      <span className="pc3-art" aria-hidden="true">
+        <img src={brincarArt} alt="" draggable={false} />
       </span>
-      <span className="pc2-body">
+      <span className="pc3-body">
         <b>Brincar com o {s.pet.name}</b>
         <small>Carinho, petiscos e buscar o graveto</small>
-        <span className="pc2-row">
-          <span className="pc2-go">Brincar</span>
-          <span className="pc2-hearts" aria-label={`${s.pet.hearts ?? 0} corações`}>
-            <svg viewBox="0 0 24 22" width="16" height="15" aria-hidden="true">
-              <path d="M12 21 C5 15 1 11 1 6.5 C1 3 3.6 1 6.4 1 C8.6 1 10.6 2.3 12 4.4 C13.4 2.3 15.4 1 17.6 1 C20.4 1 23 3 23 6.5 C23 11 19 15 12 21Z" fill="#FF5C7A" />
+        <span className="pc3-row">
+          <span className="pc3-go">
+            Brincar <PawIcon />
+          </span>
+          <span className="pc3-hearts" aria-label={`${s.pet.hearts ?? 0} corações`}>
+            <svg viewBox="0 0 24 22" width="18" height="16" aria-hidden="true">
+              <path d="M12 21 C5 15 1 11 1 6.5 C1 3 3.6 1 6.4 1 C8.6 1 10.6 2.3 12 4.4 C13.4 2.3 15.4 1 17.6 1 C20.4 1 23 3 23 6.5 C23 11 19 15 12 21Z" fill="#FF4F78" />
             </svg>
             {s.pet.hearts ?? 0}
           </span>
         </span>
       </span>
+      <span className="pc3-spark" aria-hidden="true" />
     </button>
+  );
+}
+
+function PawIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <ellipse cx="12" cy="16" rx="5.4" ry="4.6" fill="#fff" />
+      <circle cx="5.6" cy="10.4" r="2.4" fill="#fff" />
+      <circle cx="9.6" cy="6.4" r="2.4" fill="#fff" />
+      <circle cx="14.4" cy="6.4" r="2.4" fill="#fff" />
+      <circle cx="18.4" cy="10.4" r="2.4" fill="#fff" />
+    </svg>
   );
 }
 

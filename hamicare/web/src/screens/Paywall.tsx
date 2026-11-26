@@ -23,7 +23,7 @@ import { openUi } from '../lib/bus';
 
 export { PLUS_PRICE };
 
-const PARADE = ['fantasia-dragao-roxo', 'fantasia-tubarao', 'fantasia-panda'];
+const PARADE = ['fantasia-unicornio', 'fantasia-tubarao', 'fantasia-panda'];
 /** Dias grátis de cada plano (o servidor confere: anual 7, mensal 3). */
 export const TRIAL_DAYS = { anual: 7, mensal: 3 } as const;
 type Plan = keyof typeof TRIAL_DAYS;
@@ -156,7 +156,7 @@ export function Paywall({ onClose, fromOnboarding, fur, name }: { onClose: () =>
           </li>
           <li>
             <span className="pw-ico">
-              <Hamster growth={1} fur={petFur} outfit={{ chapeu: null, oculos: null, roupa: 'fantasia-raposa', acessorio: null, efeito: null }} size={56} idle={false} mood="feliz" label="Lumbi de raposinha" />
+              <Hamster growth={1} fur={petFur} outfit={{ chapeu: null, oculos: null, roupa: 'fantasia-urso-rosa', acessorio: null, efeito: null }} size={56} idle={false} mood="feliz" label="Lumbi de ursinho" />
             </span>
             <span>
               <b>Deixe o {pet} do seu jeito</b>

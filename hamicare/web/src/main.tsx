@@ -11,6 +11,7 @@ import './theme.css';
 import './wellbeing.css';
 import './arcade.css';
 import './story.css';
+import './lumbi.css';
 
 installAppSounds();
 installNativeReminders();

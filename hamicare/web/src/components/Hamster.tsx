@@ -195,6 +195,7 @@ export function dogColors(
   else if (fur.id === "mel") ear = "#A8622C";
   else if (fur.id === "dourado") ear = "#C9862A";
   else if (fur.id === "neve") ear = "#E8C9A8";
+  else if (fur.plus) ear = fur.ear;
   return { body, line, ear, patch: fur.patch };
 }
 
