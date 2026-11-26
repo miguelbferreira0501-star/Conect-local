@@ -131,6 +131,12 @@ export function DogPose({
       </defs>
       {/* virado: espelha por dentro do desenho (sem o volume de tecido, que escurece quando espelhado) */}
       <g transform={flip ? `translate(${S.w} 0) scale(-1 1)` : undefined}>
+        {anim && kind === 'anda' && (
+          <g className="dogp-dust" aria-hidden="true">
+            <circle cx={S.w * 0.18} cy={S.h - 8} r="7" fill="rgba(255,255,255,0.85)" />
+            <circle cx={S.w * 0.1} cy={S.h - 12} r="5" fill="rgba(255,255,255,0.75)" />
+          </g>
+        )}
         <ellipse className={anim && kind === 'anda' ? (fast ? 'dogp-shadow is-fast' : 'dogp-shadow') : undefined} style={{ transformOrigin: `${S.w * 0.5}px ${S.h - 4}px` }} cx={S.w * 0.5} cy={S.h - 4} rx={S.w * 0.34} ry="4.6" fill="rgba(60,30,40,0.13)" />
         <g
           className={anim ? (kind === 'anda' ? (fast ? 'dogp-bob is-fast' : 'dogp-bob') : kind === 'dorme' ? 'hami-sleep' : 'hami-breathe') : undefined}
@@ -188,7 +194,14 @@ export function DogPose({
               {im(andaPernaF, SPRITES.anda.pernaF, furF, wetStyle)}
             </g>
           )}
-          {im(kind === 'dorme' ? dormeRosto : kind === 'senta' ? sentaRosto : andaRosto, S.face)}
+          {kind === 'anda' && anim ? (
+            // o rosto acompanha o passo com um balancinho (atrasado do corpo, como cabeça de verdade)
+            <g className="dogp-head" style={{ transformOrigin: `${S.w * 0.62}px ${S.h * 0.55}px`, transformBox: 'view-box' }}>
+              {im(andaRosto, S.face)}
+            </g>
+          ) : (
+            im(kind === 'dorme' ? dormeRosto : kind === 'senta' ? sentaRosto : andaRosto, S.face)
+          )}
           {kind === 'anda' && carry && (
             <g transform="translate(-22 66) rotate(-6)">
               <path d="M4 15 C18 12 34 13 50 9 C56 8 62 7 66 6" stroke="#8B5A35" strokeWidth="6" strokeLinecap="round" fill="none" />

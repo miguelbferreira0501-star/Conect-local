@@ -1,0 +1,343 @@
+/* ================= Rodada 78: botões-adesivo, trilho do Início, banner do Plus, poses ================= */
+
+/* Adesivo: contorno branco grosso + sombrinha, em volta de qualquer desenho. */
+.stk {
+  display: inline-grid;
+  place-items: center;
+  filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 3px 3px rgba(40, 30, 70, 0.28));
+}
+.stk-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  border: 0;
+  background: none;
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.stk-btn:active { transform: scale(0.9) rotate(-4deg); }
+.stk-badge {
+  position: absolute;
+  right: 2px;
+  top: 0;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 2px solid #fff;
+  border-radius: 99px;
+  background: #ff5a5f;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* Topo do Início: menu e mundo à esquerda, trilho que recolhe à direita. */
+.hr-top { align-items: flex-start !important; justify-content: space-between; pointer-events: none; }
+.hr-top > * { pointer-events: auto; }
+.hr-top .hr-left { position: static; display: grid; gap: 4px; }
+.hr-rail {
+  display: grid;
+  justify-items: center;
+  gap: 0;
+  width: 66px;
+  padding: 6px 0 4px;
+  border-radius: 30px;
+  background: rgba(44, 52, 104, 0.32);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.hr-rail > .stk-btn + .stk-btn { border-top: 1.5px solid rgba(255, 255, 255, 0.35); height: 60px; width: 50px; }
+.hr-rail-toggle {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 22px;
+  margin-bottom: 2px;
+  border: 0;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.4);
+  color: #4a5794;
+}
+.hr-rail-toggle svg { transition: transform 200ms ease; }
+.hr-rail.is-closed { padding-bottom: 6px; }
+.hr-rail.is-closed .hr-rail-toggle { margin: 0; }
+.hr-rail.is-closed .hr-rail-toggle svg { transform: rotate(180deg); }
+/* o balão de fala não passa por baixo do trilho */
+.home-room .hr-bubble { max-width: calc(100% - 150px); }
+
+/* Ícones da barra de baixo também viram adesivo. */
+.tabbar .tab svg, .tabbar .tab img { filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) drop-shadow(0 2px 2px rgba(40, 30, 70, 0.2)); }
+
+/* Aventura bem menor (uma faixa só). */
+.hc-trip { border-radius: 18px !important; }
+.hc-trip-top { grid-auto-flow: column; justify-content: space-between; align-items: center; gap: 10px !important; padding: 8px 14px !important; }
+.hc-trip-top b { font-size: 15px !important; white-space: nowrap; }
+.hc-trip-step > i { width: 18px !important; height: 4px !important; }
+.hc-trip-dot { width: 24px !important; height: 24px !important; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.55) !important; }
+.hc-trip-dot .glyph { width: 16px !important; height: 16px !important; }
+.hc-trip-seed { width: 9px !important; height: 9px !important; }
+.hc-trip-foot { padding: 6px 14px !important; font-size: 12px !important; }
+.hc-trip-streak { padding: 1px 7px !important; font-size: 12px; }
+
+/* Calendário e "Faltam hoje" menores. */
+.hc-head { gap: 8px !important; }
+.hc-head .hc-head-btn { width: 36px !important; height: 36px !important; border-radius: 12px !important; }
+.hc-head .hc-head-btn .glyph, .hc-head .hc-head-btn .glyph-emoji { width: 20px !important; height: 20px !important; font-size: 17px !important; }
+.hc-head h2 { font-size: 17px !important; }
+
+/* Banner do Lumbi+ em carrossel. */
+.pb { position: relative; }
+.pb-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 26px; }
+.pb-track::-webkit-scrollbar { display: none; }
+.pb-slide {
+  position: relative;
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  display: flex;
+  align-items: center;
+  min-height: 112px;
+  padding: 12px 54px 22px 18px;
+  border: 0;
+  border-radius: 26px;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.35);
+  text-align: left;
+  overflow: hidden;
+}
+.pb-yellow { background: #fec61f; color: #4a2c12; box-shadow: inset 0 0 0 3px #f2a92a; }
+.pb-pink { background: linear-gradient(135deg, #ff9fbf, #ff7aa2); color: #4f1430; }
+.pb-lilac { background: linear-gradient(135deg, #b9a4ff, #8f7bf0); color: #261a5c; }
+.pb-text { position: relative; z-index: 1; display: grid; gap: 6px; max-width: 54%; }
+.pb-chip { justify-self: start; display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 99px; background: rgba(255, 255, 255, 0.55); font-size: 11px; font-weight: 900; letter-spacing: 0.06em; }
+.pb-text b { font-family: var(--font-display, inherit); font-size: 17px; font-weight: 800; line-height: 1.1; }
+.pb-art { position: absolute; right: 42px; bottom: 0; display: flex; align-items: flex-end; height: 100%; pointer-events: none; }
+.pb-dog { height: 84%; width: auto; }
+.pb-duo, .pb-furs { display: flex; align-items: flex-end; gap: 0; padding-bottom: 6px; }
+.pb-heart { align-self: center; color: #fff; font-size: 22px; animation: pb-beat 1.2s ease-in-out infinite; }
+.pb-pose { height: 86px; width: auto; margin: 0 -6px; }
+.pb-go { position: absolute; right: 12px; top: 50%; translate: 0 -50%; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #4a2c12; color: #ffd34d; }
+.pb-pink .pb-go { background: #fff; color: #ff5c8a; }
+.pb-lilac .pb-go { background: #fff; color: #7a63e8; }
+.pb-dots { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 5px; pointer-events: none; }
+.pb-dots i { width: 7px; height: 7px; border-radius: 99px; background: rgba(255, 255, 255, 0.6); transition: width 200ms ease; }
+.pb-dots i.is-on { width: 20px; background: #fff; }
+@keyframes pb-beat { 50% { transform: scale(1.25); } }
+
+/* Pose do Lumbi (folha de poses). */
+.pose { display: inline-grid; place-items: center; padding: 0; border: 0; background: none; }
+.pose img { display: block; width: 100%; height: auto; user-select: none; -webkit-user-drag: none; }
+.pose.is-float img { animation: pose-float 3.2s ease-in-out infinite; }
+.pose.is-pop { animation: pose-pop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.pose img.is-boing { animation: pose-boing 560ms cubic-bezier(0.34, 1.56, 0.64, 1), pose-float 3.2s ease-in-out 560ms infinite; }
+@keyframes pose-float { 50% { transform: translateY(-5px); } }
+@keyframes pose-pop { from { transform: scale(0.6) translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes pose-boing { 0% { transform: scale(1, 1); } 30% { transform: scale(1.12, 0.88) translateY(4px); } 55% { transform: scale(0.94, 1.08) translateY(-10px); } 80% { transform: scale(1.03, 0.97); } 100% { transform: none; } }
+
+/* Foto do Lumbi (câmera do Início). */
+.snap { display: grid; gap: 12px; padding-bottom: 6px; }
+.snap-photo { position: relative; display: grid; place-items: center; aspect-ratio: 1; margin: 0 auto; width: min(100%, 320px); border: 10px solid #fff; border-bottom-width: 10px; border-radius: 10px; box-shadow: 0 8px 22px rgba(40, 30, 70, 0.18); overflow: hidden; }
+.snap-photo img { width: 78%; height: auto; animation: pose-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.snap-flash { position: absolute; inset: 0; background: #fff; animation: snap-flash 420ms ease-out forwards; }
+@keyframes snap-flash { from { opacity: 0.95; } to { opacity: 0; } }
+.snap-cap { display: grid; justify-items: center; }
+.snap-cap b { font-family: var(--font-display, inherit); font-size: 20px; }
+.snap-cap small { color: var(--muted); font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pose.is-float img, .pose.is-pop, .pose img.is-boing, .pb-heart { animation: none !important; }
+}
+
+/* Rotinas: a fileira de filtros (que rola para o lado) ficava espremida quando a lista era comprida. */
+.gw-chips { min-height: 44px; flex-shrink: 0; align-items: center; }
+.gw-page > .gw-chips { height: 44px; }
+/* O mesmo para qualquer fileira das telas cheias do Crescer (a tela inteira rola, não as fileiras). */
+.gw-page > * { min-height: max-content; }
+
+/* Aba Lumbi (amigos): título com risquinhos de brilho e o cartão Brincar desenhado pela dona do app. */
+.fr-head h1 { display: inline-flex; align-items: flex-start; gap: 6px; }
+.fr-spark, .pc3-spark { display: inline-block; width: 30px; height: 30px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cg stroke='%23FFC93C' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M8 14 13 4'/%3E%3Cpath d='M14 18 24 11'/%3E%3Cpath d='M15 26 26 25'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain; }
+.pc3 {
+  position: relative;
+  display: grid;
+  grid-template-columns: 42% 1fr;
+  align-items: stretch;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 26px;
+  background: #fbf7ff;
+  box-shadow: 0 0 0 3px #e6dbff, 0 8px 20px rgba(110, 80, 190, 0.16);
+  text-align: left;
+  overflow: hidden;
+}
+.pc3:active { transform: scale(0.985); }
+.pc3-art { display: block; min-height: 150px; }
+.pc3-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.pc3-body { display: grid; align-content: center; gap: 6px; padding: 14px 14px 14px 16px; }
+.pc3-body b { font-family: var(--font-display, inherit); font-size: 20px; font-weight: 800; line-height: 1.12; color: #2c1650; }
+.pc3-body small { font-size: 14px; font-weight: 700; line-height: 1.3; color: #7d63c6; }
+.pc3-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.pc3-go { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 99px; background: linear-gradient(180deg, #ff8a6b, #f86a52); color: #fff; font-family: var(--font-display, inherit); font-size: 17px; font-weight: 800; box-shadow: 0 3px 0 #d84f3a; }
+.pc3-hearts { display: inline-flex; align-items: center; gap: 4px; padding: 7px 11px; border-radius: 99px; background: #ffe3ec; color: #ff4f78; font-weight: 900; font-size: 15px; }
+.pc3-spark { position: absolute; left: calc(42% + 150px); bottom: 34px; width: 24px; height: 24px; transform: rotate(-30deg); }
+@media (max-width: 360px) { .pc3-spark { display: none; } }
+
+/* Casinha dos amigos: textos escuros sobre a parede clara. */
+.ft-house .ft-friend, .ft-house .ft-me { color: #4a2c1d; }
+.ft-house .ft-friend b, .ft-house .ft-me b { text-shadow: 0 2px 0 rgba(255, 255, 255, 0.8); }
+.ft-house .ft-friend small, .ft-house .ft-me small { color: #8a6448; text-shadow: none; }
+.ft-house .ft-me { top: 60%; }
+.ft-house .ft-add { white-space: nowrap; }
+.ft-house .ft-sign { filter: drop-shadow(0 2px 3px rgba(120, 80, 40, 0.35)); }
+
+/* Bem-estar: o cachorrinho de bandana com a estrela e o balão de incentivo do lado. */
+.wb-pet-art { left: 4% !important; right: 4%; transform: none !important; bottom: 14px !important; display: flex; align-items: flex-end; }
+.wb-art-btn { flex: none; width: min(56%, 230px); padding: 0; border: 0; background: none; }
+.wb-art-btn img { display: block; width: 100%; height: auto; animation: pose-float 3.4s ease-in-out infinite; }
+.wb-art-btn img.is-boing { animation: pose-boing 560ms cubic-bezier(0.34, 1.56, 0.64, 1), pose-float 3.4s ease-in-out 560ms infinite; }
+.wb-pet-art .wb-say {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  align-self: flex-start;
+  display: grid;
+  gap: 2px;
+  max-width: 48%;
+  margin: 0 0 0 -6px;
+  padding: 12px 14px;
+  border-radius: 22px;
+  white-space: normal;
+  text-align: center;
+  background: #fff8ff;
+  box-shadow: 0 4px 0 rgba(80, 50, 140, 0.12);
+}
+.wb-pet-art .wb-say b { color: #4b2a8c; font-family: var(--font-display, inherit); font-size: 17px; }
+.wb-pet-art .wb-say span { color: #5d4d80; font-size: 13px; font-weight: 700; line-height: 1.3; }
+.wb-stage { height: 272px !important; }
+
+/* Quizzes (tela desenhada pela dona do app). */
+.qz { position: fixed; inset: 0; z-index: 95; overflow-y: auto; background: linear-gradient(180deg, #ecdfff 0%, #e4d4ff 55%, #cdb8ff 100%); color: #2a1a52; animation: ci-up 300ms cubic-bezier(0.2, 0.9, 0.3, 1); }
+.qz-in { position: relative; z-index: 1; display: grid; gap: 14px; max-width: 480px; min-height: 100%; margin: 0 auto; padding: calc(16px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) 18px calc(26px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))); align-content: start; }
+.qz-cloud { position: absolute; z-index: 0; width: 150px; height: 56px; border-radius: 40px; background: rgba(255, 255, 255, 0.7); }
+.qz-cloud::before { content: ''; position: absolute; left: 30px; top: -26px; width: 70px; height: 60px; border-radius: 50%; background: inherit; }
+.qz-cloud.is-a { right: -30px; top: 40px; }
+.qz-cloud.is-b { left: -50px; top: 380px; transform: scale(0.8); }
+.qz-cloud.is-c { right: -40px; top: 640px; transform: scale(0.9); }
+.qz-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.qz-head h1 { font-family: var(--font-display, inherit); font-size: 34px; font-weight: 900; line-height: 1; color: #2a1460; }
+.qz-head p { margin-top: 4px; font-size: 16px; font-weight: 700; color: #5b4790; }
+.qz-x { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.8); color: #4a3586; }
+.qz-hero { position: relative; display: flex; align-items: flex-end; justify-content: space-between; min-height: 170px; margin: 0 -18px; padding: 0 18px; border-radius: 0 0 50% 50% / 0 0 28px 28px; background: radial-gradient(120% 90% at 70% 100%, #d7c4ff 0 55%, transparent 56%); }
+.qz-bubble { position: relative; align-self: center; max-width: 52%; padding: 14px 16px; border-radius: 26px; background: #fffaf0; box-shadow: 0 4px 0 rgba(90, 60, 160, 0.12); font-family: 'Comic Sans MS', var(--font-display, inherit); font-size: 17px; font-weight: 800; line-height: 1.25; color: #4a2c8c; transform: rotate(-6deg); text-align: center; }
+.qz-bubble::after { content: ''; position: absolute; right: 26px; bottom: -12px; border: 12px solid transparent; border-top-color: #fffaf0; border-bottom: 0; transform: rotate(-20deg); }
+.qz-peek { width: 48%; max-width: 230px; height: auto; margin-bottom: -2px; animation: pose-float 3.4s ease-in-out infinite; transform-origin: 50% 100%; }
+.qz-spark { position: absolute; right: 44%; top: 6px; width: 32px; height: 32px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cg stroke='%23FFC93C' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M8 14 13 4'/%3E%3Cpath d='M14 18 24 11'/%3E%3Cpath d='M15 26 26 25'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain; transform: scaleX(-1) rotate(-60deg); }
+.qz-note { text-align: center; font-size: 15px; font-weight: 700; line-height: 1.45; color: #4f3f7a; }
+.qz-rule { display: flex; align-items: center; justify-content: center; gap: 10px; color: #8e6cf0; }
+.qz-rule i { width: 80px; height: 3px; border-radius: 3px; background: #c7b4ff; }
+.qz-list { display: grid; gap: 12px; }
+.qz-card { display: flex; align-items: center; gap: 14px; padding: 14px 14px 14px 12px; border: 0; border-radius: 24px; background: #fbf8ff; box-shadow: 0 0 0 2px #e4d8ff, 0 6px 14px rgba(90, 60, 160, 0.1); color: #2a1460; text-align: left; }
+.qz-card:active { transform: scale(0.98); }
+.qz-card b { display: block; font-size: 17px; font-weight: 800; line-height: 1.2; }
+.qz-card small { display: block; margin-top: 3px; font-size: 12.5px; font-weight: 700; color: #8a76b8; }
+.qz-card svg:last-child { color: #6b52c8; flex: none; }
+.qz-ico { display: grid; place-items: center; width: 60px; height: 60px; flex: none; border-radius: 18px; }
+.qz-foot { position: relative; display: grid; justify-items: center; margin: 18px -18px -26px; padding: 40px 18px calc(30px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))); border-radius: 50% 50% 0 0 / 40px 40px 0 0; background: #c3abff; }
+.qz-foot p { padding: 12px 22px; border-radius: 99px; background: rgba(255, 255, 255, 0.75); font-size: 16px; font-weight: 700; color: #3b2a72; text-align: center; }
+.qz-paws { position: absolute; left: 22px; top: 6px; fill: #a98be8; opacity: 0.8; }
+.qz-paws svg { position: absolute; }
+.qz-bar { display: flex; flex: 1; gap: 5px; }
+.qz-bar i { flex: 1; height: 8px; border-radius: 99px; background: rgba(255, 255, 255, 0.7); }
+.qz-bar i.is-done { background: #8e6cf0; }
+.qz-bar i.is-now { background: #c7b4ff; }
+.qz-qtitle { text-align: center; font-size: 14px; font-weight: 800; letter-spacing: 0.02em; color: #6b55a8; }
+.qz-intro { text-align: center; font-size: 15px; font-weight: 700; line-height: 1.4; color: #4f3f7a; }
+.qz-ask { display: flex; align-items: flex-end; gap: 10px; margin-top: 4px; }
+.qz-pose { width: 120px; height: auto; flex: none; }
+.qz-pose.is-boing { animation: pose-boing 560ms cubic-bezier(0.34, 1.56, 0.64, 1), pose-float 3.2s ease-in-out 560ms infinite; }
+.qz-q { position: relative; flex: 1; margin-bottom: 40px; padding: 16px 18px; border-radius: 24px 24px 24px 6px; background: #fff; font-family: var(--font-display, inherit); font-size: 20px; font-weight: 800; line-height: 1.25; color: #2a1460; box-shadow: 0 4px 0 rgba(90, 60, 160, 0.1); animation: bubble-in 280ms cubic-bezier(0.2, 0.9, 0.3, 1); }
+.qz-opts { display: grid; gap: 10px; }
+.qz-opt { padding: 16px 18px; border: 0; border-radius: 20px; background: #fbf8ff; box-shadow: 0 0 0 2px #e4d8ff, 0 4px 0 #d6c6ff; color: #2a1460; font-size: 16.5px; font-weight: 800; text-align: left; animation: pose-pop 360ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.qz-opt:active { transform: translateY(3px); box-shadow: 0 0 0 2px #c9b4ff, 0 1px 0 #d6c6ff; background: #f1e9ff; }
+.qz-result { position: relative; display: grid; justify-items: center; gap: 10px; text-align: center; }
+.qz-burst { position: absolute; top: 0; left: 50%; width: 260px; height: 260px; translate: -50% -20px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0 30%, rgba(255, 255, 255, 0) 70%); animation: qz-glow 2.6s ease-in-out infinite; }
+.qz-rpose { position: relative; width: 170px; height: auto; animation: pose-pop 600ms cubic-bezier(0.34, 1.56, 0.64, 1) both, pose-float 3.2s ease-in-out 600ms infinite; }
+.qz-result small { font-size: 13px; font-weight: 800; color: #7a64b8; }
+.qz-result h2 { font-family: var(--font-display, inherit); font-size: 28px; font-weight: 900; line-height: 1.1; color: #2a1460; }
+.qz-result > p { font-size: 16px; font-weight: 700; line-height: 1.45; color: #4a3a75; }
+.qz-tip { display: grid; gap: 4px; width: 100%; padding: 14px 16px; border-radius: 20px; background: #fff7d6; box-shadow: 0 0 0 2px #ffe58a; text-align: left; }
+.qz-tip b { font-size: 13px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: #b07a00; }
+.qz-tip span { font-size: 15px; font-weight: 700; line-height: 1.4; color: #5a4200; }
+.qz-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 15px; border: 0; border-radius: 18px; background: #7b5cf0; color: #fff; font-size: 17px; font-weight: 900; box-shadow: 0 4px 0 #5a3fc8; }
+.qz-btn.is-ghost { background: rgba(255, 255, 255, 0.8); color: #5a3fc8; box-shadow: 0 3px 0 #d6c6ff; }
+@keyframes qz-glow { 50% { transform: scale(1.1); opacity: 0.7; } }
+@media (prefers-reduced-motion: reduce) { .qz-peek, .qz-rpose, .qz-pose, .qz-opt, .qz-burst { animation: none !important; } }
+
+/* Volta da viagem: céu de fim de tarde, raios girando, o Lumbi comemorando e os presentes aparecendo um a um. */
+.unp.is-home { background: linear-gradient(180deg, #ffb36b 0%, #ff8fa8 45%, #a98bff 100%); }
+.unp-volta { justify-content: center; padding-top: calc(28px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) !important; overflow: hidden; }
+.unp-rays { position: absolute; left: 50%; top: 150px; width: 640px; height: 640px; translate: -50% -50%; background: repeating-conic-gradient(rgba(255, 255, 255, 0.22) 0 10deg, transparent 10deg 24deg); border-radius: 50%; -webkit-mask: radial-gradient(circle, #000 0 30%, transparent 62%); mask: radial-gradient(circle, #000 0 30%, transparent 62%); animation: unp-spin 18s linear infinite; pointer-events: none; }
+.unp-hero { position: relative; width: 190px; height: auto; animation: pose-pop 700ms cubic-bezier(0.34, 1.56, 0.64, 1) both, unp-jump 1.6s ease-in-out 700ms infinite; filter: drop-shadow(0 10px 14px rgba(90, 30, 80, 0.25)); }
+.unp-gifts { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 360px; }
+.unp-gift { display: grid; justify-items: center; gap: 2px; padding: 12px 8px; border-radius: 20px; background: rgba(255, 255, 255, 0.92); color: #3a2f55; box-shadow: 0 5px 0 rgba(90, 30, 80, 0.15); animation: pose-pop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.unp-gift i { display: grid; place-items: center; height: 44px; }
+.unp-gift b { font-size: 14px; font-weight: 900; }
+.unp-gift small { font-size: 15px; font-weight: 900; color: #e2547a; }
+.unp-volta .unp-btn { margin-top: 6px; max-width: 360px; }
+@keyframes unp-spin { to { rotate: 360deg; } }
+@keyframes unp-jump { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-16px) rotate(-3deg); } 60% { transform: translateY(-16px) rotate(3deg); } }
+@media (prefers-reduced-motion: reduce) { .unp-rays, .unp-hero, .unp-gift { animation: none !important; } }
+
+/* Caminhada mais viva: passo mais solto, cabeça balançando atrasada do corpo e poeirinha atrás dos pés. */
+@keyframes dogp-leg { 0%, 100% { transform: rotate(-30deg) translateY(-2px); } 25% { transform: rotate(-4deg) translateY(-6px); } 50% { transform: rotate(26deg) translateY(0); } 75% { transform: rotate(2deg) translateY(0); } }
+@keyframes dogp-bob {
+  0%, 50%, 100% { transform: translateY(0) rotate(0deg) scale(1.02, 0.98); }
+  25% { transform: translateY(-8px) rotate(-2.2deg) scale(0.985, 1.02); }
+  75% { transform: translateY(-8px) rotate(1.6deg) scale(0.985, 1.02); }
+}
+.dogp-head { animation: dogp-head 0.6s cubic-bezier(0.45, 0, 0.55, 1) -0.08s infinite; }
+@keyframes dogp-head { 0%, 50%, 100% { transform: rotate(1.5deg) translateY(1px); } 25%, 75% { transform: rotate(-2.5deg) translateY(-1px); } }
+.dogp-bob.is-fast .dogp-head { animation-duration: 0.34s; }
+.dogp-dust circle { transform-box: fill-box; transform-origin: center; animation: dogp-dust 0.6s ease-out infinite; opacity: 0; }
+.dogp-dust circle + circle { animation-delay: 0.3s; }
+@keyframes dogp-dust { 0% { transform: translateX(6px) scale(0.3); opacity: 0.9; } 100% { transform: translateX(-16px) translateY(-6px) scale(1.2); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .dogp-head, .dogp-dust circle { animation: none !important; opacity: 0; } }
+
+/* Ovinho (tela depois de cada tarefa, estilo dos apps de pet). */
+.eggs { position: fixed; inset: 0; z-index: 120; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: calc(40px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) 24px calc(28px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))); background: #5fb878; color: #fff; text-align: center; overflow: hidden; animation: fade-in 220ms ease; }
+.eggs-top { font-size: 14px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.95; }
+.eggs-stage { position: relative; display: flex; align-items: flex-end; justify-content: center; gap: 0; height: 250px; margin-top: 30px; }
+.eggs-egg { display: block; transform-origin: 50% 90%; animation: egg-wobble 1.6s ease-in-out infinite; }
+.eggs-egg.is-hatching { animation: egg-shake 0.25s ease-in-out infinite; }
+.eggs-pose { width: 120px; height: auto; margin-left: -26px; animation: pose-pop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both, pose-float 3s ease-in-out 0.7s infinite; }
+.eggs-born { position: relative; display: grid; place-items: center; animation: pose-pop 620ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.eggs-glow { position: absolute; width: 230px; height: 230px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0 30%, rgba(255, 255, 255, 0) 70%); animation: qz-glow 2.2s ease-in-out infinite; }
+.eggs-born svg { position: relative; }
+.eggs-title { max-width: 340px; font-family: var(--font-display, inherit); font-size: 24px; font-weight: 900; line-height: 1.2; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.12); }
+.eggs-bar { display: flex; align-items: center; gap: 6px; width: 100%; max-width: 340px; }
+.eggs-track { flex: 1; height: 22px; padding: 4px; border-radius: 99px; background: #fff; }
+.eggs-track i { display: block; height: 100%; border-radius: 99px; background: repeating-linear-gradient(-45deg, #b6e86b 0 10px, #9fd651 10px 20px); transition: width 700ms cubic-bezier(0.2, 0.9, 0.3, 1); animation: eggs-fill 900ms cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+.eggs-end { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: #c5ec8f; box-shadow: 0 0 0 3px #fff; }
+.eggs-sub { font-size: 16px; font-weight: 800; opacity: 0.95; }
+.eggs-btn { margin-top: auto; width: 100%; max-width: 360px; padding: 16px; border: 0; border-radius: 18px; background: #fff; color: #2f4a35; font-size: 18px; font-weight: 900; box-shadow: 0 5px 0 rgba(0, 0, 0, 0.12); }
+.eggs-confetti i { position: absolute; top: -20px; width: 10px; height: 16px; border-radius: 3px; animation: unp-fall 2.8s linear infinite; }
+@keyframes egg-wobble { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-6deg); } 40% { transform: rotate(5deg); } 60% { transform: rotate(-3deg); } 80% { transform: rotate(0); } }
+@keyframes egg-shake { 0%, 100% { transform: translateX(0) rotate(0); } 25% { transform: translateX(-4px) rotate(-5deg); } 75% { transform: translateX(4px) rotate(5deg); } }
+@keyframes eggs-fill { from { width: 0; } }
+@media (prefers-reduced-motion: reduce) { .eggs-egg, .eggs-pose, .eggs-born, .eggs-glow, .eggs-confetti i, .eggs-track i { animation: none !important; } }
+
+/* Coleção de filhotes (em "Mais para hoje"). */
+.eggc { display: grid; gap: 10px; padding: 14px; border-radius: 22px; background: var(--surface); box-shadow: inset 0 0 0 2px var(--line); }
+.eggc-now { display: flex; align-items: center; gap: 12px; }
+.eggc-now svg { flex: none; width: 56px; height: 70px; }
+.eggc-now b { display: block; font-family: var(--font-display, inherit); font-size: 17px; }
+.eggc-now small { color: var(--muted); font-weight: 800; }
+.eggc-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.eggc-list span { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 16px; background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+.gw-head.has-pose { position: relative; padding-right: 96px; }
+.gw-head-pose { position: absolute; right: -4px; top: -8px; }
+.hc-alldone .pose { margin: 0 auto -4px; }

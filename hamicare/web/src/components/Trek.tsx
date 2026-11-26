@@ -10,6 +10,8 @@ import { finishTrek, startTrek, trekMissing, trekPlaceOf, trekReady, useApp, TRE
 import { shade } from './Furniture';
 import { Glyph } from './art';
 import { Seed } from './ui';
+import { POSES } from './Poses';
+import { StickerDogFace } from './Stickers';
 import type { State } from '../types';
 
 // O Lumbi passeando de mochilinha (WalkingHami.tsx).
@@ -558,7 +560,7 @@ function Confetti() {
  */
 export function TrekUnpack({ result, onClose }: { result: TrekResult | null; onClose: () => void }) {
   const s = useApp();
-  const [step, setStep] = useState<'mala' | 'verso' | 'frente' | 'fim' | 'comida' | 'sementes'>('mala');
+  const [step, setStep] = useState<'mala' | 'verso' | 'frente' | 'fim' | 'volta'>('mala');
   const [pick, setPick] = useState<0 | 1 | null>(null);
   useEffect(() => {
     if (result) (setStep('mala'), setPick(null));
@@ -567,6 +569,7 @@ export function TrekUnpack({ result, onClose }: { result: TrekResult | null; onC
   const tale = TREK_TALES[Math.abs(result.tale) % TREK_TALES.length] ?? TREK_TALES[0];
   const food = itemById(result.food);
   const dark = step === 'frente' || step === 'fim';
+  const home = step === 'volta';
   const card = (
     <div className="unp-card is-front">
       <div className="unp-card-art">
@@ -578,8 +581,8 @@ export function TrekUnpack({ result, onClose }: { result: TrekResult | null; onC
     </div>
   );
   return (
-    <div className={`unp ${dark ? 'is-dark' : ''}`} role="dialog" aria-modal="true" aria-label="A mala da viagem">
-      {!dark && (
+    <div className={`unp ${dark ? 'is-dark' : ''} ${home ? 'is-home' : ''}`} role="dialog" aria-modal="true" aria-label="A mala da viagem">
+      {!dark && !home && (
         <div className="unp-top" aria-hidden="true">
           <TrekScene theme={result.place} height={120} still />
         </div>
@@ -598,7 +601,9 @@ export function TrekUnpack({ result, onClose }: { result: TrekResult | null; onC
           <h2>{s.pet.name} trouxe um cartão de lembrança</h2>
           <p className="unp-sub">Toda vez que ele volta de uma viagem, você ganha 1 cartão do lugar por onde ele passou.</p>
           <div className="unp-card is-back">
-            <span>🐹</span>
+            <span className="stk">
+              <StickerDogFace size={86} />
+            </span>
             <i>Lumbi</i>
           </div>
           <p className="unp-plus">
@@ -635,38 +640,49 @@ export function TrekUnpack({ result, onClose }: { result: TrekResult | null; onC
           <h2>{tale.r[pick ?? 0]}</h2>
           <p className="unp-sub">Hoje ele {result.story}.</p>
           <span className="unp-chip">+{result.xp} XP</span>
-          <button className="unp-btn" onClick={() => setStep('comida')}>
+          <button className="unp-btn" onClick={() => setStep('volta')}>
             Continuar
           </button>
         </div>
       )}
-      {step === 'comida' && (
-        <div className="unp-body">
+      {step === 'volta' && (
+        // A volta pra casa: o Lumbi comemorando no meio de raios de sol, e o que veio na mala aparecendo um a um.
+        <div className="unp-body unp-volta">
           <Confetti />
-          <h2>Parabéns!</h2>
-          <span className="unp-prize">{food && <Glyph e={food.art ?? food.emoji} size={72} />}</span>
-          <p className="unp-plus">{food?.name ?? 'Comidinha'} +1</p>
-          <span className="unp-mala">
-            <Suitcase size={84} />
-          </span>
-          <button className="unp-btn" data-sound="conquista" onClick={() => setStep('sementes')}>
-            Continuar
-          </button>
-        </div>
-      )}
-      {step === 'sementes' && (
-        <div className="unp-body">
-          <Confetti />
-          <h2>Parabéns!</h2>
-          <span className="unp-prize">
-            <Seed size={64} />
-          </span>
-          <p className="unp-plus">+{result.coins} sementes</p>
-          <span className="unp-mala">
-            <Suitcase size={84} />
-          </span>
+          <span className="unp-rays" aria-hidden="true" />
+          <img src={POSES.comemora} alt="" className="unp-hero" draggable={false} />
+          <h2>{s.pet.name} voltou pra casa!</h2>
+          <p className="unp-sub">Que viagem boa em {placeName(result.place)}. Olha o que veio na mala:</p>
+          <div className="unp-gifts">
+            <span className="unp-gift" style={{ animationDelay: '0.15s' }}>
+              <i>{food ? <Glyph e={food.art ?? food.emoji} size={40} /> : <Glyph e="🍪" size={40} />}</i>
+              <b>{food?.name ?? 'Comidinha'}</b>
+              <small>+1</small>
+            </span>
+            <span className="unp-gift" style={{ animationDelay: '0.35s' }}>
+              <i>
+                <Seed size={34} />
+              </i>
+              <b>Sementes</b>
+              <small>+{result.coins}</small>
+            </span>
+            <span className="unp-gift" style={{ animationDelay: '0.55s' }}>
+              <i>
+                <Glyph e="✨" size={36} />
+              </i>
+              <b>Experiência</b>
+              <small>+{result.xp} XP</small>
+            </span>
+            <span className="unp-gift" style={{ animationDelay: '0.75s' }}>
+              <i>
+                <Glyph e="🎴" size={36} />
+              </i>
+              <b>Cartão</b>
+              <small>{result.cards} de {placeName(result.place)}</small>
+            </span>
+          </div>
           <button className="unp-btn" data-sound="conquista" onClick={onClose}>
-            OK
+            Que viagem! Voltar pra casa
           </button>
         </div>
       )}

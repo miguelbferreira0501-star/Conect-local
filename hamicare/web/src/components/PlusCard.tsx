@@ -13,7 +13,7 @@ export const PLUS_PRICE = { month: 'R$ 10,00', year: 'R$ 65,90', yearMonthly: 'R
 /** Quanto conteúdo é só do Plus (para mostrar números de verdade). */
 export const PLUS_COUNTS = {
   items: ITEMS.filter((i) => i.plus).length,
-  furs: FURS.filter((f) => f.plus).length,
+  furs: FURS.filter((f) => f.plus && !f.partner).length,
   styles: STYLES.filter((s) => s.plus).length,
 };
 

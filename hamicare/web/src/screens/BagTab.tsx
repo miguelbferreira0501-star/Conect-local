@@ -76,7 +76,7 @@ const Tile = memo(function Tile({ entry, on, fur, onTap }: { entry: Entry; on: b
 
 function ownedFurs(s: State) {
   const premium = isPremium(s);
-  return FURS.filter((f) => (!f.price || owned(s, `fur:${f.id}`)) && (!f.plus || premium));
+  return FURS.filter((f) => !f.partner && (!f.price || owned(s, `fur:${f.id}`)) && (!f.plus || premium));
 }
 
 /** Carregando a categoria: o Lumbi pequenininho com pontinhos pulando. */

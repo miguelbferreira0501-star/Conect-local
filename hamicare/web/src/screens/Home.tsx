@@ -1,7 +1,12 @@
 import { PlusWeeklyCard } from '../components/PlusWeekly';
 import { MoonTeaser } from '../components/MoonTeaser';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronRight, Flame, Globe, House as HouseIcon, Mail, Plus, Settings, Trees } from 'lucide-react';
+import { ChevronRight, ChevronUp, Flame, Mail, Plus } from 'lucide-react';
+import { StickerCamera, StickerClothes, StickerGlobe, StickerHouse, StickerInvite, StickerMenu, StickerTree } from '../components/Stickers';
+import { PlusBanner } from '../components/PlusBanner';
+import { EggCollection } from '../components/Egg';
+import { PoseSnap } from '../components/PoseSnap';
+import { Pose } from '../components/Poses';
 import { MOON_N } from '../data/arenas';
 import { MoonOutdoors, OUTDOOR_W, Outdoors, outdoorGround, type YardTheme } from '../components/Outdoors';
 import { gameCfg } from '../lib/game';
@@ -56,7 +61,7 @@ export function useNow(ms: number) {
   return now;
 }
 
-export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onArenas: () => void; onPlus: () => void; onTeam: () => void; onWorld?: (tab?: 'arenas' | 'casa' | 'mapa') => void }) {
+export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, onWorld, onBag, onInvite }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onArenas: () => void; onPlus: () => void; onTeam: () => void; onWorld?: (tab?: 'arenas' | 'casa' | 'mapa') => void; onBag?: () => void; onInvite?: () => void }) {
   const [areaOpen, setAreaOpen] = useState(false);
   const [wallet, setWallet] = useState(false);
   const [cal, setCal] = useState(false);
@@ -142,6 +147,8 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
   const advLeft = adv ? Math.max(0, Math.ceil((adv.endsAt - now) / 60_000)) : 0;
 
   // Apertou, a tarefa sai na hora: sem animação, sem esperar.
+  const [railOpen, setRailOpen] = useState(true);
+  const [snap, setSnap] = useState(false);
   function onToggle(t: Task) {
     toggleTask(t.id);
   }
@@ -280,31 +287,71 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
             </Room>
           </PanRoom>
         )}
+        {/* Botões do cenário em estilo adesivo: à esquerda o menu (com as cartas) e o mundo; à direita o trilho
+            que recolhe (roupas, casa, lá fora, convidar amigos e foto). */}
         <div className="hr-top">
-          {!s.trek && !adv ? (
-            <button
-              className="hr-place"
-              onClick={() => {
-                if (furniture.use) furniture.stop();
-                setOutside(!outside);
-              }}
-              aria-label={outside ? `Levar o ${s.pet.name} para dentro de casa` : `Levar o ${s.pet.name} lá para fora`}
-            >
-              {outside ? <HouseIcon size={17} /> : <Trees size={17} />}
-              {outside ? 'Voltar pra casa' : 'Sair pra fora'}
+          <div className="hr-left">
+            <button className="stk-btn" onClick={onSettings} aria-label={`Menu${mailN ? `: ${mailN} cartas novas` : ''}`}>
+              <span className="stk">
+                <StickerMenu size={40} />
+              </span>
+              {mailN > 0 && <span className="stk-badge">{mailN}</span>}
             </button>
-          ) : (
-            <span className="flex-1" />
-          )}
-          {onWorld && (
-            <button className="hr-pill hr-round hr-world" onClick={() => onWorld()} aria-label="Mundo: arenas, casa e passeios">
-              <Globe size={18} />
+            {onWorld && (
+              <button className="stk-btn" onClick={() => onWorld()} aria-label="Mundo: arenas, casa e passeios">
+                <span className="stk">
+                  <StickerGlobe size={38} />
+                </span>
+              </button>
+            )}
+          </div>
+          <div className={`hr-rail ${railOpen ? '' : 'is-closed'}`}>
+            <button className="hr-rail-toggle" onClick={() => setRailOpen((o) => !o)} aria-label={railOpen ? 'Recolher os botões' : 'Mostrar os botões'} aria-expanded={railOpen}>
+              <ChevronUp size={18} strokeWidth={3} />
             </button>
-          )}
-          <button className="hr-pill hr-round" onClick={onSettings} aria-label={`Menu${mailN ? `: ${mailN} cartas novas` : ''}`}>
-            <Settings size={18} />
-            {mailN > 0 && <span className="hr-dot" aria-hidden="true" />}
-          </button>
+            {railOpen && (
+              <>
+                {onBag && (
+                  <button className="stk-btn" onClick={onBag} aria-label="Roupas do Lumbi">
+                    <span className="stk">
+                      <StickerClothes size={42} />
+                    </span>
+                  </button>
+                )}
+                {onWorld && (
+                  <button className="stk-btn" onClick={() => onWorld('casa')} aria-label="Decorar a casa">
+                    <span className="stk">
+                      <StickerHouse size={42} />
+                    </span>
+                  </button>
+                )}
+                {!s.trek && !adv && (
+                  <button
+                    className="stk-btn"
+                    onClick={() => {
+                      if (furniture.use) furniture.stop();
+                      setOutside(!outside);
+                    }}
+                    aria-label={outside ? `Levar o ${s.pet.name} para dentro de casa` : `Levar o ${s.pet.name} lá para fora`}
+                  >
+                    <span className="stk">{outside ? <StickerHouse size={42} /> : <StickerTree size={42} />}</span>
+                  </button>
+                )}
+                {onInvite && (
+                  <button className="stk-btn" onClick={onInvite} aria-label="Convidar amigos">
+                    <span className="stk">
+                      <StickerInvite size={42} />
+                    </span>
+                  </button>
+                )}
+                <button className="stk-btn" onClick={() => setSnap(true)} aria-label={`Tirar foto do ${s.pet.name}`} data-sound="foto">
+                  <span className="stk">
+                    <StickerCamera size={42} />
+                  </span>
+                </button>
+              </>
+            )}
+          </div>
         </div>
         {trekBack && (
           <>
@@ -367,6 +414,8 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
           </span>
         </button>
       </section>
+      <PlusBanner onOpen={onPlus} />
+      <PoseSnap open={snap} onClose={() => setSnap(false)} />
       <TrekGo open={trekGo && !s.trek} onClose={() => setTrekGo(false)} onGo={() => (setTrekGo(false), startTrek() && setTrekStart(true))} />
       <DestinationSheet open={destOpen} onClose={() => setDestOpen(false)} />
       <DayGoalSheet open={areaOpen} onClose={() => setAreaOpen(false)} total={tasks.length} />
@@ -404,7 +453,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
         ))}
         {tasks.length > 0 && done >= tasks.length && (
           <div className="hc-alldone">
-            <Glyph e="🎉" size={64} />
+            <Pose name="comemora" size={130} cycle={['comemora', 'danca', 'late', 'risada', 'coracao']} label="Lumbi comemorando" />
             <p>
               <b>Uhuul!</b> Tarefas de hoje concluídas!
             </p>
@@ -415,6 +464,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
         )}
         {!tasks.length && (
           <div className="hc-alldone">
+            <Pose name="duvida" size={110} cycle={['duvida', 'curioso', 'espia']} label="Lumbi esperando" />
             <p>Nenhuma tarefa para hoje ainda.</p>
             <button className="hc-alldone-add" onClick={() => setAddOpen(true)} aria-label="Adicionar tarefa">
               <Plus size={30} strokeWidth={3} />
@@ -430,6 +480,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onTeam, onWorld 
           <small>água, trilha, relatórios e mais</small>
         </summary>
         <div className="grid gap-4 pt-3">
+          <EggCollection />
           <PlusWeeklyCard />
           <WaterCard />
           <TrailCard />

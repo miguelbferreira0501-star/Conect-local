@@ -276,6 +276,9 @@ export interface State {
   pet: PetState;
   /** Par do Lumbi (Lumbi+). */
   partner?: PartnerPet;
+  /** Ovinho que choca com as tarefas: n = tarefas contadas no ovo atual, pets = filhotes já chocados,
+   *  counted = tarefas de hoje que já contaram (desfazer e refazer não conta de novo). */
+  egg?: { n: number; pets: string[]; counted?: { day: string; ids: string[] } };
   body: BodyData;
   coins: number;
   xp: number;

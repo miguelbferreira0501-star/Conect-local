@@ -58,7 +58,7 @@ export const SEASON_PLUS: SeasonPlusTier[] = [
   { item: 'fantasia-raposa' },
   { coins: 400 },
   { chest: 'ouro' },
-  { item: 'fantasia-dragao-roxo' },
+  { item: 'fantasia-dragao-rosa' },
   { coins: 800 },
   { chest: 'magico' },
   { item: 'fantasia-unicornio' },

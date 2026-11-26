@@ -1,6 +1,7 @@
 // A Loja: a rua das lojinhas (portas grandes coloridas) e a loja em tela cheia, como um cantinho próprio:
 // o Lumbi vendedor no alto, fundo marrom, quadradinhos só com o desenho e o preço (o nome aparece ao tocar)
 // e abas da loja embaixo (Vendinha, Roupas, Casa, Comida e Baús).
+import { HouseStyles, ThemeCollections } from './StoreTab';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ChevronLeft, ChevronRight, Crown, Gift, Heart, Lock } from 'lucide-react';
@@ -107,6 +108,20 @@ function ShopMode({ shop, onShop, onClose, onPlus, onGift }: { shop: ShopId; onS
         <div className="sm-body">
           {!kids && !isPremium(s) && <PlusBanner onPlus={onPlus} />}
           {shop === 'vendinha' && <VendinhaBody onTry={openTry} kids={kids} />}
+          {shop === 'casa' && (
+            <>
+              <section className="st-card">
+                <span className="st-ribbon is-pink">Coleções temáticas</span>
+                <p className="st-refresh">Móveis do mesmo tema e a roupinha combinando</p>
+                <ThemeCollections />
+              </section>
+              <section className="st-card">
+                <span className="st-ribbon">Casas prontas</span>
+                <p className="st-refresh">A coleção inteira com 10% de desconto</p>
+                <HouseStyles />
+              </section>
+            </>
+          )}
           {(shop === 'roupas' || shop === 'casa' || shop === 'comida') && <AisleBody key={shop} kinds={AISLES[shop]} looks={shop === 'roupas'} onTry={openTry} onPlus={onPlus} />}
           {shop === 'baus' && (
             <div className="sm-chests">

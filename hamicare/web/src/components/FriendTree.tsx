@@ -1,5 +1,6 @@
-// Árvore dos amigos (estilo Finch): o seu Lumbi no meio da árvore, cada amigo num galho e placas "???"
-// nos lugares vazios. Embaixo, o prêmio do próximo amigo e o menu de adicionar (convite, código e QR).
+// Casinha dos amigos: um prédio de casinhas de cachorro de madeira, com o seu Lumbi na casinha do meio e
+// cada amigo morando num cantinho (almofada, túnel, cestinho, plataformas). Os cantinhos vazios mostram
+// uma carinha tracejada com "+" para convidar. Embaixo, o prêmio do próximo amigo e o menu de adicionar.
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronRight, Gift, Plus, QrCode, ScanLine, Search, Share2 } from 'lucide-react';
 import qrcode from 'qrcode-generator';
@@ -11,25 +12,22 @@ import { FRIEND_LADDER } from '../shared/game';
 import { inviteLink, shareInvite } from '../lib/social/invite';
 import type { Profile } from '../lib/social/types';
 
-/** Lugares dos galhos (em % da cena): os 5 primeiros amigos. */
+/** Cantinhos do prédio (em % da cena): os 5 primeiros amigos. */
 const SLOTS = [
-  { x: 18, y: 36 },
-  { x: 82, y: 33 },
-  { x: 22, y: 62 },
-  { x: 80, y: 60 },
-  { x: 50, y: 15 },
+  { x: 22, y: 74 },
+  { x: 79, y: 70 },
+  { x: 24, y: 40 },
+  { x: 80, y: 40 },
+  { x: 58, y: 18 },
 ];
 
+/** Cantinho vazio: carinha de cachorro tracejada com "+". */
 function Sign() {
   return (
-    <svg viewBox="0 0 80 74" width="72" height="66" aria-hidden="true">
-      <ellipse cx="40" cy="70" rx="16" ry="4" fill="#000" opacity="0.18" />
-      <rect x="35" y="16" width="10" height="54" rx="3" fill="#6B4A2E" />
-      <rect x="6" y="14" width="68" height="15" rx="4" fill="#8C6440" transform="rotate(-4 40 21)" />
-      <rect x="6" y="28" width="68" height="15" rx="4" fill="#7A5535" transform="rotate(-4 40 35)" />
-      <text x="40" y="35" textAnchor="middle" fontFamily="Nunito, sans-serif" fontWeight="900" fontSize="17" fill="#B9B2C4" transform="rotate(-4 40 30)">
-        ???
-      </text>
+    <svg viewBox="0 0 80 70" width="68" height="60" aria-hidden="true">
+      <path d="M20 22c-8-4-14 2-13 12 1 7 5 10 8 9M60 22c8-4 14 2 13 12-1 7-5 10-8 9" fill="rgba(255,255,255,0.6)" stroke="#B07A52" strokeWidth="2.5" strokeDasharray="5 4" strokeLinecap="round" />
+      <ellipse cx="40" cy="38" rx="24" ry="22" fill="rgba(255,255,255,0.6)" stroke="#B07A52" strokeWidth="2.5" strokeDasharray="5 4" />
+      <path d="M40 30v16M32 38h16" stroke="#B07A52" strokeWidth="4" strokeLinecap="round" />
     </svg>
   );
 }
@@ -37,38 +35,66 @@ function Sign() {
 function Scenery() {
   return (
     <svg className="ft-bg" viewBox="0 0 390 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <defs>
-        <linearGradient id="ft-sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#27304f" />
-          <stop offset="1" stopColor="#3a4868" />
-        </linearGradient>
-      </defs>
-      <rect width="390" height="460" fill="url(#ft-sky)" />
-      {[
-        [40, 40], [120, 22], [250, 30], [330, 60], [80, 90], [300, 110], [190, 50],
-      ].map(([x, y], i) => (
-        <circle key={i} className="ft-star" style={{ animationDelay: `${i * 0.4}s` }} cx={x} cy={y} r={i % 2 ? 1.6 : 2.2} fill="#FFF6D8" />
+      {/* parede pêssego com bolinhas e varal de bandeirinhas */}
+      <rect width="390" height="460" fill="#F8E7D3" />
+      {Array.from({ length: 30 }, (_, i) => (
+        <circle key={i} cx={(i % 6) * 70 + (Math.floor(i / 6) % 2 ? 35 : 0) + 12} cy={Math.floor(i / 6) * 70 + 70} r="5" fill="#F1D6BC" />
       ))}
-      <circle cx="338" cy="44" r="16" fill="#FFF3C4" />
-      <circle cx="331" cy="40" r="15" fill="#2c3554" />
-      {/* tronco */}
-      <path d="M160 470 C170 400 168 380 150 352 L240 352 C222 380 220 400 230 470 Z" fill="#3a2a1d" />
-      {/* copa: fundo, meio e frente */}
-      <g fill="#1d3a20">
-        <circle cx="60" cy="210" r="90" /><circle cx="330" cy="205" r="95" /><circle cx="195" cy="120" r="105" /><circle cx="120" cy="140" r="80" /><circle cx="280" cy="140" r="80" />
+      <path d="M-10 26 Q195 62 400 26" fill="none" stroke="#B88A62" strokeWidth="2" />
+      {Array.from({ length: 11 }, (_, i) => {
+        const x = 10 + i * 36;
+        const y = 26 + 36 * (1 - ((x - 195) / 205) ** 2) * 0.55;
+        return <path key={i} d={`M${x - 12} ${y} L${x + 12} ${y} L${x} ${y + 20} Z`} fill={['#FF9FBF', '#FFD66B', '#8FD3B0', '#9EC4FF'][i % 4]} />;
+      })}
+      {/* chão verdinho */}
+      <rect y="372" width="390" height="88" fill="#9CC98A" />
+      <rect y="372" width="390" height="8" fill="#B4DAA2" />
+      {/* base de madeira */}
+      <rect x="44" y="378" width="302" height="26" rx="10" fill="#8C5E3C" />
+      <rect x="44" y="374" width="302" height="12" rx="6" fill="#B07A52" />
+      {/* postes de sisal */}
+      <rect x="183" y="112" width="24" height="268" rx="6" fill="#E3C79C" />
+      <rect x="290" y="208" width="18" height="170" rx="5" fill="#E3C79C" />
+      <rect x="82" y="208" width="18" height="170" rx="5" fill="#E3C79C" />
+      {[130, 160, 190, 220, 250].map((y) => (
+        <path key={y} d={`M183 ${y} l24 8`} stroke="#CDAA78" strokeWidth="3" />
+      ))}
+      {/* plataforma de cima com almofadinha */}
+      <ellipse cx="226" cy="118" rx="82" ry="15" fill="#8C5E3C" />
+      <ellipse cx="226" cy="112" rx="82" ry="14" fill="#C98F5E" />
+      <ellipse cx="226" cy="104" rx="46" ry="10" fill="#FFB9CF" />
+      {/* plataformas dos lados com cestinho e almofada */}
+      <ellipse cx="94" cy="214" rx="58" ry="12" fill="#8C5E3C" />
+      <ellipse cx="94" cy="209" rx="58" ry="11" fill="#C98F5E" />
+      <path d="M58 204 Q94 236 130 204 Z" fill="#D9A46C" />
+      <ellipse cx="300" cy="214" rx="58" ry="12" fill="#8C5E3C" />
+      <ellipse cx="300" cy="209" rx="58" ry="11" fill="#C98F5E" />
+      <ellipse cx="300" cy="200" rx="36" ry="9" fill="#A9D8FF" />
+      {/* casinha do meio (onde mora o seu Lumbi) */}
+      <rect x="132" y="250" width="126" height="104" rx="10" fill="#F2A65A" />
+      <rect x="132" y="250" width="126" height="16" fill="#E58E3E" />
+      <path d="M118 258 L195 196 L272 258 Z" fill="#C0583F" />
+      <path d="M118 258 L195 196 L272 258" fill="none" stroke="#9C4430" strokeWidth="8" strokeLinejoin="round" strokeLinecap="round" />
+      <path d="M160 354 v-44 a35 35 0 0 1 70 0 v44 Z" fill="#6B3E22" />
+      <path d="M195 236 a8 8 0 1 0 0.1 0" fill="#FFE7A8" />
+      {/* escadinha */}
+      <g stroke="#9C6A42" strokeWidth="5" strokeLinecap="round">
+        <path d="M118 372 L148 270" />
+        <path d="M140 376 L170 274" />
+        {[0, 1, 2, 3].map((k) => (
+          <path key={k} d={`M${122 + k * 7} ${356 - k * 24} l22 4`} />
+        ))}
       </g>
-      <g fill="#2a4f2b">
-        <circle cx="40" cy="300" r="85" /><circle cx="350" cy="290" r="90" /><circle cx="195" cy="210" r="110" /><circle cx="100" cy="230" r="80" /><circle cx="300" cy="225" r="85" />
-      </g>
-      <g fill="#36622f">
-        <circle cx="70" cy="370" r="80" /><circle cx="320" cy="365" r="85" /><circle cx="195" cy="330" r="90" /><circle cx="130" cy="290" r="60" /><circle cx="265" cy="290" r="62" />
-      </g>
-      {/* galho do meio, onde mora o seu Lumbi */}
-      <ellipse cx="195" cy="300" rx="84" ry="30" fill="#2f5a2c" />
-      {/* brilhinhos nas folhas */}
-      <g fill="#4f8a43" opacity="0.55">
-        <circle cx="150" cy="200" r="14" /><circle cx="250" cy="180" r="10" /><circle cx="90" cy="300" r="12" /><circle cx="310" cy="320" r="11" />
-      </g>
+      {/* almofada no chão (esquerda) e túnel (direita) */}
+      <ellipse cx="86" cy="366" rx="52" ry="16" fill="#F7D9A8" />
+      <ellipse cx="86" cy="360" rx="44" ry="12" fill="#FFE9C4" />
+      <rect x="262" y="300" width="92" height="74" rx="20" fill="#7FB07A" />
+      <ellipse cx="308" cy="336" rx="30" ry="27" fill="#4E7A4A" />
+      <ellipse cx="308" cy="300" rx="46" ry="12" fill="#97C48F" />
+      {/* bolinha de lã pendurada */}
+      <path d="M150 118 v52" stroke="#B88A62" strokeWidth="2" />
+      <circle cx="150" cy="178" r="10" fill="#B7E0A8" />
+      <path d="M143 172 q7 6 14 0 M142 180 q8 5 16 0" stroke="#8CC57A" strokeWidth="2" fill="none" />
     </svg>
   );
 }
@@ -79,7 +105,7 @@ export function FriendTree({ me, friends, onAdd, onOpenProfile }: { me: Profile 
   const next = FRIEND_LADDER.findIndex((_, i) => !friendRewardClaimed(s, i + 1));
   return (
     <div className="grid gap-3">
-      <section className="ft" aria-label="Árvore dos amigos">
+      <section className="ft ft-house" aria-label="Casinha dos amigos">
         <Scenery />
         {SLOTS.map((p, i) => {
           const f = shown[i];
@@ -109,7 +135,7 @@ export function FriendTree({ me, friends, onAdd, onOpenProfile }: { me: Profile 
           <span className="ft-add-plus">
             <Plus size={18} strokeWidth={3.5} />
           </span>
-          Adicionar amigo
+          Convide amigos para se mudarem!
         </button>
       </section>
       {next >= 0 && (

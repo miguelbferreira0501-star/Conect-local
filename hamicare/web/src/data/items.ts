@@ -621,7 +621,8 @@ export const ITEMS: Item[] = [
   W('fantasia-gato-preto', 'Fantasia de gatinho preto', 'roupa', 110, { base: 'fantasia-gato', c1: '#4A4452', c2: '#FFFFFF', level: 3 }),
   W('fantasia-sapo', 'Fantasia de sapinho', 'roupa', 110, { base: 'fantasia-sapo', c1: '#7BD389', c2: '#E8F7C8' }),
   W('fantasia-dino-verde', 'Fantasia de dinossauro', 'roupa', 130, { base: 'fantasia-dino', c1: '#6CC48C', c2: '#FFE27A', level: 2 }),
-  W('fantasia-dino-roxo', 'Fantasia de dinossauro roxo', 'roupa', 130, { base: 'fantasia-dino', c1: '#A57CF0', c2: '#FFD6E4', level: 4 }),
+  // fantasias roxas de dinossauro e dragão saíram da loja (quem já tem continua com elas)
+  W('fantasia-dino-roxo', 'Fantasia de dinossauro roxo', 'roupa', 130, { base: 'fantasia-dino', c1: '#A57CF0', c2: '#FFD6E4', level: 4, souvenir: true }),
   W('fantasia-pintinho', 'Fantasia de pintinho', 'roupa', 100, { base: 'fantasia-pintinho', c1: '#FFE066', c2: '#FFF5C2' }),
   W('fantasia-pinguim', 'Fantasia de pinguim', 'roupa', 120, { base: 'fantasia-pinguim', c1: '#3A3440', c2: '#FFFFFF', level: 3 }),
   W('fantasia-unicornio', 'Fantasia de unicórnio', 'roupa', 160, { base: 'fantasia-unicornio', c1: '#FFFFFF', c2: '#FF9FC2', plus: true }),
@@ -629,7 +630,7 @@ export const ITEMS: Item[] = [
   W('fantasia-raposa', 'Fantasia de raposinha', 'roupa', 150, { base: 'fantasia-raposa', c1: '#FF9A4D', c2: '#FFFFFF', plus: true }),
   W('fantasia-panda', 'Fantasia de panda', 'roupa', 150, { base: 'fantasia-panda', c1: '#FFFFFF', c2: '#2B2224', plus: true }),
   W('fantasia-leao', 'Fantasia de leãozinho', 'roupa', 160, { base: 'fantasia-leao', c1: '#FFC857', c2: '#FFF1C9', plus: true }),
-  W('fantasia-dragao-roxo', 'Fantasia de dragãozinho', 'roupa', 170, { base: 'fantasia-dragao', c1: '#A57CF0', c2: '#FFD6E4', plus: true }),
+  W('fantasia-dragao-roxo', 'Fantasia de dragãozinho', 'roupa', 170, { base: 'fantasia-dragao', c1: '#A57CF0', c2: '#FFD6E4', plus: true, souvenir: true }),
   W('fantasia-dragao-rosa', 'Fantasia de dragãozinho rosa', 'roupa', 170, { base: 'fantasia-dragao', c1: '#FF9FC2', c2: '#FFE27A', plus: true }),
   W('fantasia-dragao-azul', 'Fantasia de dragãozinho azul', 'roupa', 170, { base: 'fantasia-dragao', c1: '#7FB8F0', c2: '#FFE3F7', plus: true }),
   W('fantasia-tubarao', 'Fantasia de tubarão', 'roupa', 160, { base: 'fantasia-tubarao', c1: '#8FA8C8', c2: '#FFFFFF', plus: true }),

@@ -1,13 +1,14 @@
+import bemestarArt from '../assets/lumbi/bemestar.webp';
 import { play } from '../lib/sound';
 import { MoodSlider } from '../components/MoodSlider';
 import { PlusCard } from '../components/PlusCard';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronRight, Copy, Lock, Phone, Shuffle, Trash2, X } from 'lucide-react';
+import { Copy, Lock, Phone, Shuffle, Trash2, X } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
-import { LivePet } from '../components/LivePet';
 import { LineChart, toast } from '../components/ui';
 import { AFFIRMATIONS, EMOTIONS, MOODS, REFLECTIONS } from '../data/lines';
-import { BODY_SCAN, BREATHS, MEDITATION_CUES, QUIZZES, SLEEP_ROUTINE } from '../data/wellbeing';
+import { BODY_SCAN, BREATHS, MEDITATION_CUES, SLEEP_ROUTINE } from '../data/wellbeing';
+import { Quizzes } from '../components/Quizzes';
 import { addJar, addJournal, dayOf, deleteJar, deleteJournal, getState, isPremium, logEvent, setEmotions, setMood, todayKey, todayTasks, toggleTask, useApp } from '../lib/store';
 import { addDays, copyText, formatDay, hashStr, prefersReducedMotion } from '../lib/util';
 import type { PetMood } from '../types';
@@ -122,7 +123,7 @@ export function Wellbeing({ onPlus }: { onPlus: () => void }) {
       {tool === 'sono' && <SleepRoutine onClose={() => setTool(null)} onBreath={() => setTool('respirar')} />}
       {tool === 'afirmacoes' && <Affirmations onClose={() => setTool(null)} />}
       {tool === 'pote' && <Jar onClose={() => setTool(null)} />}
-      {tool === 'quiz' && <Quiz onClose={() => setTool(null)} />}
+      {tool === 'quiz' && <Quizzes onClose={() => setTool(null)} />}
     </div>
   );
 }
@@ -141,11 +142,15 @@ function WellbeingPet() {
       <span className="wb-spark" style={{ left: '14%', top: '12%' }} aria-hidden="true" />
       <span className="wb-spark is-sm" style={{ right: '18%', top: '22%', animationDelay: '0.8s' }} aria-hidden="true" />
       <span className="wb-cloud" aria-hidden="true" />
-      <div className="wb-pet">
-        <LivePet size={240} say={n > 0 ? line : null} onTap={() => setN((x) => x + 1)} />
-        <span className="wb-heart" aria-hidden="true">
-          <Glyph e="💗" size={40} />
-        </span>
+      {/* o cachorrinho de bandana com a estrela (arte enviada) e o balão de incentivo do lado */}
+      <div className="wb-pet wb-pet-art">
+        <button className="wb-art-btn" onClick={() => (setN((x) => x + 1), play('pulo'))} aria-label={`${s.pet.name}: toque para ouvir uma frase gentil`} data-sound="none">
+          <img key={n} src={bemestarArt} alt="" className={n ? 'is-boing' : ''} draggable={false} />
+        </button>
+        <p className="wb-say" aria-live="polite">
+          <b>{n % 3 === 0 ? 'Você consegue!' : n % 3 === 1 ? 'Tô aqui com você!' : 'Um passo de cada vez'}</b>
+          <span>{n ? line : 'Estou aqui para caminhar com você 💙'}</span>
+        </p>
       </div>
     </section>
   );
@@ -1036,72 +1041,3 @@ function Jar({ onClose }: { onClose: () => void }) {
 
 // ---------- Quizzes ----------
 
-function Quiz({ onClose }: { onClose: () => void }) {
-  const [quiz, setQuiz] = useState<(typeof QUIZZES)[number] | null>(null);
-  const [answers, setAnswers] = useState<string[]>([]);
-  const pet = useRef<HTMLDivElement>(null);
-  if (!quiz) {
-    return (
-      <ToolScreen title="Quizzes" sub="Para se conhecer melhor" theme="lavanda" onClose={onClose}>
-        <div className="flex justify-center">
-          <PetBig mood="surpreso" size={140} />
-        </div>
-        <p className="tool-text text-[14px]">Não são testes de saúde e não dão diagnóstico. São só para pensar com carinho.</p>
-        {QUIZZES.map((q, k) => (
-          <button key={q.id} className="opt" onClick={() => (setQuiz(q), setAnswers([]))}>
-            <span className="tool-ico" style={{ background: ['#FFE39A', '#CFE8FF', '#FFD6E2', '#DFF5D2'][k % 4] }} aria-hidden="true">
-              <Glyph e={['🧩', '💭', '🌙', '🌻'][k % 4]} size={30} />
-            </span>
-            <span className="min-w-0 flex-1">{q.title}</span>
-            <ChevronRight size={18} className="text-muted" />
-          </button>
-        ))}
-      </ToolScreen>
-    );
-  }
-  const qi = answers.length;
-  const done = qi >= quiz.questions.length;
-  const top = done ? Object.entries(answers.reduce<Record<string, number>>((m, a) => ((m[a] = (m[a] ?? 0) + 1), m), {})).sort((a, b) => b[1] - a[1])[0][0] : null;
-  return (
-    <ToolScreen title={quiz.title} sub={done ? 'Seu resultado' : `Pergunta ${qi + 1} de ${quiz.questions.length}`} theme="lavanda" onClose={onClose}>
-      <div className="quiz-bar">
-        {quiz.questions.map((_, k) => (
-          <span key={k} className={k < qi ? 'is-done' : k === qi ? 'is-now' : ''} />
-        ))}
-      </div>
-      {done && top ? (
-        <div className="grid justify-items-center gap-4 text-center">
-          <div className="relative">
-            <PetBig mood="animado" size={160} className="hop-loop" />
-            <Burst emoji="✨" k={1} />
-          </div>
-          <div className="affirm-card">
-            <p className="font-display text-[22px] font-bold leading-snug">{quiz.results[top]}</p>
-          </div>
-          <button className="btn btn-primary w-full" onClick={() => setQuiz(null)}>
-            Ver outros quizzes
-          </button>
-        </div>
-      ) : (
-        <div className="grid gap-3">
-          <div className="flex items-end gap-2">
-            <div ref={pet} className="relative shrink-0">
-              <PetBig mood="surpreso" size={96} />
-              <span className="think" aria-hidden="true">
-                ?
-              </span>
-            </div>
-            <p className="bubble-pet min-w-0 flex-1 text-[18px]" key={qi}>
-              {quiz.questions[qi].q}
-            </p>
-          </div>
-          {quiz.questions[qi].a.map(([label, key]) => (
-            <button key={label} className="opt" onClick={() => (setAnswers([...answers, key]), hop(pet.current))}>
-              {label}
-            </button>
-          ))}
-        </div>
-      )}
-    </ToolScreen>
-  );
-}

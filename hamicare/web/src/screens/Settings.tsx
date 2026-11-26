@@ -68,7 +68,7 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
             <input id="set-pet" className="field" maxLength={18} value={s.pet.name} onChange={(e) => updatePet({ name: e.target.value })} />
           </Field>
           <div className="grid grid-cols-5 gap-1.5">
-            {FURS.map((f) => {
+            {FURS.filter((f) => !f.partner).map((f) => {
               const locked = f.plus && !isPremium(s);
               const toBuy = !!f.price && !owned(s, `fur:${f.id}`);
               return (
