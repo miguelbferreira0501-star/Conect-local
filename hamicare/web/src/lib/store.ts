@@ -19,7 +19,7 @@ import {
 import { HAMMER_MAX, repairPlan, streakOf, type RepairPlan } from '../logic/streak';
 import { activeQuests, claimKey, levelOf, newAchievements, periodStart, questProgress, QUESTS } from '../logic/progress';
 import { addUsage, arenaItemsOf, arenaOf, baseGrant, canCraft, capGrant, chestPool, collectionProgress, emptyPity, emptyUsage, FRIEND_LADDER, HAMMER_PRICE, JOGO, PLUS_GAMES, PLUS_WEEKLY, gameCoins, type GameId, SEASON_PLUS, TREK, levelUps, migrateXp, openChest, reflectionCoins, xpAt, type ChestId, type DayUsage, type Pity, type QuickId, type Rarity, type Source } from '../shared/game';
-import { arenaHouse, MOON_ITEMS, MOON_N, MOON_PRICE, upgradeHouse } from '../data/arenas';
+import { arenaHouse, isWheel, MOON_ITEMS, MOON_N, MOON_PRICE, upgradeHouse } from '../data/arenas';
 import { companionById, eggWarmth, HATCH_DAYS, withEggs } from '../data/companions';
 import { KIT_PLACE } from '../components/room/kit';
 import { gameCfg } from './game';
@@ -82,7 +82,7 @@ export function fresh(): State {
     journal: [],
     jar: [],
     // Os móveis do quartinho inicial já são da pessoa (pode guardar e recolocar).
-    inventory: { 'p-azulzinho': 1, 'f-creme': 1, 'p-menta': 1, 'f-pistache': 1, 'p-creme': 1, 'f-madeira': 1, cenoura: 3, maca: 2, semente: 3, rodinha: 1, caminha: 1, planta: 1, ...Object.fromEntries(arenaHouse(1).items.map((i) => [i.itemId, 1])) },
+    inventory: { 'p-azulzinho': 1, 'f-creme': 1, 'p-menta': 1, 'f-pistache': 1, 'p-creme': 1, 'f-madeira': 1, cenoura: 3, maca: 2, semente: 3, caminha: 1, planta: 1, ...Object.fromEntries(arenaHouse(1).items.map((i) => [i.itemId, 1])) },
     wishlist: [],
     // Casa inicial: um quartinho já decorado (cama, criado-mudo, guarda-roupa, rodinha…).
     house: arenaHouse(1),
@@ -153,6 +153,8 @@ function upgradeHouses(input: State): State {
     const up = upgradeHouse(h, Number(n));
     if (up !== h) s = withHouseFurniture({ ...s, houses: { ...s.houses, [n]: up } }, onlyNew(h, up));
   }
+  // A rodinha de exercício (coisa de hamster) saiu do jogo: some também da bolsa.
+  if (Object.keys(s.inventory).some(isWheel)) s = { ...s, inventory: Object.fromEntries(Object.entries(s.inventory).filter(([id]) => !isWheel(id))) };
   return s;
 }
 

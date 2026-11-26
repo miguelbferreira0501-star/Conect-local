@@ -366,7 +366,7 @@ body {
 
 /* Cenário do Início: ocupa a largura toda e se funde com a cor da tela */
 .scene-bleed {
-  margin: -16px calc(-1 * max(16px, env(safe-area-inset-left, 0px))) 0;
+  margin: -16px calc(-1 * max(16px, var(--safe-area-inset-left, env(safe-area-inset-left, 0px)))) 0;
   border-radius: 0 0 36px 36px;
   box-shadow: none;
 }
@@ -388,7 +388,7 @@ body {
   position: absolute;
   left: 16px;
   right: 16px;
-  top: calc(12px + env(safe-area-inset-top, 0px));
+  top: calc(12px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px)));
   z-index: 3;
   display: flex;
   align-items: center;
@@ -682,7 +682,7 @@ body {
   grid-template-rows: auto 1fr auto;
   background: #14121a;
   color: #fff;
-  padding: max(10px, env(safe-area-inset-top)) 0 max(14px, env(safe-area-inset-bottom));
+  padding: max(10px, var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) 0 max(14px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
 }
 .camera-top {
   display: flex;

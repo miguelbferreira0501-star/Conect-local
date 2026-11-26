@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { ARENA_HOME, arenaHouse } from './arenas';
+import { ARENA_HOME, arenaHouse, isWheel, upgradeHouse } from './arenas';
 import { ITEMS, itemById } from './items';
 import { PLACES } from './world';
 import { WALLPAPER_CSS, FLOOR_CSS } from '../components/Furniture';
@@ -131,7 +131,8 @@ describe('reforma das casas', () => {
     expect(up.items.map((i) => i.itemId)).toEqual(arenaHouse(1).items.map((i) => i.itemId));
     expect(up.wallpaper).toBe('p-lavanda');
     const mine = { ...old, items: [...old.items, { uid: 'd', itemId: 'sofa', x: 30, y: 80, z: 4 }] };
-    expect(upgradeHouse(mine, 1)).toBe(mine);
+    // casa arrumada pela pessoa fica como está, só sem a rodinha (coisa de hamster, saiu do jogo)
+    expect(upgradeHouse(mine, 1).items).toEqual(mine.items.filter((i) => i.itemId !== 'rodinha'));
     const arena2 = { wallpaper: 'p-jardim', floor: 'f-musgo', items: [{ uid: 'x', itemId: 'casa-passaro', x: 78, y: 46, z: 1 }, { uid: 'y', itemId: 'banco-galho', x: 30, y: 94, z: 2 }] };
     expect(upgradeHouse(arena2, 2).items.length).toBeGreaterThan(5);
     expect(upgradeHouse(arenaHouse(3), 3).items).toEqual(arenaHouse(3).items);
@@ -149,5 +150,28 @@ describe('casa na Lua', () => {
     expect(homeArenaOf(getState())).toBe(13);
     expect(backToEarth()).toBe(true);
     expect(homeArenaOf(getState())).toBe(3);
+  });
+});
+
+describe('casa inicial arrumada e sem rodinha', () => {
+  it('a casa nova vem sem rodinha e sem móveis um dentro do outro no fundo', () => {
+    const h = arenaHouse(1);
+    expect(h.items.some((i) => isWheel(i.itemId))).toBe(false);
+    const back = ['k-cama-rosa', 'k-criado-branco', 'k-planta-grande-terracota', 'k-guarda-roupa-rosa'].map((id) => h.items.find((i) => i.itemId === id)!.x);
+    expect([...back].sort((a, b) => a - b)).toEqual(back);
+  });
+  it('quem estava com a casa de fábrica de antes (com a rodinha) ganha a arrumação nova e perde a rodinha', () => {
+    const prev = [
+      ['k-tapete-rosa', 50, 94], ['k-cama-rosa', 35, 71], ['k-criado-branco', 49, 64], ['k-planta-grande-terracota', 58.5, 66], ['k-guarda-roupa-rosa', 68, 66],
+      ['k-relogio-madeira', 30, 36], ['k-rodinha-azul', 69, 91], ['k-banheira-madeira', 31, 92], ['k-ursinho-caramelo', 41, 97],
+    ] as const;
+    const up = upgradeHouse({ wallpaper: 'p-azulzinho', floor: 'f-creme', items: prev.map(([itemId, x, y], i) => ({ uid: String(i), itemId, x, y, z: i })) }, 1);
+    const fresh = arenaHouse(1).items;
+    expect(up.items.some((i) => isWheel(i.itemId))).toBe(false);
+    for (const i of up.items) expect([i.x, i.y]).toEqual([fresh.find((f) => f.itemId === i.itemId)!.x, fresh.find((f) => f.itemId === i.itemId)!.y]);
+  });
+  it('quem mudou os móveis de lugar fica como está, só sem a rodinha', () => {
+    const up = upgradeHouse({ wallpaper: 'p-azulzinho', floor: 'f-creme', items: [{ uid: 'a', itemId: 'k-cama-rosa', x: 12, y: 70, z: 1 }, { uid: 'b', itemId: 'k-rodinha-rosa', x: 80, y: 90, z: 2 }] }, 1);
+    expect(up.items).toEqual([{ uid: 'a', itemId: 'k-cama-rosa', x: 12, y: 70, z: 1 }]);
   });
 });
