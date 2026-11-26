@@ -167,7 +167,7 @@ export function Quizzes({ onClose }: { onClose: () => void }) {
             </header>
             <div className="qz-result">
               <span className="qz-burst" aria-hidden="true" />
-              <PetAct t={RESULT_ACTS[quiz.id.length % RESULT_ACTS.length]} size={180} every={3200} className="qz-rpose" />
+              <PetAct t={RESULT_ACTS[quiz.id.length % RESULT_ACTS.length]} size={180} className="qz-rpose" />
               <small>{quiz.title}</small>
               <h2>{result.title}</h2>
               <p>{result.text}</p>

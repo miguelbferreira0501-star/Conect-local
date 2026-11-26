@@ -1,8 +1,8 @@
 import { PlusWeeklyCard } from '../components/PlusWeekly';
 import { MoonTeaser } from '../components/MoonTeaser';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronRight, Flame, Mail, Menu, Plus } from 'lucide-react';
-import { StickerGlobe, StickerHouse, StickerTree } from '../components/Stickers';
+import { ChevronRight, Flame, Mail, Plus } from 'lucide-react';
+import { StickerGlobe, StickerHouse, StickerLines, StickerTree } from '../components/Stickers';
 import { PlusBanner } from '../components/PlusBanner';
 import { EggCollection } from '../components/Egg';
 import { MOON_N } from '../data/arenas';
@@ -286,30 +286,33 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
             </Room>
           </PanRoom>
         )}
-        {/* Só três botões no cenário: o menu (três tracinhos, com as cartas), o Mundo e sair pra fora / voltar pra casa. */}
+        {/* Só três botões no cenário, em estilo adesivo: o menu (três tracinhos, com as cartas) e, no trilho
+            da direita, o Mundo e sair pra fora / voltar pra casa. */}
         <div className="hr-top">
-          <button className="hr-btn" onClick={onSettings} aria-label={`Menu${mailN ? `: ${mailN} cartas novas` : ''}`}>
-            <Menu size={22} strokeWidth={2.8} />
+          <button className="stk-btn" onClick={onSettings} aria-label={`Menu${mailN ? `: ${mailN} cartas novas` : ''}`}>
+            <span className="stk">
+              <StickerLines size={30} />
+            </span>
             {mailN > 0 && <span className="stk-badge">{mailN}</span>}
           </button>
-          <div className="hr-right">
+          <div className="hr-rail">
             {onWorld && (
-              <button className="hr-btn" onClick={() => onWorld()} aria-label="Mundo: arenas, casa e passeios">
+              <button className="stk-btn" onClick={() => onWorld()} aria-label="Mundo: arenas, casa e passeios">
                 <span className="stk">
-                  <StickerGlobe size={26} />
+                  <StickerGlobe size={30} />
                 </span>
               </button>
             )}
             {!s.trek && !adv && (
               <button
-                className="hr-btn"
+                className="stk-btn"
                 onClick={() => {
                   if (furniture.use) furniture.stop();
                   setOutside(!outside);
                 }}
                 aria-label={outside ? `Levar o ${s.pet.name} para dentro de casa` : `Levar o ${s.pet.name} lá para fora`}
               >
-                <span className="stk">{outside ? <StickerHouse size={26} /> : <StickerTree size={26} />}</span>
+                <span className="stk">{outside ? <StickerHouse size={30} /> : <StickerTree size={30} />}</span>
               </button>
             )}
           </div>
@@ -413,7 +416,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
         ))}
         {tasks.length > 0 && done >= tasks.length && (
           <div className="hc-alldone">
-            <PetAct t="danca" size={130} every={4000} quiet />
+            <PetAct t="danca" size={130} quiet />
             <p>
               <b>Uhuul!</b> Tarefas de hoje concluídas!
             </p>
@@ -424,7 +427,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
         )}
         {!tasks.length && (
           <div className="hc-alldone">
-            <PetAct t="curioso" size={110} every={5000} quiet />
+            <PetAct t="curioso" size={110} quiet />
             <p>Nenhuma tarefa para hoje ainda.</p>
             <button className="hc-alldone-add" onClick={() => setAddOpen(true)} aria-label="Adicionar tarefa">
               <Plus size={30} strokeWidth={3} />

@@ -111,3 +111,14 @@ export function StickerDogFace({ size = 44 }: P) {
     </svg>
   );
 }
+
+/** Menu: três tracinhos gordinhos (adesivo). */
+export function StickerLines({ size = 44 }: P) {
+  return (
+    <svg {...box(size)}>
+      {[18, 32, 46].map((y, i) => (
+        <rect key={y} x="10" y={y - 5} width="44" height="10" rx="5" fill={['#7B6CF0', '#FF7AA2', '#FFB547'][i]} />
+      ))}
+    </svg>
+  );
+}

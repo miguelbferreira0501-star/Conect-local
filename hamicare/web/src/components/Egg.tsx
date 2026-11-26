@@ -5,6 +5,8 @@ import { useEffect, useId, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { dayGoalOf, dayOf, EGG_GOAL, eggCount, todayKey, todayTasks, useApp, watchState } from '../lib/store';
 import { play } from '../lib/sound';
+import { CompanionArt } from './Companion';
+import { COMPANIONS, type CompanionKind } from '../data/companions';
 import { PetAct, type Trick } from './LivePet';
 import type { State } from '../types';
 
@@ -45,116 +47,17 @@ export function EggArt({ k = 0, progress = 0, size = 150, open = false }: { k?: 
   );
 }
 
-/** Os filhotes que nascem dos ovos (desenhos próprios, simples e fofos). */
+/** Filhotes antigos (antes do redesenho) viram os bichinhos novos, no mesmo estilo dos companheiros. */
+const LEGACY: Record<string, CompanionKind> = { pintinho: 'passarinho', coelhinho: 'ovelha', patinho: 'passarinho', sapinho: 'tartaruga' };
+
+/** Os filhotes que nascem dos ovos: os mesmos bichinhos dos companheiros (contorno macio, olhos brilhantes). */
 export function EggPet({ id, size = 80 }: { id: string; size?: number }) {
-  const eye = (x: number, y: number) => <circle cx={x} cy={y} r="2.6" fill="#3a2a2a" />;
-  const blush = (x: number, y: number) => <ellipse cx={x} cy={y} rx="3.4" ry="2.2" fill="#ff9fb4" opacity="0.7" />;
-  return (
-    <svg viewBox="0 0 64 64" width={size} height={size} aria-hidden="true">
-      <ellipse cx="32" cy="60" rx="16" ry="3" fill="rgba(0,0,0,0.12)" />
-      {id === 'pintinho' && (
-        <g>
-          <ellipse cx="32" cy="38" rx="18" ry="19" fill="#FFE066" />
-          <path d="M30 18 q2-6 6-4" stroke="#F2B705" strokeWidth="3" fill="none" strokeLinecap="round" />
-          {eye(26, 34)}
-          {eye(38, 34)}
-          <path d="M29 39 l3 3 3-3 Z" fill="#FF9A3D" />
-          {blush(22, 41)}
-          {blush(42, 41)}
-          <path d="M14 40 q-5 3 0 7 M50 40 q5 3 0 7" stroke="#F2C230" strokeWidth="4" fill="none" strokeLinecap="round" />
-        </g>
-      )}
-      {id === 'coelhinho' && (
-        <g>
-          <ellipse cx="24" cy="16" rx="5" ry="13" fill="#fff" stroke="#e9dce4" strokeWidth="1.5" />
-          <ellipse cx="40" cy="16" rx="5" ry="13" fill="#fff" stroke="#e9dce4" strokeWidth="1.5" />
-          <ellipse cx="24" cy="17" rx="2.4" ry="8" fill="#ffc2d4" />
-          <ellipse cx="40" cy="17" rx="2.4" ry="8" fill="#ffc2d4" />
-          <ellipse cx="32" cy="40" rx="18" ry="17" fill="#fff" stroke="#e9dce4" strokeWidth="1.5" />
-          {eye(26, 38)}
-          {eye(38, 38)}
-          <ellipse cx="32" cy="43" rx="2.2" ry="1.6" fill="#ff8fab" />
-          {blush(22, 45)}
-          {blush(42, 45)}
-        </g>
-      )}
-      {id === 'passarinho' && (
-        <g>
-          <ellipse cx="32" cy="38" rx="18" ry="17" fill="#8FC8FF" />
-          <ellipse cx="32" cy="44" rx="11" ry="9" fill="#DDF0FF" />
-          <path d="M14 36 q-8 6 -2 12 q6 -2 6 -8 Z" fill="#6FB2F0" />
-          <path d="M50 36 q8 6 2 12 q-6 -2 -6 -8 Z" fill="#6FB2F0" />
-          {eye(26, 33)}
-          {eye(38, 33)}
-          <path d="M29 38 l3 3 3-3 Z" fill="#FFB547" />
-          <path d="M30 21 q2 -6 5 -3 q1 -5 4 -1" stroke="#6FB2F0" strokeWidth="2.6" fill="none" strokeLinecap="round" />
-        </g>
-      )}
-      {id === 'tartaruga' && (
-        <g>
-          <ellipse cx="14" cy="46" rx="6" ry="5" fill="#9BD67F" />
-          <ellipse cx="50" cy="46" rx="6" ry="5" fill="#9BD67F" />
-          <circle cx="32" cy="22" r="10" fill="#9BD67F" />
-          {eye(28, 21)}
-          {eye(36, 21)}
-          {blush(25, 25)}
-          {blush(39, 25)}
-          <ellipse cx="32" cy="42" rx="20" ry="14" fill="#6FB65A" />
-          <path d="M22 40 h20 M32 30 v22 M24 34 l16 14 M40 34 l-16 14" stroke="#5A9A48" strokeWidth="2" opacity="0.6" />
-        </g>
-      )}
-      {id === 'ourico' && (
-        <g>
-          {Array.from({ length: 9 }, (_, i) => (
-            <path key={i} d={`M${14 + i * 4.5} 30 l2 -12 l3 12 Z`} fill="#A47551" />
-          ))}
-          <ellipse cx="32" cy="40" rx="20" ry="16" fill="#A47551" />
-          <ellipse cx="34" cy="44" rx="14" ry="11" fill="#F7DFC2" />
-          {eye(30, 41)}
-          {eye(40, 41)}
-          <circle cx="47" cy="45" r="2.4" fill="#3a2a2a" />
-          {blush(28, 47)}
-        </g>
-      )}
-      {id === 'sapinho' && (
-        <g>
-          <circle cx="23" cy="24" r="7" fill="#8ED081" />
-          <circle cx="41" cy="24" r="7" fill="#8ED081" />
-          {eye(23, 24)}
-          {eye(41, 24)}
-          <ellipse cx="32" cy="40" rx="20" ry="15" fill="#8ED081" />
-          <path d="M24 42 q8 6 16 0" stroke="#3a2a2a" strokeWidth="2" fill="none" strokeLinecap="round" />
-          {blush(19, 42)}
-          {blush(45, 42)}
-        </g>
-      )}
-      {id === 'patinho' && (
-        <g>
-          <ellipse cx="34" cy="44" rx="18" ry="13" fill="#FFF3A6" />
-          <circle cx="26" cy="28" r="11" fill="#FFF3A6" />
-          {eye(24, 26)}
-          <path d="M14 29 q-6 1 -7 4 q5 2 9 0 Z" fill="#FF9A3D" />
-          {blush(28, 31)}
-          <path d="M40 40 q8 -2 10 4" stroke="#F2D96B" strokeWidth="3" fill="none" strokeLinecap="round" />
-        </g>
-      )}
-      {id === 'joaninha' && (
-        <g>
-          <circle cx="32" cy="22" r="9" fill="#3a2a2a" />
-          <circle cx="29" cy="21" r="2" fill="#fff" />
-          <circle cx="35" cy="21" r="2" fill="#fff" />
-          <ellipse cx="32" cy="42" rx="19" ry="16" fill="#FF5C5C" />
-          <path d="M32 26 v32" stroke="#3a2a2a" strokeWidth="2" />
-          {[[24, 36], [40, 36], [22, 48], [42, 48]].map(([x, y], i) => (
-            <circle key={i} cx={x} cy={y} r="3.4" fill="#3a2a2a" />
-          ))}
-        </g>
-      )}
-    </svg>
-  );
+  const kind = (LEGACY[id] ?? id) as CompanionKind;
+  const pet = COMPANIONS.find((c) => c.kind === kind) ?? COMPANIONS[0];
+  return <CompanionArt pet={pet} size={size} label={NAMES[id] ?? pet.species} />;
 }
 
-const NAMES: Record<string, string> = { pintinho: 'Pintinho', coelhinho: 'Coelhinho', passarinho: 'Passarinho', tartaruga: 'Tartaruguinha', ourico: 'Ouricinho', sapinho: 'Sapinho', patinho: 'Patinho', joaninha: 'Joaninha' };
+const NAMES: Record<string, string> = { pintinho: 'Passarinho', coelhinho: 'Ovelhinha', passarinho: 'Passarinho', tartaruga: 'Tartaruguinha', ourico: 'Ouricinho', sapinho: 'Tartaruguinha', patinho: 'Passarinho', joaninha: 'Joaninha', ovelha: 'Ovelhinha', pinguim: 'Pinguinzinho', gatinho: 'Gatinho', polvo: 'Polvinho' };
 const CHEER: Trick[] = ['coracao', 'comemora', 'estrela', 'danca', 'acenar'];
 
 const doneToday = (s: State) => {
@@ -214,7 +117,7 @@ export function EggHost() {
         )}
         <PetAct t={pose} size={130} className="eggs-pose" quiet />
       </div>
-      <h2 className="eggs-title">{show.hatched ? (cracked ? `Nasceu um ${NAMES[show.hatched] ?? 'filhote'}!` : 'Ih… está rachando!') : 'Oba! Seu ovinho ficou mais perto de chocar!'}</h2>
+      <h2 className="eggs-title">{show.hatched ? (cracked ? `Chocou! Olha: ${NAMES[show.hatched] ?? 'um filhote'}` : 'Ih… está rachando!') : 'Oba! Seu ovinho ficou mais perto de chocar!'}</h2>
       {!show.hatched && (
         <div className="eggs-bar" aria-label={`${show.n} de ${EGG_GOAL}`}>
           <span className="eggs-track">

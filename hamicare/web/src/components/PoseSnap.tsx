@@ -93,7 +93,7 @@ export function PoseSnap({ open, onClose }: { open: boolean; onClose: () => void
       <div className="snap">
         <div className="snap-photo" style={{ background: bg }} ref={photo}>
           {flash > 0 && <span key={flash} className="snap-flash" aria-hidden="true" />}
-          <PetAct t={t} size={230} every={3600} quiet />
+          <PetAct t={t} size={230} quiet />
         </div>
         <p className="snap-cap">
           <b>{s.pet.name}</b>

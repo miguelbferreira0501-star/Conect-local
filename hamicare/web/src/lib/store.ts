@@ -1969,7 +1969,7 @@ export function updatePartner(patch: Partial<NonNullable<State['partner']>>) {
 /** Tarefas para chocar cada ovo. */
 export const EGG_GOAL = 5;
 /** Filhotes que podem nascer (em ordem; depois do último, recomeça). */
-export const EGG_PETS = ['pintinho', 'coelhinho', 'passarinho', 'tartaruga', 'ourico', 'sapinho', 'patinho', 'joaninha'] as const;
+export const EGG_PETS = ['passarinho', 'ovelha', 'tartaruga', 'ourico', 'joaninha', 'pinguim', 'gatinho', 'polvo'] as const;
 
 /**
  * Conta uma tarefa concluída no ovinho (cada tarefa só conta uma vez por dia). Devolve quantas já contaram
