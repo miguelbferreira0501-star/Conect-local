@@ -1,6 +1,6 @@
 // Quizzes de autoconhecimento do Bem-estar. Não são testes clínicos e não dão diagnóstico: são para pensar
 // com carinho. Cada resposta soma ponto para um perfil; o resultado tem título, explicação e uma dica para hoje.
-import type { PoseName } from '../components/Poses';
+import type { Trick } from '../components/LivePet';
 
 export interface QuizResult {
   title: string;
@@ -13,7 +13,7 @@ export interface QuizDef {
   emoji: string;
   color: string;
   intro: string;
-  pose: PoseName;
+  pose: Trick;
   questions: { q: string; a: [string, string][] }[];
   results: Record<string, QuizResult>;
 }
@@ -46,7 +46,7 @@ export const QUIZZES: QuizDef[] = [
     emoji: '💭',
     color: '#CFE8FF',
     intro: 'Às vezes a gente se sente cansado sem saber por quê. Vamos procurar o ladrão de energia.',
-    pose: 'duvida',
+    pose: 'curioso',
     questions: [
       { q: 'O que mais te cansa numa semana comum?', a: [['Dormir pouco ou mal', 'sono'], ['Passar horas no celular', 'tela'], ['Pular refeições', 'comida'], ['Me cobrar demais', 'cobranca']] },
       { q: 'Quando você acorda sem energia, normalmente…', a: [['Dormi tarde', 'sono'], ['Fiquei rolando o feed antes de dormir', 'tela'], ['Jantei mal ou nem jantei', 'comida'], ['Fui dormir pensando no que não fiz', 'cobranca']] },
@@ -109,7 +109,7 @@ export const QUIZZES: QuizDef[] = [
     emoji: '🌙',
     color: '#DFF5D2',
     intro: 'Seu corpo tem um horário preferido. Descubra o seu e use isso a seu favor.',
-    pose: 'dorme',
+    pose: 'travesseiro',
     questions: [
       { q: 'Sem despertador, você acordaria…', a: [['Bem cedinho, cheio de energia', 'cotovia'], ['Lá pelas dez, tranquilo', 'beija-flor'], ['Perto do almoço', 'coruja'], ['Depende muito do dia', 'gato']] },
       { q: 'Sua cabeça funciona melhor…', a: [['De manhã', 'cotovia'], ['No meio do dia', 'beija-flor'], ['À noite', 'coruja'], ['Em momentos curtos, com pausas', 'gato']] },
@@ -130,7 +130,7 @@ export const QUIZZES: QuizDef[] = [
     emoji: '🌻',
     color: '#FFE8C7',
     intro: 'Autocuidado não é só banho de espuma. Vamos achar o tipo que faz sentido pra você.',
-    pose: 'bandana',
+    pose: 'acenar',
     questions: [
       { q: 'Quando você quer se cuidar, pensa primeiro em…', a: [['Dormir bem e comer direito', 'corpo'], ['Organizar a cabeça', 'mente'], ['Ver pessoas queridas', 'social'], ['Fazer algo divertido', 'alegria']] },
       { q: 'Um domingo ideal tem…', a: [['Alongamento e comida gostosa', 'corpo'], ['Diário e chá', 'mente'], ['Almoço em família', 'social'], ['Filme, jogo ou música alta', 'alegria']] },
@@ -151,7 +151,7 @@ export const QUIZZES: QuizDef[] = [
     emoji: '🎯',
     color: '#FFD9C7',
     intro: 'Cada cabeça foca de um jeito. Descubra o ambiente perfeito para a sua.',
-    pose: 'orgulho',
+    pose: 'estrela',
     questions: [
       { q: 'Para estudar ou trabalhar, você prefere…', a: [['Silêncio total', 'silencio'], ['Uma música de fundo', 'musica'], ['Um prazo chegando', 'prazo'], ['Alguém por perto fazendo o mesmo', 'companhia']] },
       { q: 'O que mais te distrai?', a: [['Barulho de conversa', 'silencio'], ['Silêncio demais', 'musica'], ['Ter tempo sobrando', 'prazo'], ['Ficar sozinho', 'companhia']] },
@@ -193,7 +193,7 @@ export const QUIZZES: QuizDef[] = [
     emoji: '🫧',
     color: '#E3E8FF',
     intro: 'Sentir é normal. O jeito de lidar é que muda de pessoa pra pessoa.',
-    pose: 'chora',
+    pose: 'coracao',
     questions: [
       { q: 'Quando algo te chateia, você…', a: [['Guarda pra si', 'guarda'], ['Conta pra alguém', 'fala'], ['Escreve ou desenha', 'escreve'], ['Vai fazer algo pra gastar energia', 'movimento']] },
       { q: 'Chorar pra você é…', a: [['Difícil, quase nunca', 'guarda'], ['Normal, perto de quem confio', 'fala'], ['Algo que faço sozinho, com música', 'escreve'], ['Raro, prefiro me mexer', 'movimento']] },
@@ -214,7 +214,7 @@ export const QUIZZES: QuizDef[] = [
     emoji: '🤝',
     color: '#FFE1F0',
     intro: 'Toda turma precisa de vários tipos de amigo. Qual é o seu papel?',
-    pose: 'acena',
+    pose: 'acenar',
     questions: [
       { q: 'Um amigo está triste. Você…', a: [['Dá um bom conselho', 'conselheiro'], ['Tenta fazer ele rir', 'animado'], ['Fica do lado, sem sair', 'leal'], ['Leva um docinho e um cobertor', 'cuidador']] },
       { q: 'Na turma, você é quem…', a: [['Todo mundo pede opinião', 'conselheiro'], ['Organiza os rolês', 'animado'], ['Guarda todos os segredos', 'leal'], ['Lembra dos aniversários', 'cuidador']] },

@@ -1,6 +1,6 @@
 // Crescer: a missão do dia (com contagem até a meia-noite), atalhos "Para você", rotinas prontas por tema,
 // o planejador de missões (nome, área e até 50 tarefas) e testes rápidos para se conhecer (não são diagnóstico).
-import { Pose, poseOfDay } from '../components/Poses';
+import { LivePet } from '../components/LivePet';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ChevronLeft, ChevronRight, Heart, Lock, Phone, Plus, Sparkles, Trash2, Wand2, X } from 'lucide-react';
@@ -574,7 +574,7 @@ export function Grow({ onGo, onPlus }: { onGo: Go; onPlus: () => void }) {
         <h1>Crescer</h1>
         <p>Pequenos passos para cuidar de você.</p>
         {/* o Lumbi espiando no cantinho: cada toque troca de pose */}
-        <Pose name={poseOfDay(['espia', 'curioso', 'acena', 'bandana'])} size={92} className="gw-head-pose" cycle={['espia', 'acena', 'risada', 'coracao', 'estrela', 'musica']} label="Lumbi: toque para ele mudar de pose" />
+        <LivePet size={92} className="gw-head-pose" auto label="Lumbi: toque para ele fazer alguma coisa" />
       </header>
 
       <DailyMission onGo={onGo} />

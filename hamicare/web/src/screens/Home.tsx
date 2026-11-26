@@ -6,7 +6,6 @@ import { StickerCamera, StickerClothes, StickerGlobe, StickerHouse, StickerInvit
 import { PlusBanner } from '../components/PlusBanner';
 import { EggCollection } from '../components/Egg';
 import { PoseSnap } from '../components/PoseSnap';
-import { Pose } from '../components/Poses';
 import { MOON_N } from '../data/arenas';
 import { MoonOutdoors, OUTDOOR_W, Outdoors, outdoorGround, type YardTheme } from '../components/Outdoors';
 import { gameCfg } from '../lib/game';
@@ -42,7 +41,7 @@ import { WaterCard } from '../components/WaterCard';
 import { StreakRepairCard } from '../components/StreakRepair';
 import { requestTool } from './Wellbeing';
 import { CompanionBuddy } from './Companions';
-import { LivePet } from '../components/LivePet';
+import { LivePet, PetAct } from '../components/LivePet';
 import { AddTaskSheet } from '../components/AddTask';
 import { useFurniturePlay } from '../components/FurniturePlay';
 import { TaskCalendar, byPart } from '../components/TaskCalendar';
@@ -60,6 +59,9 @@ export function useNow(ms: number) {
   }, [ms]);
   return now;
 }
+
+/** Altura do cenário do Início: mais baixo, para as tarefas aparecerem sem precisar rolar (como no app do gatinho). */
+const ROOM_H = 330;
 
 export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, onWorld, onBag, onInvite }: { onGo: (tab: 'atividades' | 'cuidar' | 'bem-estar') => void; onSettings: () => void; onEvolution: () => void; onArenas: () => void; onPlus: () => void; onTeam: () => void; onWorld?: (tab?: 'arenas' | 'casa' | 'mapa') => void; onBag?: () => void; onInvite?: () => void }) {
   const [areaOpen, setAreaOpen] = useState(false);
@@ -162,7 +164,8 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
   const cond0 = conditionOf(s.seed, today);
   const cond = onMoon && cond0 === 'chuva' ? 'frio' : cond0;
   const need = conditionNeed(tasks.length);
-  const condOn = tasks.length > 0 && done < need;
+  // O pedido "faz N tarefas pra mim" saiu (a dona do app não quer mais): ele não pede tarefas no balão.
+  const condOn = false as boolean;
   // Quando melhora agora (acabou de fazer a tarefa que faltava), ele comemora e agradece.
   const wasOn = useRef(condOn);
   const [justFixed, setJustFixed] = useState(false);
@@ -230,12 +233,13 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
     <div className="relative">
       <div ref={petRef} style={{ transformOrigin: '50% 100%' }}>
         <LivePet
-          size={168}
+          size={140}
           mood={moonHop ? 'surpreso' : petMood}
           cond={condOn ? cond : null}
           wear={condOn ? CONDITIONS[cond].wear : undefined}
           prop={busy || hardDay || mood ? undefined : act.prop}
           pose={moonHop ? 'lua' : undefined}
+          auto={!moonHop}
           fx={moonHop ? '' : bodyFxClass(condOn ? cond : null, busy || hardDay ? null : activity)}
           cryEvery={condOn && !mood ? cryEvery(new Date(now).getHours()) : 0}
           onTap={() => {
@@ -267,22 +271,22 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
       {layer}
       <section className="home-room" aria-label={`Casa do ${s.pet.name}`}>
         {s.trek && trekTheme ? (
-          <TrekScene theme={trekTheme} height={430}>
+          <TrekScene theme={trekTheme} height={ROOM_H}>
             <WalkingHami fur={s.pet.fur} outfit={s.pet.outfit} size={148} />
           </TrekScene>
         ) : outside ? (
           <PanRoom key={onMoon ? 'lua' : 'fora'} width={onMoon ? 1.9 : OUTDOOR_W / 390}>
             {onMoon ? (
-              <MoonOutdoors height={430}>{duo}</MoonOutdoors>
+              <MoonOutdoors height={ROOM_H}>{duo}</MoonOutdoors>
             ) : (
-              <Outdoors period={period} height={430} theme={yard}>
+              <Outdoors period={period} height={ROOM_H} theme={yard}>
                 {duo}
               </Outdoors>
             )}
           </PanRoom>
         ) : (
           <PanRoom key="casa" width={1.45}>
-            <Room house={s.house} period={period} height={430} wide={1.45} onUse={(uid, kind) => (napping && furniture.use?.uid === uid && setAwake(true), furniture.useItem(uid, kind))} usage={furniture.usage}>
+            <Room house={s.house} period={period} height={ROOM_H} wide={1.45} onUse={(uid, kind) => (napping && furniture.use?.uid === uid && setAwake(true), furniture.useItem(uid, kind))} usage={furniture.usage}>
               {furniture.use ? null : duo}
             </Room>
           </PanRoom>
@@ -293,14 +297,14 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
           <div className="hr-left">
             <button className="stk-btn" onClick={onSettings} aria-label={`Menu${mailN ? `: ${mailN} cartas novas` : ''}`}>
               <span className="stk">
-                <StickerMenu size={40} />
+                <StickerMenu size={32} />
               </span>
               {mailN > 0 && <span className="stk-badge">{mailN}</span>}
             </button>
             {onWorld && (
               <button className="stk-btn" onClick={() => onWorld()} aria-label="Mundo: arenas, casa e passeios">
                 <span className="stk">
-                  <StickerGlobe size={38} />
+                  <StickerGlobe size={30} />
                 </span>
               </button>
             )}
@@ -314,14 +318,14 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
                 {onBag && (
                   <button className="stk-btn" onClick={onBag} aria-label="Roupas do Lumbi">
                     <span className="stk">
-                      <StickerClothes size={42} />
+                      <StickerClothes size={30} />
                     </span>
                   </button>
                 )}
                 {onWorld && (
                   <button className="stk-btn" onClick={() => onWorld('casa')} aria-label="Decorar a casa">
                     <span className="stk">
-                      <StickerHouse size={42} />
+                      <StickerHouse size={30} />
                     </span>
                   </button>
                 )}
@@ -334,19 +338,19 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
                     }}
                     aria-label={outside ? `Levar o ${s.pet.name} para dentro de casa` : `Levar o ${s.pet.name} lá para fora`}
                   >
-                    <span className="stk">{outside ? <StickerHouse size={42} /> : <StickerTree size={42} />}</span>
+                    <span className="stk">{outside ? <StickerHouse size={30} /> : <StickerTree size={30} />}</span>
                   </button>
                 )}
                 {onInvite && (
                   <button className="stk-btn" onClick={onInvite} aria-label="Convidar amigos">
                     <span className="stk">
-                      <StickerInvite size={42} />
+                      <StickerInvite size={30} />
                     </span>
                   </button>
                 )}
                 <button className="stk-btn" onClick={() => setSnap(true)} aria-label={`Tirar foto do ${s.pet.name}`} data-sound="foto">
                   <span className="stk">
-                    <StickerCamera size={42} />
+                    <StickerCamera size={30} />
                   </span>
                 </button>
               </>
@@ -453,7 +457,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
         ))}
         {tasks.length > 0 && done >= tasks.length && (
           <div className="hc-alldone">
-            <Pose name="comemora" size={130} cycle={['comemora', 'danca', 'late', 'risada', 'coracao']} label="Lumbi comemorando" />
+            <PetAct t="danca" size={130} every={4000} quiet />
             <p>
               <b>Uhuul!</b> Tarefas de hoje concluídas!
             </p>
@@ -464,7 +468,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
         )}
         {!tasks.length && (
           <div className="hc-alldone">
-            <Pose name="duvida" size={110} cycle={['duvida', 'curioso', 'espia']} label="Lumbi esperando" />
+            <PetAct t="curioso" size={110} every={5000} quiet />
             <p>Nenhuma tarefa para hoje ainda.</p>
             <button className="hc-alldone-add" onClick={() => setAddOpen(true)} aria-label="Adicionar tarefa">
               <Plus size={30} strokeWidth={3} />

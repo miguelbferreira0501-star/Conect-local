@@ -1,4 +1,3 @@
-import brincarArt from '../assets/lumbi/brincar.webp';
 import { useCallback, useEffect, useState } from 'react';
 import { Gift as GiftIcon, Plus, Share2, UserPlus, X } from 'lucide-react';
 import { Hamster } from '../components/Hamster';
@@ -160,30 +159,23 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Brincar com o seu cachorrinho (área de Interações): o cartão desenhado pela dona do app. */
+/** Brincar com o seu cachorrinho (área de Interações): uma faixa simples com o Lumbi, o texto e um botão redondo. */
 function PlayCard() {
   const s = useApp();
   return (
-    <button className="pc3" onClick={() => openUi('interacoes')} aria-label={`Brincar com o ${s.pet.name}`}>
-      <span className="pc3-art" aria-hidden="true">
-        <img src={brincarArt} alt="" draggable={false} />
+    <button className="pc4" onClick={() => openUi('interacoes')} aria-label={`Brincar com o ${s.pet.name}`}>
+      <span className="pc4-pet" aria-hidden="true">
+        <Hamster fur={s.pet.fur} outfit={s.pet.outfit} mood="risada" size={74} label="" />
       </span>
-      <span className="pc3-body">
+      <span className="min-w-0 flex-1">
         <b>Brincar com o {s.pet.name}</b>
-        <small>Carinho, petiscos e buscar o graveto</small>
-        <span className="pc3-row">
-          <span className="pc3-go">
-            Brincar <PawIcon />
-          </span>
-          <span className="pc3-hearts" aria-label={`${s.pet.hearts ?? 0} corações`}>
-            <svg viewBox="0 0 24 22" width="18" height="16" aria-hidden="true">
-              <path d="M12 21 C5 15 1 11 1 6.5 C1 3 3.6 1 6.4 1 C8.6 1 10.6 2.3 12 4.4 C13.4 2.3 15.4 1 17.6 1 C20.4 1 23 3 23 6.5 C23 11 19 15 12 21Z" fill="#FF4F78" />
-            </svg>
-            {s.pet.hearts ?? 0}
-          </span>
-        </span>
+        <small>
+          Carinho, petiscos e graveto · <span className="pc4-heart">♥</span> {s.pet.hearts ?? 0}
+        </small>
       </span>
-      <span className="pc3-spark" aria-hidden="true" />
+      <span className="pc4-go" aria-hidden="true">
+        <PawIcon />
+      </span>
     </button>
   );
 }

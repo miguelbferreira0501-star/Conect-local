@@ -70,7 +70,7 @@ export const askText = (c: Condition, n: number) => CONDITIONS[c].ask.replace('{
 
 export type Activity = 'parado' | 'sentado' | 'soneca' | 'cama';
 /** O que ele segura enquanto faz a atividade (desenhado no próprio mascote). */
-export type HamiProp = 'livro' | 'fones' | 'desenho' | 'halteres' | 'varinha';
+export type HamiProp = 'livro' | 'fones' | 'desenho' | 'halteres' | 'varinha' | 'coracao' | 'estrela' | 'travesseiro';
 
 export interface ActivityInfo {
   mood: PetMood;

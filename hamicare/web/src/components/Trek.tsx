@@ -10,7 +10,7 @@ import { finishTrek, startTrek, trekMissing, trekPlaceOf, trekReady, useApp, TRE
 import { shade } from './Furniture';
 import { Glyph } from './art';
 import { Seed } from './ui';
-import { POSES } from './Poses';
+import { PetAct } from './LivePet';
 import { StickerDogFace } from './Stickers';
 import type { State } from '../types';
 
@@ -650,7 +650,7 @@ export function TrekUnpack({ result, onClose }: { result: TrekResult | null; onC
         <div className="unp-body unp-volta">
           <Confetti />
           <span className="unp-rays" aria-hidden="true" />
-          <img src={POSES.comemora} alt="" className="unp-hero" draggable={false} />
+          <PetAct t="comemora" size={190} every={2600} className="unp-hero" />
           <h2>{s.pet.name} voltou pra casa!</h2>
           <p className="unp-sub">Que viagem boa em {placeName(result.place)}. Olha o que veio na mala:</p>
           <div className="unp-gifts">
