@@ -106,10 +106,12 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
     const t = setTimeout(() => setTrekGo(true), 1000);
     return () => clearTimeout(t);
   }, [goalDone]);
+  // Lá fora, a página tem a cor do gramado de agora (de dia, à tarde e à noite, quando escurece).
+  const groundPeriod = periodOf(new Date(now));
   useEffect(() => {
     // Na viagem, a página continua o chão do caminho.
     // Lá fora, a página continua o gramado.
-    const p = trekTheme ? tonePalette((TREK_THEMES[trekTheme] ?? TREK_THEMES.casinha).ground) : outside ? tonePalette(outdoorGround(periodOf(new Date()), onMoon, yard)) : floorPalette(floor);
+    const p = trekTheme ? tonePalette((TREK_THEMES[trekTheme] ?? TREK_THEMES.casinha).ground) : outside ? tonePalette(outdoorGround(groundPeriod, onMoon, yard)) : floorPalette(floor);
     const root = document.documentElement.style;
     root.setProperty('--home-floor', p.tone);
     root.setProperty('--home-page', p.page);
@@ -120,7 +122,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
     root.setProperty('--home-soft', p.soft);
     root.setProperty('--home-soft2', p.soft2);
     return () => ['--home-floor', '--home-page', '--home-card', '--home-deep', '--home-page-dark', '--home-ink', '--home-soft', '--home-soft2'].forEach((k) => root.removeProperty(k));
-  }, [floor, trekTheme, outside, onMoon, yard]);
+  }, [floor, trekTheme, outside, onMoon, yard, groundPeriod]);
   const day = dayOf(s, today);
   const tasks = todayTasks(s, today);
   const done = tasks.filter((t) => t.id in day.done).length;
