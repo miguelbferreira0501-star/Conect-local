@@ -1,4 +1,4 @@
-// Widget do Hami na tela do iPhone: o Hami, as missões de hoje, a água e a ofensiva.
+// Widget do Lumbi na tela do iPhone: o Lumbi, as tarefas de hoje, a água e a ofensiva.
 // Os dados vêm do app pelo App Group (group.com.hamicare.app), gravados pelo plugin HamiWidget.
 import SwiftUI
 import WidgetKit
@@ -12,7 +12,7 @@ struct HamiEntry: TimelineEntry {
     let water: String
     let streak: Int
 
-    static let sample = HamiEntry(date: Date(), name: "Hami", line: "Bora cuidar de você hoje?", done: 2, total: 5, water: "1 L de 2 L", streak: 3)
+    static let sample = HamiEntry(date: Date(), name: "Lumbi", line: "Bora cuidar de você hoje?", done: 2, total: 5, water: "1 L de 2 L", streak: 3)
 }
 
 struct HamiProvider: TimelineProvider {
@@ -32,7 +32,7 @@ struct HamiProvider: TimelineProvider {
               let o = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else { return nil }
         return HamiEntry(
             date: Date(),
-            name: o["name"] as? String ?? "Hami",
+            name: o["name"] as? String ?? "Lumbi",
             line: o["line"] as? String ?? "",
             done: (o["done"] as? NSNumber)?.intValue ?? 0,
             total: (o["total"] as? NSNumber)?.intValue ?? 0,
@@ -65,7 +65,7 @@ struct HamiWidgetView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(entry.name).font(.system(size: 18, weight: .heavy)).foregroundColor(ink)
                         if !entry.line.isEmpty { Text(entry.line).font(.system(size: 13)).foregroundColor(ink.opacity(0.8)).lineLimit(2) }
-                        if entry.total > 0 { Text("\(entry.done)/\(entry.total) missões").font(.system(size: 15, weight: .bold)).foregroundColor(.blue) }
+                        if entry.total > 0 { Text("\(entry.done)/\(entry.total) tarefas").font(.system(size: 15, weight: .bold)).foregroundColor(.blue) }
                         HStack(spacing: 10) {
                             if !entry.water.isEmpty { Text("💧 \(entry.water)") }
                             if entry.streak > 0 { Text("🔥 \(entry.streak) \(entry.streak == 1 ? "dia" : "dias")") }
@@ -98,8 +98,8 @@ struct HamiWidget: Widget {
         StaticConfiguration(kind: "HamiWidget", provider: HamiProvider()) { entry in
             HamiWidgetView(entry: entry)
         }
-        .configurationDisplayName("Hami")
-        .description("O Hami, as missões de hoje, a água e a ofensiva.")
+        .configurationDisplayName("Lumbi")
+        .description("O Lumbi, as tarefas de hoje, a água e a ofensiva.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
