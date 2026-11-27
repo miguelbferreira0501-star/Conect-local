@@ -12,6 +12,7 @@ import { notifyFriend } from '../push';
 import { ITEMS } from '../../../web/src/data/items';
 import { arenaOf } from '../../../web/src/shared/game';
 import { TEAM_MAX_PLUS, TEAM_MISSIONS_MAX, dayComplete, isTeamMission, teamStreak, type TeamCheckins } from '../../../web/src/shared/team';
+import { duoBest, duoBoth, duoStreak, duoWeek } from '../../../web/src/shared/duo';
 import { codeKey, isServerKey } from '../../../web/src/shared/friendCode';
 import { gameConfig } from './game';
 
@@ -431,6 +432,117 @@ social.post('/team/checkin', (c) =>
     const team = (await loadTeam(db, day))!;
     if (body.data.done) await teamNotices(db, team, me.id);
     return c.json({ team });
+  }),
+);
+
+// ---------- Ofensiva em dupla (você e um amigo; o dia conta quando os dois fazem 1 tarefa) ----------
+
+async function loadDuo(db: pg.PoolClient, myId: string, day: string) {
+  const d = (await db.query('SELECT id, a, b, status FROM duos WHERE app.current_user_id() IN (a, b)')).rows[0];
+  if (!d) return null;
+  const other = d.a === myId ? d.b : d.a;
+  const partner = (await db.query(`SELECT ${PROFILE_COLS} FROM profiles p WHERE p.user_id = $1`, [other])).rows[0];
+  if (!partner) {
+    // Deixaram de ser amigos (ou alguém bloqueou): a dupla acaba.
+    await db.query('DELETE FROM duos WHERE id = $1', [d.id]);
+    return null;
+  }
+  const rows = (await db.query("SELECT user_id, to_char(day, 'YYYY-MM-DD') AS day FROM duo_days WHERE duo_id = $1 AND day >= $2::date - 400", [d.id, day])).rows;
+  const mine = new Set<string>(rows.filter((r) => r.user_id === myId).map((r) => r.day));
+  const theirs = new Set<string>(rows.filter((r) => r.user_id === other).map((r) => r.day));
+  const both = duoBoth(mine, theirs);
+  return {
+    id: d.id as string,
+    status: d.status as 'convite' | 'ativa',
+    invitedByMe: d.a === myId,
+    partner: { ...partner, updatedAt: Number(partner.updatedAt) },
+    today: { date: day, me: mine.has(day), partner: theirs.has(day) },
+    streak: duoStreak(both, day),
+    best: duoBest(both),
+    days: both.size,
+    week: duoWeek(mine, theirs, day),
+  };
+}
+type DuoView = NonNullable<Awaited<ReturnType<typeof loadDuo>>>;
+
+const duoOnce = async (db: pg.PoolClient, duo: DuoView, userId: string, kind: string) =>
+  (await db.query('INSERT INTO duo_notices (duo_id, user_id, day, kind) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING', [duo.id, userId, duo.today.date, kind])).rowCount;
+const dias = (n: number) => `${n} ${n === 1 ? 'dia' : 'dias'}`;
+
+social.get('/duo', (c) => asMe(c, async (db, me) => c.json({ duo: await loadDuo(db, me.id, await teamDay(db, c.req.query('day'))) })));
+
+social.post('/duo', (c) =>
+  asMe(c, async (db, me) => {
+    const body = z.object({ userId: z.string().uuid() }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success || body.data.userId === me.id) throw invalid('Escolha um amigo.');
+    try {
+      await db.query('INSERT INTO duos (a, b) VALUES ($1, $2)', [me.id, body.data.userId]);
+    } catch (e) {
+      const code = (e as { code?: string }).code;
+      if (code === '23505') throw new AppError(409, 'ocupado', 'Você ou seu amigo já está numa dupla.');
+      if (code === '42501') throw forbidden('Só dá para fazer dupla com amigos.');
+      throw e;
+    }
+    const name = await myName(db);
+    later(() => notifyFriend(body.data.userId, `${name} quer fazer uma ofensiva em dupla com você 🔥 Aceite no Lumbi!`));
+    return c.json({ duo: await loadDuo(db, me.id, await teamDay(db, c.req.query('day'))) }, 201);
+  }),
+);
+
+social.post('/duo/accept', (c) =>
+  asMe(c, async (db, me) => {
+    const r = await db.query("UPDATE duos SET status = 'ativa' WHERE b = app.current_user_id() AND status = 'convite' RETURNING a");
+    if (!r.rowCount) throw notFound('Convite não encontrado.');
+    const name = await myName(db);
+    const inviter = r.rows[0].a as string;
+    later(() => notifyFriend(inviter, `${name} topou a ofensiva em dupla! Façam 1 tarefa por dia juntos 🔥`));
+    return c.json({ duo: await loadDuo(db, me.id, await teamDay(db, c.req.query('day'))) });
+  }),
+);
+
+social.delete('/duo', (c) =>
+  asMe(c, async (db) => {
+    await db.query('DELETE FROM duos WHERE app.current_user_id() IN (a, b)');
+    return c.json({ duo: null });
+  }),
+);
+
+social.post('/duo/checkin', (c) =>
+  asMe(c, async (db, me) => {
+    const body = z.object({ day: dayParam.optional(), done: z.boolean().default(true) }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success) throw invalid('Dados inválidos.');
+    const day = await teamDay(db, body.data.day);
+    const d = (await db.query("SELECT id FROM duos WHERE status = 'ativa' AND app.current_user_id() IN (a, b)")).rows[0];
+    if (!d) throw notFound('Você não está numa dupla.');
+    if (body.data.done) await db.query('INSERT INTO duo_days (duo_id, user_id, day) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING', [d.id, me.id, day]);
+    else await db.query('DELETE FROM duo_days WHERE duo_id = $1 AND user_id = $2 AND day = $3', [d.id, me.id, day]);
+    const duo = await loadDuo(db, me.id, day);
+    if (duo && body.data.done) {
+      const other = duo.partner.id as string;
+      const name = await myName(db);
+      if (duo.today.partner) {
+        if (await duoOnce(db, duo, other, 'completo')) later(() => notifyFriend(other, `Vocês dois cuidaram de vocês hoje! Ofensiva em dupla: ${dias(duo.streak)} 🔥`));
+      } else if (await duoOnce(db, duo, other, 'falta')) {
+        later(() => notifyFriend(other, `${name} já fez a parte de hoje. Só falta você para a ofensiva de vocês continuar 🔥`));
+      }
+    }
+    return c.json({ duo });
+  }),
+);
+
+/** Cutucar o amigo (uma vez por dia): "seu amigo precisa de você hoje!". */
+social.post('/duo/nudge', (c) =>
+  asMe(c, async (db, me) => {
+    const body = z.object({ day: dayParam.optional() }).safeParse(await c.req.json().catch(() => ({})));
+    const duo = await loadDuo(db, me.id, await teamDay(db, body.success ? body.data.day : undefined));
+    if (!duo || duo.status !== 'ativa') throw notFound('Você não está numa dupla.');
+    if (duo.today.partner) return c.json({ result: 'ja-fez' });
+    if (!(await duoOnce(db, duo, me.id, 'cutucou'))) return c.json({ result: 'limite' });
+    const name = await myName(db);
+    const other = duo.partner.id as string;
+    const streak = duo.streak;
+    later(() => notifyFriend(other, streak > 0 ? `${name} precisa de você hoje! Faça 1 tarefa para não perder os ${dias(streak)} de vocês 🔥` : `${name} precisa de você hoje! Faça 1 tarefa e comecem a ofensiva em dupla 🔥`));
+    return c.json({ result: 'ok' });
   }),
 );
 

@@ -352,6 +352,10 @@ export interface State {
   favorites?: string[];
   /** Curva de níveis nova aplicada (o XP antigo foi convertido sem perder nível). */
   xpV?: number;
+  /** Lembrança do Lumbi já mostrada: o dia e qual (uma por dia, nunca a mesma de ontem). */
+  memo?: { day: string; id: string };
+  /** Retrospectiva do mês já vista (AAAA-MM do mês contado). */
+  recapSeen?: string;
   updatedAt: number;
   /** Veio do app antigo (Xodó): o onboarding mostra uma mensagem de boas-vindas. */
   from?: 'xodo';

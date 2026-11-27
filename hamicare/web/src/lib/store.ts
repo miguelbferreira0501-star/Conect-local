@@ -1021,6 +1021,17 @@ export function setEmotions(emotions: string[], key = todayKey()) {
   commit(withDay(state, key, { ...dayOf(state, key), emotions }));
 }
 
+/** O Lumbi já falou a lembrança de hoje (não repete no dia). */
+export function seeMemory(id: string, day = todayKey()) {
+  commit({ ...state, memo: { day, id } });
+}
+
+/** A retrospectiva de um mês (AAAA-MM) já foi vista. */
+export function seeRecap(month: string) {
+  if (state.recapSeen && state.recapSeen >= month) return;
+  commit({ ...state, recapSeen: month });
+}
+
 export function addJournal(text: string, prompt?: string) {
   const clean = text.trim();
   if (!clean) return;
@@ -1639,7 +1650,7 @@ export function finishTrek(now = Date.now()): TrekResult | null {
   const place = trekPlaceOf(state);
   const cards = (state.trekCards?.[place] ?? 0) + 1;
   let next: State = { ...state, trek: null, trekCards: { ...(state.trekCards ?? {}), [place]: cards }, inventory: { ...state.inventory, [food]: (state.inventory[food] ?? 0) + 1 } };
-  next = logEventIn(grant(next, { kind: 'viagem', date }), 'aventura');
+  next = logEventIn(logEventIn(grant(next, { kind: 'viagem', date }), 'aventura'), `viagem:${place}`);
   commit(next);
   const paid = next.game.paid[`viagem:${date}`];
   return { coins: paid?.coins ?? TREK.coins, xp: paid?.xp ?? TREK.xp, food, story: TREK_STORIES[Math.abs(h) % TREK_STORIES.length], place, cards, tale: Math.floor(Math.abs(h) / 8) % TREK_TALES.length };

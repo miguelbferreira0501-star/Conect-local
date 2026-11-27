@@ -66,6 +66,22 @@ export interface Team {
   completeDays: number;
 }
 
+/** Ofensiva em dupla: você e um amigo; o dia conta quando os dois fazem pelo menos 1 tarefa. */
+export interface Duo {
+  id: string;
+  /** 'convite' enquanto o amigo não aceitou. */
+  status: 'convite' | 'ativa';
+  invitedByMe: boolean;
+  partner: Profile;
+  today: { date: string; me: boolean; partner: boolean };
+  streak: number;
+  best: number;
+  /** Dias que os dois fizeram, no total. */
+  days: number;
+  /** Os últimos 7 dias, do mais antigo para hoje. */
+  week: { date: string; me: boolean; partner: boolean }[];
+}
+
 export interface Visit {
   userId: string;
   name: string;
@@ -215,4 +231,14 @@ export interface SocialApi {
   /** Sair (você) ou tirar alguém (quem criou). Se quem criou sai, a turma acaba. */
   leaveTeam(userId: string, day: string): Promise<Team | null>;
   teamCheckin(mission: string, day: string, done: boolean): Promise<Team | null>;
+  /** Ofensiva em dupla (ou null). */
+  duo(day: string): Promise<Duo | null>;
+  inviteDuo(userId: string, day: string): Promise<Duo | null>;
+  acceptDuo(day: string): Promise<Duo | null>;
+  /** Recusar, cancelar o convite ou desfazer a dupla. */
+  leaveDuo(): Promise<void>;
+  /** Marca (ou desmarca) que você fez pelo menos 1 tarefa hoje. */
+  duoCheckin(day: string, done: boolean): Promise<Duo | null>;
+  /** Cutucar o amigo (uma vez por dia). */
+  nudgeDuo(day: string): Promise<'ok' | 'limite' | 'ja-fez'>;
 }

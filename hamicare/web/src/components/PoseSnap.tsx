@@ -11,7 +11,7 @@ const SNAP_ACTS: Trick[] = ['acenar', 'coracao', 'estrela', 'danca', 'musica', '
 const FRAMES = ['#FFE3EC', '#E3F0FF', '#FFF3C4', '#E6F7E9', '#EEE6FF'];
 
 /** Desenho SVG do Lumbi → imagem (as partes dele viram dados dentro do SVG para o navegador conseguir desenhar). */
-async function svgToImage(svg: SVGSVGElement): Promise<HTMLImageElement> {
+export async function svgToImage(svg: SVGSVGElement): Promise<HTMLImageElement> {
   const clone = svg.cloneNode(true) as SVGSVGElement;
   const box = svg.getBoundingClientRect();
   clone.setAttribute('width', String(box.width * 3));

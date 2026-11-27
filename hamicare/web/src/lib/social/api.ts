@@ -1,7 +1,7 @@
 // Parte social e conta usando o servidor do Lumbi (hamicare/server).
 import type { ReactionId } from '../../shared/moderation';
 import { apiBase } from '../native';
-import type { CommentResult, Feed, FriendState, Gift, GroupChallenge, Profile, RankRow, ReportTarget, SocialApi, Team, Visit } from './types';
+import type { CommentResult, Duo, Feed, FriendState, Gift, GroupChallenge, Profile, RankRow, ReportTarget, SocialApi, Team, Visit } from './types';
 
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string, public details?: unknown) {
@@ -96,5 +96,11 @@ export function createApiSocial(): SocialApi {
     addTeamMember: (userId, day) => http<{ team: Team | null }>('POST', `/social/team/members?day=${day}`, { userId }).then((r) => r.team),
     leaveTeam: (userId, day) => http<{ team: Team | null }>('DELETE', `/social/team/members/${userId}?day=${day}`).then((r) => r.team),
     teamCheckin: (mission, day, done) => http<{ team: Team | null }>('POST', '/social/team/checkin', { mission, day, done }).then((r) => r.team),
+    duo: (day) => http<{ duo: Duo | null }>('GET', `/social/duo?day=${day}`).then((r) => r.duo),
+    inviteDuo: (userId, day) => http<{ duo: Duo | null }>('POST', `/social/duo?day=${day}`, { userId }).then((r) => r.duo),
+    acceptDuo: (day) => http<{ duo: Duo | null }>('POST', `/social/duo/accept?day=${day}`).then((r) => r.duo),
+    leaveDuo: () => http<{ duo: null }>('DELETE', '/social/duo').then(() => undefined),
+    duoCheckin: (day, done) => http<{ duo: Duo | null }>('POST', '/social/duo/checkin', { day, done }).then((r) => r.duo),
+    nudgeDuo: (day) => http<{ result: 'ok' | 'limite' | 'ja-fez' }>('POST', '/social/duo/nudge', { day }).then((r) => r.result),
   };
 }

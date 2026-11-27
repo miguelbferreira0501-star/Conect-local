@@ -44,7 +44,8 @@ import { useFurniturePlay } from '../components/FurniturePlay';
 import { TaskCalendar, byPart } from '../components/TaskCalendar';
 import { petMoodOf } from '../lib/petState';
 import { ACTIVITIES, activityForVisit, askText, conditionNeed, conditionOf, CONDITIONS, cryEvery, type Activity } from '../lib/hamiDay';
-import { setBattery } from '../lib/store';
+import { seeMemory, setBattery } from '../lib/store';
+import { memoryOf } from '../lib/memory';
 
 
 export function useNow(ms: number) {
@@ -197,6 +198,20 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
   const petMood: PetMood = mood ?? (justFixed ? 'risada' : condOn ? (CONDITIONS[cond].teary ? 'manha' : 'feliz') : hardDay ? petMoodOf(s, { hardDay, done, total: tasks.length, hour: new Date(now).getHours() }) : act.mood);
   const scrollToTasks = () => document.querySelector('.hc-tasks')?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
 
+  // O Lumbi que lembra de você: uma lembrança por dia (o que você contou ontem, no diário, a água, o sono…).
+  const [memo] = useState(() => memoryOf(s, today));
+  const [memoAnswer, setMemoAnswer] = useState<string | null>(null);
+  const [memoGone, setMemoGone] = useState(false);
+  const showMemo = !!memo && !memoGone && !adv && !s.trek && !s.pet.sleeping;
+  const closeMemo = (answer?: string) => {
+    if (!memo) return;
+    seeMemory(memo.id);
+    if (!answer) return setMemoGone(true);
+    setMemoAnswer(answer);
+    play('latido');
+    setTimeout(() => setMemoGone(true), 6000);
+  };
+
   const hami = adv ? (
     <div className="mb-6 grid justify-items-center gap-1 rounded-3xl bg-surface/95 px-4 py-3 text-center shadow-[var(--shadow)]">
       <Glyph e={advPlace?.emoji} size={40} />
@@ -228,7 +243,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
       <div ref={petRef} style={{ transformOrigin: '50% 100%' }}>
         <LivePet
           size={140}
-          mood={moonHop ? 'surpreso' : petMood}
+          mood={moonHop ? 'surpreso' : showMemo && memo ? (memoAnswer ? 'risada' : memo.mood) : petMood}
           cond={condOn ? cond : null}
           wear={condOn ? CONDITIONS[cond].wear : undefined}
           prop={undefined}
@@ -324,7 +339,24 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
             </button>
           </>
         )}
-        {!adv && !s.trek && (
+        {showMemo && memo && (
+          <div className="hr-bubble hr-memo" role="status">
+            <button className="hr-memo-x" onClick={() => closeMemo()} aria-label="Fechar a lembrança">
+              ×
+            </button>
+            <p key={memoAnswer ?? 'q'}>{memoAnswer ?? memo.text}</p>
+            {!memoAnswer && (
+              <div className="hr-memo-replies">
+                {memo.replies.map((r) => (
+                  <button key={r.label} onClick={() => closeMemo(r.answer)} data-sound="none">
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        {!adv && !s.trek && !showMemo && (
           <div className={`hr-bubble ${condOn && !furniture.line ? 'is-need' : ''}`}>
             <p>{napping || sittingNow ? actLine : moonHop && !furniture.line ? 'Uau! Aqui na Lua eu pulo bem alto e caio devagarinho!' : furniture.line ?? (s.pet.sleeping ? line : justFixed ? CONDITIONS[cond].fixed : condOn ? askText(cond, need) : hardDay ? line : actLine)}</p>
             {condOn && !furniture.line && !s.pet.sleeping && (
@@ -368,7 +400,7 @@ export function Home({ onGo, onSettings, onEvolution, onArenas, onPlus, onTeam, 
         </button>
         <button className="hc-trip-foot" onClick={() => (goalDone ? setTrekGo(true) : setDestOpen(true))}>
           <span>
-            {goalDone ? 'Meta cumprida! Toque para escolher o destino e viajar' : s.trek ? `${s.pet.name} está em ${destById(trekPlaceOf(s))?.name ?? 'viagem'}` : `Faltam ${Math.max(0, goal - done)} ${goal - done === 1 ? 'tarefa' : 'tarefas'} · Destino: ${destById(trekPlaceOf(s))?.name ?? ''}`}
+            {goalDone ? 'Meta cumprida! Toque para escolher o destino e viajar' : s.trek ? `${s.pet.name} está em ${destById(trekPlaceOf(s))?.name ?? 'viagem'}` : `${goal - done === 1 ? 'Falta 1 tarefa' : `Faltam ${Math.max(0, goal - done)} tarefas`} · Destino: ${destById(trekPlaceOf(s))?.name ?? ''}`}
           </span>
           <span className="hc-trip-streak">
             <Flame size={14} /> {streak.count}

@@ -470,3 +470,77 @@
 /* Brincar (aba Lumbi): botão simples. */
 .pc5 { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 15px 18px; border: 0; border-radius: 18px; background: #ff8a5c; color: #fff; font-family: var(--font-display, inherit); font-size: 17px; font-weight: 800; box-shadow: 0 4px 0 #e06a3f; }
 .pc5:active { transform: translateY(3px); box-shadow: 0 1px 0 #e06a3f; }
+
+/* ---------- Ofensiva em dupla ---------- */
+.dp { position: relative; display: grid; gap: 12px; padding: 16px; border-radius: 26px; background: linear-gradient(160deg, #fff4e8, #ffe6d6); color: #4a2c1d; box-shadow: 0 6px 18px rgba(222, 120, 60, 0.18); }
+.dp.is-done { background: linear-gradient(160deg, #fff1d9, #ffd9b8); }
+.dp-top { display: flex; align-items: center; gap: 12px; }
+.dp-top b { display: block; font-family: var(--font-display, inherit); font-size: 18px; }
+.dp-top small { display: block; font-size: 14px; line-height: 1.35; color: #8a5a3b; }
+.dp-flame { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border-radius: 16px; background: #ff8a3c; color: #fff; box-shadow: 0 3px 0 #e06a2a; }
+.dp-btn { width: 100%; padding: 13px 16px; border: 0; border-radius: 16px; background: #ff8a3c; color: #fff; font-family: var(--font-display, inherit); font-size: 16px; font-weight: 800; box-shadow: 0 4px 0 #e06a2a; }
+.dp-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #e06a2a; }
+.dp-btn.is-ghost { background: #fff; color: #c2622a; box-shadow: 0 4px 0 #f1c9a8; }
+.dp-btn:disabled { opacity: 0.6; }
+.dp-link { justify-self: center; border: 0; background: none; color: #a4714f; font-size: 13px; font-weight: 700; text-decoration: underline; }
+.dp-head { display: flex; align-items: center; gap: 10px; }
+.dp-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #d06a2c; }
+.dp-names { overflow: hidden; font-family: var(--font-display, inherit); font-size: 18px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.dp-count { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 999px; background: #ff8a3c; color: #fff; font-family: var(--font-display, inherit); font-size: 20px; font-weight: 800; box-shadow: 0 3px 0 #e06a2a; }
+.dp-pair { display: flex; align-items: flex-end; justify-content: center; gap: 0; margin: -4px 0 -6px; }
+.dp-pet { display: block; }
+.dp-pet.is-flip { transform: scaleX(-1); }
+.dp-heart { align-self: center; margin: 0 -10px; color: #ff6f91; filter: drop-shadow(0 2px 0 #fff); z-index: 1; }
+.dp-pair.is-on .dp-heart { animation: dp-beat 1.6s ease-in-out infinite; }
+@keyframes dp-beat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.25); } 30% { transform: scale(1); } }
+.dp-say { text-align: center; font-size: 15px; font-weight: 700; line-height: 1.35; }
+.dp-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.dp-day { display: grid; justify-items: center; gap: 3px; }
+.dp-day i { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 2px dashed #f1c9a8; color: #fff; }
+.dp-day.is-half i { border: 2px solid #ffb07a; background: linear-gradient(90deg, #ffb07a 50%, #fff 50%); }
+.dp-day.is-full i { border: 0; background: #ff8a3c; box-shadow: 0 2px 0 #e06a2a; }
+.dp-day small { font-size: 11px; font-weight: 800; color: #a4714f; }
+.dp-day.is-today small { color: #d06a2c; }
+.dp-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 700; color: #a4714f; }
+.dp-friend { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; border: 0; border-radius: 18px; background: var(--surface-2); color: inherit; }
+.dp-friend b { display: block; font-size: 16px; }
+.dp-friend small { display: block; font-size: 13px; color: var(--muted); }
+.dp-chip { padding: 7px 12px; border-radius: 999px; background: #ff8a3c; color: #fff; font-size: 13px; font-weight: 800; }
+
+/* ---------- O Lumbi que lembra de você (balão do Início) ---------- */
+.home-room .hr-bubble.hr-memo { left: calc(50% - 6px); width: calc(100% - 140px); max-width: 280px; padding: 12px 12px 10px; border: 3px solid #ffd6e4; }
+.home-room .hr-bubble.hr-memo p { font-size: 13.5px; }
+.hr-memo p { animation: bubble-in 360ms var(--ease-out); }
+.hr-memo .hr-memo-x { position: absolute; top: -10px; right: -10px; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border-radius: 50%; background: #ffffff; color: #8a7f98; font-size: 18px; line-height: 1; box-shadow: 0 2px 0 rgba(43, 47, 85, 0.15); }
+.hr-memo-replies { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.hr-memo .hr-memo-x { top: -12px; left: -12px; right: auto; }
+.hr-memo .hr-memo-replies button { justify-content: center; padding: 8px 4px; border-radius: 12px; background: #fff0f5; color: #c23d6c; font-size: 12px; line-height: 1.2; box-shadow: 0 2px 0 #ffd6e4; }
+.hr-memo .hr-memo-replies button:first-child { background: #ff6f91; color: #ffffff; box-shadow: 0 2px 0 #e04f75; }
+
+/* ---------- Retrospectiva do mês (stories) ---------- */
+.rc { position: fixed; inset: 0; z-index: 450; display: grid; grid-template-rows: auto 1fr auto; padding: calc(12px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) 16px calc(16px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))); overflow: hidden; transition: background 500ms ease; }
+.rc-bars { display: flex; gap: 4px; padding-right: 44px; }
+.rc-bars span { flex: 1; height: 4px; overflow: hidden; border-radius: 4px; background: rgba(255, 255, 255, 0.35); }
+.rc-bars i { display: block; width: 0; height: 100%; border-radius: inherit; background: #fff; }
+.rc-bars i.is-done, .rc-bars i.is-hold { width: 100%; }
+.rc-bars i.is-now { animation: rc-fill linear forwards; }
+@keyframes rc-fill { from { width: 0; } to { width: 100%; } }
+.rc-x { position: absolute; top: calc(4px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))); right: 10px; z-index: 2; display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.25); color: inherit; }
+.rc-tap { display: grid; place-items: center; min-height: 0; touch-action: manipulation; user-select: none; }
+.rc-in { display: grid; justify-items: center; gap: 8px; width: min(100%, 420px); text-align: center; animation: rc-in 520ms var(--ease-out, ease-out); }
+@keyframes rc-in { from { opacity: 0; transform: translateY(18px) scale(0.97); } to { opacity: 1; transform: none; } }
+.rc-eyebrow { font-size: 14px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.9; }
+.rc-pet { filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.18)); }
+.rc-big { font-family: var(--font-display, inherit); font-size: 88px; font-weight: 900; line-height: 1; text-shadow: 0 4px 0 rgba(0, 0, 0, 0.12); animation: rc-pop 700ms cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+@keyframes rc-pop { from { transform: scale(0.4); opacity: 0; } to { transform: none; opacity: 1; } }
+.rc-title { font-family: var(--font-display, inherit); font-size: 28px; font-weight: 900; line-height: 1.15; }
+.rc-text { max-width: 32ch; font-size: 17px; font-weight: 700; line-height: 1.4; opacity: 0.95; }
+.rc-card { display: grid; justify-items: center; gap: 10px; width: 100%; padding: 18px 16px; border-radius: 30px; background: rgba(255, 255, 255, 0.2); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35); }
+.rc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+.rc-grid span { display: grid; padding: 10px 6px; border-radius: 18px; background: rgba(255, 255, 255, 0.22); font-size: 14px; font-weight: 800; }
+.rc-grid b { font-family: var(--font-display, inherit); font-size: 34px; line-height: 1.05; }
+.rc-card-mood { font-size: 17px; font-weight: 800; }
+.rc-foot { display: grid; gap: 8px; width: min(100%, 420px); justify-self: center; }
+.rc-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 15px; border: 0; border-radius: 18px; background: #fff; color: #6b4fd8; font-family: var(--font-display, inherit); font-size: 17px; font-weight: 900; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15); }
+.rc-btn.is-ghost { background: rgba(255, 255, 255, 0.22); color: #fff; box-shadow: none; }
+@media (max-height: 640px) { .rc-big { font-size: 64px; } .rc-title { font-size: 23px; } }
