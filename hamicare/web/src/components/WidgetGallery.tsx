@@ -1,13 +1,16 @@
 // Galeria de widgets (como a de apps de pet): cada widget com a prévia já com os seus números,
 // coroa nos do Lumbi+ e o botão para colocar na tela inicial do celular (Android pede confirmação).
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, Crown, Plus } from 'lucide-react';
 import { toast } from './ui';
 import { openUi } from '../lib/bus';
 import { isNativeApp, nativePlatform } from '../lib/native';
 import { isPremium, useApp } from '../lib/store';
-import { pinWidget, widgetData, type WidgetData } from '../lib/widget';
+import { openWidgetPermissions, pinWidget, takePinned, widgetData, type PinResult, type WidgetData } from '../lib/widget';
+import { Sheet } from './ui';
+import { burstConfetti } from '../lib/confetti';
+import { play } from '../lib/sound';
 
 const img = (k: string) => new URL(`../assets/widgets/${k}.webp`, import.meta.url).href;
 
@@ -87,13 +90,37 @@ const SECTIONS: { title: string; items: Def[] }[] = [
   },
 ];
 
+const XIAOMI = ['xiaomi', 'redmi', 'poco'];
+
 export function WidgetGallery({ open, onClose }: { open: boolean; onClose: () => void }) {
   const s = useApp();
   const d = useMemo(() => widgetData(s), [s]);
+  // Folha de ajuda depois do toque: o aviso do celular, ou o passo a passo quando o celular não deixa.
+  const [help, setHelp] = useState<{ w: Def; r: PinResult } | null>(null);
+  const [done, setDone] = useState(false);
+
+  // Quando o widget entra na tela (o celular avisa o app), comemora.
+  useEffect(() => {
+    if (!open) return;
+    const check = async () => {
+      if (await takePinned()) {
+        setDone(true);
+        play('conquista');
+        burstConfetti(document.querySelector('.wg-head'), 30);
+      }
+    };
+    const t = setInterval(check, 1200);
+    const onVis = () => !document.hidden && check();
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      clearInterval(t);
+      document.removeEventListener('visibilitychange', onVis);
+    };
+  }, [open]);
+
   if (!open) return null;
   const kid = s.profile.ageGroup === 'ate12';
   const premium = isPremium(s) || kid;
-  const android = isNativeApp() && nativePlatform() === 'android';
 
   const add = async (w: Def) => {
     if (w.plus && !premium) {
@@ -102,9 +129,26 @@ export function WidgetGallery({ open, onClose }: { open: boolean; onClose: () =>
       return;
     }
     if (!isNativeApp()) return toast('Os widgets funcionam no app instalado pela loja.');
-    if (android && (await pinWidget(w.kind))) return toast('Confirme no aviso do celular para colocar na tela inicial.');
-    toast(nativePlatform() === 'ios' ? 'Segure a tela inicial, toque em + e procure por Lumbi.' : `Segure a tela inicial, toque em Widgets e procure "${'Lumbi: ' + w.label.toLowerCase()}".`);
+    setDone(false);
+    const r = nativePlatform() === 'android' ? await pinWidget(w.kind) : { ok: false, supported: false, maker: '' };
+    setHelp({ w, r });
   };
+
+  const xiaomi = !!help && XIAOMI.some((m) => help.r.maker.includes(m));
+  const manual = (
+    <ol className="wg-steps">
+      <li>Volte para a <b>tela inicial</b> do celular.</li>
+      <li>
+        <b>Segure o dedo</b> num espaço vazio até aparecer o menu.
+      </li>
+      <li>
+        Toque em <b>Widgets</b> e procure <b>Lumbi</b>.
+      </li>
+      <li>
+        Segure <b>“Lumbi: {help?.w.label.toLowerCase()}”</b> e arraste para a tela.
+      </li>
+    </ol>
+  );
 
   return createPortal(
     <div className="wg" role="dialog" aria-modal="true" aria-label="Widgets">
@@ -139,6 +183,49 @@ export function WidgetGallery({ open, onClose }: { open: boolean; onClose: () =>
           </div>
         </section>
       ))}
+      <Sheet open={!!help} onClose={() => setHelp(null)} title={done ? 'Pronto! 🎉' : help?.r.ok ? 'Quase lá!' : 'Colocar na tela inicial'} top>
+        {help && (
+          <div className="wg-help">
+            <span className="wg-help-art" style={{ backgroundImage: `url(${img(help.w.kind)})` }} />
+            {done ? (
+              <p className="wg-help-big">O widget “{help.w.label}” já está na sua tela inicial!</p>
+            ) : help.r.ok ? (
+              <>
+                <p className="wg-help-big">
+                  Apareceu um aviso do celular: toque em <b>Adicionar</b> (ou arraste o widget para a tela).
+                </p>
+                <p className="wg-help-small">O Android sempre pede essa confirmação por segurança.</p>
+                {xiaomi && (
+                  <div className="wg-help-box">
+                    <b>Não apareceu nenhum aviso?</b> No Xiaomi é preciso liberar <b>“Atalhos da tela inicial”</b> para o Lumbi.
+                    <button className="btn btn-primary btn-sm" onClick={() => openWidgetPermissions()}>
+                      Abrir permissões do Lumbi
+                    </button>
+                    <small>Depois volte aqui e toque no widget de novo.</small>
+                  </div>
+                )}
+                <details className="wg-help-more">
+                  <summary>Não apareceu nada? Faça pela tela inicial</summary>
+                  {manual}
+                </details>
+              </>
+            ) : (
+              <>
+                <p className="wg-help-big">O seu celular não deixa o app colocar o widget sozinho, mas é rapidinho:</p>
+                {manual}
+                {xiaomi && (
+                  <button className="btn btn-ghost btn-sm" onClick={() => openWidgetPermissions()}>
+                    Liberar “Atalhos da tela inicial” (Xiaomi)
+                  </button>
+                )}
+              </>
+            )}
+            <button className="btn btn-primary" onClick={() => setHelp(null)}>
+              {done ? 'Oba!' : 'Entendi'}
+            </button>
+          </div>
+        )}
+      </Sheet>
       {!premium && (
         <button className="wg-plus" onClick={() => (onClose(), openUi('plus'))}>
           <Crown size={18} /> Desbloqueie todos os widgets

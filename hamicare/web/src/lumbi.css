@@ -600,3 +600,11 @@
 .wg-affirm { position: absolute; left: 12%; right: 12%; top: 12%; font-size: 3.6cqw; font-weight: 800; color: #2f6b4f; }
 .wg-coin { position: absolute; bottom: 4%; left: 0; right: 0; font-size: 5.5cqw; font-weight: 800; color: rgba(255, 255, 255, 0.9); }
 .wg-plus { position: fixed; left: 16px; right: 16px; bottom: calc(16px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))); display: flex; align-items: center; justify-content: center; gap: 8px; padding: 15px; border: 0; border-radius: 22px; background: #ffd84a; color: #4a3500; font-family: var(--font-display, inherit); font-size: 16px; font-weight: 900; box-shadow: 0 4px 0 #e0b400; }
+.wg-help { display: grid; gap: 12px; padding-bottom: 6px; }
+.wg-help-art { display: block; width: 60%; aspect-ratio: 2 / 1; justify-self: center; border-radius: 16px; background-size: cover; background-position: center; box-shadow: 0 4px 12px rgba(60, 40, 90, 0.15); }
+.wg-help-big { text-align: center; font-size: 16px; font-weight: 700; line-height: 1.4; }
+.wg-help-small { text-align: center; font-size: 13px; color: var(--muted); }
+.wg-help-box { display: grid; gap: 8px; padding: 12px; border-radius: 16px; background: #fff4d6; font-size: 14px; line-height: 1.4; color: #5a4300; }
+.wg-help-box small { font-size: 12px; opacity: 0.85; }
+.wg-help-more summary { cursor: pointer; text-align: center; font-size: 14px; font-weight: 700; color: #7b5bd6; }
+.wg-steps { display: grid; gap: 8px; margin: 10px 0 0; padding-left: 22px; font-size: 15px; line-height: 1.4; }
