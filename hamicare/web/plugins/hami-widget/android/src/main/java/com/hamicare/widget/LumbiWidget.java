@@ -99,6 +99,7 @@ public abstract class LumbiWidget extends AppWidgetProvider {
     public void onReceive(Context c, Intent intent) {
         super.onReceive(c, intent);
         if (ACTION.equals(intent.getAction())) {
+            if ("pinned".equals(intent.getStringExtra("what"))) prefs(c).edit().putBoolean("pinned", true).apply();
             handle(c, intent.getStringExtra("what"), intent.getIntExtra("index", 0));
             refresh(c, getClass());
         }

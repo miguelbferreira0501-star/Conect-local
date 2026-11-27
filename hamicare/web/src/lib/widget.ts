@@ -37,7 +37,9 @@ const MOVE_TIPS = ['Que tal alongar 5 minutinhos?', 'Uma voltinha de 10 minutos 
 interface HamiWidgetPlugin {
   update(data: WidgetData): Promise<{ saved: boolean }>;
   takePending(): Promise<{ water: number }>;
-  pin(o: { kind: string }): Promise<{ ok: boolean }>;
+  pin(o: { kind: string }): Promise<{ ok: boolean; supported: boolean; maker: string }>;
+  openPermissions(): Promise<void>;
+  takePinned(): Promise<{ pinned: boolean }>;
 }
 const HamiWidget = registerPlugin<HamiWidgetPlugin>('HamiWidget');
 
@@ -87,11 +89,32 @@ async function takePending() {
   }
 }
 
-/** Coloca um widget da galeria na tela inicial (Android 8+). */
-export async function pinWidget(kind: string): Promise<boolean> {
+export type PinResult = { ok: boolean; supported: boolean; maker: string };
+
+/** Pede para o celular colocar um widget da galeria na tela inicial (Android 8+; o celular mostra um aviso). */
+export async function pinWidget(kind: string): Promise<PinResult> {
+  if (!isNativeApp() || !Capacitor.isPluginAvailable('HamiWidget')) return { ok: false, supported: false, maker: '' };
+  try {
+    return await HamiWidget.pin({ kind });
+  } catch {
+    return { ok: false, supported: false, maker: '' };
+  }
+}
+
+/** Abre a tela de permissões do app (no Xiaomi: liberar "Atalhos da tela inicial"). */
+export async function openWidgetPermissions() {
+  try {
+    await HamiWidget.openPermissions();
+  } catch {
+    /* sem plugin */
+  }
+}
+
+/** O widget pedido pelo app entrou na tela inicial? (lê e zera) */
+export async function takePinned(): Promise<boolean> {
   if (!isNativeApp() || !Capacitor.isPluginAvailable('HamiWidget')) return false;
   try {
-    return (await HamiWidget.pin({ kind })).ok;
+    return (await HamiWidget.takePinned()).pinned;
   } catch {
     return false;
   }
