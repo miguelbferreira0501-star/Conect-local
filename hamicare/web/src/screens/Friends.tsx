@@ -13,6 +13,7 @@ import { openUi } from '../lib/bus';
 import { codeKey, isServerKey } from '../shared/friendCode';
 import { RankingTab, VisitsCard } from './social/Ranking';
 import { TeamTab } from './social/Team';
+import { DuoCard } from '../components/Duo';
 import { postKey, type Feed, type FriendState, type Gift, type GroupChallenge, type Profile, type SocialApi } from '../lib/social/types';
 import { Avatar, Composer, PostCard, type ShareDraft } from './social/Post';
 import { MyHeader, ProfilePage } from './social/Profile';
@@ -110,6 +111,7 @@ export function Friends({ share, onShareDone, giftItem, onGiftDone, account, ini
   ];
   return (
     <Shell>
+      <DuoCard api={api} friends={fs?.friends ?? []} />
       <MyHeader me={me} api={api} postsCount={myPosts} friendsCount={fs?.friends.length ?? 0} onAdd={() => setMenu(true)} error={profileErr} onRetry={refreshFriends} />
       <div className="tabs-scroll" role="tablist" aria-label="Seções">
         {TABS.map((t) => (

@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { DuoSync } from './components/Duo';
+import { RecapScreen } from './components/Recap';
+import { recapDue, recapPick } from './lib/recap';
 import { GoalDone } from './components/GoalDone';
 import { MoodCheckinHost } from './components/MoodCheckin';
 import { Sheet, Toaster, toast } from './components/ui';
@@ -132,6 +135,17 @@ export default function App() {
 
   useEffect(() => onCelebrate((c) => setQueue((q) => [...q, c])), []);
 
+  // Retrospectiva do mês: nos primeiros dias do mês, depois do check-in de humor, abre sozinha uma vez.
+  const [recap, setRecap] = useState<string | null>(null);
+  const moodToday = s.days[todayKey()]?.mood;
+  useEffect(() => {
+    if (!moodToday || recap) return;
+    const due = recapDue(s, todayKey());
+    if (!due) return;
+    const t = setTimeout(() => setRecap(due), 1200);
+    return () => clearTimeout(t);
+  }, [moodToday]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Atalhos pedidos por outras telas (menu, correio, trilha…).
   useEffect(
     () =>
@@ -151,6 +165,7 @@ export default function App() {
         else if (t === 'areas') setAreasOpen(true);
         else if (t === 'loja') setTab('loja');
         else if (t === 'interacoes') setInter(true);
+        else if (t === 'retrospectiva') setRecap(recapPick(getState(), todayKey()));
       }),
     [],
   );
@@ -258,6 +273,8 @@ export default function App() {
       <GoalDone />
       {!showWelcome && <MoodCheckinHost />}
       <GuardianHost />
+      <DuoSync />
+      {recap && <RecapScreen month={recap} onClose={() => setRecap(null)} />}
       <Toaster />
     </GrowthContext.Provider>
   );

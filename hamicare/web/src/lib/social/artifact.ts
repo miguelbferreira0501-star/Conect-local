@@ -7,9 +7,10 @@ import { checkKindness, REASON_TEXT, type ReactionId } from '../../shared/modera
 import { codeKey } from '../../shared/friendCode';
 import { addDays, hashStr, uid } from '../util';
 import { getState, isPremium, todayKey } from '../store';
-import type { Comment, Feed, FriendState, Gift, Group, GroupChallenge, Post, Profile, RankRow, Reaction, ReportTarget, SocialApi, Team, Visit } from './types';
+import type { Comment, Duo, Feed, FriendState, Gift, Group, GroupChallenge, Post, Profile, RankRow, Reaction, ReportTarget, SocialApi, Team, Visit } from './types';
 import { TEAM_MAX, TEAM_MAX_PLUS, TEAM_MISSIONS_MAX, dayComplete, isTeamMission, teamStreak } from '../../shared/team';
 import { postKey } from './types';
+import { duoBest, duoBoth, duoStreak, duoWeek } from '../../shared/duo';
 
 /** Regras de acesso declaradas na publicação (ver scripts/artifact.mjs). */
 export const DB_RULES = [
@@ -49,6 +50,12 @@ interface SocialDoc {
   leftTeams?: string[];
   /** Missões da turma feitas: dono:id → dia → missões. */
   teamCheckins?: Record<string, Record<string, string[]>>;
+  /** Ofensiva em dupla: com quem a pessoa quer fazer dupla (vira dupla quando os dois escolhem um ao outro). */
+  duoWith?: string | null;
+  /** Dias em que fez pelo menos 1 tarefa, por amigo da dupla. */
+  duoDays?: Record<string, string[]>;
+  /** Último dia em que cutucou o amigo. */
+  duoNudged?: string;
 }
 interface TeamDoc {
   id: string;
@@ -113,6 +120,37 @@ export function createArtifactSocial(db: Db, myId: string): SocialApi {
       }
     }
     return { ...st, groups, socialDocs };
+  }
+
+  /** A dupla de hoje: ativa quando os dois se escolheram; convite quando só um escolheu. */
+  async function duoView(day: string): Promise<Duo | null> {
+    const [st, socialDocs] = await Promise.all([state(), all<SocialDoc>('social')]);
+    const mine = socialDocs[myId] ?? emptySocial();
+    let other = mine.duoWith ?? null;
+    let invitedByMe = true;
+    if (!other) {
+      // Alguém me chamou (e eu ainda não tenho dupla)?
+      other = st.friends.find((f) => socialDocs[f]?.duoWith === myId) ?? null;
+      invitedByMe = false;
+    }
+    if (!other || !st.friends.includes(other) || !st.profiles[other]) return null;
+    const theirSide = socialDocs[other]?.duoWith ?? null;
+    if (invitedByMe && theirSide && theirSide !== myId) return null;
+    const active = mine.duoWith === other && theirSide === myId;
+    const me = new Set(mine.duoDays?.[other] ?? []);
+    const them = new Set(socialDocs[other]?.duoDays?.[myId] ?? []);
+    const both = active ? duoBoth(me, them) : new Set<string>();
+    return {
+      id: [myId, other].sort().join(':'),
+      status: active ? 'ativa' : 'convite',
+      invitedByMe,
+      partner: { ...st.profiles[other], id: other },
+      today: { date: day, me: me.has(day), partner: them.has(day) },
+      streak: duoStreak(both, day),
+      best: duoBest(both),
+      days: both.size,
+      week: duoWeek(me, them, day),
+    };
   }
 
   /** Todas as turmas, com quem está nelas de verdade (amigos de quem criou, sem quem saiu). */
@@ -452,7 +490,48 @@ export function createArtifactSocial(db: Db, myId: string): SocialApi {
       await write(`social/${myId}`, { ...mine, teamCheckins: all });
       return teamView(day);
     },
+    duo: (day) => duoView(day),
+    async inviteDuo(userId, day) {
+      const [{ friends }, socialDocs] = await Promise.all([state(), all<SocialDoc>('social')]);
+      if (!friends.includes(userId)) throw new Error('Só dá para fazer dupla com amigos.');
+      if (socialDocs[userId]?.duoWith && socialDocs[userId]?.duoWith !== myId) throw new Error('Você ou seu amigo já está numa dupla.');
+      const mine = await mySocial();
+      await write(`social/${myId}`, { ...mine, duoWith: userId });
+      return duoView(day);
+    },
+    async acceptDuo(day) {
+      const d = await duoView(day);
+      if (!d || d.invitedByMe) throw new Error('Convite não encontrado.');
+      const mine = await mySocial();
+      await write(`social/${myId}`, { ...mine, duoWith: d.partner.id });
+      return duoView(day);
+    },
+    async leaveDuo() {
+      const mine = await mySocial();
+      await write(`social/${myId}`, { ...mine, duoWith: null });
+    },
+    async duoCheckin(day, done) {
+      const d = await duoView(day);
+      if (!d || d.status !== 'ativa') throw new Error('Você não está numa dupla.');
+      const mine = await mySocial();
+      const list = new Set(mine.duoDays?.[d.partner.id] ?? []);
+      if (done) list.add(day);
+      else list.delete(day);
+      const days = [...list].sort().slice(-400);
+      await write(`social/${myId}`, { ...mine, duoDays: { ...(mine.duoDays ?? {}), [d.partner.id]: days } });
+      return duoView(day);
+    },
+    async nudgeDuo(day) {
+      const d = await duoView(day);
+      if (!d || d.status !== 'ativa') throw new Error('Você não está numa dupla.');
+      if (d.today.partner) return 'ja-fez';
+      const mine = await mySocial();
+      if (mine.duoNudged === day) return 'limite';
+      await write(`social/${myId}`, { ...mine, duoNudged: day });
+      return 'ok';
+    },
     async challenges() {
+
       const [{ friends }, chDocs, socialDocs] = await Promise.all([state(), all<ChallengesDoc>('challenges'), all<SocialDoc>('social')]);
       const out: GroupChallenge[] = [];
       for (const [owner, doc] of Object.entries(chDocs)) {

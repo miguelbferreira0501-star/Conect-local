@@ -49,6 +49,7 @@ export function MenuScreen({ open, onClose }: { open: boolean; onClose: () => vo
     { ico: '🌈', label: 'Áreas da vida', on: () => go('areas') },
     { ico: '📋', label: 'Temporada', on: () => go('temporada') },
     { ico: '📊', label: 'Evolução', on: () => go('evolucao') },
+    { ico: '🎞️', label: 'Retrospectiva do mês', on: () => go('retrospectiva') },
     { ico: '💌', label: 'Correio', on: () => go('correio'), badge: mail },
     { ico: '📅', label: 'Carteira e histórico', on: () => go('carteira') },
   ];

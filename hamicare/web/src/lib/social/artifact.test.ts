@@ -217,3 +217,39 @@ describe('turma na página publicada', () => {
     expect(await bia.team(day)).toBeNull();
   });
 });
+
+describe('ofensiva em dupla na página publicada', () => {
+  it('convite, aceite, dias que contam só com os dois e cutucada uma vez por dia', async () => {
+    const db = fakeDb();
+    const ana = createArtifactSocial(db, 'u_ana');
+    const bia = createArtifactSocial(db, 'u_bia');
+    const cid = createArtifactSocial(db, 'u_cid');
+    for (const [api, n] of [[ana, 'Ana'], [bia, 'Bia'], [cid, 'Cid']] as const) await api.saveProfile(profile(n));
+    await ana.request('u_bia');
+    await bia.accept('u_ana');
+    const day = '2026-11-20';
+
+    await expect(ana.inviteDuo('u_cid', day)).rejects.toThrow(/amigos/);
+    const inv = await ana.inviteDuo('u_bia', day);
+    expect(inv).toMatchObject({ status: 'convite', invitedByMe: true });
+    expect(await bia.duo(day)).toMatchObject({ status: 'convite', invitedByMe: false });
+    await expect(ana.duoCheckin(day, true)).rejects.toThrow();
+    expect((await bia.acceptDuo(day))?.status).toBe('ativa');
+
+    let d = await ana.duoCheckin(day, true);
+    expect(d).toMatchObject({ streak: 0, today: { me: true, partner: false } });
+    expect(await ana.nudgeDuo(day)).toBe('ok');
+    expect(await ana.nudgeDuo(day)).toBe('limite');
+    d = await bia.duoCheckin(day, true);
+    expect(d).toMatchObject({ streak: 1, best: 1, today: { me: true, partner: true } });
+    expect(await ana.nudgeDuo(day)).toBe('ja-fez');
+    await ana.duoCheckin('2026-11-21', true);
+    await bia.duoCheckin('2026-11-21', true);
+    expect((await ana.duo('2026-11-22'))?.streak).toBe(2);
+
+    await bia.leaveDuo();
+    expect((await ana.duo(day))?.status).toBe('convite');
+    await ana.leaveDuo();
+    expect(await ana.duo(day)).toBeNull();
+  });
+});
