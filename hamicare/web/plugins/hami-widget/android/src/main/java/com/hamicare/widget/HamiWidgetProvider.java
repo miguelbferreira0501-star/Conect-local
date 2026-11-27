@@ -11,7 +11,7 @@ import android.widget.RemoteViews;
 
 import org.json.JSONObject;
 
-/** Widget do Hami: desenha o resumo que o app guardou (ou um convite para abrir o app). */
+/** Widget do Lumbi: desenha o resumo que o app guardou (ou um convite para abrir o app). */
 public class HamiWidgetProvider extends AppWidgetProvider {
 
     @Override
@@ -30,7 +30,7 @@ public class HamiWidgetProvider extends AppWidgetProvider {
 
     static RemoteViews build(Context context) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.hami_widget);
-        String name = "Hami";
+        String name = "Lumbi";
         String line = "Abra o app para ver o seu dia";
         String tasks = "";
         String water = "";
@@ -44,7 +44,7 @@ public class HamiWidgetProvider extends AppWidgetProvider {
                 line = d.optString("line", line);
                 int done = d.optInt("done", 0);
                 int total = d.optInt("total", 0);
-                tasks = total > 0 ? done + "/" + total + " missões" : "";
+                tasks = total > 0 ? done + "/" + total + " tarefas" : "";
                 water = d.optString("water", "");
                 int s = d.optInt("streak", 0);
                 streak = s > 0 ? "🔥 " + s + (s == 1 ? " dia" : " dias") : "";

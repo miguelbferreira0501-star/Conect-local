@@ -3,7 +3,7 @@
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { planDay } from '../shared/reminders';
 import { isNativeApp } from './native';
-import { dayOf, getState, isDue, todayKey, todayTasks, watchState } from './store';
+import { dayOf, getState, isDue, todayKey, todayTasks, updateSettings, watchState } from './store';
 import type { State } from '../types';
 
 /** Quantos dias para frente ficam agendados (o app reagenda sempre que abre). */
@@ -95,6 +95,7 @@ export async function scheduleNativeReminders(s: State = getState()) {
 export function installNativeReminders() {
   if (!isNativeApp()) return;
   void scheduleNativeReminders();
+  void askOnce();
   let t: ReturnType<typeof setTimeout> | undefined;
   watchState(() => {
     clearTimeout(t);
@@ -103,4 +104,45 @@ export function installNativeReminders() {
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) void scheduleNativeReminders();
   });
+}
+
+/** No app da loja, pede a permissão de notificação uma vez (depois do começo) e liga os lembretes.
+ *  Antes só pedia quando a pessoa ligava os lembretes nos ajustes, e eles começam desligados. */
+async function askOnce() {
+  const KEY = 'lumbi:notif-perguntado';
+  const run = async () => {
+    const s = getState();
+    if (!s.onboarded) return false;
+    try {
+      if (localStorage.getItem(KEY)) return true;
+      localStorage.setItem(KEY, '1');
+    } catch {
+      /* sem armazenamento: pergunta mesmo assim */
+    }
+    await refreshPermission();
+    if (perm === 'default') await askNativePermission();
+    if (perm === 'granted' && !getState().settings.notif.enabled) updateSettings({ notif: { ...getState().settings.notif, enabled: true } });
+    void scheduleNativeReminders();
+    return true;
+  };
+  if (await run()) return;
+  const stop = watchState((s) => {
+    if (s.onboarded) {
+      stop();
+      setTimeout(() => void run(), 2500);
+    }
+  });
+}
+
+/** Botão "Testar lembrete" no app da loja: uma notificação de verdade em 5 segundos. */
+export async function testNativeNotification(name: string): Promise<'ok' | 'bloqueado' | 'erro'> {
+  await refreshPermission();
+  if (perm !== 'granted') await askNativePermission();
+  if (perm !== 'granted') return 'bloqueado';
+  try {
+    await LocalNotifications.schedule({ notifications: [{ id: 99_999, title: name || 'Lumbi', body: 'Oi! Assim que vão chegar os meus lembretes 🐾', schedule: { at: new Date(Date.now() + 5000), allowWhileIdle: true } }] });
+    return 'ok';
+  } catch {
+    return 'erro';
+  }
 }

@@ -10,6 +10,8 @@ import {
   deleteWeightData, enableTracking, exportCode, importCode, isPremium, minor, owned, resetAll, setHeight, setHideNumbers, updatePet, updatePrivacy, updateProfile, updateSettings, useApp,
 } from '../lib/store';
 import { askPermission, permission, pickReminder, showNotification } from '../lib/notify';
+import { testNativeNotification } from '../lib/nativeReminders';
+import { isNativeApp } from '../lib/native';
 import { copyText, formatDay } from '../lib/util';
 import { syncPush } from '../lib/account';
 import { getState } from '../lib/store';
@@ -175,11 +177,22 @@ export function SettingsSheet({ open, onClose, onPlus, account }: { open: boolea
                   <input id="set-bed" type="time" className="field" value={s.settings.notif.bedtime ?? '22:00'} onChange={(e) => updateSettings({ notif: { ...s.settings.notif, bedtime: e.target.value || '22:00' } })} onBlur={() => syncPush(getState())} />
                 </Field>
               )}
-              <button className="btn btn-ghost btn-sm" onClick={() => showNotification(pickReminder(s)?.text ?? 'Hora de cuidar um pouquinho de você.', toast)}>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={async () => {
+                  if (!isNativeApp()) return showNotification(pickReminder(s)?.text ?? 'Hora de cuidar um pouquinho de você.', toast);
+                  const r = await testNativeNotification(s.pet.name);
+                  toast(r === 'ok' ? 'Pronto! Em 5 segundos chega uma notificação de teste.' : r === 'bloqueado' ? 'As notificações do Lumbi estão bloqueadas. Libere em Configurações do celular → Apps → Lumbi → Notificações.' : 'Não deu para agendar agora. Tente de novo.');
+                }}
+              >
                 Testar lembrete
               </button>
-              {permission() === 'denied' && <p className="text-[13px] text-muted">As notificações do sistema estão bloqueadas neste navegador. Os lembretes aparecem dentro do app.</p>}
-              <p className="text-[13px] text-muted">No iPhone, os lembretes só chegam com o Lumbi na tela inicial (Compartilhar → Adicionar à Tela de Início).</p>
+              {permission() === 'denied' && (
+                <p className="text-[13px] text-muted">
+                  {isNativeApp() ? 'As notificações do Lumbi estão bloqueadas no celular. Para liberar: Configurações → Apps → Lumbi → Notificações.' : 'As notificações do sistema estão bloqueadas neste navegador. Os lembretes aparecem dentro do app.'}
+                </p>
+              )}
+              {!isNativeApp() && <p className="text-[13px] text-muted">No iPhone, os lembretes só chegam com o Lumbi na tela inicial (Compartilhar → Adicionar à Tela de Início).</p>}
             </>
           )}
         </Group>
