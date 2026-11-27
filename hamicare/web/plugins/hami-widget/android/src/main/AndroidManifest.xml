@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
-        <!-- Widget do Hami na tela inicial: o Hami, as missões de hoje, a água e a ofensiva. -->
+        <!-- Widget do Lumbi (resumo do dia): o Lumbi, as tarefas de hoje, a água e a ofensiva. -->
         <receiver
             android:name="com.hamicare.widget.HamiWidgetProvider"
             android:exported="false"
@@ -12,6 +12,85 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/hami_widget_info" />
+        </receiver>
+        <!-- Galeria de widgets do Lumbi (um receiver por tipo). -->
+        <receiver android:name="com.hamicare.widget.Widgets$AguaM" android:exported="false" android:label="Lumbi: água de hoje">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/w_info_agua_m" />
+        </receiver>
+        <receiver android:name="com.hamicare.widget.Widgets$AguaP" android:exported="false" android:label="Lumbi: copos de água">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/w_info_agua_p" />
+        </receiver>
+        <receiver android:name="com.hamicare.widget.Widgets$TarefasG" android:exported="false" android:label="Lumbi: tarefas de hoje">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/w_info_tarefas_g" />
+        </receiver>
+        <receiver android:name="com.hamicare.widget.Widgets$MetaP" android:exported="false" android:label="Lumbi: meta do dia">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/w_info_meta_p" />
+        </receiver>
+        <receiver android:name="com.hamicare.widget.Widgets$SemanaM" android:exported="false" android:label="Lumbi: esta semana">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/w_info_semana_m" />
+        </receiver>
+        <receiver android:name="com.hamicare.widget.Widgets$DiasM" android:exported="false" android:label="Lumbi: dias juntos">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/w_info_dias_m" />
+        </receiver>
+        <receiver android:name="com.hamicare.widget.Widgets$DiasP" android:exported="false" android:label="Lumbi: dias juntos (pequeno)">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/w_info_dias_p" />
+        </receiver>
+        <receiver android:name="com.hamicare.widget.Widgets$AmigoG" android:exported="false" android:label="Lumbi: melhor amigo">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/w_info_amigo_g" />
+        </receiver>
+        <receiver android:name="com.hamicare.widget.Widgets$PasseioG" android:exported="false" android:label="Lumbi: passeio">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/w_info_passeio_g" />
+        </receiver>
+        <receiver android:name="com.hamicare.widget.Widgets$MovM" android:exported="false" android:label="Lumbi: bora se mexer">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/w_info_mov_m" />
+        </receiver>
+        <receiver android:name="com.hamicare.widget.Widgets$AfirmM" android:exported="false" android:label="Lumbi: afirmação do dia">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/w_info_afirm_m" />
+        </receiver>
+        <receiver android:name="com.hamicare.widget.Widgets$BolhasM" android:exported="false" android:label="Lumbi: estoure bolhas">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/w_info_bolhas_m" />
+        </receiver>
+        <receiver android:name="com.hamicare.widget.Widgets$MoedaP" android:exported="false" android:label="Lumbi: moeda da sorte">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/w_info_moeda_p" />
         </receiver>
     </application>
 </manifest>

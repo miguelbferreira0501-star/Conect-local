@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/w_root" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/w_round" android:clipToOutline="true"><ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:src="@drawable/w_dias_p" android:contentDescription="Lumbi"/><LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_horizontal" android:orientation="vertical">
+ <FrameLayout android:layout_width="1dp" android:layout_height="0dp" android:layout_weight="20"/>
+ <TextView android:id="@+id/w_num" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="30sp" android:textColor="#FFE84C88" android:textStyle="bold" />
+ <TextView android:id="@+id/w_lbl" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="12sp" android:textColor="#FFC2386F" android:textStyle="bold" android:text="dias juntos"/>
+ <FrameLayout android:layout_width="1dp" android:layout_height="0dp" android:layout_weight="52"/>
+</LinearLayout></FrameLayout>
