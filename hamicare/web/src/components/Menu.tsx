@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Copy } from 'lucide-react';
 import { Hamster } from './Hamster';
+import { WidgetGallery } from './WidgetGallery';
 import { openGuardian } from './Guardian';
 import { guardiansHere } from '../lib/native';
 import { openLegal } from './Legal';
@@ -10,7 +11,6 @@ import { Glyph } from './art';
 import { toast } from './ui';
 import { openUi } from '../lib/bus';
 import { unreadMail } from '../lib/mail';
-import { isNativeApp, nativePlatform } from '../lib/native';
 import { getSocial } from '../lib/social';
 import { isPremium, useApp } from '../lib/store';
 import { copyText } from '../lib/util';
@@ -18,6 +18,7 @@ import { copyText } from '../lib/util';
 export function MenuScreen({ open, onClose }: { open: boolean; onClose: () => void }) {
   const s = useApp();
   const [code, setCode] = useState<string | null>(null);
+  const [gallery, setGallery] = useState(false);
   useEffect(() => {
     if (!open || code) return;
     let live = true;
@@ -32,14 +33,7 @@ export function MenuScreen({ open, onClose }: { open: boolean; onClose: () => vo
   if (!open) return null;
   const go = (t: Parameters<typeof openUi>[0]) => (onClose(), openUi(t));
   const mail = unreadMail(s);
-  const widget = () =>
-    toast(
-      !isNativeApp()
-        ? 'O widget funciona no app instalado pela loja. Assim que o app sair, é só adicionar pela tela inicial.'
-        : nativePlatform() === 'ios'
-          ? 'Segure a tela inicial, toque em + e procure por Lumbi.'
-          : 'Segure a tela inicial, toque em Widgets e escolha Lumbi.',
-    );
+  const widget = () => setGallery(true);
   const tiles: { ico: string; label: string; on: () => void; badge?: number }[] = [
     { ico: '💗', label: `Perfil do ${s.pet.name}`, on: () => go('hami') },
     { ico: '🎾', label: 'Interações', on: () => go('interacoes') },
@@ -55,6 +49,7 @@ export function MenuScreen({ open, onClose }: { open: boolean; onClose: () => vo
   ];
   return (
     <div className="menu" role="dialog" aria-modal="true" aria-label="Menu">
+      <WidgetGallery open={gallery} onClose={() => setGallery(false)} />
       <button className="menu-back" onClick={onClose} aria-label="Voltar">
         <ChevronLeft size={34} strokeWidth={3.5} />
       </button>
