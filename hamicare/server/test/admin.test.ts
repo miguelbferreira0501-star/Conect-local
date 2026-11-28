@@ -78,3 +78,22 @@ describe('métricas de produto', () => {
     expect(m.retencao.d1).toBeTruthy();
   });
 });
+
+describe('painel do negócio', () => {
+  it('só admin; usuários, série de 30 dias, assinantes e receita estimada', async () => {
+    const comum = await newUser('Comum Painel');
+    expect((await call('GET', '/admin/dashboard', undefined, comum.cookie)).status).toBe(403);
+    // O admin (chefe@teste.com) já foi criado no teste de cima: entra de novo.
+    const login = await call('POST', '/auth/login', { email: 'chefe@teste.com', password: 'Senha1234' });
+    const r = await call('GET', '/admin/dashboard', undefined, login.cookie);
+    expect(r.status).toBe(200);
+    const d = r.body.dashboard;
+    expect(d.usuarios.total).toBeGreaterThanOrEqual(2);
+    expect(d.usuarios.novosHoje).toBeGreaterThanOrEqual(2);
+    expect(d.serie).toHaveLength(30);
+    expect(d.assinantes).toMatchObject({ googleMensal: 0, appleAnual: 0 });
+    expect(d.mrrCents).toBe(0);
+    expect(Array.isArray(d.pagamentos)).toBe(true);
+    expect(d.recentes[0].nome).toBe('Comum Painel');
+  });
+});

@@ -6,8 +6,9 @@ import { http, ApiError } from '../lib/social/api';
 import { addDays } from '../lib/util';
 import { todayKey } from '../lib/store';
 import { AdminGame } from './AdminGame';
+import { AdminDashboard } from './AdminDashboard';
 
-type Tab = 'resumo' | 'denuncias' | 'usuarios' | 'eventos' | 'jogo';
+type Tab = 'painel' | 'resumo' | 'denuncias' | 'usuarios' | 'eventos' | 'jogo';
 
 const STAT_LABEL: Record<string, string> = {
   usuarios: 'Usuários',
@@ -25,7 +26,7 @@ const STAT_LABEL: Record<string, string> = {
 
 /** Painel de administração (só aparece para quem tem papel de admin no servidor). */
 export function Admin({ onClose }: { onClose: () => void }) {
-  const [tab, setTab] = useState<Tab>('resumo');
+  const [tab, setTab] = useState<Tab>('painel');
   // Fora da gaveta de Ajustes (uma gaveta com animação prende o "fixed" dentro dela).
   return createPortal(
     <div className="fullscreen admin-screen" role="dialog" aria-modal="true" aria-label="Administração">
@@ -36,7 +37,8 @@ export function Admin({ onClose }: { onClose: () => void }) {
             <X size={20} />
           </button>
         </div>
-        <Seg value={tab} onChange={setTab} label="Seções" options={[{ id: 'resumo', label: 'Resumo' }, { id: 'denuncias', label: 'Denúncias' }, { id: 'usuarios', label: 'Usuários' }, { id: 'eventos', label: 'Eventos' }, { id: 'jogo', label: 'Jogo' }]} />
+        <Seg value={tab} onChange={setTab} label="Seções" options={[{ id: 'painel', label: 'Painel' }, { id: 'resumo', label: 'Resumo' }, { id: 'denuncias', label: 'Denúncias' }, { id: 'usuarios', label: 'Usuários' }, { id: 'eventos', label: 'Eventos' }, { id: 'jogo', label: 'Jogo' }]} />
+        {tab === 'painel' && <AdminDashboard />}
         {tab === 'resumo' && <Stats />}
         {tab === 'denuncias' && <Reports />}
         {tab === 'usuarios' && <Users />}

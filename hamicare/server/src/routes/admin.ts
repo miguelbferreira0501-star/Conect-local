@@ -21,6 +21,11 @@ async function asAdmin<T>(c: { get: (k: 'userId') => string | null }, fn: (db: p
 
 admin.get('/stats', (c) => asAdmin(c, async (db) => c.json({ stats: (await db.query('SELECT app.admin_stats() AS s')).rows[0].s })));
 
+// Painel do negócio: usuários, ativos, assinantes por loja, receita estimada (preço de tabela) e pagamentos recentes.
+admin.get('/dashboard', (c) =>
+  asAdmin(c, async (db) => c.json({ dashboard: (await db.query('SELECT app.admin_dashboard($1, $2) AS d', [1000, 6590])).rows[0].d })),
+);
+
 admin.get('/metrics', (c) => asAdmin(c, async (db) => c.json({ metrics: (await db.query('SELECT app.admin_metrics() AS m')).rows[0].m })));
 
 admin.get('/users', (c) =>
